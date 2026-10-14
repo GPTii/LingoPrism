@@ -1,0 +1,14 @@
+targets:
+  $default:
+    builders:
+      realm_generator:
+        enabled: false
+      realm:realm_generator:
+        enabled: true
+        generate_for:
+          - lib/app/data/models/**/*.dart
+          - lib/app/models/**/*.dart
+      hive_generator:
+        enabled: false
+        generate_for:
+          - lib/app/data/hive/**/*.dart

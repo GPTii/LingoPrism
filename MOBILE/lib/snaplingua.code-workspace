@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"name": "snaplingua",
+			"path": ".."
+		},
+		{
+			"name": "backend",
+			"path": "../../../Downloads/backend"
+		}
+	],
+	"settings": {}
+}
