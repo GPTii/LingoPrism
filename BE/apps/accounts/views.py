@@ -24,6 +24,7 @@ def _auth_response(user, status_code=status.HTTP_200_OK):
 
 @extend_schema(tags=["auth"])
 class RegisterView(APIView):
+    serializer_class = s.RegisterSerializer
     permission_classes = [AllowAny]
 
     @extend_schema(request=s.RegisterSerializer)
@@ -36,6 +37,7 @@ class RegisterView(APIView):
 
 @extend_schema(tags=["auth"])
 class LoginView(APIView):
+    serializer_class = s.LoginSerializer
     permission_classes = [AllowAny]
 
     @extend_schema(request=s.LoginSerializer)
@@ -52,6 +54,7 @@ class LoginView(APIView):
 class GoogleLoginView(APIView):
     """Verify a Google ID token (from Flutter google_sign_in or Google Identity on web)."""
 
+    serializer_class = s.GoogleLoginSerializer
     permission_classes = [AllowAny]
 
     @extend_schema(request=s.GoogleLoginSerializer)
@@ -89,6 +92,7 @@ class GoogleLoginView(APIView):
 
 @extend_schema(tags=["auth"])
 class LogoutView(APIView):
+    serializer_class = s.LogoutSerializer
     @extend_schema(request=s.LogoutSerializer, responses={205: None})
     def post(self, request):
         ser = s.LogoutSerializer(data=request.data)
@@ -102,6 +106,7 @@ class LogoutView(APIView):
 
 @extend_schema(tags=["auth"])
 class ForgotPasswordView(APIView):
+    serializer_class = s.ForgotPasswordSerializer
     permission_classes = [AllowAny]
 
     @extend_schema(request=s.ForgotPasswordSerializer)
@@ -123,6 +128,7 @@ class ForgotPasswordView(APIView):
 
 @extend_schema(tags=["auth"])
 class VerifyResetCodeView(APIView):
+    serializer_class = s.VerifyResetCodeSerializer
     permission_classes = [AllowAny]
 
     @extend_schema(request=s.VerifyResetCodeSerializer)
@@ -150,6 +156,7 @@ class VerifyResetCodeView(APIView):
 
 @extend_schema(tags=["auth"])
 class ResetPasswordView(APIView):
+    serializer_class = s.ResetPasswordSerializer
     permission_classes = [AllowAny]
 
     @extend_schema(request=s.ResetPasswordSerializer)
@@ -170,6 +177,7 @@ class ResetPasswordView(APIView):
 
 @extend_schema(tags=["auth"])
 class ChangePasswordView(APIView):
+    serializer_class = s.ChangePasswordSerializer
     @extend_schema(request=s.ChangePasswordSerializer)
     def post(self, request):
         ser = s.ChangePasswordSerializer(data=request.data, context={"request": request})

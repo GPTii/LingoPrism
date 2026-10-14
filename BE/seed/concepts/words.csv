@@ -1,0 +1,301 @@
+slug,topics,yolo_label,pos,audience,difficulty,vi,en,en_aliases,zh_hans,zh_hant
+person,people,person,noun,all,1,người,person,human;people,人,人
+baby,people,,noun,all,1,em bé,baby,infant,婴儿,嬰兒
+boy,people,,noun,all,1,cậu bé,boy,,男孩,男孩
+girl,people,,noun,all,1,cô bé,girl,,女孩,女孩
+man,people,,noun,all,1,đàn ông,man,,男人,男人
+woman,people,,noun,all,1,phụ nữ,woman,,女人,女人
+mother,people,,noun,all,1,mẹ,mother,mom;mum,妈妈,媽媽
+father,people,,noun,all,1,bố,father,dad,爸爸,爸爸
+teacher,people|education,,noun,all,1,giáo viên,teacher,,老师,老師
+student,people|education,,noun,all,1,học sinh,student,pupil,学生,學生
+doctor,people|places,,noun,all,2,bác sĩ,doctor,physician,医生,醫生
+nurse,people,,noun,all,2,y tá,nurse,,护士,護士
+police-officer,people,,noun,all,2,cảnh sát,police officer,police;policeman,警察,警察
+friend,people,,noun,all,1,bạn bè,friend,,朋友,朋友
+bicycle,transport,bicycle,noun,all,1,xe đạp,bicycle,bike,自行车,腳踏車
+car,transport,car,noun,all,1,xe ô tô,car,automobile,汽车,汽車
+motorcycle,transport,motorcycle,noun,all,1,xe máy,motorcycle,motorbike;scooter,摩托车,機車
+airplane,transport,airplane,noun,all,1,máy bay,airplane,plane;aircraft;airliner,飞机,飛機
+bus,transport,bus,noun,all,1,xe buýt,bus,,公交车,公車
+train,transport,train,noun,all,1,tàu hỏa,train,,火车,火車
+truck,transport,truck,noun,all,2,xe tải,truck,lorry,卡车,卡車
+boat,transport,boat,noun,all,1,thuyền,boat,ship,船,船
+traffic-light,transport,traffic light,noun,all,2,đèn giao thông,traffic light,traffic lights;traffic signal,红绿灯,紅綠燈
+fire-hydrant,transport,fire hydrant,noun,adult,3,trụ nước chữa cháy,fire hydrant,hydrant,消防栓,消防栓
+taxi,transport,,noun,all,2,xe taxi,taxi,cab,出租车,計程車
+subway,transport,,noun,adult,2,tàu điện ngầm,subway,metro;underground,地铁,地鐵
+helicopter,transport,,noun,all,2,trực thăng,helicopter,,直升机,直升機
+ambulance,transport,,noun,all,2,xe cứu thương,ambulance,,救护车,救護車
+fire-truck,transport,,noun,all,2,xe cứu hỏa,fire truck,fire engine,消防车,消防車
+road,transport,,noun,all,1,con đường,road,street,马路,馬路
+bridge,transport,,noun,all,2,cây cầu,bridge,,桥,橋
+bench,objects,bench,noun,all,2,ghế dài,bench,,长椅,長椅
+bird,animals,bird,noun,all,1,con chim,bird,,鸟,鳥
+cat,animals,cat,noun,all,1,con mèo,cat,,猫,貓
+dog,animals,dog,noun,all,1,con chó,dog,,狗,狗
+horse,animals,horse,noun,all,1,con ngựa,horse,,马,馬
+sheep,animals,sheep,noun,all,1,con cừu,sheep,,绵羊,綿羊
+cow,animals,cow,noun,all,1,con bò,cow,cattle,奶牛,乳牛
+elephant,animals,elephant,noun,all,1,con voi,elephant,,大象,大象
+bear,animals,bear,noun,all,1,con gấu,bear,,熊,熊
+zebra,animals,zebra,noun,all,2,ngựa vằn,zebra,,斑马,斑馬
+giraffe,animals,giraffe,noun,all,2,hươu cao cổ,giraffe,,长颈鹿,長頸鹿
+pig,animals,,noun,all,1,con lợn,pig,hog,猪,豬
+chicken,animals|food,,noun,all,1,con gà,chicken,,鸡,雞
+duck,animals,,noun,all,1,con vịt,duck,,鸭子,鴨子
+rabbit,animals,,noun,all,1,con thỏ,rabbit,bunny,兔子,兔子
+mouse-animal,animals,,noun,all,1,con chuột,mouse,rat,老鼠,老鼠
+tiger,animals,,noun,all,1,con hổ,tiger,,老虎,老虎
+lion,animals,,noun,all,1,sư tử,lion,,狮子,獅子
+monkey,animals,,noun,all,1,con khỉ,monkey,,猴子,猴子
+panda,animals,,noun,all,1,gấu trúc,panda,giant panda,熊猫,熊貓
+fish,animals|food,,noun,all,1,con cá,fish,,鱼,魚
+butterfly,animals,,noun,all,1,con bướm,butterfly,,蝴蝶,蝴蝶
+bee,animals,,noun,all,2,con ong,bee,honeybee,蜜蜂,蜜蜂
+ant,animals,,noun,all,2,con kiến,ant,,蚂蚁,螞蟻
+snake,animals,,noun,all,2,con rắn,snake,serpent,蛇,蛇
+frog,animals,,noun,all,2,con ếch,frog,,青蛙,青蛙
+turtle,animals,,noun,all,2,con rùa,turtle,tortoise,乌龟,烏龜
+penguin,animals,,noun,all,1,chim cánh cụt,penguin,,企鹅,企鵝
+kangaroo,animals,,noun,all,2,chuột túi,kangaroo,,袋鼠,袋鼠
+deer,animals,,noun,all,2,con hươu,deer,,鹿,鹿
+wolf,animals,,noun,all,2,con sói,wolf,,狼,狼
+fox,animals,,noun,all,2,con cáo,fox,,狐狸,狐狸
+goat,animals,,noun,all,2,con dê,goat,,山羊,山羊
+camel,animals,,noun,all,2,lạc đà,camel,,骆驼,駱駝
+dolphin,animals,,noun,all,2,cá heo,dolphin,,海豚,海豚
+whale,animals,,noun,all,2,cá voi,whale,,鲸鱼,鯨魚
+shark,animals,,noun,all,2,cá mập,shark,,鲨鱼,鯊魚
+owl,animals,,noun,all,2,con cú,owl,,猫头鹰,貓頭鷹
+parrot,animals,,noun,all,2,con vẹt,parrot,,鹦鹉,鸚鵡
+spider,animals,,noun,all,2,con nhện,spider,,蜘蛛,蜘蛛
+crocodile,animals,,noun,all,3,cá sấu,crocodile,alligator,鳄鱼,鱷魚
+squirrel,animals,,noun,all,2,con sóc,squirrel,,松鼠,松鼠
+hippo,animals,,noun,all,3,hà mã,hippopotamus,hippo,河马,河馬
+backpack,objects|education,backpack,noun,all,1,ba lô,backpack,knapsack;rucksack,背包,背包
+umbrella,objects,umbrella,noun,all,1,cái ô,umbrella,,雨伞,雨傘
+handbag,clothing,handbag,noun,all,2,túi xách,handbag,bag;purse,手提包,手提包
+tie,clothing,tie,noun,adult,2,cà vạt,tie,necktie,领带,領帶
+suitcase,objects|places,suitcase,noun,all,2,va li,suitcase,luggage,行李箱,行李箱
+frisbee,sports,frisbee,noun,all,3,đĩa ném,frisbee,,飞盘,飛盤
+ball,sports,sports ball,noun,all,1,quả bóng,ball,,球,球
+kite,sports|objects,kite,noun,all,2,con diều,kite,,风筝,風箏
+baseball-bat,sports,baseball bat,noun,adult,3,gậy bóng chày,bat,baseball bat,球棒,球棒
+skateboard,sports,skateboard,noun,all,2,ván trượt,skateboard,,滑板,滑板
+surfboard,sports,surfboard,noun,adult,3,ván lướt sóng,surfboard,,冲浪板,衝浪板
+tennis-racket,sports,tennis racket,noun,all,3,cái vợt,racket,tennis racket;racquet,球拍,球拍
+bottle,objects|home,bottle,noun,all,1,cái chai,bottle,,瓶子,瓶子
+wine-glass,home,wine glass,noun,adult,3,ly rượu,wine glass,wine cup;goblet,酒杯,酒杯
+cup,home,cup,noun,all,1,cái cốc,cup,mug;glass,杯子,杯子
+fork,home,fork,noun,all,1,cái nĩa,fork,,叉子,叉子
+knife,home,knife,noun,all,1,con dao,knife,,刀,刀
+spoon,home,spoon,noun,all,1,cái thìa,spoon,,勺子,湯匙
+bowl,home,bowl,noun,all,1,cái bát,bowl,,碗,碗
+banana,fruits-vegetables,banana,noun,all,1,quả chuối,banana,,香蕉,香蕉
+apple,fruits-vegetables,apple,noun,all,1,quả táo,apple,,苹果,蘋果
+sandwich,food,sandwich,noun,all,2,bánh mì kẹp,sandwich,,三明治,三明治
+orange,fruits-vegetables,orange,noun,all,1,quả cam,orange,,橙子,柳橙
+broccoli,fruits-vegetables,broccoli,noun,all,2,súp lơ xanh,broccoli,,西兰花,青花菜
+carrot,fruits-vegetables,carrot,noun,all,1,cà rốt,carrot,,胡萝卜,紅蘿蔔
+hot-dog,food,hot dog,noun,all,2,xúc xích kẹp,hot dog,hotdog,热狗,熱狗
+pizza,food,pizza,noun,all,1,bánh pizza,pizza,,比萨饼,披薩
+donut,food,donut,noun,all,2,bánh vòng,donut,doughnut,甜甜圈,甜甜圈
+cake,food,cake,noun,all,1,bánh ngọt,cake,,蛋糕,蛋糕
+chair,home,chair,noun,all,1,cái ghế,chair,,椅子,椅子
+sofa,home,couch,noun,all,1,ghế sofa,sofa,couch,沙发,沙發
+potted-plant,home|nature,potted plant,noun,all,2,chậu cây,potted plant,potted landscape;bonsai,盆栽,盆栽
+bed,home,bed,noun,all,1,cái giường,bed,,床,床
+table,home,dining table,noun,all,1,cái bàn,table,,桌子,桌子
+toilet,home,toilet,noun,all,2,bồn cầu,toilet,,马桶,馬桶
+television,home|technology,tv,noun,all,1,tivi,television,tv,电视,電視
+laptop,technology,laptop,noun,all,2,máy tính xách tay,laptop,notebook computer;notebook,笔记本电脑,筆記型電腦
+computer-mouse,technology,mouse,noun,all,2,chuột máy tính,mouse,computer mouse,鼠标,滑鼠
+remote-control,home|technology,remote,noun,all,2,điều khiển từ xa,remote control,remote,遥控器,遙控器
+keyboard,technology,keyboard,noun,all,2,bàn phím,keyboard,,键盘,鍵盤
+mobile-phone,technology,cell phone,noun,all,1,điện thoại di động,mobile phone,cell phone;cellphone;mobile,手机,手機
+microwave,home,microwave,noun,all,2,lò vi sóng,microwave oven,microwave,微波炉,微波爐
+oven,home,oven,noun,all,2,lò nướng,oven,,烤箱,烤箱
+toaster,home,toaster,noun,adult,3,máy nướng bánh mì,toaster,,烤面包机,烤麵包機
+sink,home,sink,noun,all,2,bồn rửa,sink,,水槽,水槽
+refrigerator,home,refrigerator,noun,all,1,tủ lạnh,refrigerator,fridge,冰箱,冰箱
+book,education|objects,book,noun,all,1,quyển sách,book,,书,書
+clock,home|objects,clock,noun,all,1,đồng hồ,clock,,时钟,時鐘
+vase,home,vase,noun,all,2,bình hoa,vase,,花瓶,花瓶
+scissors,education|objects,scissors,noun,all,1,cái kéo,scissors,,剪刀,剪刀
+teddy-bear,objects,teddy bear,noun,kid,1,gấu bông,teddy bear,teddy,泰迪熊,泰迪熊
+hair-dryer,home,hair drier,noun,all,2,máy sấy tóc,hair dryer,hairdryer;hair drier,吹风机,吹風機
+toothbrush,home,toothbrush,noun,all,1,bàn chải đánh răng,toothbrush,,牙刷,牙刷
+pen,education,,noun,all,1,cái bút,pen,,笔,筆
+pencil,education,,noun,all,1,bút chì,pencil,,铅笔,鉛筆
+eraser,education,,noun,all,1,cục tẩy,eraser,rubber,橡皮,橡皮擦
+ruler,education,,noun,all,1,thước kẻ,ruler,,尺子,尺
+notebook,education,,noun,all,1,quyển vở,notebook,,笔记本,筆記本
+desk,education|home,,noun,all,1,bàn học,desk,,书桌,書桌
+blackboard,education,,noun,all,2,bảng đen,blackboard,chalkboard,黑板,黑板
+school,education|places,,noun,all,1,trường học,school,,学校,學校
+classroom,education,,noun,all,1,lớp học,classroom,,教室,教室
+map,education|places,,noun,all,2,bản đồ,map,,地图,地圖
+computer,technology|education,,noun,all,1,máy tính,computer,,电脑,電腦
+calculator,education|technology,,noun,all,2,máy tính bỏ túi,calculator,,计算器,計算機
+glue,education,,noun,all,2,keo dán,glue,,胶水,膠水
+dictionary,education,,noun,all,2,từ điển,dictionary,,词典,字典
+grape,fruits-vegetables,,noun,all,1,quả nho,grape,grapes,葡萄,葡萄
+watermelon,fruits-vegetables,,noun,all,1,dưa hấu,watermelon,,西瓜,西瓜
+strawberry,fruits-vegetables,,noun,all,1,dâu tây,strawberry,,草莓,草莓
+pineapple,fruits-vegetables,,noun,all,2,quả dứa,pineapple,,菠萝,鳳梨
+mango,fruits-vegetables,,noun,all,1,quả xoài,mango,,芒果,芒果
+lemon,fruits-vegetables,,noun,all,2,quả chanh,lemon,,柠檬,檸檬
+pear,fruits-vegetables,,noun,all,2,quả lê,pear,,梨,梨
+peach,fruits-vegetables,,noun,all,2,quả đào,peach,,桃子,桃子
+tomato,fruits-vegetables,,noun,all,1,cà chua,tomato,,西红柿,番茄
+potato,fruits-vegetables,,noun,all,1,khoai tây,potato,,土豆,馬鈴薯
+corn,fruits-vegetables,,noun,all,2,ngô,corn,maize,玉米,玉米
+cucumber,fruits-vegetables,,noun,all,2,dưa chuột,cucumber,,黄瓜,黃瓜
+onion,fruits-vegetables,,noun,all,2,hành tây,onion,,洋葱,洋蔥
+garlic,fruits-vegetables,,noun,all,2,tỏi,garlic,,大蒜,大蒜
+coconut,fruits-vegetables,,noun,all,2,quả dừa,coconut,,椰子,椰子
+rice,food,,noun,all,1,cơm,rice,cooked rice,米饭,米飯
+noodles,food,,noun,all,1,mì sợi,noodles,noodle,面条,麵條
+bread,food,,noun,all,1,bánh mì,bread,,面包,麵包
+egg,food,,noun,all,1,quả trứng,egg,,鸡蛋,雞蛋
+milk,food,,noun,all,1,sữa,milk,,牛奶,牛奶
+water,food|nature,,noun,all,1,nước,water,,水,水
+tea,food,,noun,all,1,trà,tea,,茶,茶
+coffee,food,,noun,all,1,cà phê,coffee,,咖啡,咖啡
+juice,food,,noun,all,2,nước ép,juice,,果汁,果汁
+cheese,food,,noun,all,2,phô mai,cheese,,奶酪,起司
+ice-cream,food,,noun,all,1,kem,ice cream,,冰淇淋,冰淇淋
+chocolate,food,,noun,all,1,sô cô la,chocolate,,巧克力,巧克力
+candy,food,,noun,kid,1,kẹo,candy,sweets,糖果,糖果
+cookie,food,,noun,all,2,bánh quy,cookie,biscuit,饼干,餅乾
+meat,food,,noun,all,1,thịt,meat,,肉,肉
+soup,food,,noun,all,2,canh,soup,,汤,湯
+salt,food,,noun,all,2,muối,salt,,盐,鹽
+sugar,food,,noun,all,2,đường,sugar,,糖,糖
+door,home,,noun,all,1,cửa ra vào,door,,门,門
+window,home,,noun,all,1,cửa sổ,window,,窗户,窗戶
+lamp,home,,noun,all,2,đèn bàn,desk lamp,lamp,台灯,檯燈
+light-bulb,home,,noun,all,2,bóng đèn,light bulb,bulb,灯泡,燈泡
+fan,home,,noun,all,2,quạt điện,electric fan,fan,电风扇,電風扇
+air-conditioner,home,,noun,adult,2,máy điều hòa,air conditioner,air conditioning,空调,冷氣
+washing-machine,home,,noun,all,2,máy giặt,washing machine,,洗衣机,洗衣機
+mirror,home,,noun,all,2,cái gương,mirror,,镜子,鏡子
+pillow,home,,noun,all,2,cái gối,pillow,,枕头,枕頭
+blanket,home,,noun,all,2,cái chăn,blanket,,毯子,毯子
+towel,home,,noun,all,2,khăn tắm,towel,,毛巾,毛巾
+soap,home,,noun,all,2,xà phòng,soap,,肥皂,肥皂
+toothpaste,home,,noun,all,2,kem đánh răng,toothpaste,,牙膏,牙膏
+comb,home,,noun,all,2,cái lược,comb,,梳子,梳子
+key,home|objects,,noun,all,1,chìa khóa,key,,钥匙,鑰匙
+trash-can,home,,noun,all,2,thùng rác,trash can,garbage can;dustbin;rubbish bin,垃圾桶,垃圾桶
+broom,home,,noun,all,2,cái chổi,broom,,扫帚,掃把
+bucket,home,,noun,all,2,cái xô,bucket,pail,水桶,水桶
+plate,home,,noun,all,1,cái đĩa,plate,dish,盘子,盤子
+chopsticks,home,,noun,all,1,đôi đũa,chopsticks,,筷子,筷子
+pot,home,,noun,all,2,cái nồi,pot,pan,锅,鍋
+kettle,home,,noun,all,2,ấm đun nước,kettle,,水壶,水壺
+stairs,home,,noun,all,2,cầu thang,stairs,staircase,楼梯,樓梯
+kitchen,home,,noun,all,1,nhà bếp,kitchen,,厨房,廚房
+bathroom,home,,noun,all,2,phòng tắm,bathroom,,浴室,浴室
+bedroom,home,,noun,all,2,phòng ngủ,bedroom,,卧室,臥室
+house,home|places,,noun,all,1,ngôi nhà,house,,房子,房子
+curtain,home,,noun,all,2,rèm cửa,curtain,,窗帘,窗簾
+bookshelf,home|education,,noun,all,2,giá sách,bookshelf,bookcase,书架,書架
+wardrobe,home,,noun,all,2,tủ quần áo,wardrobe,closet,衣柜,衣櫃
+shirt,clothing,,noun,all,1,áo sơ mi,shirt,,衬衫,襯衫
+pants,clothing,,noun,all,1,quần dài,pants,trousers,裤子,褲子
+skirt,clothing,,noun,all,1,chân váy,skirt,,裙子,裙子
+shoes,clothing,,noun,all,1,đôi giày,shoes,shoe,鞋子,鞋子
+socks,clothing,,noun,all,1,đôi tất,socks,sock,袜子,襪子
+hat,clothing,,noun,all,1,cái mũ,hat,cap,帽子,帽子
+glasses,clothing,,noun,all,2,kính mắt,glasses,spectacles;eyeglasses,眼镜,眼鏡
+watch,clothing,,noun,all,2,đồng hồ đeo tay,watch,wristwatch,手表,手錶
+jacket,clothing,,noun,all,2,áo khoác,jacket,coat,外套,外套
+ring,clothing,,noun,adult,2,nhẫn,ring,,戒指,戒指
+wallet,clothing,,noun,adult,2,cái ví,wallet,purse,钱包,錢包
+gloves,clothing,,noun,all,2,găng tay,gloves,glove,手套,手套
+scarf,clothing,,noun,all,2,khăn quàng cổ,scarf,,围巾,圍巾
+belt,clothing,,noun,all,2,thắt lưng,belt,,皮带,皮帶
+hand,body,,noun,all,1,bàn tay,hand,,手,手
+eye,body,,noun,all,1,con mắt,eye,,眼睛,眼睛
+nose,body,,noun,all,1,cái mũi,nose,,鼻子,鼻子
+mouth,body,,noun,all,1,cái miệng,mouth,,嘴巴,嘴巴
+ear,body,,noun,all,1,cái tai,ear,,耳朵,耳朵
+hair,body,,noun,all,1,tóc,hair,,头发,頭髮
+head,body,,noun,all,1,cái đầu,head,,头,頭
+foot,body,,noun,all,1,bàn chân,foot,,脚,腳
+face,body,,noun,all,1,khuôn mặt,face,,脸,臉
+tooth,body,,noun,all,1,răng,tooth,teeth,牙齿,牙齒
+leg,body,,noun,all,1,cái chân,leg,,腿,腿
+arm,body,,noun,all,1,cánh tay,arm,,手臂,手臂
+tablet,technology,,noun,adult,2,máy tính bảng,tablet computer,tablet,平板电脑,平板電腦
+camera,technology,,noun,all,2,máy ảnh,camera,,相机,相機
+headphones,technology,,noun,all,2,tai nghe,headphones,earphones;headset,耳机,耳機
+charger,technology,,noun,adult,2,cục sạc,charger,,充电器,充電器
+printer,technology,,noun,adult,2,máy in,printer,,打印机,印表機
+screen,technology,,noun,adult,2,màn hình,screen,monitor,屏幕,螢幕
+robot,technology,,noun,all,2,người máy,robot,,机器人,機器人
+battery,technology,,noun,all,2,cục pin,battery,,电池,電池
+tree,nature,,noun,all,1,cái cây,tree,,树,樹
+flower,nature,,noun,all,1,bông hoa,flower,,花,花
+grass,nature,,noun,all,1,cỏ,grass,,草,草
+mountain,nature,,noun,all,1,núi,mountain,,山,山
+river,nature,,noun,all,1,dòng sông,river,,河,河
+sea,nature,,noun,all,1,biển,sea,ocean,大海,大海
+sun,nature,,noun,all,1,mặt trời,sun,,太阳,太陽
+moon,nature,,noun,all,1,mặt trăng,moon,,月亮,月亮
+star,nature,,noun,all,1,ngôi sao,star,,星星,星星
+cloud,nature,,noun,all,1,đám mây,cloud,,云,雲
+rain,nature,,noun,all,1,mưa,rain,,雨,雨
+snow,nature,,noun,all,2,tuyết,snow,,雪,雪
+sky,nature,,noun,all,1,bầu trời,sky,,天空,天空
+stone,nature,,noun,all,2,hòn đá,stone,rock,石头,石頭
+leaf,nature,,noun,all,1,chiếc lá,leaf,,叶子,葉子
+beach,nature|places,,noun,all,2,bãi biển,beach,,海滩,海灘
+forest,nature,,noun,all,2,khu rừng,forest,woods,森林,森林
+lake,nature,,noun,all,2,hồ nước,lake,,湖,湖
+island,nature,,noun,all,2,hòn đảo,island,,岛,島
+rainbow,nature,,noun,all,1,cầu vồng,rainbow,,彩虹,彩虹
+wind,nature,,noun,all,2,gió,wind,,风,風
+fire,nature,,noun,all,1,lửa,fire,,火,火
+football,sports,,noun,all,1,bóng đá,soccer,football,足球,足球
+basketball,sports,,noun,all,1,bóng rổ,basketball,,篮球,籃球
+volleyball,sports,,noun,all,2,bóng chuyền,volleyball,,排球,排球
+badminton,sports,,noun,all,2,cầu lông,badminton,,羽毛球,羽毛球
+tennis,sports,,noun,all,2,quần vợt,tennis,,网球,網球
+table-tennis,sports,,noun,all,2,bóng bàn,table tennis,ping-pong;ping pong,乒乓球,乒乓球
+swimming-pool,sports|places,,noun,all,2,bể bơi,swimming pool,pool,游泳池,游泳池
+whistle,sports,,noun,all,2,cái còi,whistle,,哨子,哨子
+helmet,sports|transport,,noun,all,2,mũ bảo hiểm,helmet,,头盔,安全帽
+medal,sports,,noun,all,2,huy chương,medal,,奖牌,獎牌
+airport,places|transport,,noun,all,2,sân bay,airport,,机场,機場
+hotel,places,,noun,adult,2,khách sạn,hotel,,酒店,飯店
+passport,places,,noun,adult,2,hộ chiếu,passport,,护照,護照
+ticket,places|transport,,noun,all,2,vé,ticket,,票,票
+tent,places,,noun,all,2,cái lều,tent,,帐篷,帳篷
+restaurant,places,,noun,all,1,nhà hàng,restaurant,,餐厅,餐廳
+hospital,places,,noun,all,1,bệnh viện,hospital,,医院,醫院
+supermarket,places,,noun,all,1,siêu thị,supermarket,,超市,超市
+market,places,,noun,all,1,chợ,market,,市场,市場
+park,places,,noun,all,1,công viên,park,,公园,公園
+museum,places,,noun,adult,2,bảo tàng,museum,,博物馆,博物館
+library,places|education,,noun,all,2,thư viện,library,,图书馆,圖書館
+bank,places,,noun,adult,2,ngân hàng,bank,,银行,銀行
+post-office,places,,noun,adult,2,bưu điện,post office,,邮局,郵局
+zoo,places,,noun,all,1,sở thú,zoo,,动物园,動物園
+cinema,places,,noun,all,2,rạp chiếu phim,cinema,movie theater;movie theatre,电影院,電影院
+pharmacy,places,,noun,adult,2,hiệu thuốc,pharmacy,drugstore,药店,藥局
+temple,places,,noun,adult,3,chùa,temple,,寺庙,寺廟
+church,places,,noun,adult,2,nhà thờ,church,,教堂,教堂
+red,colors,,adj,kid,1,màu đỏ,red,,红色,紅色
+blue,colors,,adj,kid,1,màu xanh dương,blue,,蓝色,藍色
+yellow,colors,,adj,kid,1,màu vàng,yellow,,黄色,黃色
+green,colors,,adj,kid,1,màu xanh lá,green,,绿色,綠色
+white,colors,,adj,kid,1,màu trắng,white,,白色,白色
+black,colors,,adj,kid,1,màu đen,black,,黑色,黑色
+pink,colors,,adj,kid,1,màu hồng,pink,,粉红色,粉紅色
+purple,colors,,adj,kid,1,màu tím,purple,violet,紫色,紫色
+orange-color,colors,,adj,kid,1,màu cam,orange,,橙色,橘色
+brown,colors,,adj,kid,1,màu nâu,brown,,棕色,咖啡色
+gray,colors,,adj,kid,1,màu xám,gray,grey,灰色,灰色

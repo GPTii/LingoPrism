@@ -1,0 +1,16 @@
+slug,order,icon,audience,name_vi,name_en,name_zh_hans,name_zh_hant
+animals,1,🐾,all,Động vật,Animals,动物,動物
+food,2,🍜,all,Thực phẩm,Food,食物,食物
+fruits-vegetables,3,🍎,all,Rau củ quả,Fruits & Vegetables,蔬果,蔬果
+objects,4,🎒,all,Đồ vật,Objects,东西,東西
+home,5,🛋️,all,Nội thất & gia dụng,Home,家居,家居
+technology,6,💻,adult,Công nghệ,Technology,科技,科技
+transport,7,🚗,all,Giao thông,Transport,交通,交通
+education,8,📚,all,Giáo dục,Education,教育,教育
+places,9,🏙️,all,Địa điểm & du lịch,Places & Travel,地方,地方
+sports,10,⚽,all,Thể thao,Sports,运动,運動
+nature,11,🌳,all,Thiên nhiên,Nature,自然,自然
+people,12,🧑,all,Con người,People,人,人
+clothing,13,👕,all,Quần áo & phụ kiện,Clothing & Accessories,衣服,衣服
+body,14,🖐️,kid,Cơ thể,Body,身体,身體
+colors,15,🎨,kid,Màu sắc,Colors,颜色,顏色

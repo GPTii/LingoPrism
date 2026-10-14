@@ -32,6 +32,8 @@ INSTALLED_APPS = [
     # local
     "apps.core",
     "apps.accounts",
+    "apps.vocab",
+    "apps.learning",
 ]
 
 MIDDLEWARE = [

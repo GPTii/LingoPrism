@@ -8,6 +8,8 @@ api_v1 = [
     path("", include("apps.core.urls")),
     path("auth/", include("apps.accounts.urls.auth")),
     path("", include("apps.accounts.urls.users")),
+    path("", include("apps.vocab.urls")),
+    path("", include("apps.learning.urls")),
 ]
 
 urlpatterns = [

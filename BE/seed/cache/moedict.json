@@ -1,0 +1,2990 @@
+{
+ "三明治": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄙㄢ ㄇㄧㄥˊ ㄓˋ",
+    "pinyin": "sān míng zhì"
+   }
+  ],
+  "title": "三明治"
+ },
+ "乒乓球": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄆㄧㄥ ㄆㄤ ㄑㄧㄡˊ",
+    "pinyin": "pīng pāng qiú"
+   }
+  ],
+  "title": "乒乓球"
+ },
+ "乳牛": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄖㄨˇ ㄋㄧㄡˊ",
+    "pinyin": "rǔ niú"
+   }
+  ],
+  "title": "乳牛"
+ },
+ "人": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄖㄣˊ",
+    "pinyin": "rén"
+   }
+  ],
+  "title": "人"
+ },
+ "企鵝": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄑㄧˋ ㄜˊ",
+    "pinyin": "qì é"
+   }
+  ],
+  "title": "企鵝"
+ },
+ "充": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄔㄨㄥ",
+    "pinyin": "chōng"
+   }
+  ],
+  "title": "充"
+ },
+ "充電器": null,
+ "兔子": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄊㄨˋ ˙ㄗ",
+    "pinyin": "tù zi"
+   }
+  ],
+  "title": "兔子"
+ },
+ "公園": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄍㄨㄥ ㄩㄢˊ",
+    "pinyin": "gōng yuán"
+   }
+  ],
+  "title": "公園"
+ },
+ "公車": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄍㄨㄥ ㄐㄩ",
+    "pinyin": "gōng jū"
+   },
+   {
+    "bopomofo": "ㄍㄨㄥ ㄔㄜ",
+    "pinyin": "gōng chē"
+   }
+  ],
+  "title": "公車"
+ },
+ "冰淇淋": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄅㄧㄥ ㄑㄧˊ ㄌㄧㄣˊ",
+    "pinyin": "bīng qí lín"
+   }
+  ],
+  "title": "冰淇淋"
+ },
+ "冰箱": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄅㄧㄥ ㄒㄧㄤ",
+    "pinyin": "bīng xiāng"
+   }
+  ],
+  "title": "冰箱"
+ },
+ "冷氣": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄌㄥˇ ㄑㄧˋ",
+    "pinyin": "lěng qì"
+   }
+  ],
+  "title": "冷氣"
+ },
+ "刀": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄉㄠ",
+    "pinyin": "dāo"
+   }
+  ],
+  "title": "刀"
+ },
+ "剪刀": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄐㄧㄢˇ ㄉㄠ",
+    "pinyin": "jiǎn dāo"
+   }
+  ],
+  "title": "剪刀"
+ },
+ "動物園": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄉㄨㄥˋ ㄨˋ ㄩㄢˊ",
+    "pinyin": "dòng wù yuán"
+   }
+  ],
+  "title": "動物園"
+ },
+ "博物館": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄅㄛˊ ㄨˋ ㄍㄨㄢˇ",
+    "pinyin": "bó wù guǎn"
+   }
+  ],
+  "title": "博物館"
+ },
+ "卡車": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄎㄚˇ ㄔㄜ",
+    "pinyin": "kǎ chē"
+   }
+  ],
+  "title": "卡車"
+ },
+ "印表機": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄧㄣˋ ㄅㄧㄠˇ ㄐㄧ",
+    "pinyin": "yìn biǎo jī"
+   }
+  ],
+  "title": "印表機"
+ },
+ "叉子": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄔㄚ ˙ㄗ",
+    "pinyin": "chā zi"
+   }
+  ],
+  "title": "叉子"
+ },
+ "吹風機": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄔㄨㄟ ㄈㄥ ㄐㄧ",
+    "pinyin": "chuī fēng jī"
+   }
+  ],
+  "title": "吹風機"
+ },
+ "咖啡": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄎㄚ ㄈㄟ",
+    "pinyin": "kā fēi"
+   }
+  ],
+  "title": "咖啡"
+ },
+ "咖啡色": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄎㄚ ㄈㄟ ㄙㄜˋ",
+    "pinyin": "kā fēi sè"
+   }
+  ],
+  "title": "咖啡色"
+ },
+ "哨子": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄕㄠˋ ˙ㄗ",
+    "pinyin": "shào zi"
+   }
+  ],
+  "title": "哨子"
+ },
+ "嘴巴": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄗㄨㄟˇ ˙ㄅㄚ",
+    "pinyin": "zuǐ ba"
+   }
+  ],
+  "title": "嘴巴"
+ },
+ "器": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄑㄧˋ",
+    "pinyin": "qì"
+   }
+  ],
+  "title": "器"
+ },
+ "圍巾": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄨㄟˊ ㄐㄧㄣ",
+    "pinyin": "wéi jīn"
+   }
+  ],
+  "title": "圍巾"
+ },
+ "圖書館": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄊㄨˊ ㄕㄨ ㄍㄨㄢˇ",
+    "pinyin": "tú shū guǎn"
+   }
+  ],
+  "title": "圖書館"
+ },
+ "地圖": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄉㄧˋ ㄊㄨˊ",
+    "pinyin": "dì tú"
+   }
+  ],
+  "title": "地圖"
+ },
+ "地鐵": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄉㄧˋ ㄊㄧㄝˇ",
+    "pinyin": "dì tiě"
+   }
+  ],
+  "title": "地鐵"
+ },
+ "垃圾": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄌㄜˋ ㄙㄜˋ",
+    "pinyin": "lè sè"
+   }
+  ],
+  "title": "垃圾"
+ },
+ "垃圾桶": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄌㄜˋ ㄙㄜˋ ㄊㄨㄥˇ",
+    "pinyin": "lè sè tǒng"
+   }
+  ],
+  "title": "垃圾桶"
+ },
+ "外套": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄨㄞˋ ㄊㄠˋ",
+    "pinyin": "wài tào"
+   }
+  ],
+  "title": "外套"
+ },
+ "大海": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄉㄚˋ ㄏㄞˇ",
+    "pinyin": "dà hǎi"
+   }
+  ],
+  "title": "大海"
+ },
+ "大蒜": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄉㄚˋ ㄙㄨㄢˋ",
+    "pinyin": "dà suàn"
+   }
+  ],
+  "title": "大蒜"
+ },
+ "大象": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄉㄚˋ ㄒㄧㄤˋ",
+    "pinyin": "dà xiàng"
+   }
+  ],
+  "title": "大象"
+ },
+ "天空": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄊㄧㄢ ㄎㄨㄥ",
+    "pinyin": "tiān kōng"
+   }
+  ],
+  "title": "天空"
+ },
+ "太陽": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄊㄞˋ ㄧㄤˊ",
+    "pinyin": "tài yáng"
+   }
+  ],
+  "title": "太陽"
+ },
+ "女": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄋㄩˇ",
+    "pinyin": "nǚ"
+   },
+   {
+    "bopomofo": "ㄋㄩˋ",
+    "pinyin": "nǜ"
+   },
+   {
+    "bopomofo": "ㄖㄨˇ",
+    "pinyin": "rǔ"
+   }
+  ],
+  "title": "女"
+ },
+ "女人": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄋㄩˇ ㄖㄣˊ",
+    "pinyin": "nǚ rén"
+   }
+  ],
+  "title": "女人"
+ },
+ "女孩": null,
+ "媽媽": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄇㄚ ˙ㄇㄚ",
+    "pinyin": "mā ma"
+   }
+  ],
+  "title": "媽媽"
+ },
+ "嬰兒": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄧㄥ ㄦˊ",
+    "pinyin": "yīng ér"
+   }
+  ],
+  "title": "嬰兒"
+ },
+ "子": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄗˇ",
+    "pinyin": "zǐ"
+   },
+   {
+    "bopomofo": "˙ㄗ",
+    "pinyin": "zi"
+   }
+  ],
+  "title": "子"
+ },
+ "字典": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄗˋ ㄉㄧㄢˇ",
+    "pinyin": "zì diǎn"
+   }
+  ],
+  "title": "字典"
+ },
+ "孩": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄏㄞˊ",
+    "pinyin": "hái"
+   }
+  ],
+  "title": "孩"
+ },
+ "學校": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄒㄩㄝˊ ㄒㄧㄠˋ",
+    "pinyin": "xué xiào"
+   }
+  ],
+  "title": "學校"
+ },
+ "學生": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄒㄩㄝˊ ㄕㄥ",
+    "pinyin": "xué shēng"
+   }
+  ],
+  "title": "學生"
+ },
+ "安全帽": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄢ ㄑㄩㄢˊ ㄇㄠˋ",
+    "pinyin": "ān quán mào"
+   }
+  ],
+  "title": "安全帽"
+ },
+ "寺廟": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄙˋ ㄇㄧㄠˋ",
+    "pinyin": "sì miào"
+   }
+  ],
+  "title": "寺廟"
+ },
+ "小黃瓜": null,
+ "尺": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄔˇ",
+    "pinyin": "chǐ"
+   },
+   {
+    "bopomofo": "ㄔˊ",
+    "pinyin": "chí"
+   },
+   {
+    "bopomofo": "ㄔㄜˇ",
+    "pinyin": "chě"
+   }
+  ],
+  "title": "尺"
+ },
+ "山": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄕㄢ",
+    "pinyin": "shān"
+   }
+  ],
+  "title": "山"
+ },
+ "山羊": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄕㄢ ㄧㄤˊ",
+    "pinyin": "shān yáng"
+   }
+  ],
+  "title": "山羊"
+ },
+ "島": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄉㄠˇ",
+    "pinyin": "dǎo"
+   }
+  ],
+  "title": "島"
+ },
+ "巧克力": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄑㄧㄠˇ ㄎㄜˋ ㄌㄧˋ",
+    "pinyin": "qiǎo kè lì"
+   }
+  ],
+  "title": "巧克力"
+ },
+ "市": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄕˋ",
+    "pinyin": "shì"
+   }
+  ],
+  "title": "市"
+ },
+ "市場": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄕˋ ㄔㄤˊ",
+    "pinyin": "shì cháng"
+   }
+  ],
+  "title": "市場"
+ },
+ "帳篷": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄓㄤˋ ㄆㄥˊ",
+    "pinyin": "zhàng péng"
+   }
+  ],
+  "title": "帳篷"
+ },
+ "帽子": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄇㄠˋ ˙ㄗ",
+    "pinyin": "mào zi"
+   }
+  ],
+  "title": "帽子"
+ },
+ "平": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄆㄧㄥˊ",
+    "pinyin": "píng"
+   },
+   {
+    "bopomofo": "ㄆㄧㄢˊ",
+    "pinyin": "pián"
+   }
+  ],
+  "title": "平"
+ },
+ "平板電腦": null,
+ "床": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄔㄨㄤˊ",
+    "pinyin": "chuáng"
+   }
+  ],
+  "title": "床"
+ },
+ "廚房": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄔㄨˊ ㄈㄤˊ",
+    "pinyin": "chú fáng"
+   }
+  ],
+  "title": "廚房"
+ },
+ "彩虹": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄘㄞˇ ㄏㄨㄥˊ",
+    "pinyin": "cǎi hóng"
+   }
+  ],
+  "title": "彩虹"
+ },
+ "微波爐": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄨㄟˊ ㄅㄛ ㄌㄨˊ",
+    "pinyin": "wéi bō lú"
+   }
+  ],
+  "title": "微波爐"
+ },
+ "戒指": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄐㄧㄝˋ ㄓˇ",
+    "pinyin": "jiè zhǐ"
+   }
+  ],
+  "title": "戒指"
+ },
+ "房子": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄈㄤˊ ˙ㄗ",
+    "pinyin": "fáng zi"
+   }
+  ],
+  "title": "房子"
+ },
+ "手": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄕㄡˇ",
+    "pinyin": "shǒu"
+   }
+  ],
+  "title": "手"
+ },
+ "手套": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄕㄡˇ ㄊㄠˋ",
+    "pinyin": "shǒu tào"
+   }
+  ],
+  "title": "手套"
+ },
+ "手提包": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄕㄡˇ ㄊㄧˊ ㄅㄠ",
+    "pinyin": "shǒu tí bāo"
+   }
+  ],
+  "title": "手提包"
+ },
+ "手機": null,
+ "手臂": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄕㄡˇ ㄅㄧˋ",
+    "pinyin": "shǒu bì"
+   }
+  ],
+  "title": "手臂"
+ },
+ "手錶": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄕㄡˇ ㄅㄧㄠˇ",
+    "pinyin": "shǒu biǎo"
+   }
+  ],
+  "title": "手錶"
+ },
+ "披薩": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄆㄧ ㄙㄚˋ",
+    "pinyin": "pī sà"
+   }
+  ],
+  "title": "披薩"
+ },
+ "掃把": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄙㄠˋ ㄅㄚˇ",
+    "pinyin": "sào bǎ"
+   }
+  ],
+  "title": "掃把"
+ },
+ "排球": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄆㄞˊ ㄑㄧㄡˊ",
+    "pinyin": "pái qiú"
+   }
+  ],
+  "title": "排球"
+ },
+ "救護車": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄐㄧㄡˋ ㄏㄨˋ ㄔㄜ",
+    "pinyin": "jiù hù chē"
+   }
+  ],
+  "title": "救護車"
+ },
+ "教堂": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄐㄧㄠˋ ㄊㄤˊ",
+    "pinyin": "jiào táng"
+   }
+  ],
+  "title": "教堂"
+ },
+ "教室": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄐㄧㄠˋ ㄕˋ",
+    "pinyin": "jiào shì"
+   }
+  ],
+  "title": "教室"
+ },
+ "斑馬": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄅㄢ ㄇㄚˇ",
+    "pinyin": "bān mǎ"
+   }
+  ],
+  "title": "斑馬"
+ },
+ "星星": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄒㄧㄥ ㄒㄧㄥ",
+    "pinyin": "xīng xīng"
+   },
+   {
+    "bopomofo": "ㄒㄧㄥ ˙ㄒㄧㄥ",
+    "pinyin": "xīng xing"
+   }
+  ],
+  "title": "星星"
+ },
+ "時鐘": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄕˊ ㄓㄨㄥ",
+    "pinyin": "shí zhōng"
+   }
+  ],
+  "title": "時鐘"
+ },
+ "書": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄕㄨ",
+    "pinyin": "shū"
+   }
+  ],
+  "title": "書"
+ },
+ "書架": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄕㄨ ㄐㄧㄚˋ",
+    "pinyin": "shū jià"
+   }
+  ],
+  "title": "書架"
+ },
+ "書桌": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄕㄨ ㄓㄨㄛ",
+    "pinyin": "shū zhuō"
+   }
+  ],
+  "title": "書桌"
+ },
+ "月亮": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄩㄝˋ ㄌㄧㄤˋ",
+    "pinyin": "yuè liàng"
+   }
+  ],
+  "title": "月亮"
+ },
+ "朋友": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄆㄥˊ ㄧㄡˇ",
+    "pinyin": "péng yǒu"
+   }
+  ],
+  "title": "朋友"
+ },
+ "本": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄅㄣˇ",
+    "pinyin": "běn"
+   }
+  ],
+  "title": "本"
+ },
+ "杯子": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄅㄟ ˙ㄗ",
+    "pinyin": "bēi zi"
+   }
+  ],
+  "title": "杯子"
+ },
+ "松鼠": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄙㄨㄥ ㄕㄨˇ",
+    "pinyin": "sōng shǔ"
+   }
+  ],
+  "title": "松鼠"
+ },
+ "板": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄅㄢˇ",
+    "pinyin": "bǎn"
+   }
+  ],
+  "title": "板"
+ },
+ "枕頭": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄓㄣˇ ˙ㄊㄡ",
+    "pinyin": "zhěn tou"
+   }
+  ],
+  "title": "枕頭"
+ },
+ "果汁": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄍㄨㄛˇ ㄓ",
+    "pinyin": "guǒ zhī"
+   }
+  ],
+  "title": "果汁"
+ },
+ "柳橙": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄌㄧㄡˇ ㄔㄥˊ",
+    "pinyin": "liǔ chéng"
+   }
+  ],
+  "title": "柳橙"
+ },
+ "桃子": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄊㄠˊ ˙ㄗ",
+    "pinyin": "táo zi"
+   }
+  ],
+  "title": "桃子"
+ },
+ "桌子": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄓㄨㄛ ˙ㄗ",
+    "pinyin": "zhuō zi"
+   }
+  ],
+  "title": "桌子"
+ },
+ "桶": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄊㄨㄥˇ",
+    "pinyin": "tǒng"
+   }
+  ],
+  "title": "桶"
+ },
+ "梨": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄌㄧˊ",
+    "pinyin": "lí"
+   }
+  ],
+  "title": "梨"
+ },
+ "梳子": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄕㄨ ˙ㄗ",
+    "pinyin": "shū zi"
+   }
+  ],
+  "title": "梳子"
+ },
+ "森林": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄙㄣ ㄌㄧㄣˊ",
+    "pinyin": "sēn lín"
+   }
+  ],
+  "title": "森林"
+ },
+ "椅": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄧˇ",
+    "pinyin": "yǐ"
+   },
+   {
+    "bopomofo": "ㄧ",
+    "pinyin": "yī"
+   }
+  ],
+  "title": "椅"
+ },
+ "椅子": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄧˇ ˙ㄗ",
+    "pinyin": "yǐ zi"
+   }
+  ],
+  "title": "椅子"
+ },
+ "椰子": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄧㄝˊ ˙ㄗ",
+    "pinyin": "yé zi"
+   }
+  ],
+  "title": "椰子"
+ },
+ "樓梯": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄌㄡˊ ㄊㄧ",
+    "pinyin": "lóu tī"
+   }
+  ],
+  "title": "樓梯"
+ },
+ "樹": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄕㄨˋ",
+    "pinyin": "shù"
+   }
+  ],
+  "title": "樹"
+ },
+ "橋": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄑㄧㄠˊ",
+    "pinyin": "qiáo"
+   }
+  ],
+  "title": "橋"
+ },
+ "橘": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄐㄩˊ",
+    "pinyin": "jú"
+   }
+  ],
+  "title": "橘"
+ },
+ "橘色": null,
+ "機": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄐㄧ",
+    "pinyin": "jī"
+   }
+  ],
+  "title": "機"
+ },
+ "機器人": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄐㄧ ㄑㄧˋ ㄖㄣˊ",
+    "pinyin": "jī qì rén"
+   }
+  ],
+  "title": "機器人"
+ },
+ "機場": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄐㄧ ㄔㄤˊ",
+    "pinyin": "jī cháng"
+   }
+  ],
+  "title": "機場"
+ },
+ "機車": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄐㄧ ㄔㄜ",
+    "pinyin": "jī chē"
+   }
+  ],
+  "title": "機車"
+ },
+ "橡皮擦": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄒㄧㄤˋ ㄆㄧˊ ㄘㄚ",
+    "pinyin": "xiàng pí cā"
+   }
+  ],
+  "title": "橡皮擦"
+ },
+ "檯燈": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄊㄞˊ ㄉㄥ",
+    "pinyin": "tái dēng"
+   }
+  ],
+  "title": "檯燈"
+ },
+ "檸檬": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄋㄧㄥˊ ㄇㄥˊ",
+    "pinyin": "níng méng"
+   }
+  ],
+  "title": "檸檬"
+ },
+ "毛巾": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄇㄠˊ ㄐㄧㄣ",
+    "pinyin": "máo jīn"
+   }
+  ],
+  "title": "毛巾"
+ },
+ "毯子": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄊㄢˇ ˙ㄗ",
+    "pinyin": "tǎn zi"
+   }
+  ],
+  "title": "毯子"
+ },
+ "水": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄕㄨㄟˇ",
+    "pinyin": "shuǐ"
+   }
+  ],
+  "title": "水"
+ },
+ "水壺": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄕㄨㄟˇ ㄏㄨˊ",
+    "pinyin": "shuǐ hú"
+   }
+  ],
+  "title": "水壺"
+ },
+ "水桶": null,
+ "水槽": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄕㄨㄟˇ ㄘㄠˊ",
+    "pinyin": "shuǐ cáo"
+   }
+  ],
+  "title": "水槽"
+ },
+ "池": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄔˊ",
+    "pinyin": "chí"
+   }
+  ],
+  "title": "池"
+ },
+ "汽車": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄑㄧˋ ㄔㄜ",
+    "pinyin": "qì chē"
+   }
+  ],
+  "title": "汽車"
+ },
+ "沙發": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄕㄚ ㄈㄚ",
+    "pinyin": "shā fā"
+   }
+  ],
+  "title": "沙發"
+ },
+ "河": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄏㄜˊ",
+    "pinyin": "hé"
+   }
+  ],
+  "title": "河"
+ },
+ "河馬": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄏㄜˊ ㄇㄚˇ",
+    "pinyin": "hé mǎ"
+   }
+  ],
+  "title": "河馬"
+ },
+ "泰": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄊㄞˋ",
+    "pinyin": "tài"
+   }
+  ],
+  "title": "泰"
+ },
+ "泰迪熊": null,
+ "洋蔥": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄧㄤˊ ㄘㄨㄥ",
+    "pinyin": "yáng cōng"
+   }
+  ],
+  "title": "洋蔥"
+ },
+ "洗衣機": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄒㄧˇ ㄧ ㄐㄧ",
+    "pinyin": "xǐ yī jī"
+   }
+  ],
+  "title": "洗衣機"
+ },
+ "浪": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄌㄤˋ",
+    "pinyin": "làng"
+   },
+   {
+    "bopomofo": "ㄌㄤˊ",
+    "pinyin": "láng"
+   }
+  ],
+  "title": "浪"
+ },
+ "浴室": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄩˋ ㄕˋ",
+    "pinyin": "yù shì"
+   }
+  ],
+  "title": "浴室"
+ },
+ "海灘": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄏㄞˇ ㄊㄢ",
+    "pinyin": "hǎi tān"
+   }
+  ],
+  "title": "海灘"
+ },
+ "海豚": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄏㄞˇ ㄊㄨㄣˊ",
+    "pinyin": "hǎi tún"
+   }
+  ],
+  "title": "海豚"
+ },
+ "消防栓": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄒㄧㄠ ㄈㄤˊ ㄕㄨㄢ",
+    "pinyin": "xiāo fáng shuān"
+   }
+  ],
+  "title": "消防栓"
+ },
+ "消防車": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄒㄧㄠ ㄈㄤˊ ㄔㄜ",
+    "pinyin": "xiāo fáng chē"
+   }
+  ],
+  "title": "消防車"
+ },
+ "游泳池": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄧㄡˊ ㄩㄥˇ ㄔˊ",
+    "pinyin": "yóu yǒng chí"
+   }
+  ],
+  "title": "游泳池"
+ },
+ "湖": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄏㄨˊ",
+    "pinyin": "hú"
+   }
+  ],
+  "title": "湖"
+ },
+ "湯": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄊㄤ",
+    "pinyin": "tāng"
+   },
+   {
+    "bopomofo": "ㄕㄤ",
+    "pinyin": "shāng"
+   }
+  ],
+  "title": "湯"
+ },
+ "湯匙": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄊㄤ ㄔˊ",
+    "pinyin": "tāng chí"
+   }
+  ],
+  "title": "湯匙"
+ },
+ "滑板": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄏㄨㄚˊ ㄅㄢˇ",
+    "pinyin": "huá bǎn"
+   }
+  ],
+  "title": "滑板"
+ },
+ "滑鼠": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄏㄨㄚˊ ㄕㄨˇ",
+    "pinyin": "huá shǔ"
+   }
+  ],
+  "title": "滑鼠"
+ },
+ "火": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄏㄨㄛˇ",
+    "pinyin": "huǒ"
+   }
+  ],
+  "title": "火"
+ },
+ "火車": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄏㄨㄛˇ ㄔㄜ",
+    "pinyin": "huǒ chē"
+   }
+  ],
+  "title": "火車"
+ },
+ "灰色": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄏㄨㄟ ㄙㄜˋ",
+    "pinyin": "huī sè"
+   }
+  ],
+  "title": "灰色"
+ },
+ "烏龜": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄨ ㄍㄨㄟ",
+    "pinyin": "wū guī"
+   }
+  ],
+  "title": "烏龜"
+ },
+ "烤箱": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄎㄠˇ ㄒㄧㄤ",
+    "pinyin": "kǎo xiāng"
+   }
+  ],
+  "title": "烤箱"
+ },
+ "烤麵包機": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄎㄠˇ ㄇㄧㄢˋ ㄅㄠ ㄐㄧ",
+    "pinyin": "kǎo miàn bāo jī"
+   }
+  ],
+  "title": "烤麵包機"
+ },
+ "熊": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄒㄩㄥˊ",
+    "pinyin": "xióng"
+   }
+  ],
+  "title": "熊"
+ },
+ "熊貓": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄒㄩㄥˊ ㄇㄠ",
+    "pinyin": "xióng māo"
+   }
+  ],
+  "title": "熊貓"
+ },
+ "熱狗": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄖㄜˋ ㄍㄡˇ",
+    "pinyin": "rè gǒu"
+   }
+  ],
+  "title": "熱狗"
+ },
+ "燈泡": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄉㄥ ㄆㄠˋ",
+    "pinyin": "dēng pào"
+   }
+  ],
+  "title": "燈泡"
+ },
+ "爸爸": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄅㄚˋ ˙ㄅㄚ",
+    "pinyin": "bà ba"
+   }
+  ],
+  "title": "爸爸"
+ },
+ "牙刷": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄧㄚˊ ㄕㄨㄚ",
+    "pinyin": "yá shuā"
+   }
+  ],
+  "title": "牙刷"
+ },
+ "牙膏": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄧㄚˊ ㄍㄠ",
+    "pinyin": "yá gāo"
+   }
+  ],
+  "title": "牙膏"
+ },
+ "牙齒": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄧㄚˊ ㄔˇ",
+    "pinyin": "yá chǐ"
+   }
+  ],
+  "title": "牙齒"
+ },
+ "牛奶": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄋㄧㄡˊ ㄋㄞˇ",
+    "pinyin": "niú nǎi"
+   }
+  ],
+  "title": "牛奶"
+ },
+ "狐狸": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄏㄨˊ ˙ㄌㄧ",
+    "pinyin": "hú li"
+   }
+  ],
+  "title": "狐狸"
+ },
+ "狗": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄍㄡˇ",
+    "pinyin": "gǒu"
+   }
+  ],
+  "title": "狗"
+ },
+ "狼": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄌㄤˊ",
+    "pinyin": "láng"
+   }
+  ],
+  "title": "狼"
+ },
+ "猴子": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄏㄡˊ ˙ㄗ",
+    "pinyin": "hóu zi"
+   }
+  ],
+  "title": "猴子"
+ },
+ "獅子": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄕ ˙ㄗ",
+    "pinyin": "shī zi"
+   }
+  ],
+  "title": "獅子"
+ },
+ "獎牌": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄐㄧㄤˇ ㄆㄞˊ",
+    "pinyin": "jiǎng pái"
+   }
+  ],
+  "title": "獎牌"
+ },
+ "玉米": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄩˋ ˙ㄇㄧ",
+    "pinyin": "yù mi"
+   }
+  ],
+  "title": "玉米"
+ },
+ "球": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄑㄧㄡˊ",
+    "pinyin": "qiú"
+   }
+  ],
+  "title": "球"
+ },
+ "球拍": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄑㄧㄡˊ ㄆㄞ",
+    "pinyin": "qiú pāi"
+   }
+  ],
+  "title": "球拍"
+ },
+ "球棒": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄑㄧㄡˊ ㄅㄤˋ",
+    "pinyin": "qiú bàng"
+   }
+  ],
+  "title": "球棒"
+ },
+ "瓶子": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄆㄧㄥˊ ˙ㄗ",
+    "pinyin": "píng zi"
+   }
+  ],
+  "title": "瓶子"
+ },
+ "甜甜圈": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄊㄧㄢˊ ㄊㄧㄢˊ ㄑㄩㄢ",
+    "pinyin": "tián tián quān"
+   }
+  ],
+  "title": "甜甜圈"
+ },
+ "男": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄋㄢˊ",
+    "pinyin": "nán"
+   }
+  ],
+  "title": "男"
+ },
+ "男人": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄋㄢˊ ㄖㄣˊ",
+    "pinyin": "nán rén"
+   },
+   {
+    "bopomofo": "ㄋㄢˊ ˙ㄖㄣ",
+    "pinyin": "nán ren"
+   }
+  ],
+  "title": "男人"
+ },
+ "男孩": null,
+ "番茄": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄈㄢ ㄑㄧㄝˊ",
+    "pinyin": "fān qié"
+   }
+  ],
+  "title": "番茄"
+ },
+ "白色": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄅㄞˊ ㄙㄜˋ",
+    "pinyin": "bái sè"
+   }
+  ],
+  "title": "白色"
+ },
+ "皮帶": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄆㄧˊ ㄉㄞˋ",
+    "pinyin": "pí dài"
+   }
+  ],
+  "title": "皮帶"
+ },
+ "盆栽": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄆㄣˊ ㄗㄞ",
+    "pinyin": "pén zāi"
+   }
+  ],
+  "title": "盆栽"
+ },
+ "盤子": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄆㄢˊ ˙ㄗ",
+    "pinyin": "pán zi"
+   }
+  ],
+  "title": "盤子"
+ },
+ "直升機": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄓˊ ㄕㄥ ㄐㄧ",
+    "pinyin": "zhí shēng jī"
+   }
+  ],
+  "title": "直升機"
+ },
+ "相機": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄒㄧㄤˋ ㄐㄧ",
+    "pinyin": "xiàng jī"
+   }
+  ],
+  "title": "相機"
+ },
+ "眼睛": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄧㄢˇ ㄐㄧㄥ",
+    "pinyin": "yǎn jīng"
+   }
+  ],
+  "title": "眼睛"
+ },
+ "眼鏡": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄧㄢˇ ㄐㄧㄥˋ",
+    "pinyin": "yǎn jìng"
+   }
+  ],
+  "title": "眼鏡"
+ },
+ "石頭": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄕˊ ˙ㄊㄡ",
+    "pinyin": "shí tou"
+   }
+  ],
+  "title": "石頭"
+ },
+ "碗": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄨㄢˇ",
+    "pinyin": "wǎn"
+   }
+  ],
+  "title": "碗"
+ },
+ "票": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄆㄧㄠˋ",
+    "pinyin": "piào"
+   },
+   {
+    "bopomofo": "ㄆㄧㄠ",
+    "pinyin": "piāo"
+   }
+  ],
+  "title": "票"
+ },
+ "窗戶": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄔㄨㄤ ˙ㄏㄨ",
+    "pinyin": "chuāng hu"
+   }
+  ],
+  "title": "窗戶"
+ },
+ "窗簾": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄔㄨㄤ ㄌㄧㄢˊ",
+    "pinyin": "chuāng lián"
+   }
+  ],
+  "title": "窗簾"
+ },
+ "筆": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄅㄧˇ",
+    "pinyin": "bǐ"
+   }
+  ],
+  "title": "筆"
+ },
+ "筆記型電腦": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄅㄧˇ ㄐㄧˋ ㄒㄧㄥˊ ㄉㄧㄢˋ ㄋㄠˇ",
+    "pinyin": "bǐ jì xíng diàn nǎo"
+   }
+  ],
+  "title": "筆記型電腦"
+ },
+ "筆記本": null,
+ "筷子": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄎㄨㄞˋ ˙ㄗ",
+    "pinyin": "kuài zi"
+   }
+  ],
+  "title": "筷子"
+ },
+ "籃球": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄌㄢˊ ㄑㄧㄡˊ",
+    "pinyin": "lán qiú"
+   }
+  ],
+  "title": "籃球"
+ },
+ "米飯": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄇㄧˇ ㄈㄢˋ",
+    "pinyin": "mǐ fàn"
+   }
+  ],
+  "title": "米飯"
+ },
+ "粉": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄈㄣˇ",
+    "pinyin": "fěn"
+   }
+  ],
+  "title": "粉"
+ },
+ "粉紅色": null,
+ "糖": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄊㄤˊ",
+    "pinyin": "táng"
+   }
+  ],
+  "title": "糖"
+ },
+ "糖果": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄊㄤˊ ㄍㄨㄛˇ",
+    "pinyin": "táng guǒ"
+   }
+  ],
+  "title": "糖果"
+ },
+ "紅": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄏㄨㄥˊ",
+    "pinyin": "hóng"
+   },
+   {
+    "bopomofo": "ㄍㄨㄥ",
+    "pinyin": "gōng"
+   }
+  ],
+  "title": "紅"
+ },
+ "紅綠燈": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄏㄨㄥˊ ㄌㄩˋ ㄉㄥ",
+    "pinyin": "hóng lǜ dēng"
+   }
+  ],
+  "title": "紅綠燈"
+ },
+ "紅色": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄏㄨㄥˊ ㄙㄜˋ",
+    "pinyin": "hóng sè"
+   }
+  ],
+  "title": "紅色"
+ },
+ "紅蘿蔔": null,
+ "紫色": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄗˇ ㄙㄜˋ",
+    "pinyin": "zǐ sè"
+   }
+  ],
+  "title": "紫色"
+ },
+ "綠色": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄌㄩˋ ㄙㄜˋ",
+    "pinyin": "lǜ sè"
+   }
+  ],
+  "title": "綠色"
+ },
+ "網球": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄨㄤˇ ㄑㄧㄡˊ",
+    "pinyin": "wǎng qiú"
+   }
+  ],
+  "title": "網球"
+ },
+ "網球拍": null,
+ "綿羊": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄇㄧㄢˊ ㄧㄤˊ",
+    "pinyin": "mián yáng"
+   }
+  ],
+  "title": "綿羊"
+ },
+ "羽毛球": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄩˇ ㄇㄠˊ ㄑㄧㄡˊ",
+    "pinyin": "yǔ máo qiú"
+   }
+  ],
+  "title": "羽毛球"
+ },
+ "老師": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄌㄠˇ ㄕ",
+    "pinyin": "lǎo shī"
+   }
+  ],
+  "title": "老師"
+ },
+ "老虎": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄌㄠˇ ㄏㄨˇ",
+    "pinyin": "lǎo hǔ"
+   }
+  ],
+  "title": "老虎"
+ },
+ "老鼠": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄌㄠˇ ㄕㄨˇ",
+    "pinyin": "lǎo shǔ"
+   }
+  ],
+  "title": "老鼠"
+ },
+ "耳朵": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄦˇ ˙ㄉㄨㄛ",
+    "pinyin": "ěr duo"
+   }
+  ],
+  "title": "耳朵"
+ },
+ "耳機": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄦˇ ㄐㄧ",
+    "pinyin": "ěr jī"
+   }
+  ],
+  "title": "耳機"
+ },
+ "肉": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄖㄡˋ",
+    "pinyin": "ròu"
+   },
+   {
+    "bopomofo": "ㄖㄨˋ",
+    "pinyin": "rù"
+   }
+  ],
+  "title": "肉"
+ },
+ "肥皂": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄈㄟˊ ㄗㄠˋ",
+    "pinyin": "féi zào"
+   }
+  ],
+  "title": "肥皂"
+ },
+ "背包": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄅㄟ ㄅㄠ",
+    "pinyin": "bēi bāo"
+   }
+  ],
+  "title": "背包"
+ },
+ "腦": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄋㄠˇ",
+    "pinyin": "nǎo"
+   }
+  ],
+  "title": "腦"
+ },
+ "腳": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄐㄧㄠˇ",
+    "pinyin": "jiǎo"
+   },
+   {
+    "bopomofo": "ㄐㄩㄝˊ",
+    "pinyin": "jué"
+   }
+  ],
+  "title": "腳"
+ },
+ "腳踏車": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄐㄧㄠˇ ㄊㄚˋ ㄔㄜ",
+    "pinyin": "jiǎo tà chē"
+   }
+  ],
+  "title": "腳踏車"
+ },
+ "腿": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄊㄨㄟˇ",
+    "pinyin": "tuǐ"
+   }
+  ],
+  "title": "腿"
+ },
+ "膠水": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄐㄧㄠ ㄕㄨㄟˇ",
+    "pinyin": "jiāo shuǐ"
+   }
+  ],
+  "title": "膠水"
+ },
+ "臉": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄌㄧㄢˇ",
+    "pinyin": "liǎn"
+   }
+  ],
+  "title": "臉"
+ },
+ "臥室": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄨㄛˋ ㄕˋ",
+    "pinyin": "wò shì"
+   }
+  ],
+  "title": "臥室"
+ },
+ "船": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄔㄨㄢˊ",
+    "pinyin": "chuán"
+   }
+  ],
+  "title": "船"
+ },
+ "色": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄙㄜˋ",
+    "pinyin": "sè"
+   },
+   {
+    "bopomofo": "ㄕㄞˇ",
+    "pinyin": "shǎi"
+   },
+   {
+    "bopomofo": "ㄕㄜˋ",
+    "pinyin": "shè"
+   }
+  ],
+  "title": "色"
+ },
+ "芒果": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄇㄤˊ ㄍㄨㄛˇ",
+    "pinyin": "máng guǒ"
+   }
+  ],
+  "title": "芒果"
+ },
+ "花": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄏㄨㄚ",
+    "pinyin": "huā"
+   }
+  ],
+  "title": "花"
+ },
+ "花瓶": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄏㄨㄚ ㄆㄧㄥˊ",
+    "pinyin": "huā píng"
+   }
+  ],
+  "title": "花瓶"
+ },
+ "茶": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄔㄚˊ",
+    "pinyin": "chá"
+   }
+  ],
+  "title": "茶"
+ },
+ "草": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄘㄠˇ",
+    "pinyin": "cǎo"
+   }
+  ],
+  "title": "草"
+ },
+ "草莓": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄘㄠˇ ㄇㄟˊ",
+    "pinyin": "cǎo méi"
+   }
+  ],
+  "title": "草莓"
+ },
+ "菜": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄘㄞˋ",
+    "pinyin": "cài"
+   }
+  ],
+  "title": "菜"
+ },
+ "葉子": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄧㄝˋ ˙ㄗ",
+    "pinyin": "yè zi"
+   }
+  ],
+  "title": "葉子"
+ },
+ "葡萄": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄆㄨˊ ㄊㄠˊ",
+    "pinyin": "pú táo"
+   }
+  ],
+  "title": "葡萄"
+ },
+ "蔔": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄅㄛˊ",
+    "pinyin": "bó"
+   },
+   {
+    "bopomofo": "˙ㄅㄛ",
+    "pinyin": "bo"
+   }
+  ],
+  "title": "蔔"
+ },
+ "藍色": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄌㄢˊ ㄙㄜˋ",
+    "pinyin": "lán sè"
+   }
+  ],
+  "title": "藍色"
+ },
+ "藥局": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄧㄠˋ ㄐㄩˊ",
+    "pinyin": "yào jú"
+   }
+  ],
+  "title": "藥局"
+ },
+ "蘋果": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄆㄧㄥˊ ㄍㄨㄛˇ",
+    "pinyin": "píng guǒ"
+   }
+  ],
+  "title": "蘋果"
+ },
+ "蘿": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄌㄨㄛˊ",
+    "pinyin": "luó"
+   }
+  ],
+  "title": "蘿"
+ },
+ "蛇": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄕㄜˊ",
+    "pinyin": "shé"
+   },
+   {
+    "bopomofo": "ㄧˊ",
+    "pinyin": "yí"
+   }
+  ],
+  "title": "蛇"
+ },
+ "蛋糕": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄉㄢˋ ㄍㄠ",
+    "pinyin": "dàn gāo"
+   }
+  ],
+  "title": "蛋糕"
+ },
+ "蜘蛛": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄓ ㄓㄨ",
+    "pinyin": "zhī zhū"
+   }
+  ],
+  "title": "蜘蛛"
+ },
+ "蜜蜂": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄇㄧˋ ㄈㄥ",
+    "pinyin": "mì fēng"
+   }
+  ],
+  "title": "蜜蜂"
+ },
+ "蝴蝶": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄏㄨˊ ㄉㄧㄝˊ",
+    "pinyin": "hú dié"
+   }
+  ],
+  "title": "蝴蝶"
+ },
+ "螞蟻": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄇㄚˇ ㄧˇ",
+    "pinyin": "mǎ yǐ"
+   }
+  ],
+  "title": "螞蟻"
+ },
+ "螢幕": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄧㄥˊ ㄇㄨˋ",
+    "pinyin": "yíng mù"
+   }
+  ],
+  "title": "螢幕"
+ },
+ "行李箱": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄒㄧㄥˊ ㄌㄧˇ ㄒㄧㄤ",
+    "pinyin": "xíng lǐ xiāng"
+   }
+  ],
+  "title": "行李箱"
+ },
+ "衝": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄔㄨㄥ",
+    "pinyin": "chōng"
+   },
+   {
+    "bopomofo": "ㄔㄨㄥˋ",
+    "pinyin": "chòng"
+   }
+  ],
+  "title": "衝"
+ },
+ "衝浪板": null,
+ "衣櫃": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄧ ㄍㄨㄟˋ",
+    "pinyin": "yī guì"
+   }
+  ],
+  "title": "衣櫃"
+ },
+ "袋鼠": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄉㄞˋ ㄕㄨˇ",
+    "pinyin": "dài shǔ"
+   }
+  ],
+  "title": "袋鼠"
+ },
+ "裙子": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄑㄩㄣˊ ˙ㄗ",
+    "pinyin": "qún zi"
+   }
+  ],
+  "title": "裙子"
+ },
+ "褲": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄎㄨˋ",
+    "pinyin": "kù"
+   }
+  ],
+  "title": "褲"
+ },
+ "褲子": null,
+ "襪子": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄨㄚˋ ˙ㄗ",
+    "pinyin": "wà zi"
+   }
+  ],
+  "title": "襪子"
+ },
+ "襯衫": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄔㄣˋ ㄕㄢ",
+    "pinyin": "chèn shān"
+   }
+  ],
+  "title": "襯衫"
+ },
+ "西瓜": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄒㄧ ㄍㄨㄚ",
+    "pinyin": "xī guā"
+   }
+  ],
+  "title": "西瓜"
+ },
+ "計程車": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄐㄧˋ ㄔㄥˊ ㄔㄜ",
+    "pinyin": "jì chéng chē"
+   }
+  ],
+  "title": "計程車"
+ },
+ "計算機": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄐㄧˋ ㄙㄨㄢˋ ㄐㄧ",
+    "pinyin": "jì suàn jī"
+   }
+  ],
+  "title": "計算機"
+ },
+ "記": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄐㄧˋ",
+    "pinyin": "jì"
+   }
+  ],
+  "title": "記"
+ },
+ "警察": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄐㄧㄥˇ ㄔㄚˊ",
+    "pinyin": "jǐng chá"
+   }
+  ],
+  "title": "警察"
+ },
+ "護士": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄏㄨˋ ㄕˋ",
+    "pinyin": "hù shì"
+   }
+  ],
+  "title": "護士"
+ },
+ "護照": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄏㄨˋ ㄓㄠˋ",
+    "pinyin": "hù zhào"
+   }
+  ],
+  "title": "護照"
+ },
+ "豬": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄓㄨ",
+    "pinyin": "zhū"
+   }
+  ],
+  "title": "豬"
+ },
+ "貓": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄇㄠ",
+    "pinyin": "māo"
+   }
+  ],
+  "title": "貓"
+ },
+ "貓頭鷹": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄇㄠ ㄊㄡˊ ㄧㄥ",
+    "pinyin": "māo tóu yīng"
+   }
+  ],
+  "title": "貓頭鷹"
+ },
+ "起司": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄑㄧˇ ㄙ",
+    "pinyin": "qǐ sī"
+   }
+  ],
+  "title": "起司"
+ },
+ "超": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄔㄠ",
+    "pinyin": "chāo"
+   }
+  ],
+  "title": "超"
+ },
+ "超市": null,
+ "足球": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄗㄨˊ ㄑㄧㄡˊ",
+    "pinyin": "zú qiú"
+   }
+  ],
+  "title": "足球"
+ },
+ "迪": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄉㄧˊ",
+    "pinyin": "dí"
+   }
+  ],
+  "title": "迪"
+ },
+ "遙控器": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄧㄠˊ ㄎㄨㄥˋ ㄑㄧˋ",
+    "pinyin": "yáo kòng qì"
+   }
+  ],
+  "title": "遙控器"
+ },
+ "郵局": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄧㄡˊ ㄐㄩˊ",
+    "pinyin": "yóu jú"
+   }
+  ],
+  "title": "郵局"
+ },
+ "酒杯": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄐㄧㄡˇ ㄅㄟ",
+    "pinyin": "jiǔ bēi"
+   }
+  ],
+  "title": "酒杯"
+ },
+ "醫生": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄧ ㄕㄥ",
+    "pinyin": "yī shēng"
+   }
+  ],
+  "title": "醫生"
+ },
+ "醫院": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄧ ㄩㄢˋ",
+    "pinyin": "yī yuàn"
+   }
+  ],
+  "title": "醫院"
+ },
+ "鉛筆": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄑㄧㄢ ㄅㄧˇ",
+    "pinyin": "qiān bǐ"
+   }
+  ],
+  "title": "鉛筆"
+ },
+ "銀行": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄧㄣˊ ㄏㄤˊ",
+    "pinyin": "yín háng"
+   }
+  ],
+  "title": "銀行"
+ },
+ "錢包": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄑㄧㄢˊ ㄅㄠ",
+    "pinyin": "qián bāo"
+   }
+  ],
+  "title": "錢包"
+ },
+ "鍋": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄍㄨㄛ",
+    "pinyin": "guō"
+   }
+  ],
+  "title": "鍋"
+ },
+ "鍵盤": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄐㄧㄢˋ ㄆㄢˊ",
+    "pinyin": "jiàn pán"
+   }
+  ],
+  "title": "鍵盤"
+ },
+ "鏡子": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄐㄧㄥˋ ˙ㄗ",
+    "pinyin": "jìng zi"
+   }
+  ],
+  "title": "鏡子"
+ },
+ "鑰匙": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄧㄠˋ ˙ㄕ",
+    "pinyin": "yào shi"
+   }
+  ],
+  "title": "鑰匙"
+ },
+ "長": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄔㄤˊ",
+    "pinyin": "cháng"
+   },
+   {
+    "bopomofo": "ㄓㄤˇ",
+    "pinyin": "zhǎng"
+   },
+   {
+    "bopomofo": "ㄓㄤˋ",
+    "pinyin": "zhàng"
+   }
+  ],
+  "title": "長"
+ },
+ "長椅": null,
+ "長頸鹿": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄔㄤˊ ㄐㄧㄥˇ ㄌㄨˋ",
+    "pinyin": "cháng jǐng lù"
+   }
+  ],
+  "title": "長頸鹿"
+ },
+ "門": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄇㄣˊ",
+    "pinyin": "mén"
+   }
+  ],
+  "title": "門"
+ },
+ "雞": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄐㄧ",
+    "pinyin": "jī"
+   }
+  ],
+  "title": "雞"
+ },
+ "雞蛋": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄐㄧ ㄉㄢˋ",
+    "pinyin": "jī dàn"
+   }
+  ],
+  "title": "雞蛋"
+ },
+ "雨": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄩˇ",
+    "pinyin": "yǔ"
+   },
+   {
+    "bopomofo": "ㄩˋ",
+    "pinyin": "yù"
+   }
+  ],
+  "title": "雨"
+ },
+ "雨傘": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄩˇ ㄙㄢˇ",
+    "pinyin": "yǔ sǎn"
+   }
+  ],
+  "title": "雨傘"
+ },
+ "雪": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄒㄩㄝˇ",
+    "pinyin": "xuě"
+   },
+   {
+    "bopomofo": "ㄒㄩㄝˋ",
+    "pinyin": "xuè"
+   }
+  ],
+  "title": "雪"
+ },
+ "雲": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄩㄣˊ",
+    "pinyin": "yún"
+   }
+  ],
+  "title": "雲"
+ },
+ "電": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄉㄧㄢˋ",
+    "pinyin": "diàn"
+   }
+  ],
+  "title": "電"
+ },
+ "電影院": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄉㄧㄢˋ ㄧㄥˇ ㄩㄢˋ",
+    "pinyin": "diàn yǐng yuàn"
+   }
+  ],
+  "title": "電影院"
+ },
+ "電池": null,
+ "電腦": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄉㄧㄢˋ ㄋㄠˇ",
+    "pinyin": "diàn nǎo"
+   }
+  ],
+  "title": "電腦"
+ },
+ "電視": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄉㄧㄢˋ ㄕˋ",
+    "pinyin": "diàn shì"
+   }
+  ],
+  "title": "電視"
+ },
+ "電風扇": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄉㄧㄢˋ ㄈㄥ ㄕㄢˋ",
+    "pinyin": "diàn fēng shàn"
+   }
+  ],
+  "title": "電風扇"
+ },
+ "青": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄑㄧㄥ",
+    "pinyin": "qīng"
+   },
+   {
+    "bopomofo": "ㄐㄧㄥ",
+    "pinyin": "jīng"
+   }
+  ],
+  "title": "青"
+ },
+ "青花菜": null,
+ "青蛙": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄑㄧㄥ ㄨㄚ",
+    "pinyin": "qīng wā"
+   }
+  ],
+  "title": "青蛙"
+ },
+ "鞋子": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄒㄧㄝˊ ˙ㄗ",
+    "pinyin": "xié zi"
+   }
+  ],
+  "title": "鞋子"
+ },
+ "領帶": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄌㄧㄥˇ ㄉㄞˋ",
+    "pinyin": "lǐng dài"
+   }
+  ],
+  "title": "領帶"
+ },
+ "頭": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄊㄡˊ",
+    "pinyin": "tóu"
+   },
+   {
+    "bopomofo": "˙ㄊㄡ",
+    "pinyin": "tou"
+   }
+  ],
+  "title": "頭"
+ },
+ "頭發": null,
+ "頭髮": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄊㄡˊ ㄈㄚˇ",
+    "pinyin": "tóu fǎ"
+   }
+  ],
+  "title": "頭髮"
+ },
+ "風": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄈㄥ",
+    "pinyin": "fēng"
+   },
+   {
+    "bopomofo": "ㄈㄥˋ",
+    "pinyin": "fèng"
+   }
+  ],
+  "title": "風"
+ },
+ "風箏": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄈㄥ ㄓㄥ",
+    "pinyin": "fēng zhēng"
+   }
+  ],
+  "title": "風箏"
+ },
+ "飛機": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄈㄟ ㄐㄧ",
+    "pinyin": "fēi jī"
+   }
+  ],
+  "title": "飛機"
+ },
+ "飛盤": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄈㄟ ㄆㄢˊ",
+    "pinyin": "fēi pán"
+   }
+  ],
+  "title": "飛盤"
+ },
+ "飯店": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄈㄢˋ ㄉㄧㄢˋ",
+    "pinyin": "fàn diàn"
+   }
+  ],
+  "title": "飯店"
+ },
+ "餅乾": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄅㄧㄥˇ ㄍㄢ",
+    "pinyin": "bǐng gān"
+   }
+  ],
+  "title": "餅乾"
+ },
+ "餐廳": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄘㄢ ㄊㄧㄥ",
+    "pinyin": "cān tīng"
+   }
+  ],
+  "title": "餐廳"
+ },
+ "香蕉": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄒㄧㄤ ㄐㄧㄠ",
+    "pinyin": "xiāng jiāo"
+   }
+  ],
+  "title": "香蕉"
+ },
+ "馬": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄇㄚˇ",
+    "pinyin": "mǎ"
+   }
+  ],
+  "title": "馬"
+ },
+ "馬桶": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄇㄚˇ ㄊㄨㄥˇ",
+    "pinyin": "mǎ tǒng"
+   }
+  ],
+  "title": "馬桶"
+ },
+ "馬路": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄇㄚˇ ㄌㄨˋ",
+    "pinyin": "mǎ lù"
+   }
+  ],
+  "title": "馬路"
+ },
+ "馬鈴薯": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄇㄚˇ ㄌㄧㄥˊ ㄕㄨˇ",
+    "pinyin": "mǎ líng shǔ"
+   }
+  ],
+  "title": "馬鈴薯"
+ },
+ "駱駝": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄌㄨㄛˋ ˙ㄊㄨㄛ",
+    "pinyin": "luò tuo"
+   }
+  ],
+  "title": "駱駝"
+ },
+ "魚": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄩˊ",
+    "pinyin": "yú"
+   }
+  ],
+  "title": "魚"
+ },
+ "鯊魚": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄕㄚ ㄩˊ",
+    "pinyin": "shā yú"
+   }
+  ],
+  "title": "鯊魚"
+ },
+ "鯨魚": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄐㄧㄥ ㄩˊ",
+    "pinyin": "jīng yú"
+   }
+  ],
+  "title": "鯨魚"
+ },
+ "鱷魚": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄜˋ ㄩˊ",
+    "pinyin": "è yú"
+   }
+  ],
+  "title": "鱷魚"
+ },
+ "鳥": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄋㄧㄠˇ",
+    "pinyin": "niǎo"
+   },
+   {
+    "bopomofo": "ㄉㄧㄠˇ",
+    "pinyin": "diǎo"
+   }
+  ],
+  "title": "鳥"
+ },
+ "鳳梨": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄈㄥˋ ㄌㄧˊ",
+    "pinyin": "fèng lí"
+   }
+  ],
+  "title": "鳳梨"
+ },
+ "鴨子": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄧㄚ ˙ㄗ",
+    "pinyin": "yā zi"
+   }
+  ],
+  "title": "鴨子"
+ },
+ "鸚鵡": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄧㄥ ㄨˇ",
+    "pinyin": "yīng wǔ"
+   }
+  ],
+  "title": "鸚鵡"
+ },
+ "鹽": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄧㄢˋ",
+    "pinyin": "yàn"
+   },
+   {
+    "bopomofo": "ㄧㄢˊ",
+    "pinyin": "yán"
+   }
+  ],
+  "title": "鹽"
+ },
+ "鹿": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄌㄨˋ",
+    "pinyin": "lù"
+   }
+  ],
+  "title": "鹿"
+ },
+ "麵包": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄇㄧㄢˋ ㄅㄠ",
+    "pinyin": "miàn bāo"
+   }
+  ],
+  "title": "麵包"
+ },
+ "麵條": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄇㄧㄢˋ ㄊㄧㄠˊ",
+    "pinyin": "miàn tiáo"
+   }
+  ],
+  "title": "麵條"
+ },
+ "黃瓜": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄏㄨㄤˊ ㄍㄨㄚ",
+    "pinyin": "huáng guā"
+   }
+  ],
+  "title": "黃瓜"
+ },
+ "黃色": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄏㄨㄤˊ ㄙㄜˋ",
+    "pinyin": "huáng sè"
+   }
+  ],
+  "title": "黃色"
+ },
+ "黑板": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄏㄟ ㄅㄢˇ",
+    "pinyin": "hēi bǎn"
+   }
+  ],
+  "title": "黑板"
+ },
+ "黑色": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄏㄟ ㄙㄜˋ",
+    "pinyin": "hēi sè"
+   }
+  ],
+  "title": "黑色"
+ },
+ "鼻子": {
+  "heteronyms": [
+   {
+    "bopomofo": "ㄅㄧˊ ㄗˇ",
+    "pinyin": "bí zǐ"
+   },
+   {
+    "bopomofo": "ㄅㄧˊ ˙ㄗ",
+    "pinyin": "bí zi"
+   }
+  ],
+  "title": "鼻子"
+ }
+}

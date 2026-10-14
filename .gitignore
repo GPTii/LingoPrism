@@ -65,3 +65,6 @@ AI/weights/
 *.onnx
 *.tflite
 !MOBILE/assets/ml_models/*.tflite
+
+# Raw language source downloads (fetched by manage.py fetch_sources)
+BE/seed/sources/
