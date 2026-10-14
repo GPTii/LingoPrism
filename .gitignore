@@ -1,0 +1,67 @@
+# ---- Local reference / private docs (not part of the repo) ----
+/SnapLingua-main/
+/tàiliệu/
+/tailieu/
+
+# ---- Secrets ----
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+google-services.json
+GoogleService-Info.plist
+
+# ---- OS / editors ----
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.swp
+
+# ---- Python ----
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# ---- Django ----
+BE/media/
+BE/staticfiles/
+*.sqlite3
+
+# ---- Node / FE ----
+node_modules/
+FE/dist/
+*.log
+
+# ---- Flutter / MOBILE ----
+MOBILE/.dart_tool/
+MOBILE/build/
+MOBILE/.flutter-plugins
+MOBILE/.flutter-plugins-dependencies
+MOBILE/**/ephemeral/
+MOBILE/android/.gradle/
+MOBILE/android/local.properties
+MOBILE/android/app/release/
+MOBILE/ios/Pods/
+MOBILE/ios/build/
+MOBILE/macos/Pods/
+MOBILE/.swift-module-cache/
+*.realm
+*.realm.lock
+*.realm.management/
+
+# ---- AI (large files) ----
+AI/datasets/
+AI/runs/
+AI/weights/
+*.pt
+*.onnx
+*.tflite
+!MOBILE/assets/ml_models/*.tflite

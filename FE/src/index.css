@@ -1,0 +1,16 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-50: #e5fffd;
+  --color-brand-100: #b8f5f0;
+  --color-brand-500: #14b8a6;
+  --color-brand-600: #0d9488;
+  --color-brand-700: #0f766e;
+  --font-sans: "Inter", "Segoe UI", system-ui, sans-serif;
+}
+
+/* Chinese text must render with a font matching its script (Han unification). */
+:lang(zh-Hans) { font-family: "Noto Sans SC", "Microsoft YaHei", sans-serif; }
+:lang(zh-Hant) { font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif; }
+
+body { margin: 0; background: #f6fbfb; }
