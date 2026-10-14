@@ -1,15 +1,17 @@
-import { App, Avatar, Dropdown, Select } from 'antd'
+import { App, Avatar, Badge, Dropdown, Select } from 'antd'
 import { useEffect } from 'react'
-import { useQueryClient } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { gameApi } from '../api/app'
 import { authApi } from '../api/auth'
 import {
   BookOutlined, CameraOutlined, EnvironmentOutlined, FileDoneOutlined, HomeOutlined,
-  LogoutOutlined, RedoOutlined, SettingOutlined, ShopOutlined, TeamOutlined, UserOutlined,
+  LogoutOutlined, RedoOutlined, SettingOutlined, TrophyOutlined, TeamOutlined, UserOutlined, BellOutlined, MessageOutlined,
 } from '@ant-design/icons'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { isStaffRole, useAuth } from '../auth/store'
 import { useLogout } from '../auth/useLogout'
 import type { User } from '../api/types'
+import { useUnread, useUserEvents } from '../lib/useUserEvents'
 
 const NAV = [
   { to: '/', label: 'Trang chủ', icon: <HomeOutlined /> },
@@ -19,7 +21,8 @@ const NAV = [
   { to: '/exams', label: 'Đề thi', icon: <FileDoneOutlined /> },
   { to: '/community', label: 'Cộng đồng', icon: <TeamOutlined /> },
   { to: '/map', label: 'Bản đồ', icon: <EnvironmentOutlined /> },
-  { to: '/shop', label: 'Cửa hàng', icon: <ShopOutlined /> },
+  { to: '/achievements', label: 'Thành tích', icon: <TrophyOutlined /> },
+  { to: '/support', label: 'Hỏi giáo viên', icon: <MessageOutlined /> },
 ]
 
 export default function LearnerLayout() {
@@ -29,6 +32,9 @@ export default function LearnerLayout() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const { message } = App.useApp()
+  const unread = useUnread((s) => s.unread)
+  useUserEvents()
+  const game = useQuery({ queryKey: ['game-summary'], queryFn: gameApi.summary, enabled: !!user })
 
   useEffect(() => {
     const onNoVoice = (e: Event) =>
@@ -95,8 +101,12 @@ export default function LearnerLayout() {
                 { value: 'vi', label: '🇻🇳 Tiếng Việt' },
               ]}
             />
-            <span title="Vảy">🐟 {user?.scales_balance ?? 0}</span>
-            <span title="Ngọc">💎 {user?.gems_balance ?? 0}</span>
+            <Badge count={unread} size="small">
+              <BellOutlined className="text-xl cursor-pointer" onClick={() => navigate('/notifications')} />
+            </Badge>
+            <span title="Chuỗi ngày học">🔥 {game.data?.streak ?? 0}</span>
+            <span title="Vảy">🐟 {game.data?.scales ?? user?.scales_balance ?? 0}</span>
+            <span title="Ngọc">💎 {game.data?.gems ?? user?.gems_balance ?? 0}</span>
             <Dropdown menu={{ items: menu }} placement="bottomRight" trigger={['click']}>
               <button className="flex items-center gap-2 cursor-pointer">
                 <Avatar src={user?.avatar ?? undefined} icon={<UserOutlined />} />

@@ -1,7 +1,7 @@
 import { Avatar, Dropdown, Layout, Menu } from 'antd'
 import {
   AlertOutlined, AuditOutlined, BookOutlined, CameraOutlined, DashboardOutlined, EnvironmentOutlined,
-  FileDoneOutlined, LogoutOutlined, MessageOutlined, NotificationOutlined, TeamOutlined, TrophyOutlined,
+  FileDoneOutlined, LogoutOutlined, MessageOutlined, NotificationOutlined, TrophyOutlined,
   UserOutlined, HomeOutlined,
 } from '@ant-design/icons'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
@@ -19,7 +19,6 @@ const ITEMS = [
   { key: '/admin/support', icon: <MessageOutlined />, label: 'Chat hỗ trợ' },
   { key: '/admin/notifications', icon: <NotificationOutlined />, label: 'Thông báo' },
   { key: '/admin/gamification', icon: <TrophyOutlined />, label: 'Game hóa' },
-  { key: '/admin/groups', icon: <TeamOutlined />, label: 'Nhóm học' },
   { key: '/admin/detections', icon: <CameraOutlined />, label: 'Nhận diện YOLO' },
 ]
 

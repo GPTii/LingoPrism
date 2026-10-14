@@ -10,10 +10,22 @@ import ProfilePage from './pages/learner/ProfilePage'
 import VocabPage from './pages/learner/VocabPage'
 import TopicPage from './pages/learner/TopicPage'
 import SessionPage from './pages/learner/SessionPage'
+import CameraPage from './pages/learner/CameraPage'
+import CommunityPage from './pages/learner/CommunityPage'
+import GroupPage from './pages/learner/GroupPage'
+import MemberProfilePage from './pages/learner/MemberProfilePage'
+import { ExamListPage, ExamResultPage, ExamTakePage } from './pages/learner/ExamsPages'
+import MapPage from './pages/learner/MapPage'
+import AchievementsPage from './pages/learner/AchievementsPage'
+import SupportPage from './pages/learner/SupportPage'
+import NotificationsPage from './pages/learner/NotificationsPage'
 import DashboardPage from './pages/admin/DashboardPage'
 import UsersPage from './pages/admin/UsersPage'
 import VocabAdminPage from './pages/admin/VocabAdminPage'
 import LanguageReviewPage from './pages/admin/LanguageReviewPage'
+import ExamsAdminPage from './pages/admin/ExamsAdminPage'
+import PoisAdminPage from './pages/admin/PoisAdminPage'
+import { BroadcastPage, DetectionsAdminPage, GamificationAdminPage, ModerationPage, SupportAdminPage } from './pages/admin/OperationsPages'
 
 export default function App() {
   return (
@@ -30,6 +42,18 @@ export default function App() {
           <Route path="vocab/topics/:id" element={<TopicPage />} />
           <Route path="learn" element={<SessionPage />} />
           <Route path="review" element={<Navigate to="/learn?kind=review" replace />} />
+          <Route path="camera" element={<CameraPage />} />
+          <Route path="community" element={<CommunityPage />} />
+          <Route path="community/groups/:id" element={<GroupPage />} />
+          <Route path="community/users/:id" element={<MemberProfilePage />} />
+          <Route path="exams" element={<ExamListPage />} />
+          <Route path="exams/:id" element={<ExamTakePage />} />
+          <Route path="exams/results/:id" element={<ExamResultPage />} />
+          <Route path="map" element={<MapPage />} />
+          <Route path="shop" element={<AchievementsPage />} />
+          <Route path="achievements" element={<AchievementsPage />} />
+          <Route path="support" element={<SupportPage />} />
+          <Route path="notifications" element={<NotificationsPage />} />
         </Route>
 
         <Route path="admin" element={<RequireStaff />}>
@@ -38,6 +62,13 @@ export default function App() {
             <Route path="users" element={<UsersPage />} />
             <Route path="vocab" element={<VocabAdminPage />} />
             <Route path="language-review" element={<LanguageReviewPage />} />
+            <Route path="exams" element={<ExamsAdminPage />} />
+            <Route path="pois" element={<PoisAdminPage />} />
+            <Route path="moderation" element={<ModerationPage />} />
+            <Route path="support" element={<SupportAdminPage />} />
+            <Route path="notifications" element={<BroadcastPage />} />
+            <Route path="gamification" element={<GamificationAdminPage />} />
+            <Route path="detections" element={<DetectionsAdminPage />} />
           </Route>
         </Route>
       </Route>
