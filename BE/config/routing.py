@@ -1,2 +1,7 @@
-# WebSocket routes are added by each app (chat, notifications) in later phases.
-websocket_urlpatterns = []
+from django.urls import path
+
+from apps.notifications.consumers import UserEventsConsumer
+
+websocket_urlpatterns = [
+    path("ws/events/", UserEventsConsumer.as_asgi()),
+]

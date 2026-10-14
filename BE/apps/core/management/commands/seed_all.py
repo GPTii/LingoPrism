@@ -14,4 +14,6 @@ class Command(BaseCommand):
         if not sources_available():
             call_command("fetch_sources")
         call_command("build_vocab", offline=offline)
+        call_command("seed_gamification")
+        call_command("generate_exams")
         call_command("seed_demo_users")

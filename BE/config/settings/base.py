@@ -34,6 +34,9 @@ INSTALLED_APPS = [
     "apps.accounts",
     "apps.vocab",
     "apps.learning",
+    "apps.notifications",
+    "apps.gamification",
+    "apps.quizzes",
 ]
 
 MIDDLEWARE = [

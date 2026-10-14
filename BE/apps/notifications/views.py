@@ -1,0 +1,116 @@
+from django.contrib.auth import get_user_model
+from django.utils import timezone
+from drf_spectacular.utils import extend_schema
+from rest_framework import generics, mixins, serializers, viewsets
+from rest_framework.decorators import action
+from rest_framework.response import Response
+
+from apps.core.permissions import IsStaffRole
+
+from .models import DeviceToken, Notification, NotificationSetting
+from .services import notify
+
+
+class NotificationSerializer(serializers.ModelSerializer):
+    read = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Notification
+        fields = ["id", "kind", "title", "body", "image", "data", "read", "read_at", "created_at"]
+
+    def get_read(self, obj):
+        return obj.read_at is not None
+
+
+class SettingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = NotificationSetting
+        fields = ["push_enabled", "morning_time", "evening_time", "contextual_allowed", "social_enabled"]
+
+
+class DeviceSerializer(serializers.Serializer):
+    token = serializers.CharField(max_length=255)
+    platform = serializers.ChoiceField(choices=["android", "ios", "web"])
+
+
+class BroadcastSerializer(serializers.Serializer):
+    title = serializers.CharField(max_length=120)
+    body = serializers.CharField(max_length=300, allow_blank=True, required=False)
+    role = serializers.ChoiceField(choices=["all", "learner", "staff", "admin"], default="all")
+    learner_type = serializers.ChoiceField(choices=["all", "kid", "adult"], default="all")
+
+
+@extend_schema(tags=["notifications"])
+class NotificationViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+    serializer_class = NotificationSerializer
+    filterset_fields = ["kind"]
+
+    def get_queryset(self):
+        if getattr(self, "swagger_fake_view", False):
+            return Notification.objects.none()
+        return Notification.objects.filter(user=self.request.user)
+
+    @action(detail=False, methods=["get"], url_path="unread-count")
+    def unread_count(self, request):
+        return Response({"unread": self.get_queryset().filter(read_at__isnull=True).count()})
+
+    @action(detail=True, methods=["post"])
+    def read(self, request, pk=None):
+        n = self.get_queryset().get(pk=pk)
+        n.read_at = n.read_at or timezone.now()
+        n.save(update_fields=["read_at"])
+        return Response(NotificationSerializer(n).data)
+
+    @action(detail=False, methods=["post"], url_path="read-all")
+    def read_all(self, request):
+        updated = self.get_queryset().filter(read_at__isnull=True).update(read_at=timezone.now())
+        return Response({"updated": updated})
+
+
+@extend_schema(tags=["notifications"])
+class NotificationSettingView(generics.RetrieveUpdateAPIView):
+    serializer_class = SettingSerializer
+
+    def get_object(self):
+        obj, _ = NotificationSetting.objects.get_or_create(user=self.request.user)
+        return obj
+
+
+@extend_schema(tags=["notifications"])
+class DeviceViewSet(viewsets.GenericViewSet):
+    serializer_class = DeviceSerializer
+
+    def create(self, request):
+        ser = DeviceSerializer(data=request.data)
+        ser.is_valid(raise_exception=True)
+        DeviceToken.objects.update_or_create(
+            token=ser.validated_data["token"],
+            defaults={"user": request.user, "platform": ser.validated_data["platform"], "last_active_at": timezone.now()},
+        )
+        return Response({"registered": True}, status=201)
+
+    @action(detail=False, methods=["post"])
+    def unregister(self, request):
+        DeviceToken.objects.filter(user=request.user, token=request.data.get("token", "")).delete()
+        return Response({"unregistered": True})
+
+
+@extend_schema(tags=["admin-notifications"])
+class BroadcastView(generics.GenericAPIView):
+    serializer_class = BroadcastSerializer
+    permission_classes = [IsStaffRole]
+
+    def post(self, request):
+        ser = BroadcastSerializer(data=request.data)
+        ser.is_valid(raise_exception=True)
+        d = ser.validated_data
+        users = get_user_model().objects.filter(is_active=True)
+        if d["role"] != "all":
+            users = users.filter(role=d["role"])
+        if d["learner_type"] != "all":
+            users = users.filter(learner_type=d["learner_type"])
+        count = 0
+        for u in users.iterator():
+            notify(u, Notification.Kind.BROADCAST, d["title"], d.get("body", ""))
+            count += 1
+        return Response({"sent": count})
