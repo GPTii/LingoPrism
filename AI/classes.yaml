@@ -1,0 +1,92 @@
+# LingoPrism – YOLOv10 classes ↔ vocabulary concepts (BE/seed/concepts/words.csv, column yolo_label)
+#
+# label:   class name used by the model and stored as Word.yolo_label
+# slug:    vocabulary concept
+# coco:    COCO-2017 category name (images taken from COCO)
+# oi:      Open Images V7 class name (images taken from Open Images)
+# A class may combine both sources.
+
+classes:
+  # people & transport
+  - {label: person, slug: person, coco: person}
+  - {label: bicycle, slug: bicycle, coco: bicycle, oi: Bicycle}
+  - {label: car, slug: car, coco: car, oi: Car}
+  - {label: motorcycle, slug: motorcycle, coco: motorcycle, oi: Motorcycle}
+  - {label: airplane, slug: airplane, coco: airplane, oi: Airplane}
+  - {label: bus, slug: bus, coco: bus, oi: Bus}
+  - {label: train, slug: train, coco: train, oi: Train}
+  - {label: truck, slug: truck, coco: truck, oi: Truck}
+  - {label: boat, slug: boat, coco: boat, oi: Boat}
+  - {label: traffic light, slug: traffic-light, coco: traffic light, oi: Traffic light}
+  - {label: bench, slug: bench, coco: bench, oi: Bench}
+  - {label: helmet, slug: helmet, oi: Bicycle helmet}
+  # animals
+  - {label: bird, slug: bird, coco: bird}
+  - {label: cat, slug: cat, coco: cat, oi: Cat}
+  - {label: dog, slug: dog, coco: dog, oi: Dog}
+  - {label: horse, slug: horse, coco: horse, oi: Horse}
+  - {label: sheep, slug: sheep, coco: sheep, oi: Sheep}
+  - {label: cow, slug: cow, coco: cow, oi: Cattle}
+  - {label: elephant, slug: elephant, coco: elephant, oi: Elephant}
+  - {label: bear, slug: bear, coco: bear, oi: Bear}
+  - {label: zebra, slug: zebra, coco: zebra, oi: Zebra}
+  - {label: giraffe, slug: giraffe, coco: giraffe, oi: Giraffe}
+  - {label: pig, slug: pig, oi: Pig}
+  - {label: chicken, slug: chicken, oi: Chicken}
+  - {label: duck, slug: duck, oi: Duck}
+  - {label: rabbit, slug: rabbit, oi: Rabbit}
+  - {label: tiger, slug: tiger, oi: Tiger}
+  - {label: lion, slug: lion, oi: Lion}
+  - {label: monkey, slug: monkey, oi: Monkey}
+  - {label: butterfly, slug: butterfly, oi: Butterfly}
+  # objects
+  - {label: backpack, slug: backpack, coco: backpack, oi: Backpack}
+  - {label: umbrella, slug: umbrella, coco: umbrella, oi: Umbrella}
+  - {label: handbag, slug: handbag, coco: handbag, oi: Handbag}
+  - {label: suitcase, slug: suitcase, coco: suitcase, oi: Suitcase}
+  - {label: book, slug: book, coco: book, oi: Book}
+  - {label: clock, slug: clock, coco: clock, oi: Clock}
+  - {label: scissors, slug: scissors, coco: scissors, oi: Scissors}
+  - {label: teddy bear, slug: teddy-bear, coco: teddy bear, oi: Teddy bear}
+  - {label: pen, slug: pen, oi: Pen}
+  - {label: glasses, slug: glasses, oi: Glasses}
+  - {label: hat, slug: hat, oi: Hat}
+  - {label: watch, slug: watch, oi: Watch}
+  # kitchen & food
+  - {label: bottle, slug: bottle, coco: bottle, oi: Bottle}
+  - {label: cup, slug: cup, coco: cup, oi: Mug}
+  - {label: fork, slug: fork, coco: fork, oi: Fork}
+  - {label: knife, slug: knife, coco: knife, oi: Kitchen knife}
+  - {label: spoon, slug: spoon, coco: spoon, oi: Spoon}
+  - {label: bowl, slug: bowl, coco: bowl, oi: Bowl}
+  - {label: chopsticks, slug: chopsticks, oi: Chopsticks}
+  - {label: banana, slug: banana, coco: banana, oi: Banana}
+  - {label: apple, slug: apple, coco: apple, oi: Apple}
+  - {label: orange, slug: orange, coco: orange, oi: Orange}
+  - {label: broccoli, slug: broccoli, coco: broccoli, oi: Broccoli}
+  - {label: carrot, slug: carrot, coco: carrot, oi: Carrot}
+  - {label: pizza, slug: pizza, coco: pizza, oi: Pizza}
+  - {label: cake, slug: cake, coco: cake, oi: Cake}
+  - {label: strawberry, slug: strawberry, oi: Strawberry}
+  - {label: watermelon, slug: watermelon, oi: Watermelon}
+  - {label: pineapple, slug: pineapple, oi: Pineapple}
+  - {label: tomato, slug: tomato, oi: Tomato}
+  - {label: egg, slug: egg, oi: Egg (Food)}
+  - {label: bread, slug: bread, oi: Bread}
+  # home & technology
+  - {label: chair, slug: chair, coco: chair, oi: Chair}
+  - {label: couch, slug: sofa, coco: couch, oi: Couch}
+  - {label: potted plant, slug: potted-plant, coco: potted plant, oi: Houseplant}
+  - {label: bed, slug: bed, coco: bed, oi: Bed}
+  - {label: dining table, slug: table, coco: dining table, oi: Table}
+  - {label: tv, slug: television, coco: tv, oi: Television}
+  - {label: laptop, slug: laptop, coco: laptop, oi: Laptop}
+  - {label: mouse, slug: computer-mouse, coco: mouse, oi: Computer mouse}
+  - {label: keyboard, slug: keyboard, coco: keyboard, oi: Computer keyboard}
+  - {label: cell phone, slug: mobile-phone, coco: cell phone, oi: Mobile phone}
+  - {label: refrigerator, slug: refrigerator, coco: refrigerator, oi: Refrigerator}
+  - {label: toothbrush, slug: toothbrush, coco: toothbrush, oi: Toothbrush}
+  - {label: door, slug: door, oi: Door}
+  - {label: window, slug: window, oi: Window}
+  - {label: lamp, slug: lamp, oi: Lamp}
+  - {label: pillow, slug: pillow, oi: Pillow}

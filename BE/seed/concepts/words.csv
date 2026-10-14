@@ -41,17 +41,17 @@ elephant,animals,elephant,noun,all,1,con voi,elephant,,大象,大象
 bear,animals,bear,noun,all,1,con gấu,bear,,熊,熊
 zebra,animals,zebra,noun,all,2,ngựa vằn,zebra,,斑马,斑馬
 giraffe,animals,giraffe,noun,all,2,hươu cao cổ,giraffe,,长颈鹿,長頸鹿
-pig,animals,,noun,all,1,con lợn,pig,hog,猪,豬
-chicken,animals|food,,noun,all,1,con gà,chicken,,鸡,雞
-duck,animals,,noun,all,1,con vịt,duck,,鸭子,鴨子
-rabbit,animals,,noun,all,1,con thỏ,rabbit,bunny,兔子,兔子
+pig,animals,pig,noun,all,1,con lợn,pig,hog,猪,豬
+chicken,animals|food,chicken,noun,all,1,con gà,chicken,,鸡,雞
+duck,animals,duck,noun,all,1,con vịt,duck,,鸭子,鴨子
+rabbit,animals,rabbit,noun,all,1,con thỏ,rabbit,bunny,兔子,兔子
 mouse-animal,animals,,noun,all,1,con chuột,mouse,rat,老鼠,老鼠
-tiger,animals,,noun,all,1,con hổ,tiger,,老虎,老虎
-lion,animals,,noun,all,1,sư tử,lion,,狮子,獅子
-monkey,animals,,noun,all,1,con khỉ,monkey,,猴子,猴子
+tiger,animals,tiger,noun,all,1,con hổ,tiger,,老虎,老虎
+lion,animals,lion,noun,all,1,sư tử,lion,,狮子,獅子
+monkey,animals,monkey,noun,all,1,con khỉ,monkey,,猴子,猴子
 panda,animals,,noun,all,1,gấu trúc,panda,giant panda,熊猫,熊貓
 fish,animals|food,,noun,all,1,con cá,fish,,鱼,魚
-butterfly,animals,,noun,all,1,con bướm,butterfly,,蝴蝶,蝴蝶
+butterfly,animals,butterfly,noun,all,1,con bướm,butterfly,,蝴蝶,蝴蝶
 bee,animals,,noun,all,2,con ong,bee,honeybee,蜜蜂,蜜蜂
 ant,animals,,noun,all,2,con kiến,ant,,蚂蚁,螞蟻
 snake,animals,,noun,all,2,con rắn,snake,serpent,蛇,蛇
@@ -126,7 +126,7 @@ scissors,education|objects,scissors,noun,all,1,cái kéo,scissors,,剪刀,剪刀
 teddy-bear,objects,teddy bear,noun,kid,1,gấu bông,teddy bear,teddy,泰迪熊,泰迪熊
 hair-dryer,home,hair drier,noun,all,2,máy sấy tóc,hair dryer,hairdryer;hair drier,吹风机,吹風機
 toothbrush,home,toothbrush,noun,all,1,bàn chải đánh răng,toothbrush,,牙刷,牙刷
-pen,education,,noun,all,1,cái bút,pen,,笔,筆
+pen,education,pen,noun,all,1,cái bút,pen,,笔,筆
 pencil,education,,noun,all,1,bút chì,pencil,,铅笔,鉛筆
 eraser,education,,noun,all,1,cục tẩy,eraser,rubber,橡皮,橡皮擦
 ruler,education,,noun,all,1,thước kẻ,ruler,,尺子,尺
@@ -141,14 +141,14 @@ calculator,education|technology,,noun,all,2,máy tính bỏ túi,calculator,,计
 glue,education,,noun,all,2,keo dán,glue,,胶水,膠水
 dictionary,education,,noun,all,2,từ điển,dictionary,,词典,字典
 grape,fruits-vegetables,,noun,all,1,quả nho,grape,grapes,葡萄,葡萄
-watermelon,fruits-vegetables,,noun,all,1,dưa hấu,watermelon,,西瓜,西瓜
-strawberry,fruits-vegetables,,noun,all,1,dâu tây,strawberry,,草莓,草莓
-pineapple,fruits-vegetables,,noun,all,2,quả dứa,pineapple,,菠萝,鳳梨
+watermelon,fruits-vegetables,watermelon,noun,all,1,dưa hấu,watermelon,,西瓜,西瓜
+strawberry,fruits-vegetables,strawberry,noun,all,1,dâu tây,strawberry,,草莓,草莓
+pineapple,fruits-vegetables,pineapple,noun,all,2,quả dứa,pineapple,,菠萝,鳳梨
 mango,fruits-vegetables,,noun,all,1,quả xoài,mango,,芒果,芒果
 lemon,fruits-vegetables,,noun,all,2,quả chanh,lemon,,柠檬,檸檬
 pear,fruits-vegetables,,noun,all,2,quả lê,pear,,梨,梨
 peach,fruits-vegetables,,noun,all,2,quả đào,peach,,桃子,桃子
-tomato,fruits-vegetables,,noun,all,1,cà chua,tomato,,西红柿,番茄
+tomato,fruits-vegetables,tomato,noun,all,1,cà chua,tomato,,西红柿,番茄
 potato,fruits-vegetables,,noun,all,1,khoai tây,potato,,土豆,馬鈴薯
 corn,fruits-vegetables,,noun,all,2,ngô,corn,maize,玉米,玉米
 cucumber,fruits-vegetables,,noun,all,2,dưa chuột,cucumber,,黄瓜,黃瓜
@@ -157,8 +157,8 @@ garlic,fruits-vegetables,,noun,all,2,tỏi,garlic,,大蒜,大蒜
 coconut,fruits-vegetables,,noun,all,2,quả dừa,coconut,,椰子,椰子
 rice,food,,noun,all,1,cơm,rice,cooked rice,米饭,米飯
 noodles,food,,noun,all,1,mì sợi,noodles,noodle,面条,麵條
-bread,food,,noun,all,1,bánh mì,bread,,面包,麵包
-egg,food,,noun,all,1,quả trứng,egg,,鸡蛋,雞蛋
+bread,food,bread,noun,all,1,bánh mì,bread,,面包,麵包
+egg,food,egg,noun,all,1,quả trứng,egg,,鸡蛋,雞蛋
 milk,food,,noun,all,1,sữa,milk,,牛奶,牛奶
 water,food|nature,,noun,all,1,nước,water,,水,水
 tea,food,,noun,all,1,trà,tea,,茶,茶
@@ -173,15 +173,15 @@ meat,food,,noun,all,1,thịt,meat,,肉,肉
 soup,food,,noun,all,2,canh,soup,,汤,湯
 salt,food,,noun,all,2,muối,salt,,盐,鹽
 sugar,food,,noun,all,2,đường,sugar,,糖,糖
-door,home,,noun,all,1,cửa ra vào,door,,门,門
-window,home,,noun,all,1,cửa sổ,window,,窗户,窗戶
-lamp,home,,noun,all,2,đèn bàn,desk lamp,lamp,台灯,檯燈
+door,home,door,noun,all,1,cửa ra vào,door,,门,門
+window,home,window,noun,all,1,cửa sổ,window,,窗户,窗戶
+lamp,home,lamp,noun,all,2,đèn bàn,desk lamp,lamp,台灯,檯燈
 light-bulb,home,,noun,all,2,bóng đèn,light bulb,bulb,灯泡,燈泡
 fan,home,,noun,all,2,quạt điện,electric fan,fan,电风扇,電風扇
 air-conditioner,home,,noun,adult,2,máy điều hòa,air conditioner,air conditioning,空调,冷氣
 washing-machine,home,,noun,all,2,máy giặt,washing machine,,洗衣机,洗衣機
 mirror,home,,noun,all,2,cái gương,mirror,,镜子,鏡子
-pillow,home,,noun,all,2,cái gối,pillow,,枕头,枕頭
+pillow,home,pillow,noun,all,2,cái gối,pillow,,枕头,枕頭
 blanket,home,,noun,all,2,cái chăn,blanket,,毯子,毯子
 towel,home,,noun,all,2,khăn tắm,towel,,毛巾,毛巾
 soap,home,,noun,all,2,xà phòng,soap,,肥皂,肥皂
@@ -192,7 +192,7 @@ trash-can,home,,noun,all,2,thùng rác,trash can,garbage can;dustbin;rubbish bin
 broom,home,,noun,all,2,cái chổi,broom,,扫帚,掃把
 bucket,home,,noun,all,2,cái xô,bucket,pail,水桶,水桶
 plate,home,,noun,all,1,cái đĩa,plate,dish,盘子,盤子
-chopsticks,home,,noun,all,1,đôi đũa,chopsticks,,筷子,筷子
+chopsticks,home,chopsticks,noun,all,1,đôi đũa,chopsticks,,筷子,筷子
 pot,home,,noun,all,2,cái nồi,pot,pan,锅,鍋
 kettle,home,,noun,all,2,ấm đun nước,kettle,,水壶,水壺
 stairs,home,,noun,all,2,cầu thang,stairs,staircase,楼梯,樓梯
@@ -208,9 +208,9 @@ pants,clothing,,noun,all,1,quần dài,pants,trousers,裤子,褲子
 skirt,clothing,,noun,all,1,chân váy,skirt,,裙子,裙子
 shoes,clothing,,noun,all,1,đôi giày,shoes,shoe,鞋子,鞋子
 socks,clothing,,noun,all,1,đôi tất,socks,sock,袜子,襪子
-hat,clothing,,noun,all,1,cái mũ,hat,cap,帽子,帽子
-glasses,clothing,,noun,all,2,kính mắt,glasses,spectacles;eyeglasses,眼镜,眼鏡
-watch,clothing,,noun,all,2,đồng hồ đeo tay,watch,wristwatch,手表,手錶
+hat,clothing,hat,noun,all,1,cái mũ,hat,cap,帽子,帽子
+glasses,clothing,glasses,noun,all,2,kính mắt,glasses,spectacles;eyeglasses,眼镜,眼鏡
+watch,clothing,watch,noun,all,2,đồng hồ đeo tay,watch,wristwatch,手表,手錶
 jacket,clothing,,noun,all,2,áo khoác,jacket,coat,外套,外套
 ring,clothing,,noun,adult,2,nhẫn,ring,,戒指,戒指
 wallet,clothing,,noun,adult,2,cái ví,wallet,purse,钱包,錢包
@@ -267,7 +267,7 @@ tennis,sports,,noun,all,2,quần vợt,tennis,,网球,網球
 table-tennis,sports,,noun,all,2,bóng bàn,table tennis,ping-pong;ping pong,乒乓球,乒乓球
 swimming-pool,sports|places,,noun,all,2,bể bơi,swimming pool,pool,游泳池,游泳池
 whistle,sports,,noun,all,2,cái còi,whistle,,哨子,哨子
-helmet,sports|transport,,noun,all,2,mũ bảo hiểm,helmet,,头盔,安全帽
+helmet,sports|transport,helmet,noun,all,2,mũ bảo hiểm,helmet,,头盔,安全帽
 medal,sports,,noun,all,2,huy chương,medal,,奖牌,獎牌
 airport,places|transport,,noun,all,2,sân bay,airport,,机场,機場
 hotel,places,,noun,adult,2,khách sạn,hotel,,酒店,飯店
