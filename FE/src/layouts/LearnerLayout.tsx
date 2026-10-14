@@ -1,4 +1,7 @@
-import { Avatar, Dropdown } from 'antd'
+import { App, Avatar, Dropdown, Select } from 'antd'
+import { useEffect } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
+import { authApi } from '../api/auth'
 import {
   BookOutlined, CameraOutlined, EnvironmentOutlined, FileDoneOutlined, HomeOutlined,
   LogoutOutlined, RedoOutlined, SettingOutlined, ShopOutlined, TeamOutlined, UserOutlined,
@@ -6,6 +9,7 @@ import {
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { isStaffRole, useAuth } from '../auth/store'
 import { useLogout } from '../auth/useLogout'
+import type { User } from '../api/types'
 
 const NAV = [
   { to: '/', label: 'Trang chủ', icon: <HomeOutlined /> },
@@ -20,8 +24,26 @@ const NAV = [
 
 export default function LearnerLayout() {
   const user = useAuth((s) => s.user)
+  const setUser = useAuth((s) => s.setUser)
   const logout = useLogout()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
+  const { message } = App.useApp()
+
+  useEffect(() => {
+    const onNoVoice = (e: Event) =>
+      message.warning(`Trình duyệt chưa có giọng đọc ${(e as CustomEvent).detail}. Hãy cài thêm giọng đọc trong cài đặt hệ điều hành hoặc dùng Chrome/Edge.`)
+    window.addEventListener('lingoprism:no-voice', onNoVoice)
+    return () => window.removeEventListener('lingoprism:no-voice', onNoVoice)
+  }, [message])
+
+  const switchLanguage = async (value: string) => {
+    const [active_language, zh_script] = value.split(':') as [User['active_language'], User['zh_script'] | undefined]
+    const updated = await authApi.updateMe({ active_language, ...(zh_script ? { zh_script } : {}) })
+    setUser(updated)
+    queryClient.invalidateQueries()
+  }
+  const languageValue = user?.active_language === 'zh' ? `zh:${user.zh_script}` : user?.active_language
 
   const menu = [
     { key: 'profile', icon: <UserOutlined />, label: 'Hồ sơ & cài đặt', onClick: () => navigate('/profile') },
@@ -61,6 +83,18 @@ export default function LearnerLayout() {
           <div className="md:hidden font-bold text-slate-800">LingoPrism</div>
           <div className="flex-1" />
           <div className="flex items-center gap-5 text-sm font-semibold">
+            <Select
+              value={languageValue}
+              onChange={switchLanguage}
+              variant="borderless"
+              style={{ width: 190 }}
+              options={[
+                { value: 'en', label: '🇬🇧 Tiếng Anh' },
+                { value: 'zh:hans', label: '🇨🇳 Tiếng Trung giản thể' },
+                { value: 'zh:hant', label: '🇹🇼 Tiếng Trung phồn thể' },
+                { value: 'vi', label: '🇻🇳 Tiếng Việt' },
+              ]}
+            />
             <span title="Vảy">🐟 {user?.scales_balance ?? 0}</span>
             <span title="Ngọc">💎 {user?.gems_balance ?? 0}</span>
             <Dropdown menu={{ items: menu }} placement="bottomRight" trigger={['click']}>

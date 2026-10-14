@@ -7,8 +7,13 @@ import RegisterPage from './pages/auth/RegisterPage'
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage'
 import HomePage from './pages/learner/HomePage'
 import ProfilePage from './pages/learner/ProfilePage'
+import VocabPage from './pages/learner/VocabPage'
+import TopicPage from './pages/learner/TopicPage'
+import SessionPage from './pages/learner/SessionPage'
 import DashboardPage from './pages/admin/DashboardPage'
 import UsersPage from './pages/admin/UsersPage'
+import VocabAdminPage from './pages/admin/VocabAdminPage'
+import LanguageReviewPage from './pages/admin/LanguageReviewPage'
 
 export default function App() {
   return (
@@ -21,12 +26,18 @@ export default function App() {
         <Route element={<LearnerLayout />}>
           <Route index element={<HomePage />} />
           <Route path="profile" element={<ProfilePage />} />
+          <Route path="vocab" element={<VocabPage />} />
+          <Route path="vocab/topics/:id" element={<TopicPage />} />
+          <Route path="learn" element={<SessionPage />} />
+          <Route path="review" element={<Navigate to="/learn?kind=review" replace />} />
         </Route>
 
         <Route path="admin" element={<RequireStaff />}>
           <Route element={<AdminLayout />}>
             <Route index element={<DashboardPage />} />
             <Route path="users" element={<UsersPage />} />
+            <Route path="vocab" element={<VocabAdminPage />} />
+            <Route path="language-review" element={<LanguageReviewPage />} />
           </Route>
         </Route>
       </Route>
