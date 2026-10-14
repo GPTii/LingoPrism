@@ -34,7 +34,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
-            "id", "email", "display_name", "avatar", "bio", "role", "status",
+            "id", "email", "display_name", "avatar", "avatar_preset", "bio", "role", "status",
             "learner_type", "learning_languages", "active_language", "zh_script", "show_zhuyin",
             "birth_date", "gender", "purpose", "daily_minutes", "onboarding_completed", "timezone",
             "scales_balance", "gems_balance", "goal", "created_at",
@@ -54,9 +54,14 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class PublicUserSerializer(serializers.ModelSerializer):
+    avatar = serializers.SerializerMethodField()
+
     class Meta:
         model = User
         fields = ["id", "display_name", "avatar", "bio", "learner_type", "created_at"]
+
+    def get_avatar(self, obj):
+        return obj.avatar_url(self.context.get("request"))
 
 
 class RegisterSerializer(serializers.Serializer):

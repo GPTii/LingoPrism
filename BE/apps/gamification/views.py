@@ -20,7 +20,7 @@ from .models import (
 
 
 def _avatar(request, user):
-    return request.build_absolute_uri(user.avatar.url) if user.avatar else None
+    return user.avatar_url(request)
 
 
 class SummaryView(APIView):

@@ -69,3 +69,4 @@ AI/weights/
 # Raw language source downloads (fetched by manage.py fetch_sources)
 BE/seed/sources/
 BE/models/
+MOBILE/android/app/src/main/java/io/flutter/plugins/

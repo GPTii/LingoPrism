@@ -33,8 +33,7 @@ class NotKid(permissions.BasePermission):
 
 
 def author(request, user):
-    return {"id": user.id, "display_name": user.display_name,
-            "avatar": request.build_absolute_uri(user.avatar.url) if user.avatar else None}
+    return {"id": user.id, "display_name": user.display_name, "avatar": user.avatar_url(request)}
 
 
 # ------------------------------------------------------------------ posts
@@ -263,13 +262,26 @@ class GroupSerializer(serializers.ModelSerializer):
 
 class MemberSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField()
+    weekly_xp = serializers.SerializerMethodField()
+    lifetime_xp = serializers.SerializerMethodField()
 
     class Meta:
         model = GroupMember
-        fields = ["id", "user", "role", "status", "request_message", "joined_at"]
+        fields = ["id", "user", "role", "status", "request_message", "joined_at", "weekly_xp", "lifetime_xp"]
 
     def get_user(self, obj):
         return author(self.context["request"], obj.user)
+
+    def get_weekly_xp(self, obj):
+        from apps.gamification.models import LeagueMember
+        from apps.gamification.services import week_bounds
+
+        m = LeagueMember.objects.filter(user=obj.user, cycle__start_at=week_bounds()[0]).first()
+        return m.weekly_xp if m else 0
+
+    def get_lifetime_xp(self, obj):
+        stats = getattr(obj.user, "stats", None)
+        return stats.lifetime_xp if stats else 0
 
 
 @extend_schema(tags=["groups"])

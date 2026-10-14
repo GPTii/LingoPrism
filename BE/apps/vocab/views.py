@@ -64,6 +64,11 @@ class TopicViewSet(viewsets.ModelViewSet):
                 & ~Q(words__learners__status="new"),
                 distinct=True,
             ),
+            saved_count=Count(
+                "words__learners",
+                filter=Q(words__learners__user=user, words__learners__language=target.learn),
+                distinct=True,
+            ),
         )
         qs = qs.order_by("order", "name_vi")
         if self.request.query_params.get("mine") == "1":

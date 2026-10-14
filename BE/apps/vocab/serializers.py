@@ -13,12 +13,13 @@ class TopicSerializer(serializers.ModelSerializer):
     is_system = serializers.BooleanField(read_only=True)
     word_count = serializers.IntegerField(read_only=True, default=0)
     learned_count = serializers.IntegerField(read_only=True, default=0)
+    saved_count = serializers.IntegerField(read_only=True, default=0)
 
     class Meta:
         model = Topic
         fields = [
             "id", "slug", "name_vi", "name_en", "name_zh_hans", "name_zh_hant", "icon", "image",
-            "audience", "visibility", "is_system", "word_count", "learned_count", "created_at",
+            "audience", "visibility", "is_system", "word_count", "learned_count", "saved_count", "created_at",
         ]
         read_only_fields = ["id", "slug", "created_at"]
 

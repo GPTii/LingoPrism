@@ -59,6 +59,7 @@ class User(AbstractBaseUser, PermissionsMixin, TimeStampedModel):
     email = models.EmailField(unique=True)
     display_name = models.CharField(max_length=80, blank=True)
     avatar = models.ImageField(upload_to="avatars/", blank=True, null=True)
+    avatar_preset = models.CharField(max_length=120, blank=True, help_text="Ảnh đại diện có sẵn trong app (assets/...)")
     bio = models.CharField(max_length=200, blank=True)
 
     role = models.CharField(max_length=10, choices=Role.choices, default=Role.LEARNER, db_index=True)
@@ -94,6 +95,11 @@ class User(AbstractBaseUser, PermissionsMixin, TimeStampedModel):
 
     def __str__(self):
         return self.email
+
+    def avatar_url(self, request=None) -> str | None:
+        if self.avatar:
+            return request.build_absolute_uri(self.avatar.url) if request else self.avatar.url
+        return self.avatar_preset or None
 
     @property
     def is_staff_role(self):
