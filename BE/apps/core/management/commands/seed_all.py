@@ -16,4 +16,5 @@ class Command(BaseCommand):
         call_command("build_vocab", offline=offline)
         call_command("seed_gamification")
         call_command("generate_exams")
+        call_command("seed_pois")
         call_command("seed_demo_users")

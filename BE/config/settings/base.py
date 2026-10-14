@@ -37,6 +37,10 @@ INSTALLED_APPS = [
     "apps.notifications",
     "apps.gamification",
     "apps.quizzes",
+    "apps.community",
+    "apps.chat",
+    "apps.detection",
+    "apps.gis",
 ]
 
 MIDDLEWARE = [
@@ -160,7 +164,9 @@ EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
 EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=True)
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="LingoPrism <no-reply@lingoprism.local>")
 
-YOLO_MODEL_PATH = env("YOLO_MODEL_PATH", default=str(BASE_DIR / "models" / "yolov10.onnx"))
+YOLO_MODEL_PATH = env("YOLO_MODEL_PATH", default=str(BASE_DIR / "models" / "yolov10n.onnx"))
+DATA_UPLOAD_MAX_MEMORY_SIZE = 12 * 1024 * 1024
+FILE_UPLOAD_MAX_MEMORY_SIZE = 12 * 1024 * 1024
 
 LOGGING = {
     "version": 1,
