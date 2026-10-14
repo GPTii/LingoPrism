@@ -1,0 +1,78 @@
+# Production stack:  docker compose -f docker-compose.prod.yml up -d --build
+# Put HTTPS in front (Cloudflare, Caddy or certbot) and set DJANGO_ALLOWED_HOSTS / CSRF_TRUSTED_ORIGINS in .env.
+name: lingoprism-prod
+
+x-backend: &backend
+  build: ./BE
+  env_file: .env
+  environment:
+    DJANGO_SETTINGS_MODULE: config.settings.prod
+    DJANGO_DEBUG: "0"
+    USE_REDIS: "1"
+    DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+    REDIS_URL: redis://redis:6379/0
+    YOLO_MODEL_PATH: /app/models/yolov10n.onnx
+  volumes:
+    - media:/app/media
+    - static:/app/staticfiles
+    - ./BE/models:/app/models:ro
+  depends_on:
+    db: { condition: service_healthy }
+    redis: { condition: service_started }
+  restart: unless-stopped
+
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      retries: 20
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+
+  backend:
+    <<: *backend
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.prod
+      DJANGO_DEBUG: "0"
+      USE_REDIS: "1"
+      COLLECT_STATIC: "1"
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      REDIS_URL: redis://redis:6379/0
+      YOLO_MODEL_PATH: /app/models/yolov10n.onnx
+
+  worker:
+    <<: *backend
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.prod
+      USE_REDIS: "1"
+      RUN_MIGRATIONS: "0"
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      REDIS_URL: redis://redis:6379/0
+    command: celery -A config worker -l info
+
+  web:
+    build: ./FE
+    image: lingoprism-web
+    ports: ["80:80"]
+    volumes:
+      - media:/app/media:ro
+      - static:/app/staticfiles:ro
+      - ./deploy/nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./deploy/nginx/proxy_params.conf:/etc/nginx/proxy_params.conf:ro
+    depends_on: [backend]
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  media:
+  static:

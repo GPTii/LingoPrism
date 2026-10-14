@@ -5,6 +5,22 @@
 > Cấu trúc repo: `BE/` (Django API) · `FE/` (web React) · `MOBILE/` (Flutter) · `AI/` (YOLOv10, thực nghiệm).
 > **Chưa bao gồm** các thuật toán nghiên cứu: VIP, FSRS, Smart Distractor, Proximity Search tự cài đặt, GA → làm ở giai đoạn sau (Phase 5). Plan chỉ **chuẩn bị sẵn dữ liệu và chỗ cắm** cho chúng.
 
+## ✅ Trạng thái (cập nhật 15/10/2026)
+
+| Hạng mục | Trạng thái |
+|---|---|
+| Phase 0 – khởi tạo repo, Django, React, chuyển app sang `MOBILE/` | ✅ Xong |
+| Phase 1 – tài khoản, từ vựng 3 ngôn ngữ (300 khái niệm × vi/en/zh-Hans/zh-Hant, 100% verified), pipeline kiểm tra + golden test | ✅ Xong |
+| Phase 2 – học tập/SRS, game hoá (XP, streak, quest, league, shop, badge), thông báo realtime, đề thi + chấm tự luận | ✅ Xong (BE + Web + App) |
+| Phase 3 – cộng đồng, nhóm, chat realtime, chat hỗ trợ, nhận diện YOLOv10 (server + on-device), GIS/POI + geofence, dashboard | ✅ Xong (BE + Web + App) |
+| MOBILE – bỏ Firestore/Realm, chuyển toàn bộ sang REST + WebSocket; màn hình mới: đề thi, bản đồ POI, hỏi giáo viên, chọn ngôn ngữ / giản–phồn | ✅ Biên dịch sạch (`flutter analyze` 0 lỗi) |
+| AI – pipeline YOLOv10 (78 lớp), notebook Colab, `register_model` | ✅ Sẵn sàng – **cần chạy train trên Colab (GPU)** |
+| Docker – `docker-compose.yml` (dev), `docker-compose.prod.yml` + nginx (prod) | ✅ File cấu hình – chưa deploy |
+| Phase 5 – thuật toán nghiên cứu (SM-2, FSRS, VIP, Smart Distractor, Proximity Search tự cài, GA) | ⏳ Chưa làm |
+
+Kiểm thử: BE 73 test (pytest) · smoke test 18 luồng API thật · FE `npm run build` · MOBILE `flutter analyze`.
+Lưu ý môi trường: Windows chỉ build được Android; JDK 24 cần Gradle ≥ 8.14 (đã nâng wrapper lên 8.14.3).
+
 ---
 
 ## 0. Hiện trạng SnapLingua (đầu vào để chuyển sang)
