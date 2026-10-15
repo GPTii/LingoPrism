@@ -29,11 +29,20 @@ def main():
 
     from ultralytics import YOLO
 
-    model = YOLO(args.model)
-    model.train(data=args.data, epochs=args.epochs, imgsz=args.imgsz, batch=args.batch, project=args.project,
-                name=args.name, exist_ok=True, seed=2026, patience=20, cos_lr=True, plots=True)
-
     run = Path(args.project) / args.name
+    last, done = run / "weights" / "last.pt", run / "train_done"
+    if done.exists():
+        print(f"Đã train xong trước đó ({run}) – chỉ đánh giá & export lại")
+    elif last.exists():
+        # Colab disconnected mid-training: continue from the last checkpoint saved on Drive
+        print(f"Tiếp tục train từ {last}")
+        YOLO(last).train(resume=True)
+    else:
+        YOLO(args.model).train(data=args.data, epochs=args.epochs, imgsz=args.imgsz, batch=args.batch,
+                               project=args.project, name=args.name, exist_ok=True, seed=2026, patience=20,
+                               cos_lr=True, plots=True)
+    done.touch()
+
     best = YOLO(run / "weights" / "best.pt")
     report = run / "report"
     report.mkdir(parents=True, exist_ok=True)
@@ -67,12 +76,16 @@ def main():
     (report / "confidence.json").write_text(json.dumps(conf_hist, ensure_ascii=False), encoding="utf-8")
 
     onnx_path = best.export(format="onnx", imgsz=args.imgsz, simplify=True)
-    tflite_path = best.export(format="tflite", imgsz=args.imgsz, half=True)
+    try:
+        tflite_path = best.export(format="tflite", imgsz=args.imgsz, half=True)
+    except Exception as exc:  # TF/onnx2tf version clashes on Colab must not lose the ONNX + metrics
+        print(f"[cảnh báo] export TFLite lỗi: {exc}")
+        tflite_path = None
     card = {
         "name": args.name, "base_model": args.model, "imgsz": args.imgsz,
         "classes": [names[i] for i in range(len(names))],
         "metrics": {k: summary[k] for k in ("precision", "recall", "map50", "map50_95")},
-        "onnx": str(onnx_path), "tflite": str(tflite_path),
+        "onnx": str(onnx_path), "tflite": str(tflite_path) if tflite_path else None,
     }
     (run / "model_card.json").write_text(json.dumps(card, indent=2, ensure_ascii=False), encoding="utf-8")
     print(json.dumps(card, indent=2, ensure_ascii=False))
