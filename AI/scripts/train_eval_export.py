@@ -25,7 +25,14 @@ def main():
     ap.add_argument("--batch", type=int, default=32)
     ap.add_argument("--name", default="lingoprism-yolov10n")
     ap.add_argument("--project", default="AI/runs")
+    ap.add_argument("--patience", type=int, default=20, help="dừng sớm khi mAP không tăng sau N epoch")
+    ap.add_argument("--freeze", type=int, default=0,
+                    help="giữ nguyên N lớp đầu (backbone) – fine-tune từ model đã train sẵn: nhanh hơn, ít quên")
+    ap.add_argument("--hours", type=float, default=0,
+                    help="giới hạn thời gian train (giờ), vd 4 cho Colab miễn phí; lịch learning rate tự co theo")
     args = ap.parse_args()
+    # absolute: Ultralytics >= 8.4 puts a relative project under runs/detect/, the checkpoint must stay where we look
+    args.project = str(Path(args.project).resolve())
 
     from ultralytics import YOLO
 
@@ -38,9 +45,10 @@ def main():
         print(f"Tiếp tục train từ {last}")
         YOLO(last).train(resume=True)
     else:
+        extra = {"time": args.hours} if args.hours else {}
         YOLO(args.model).train(data=args.data, epochs=args.epochs, imgsz=args.imgsz, batch=args.batch,
-                               project=args.project, name=args.name, exist_ok=True, seed=2026, patience=20,
-                               cos_lr=True, plots=True)
+                               project=args.project, name=args.name, exist_ok=True, seed=2026, patience=args.patience,
+                               freeze=args.freeze or None, cos_lr=True, plots=True, **extra)
     done.touch()
 
     best = YOLO(run / "weights" / "best.pt")
@@ -76,11 +84,16 @@ def main():
     (report / "confidence.json").write_text(json.dumps(conf_hist, ensure_ascii=False), encoding="utf-8")
 
     onnx_path = best.export(format="onnx", imgsz=args.imgsz, simplify=True)
-    try:
-        tflite_path = best.export(format="tflite", imgsz=args.imgsz, half=True)
-    except Exception as exc:  # TF/onnx2tf version clashes on Colab must not lose the ONNX + metrics
-        print(f"[cảnh báo] export TFLite lỗi: {exc}")
-        tflite_path = None
+    tflite_path = None
+    # fp16 first (half the size); Ultralytics >= 8.4.83 exports TFLite as "LiteRT", which has no fp16 → fp32
+    for opts in ({"half": True}, {}):
+        try:
+            tflite_path = best.export(format="tflite", imgsz=args.imgsz, **opts)
+            break
+        except Exception as exc:  # TF/onnx2tf version clashes on Colab must not lose the ONNX + metrics
+            print(f"[cảnh báo] export TFLite {opts or 'fp32'} lỗi: {exc}")
+    if tflite_path is None:
+        print("Không có TFLite: chuyển từ ONNX trên máy bằng onnx2tf (như AI/scripts/export_pretrained_oiv7.py --tflite)")
     card = {
         "name": args.name, "base_model": args.model, "imgsz": args.imgsz,
         "classes": [names[i] for i in range(len(names))],
