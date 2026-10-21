@@ -19,6 +19,7 @@ export function navGroups(counts: { due?: number; unread?: number; quests?: numb
         { to: '/learn?kind=learn', label: 'Học từ mới' },
         { to: '/learn?kind=review', label: 'Ôn từ đến hạn', count: counts.due },
         { to: '/sentences', label: 'Luyện câu' },
+        { to: '/speak', label: 'Luyện phát âm' },
         { to: '/doc-viet', label: 'Học đọc – viết', only: 'vi' },
         { to: '/exams', label: 'Đề thi' },
       ],

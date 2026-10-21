@@ -9,6 +9,7 @@ import { errorMessage } from '../../api/client'
 import { useAuth } from '../../auth/store'
 import TargetWord, { langTag } from '../../components/TargetWord'
 import { speak } from '../../lib/speech'
+import SpeakCheck from '../../components/SpeakCheck'
 import WordPicture from '../../components/WordPicture'
 import { Prismo, XpIcon } from '../../components/brand/Brand'
 
@@ -215,6 +216,10 @@ export default function SessionPage() {
                     : <div className="text-slate-400">Chạm để xem hình</div>)
                 : (flipped ? <div className="text-2xl text-slate-700">{q.back || '—'}</div> : <div className="text-slate-400">Chạm để xem nghĩa tiếng Việt</div>)}
             </button>
+          )}
+          {/* once the card is turned over: say the word and get a score (only where the browser can listen) */}
+          {q.type === 'flashcard' && flipped && (
+            <SpeakCheck text={q.front.text} language={q.front.language} locale={q.front.tts_locale} compact />
           )}
 
           {(q.type === 'choose_target' || q.type === 'choose_meaning' || q.type === 'choose_pinyin') && (

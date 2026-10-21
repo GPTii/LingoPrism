@@ -52,7 +52,9 @@
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>LingoPrism dùng vị trí để gợi ý chủ đề từ vựng phù hợp với nơi bạn đang ở.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>LingoPrism dùng micro cho tính năng camera.</string>
+	<string>LingoPrism dùng micro để bạn luyện phát âm và cho tính năng camera.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>LingoPrism nhận dạng giọng nói để chấm điểm phát âm khi bạn luyện đọc từ.</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsLocalNetworking</key>

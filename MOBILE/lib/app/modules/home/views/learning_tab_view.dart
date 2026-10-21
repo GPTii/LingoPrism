@@ -260,17 +260,25 @@ class LearningTabView extends GetView<HomeStatsController> {
           ),
         );
     final learningVietnamese = Get.find<AuthService>().currentUser?.activeLanguage == 'vi';
-    return Row(children: [
-      if (learningVietnamese)
-        item(Icons.menu_book_rounded, 'Học đọc – viết', Routes.literacyMap)
-      else
-        item(Icons.edit_note_rounded, 'Luyện câu', Routes.sentencePractice),
-      SizedBox(width: 8.w),
-      item(Icons.fact_check_outlined, 'Bài kiểm tra', Routes.examList),
-      SizedBox(width: 8.w),
-      item(Icons.place_outlined, 'Học theo vị trí', Routes.poiMap),
-      SizedBox(width: 8.w),
-      item(Icons.forum_outlined, 'Hỏi giáo viên', Routes.supportChat),
+    return Column(children: [
+      Row(children: [
+        if (learningVietnamese)
+          item(Icons.menu_book_rounded, 'Học đọc – viết', Routes.literacyMap)
+        else
+          item(Icons.edit_note_rounded, 'Luyện câu', Routes.sentencePractice),
+        SizedBox(width: 8.w),
+        item(Icons.record_voice_over_outlined, 'Luyện phát âm', Routes.speakPractice),
+        SizedBox(width: 8.w),
+        item(Icons.fact_check_outlined, 'Bài kiểm tra', Routes.examList),
+      ]),
+      SizedBox(height: 8.h),
+      Row(children: [
+        item(Icons.place_outlined, 'Học theo vị trí', Routes.poiMap),
+        SizedBox(width: 8.w),
+        item(Icons.forum_outlined, 'Hỏi giáo viên', Routes.supportChat),
+        SizedBox(width: 8.w),
+        item(Icons.insights_rounded, 'Thống kê', Routes.stats),
+      ]),
     ]);
   }
 

@@ -2,6 +2,8 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.CAMERA" />
+    <!-- pronunciation practice: the learner says the word, the phone's speech recogniser listens -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <!-- Học theo vị trí (POI gần đây, geofencing) -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
@@ -50,6 +52,10 @@
         <!-- flutter_tts needs to see the installed text-to-speech engines -->
         <intent>
             <action android:name="android.intent.action.TTS_SERVICE" />
+        </intent>
+        <!-- speech_to_text needs to see the installed speech recognisers -->
+        <intent>
+            <action android:name="android.speech.RecognitionService" />
         </intent>
     </queries>
 </manifest>
