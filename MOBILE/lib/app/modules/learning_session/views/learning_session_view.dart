@@ -11,6 +11,8 @@ import '../../../core/theme/app_text_styles.dart';
 import '../controllers/learning_session_controller.dart';
 import '../../home/controllers/learning_tab_controller.dart';
 import '../../../core/widgets/word_picture.dart';
+import '../../../core/widgets/prismo.dart';
+import '../../../core/widgets/prism_effects.dart';
 
 // --- Start of Round 3 Models ---
 // Note: These model classes should ideally be in their own file (e.g., in app/data/models).
@@ -452,6 +454,7 @@ class _RoundThreeContentState extends State<_RoundThreeContent> {
     _canContinue.value = true;
     _updatePrimaryAction(null);
     _playFeedbackSound(isCorrect);
+    if (mounted) PrismoReaction.show(context, correct: isCorrect);
 
     if (isFirstAttempt) {
       _firstPassResult[wordKey] = isCorrect;
@@ -1703,7 +1706,7 @@ class _LessonCompletedScreenState extends State<_LessonCompletedScreen> {
               
               const Spacer(),
               Text(
-                'Chúc mừng bạn đã\nhoàn thành bài học!',
+                'Xong bài học!',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 26.sp,
@@ -1712,10 +1715,13 @@ class _LessonCompletedScreenState extends State<_LessonCompletedScreen> {
                 ),
               ),
               SizedBox(height: 16.h),
+              // the lesson's one celebration: Prismo hops inside a burst of the three beams
               Center(
-                child: SizedBox(
-                  height: 200.h,
-                  child: Image.asset('assets/brand/mascot/prismo_reminder.png', fit: BoxFit.contain),
+                child: PrismBurst(
+                  child: Prismo(
+                    mood: percent >= 60 ? PrismoMood.celebrate : PrismoMood.happy,
+                    size: 170.w,
+                  ),
                 ),
               ),
               SizedBox(height: 12.h),
@@ -1729,7 +1735,7 @@ class _LessonCompletedScreenState extends State<_LessonCompletedScreen> {
                         Text(
                           widget.summary.xpEarned > 0 ? '+${widget.summary.xpEarned}' : '0',
                           style: AppTextStyles.h4.copyWith(
-                            color: widget.summary.xpEarned > 0 ? const Color.fromARGB(255, 4, 57, 130) : AppColors.textHint,
+                            color: widget.summary.xpEarned > 0 ? AppColors.textPrimary : AppColors.textHint,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
@@ -1804,7 +1810,7 @@ class _LessonCompletedScreenState extends State<_LessonCompletedScreen> {
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Icon(Icons.flag, size: 18, color: Color(0xFFE65100)),
+                            const Icon(Icons.flag, size: 18, color: AppColors.streakFire),
                             SizedBox(width: 8.w),
                             Expanded(
                               child: Column(

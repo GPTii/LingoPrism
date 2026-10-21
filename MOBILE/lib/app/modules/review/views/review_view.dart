@@ -543,18 +543,24 @@ class ReviewView extends GetView<ReviewController> {
             border: Border.fromBorderSide(BorderSide(color: AppColors.line)),),
           child: Row(
             children: [
-              // Icon
-              Container(
-                width: 56.w,
-                height: 56.w,
-                decoration: BoxDecoration(
-                  color: AppColors.primaryLight.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(12.r),
-                ),
-                child: Center(
-                  child: Text(
-                    category.icon,
-                    style: TextStyle(fontSize: 28.sp),
+              // Icon – flies up into the topic page's header (Hero)
+              Hero(
+                tag: 'topic-${category.id}',
+                child: Material(
+                  color: Colors.transparent,
+                  child: Container(
+                    width: 56.w,
+                    height: 56.w,
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryLight.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(14.r),
+                    ),
+                    child: Center(
+                      child: Text(
+                        category.icon,
+                        style: TextStyle(fontSize: 28.sp),
+                      ),
+                    ),
                   ),
                 ),
               ),

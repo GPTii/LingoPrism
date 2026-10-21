@@ -15,6 +15,7 @@ import '../../../data/models/api/game.dart';
 import '../../../data/models/api/user.dart';
 import '../controllers/learning_tab_controller.dart';
 import '../../levels/levels_module.dart';
+import '../../../core/widgets/prismo.dart';
 import '../../../core/theme/theme_service.dart';
 import '../../../data/repositories/repositories.dart';
 import '../../../data/models/api/vocab.dart';
@@ -162,12 +163,9 @@ class LearningTabView extends GetView<HomeStatsController> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              _buildOptimizedAsset(
-                imagePath: done ? 'assets/brand/mascot/prismo_celebrate.png' : 'assets/brand/mascot/prismo_happy.png',
-                width: 76.w,
-                height: 76.w,
-                devicePixelRatio: devicePixelRatio,
-                fit: BoxFit.contain,
+              Prismo(
+                mood: done ? PrismoMood.celebrate : learned > 0 ? PrismoMood.happy : due > 0 ? PrismoMood.think : PrismoMood.wow,
+                size: 78.w,
               ),
               Expanded(child: _GoalBeam(learned: learned, target: safeTarget)),
             ],

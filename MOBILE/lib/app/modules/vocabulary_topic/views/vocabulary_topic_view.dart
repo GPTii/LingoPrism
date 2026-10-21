@@ -14,90 +14,109 @@ class VocabularyTopicView extends GetView<VocabularyTopicController> {
 
   @override
   Widget build(BuildContext context) {
+    final topic = controller.topic;
+    final icon = topic.icon.isEmpty ? '📘' : topic.icon;
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
-      appBar: _buildAppBar(),
-      body: Obx(() => ListView.builder(
-            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-            itemCount: controller.items.length,
-            itemBuilder: (context, index) {
-              final item = controller.items[index];
-              return _VocabularyCard(
-                item: item,
-                controller: controller,
-                index: index,
-              );
-            },
-          )),
+      backgroundColor: AppColors.background,
+      // the topic card from the library flies up into this header (Hero), which folds away on scroll
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            pinned: true,
+            stretch: true,
+            expandedHeight: 210.h,
+            backgroundColor: AppColors.ink,
+            foregroundColor: Colors.white,
+            leading: IconButton(onPressed: Get.back, icon: Icon(Icons.arrow_back, size: 24.sp)),
+            title: Obx(() => Text('${controller.topicName} · ${controller.totalWords} từ',
+                style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w700, color: Colors.white))),
+            actions: [
+              IconButton(
+                tooltip: 'Luyện câu',
+                onPressed: controller.onSentencePressed,
+                icon: Icon(Icons.edit_note_rounded, size: 26.sp, color: Colors.white),
+              ),
+              Padding(
+                padding: EdgeInsets.only(right: 12.w),
+                child: FilledButton(
+                  onPressed: controller.onFlashcardPressed,
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    minimumSize: Size(0, 38.h),
+                    padding: EdgeInsets.symmetric(horizontal: 16.w),
+                    textStyle: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700),
+                  ),
+                  child: const Text('Flashcard'),
+                ),
+              ),
+            ],
+            flexibleSpace: FlexibleSpaceBar(
+              collapseMode: CollapseMode.parallax,
+              stretchModes: const [StretchMode.zoomBackground],
+              background: Container(
+                color: AppColors.ink,
+                padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 22.h),
+                alignment: Alignment.bottomLeft,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Hero(
+                      tag: 'topic-${topic.id}',
+                      child: Material(
+                        color: Colors.transparent,
+                        child: Container(
+                          width: 84.w,
+                          height: 84.w,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(22.r),
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(icon, style: TextStyle(fontSize: 46.sp)),
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 16.w),
+                    Expanded(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(controller.topicName,
+                              style: TextStyle(fontSize: 28.sp, fontWeight: FontWeight.w800, color: Colors.white, height: 1.1, letterSpacing: -0.6)),
+                          SizedBox(height: 6.h),
+                          Obx(() => Text('${controller.totalWords} từ vựng',
+                              style: TextStyle(fontSize: 14.sp, color: Colors.white.withValues(alpha: 0.72)))),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Obx(() => SliverPadding(
+                padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 96.h),
+                sliver: SliverList.builder(
+                  itemCount: controller.items.length,
+                  itemBuilder: (context, index) => _Arrive(
+                    index: index,
+                    child: _VocabularyCard(
+                      item: controller.items[index],
+                      controller: controller,
+                      index: index,
+                    ),
+                  ),
+                ),
+              )),
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
         heroTag: 'vocabularyTopicFab',
         onPressed: controller.onAddVocabularyPressed,
         backgroundColor: AppColors.primary,
         child: Icon(Icons.add, size: 28.sp, color: Colors.white),
       ),
-    );
-  }
-
-  PreferredSizeWidget _buildAppBar() {
-    return AppBar(
-      backgroundColor: AppColors.appBarBackground,
-      elevation: 0,
-      leading: IconButton(
-        onPressed: () => Get.back(),
-        icon: Icon(Icons.arrow_back, size: 24.sp, color: AppColors.textPrimary),
-      ),
-      titleSpacing: 0,
-      title: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            controller.topicName,
-            style: TextStyle(
-              fontSize: 18.sp,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
-            ),
-          ),
-          SizedBox(height: 4.h),
-          Text(
-            '${controller.totalWords} từ vựng',
-            style: TextStyle(
-              fontSize: 13.sp,
-              color: AppColors.textSecondary,
-            ),
-          ),
-          
-        ],
-      ),
-      actions: [
-        IconButton(
-          tooltip: 'Luyện câu',
-          onPressed: controller.onSentencePressed,
-          icon: Icon(Icons.edit_note_rounded, size: 28.sp, color: AppColors.primary),
-        ),
-        Padding(
-          padding: EdgeInsets.only(right: 16.w),
-          child: ElevatedButton(
-            onPressed: controller.onFlashcardPressed,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 10.h),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14.r),
-              ),
-              elevation: 0,
-            ),
-            child: Text(
-              'Flashcard',
-              style: TextStyle(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-              ),
-            ),
-          ),
-        ),
-      ],
     );
   }
 }
@@ -118,9 +137,9 @@ class _VocabularyCard extends StatelessWidget {
       case VocabularyLearningStatus.notStarted:
         return AppColors.primary;
       case VocabularyLearningStatus.learning:
-        return const Color(0xFFF6A609);
+        return AppColors.isDark ? AppColors.beamAmber : const Color(0xFFB26F00);
       case VocabularyLearningStatus.learned:
-        return const Color(0xFF028A3D);
+        return AppColors.success;
     }
   }
 
@@ -311,6 +330,31 @@ class _ActionButton extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+
+/// The cards of a topic arrive one after another (only the first screenful, ease-out, no bounce);
+/// nothing moves with "reduce motion" on.
+class _Arrive extends StatelessWidget {
+  const _Arrive({required this.index, required this.child});
+
+  final int index;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    if (index > 7 || (MediaQuery.maybeOf(context)?.disableAnimations ?? false)) return child;
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: Duration(milliseconds: 260 + index * 45),
+      curve: Interval(index * 45 / (260 + index * 45), 1, curve: Curves.easeOutCubic),
+      builder: (context, v, child) => Opacity(
+        opacity: v,
+        child: Transform.translate(offset: Offset(0, (1 - v) * 14), child: child),
+      ),
+      child: child,
     );
   }
 }
