@@ -32,6 +32,7 @@ export function navGroups(counts: { due?: number; unread?: number; quests?: numb
     {
       key: 'snap', label: 'Chụp & khám phá', icon: <CameraOutlined />, children: [
         { to: '/camera', label: 'Chụp ảnh học từ' },
+        { to: '/camera/history', label: 'Lịch sử ảnh' },
         { to: '/map', label: 'Học theo vị trí' },
       ],
     },
@@ -65,7 +66,7 @@ function score(to: string, loc: { pathname: string; search: string; hash: string
   const u = new URL(to, 'http://x')
   const pathOk = u.pathname === '/' ? loc.pathname === '/' : loc.pathname === u.pathname || loc.pathname.startsWith(`${u.pathname}/`)
   if (!pathOk) return -1
-  let s = 1
+  let s = loc.pathname === u.pathname ? 2 : 1 // /camera/history beats /camera there
   const here = new URLSearchParams(loc.search)
   for (const [k, v] of u.searchParams) {
     if (here.get(k) === v) s += 2

@@ -348,6 +348,8 @@ export interface Submission {
 }
 
 export const learnApi = {
+  /** my earlier photos, newest first */
+  detections: (page = 1) => api.get<Paginated<DetectionResult>>('/detections/', { params: { page } }).then((r) => r.data),
   detect: (image: File) => {
     const form = new FormData()
     form.append('image', image)
@@ -358,7 +360,6 @@ export const learnApi = {
     api.post<DetectionResult & { saved: number; reported: number }>(`/detections/${id}/confirm/`, { items }).then((r) => r.data),
   /** every object the detector knows, with its word card (error report: "it is something else") */
   detectLabels: () => api.get<{ label: string; card: WordCard }[]>('/detections/labels/').then((r) => r.data),
-  detections: () => api.get<Paginated<DetectionResult>>('/detections/').then((r) => r.data.results),
   nearby: (lat: number, lng: number, radius = 3000) =>
     api.get<{ results: Poi[]; query_ms: number }>('/pois-nearby/', { params: { lat, lng, radius } }).then((r) => r.data),
   pois: () => api.get<Poi[]>('/pois/').then((r) => r.data),

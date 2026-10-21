@@ -2,6 +2,7 @@ import { App, Button, Checkbox, Select, Spin, Tooltip, Upload } from 'antd'
 import { CameraOutlined, DislikeOutlined, LikeOutlined } from '@ant-design/icons'
 import { useState, type ReactNode } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { Link } from 'react-router-dom'
 import { learnApi, type DetectedItem, type DetectionResult } from '../../api/app'
 import type { WordCard } from '../../api/vocab'
 import { errorMessage } from '../../api/client'
@@ -85,7 +86,7 @@ export default function CameraPage() {
 
   return (
     <div className="max-w-5xl mx-auto flex flex-col gap-6">
-      <PageHeader title="Chụp một đồ vật" description="Máy nhận ra đồ vật trong ảnh và cho bạn từ vựng theo ngôn ngữ đang học. Nhận sai thì bấm sửa – lần sau hệ thống sẽ nhận đúng." />
+      <PageHeader title="Chụp một đồ vật" actions={<Link to="/camera/history"><Button size="large">Lịch sử ảnh</Button></Link>} description="Máy nhận ra đồ vật trong ảnh và cho bạn từ vựng theo ngôn ngữ đang học. Nhận sai thì bấm sửa – lần sau hệ thống sẽ nhận đúng." />
       <Upload.Dragger accept="image/*" showUploadList={false} beforeUpload={detect} disabled={loading} className="[&_.ant-upload-drag]:!rounded-2xl">
         <div className="flex flex-col items-center gap-2 py-4">
           <span className="h-16 w-16 rounded-2xl prism-bg grid place-items-center text-3xl text-white"><CameraOutlined /></span>

@@ -9,7 +9,7 @@ import {
   FileDoneOutlined, FormOutlined, HomeOutlined, LogoutOutlined, MoonOutlined, RedoOutlined, SettingOutlined,
   SunOutlined, TrophyOutlined, TeamOutlined, UserOutlined, BellOutlined, MessageOutlined,
 } from '@ant-design/icons'
-import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { Navigate, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { isStaffRole, useAuth } from '../auth/store'
 import { useLogout } from '../auth/useLogout'
 import type { User } from '../api/types'
@@ -134,6 +134,9 @@ export default function LearnerLayout() {
   const pick = (to: string) => nav.find((i) => i.to === to)!
   const bottom = [pick('/'), pick('/vocab'), null, pick('/review')]
   const onTab = bottom.some((i) => i && isActive(i.to)) || isActive('/camera')
+
+  // first visit: the short survey comes before anything else (the app does the same)
+  if (user && !user.onboarding_completed && !isStaffRole(user)) return <Navigate to="/welcome" replace />
 
   return (
     <ConfigProvider theme={{ token: { borderRadius: 10, controlHeightLG: 48, fontSizeLG: 16 }, components: { Card: { borderRadiusLG: 16, headerFontSize: 17 } } }}>

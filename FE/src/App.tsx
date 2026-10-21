@@ -5,6 +5,7 @@ import AdminLayout from './layouts/AdminLayout'
 import LoginPage from './pages/auth/LoginPage'
 import RegisterPage from './pages/auth/RegisterPage'
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage'
+import WelcomePage from './pages/auth/WelcomePage'
 import HomePage from './pages/learner/HomePage'
 import ProfilePage from './pages/learner/ProfilePage'
 import VocabPage from './pages/learner/VocabPage'
@@ -14,6 +15,7 @@ import SentencePage from './pages/learner/SentencePage'
 import { LiteracyLessonPage, LiteracyMapPage } from './pages/learner/LiteracyPages'
 import LevelTestPage from './pages/learner/LevelTestPage'
 import CameraPage from './pages/learner/CameraPage'
+import DetectionHistoryPage from './pages/learner/DetectionHistoryPage'
 import CommunityPage from './pages/learner/CommunityPage'
 import GroupPage from './pages/learner/GroupPage'
 import MemberProfilePage from './pages/learner/MemberProfilePage'
@@ -39,6 +41,7 @@ export default function App() {
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
       <Route element={<RequireAuth />}>
+        <Route path="/welcome" element={<WelcomePage />} />
         <Route element={<LearnerLayout />}>
           <Route index element={<HomePage />} />
           <Route path="profile" element={<ProfilePage />} />
@@ -51,6 +54,7 @@ export default function App() {
           <Route path="levels/:n/test" element={<LevelTestPage />} />
           <Route path="review" element={<Navigate to="/learn?kind=review" replace />} />
           <Route path="camera" element={<CameraPage />} />
+          <Route path="camera/history" element={<DetectionHistoryPage />} />
           <Route path="community" element={<CommunityPage />} />
           <Route path="community/groups/:id" element={<GroupPage />} />
           <Route path="community/users/:id" element={<MemberProfilePage />} />
