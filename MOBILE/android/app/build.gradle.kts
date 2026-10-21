@@ -5,6 +5,12 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+// Push notifications: only with the Firebase config file (download it from the Firebase console).
+// Without it the app builds and runs normally, with push off.
+if (file("google-services.json").exists()) {
+    apply(plugin = "com.google.gms.google-services")
+}
+
 android {
     namespace = "com.lingoprism.app"
     compileSdk = 36

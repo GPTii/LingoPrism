@@ -82,6 +82,8 @@ dependencies:
   flutter_card_swiper: ^7.0.0
   flutter_slidable: ^3.0.1
   speech_to_text: ^7.4.0
+  firebase_core: ^5.0.0
+  firebase_messaging: ^17.0.0
 
 dev_dependencies:
   flutter_test:

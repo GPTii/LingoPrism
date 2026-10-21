@@ -13,6 +13,8 @@ import '../../../data/repositories/repositories.dart';
 import '../../../data/services/auth_service.dart';
 import '../../../data/services/game_service.dart';
 import '../../../data/services/offline_detections.dart';
+import '../../../routes/app_pages.dart';
+import '../../photo_dialogue/photo_dialogue_module.dart';
 
 /// Detected objects → vocabulary in the language being learned. The learner picks the words to save,
 /// marks wrong detections (feedback feeds the VIP algorithm) and can share the photo to the community.
@@ -157,12 +159,21 @@ class _DetectionResultViewState extends State<DetectionResultView> {
             topicLabel: topic?.nameVi ?? '');
       }
       GameService.to.refreshAll();
+      final talk = saved > 0 && await PhotoDialogueView.available();
+      final locale = chosen.map((i) => i.shownCard?.target?.ttsLocale).firstWhere((l) => l != null && l.isNotEmpty, orElse: () => '');
       Get.back();
       Get.snackbar(
           'Thành công',
           '${share ? 'Đã lưu $saved từ và chia sẻ lên cộng đồng' : 'Đã lưu $saved từ vào thư viện'}'
               '${reported > 0 ? '\nCảm ơn bạn đã báo lỗi! Lần sau gặp vật tương tự, hệ thống sẽ nhận đúng.' : ''}',
-          snackPosition: SnackPosition.BOTTOM, backgroundColor: AppColors.buttonSuccess, colorText: Colors.white);
+          snackPosition: SnackPosition.BOTTOM, backgroundColor: AppColors.buttonSuccess, colorText: Colors.white,
+          duration: Duration(seconds: talk ? 6 : 3),
+          mainButton: talk
+              ? TextButton(
+                  onPressed: () => Get.toNamed(Routes.photoDialogue, arguments: {'detection': result.id, 'locale': locale}),
+                  child: const Text('Hội thoại AI', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800)),
+                )
+              : null);
     } catch (e) {
       Get.snackbar('Lỗi', ApiClient.toApiException(e).message, snackPosition: SnackPosition.BOTTOM);
     } finally {

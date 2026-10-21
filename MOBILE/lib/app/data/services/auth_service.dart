@@ -4,6 +4,7 @@ import '../../core/network/api_client.dart';
 import '../models/api/user.dart';
 import '../repositories/repositories.dart';
 import 'google_sign_in_service.dart';
+import 'push_service.dart';
 
 /// Session state for the whole app (JWT stored locally, user profile from `/me/`).
 ///
@@ -99,6 +100,7 @@ class AuthService extends GetxService {
 
   Future<void> logout({bool remote = true}) async {
     final refresh = TokenStorage.refresh;
+    if (remote) await PushService.stop(); // while the session still works
     if (remote && refresh != null) {
       try {
         await AuthRepository.logout(refresh);

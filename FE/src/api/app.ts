@@ -282,6 +282,19 @@ export interface DetectionResult {
   items: DetectedItem[]
 }
 
+/** A practice dialogue an AI model wrote around the words of one photo (never part of the verified vocabulary). */
+export interface PhotoDialogue {
+  id: number
+  detection: number
+  language: string
+  title_vi: string
+  words: { word_id: number; text: string; meaning_vi: string }[]
+  lines: { speaker: 'A' | 'B'; text: string; reading: string; translation: string }[]
+  ai_generated: true
+  model: string
+  created_at: string
+}
+
 export interface Poi {
   id: number
   name: string
@@ -350,6 +363,15 @@ export interface Submission {
 export const learnApi = {
   /** my earlier photos, newest first */
   detections: (page = 1) => api.get<Paginated<DetectionResult>>('/detections/', { params: { page } }).then((r) => r.data),
+  /** which AI features the server has switched on */
+  aiStatus: () => api.get<{ dialogue: boolean }>('/ai/status/').then((r) => r.data),
+  /** the dialogue already written for a photo, or null */
+  dialogue: (id: number) =>
+    api.get<PhotoDialogue>(`/detections/${id}/dialogue/`).then((r) => r.data).catch((e) => {
+      if (e?.response?.status === 404) return null
+      throw e
+    }),
+  makeDialogue: (id: number) => api.post<PhotoDialogue>(`/detections/${id}/dialogue/`).then((r) => r.data),
   detect: (image: File) => {
     const form = new FormData()
     form.append('image', image)

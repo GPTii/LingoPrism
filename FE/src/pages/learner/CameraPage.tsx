@@ -8,6 +8,7 @@ import type { WordCard } from '../../api/vocab'
 import { errorMessage } from '../../api/client'
 import TargetWord, { langTag } from '../../components/TargetWord'
 import { Prismo } from '../../components/brand/Brand'
+import PhotoDialogue from '../../components/PhotoDialogue'
 import { EmptyState, PageHeader } from '../../components/ui'
 
 /** a small status word under the result, coloured by what it means */
@@ -195,6 +196,10 @@ export default function CameraPage() {
               <Button type="primary" size="large" loading={saving} disabled={result.confirmed} onClick={save}>
                 {result.confirmed ? 'Đã lưu vào thư viện' : `Lưu ${result.items.filter((x) => x.selected).length} từ đã chọn`}
               </Button>
+            )}
+            {result?.confirmed && result.items.some((x) => x.selected) && (
+              <PhotoDialogue detectionId={result.id}
+                locale={result.items.map(shownCard).find((c) => c?.target)?.target?.tts_locale ?? ''} />
             )}
           </div>
         </div>

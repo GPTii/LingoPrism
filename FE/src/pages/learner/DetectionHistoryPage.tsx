@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom'
 import { learnApi, type DetectedItem, type DetectionResult } from '../../api/app'
 import { langTag } from '../../components/TargetWord'
 import { Prismo } from '../../components/brand/Brand'
+import PhotoDialogue from '../../components/PhotoDialogue'
 import { EmptyState, PageHeader } from '../../components/ui'
 
 /** The word an object stands for: the learner's correction first, then the model's answer. */
@@ -56,6 +57,9 @@ function Shot({ d }: { d: DetectionResult }) {
             })}
           </ul>
         ) : <p className="m-0 text-sm text-slate-500">Không có đồ vật nào trong ảnh này.</p>}
+        {d.confirmed && words.some((w) => w.saved) && (
+          <PhotoDialogue detectionId={d.id} locale={words.map((w) => wordOf(w.item)?.target?.tts_locale).find(Boolean) ?? ''} />
+        )}
       </div>
     </article>
   )
