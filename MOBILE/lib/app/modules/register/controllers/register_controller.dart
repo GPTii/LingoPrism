@@ -193,10 +193,6 @@ class RegisterController extends GetxController {
     }
   }
 
-  void registerWithFacebook() {
-    AppWidgets.showInfoDialog(title: 'Facebook', message: 'Đăng ký bằng Facebook chưa được hỗ trợ. Hãy dùng email hoặc Google.');
-  }
-
   void goToLogin() {
     Get.offNamed(Routes.login);
   }

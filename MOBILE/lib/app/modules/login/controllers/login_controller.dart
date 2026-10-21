@@ -95,10 +95,6 @@ class LoginController extends GetxController {
     }
   }
 
-  void loginWithFacebook() {
-    AppWidgets.showInfoDialog(title: 'Facebook', message: 'Đăng nhập bằng Facebook chưa được hỗ trợ. Hãy dùng email hoặc Google.');
-  }
-
   Future<void> _enterApp() async {
     await AppInitializer.onSessionStarted();
     final onboarded = _authService.currentUser?.onboardingCompleted == true;

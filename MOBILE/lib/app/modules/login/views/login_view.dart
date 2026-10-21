@@ -277,25 +277,6 @@ class LoginView extends GetView<LoginController> {
                                     },
                                   ),
                                 ),
-
-                                SizedBox(width: 16.w),
-
-                                // Facebook
-                                GestureDetector(
-                                  onTap: controller.loginWithFacebook,
-                                  child: Image.asset(
-                                    'assets/icons/facebook.png',
-                                    width: 48.w,
-                                    height: 48.h,
-                                    errorBuilder: (context, error, stackTrace) {
-                                      return Icon(
-                                        Icons.people,
-                                        size: 48.sp,
-                                        color: AppColors.facebook,
-                                      );
-                                    },
-                                  ),
-                                ),
                               ],
                             ),
 
