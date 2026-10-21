@@ -134,7 +134,7 @@ class CommunityDetailView extends GetView<CommunityDetailController> {
                       width: 48.w,
                       height: 4.h,
                       decoration: BoxDecoration(
-                        color: const Color(0xFFE0E6EE),
+                        color: AppColors.line,
                         borderRadius: BorderRadius.circular(12.r),
                       ),
                     ),
@@ -200,12 +200,12 @@ class CommunityDetailView extends GetView<CommunityDetailController> {
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(16.r),
                               color: isSelected
-                                  ? const Color(0xFFE6F4FF)
+                                  ? AppColors.primarySoft
                                   : Colors.white,
                               border: Border.all(
                                 color: isSelected
-                                    ? const Color(0xFF0A69C7)
-                                    : const Color(0xFFD6DEEA),
+                                    ? AppColors.primary
+                                    : AppColors.line,
                                 width: 1.2,
                               ),
                             ),
@@ -218,7 +218,7 @@ class CommunityDetailView extends GetView<CommunityDetailController> {
                                     shape: BoxShape.circle,
                                     border: Border.all(
                                       color: isSelected
-                                          ? const Color(0xFF0A69C7)
+                                          ? AppColors.primary
                                           : const Color(0xFF7C8AA0),
                                       width: 2,
                                     ),
@@ -230,7 +230,7 @@ class CommunityDetailView extends GetView<CommunityDetailController> {
                                     height: 10.w,
                                     decoration: BoxDecoration(
                                       color: isSelected
-                                          ? const Color(0xFF0A69C7)
+                                          ? AppColors.primary
                                           : Colors.transparent,
                                       shape: BoxShape.circle,
                                     ),
@@ -271,13 +271,13 @@ class CommunityDetailView extends GetView<CommunityDetailController> {
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(18.r),
                           borderSide: const BorderSide(
-                            color: Color(0xFFD6DEEA),
+                            color: AppColors.line,
                           ),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(18.r),
                           borderSide: const BorderSide(
-                            color: Color(0xFF0A69C7),
+                            color: AppColors.primary,
                             width: 1.4,
                           ),
                         ),
@@ -343,7 +343,7 @@ class CommunityDetailView extends GetView<CommunityDetailController> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: alreadyReported
                             ? const Color(0xFFCFD7E3)
-                            : const Color(0xFFE8505B),
+                            : AppColors.error,
                         foregroundColor: Colors.white,
                         disabledForegroundColor: Colors.white,
                         elevation: 0,
@@ -462,7 +462,7 @@ class _PostImage extends StatelessWidget {
 
   Widget _buildFallbackImage() {
     return Image.asset(
-      'assets/images/chimcanhcut/chim_vui1.png',
+      'assets/brand/avatar/avatar_1.png',
       width: double.infinity,
       fit: BoxFit.cover,
       errorBuilder: (context, error, stackTrace) {
@@ -507,7 +507,7 @@ class _AvatarImageProvider {
         return FileImage(file);
       }
     }
-    return const AssetImage('assets/images/chimcanhcut/chim_vui1.png');
+    return const AssetImage('assets/brand/avatar/avatar_1.png');
   }
 }
 
@@ -659,7 +659,7 @@ class _ActionRow extends StatelessWidget {
           Obx(
             () => _StatButton(
               icon: Icons.chat_bubble_outline,
-              color: const Color(0xFF0A69C7),
+              color: AppColors.primary,
               label: '${post.comments.value}',
               onTap: () => controller.showComments(post),
             ),
@@ -812,7 +812,7 @@ class _CommentComposerState extends State<_CommentComposer> {
             child: ElevatedButton(
               onPressed: () => _submitComment(),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF0A69C7),
+                backgroundColor: AppColors.primary,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(18.r),
                 ),
@@ -955,7 +955,7 @@ class _DetectedVocabularyItem extends StatelessWidget {
           border: Border.all(color: const Color(0xFFBFE5FF)),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF0AA0FF).withValues(alpha: 0.08),
+              color: AppColors.primary.withValues(alpha: 0.08),
               blurRadius: 18.r,
               offset: Offset(0, 10.h),
             ),
@@ -1022,7 +1022,7 @@ class _DetectedVocabularyItem extends StatelessWidget {
                     onPressed: () => communityController.speakWord(item.headword),
                     icon: Icon(
                       Icons.volume_up_rounded,
-                      color: const Color(0xFF0A69C7),
+                      color: AppColors.primary,
                       size: 20.sp,
                     ),
                   ),
@@ -1037,7 +1037,7 @@ class _DetectedVocabularyItem extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w600,
-                    color: const Color(0xFF4F5B6A),
+                    color: AppColors.textSecondary,
                   ),
                 ),
                 SizedBox(width: 10.w),
@@ -1108,7 +1108,7 @@ void _showTopicPicker(
                       style: TextStyle(
                         fontSize: 18.sp,
                         fontWeight: FontWeight.w700,
-                        color: const Color(0xFF0F1D37),
+                        color: AppColors.textPrimary,
                       ),
                     ),
                   ),
@@ -1118,7 +1118,7 @@ void _showTopicPicker(
                     style: TextStyle(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w600,
-                      color: const Color(0xFF4F5B6A),
+                      color: AppColors.textSecondary,
                     ),
                   ),
                   SizedBox(height: 12.h),
@@ -1135,7 +1135,7 @@ void _showTopicPicker(
                             fontWeight: FontWeight.w600,
                             color: isActive
                                 ? Colors.white
-                                : const Color(0xFF0F1D37),
+                                : AppColors.textPrimary,
                           ),
                         ),
                         selected: isActive,
@@ -1148,14 +1148,14 @@ void _showTopicPicker(
                             );
                           });
                         },
-                        selectedColor: const Color(0xFF008DFF),
+                        selectedColor: AppColors.primary,
                         backgroundColor: const Color(0xFFE4F2FF),
                         pressElevation: 0,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20.r),
                           side: BorderSide(
                             color: isActive
-                                ? const Color(0xFF008DFF)
+                                ? AppColors.primary
                                 : const Color(0xFFCCE6FF),
                           ),
                         ),
@@ -1168,7 +1168,7 @@ void _showTopicPicker(
                     style: TextStyle(
                       fontSize: 13.sp,
                       fontWeight: FontWeight.w500,
-                      color: const Color(0xFF4F5B6A),
+                      color: AppColors.textSecondary,
                     ),
                   ),
                   SizedBox(height: 8.h),
@@ -1182,11 +1182,11 @@ void _showTopicPicker(
                       ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16.r),
-                        borderSide: const BorderSide(color: Color(0xFFE0E7FF)),
+                        borderSide: const BorderSide(color: AppColors.primarySoft),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16.r),
-                        borderSide: const BorderSide(color: Color(0xFF008DFF)),
+                        borderSide: const BorderSide(color: AppColors.primary),
                       ),
                     ),
                   ),
@@ -1240,7 +1240,7 @@ void _showTopicPicker(
                         }
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF008DFF),
+                        backgroundColor: AppColors.primary,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(18.r),
                         ),
@@ -1302,7 +1302,7 @@ class _CommentItem extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w700,
-                      color: const Color(0xFF0A69C7),
+                      color: AppColors.primary,
                     ),
                   )
                 : null,
@@ -1518,7 +1518,7 @@ class _NavButton extends StatelessWidget {
         ),
         child: Icon(
           icon,
-          color: const Color(0xFF4F5B6A),
+          color: AppColors.textSecondary,
           size: 26.sp,
         ),
       ),
@@ -1539,10 +1539,10 @@ class _SelectIndicator extends StatelessWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         border: Border.all(
-          color: isActive ? const Color(0xFF0A69C7) : const Color(0xFF94A5BE),
+          color: isActive ? AppColors.primary : const Color(0xFF94A5BE),
           width: 2,
         ),
-        color: isActive ? const Color(0xFF0A69C7) : Colors.transparent,
+        color: isActive ? AppColors.primary : Colors.transparent,
       ),
       child: isActive
           ? Icon(Icons.check, color: Colors.white, size: 16.sp)
@@ -1562,7 +1562,7 @@ class _TopicButton extends StatelessWidget {
     return ElevatedButton(
       onPressed: onPressed,
       style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFF008DFF),
+        backgroundColor: AppColors.primary,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(24.r),
         ),

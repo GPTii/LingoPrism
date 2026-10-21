@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../controllers/community_create_group_controller.dart';
+import 'package:lingoprism/app/core/theme/app_colors.dart';
 
 class CommunityCreateGroupView extends GetView<CommunityCreateGroupController> {
   const CommunityCreateGroupView({super.key});
@@ -10,13 +11,13 @@ class CommunityCreateGroupView extends GetView<CommunityCreateGroupController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFE6F9FF),
+      backgroundColor: AppColors.primarySoft,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
-          color: const Color(0xFF1A1D1F),
+          color: AppColors.textPrimary,
           onPressed: Get.back,
         ),
         title: Text(
@@ -24,7 +25,7 @@ class CommunityCreateGroupView extends GetView<CommunityCreateGroupController> {
           style: TextStyle(
             fontSize: 18.sp,
             fontWeight: FontWeight.w700,
-            color: const Color(0xFF1A1D1F),
+            color: AppColors.textPrimary,
           ),
         ),
         centerTitle: false,
@@ -63,7 +64,7 @@ class CommunityCreateGroupView extends GetView<CommunityCreateGroupController> {
                           style: TextStyle(
                             fontSize: 15.sp,
                             fontWeight: FontWeight.w600,
-                            color: const Color(0xFF1A1D1F),
+                            color: AppColors.textPrimary,
                           ),
                         ),
                         SizedBox(height: 14.h),
@@ -92,7 +93,7 @@ class CommunityCreateGroupView extends GetView<CommunityCreateGroupController> {
                         ),
                         backgroundColor: controller.canSubmit.value &&
                                 !controller.isSubmitting.value
-                            ? const Color(0xFF0A69C7)
+                            ? AppColors.primary
                             : const Color(0xFFD2D4DB),
                         foregroundColor: Colors.white,
                         textStyle: TextStyle(
@@ -191,7 +192,7 @@ class _IconSelector extends StatelessWidget {
                         color: Colors.white,
                         border: Border.all(
                           color: isActive
-                              ? const Color(0xFF0A69C7)
+                              ? AppColors.primary
                               : const Color(0xFFD4E5F7),
                           width: isActive ? 2 : 1,
                         ),
@@ -238,7 +239,7 @@ class _GroupTextField extends StatelessWidget {
           style: TextStyle(
             fontSize: 14.sp,
             fontWeight: FontWeight.w600,
-            color: const Color(0xFF1A1D1F),
+            color: AppColors.textPrimary,
           ),
         ),
         SizedBox(height: 10.h),
@@ -294,7 +295,7 @@ class _ApprovalToggle extends StatelessWidget {
               child: _ApprovalButton(
                 label: 'Không duyệt',
                 isActive: selected == StudyGroupApprovalMode.auto,
-                activeColor: const Color(0xFF0A69C7),
+                activeColor: AppColors.primary,
                 inactiveColor: const Color(0xFFD6E2F2),
                 activeTextColor: Colors.white,
                 inactiveTextColor: const Color(0xFF516579),

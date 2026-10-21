@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import '../../profile/controllers/profile_controller.dart';
 import '../../profile/views/profile_view.dart';
 import '../controllers/community_member_profile_controller.dart';
+import 'package:lingoprism/app/core/theme/app_colors.dart';
 
 class CommunityMemberProfileView
     extends GetView<CommunityMemberProfileController> {
@@ -13,20 +14,20 @@ class CommunityMemberProfileView
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFE6F9FF),
+      backgroundColor: AppColors.primarySoft,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFE6F9FF),
+        backgroundColor: AppColors.primarySoft,
         elevation: 0,
         leading: IconButton(
           onPressed: Get.back,
           icon: const Icon(Icons.arrow_back_ios_new_rounded,
-              color: Color(0xFF0B1D28)),
+              color: AppColors.textPrimary),
         ),
         titleSpacing: 0,
         title: Text(
           'Trang cá nhân',
           style: TextStyle(
-            color: const Color(0xFF0B1D28),
+            color: AppColors.textPrimary,
             fontSize: 20.sp,
             fontWeight: FontWeight.w700,
           ),
@@ -64,7 +65,7 @@ class CommunityMemberProfileView
               Text(
                 'Các bài đăng gần đây',
                 style: TextStyle(
-                  color: const Color(0xFF0B1D28),
+                  color: AppColors.textPrimary,
                   fontSize: 18.sp,
                   fontWeight: FontWeight.w700,
                 ),
@@ -88,7 +89,7 @@ class CommunityMemberProfileView
                   child: Text(
                     'Chưa có bài đăng nào',
                     style: TextStyle(
-                      color: const Color(0xFF60718C),
+                      color: AppColors.textSecondary,
                       fontSize: 15.sp,
                     ),
                     textAlign: TextAlign.center,

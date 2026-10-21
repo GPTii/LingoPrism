@@ -105,7 +105,7 @@ class SurveyView extends GetView<SurveyController> {
         children: [
           SizedBox(height: 20.h),
 
-          // Form container with penguin and bubble inside
+          // Form container with Prismo and bubble inside
           Expanded(
             child: Container(
               width: double.infinity,
@@ -120,12 +120,12 @@ class SurveyView extends GetView<SurveyController> {
                   children: [
                   SizedBox(height: 20.h),
 
-                  // Penguin and Chat bubble in a row
+                  // Prismo and chat bubble in a row
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      // Penguin character
-                      _buildPenguinCharacter(fallbackIcon: Icons.person),
+                      // Prismo (mascot)
+                      _buildMascot(fallbackIcon: Icons.person),
 
 
                       // Chat bubble
@@ -265,7 +265,7 @@ class SurveyView extends GetView<SurveyController> {
                 children: [
                   Row(
                     children: [
-                      _buildPenguinCharacter(fallbackIcon: Icons.translate),
+                      _buildMascot(fallbackIcon: Icons.translate),
                       Expanded(
                         child: Container(
                           padding: EdgeInsets.all(16.w),
@@ -321,7 +321,7 @@ class SurveyView extends GetView<SurveyController> {
         children: [
           SizedBox(height: 20.h),
 
-          // Form container with penguin and bubble inside
+          // Form container with Prismo and bubble inside
           Expanded(
             child: Container(
               width: double.infinity,
@@ -335,12 +335,12 @@ class SurveyView extends GetView<SurveyController> {
                 children: [
                   SizedBox(height: 20.h),
 
-                  // Penguin and Chat bubble in a row
+                  // Prismo and chat bubble in a row
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      // Penguin character
-                      _buildPenguinCharacter(fallbackIcon: Icons.school),
+                      // Prismo (mascot)
+                      _buildMascot(fallbackIcon: Icons.school),
 
 
                       // Chat bubble
@@ -403,7 +403,7 @@ class SurveyView extends GetView<SurveyController> {
         children: [
           SizedBox(height: 20.h),
 
-          // Form container with penguin and bubble inside
+          // Form container with Prismo and bubble inside
           Expanded(
             child: Container(
               width: double.infinity,
@@ -417,12 +417,12 @@ class SurveyView extends GetView<SurveyController> {
                 children: [
                   SizedBox(height: 20.h),
 
-                  // Penguin and Chat bubble in a row
+                  // Prismo and chat bubble in a row
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      // Penguin character
-                      _buildPenguinCharacter(fallbackIcon: Icons.schedule),
+                      // Prismo (mascot)
+                      _buildMascot(fallbackIcon: Icons.schedule),
 
                       SizedBox(width: 16.w),
 
@@ -500,12 +500,12 @@ class SurveyView extends GetView<SurveyController> {
 
                 SizedBox(height: 40.h),
 
-                // Happy penguin
+                // Happy Prismo
                 Container(
                   width: 200.w,
                   height: 200.h,
                   child: Image.asset(
-                    'assets/images/chimcanhcut/chim_yeu.png',
+                    'assets/brand/mascot/prismo_love.png',
                     fit: BoxFit.contain,
                     errorBuilder: (context, error, stackTrace) {
                       return Container(
@@ -869,12 +869,12 @@ class SurveyView extends GetView<SurveyController> {
     );
   }
 
-  Widget _buildPenguinCharacter({IconData fallbackIcon = Icons.person}) {
+  Widget _buildMascot({IconData fallbackIcon = Icons.person}) {
     return SizedBox(
       width: 60.w,
       height: 60.h,
       child: Image.asset(
-        'assets/images/chimcanhcut/chim_chaomung.png',
+        'assets/brand/mascot/prismo_hello.png',
         fit: BoxFit.contain,
         errorBuilder: (context, error, stackTrace) {
           return Container(

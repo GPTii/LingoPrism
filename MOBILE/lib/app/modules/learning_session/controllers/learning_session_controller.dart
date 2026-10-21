@@ -20,6 +20,7 @@ class LearningWord {
     this.exampleVi,
     this.target,
     this.imageUrl,
+    this.emoji = '',
   });
 
   final String vocabularyId;
@@ -32,9 +33,11 @@ class LearningWord {
   final String? exampleVi;
   final TargetText? target;
   final String? imageUrl;
+  final String emoji;
 
   String get language => target?.language ?? 'en';
   bool get isChinese => target?.isChinese == true;
+  bool get isVietnamese => language == 'vi';
 
   factory LearningWord.fromItem(SessionItem item) {
     final c = item.card;
@@ -42,7 +45,9 @@ class LearningWord {
     return LearningWord(
       vocabularyId: c.id.toString(),
       word: c.text,
-      translation: c.meaningVi.isNotEmpty ? c.meaningVi : (c.english ?? ''),
+      translation: c.isVietnameseTarget
+          ? (c.emoji.isNotEmpty ? c.emoji : '🔊')
+          : (c.meaningVi.isNotEmpty ? c.meaningVi : (c.english ?? '')),
       personalWordId: item.personalWordId.toString(),
       phonetic: c.target?.reading,
       status: c.personal?.status,
@@ -50,6 +55,7 @@ class LearningWord {
       exampleVi: example?.translationVi,
       target: c.target,
       imageUrl: c.image,
+      emoji: c.emoji,
     );
   }
 }

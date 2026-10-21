@@ -1,3 +1,4 @@
+import '../../../core/utils/brand_assets.dart';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -15,13 +16,7 @@ class ProfileEditController extends GetxController {
   final RxBool isSaving = false.obs;
   final RxString errorMessage = ''.obs;
 
-  static const List<String> avatarOptions = [
-    'assets/images/chimcanhcut/chim_vui1.png',
-    'assets/images/chimcanhcut/chim_mung.png',
-    'assets/images/chimcanhcut/chim_ok.png',
-    'assets/images/chimcanhcut/chim_thich.png',
-    'assets/images/chimcanhcut/chim_vui.png',
-  ];
+  static const List<String> avatarOptions = BrandAssets.avatars;
 
   @override
   void onInit() {

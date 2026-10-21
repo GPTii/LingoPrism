@@ -2,7 +2,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { App, Badge, Button, Card, Form, Image, Input, List, Select, Space, Table, Tag } from 'antd'
 import { useState } from 'react'
 import dayjs from 'dayjs'
-import { adminApi, type DetectionLog, type PostReport } from '../../api/admin'
+import { adminApi, type DetectionLog, type DetectionReport, type PostReport } from '../../api/admin'
 import { errorMessage } from '../../api/client'
 import { SupportChatBox } from '../learner/SupportPage'
 
@@ -51,7 +51,7 @@ export function BroadcastPage() {
       <Form form={form} layout="vertical" initialValues={{ role: 'learner', learner_type: 'all' }}>
         <Form.Item name="title" label="Tiêu đề" rules={[{ required: true }]}><Input maxLength={120} /></Form.Item>
         <Form.Item name="body" label="Nội dung"><Input.TextArea maxLength={300} rows={4} /></Form.Item>
-        <Space>
+        <Space wrap>
           <Form.Item name="role" label="Vai trò"><Select style={{ width: 160 }} options={[{ value: 'all', label: 'Tất cả' }, { value: 'learner', label: 'Học viên' }, { value: 'staff', label: 'Giáo viên' }]} /></Form.Item>
           <Form.Item name="learner_type" label="Đối tượng"><Select style={{ width: 160 }} options={[{ value: 'all', label: 'Tất cả' }, { value: 'adult', label: 'Người lớn' }, { value: 'kid', label: 'Trẻ em' }]} /></Form.Item>
         </Space>
@@ -82,6 +82,94 @@ export function SupportAdminPage() {
         {current ? <SupportChatBox key={current} conversationId={current} title={`${conv?.learner.display_name ?? ''} · ${conv?.learner.email ?? ''}`} /> : <Card>Chọn một cuộc trò chuyện</Card>}
       </div>
     </div>
+  )
+}
+
+const REPORT_STATUS: Record<DetectionReport['status'], [string, string]> = {
+  pending: ['orange', 'Chờ duyệt'], approved: ['green', 'Áp dụng cho mọi người'], rejected: ['default', 'Đã từ chối'],
+}
+
+/** Learners' error reports: reviewed here, applied by the server at once, exported for the next training run. */
+function DetectionReportsCard() {
+  const { message } = App.useApp()
+  const queryClient = useQueryClient()
+  const [status, setStatus] = useState<string | undefined>('pending')
+  const [page, setPage] = useState(1)
+  const [exporting, setExporting] = useState(false)
+  const reports = useQuery({ queryKey: ['detection-reports', status, page], queryFn: () => adminApi.detectionReports(status, page) })
+  const summary = useQuery({ queryKey: ['detection-report-summary'], queryFn: adminApi.detectionReportSummary })
+  const review = async (r: DetectionReport, approve: boolean) => {
+    try {
+      await adminApi.reviewDetectionReport(r.id, approve)
+      queryClient.invalidateQueries({ queryKey: ['detection-reports'] })
+      queryClient.invalidateQueries({ queryKey: ['detection-report-summary'] })
+    } catch (e) {
+      message.error(errorMessage(e))
+    }
+  }
+  const exportZip = async () => {
+    setExporting(true)
+    try {
+      const blob = await adminApi.exportDetectionReports()
+      const a = document.createElement('a')
+      a.href = URL.createObjectURL(blob)
+      a.download = `lingoprism_feedback_${dayjs().format('YYYYMMDD')}.zip`
+      a.click()
+      URL.revokeObjectURL(a.href)
+      message.success('Đã xuất. Tải file lên Google Drive thành MyDrive/lingoprism_feedback.zip rồi chạy notebook train.', 6)
+      queryClient.invalidateQueries({ queryKey: ['detection-report-summary'] })
+    } catch (e) {
+      message.error(errorMessage(e))
+    } finally {
+      setExporting(false)
+    }
+  }
+  const s = summary.data
+  return (
+    <Card title="Báo lỗi nhận diện của người dùng"
+      extra={
+        <Button type="primary" loading={exporting} disabled={!s?.approved} onClick={exportZip}>
+          Xuất dữ liệu train{s?.approved_not_exported ? ` (${s.approved_not_exported} mới)` : ''}
+        </Button>
+      }>
+      {s && (
+        <div className="text-sm text-slate-600 mb-3 flex flex-col gap-1">
+          <div>
+            Chờ duyệt <b>{s.pending}</b> · Đang áp dụng cho mọi người <b>{s.approved}</b> · Từ chối <b>{s.rejected}</b> ·
+            Server đã tự sửa <b>{s.applied}</b> lượt nhận diện
+          </div>
+          <div className="text-slate-500">
+            Báo lỗi có hiệu lực ngay cho người báo; tự áp dụng cho mọi người khi {s.consensus_users} người khác nhau báo cùng một lỗi
+            hoặc khi bạn duyệt. Chỉ sửa khi mô hình đoán lại đúng nhãn sai đó trên vật trông giống ảnh báo lỗi.
+          </div>
+          {!s.memory_enabled && (
+            <Tag color="red">Chưa có BE/models/embedder.onnx – server chỉ ghi nhận, chưa tự sửa (python AI/scripts/export_embedder.py)</Tag>
+          )}
+        </div>
+      )}
+      <Select className="mb-3 w-56" value={status ?? 'all'} onChange={(v) => { setStatus(v === 'all' ? undefined : v); setPage(1) }}
+        options={[{ value: 'pending', label: 'Chờ duyệt' }, { value: 'approved', label: 'Đã duyệt' }, { value: 'rejected', label: 'Đã từ chối' }, { value: 'all', label: 'Tất cả' }]} />
+      <Table<DetectionReport> size="small" rowKey="id" loading={reports.isLoading} dataSource={reports.data?.results}
+        pagination={{ current: page, total: reports.data?.count, pageSize: 20, onChange: setPage, showSizeChanger: false }}
+        columns={[
+          { title: 'Vật', render: (_, r) => (r.crop ? <Image src={r.crop} width={72} preview={{ src: r.photo ?? r.crop }} /> : '—') },
+          { title: 'Mô hình đoán → Người dùng sửa', render: (_, r) => (
+            <span><Tag color="red">{r.wrong_label}</Tag>→ <Tag color="green">{r.correct_label || 'không phải đồ vật'}</Tag></span>
+          ) },
+          { title: 'Số người báo', dataIndex: 'same_reports' },
+          { title: 'Đã tự sửa', dataIndex: 'applied' },
+          { title: 'Bị phản đối', dataIndex: 'disputes', render: (v: number) => (v ? <Tag color="volcano">{v}</Tag> : 0) },
+          { title: 'Người báo', dataIndex: 'user' },
+          { title: 'Trạng thái', render: (_, r) => <Tag color={REPORT_STATUS[r.status][0]}>{REPORT_STATUS[r.status][1]}</Tag> },
+          { title: '', render: (_, r) => (
+            <Space>
+              {r.status !== 'approved' && <Button size="small" type="primary" onClick={() => review(r, true)}>Duyệt</Button>}
+              {r.status !== 'rejected' && <Button size="small" danger onClick={() => review(r, false)}>Từ chối</Button>}
+            </Space>
+          ) },
+          { title: 'Lúc', dataIndex: 'created_at', render: (v) => dayjs(v).format('HH:mm DD/MM') },
+        ]} />
+    </Card>
   )
 }
 
@@ -116,6 +204,7 @@ export function DetectionsAdminPage() {
           </div>
         </Card>
       </div>
+      <DetectionReportsCard />
       <Card title="Nhật ký nhận diện">
         <Table<DetectionLog> rowKey="id" loading={logs.isLoading} dataSource={logs.data?.results}
           pagination={{ current: page, total: logs.data?.count, pageSize: 20, onChange: setPage, showSizeChanger: false }}
@@ -142,7 +231,7 @@ export function GamificationAdminPage() {
   const tiers = useQuery({ queryKey: ['admin-tiers'], queryFn: adminApi.tiers })
   return (
     <div className="flex flex-col gap-4">
-      <Card title="Giải đấu tuần (Igloo)" extra={<Button onClick={async () => { const r = await adminApi.closeWeek(); message.success(`Đã chốt ${r.closed} nhóm giải đấu`) }}>Chốt tuần đã kết thúc</Button>}>
+      <Card title="Giải đấu tuần" extra={<Button onClick={async () => { const r = await adminApi.closeWeek(); message.success(`Đã chốt ${r.closed} nhóm giải đấu`) }}>Chốt tuần đã kết thúc</Button>}>
         <Table size="small" rowKey="id" pagination={false} dataSource={tiers.data}
           columns={[{ title: 'Thứ tự', dataIndex: 'order' }, { title: 'Hạng', dataIndex: 'name' }, { title: 'Thăng hạng top', dataIndex: 'promote_top' }, { title: 'Xuống hạng cuối', dataIndex: 'demote_bottom' }]} />
       </Card>

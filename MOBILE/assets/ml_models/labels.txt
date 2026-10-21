@@ -76,3 +76,157 @@ door
 window
 lamp
 pillow
+fire hydrant
+tie
+frisbee
+sports ball
+kite
+baseball bat
+skateboard
+surfboard
+tennis racket
+wine glass
+sandwich
+hot dog
+donut
+toilet
+remote
+microwave
+oven
+toaster
+sink
+vase
+hair drier
+flower
+tree
+mushroom
+pumpkin
+grape
+mango
+lemon
+pear
+peach
+potato
+cucumber
+coconut
+milk
+coffee
+tea
+juice
+beer
+cheese
+ice cream
+candy
+cookie
+hamburger
+french fries
+salad
+shrimp
+crab
+fish
+bee
+ant
+ladybug
+snail
+spider
+snake
+lizard
+frog
+turtle
+crocodile
+dinosaur
+penguin
+owl
+parrot
+eagle
+swan
+goose
+kangaroo
+deer
+fox
+goat
+camel
+panda
+squirrel
+hedgehog
+mouse animal
+leopard
+rhinoceros
+hippopotamus
+dolphin
+whale
+shark
+jellyfish
+starfish
+taxi
+ambulance
+helicopter
+rocket
+house
+stairs
+tent
+swimming pool
+flag
+shirt
+pants
+jeans
+shorts
+skirt
+dress
+suit
+coat
+jacket
+shoes
+boots
+high heels
+sandals
+socks
+scarf
+belt
+gloves
+face
+hair
+eye
+ear
+nose
+mouth
+hand
+arm
+leg
+foot
+desk
+bookshelf
+wardrobe
+drawer
+curtain
+mirror
+towel
+plate
+kettle
+candle
+light bulb
+fan
+washing machine
+box
+envelope
+coin
+balloon
+doll
+hammer
+ladder
+flashlight
+seat belt
+eraser
+ruler
+calculator
+tablet
+camera
+headphones
+printer
+football
+volleyball
+guitar
+piano
+violin
+drum
+flute

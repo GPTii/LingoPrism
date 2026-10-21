@@ -2,6 +2,9 @@ import '../../core/network/api_client.dart';
 import '../models/api/common.dart';
 import '../models/api/game.dart';
 import '../models/api/learning_extra.dart';
+import '../models/api/levels.dart';
+import '../models/api/literacy.dart';
+import '../models/api/sentence.dart';
 import '../models/api/social.dart';
 import '../models/api/user.dart';
 import '../models/api/vocab.dart';
@@ -229,12 +232,32 @@ class DetectionRepository {
       DetectionResult.fromJson(asMap(await _api.post('/detections/log/',
           data: {'model_name': modelName, 'inference_ms': inferenceMs, 'items': items})));
 
-  static Future<int> confirm(int detectionId, List<DetectedItem> items, {int? topic}) async => asInt(asMap(await _api.post(
-      '/detections/$detectionId/confirm/',
-      data: {
-        'items': items.map((i) => {'id': i.id, 'selected': i.selected, 'feedback': i.feedback}).toList(),
-        'topic': topic,
-      }))['saved']);
+  /// Returns (words saved, error reports remembered by the server).
+  static Future<(int, int)> confirm(int detectionId, List<DetectedItem> items, {int? topic}) => confirmRaw(
+      detectionId,
+      items
+          .map((i) => <String, dynamic>{
+                'id': i.id,
+                'selected': i.selected,
+                'feedback': i.feedback,
+                'corrected_label': i.picked ?? '',
+                'not_object': i.notObject,
+              })
+          .toList(),
+      topic: topic);
+
+  static Future<(int, int)> confirmRaw(int detectionId, List<Map<String, dynamic>> items, {int? topic}) async {
+    final d = asMap(await _api.post('/detections/$detectionId/confirm/', data: {'items': items, 'topic': topic}));
+    return (asInt(d['saved']), asInt(d['reported']));
+  }
+
+  /// Every object the detector knows with its word card – the list for "it is something else".
+  static Future<List<DetectionAlternative>> labels() async => (await labelsRaw())
+      .map((j) => DetectionAlternative(label: asString(j['label']), confidence: 0, card: WordCard.fromJson(asMap(j['card']))))
+      .toList();
+
+  /// Same list as JSON, kept on the phone for detection without network (OfflineDetections).
+  static Future<List<Map<String, dynamic>>> labelsRaw() async => asMapList(await _api.get('/detections/labels/'));
 
   static Future<List<DetectionResult>> history() async =>
       ApiClient.results(await _api.get('/detections/')).map(DetectionResult.fromJson).toList();
@@ -261,4 +284,38 @@ class ExamRepository {
 
   static Future<SubmissionResult> result(int submissionId) async =>
       SubmissionResult.fromJson(asMap(await _api.get('/submissions/$submissionId/')));
+}
+
+class SentenceRepository {
+  static Future<SentenceLesson> lesson({int? topic, int size = 10}) async =>
+      SentenceLesson.fromJson(asMap(await _api.get('/sentences/lesson/', query: {'topic': topic, 'size': size})));
+
+  static Future<SentenceCheck> check({required int sentence, required String type, required Object answer, required int responseMs}) async =>
+      SentenceCheck.fromJson(asMap(await _api.post('/sentences/check/',
+          data: {'sentence': sentence, 'type': type, 'answer': answer, 'response_ms': responseMs})));
+}
+
+class LiteracyRepository {
+  static Future<List<LitLessonInfo>> lessons() async =>
+      asMapList(asMap(await _api.get('/literacy/lessons/'))['lessons']).map(LitLessonInfo.fromJson).toList();
+
+  static Future<LitLesson> lesson(int n) async => LitLesson.fromJson(asMap(await _api.get('/literacy/lessons/$n/')));
+
+  static Future<LitCheck> check(String token, Object answer, int responseMs) async => LitCheck.fromJson(
+      asMap(await _api.post('/literacy/check/', data: {'token': token, 'answer': answer, 'response_ms': responseMs})));
+
+  static Future<LitFinish> finish(int n, String session, int total) async => LitFinish.fromJson(
+      asMap(await _api.post('/literacy/lessons/$n/finish/', data: {'session': session, 'total': total})));
+}
+
+class LevelRepository {
+  static Future<LevelProgress> progress() async => LevelProgress.fromJson(asMap(await _api.get('/levels/')));
+
+  static Future<LevelProgress> choose(int level) async =>
+      LevelProgress.fromJson(asMap(await _api.post('/levels/', data: {'level': level})));
+
+  static Future<LevelTest> test(int level) async => LevelTest.fromJson(asMap(await _api.get('/levels/$level/test/')));
+
+  static Future<LevelTestResult> submit(int level, String token, List<String> answers) async => LevelTestResult.fromJson(
+      asMap(await _api.post('/levels/$level/test/', data: {'token': token, 'answers': answers})));
 }

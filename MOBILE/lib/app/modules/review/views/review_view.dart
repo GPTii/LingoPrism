@@ -695,7 +695,7 @@ class ReviewView extends GetView<ReviewController> {
                             child: Icon(
                               Icons.volume_up,
                               size: 18.sp,
-                              color: const Color(0xFF1CB0F6),
+                              color: AppColors.primary,
                             ),
                           ),
                         ],
@@ -719,7 +719,7 @@ class ReviewView extends GetView<ReviewController> {
               'EX: ${item.exampleEn}',
               style: AppTextStyles.captionMedium.copyWith(
                 fontSize: 13.sp,
-                color: const Color(0xFF4A5568),
+                color: AppColors.textSecondary,
                 height: 1.35,
               ),
             ),
@@ -727,7 +727,7 @@ class ReviewView extends GetView<ReviewController> {
               'VD: ${item.exampleVi}',
               style: AppTextStyles.captionMedium.copyWith(
                 fontSize: 13.sp,
-                color: const Color(0xFF4A5568),
+                color: AppColors.textSecondary,
                 height: 1.35,
               ),
             ),
@@ -744,14 +744,14 @@ class ReviewView extends GetView<ReviewController> {
                   const Icon(
                     Icons.folder_outlined,
                     size: 16,
-                    color: Color(0xFF1CB0F6),
+                    color: AppColors.primary,
                   ),
                   SizedBox(width: 6.w),
                   Text(
                     result.card.personal != null ? 'Đã có trong thư viện' : 'Chạm để lưu vào thư viện',
                     style: AppTextStyles.captionMedium.copyWith(
                       fontWeight: FontWeight.w600,
-                      color: const Color(0xFF1CB0F6),
+                      color: AppColors.primary,
                     ),
                   ),
                 ],

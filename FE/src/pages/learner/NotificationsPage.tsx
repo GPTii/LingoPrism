@@ -26,7 +26,7 @@ export default function NotificationsPage() {
   }
   return (
     <div className="max-w-3xl mx-auto flex flex-col gap-4">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-wrap justify-between items-center gap-2">
         <h1 className="text-2xl font-bold m-0">Thông báo</h1>
         <Button onClick={async () => { await notificationApi.readAll(); useUnread.getState().set(0); list.refetch() }}>Đánh dấu tất cả đã đọc</Button>
       </div>

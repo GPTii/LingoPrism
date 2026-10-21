@@ -108,7 +108,7 @@ class ShopController extends GetxController {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Image.asset(
-                    isCoins ? 'assets/images/vay.png' : 'assets/images/ngoc.png',
+                    isCoins ? 'assets/brand/icons/scale.png' : 'assets/brand/icons/gem.png',
                     height: 30,
                     errorBuilder: (context, error, stackTrace) {
                       return Icon(
@@ -123,7 +123,7 @@ class ShopController extends GetxController {
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      color: isCoins ? const Color(0xFFB8C3D1) : const Color(0xFF0571E6),
+                      color: isCoins ? AppColors.lineStrong : AppColors.primary,
                     ),
                   ),
                 ],

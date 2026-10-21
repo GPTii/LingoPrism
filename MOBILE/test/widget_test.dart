@@ -9,11 +9,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:lingoprism/main.dart';
 
 void main() {
-  testWidgets('SnapLingua app initialization test', (WidgetTester tester) async {
+  testWidgets('LingoPrism app initialization test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
     await tester.pumpWidget(const LingoPrismApp());
 
     // Verify that the app builds without errors
     expect(find.byType(LingoPrismApp), findsOneWidget);
+    // let the splash screen's timer finish
+    await tester.pump(const Duration(seconds: 5));
   });
 }

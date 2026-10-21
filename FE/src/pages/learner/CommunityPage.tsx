@@ -243,7 +243,7 @@ export default function CommunityPage() {
   const isKid = user?.learner_type === 'kid'
   return (
     <div className="max-w-3xl mx-auto flex flex-col gap-5">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <h1 className="text-2xl font-bold text-slate-800 m-0">Cộng đồng</h1>
         {tab === 'feed' && !isKid && <NewPost />}
       </div>

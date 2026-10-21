@@ -11,9 +11,9 @@ class VocabularyFlashcardView extends GetView<VocabularyFlashcardController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFE5FFFD),
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFBBFFEE),
+        backgroundColor: AppColors.primarySoft,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),

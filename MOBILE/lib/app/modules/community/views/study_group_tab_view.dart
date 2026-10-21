@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 
 import '../controllers/community_controller.dart';
 import 'package:lingoprism/app/data/services/auth_service.dart';
+import 'package:lingoprism/app/core/theme/app_colors.dart';
 
 class StudyGroupTabView extends StatelessWidget {
   const StudyGroupTabView({
@@ -82,7 +83,7 @@ class StudyGroupTabView extends StatelessWidget {
                         width: 48.w,
                         height: 4.h,
                         decoration: BoxDecoration(
-                          color: const Color(0xFFE0E6EE),
+                          color: AppColors.line,
                           borderRadius: BorderRadius.circular(12.r),
                         ),
                       ),
@@ -125,7 +126,7 @@ class StudyGroupTabView extends StatelessWidget {
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(18.r),
                           borderSide: BorderSide(
-                            color: const Color(0xFF0A69C7),
+                            color: AppColors.primary,
                             width: 1.4,
                           ),
                         ),
@@ -140,7 +141,7 @@ class StudyGroupTabView extends StatelessWidget {
                       width: double.infinity,
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF0A69C7),
+                          backgroundColor: AppColors.primary,
                           foregroundColor: Colors.white,
                           padding: EdgeInsets.symmetric(vertical: 14.h),
                           shape: RoundedRectangleBorder(
@@ -204,7 +205,7 @@ class StudyGroupList extends StatelessWidget {
                     'Không tìm thấy nhóm phù hợp.',
                     style: TextStyle(
                       fontSize: 14.sp,
-                      color: const Color(0xFF5F6C7B),
+                      color: AppColors.textSecondary,
                     ),
                   ),
                 );
@@ -268,7 +269,7 @@ class GroupSearchBar extends StatelessWidget {
                   ),
                   prefixIcon: Icon(
                     Icons.search_rounded,
-                    color: const Color(0xFF0A69C7),
+                    color: AppColors.primary,
                     size: 22.sp,
                   ),
                   suffixIcon: hasText
@@ -305,15 +306,15 @@ class GroupSearchBar extends StatelessWidget {
               shape: BoxShape.circle,
               gradient: const LinearGradient(
                 colors: [
-                  Color(0xFF0A69C7),
-                  Color(0xFF1CB0F6),
+                  AppColors.primary,
+                  AppColors.primary,
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF0A69C7).withValues(alpha: 0.28),
+                  color: AppColors.primary.withValues(alpha: 0.28),
                   blurRadius: 14.r,
                   offset: Offset(0, 8.h),
                 ),
@@ -402,14 +403,14 @@ class GroupHeaderCard extends StatelessWidget {
       padding: EdgeInsets.all(20.w),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [Color(0xFF0A69C7), Color(0xFF1CB0F6)],
+          colors: [AppColors.primary, AppColors.primary],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(30.r),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF0A69C7).withValues(alpha: 0.28),
+            color: AppColors.primary.withValues(alpha: 0.28),
             blurRadius: 24.r,
             offset: Offset(0, 14.h),
           ),
@@ -453,7 +454,7 @@ class GroupHeaderCard extends StatelessWidget {
                                   onTap: onNotificationsTap ?? () {},
                                   backgroundColor:
                                       Colors.white.withValues(alpha: 0.2),
-                                  iconColor: const Color(0xFF0A69C7),
+                                  iconColor: AppColors.primary,
                                   borderColor:
                                       Colors.white.withValues(alpha: 0.55),
                                 ),
@@ -467,7 +468,7 @@ class GroupHeaderCard extends StatelessWidget {
                                         vertical: 2.h,
                                       ),
                                       decoration: BoxDecoration(
-                                        color: const Color(0xFFE65F5C),
+                                        color: AppColors.error,
                                         borderRadius:
                                             BorderRadius.circular(12.r),
                                         border: Border.all(
@@ -494,7 +495,7 @@ class GroupHeaderCard extends StatelessWidget {
                             onTap: onOpenChat,
                             backgroundColor:
                                 Colors.white.withValues(alpha: 0.2),
-                            iconColor: const Color(0xFF0A69C7),
+                            iconColor: AppColors.primary,
                             borderColor:
                                 Colors.white.withValues(alpha: 0.55),
                           ),
@@ -504,7 +505,7 @@ class GroupHeaderCard extends StatelessWidget {
                             onTap: onLeave,
                             backgroundColor:
                                 Colors.white.withValues(alpha: 0.2),
-                            iconColor: const Color(0xFFE65F5C),
+                            iconColor: AppColors.error,
                             borderColor:
                                 Colors.white.withValues(alpha: 0.55),
                           ),
@@ -573,7 +574,7 @@ class _HeaderActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final resolvedBackground = backgroundColor ?? Colors.white;
-    final resolvedBorder = borderColor ?? (iconColor ?? const Color(0xFF0A69C7));
+    final resolvedBorder = borderColor ?? (iconColor ?? AppColors.primary);
     final resolvedIcon = iconColor ?? resolvedBorder;
     return GestureDetector(
       onTap: onTap,
@@ -685,7 +686,7 @@ class MilestoneOverview extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 22.sp,
                         fontWeight: FontWeight.w800,
-                        color: const Color(0xFF0A69C7),
+                        color: AppColors.primary,
                       ),
                     ),
                   ],
@@ -721,20 +722,20 @@ class _InfoBadge extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
       decoration: BoxDecoration(
-        color: const Color(0xFF0A69C7).withValues(alpha: 0.08),
+        color: AppColors.primary.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(18.r),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 16.sp, color: const Color(0xFF0A69C7)),
+          Icon(icon, size: 16.sp, color: AppColors.primary),
           SizedBox(width: 6.w),
           Text(
             label,
             style: TextStyle(
               fontSize: 12.sp,
               fontWeight: FontWeight.w600,
-              color: const Color(0xFF0A69C7),
+              color: AppColors.primary,
             ),
           ),
         ],
@@ -753,7 +754,7 @@ class _PointsSummary extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 16.h),
       decoration: BoxDecoration(
-        color: const Color(0xFF0A69C7).withValues(alpha: 0.08),
+        color: AppColors.primary.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(24.r),
       ),
       child: Row(
@@ -766,7 +767,7 @@ class _PointsSummary extends StatelessWidget {
               color: Colors.white,
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF0A69C7).withValues(alpha: 0.16),
+                  color: AppColors.primary.withValues(alpha: 0.16),
                   blurRadius: 12.r,
                   offset: Offset(0, 8.h),
                 )
@@ -774,7 +775,7 @@ class _PointsSummary extends StatelessWidget {
             ),
             alignment: Alignment.center,
             child: Image.asset(
-              'assets/images/XP.png',
+              'assets/brand/icons/xp.png',
               width: 26.w,
               height: 26.w,
               fit: BoxFit.contain,
@@ -789,7 +790,7 @@ class _PointsSummary extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 26.sp,
                   fontWeight: FontWeight.w800,
-                  color: const Color(0xFF0A69C7),
+                  color: AppColors.primary,
                 ),
               ),
               SizedBox(height: 4.h),
@@ -797,7 +798,7 @@ class _PointsSummary extends StatelessWidget {
                 'XP tích luỹ của nhóm',
                 style: TextStyle(
                   fontSize: 13.sp,
-                  color: const Color(0xFF4F6274),
+                  color: AppColors.textSecondary,
                 ),
               ),
             ],
@@ -869,9 +870,9 @@ class ProgressStep extends StatelessWidget {
     final isCurrent = isNext && !_isUnlocked;
     final nhomIndex = (index % 5) + 1;
     final imagePath = _isUnlocked
-        ? 'assets/images/nhom/nhom$nhomIndex.png'
-        : 'assets/images/rank/rank?.png';
-    final textColor = _isUnlocked ? const Color(0xFF0A69C7) : const Color(0xFF63748D);
+        ? 'assets/brand/group/group_$nhomIndex.png'
+        : 'assets/brand/rank/rank_locked.png';
+    final textColor = _isUnlocked ? AppColors.primary : const Color(0xFF63748D);
     final textWeight = _isUnlocked || isCurrent ? FontWeight.w700 : FontWeight.w600;
 
     return Column(
@@ -891,7 +892,7 @@ class ProgressStep extends StatelessWidget {
             boxShadow: [
               if (_isUnlocked)
                 BoxShadow(
-                  color: const Color(0xFF0A69C7).withValues(alpha: 0.16),
+                  color: AppColors.primary.withValues(alpha: 0.16),
                   blurRadius: 16.r,
                   offset: Offset(0, 12.h),
                 ),
@@ -918,7 +919,7 @@ class ProgressStep extends StatelessWidget {
             ),
             SizedBox(width: 6.w),
             Image.asset(
-              'assets/images/XP.png',
+              'assets/brand/icons/xp.png',
               width: 18.w,
               height: 18.w,
               fit: BoxFit.contain,
@@ -930,7 +931,7 @@ class ProgressStep extends StatelessWidget {
           milestone.label,
           style: TextStyle(
             fontSize: 12.sp,
-            color: const Color(0xFF4F6274),
+            color: AppColors.textSecondary,
             fontWeight: FontWeight.w600,
           ),
           textAlign: TextAlign.center,
@@ -986,15 +987,15 @@ class LeaderboardTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = _resolveColors();
     final isHighlighted = member.isHighlighted;
-    final borderColor = isHighlighted ? const Color(0xFF0A69C7) : colors.border;
+    final borderColor = isHighlighted ? AppColors.primary : colors.border;
     final shadowColor = isHighlighted
-        ? const Color(0xFF0A69C7).withValues(alpha: 0.28)
+        ? AppColors.primary.withValues(alpha: 0.28)
         : colors.shadow.withValues(alpha: 0.24);
   // badgeBackground not used directly (kept for future styling)
 
     Widget buildAvatar() {
       final avatarBorderColor =
-          isHighlighted ? const Color(0xFF0A69C7) : Colors.white.withValues(alpha: 0.7);
+          isHighlighted ? AppColors.primary : Colors.white.withValues(alpha: 0.7);
       final avatarUrl = member.avatarUrl.trim();
 
       Widget avatarContent;
@@ -1116,7 +1117,7 @@ class LeaderboardTile extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Image.asset(
-              'assets/images/XP.png',
+              'assets/brand/icons/xp.png',
               width: 20.w,
               height: 20.w,
               fit: BoxFit.contain,
@@ -1335,7 +1336,7 @@ class StudyGroupCard extends StatelessWidget {
                           ),
                           decoration: BoxDecoration(
                             color:
-                                const Color(0xFF0A69C7).withValues(alpha: 0.1),
+                                AppColors.primary.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(16.r),
                           ),
                           child: Text(
@@ -1343,7 +1344,7 @@ class StudyGroupCard extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 11.sp,
                               fontWeight: FontWeight.w600,
-                              color: const Color(0xFF0A69C7),
+                              color: AppColors.primary,
                             ),
                           ),
                         ),
@@ -1354,7 +1355,7 @@ class StudyGroupCard extends StatelessWidget {
                     'Yêu cầu: ${group.requirement}',
                     style: TextStyle(
                       fontSize: 13.sp,
-                      color: const Color(0xFF4F6274),
+                      color: AppColors.textSecondary,
                     ),
                   ),
                   SizedBox(height: 4.h),
@@ -1364,7 +1365,7 @@ class StudyGroupCard extends StatelessWidget {
                       'Trưởng nhóm: ${group.leaderName}',
                       style: TextStyle(
                         fontSize: 12.sp,
-                        color: const Color(0xFF0A69C7),
+                        color: AppColors.primary,
                         decoration: TextDecoration.underline,
                         decorationStyle: TextDecorationStyle.dotted,
                       ),
@@ -1381,12 +1382,12 @@ class StudyGroupCard extends StatelessWidget {
                 shape: BoxShape.circle,
                 color: Colors.white,
                 border: Border.all(
-                  color: const Color(0xFF0A69C7),
+                  color: AppColors.primary,
                   width: 1.6,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF0A69C7).withValues(alpha: 0.18),
+                    color: AppColors.primary.withValues(alpha: 0.18),
                     blurRadius: 10.r,
                     offset: Offset(0, 6.h),
                   ),
@@ -1398,7 +1399,7 @@ class StudyGroupCard extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 15.sp,
                   fontWeight: FontWeight.w700,
-                  color: const Color(0xFF0A69C7),
+                  color: AppColors.primary,
                 ),
               ),
             ),
@@ -1418,7 +1419,7 @@ class GroupImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final fallback = Image.asset(
-      'assets/images/nhom/nhom1.png',
+      'assets/brand/group/group_1.png',
       width: size,
       height: size,
       fit: BoxFit.contain,

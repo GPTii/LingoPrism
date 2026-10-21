@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:lingoprism/app/core/theme/app_colors.dart';
 
 class IconCategory {
   final String label;
@@ -281,13 +282,13 @@ class AddVocabularyCategoryController extends GetxController {
                                     duration: const Duration(milliseconds: 200),
                                     decoration: BoxDecoration(
                                       color: isSelected
-                                          ? const Color(0xFF1CB0F6)
+                                          ? AppColors.primary
                                               .withValues(alpha: 0.18)
                                           : const Color(0xFFF5F8FF),
                                       borderRadius: BorderRadius.circular(16),
                                       border: Border.all(
                                         color: isSelected
-                                            ? const Color(0xFF1CB0F6)
+                                            ? AppColors.primary
                                             : Colors.transparent,
                                         width: 2,
                                       ),

@@ -1,3 +1,5 @@
+import '../../../core/utils/brand_assets.dart';
+
 /// Small JSON helpers shared by the API models.
 DateTime? parseDate(dynamic v) => v == null ? null : DateTime.tryParse(v.toString())?.toLocal();
 
@@ -26,10 +28,12 @@ class Author {
   final String displayName;
   final String? avatar;
 
-  static const String defaultAvatar = 'assets/images/chimcanhcut/chim_vui1.png';
+  static const String defaultAvatar = 'assets/brand/avatar/avatar_1.png';
 
   String get avatarOrDefault => (avatar == null || avatar!.isEmpty) ? defaultAvatar : avatar!;
 
   factory Author.fromJson(Map<String, dynamic> j) =>
-      Author(id: asInt(j['id']), displayName: asString(j['display_name'], 'Người học LingoPrism'), avatar: j['avatar'] as String?);
+      Author(id: asInt(j['id']), displayName: asString(j['display_name'], 'Người học LingoPrism'), avatar: _brandOrNull(j['avatar'] as String?));
 }
+
+String? _brandOrNull(String? path) => path == null ? null : brandAsset(path);

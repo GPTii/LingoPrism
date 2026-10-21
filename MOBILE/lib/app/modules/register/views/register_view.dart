@@ -21,7 +21,7 @@ class RegisterView extends GetView<RegisterController> {
                 child: Row(
                   children: [
                     Text(
-                      'Snaplingua',
+                      'LingoPrism',
                       style: TextStyle(
                         fontSize: 28.sp,
                         fontWeight: FontWeight.bold,
@@ -32,7 +32,7 @@ class RegisterView extends GetView<RegisterController> {
                 ),
               ),
 
-              // Register form with penguin on top
+              // Register form with Prismo on top
               Expanded(
                 flex: 4,
                 child: Stack(
@@ -44,13 +44,13 @@ class RegisterView extends GetView<RegisterController> {
                       margin: EdgeInsets.only(
                         left: 16.w,
                         right: 16.w,
-                        top: 60.h, // Space for penguin
+                        top: 60.h, // Space for Prismo
                         bottom: 0,
                       ),
                       padding: EdgeInsets.only(
                         left: 24.w,
                         right: 24.w,
-                        top: 80.h, // Extra space for penguin inside
+                        top: 80.h, // Extra space for Prismo inside
                         bottom: 24.h,
                       ),
                       decoration: BoxDecoration(
@@ -371,12 +371,12 @@ class RegisterView extends GetView<RegisterController> {
                       ),
                     ),
 
-                    // Penguin image positioned on top of form
+                    // Prismo positioned on top of form
                     Positioned(
                       top: -60.h,
                       right: 50.w,
                       child: Image.asset(
-                        'assets/images/chimcanhcut/chim_xinchao.png',
+                        'assets/brand/mascot/prismo_hello.png',
                         height: 180.h,
                         fit: BoxFit.contain,
                         errorBuilder: (context, error, stackTrace) {

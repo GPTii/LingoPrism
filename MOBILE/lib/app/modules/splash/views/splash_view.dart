@@ -32,7 +32,7 @@ class SplashView extends GetView<SplashController> {
           height: 200.h,
           decoration: const BoxDecoration(
             image: DecorationImage(
-              image: AssetImage('assets/images/chimcanhcut/chim_vui1.png'),
+              image: AssetImage('assets/brand/avatar/avatar_1.png'),
               fit: BoxFit.contain,
             ),
           ),
@@ -40,7 +40,7 @@ class SplashView extends GetView<SplashController> {
         SizedBox(height: 24.h),
         // App name
         Text(
-          'SnapLingua',
+          'LingoPrism',
           style: TextStyle(
             fontSize: 32.sp,
             fontWeight: FontWeight.bold,

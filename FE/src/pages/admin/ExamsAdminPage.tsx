@@ -117,7 +117,7 @@ function Questions() {
       ]} />
       <Modal title="Thêm câu hỏi" open={open} onOk={create} onCancel={() => setOpen(false)} width={640}>
         <Form form={form} layout="vertical" initialValues={{ kind: 'mcq', options: ['', '', '', ''], correct: 0 }}>
-          <Space>
+          <Space wrap>
             <Form.Item name="kind" label="Loại"><Select style={{ width: 150 }} options={[{ value: 'mcq', label: 'Trắc nghiệm' }, { value: 'fill', label: 'Điền từ' }, { value: 'essay', label: 'Tự luận' }]} /></Form.Item>
             <Form.Item name="language" label="Ngôn ngữ" rules={[{ required: true }]}><Select style={{ width: 160 }} options={LANGS} /></Form.Item>
           </Space>

@@ -47,7 +47,7 @@ class VocabularyListView extends GetView<VocabularyListController> {
       floatingActionButton: FloatingActionButton(
         heroTag: 'vocabularyListFab',
         onPressed: controller.addNewWord,
-        backgroundColor: const Color(0xFF1CB0F6),
+        backgroundColor: AppColors.primary,
         child: Icon(Icons.add, size: 30.sp, color: Colors.white),
       ),
     );
@@ -97,7 +97,7 @@ class VocabularyListView extends GetView<VocabularyListController> {
           ElevatedButton(
             onPressed: controller.openFlashcard,
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF1CB0F6),
+              backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
               padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
               shape: RoundedRectangleBorder(
@@ -130,7 +130,7 @@ class VocabularyListView extends GetView<VocabularyListController> {
         color: const Color(0xFFE5F8FF),
         borderRadius: BorderRadius.circular(16.r),
         border: Border.all(
-          color: const Color(0xFF1CB0F6),
+          color: AppColors.primary,
           width: 2,
         ),
       ),
@@ -159,7 +159,7 @@ class VocabularyListView extends GetView<VocabularyListController> {
                   icon: Icon(
                     Icons.volume_up,
                     size: 24.sp,
-                    color: const Color(0xFF1CB0F6),
+                    color: AppColors.primary,
                   ),
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
@@ -283,9 +283,9 @@ class VocabularyListView extends GetView<VocabularyListController> {
       case 'learning':
         return const Color(0xFFF59E0B); // Orange
       case 'reviewing':
-        return const Color(0xFF3B82F6); // Blue
+        return AppColors.primary; // Blue
       case 'mastered':
-        return const Color(0xFF10B981); // Green
+        return AppColors.success; // Green
       default:
         return Colors.grey;
     }

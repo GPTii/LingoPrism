@@ -57,7 +57,7 @@ export default function MapPage() {
         </div>
       </div>
       <div className="grid lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-2 h-[560px] rounded-2xl overflow-hidden border border-slate-200">
+        <div className="lg:col-span-2 h-[55vh] min-h-[320px] lg:h-[560px] rounded-2xl overflow-hidden border border-slate-200">
           <MapContainer center={center} zoom={13} style={{ height: '100%', width: '100%' }}>
             <TileLayer attribution="&copy; OpenStreetMap contributors" url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
             <Recenter center={center} />
@@ -78,7 +78,7 @@ export default function MapPage() {
             {pois.map((p) => <Circle key={`c${p.id}`} center={[p.lat, p.lng]} radius={p.radius_m} pathOptions={{ color: '#0d9488', weight: 1, fillOpacity: 0.08 }} />)}
           </MapContainer>
         </div>
-        <div className="flex flex-col gap-3 max-h-[560px] overflow-y-auto">
+        <div className="flex flex-col gap-3 lg:max-h-[560px] overflow-y-auto">
           {pois.map((p) => (
             <Card key={p.id} size="small" className="!rounded-xl" hoverable onClick={() => setCenter([p.lat, p.lng])}>
               <div className="font-semibold">{ICONS[p.category] ?? '📍'} {p.name}</div>

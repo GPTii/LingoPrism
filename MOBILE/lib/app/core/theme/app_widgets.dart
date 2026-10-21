@@ -16,22 +16,11 @@ class AppWidgets {
   /// )
   /// ```
   static BoxDecoration questGradientDecoration() {
+    // name kept for older screens: now the plain surface every card uses (a hairline, no gradient)
     return BoxDecoration(
-      gradient: const LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        stops: [0.0, 0.25, 1.0],
-        colors: [
-          Color(0xFFE0E0E0),
-          Color(0xFFE5FFFD),
-          Color(0xFFE5FFFD),
-        ],
-      ),
-      borderRadius: BorderRadius.circular(20),
-      border: Border.all(
-        color: const Color(0xFF1CB0F6),
-        width: 1.5,
-      ),
+      color: AppColors.surface,
+      borderRadius: BorderRadius.circular(16),
+      border: Border.all(color: AppColors.line),
     );
   }
 
@@ -54,13 +43,14 @@ class AppWidgets {
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF3D8EF7),
+          backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
           padding: EdgeInsets.zero,
+          minimumSize: const Size(0, 36),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(12),
           ),
-          elevation: 2,
+          elevation: 0,
         ),
         child: Text(
           text,
@@ -97,8 +87,9 @@ class AppWidgets {
         style: ElevatedButton.styleFrom(
           backgroundColor: enabled ? AppColors.buttonActive : AppColors.buttonDisabled,
           padding: const EdgeInsets.symmetric(vertical: 16),
+          elevation: 0,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(50),
+            borderRadius: BorderRadius.circular(14),
           ),
           disabledBackgroundColor: AppColors.buttonDisabled,
         ),
@@ -140,9 +131,10 @@ class AppWidgets {
   }) async {
     await Get.dialog(
       AlertDialog(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.surface,
+        surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(20),
         ),
         title: Text(
           title,
@@ -150,7 +142,7 @@ class AppWidgets {
           style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
-            color: Colors.black87,
+            color: AppColors.textPrimary,
           ),
         ),
         content: Text(
@@ -158,7 +150,7 @@ class AppWidgets {
           textAlign: TextAlign.center,
           style: const TextStyle(
             fontSize: 15,
-            color: Colors.black54,
+            color: AppColors.textSecondary,
             height: 1.4,
           ),
         ),
@@ -178,7 +170,7 @@ class AppWidgets {
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF0088FF),
+                color: AppColors.primary,
               ),
             ),
           ),
@@ -205,9 +197,10 @@ class AppWidgets {
   }) async {
     await Get.dialog(
       AlertDialog(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.surface,
+        surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(20),
         ),
         title: Text(
           title,
@@ -215,7 +208,7 @@ class AppWidgets {
           style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
-            color: Colors.black87,
+            color: AppColors.textPrimary,
           ),
         ),
         content: Text(
@@ -223,7 +216,7 @@ class AppWidgets {
           textAlign: TextAlign.center,
           style: const TextStyle(
             fontSize: 15,
-            color: Colors.black54,
+            color: AppColors.textSecondary,
             height: 1.4,
           ),
         ),
@@ -243,7 +236,7 @@ class AppWidgets {
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
-                color: Colors.red,
+                color: AppColors.error,
               ),
             ),
           ),
@@ -274,9 +267,10 @@ class AppWidgets {
   }) async {
     return await Get.dialog<bool>(
       AlertDialog(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.surface,
+        surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(20),
         ),
         title: Text(
           title,
@@ -284,7 +278,7 @@ class AppWidgets {
           style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
-            color: Colors.black87,
+            color: AppColors.textPrimary,
           ),
         ),
         content: Text(
@@ -292,7 +286,7 @@ class AppWidgets {
           textAlign: TextAlign.center,
           style: const TextStyle(
             fontSize: 15,
-            color: Colors.black54,
+            color: AppColors.textSecondary,
             height: 1.4,
           ),
         ),
@@ -309,13 +303,13 @@ class AppWidgets {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    side: const BorderSide(color: Colors.grey),
+                    side: const BorderSide(color: AppColors.lineStrong, width: 1.5),
                   ),
                   child: Text(
                     cancelText,
                     style: const TextStyle(
                       fontSize: 16,
-                      color: Colors.black54,
+                      color: AppColors.textSecondary,
                     ),
                   ),
                 ),
@@ -366,9 +360,10 @@ class AppWidgets {
   }) async {
     await Get.dialog(
       AlertDialog(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.surface,
+        surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(20),
         ),
         title: Text(
           title,
@@ -376,7 +371,7 @@ class AppWidgets {
           style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
-            color: Colors.black87,
+            color: AppColors.textPrimary,
           ),
         ),
         content: Text(
@@ -384,7 +379,7 @@ class AppWidgets {
           textAlign: TextAlign.center,
           style: const TextStyle(
             fontSize: 15,
-            color: Colors.black54,
+            color: AppColors.textSecondary,
             height: 1.4,
           ),
         ),
@@ -404,7 +399,7 @@ class AppWidgets {
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF58CC02),
+                color: AppColors.success,
               ),
             ),
           ),
@@ -435,19 +430,13 @@ class AppWidgets {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(18),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.08),
-                  blurRadius: 18,
-                  offset: const Offset(0, 10),
-                ),
-              ],
+              border: Border.all(color: AppColors.line),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Image.asset(
-                  'assets/images/chimcanhcut/chim_ngu.png',
+                  'assets/brand/mascot/prismo_sleepy.png',
                   width: 96,
                   height: 96,
                   fit: BoxFit.contain,
@@ -455,7 +444,7 @@ class AppWidgets {
                 const SizedBox(height: 14),
                 const CircularProgressIndicator(
                   strokeWidth: 3,
-                  valueColor: AlwaysStoppedAnimation(Color(0xFF0A69C7)),
+                  valueColor: AlwaysStoppedAnimation(AppColors.primary),
                 ),
                 const SizedBox(height: 12),
                 Text(
@@ -465,7 +454,7 @@ class AppWidgets {
                     fontSize: 14,
                     height: 1.4,
                     fontWeight: FontWeight.w500,
-                    color: Color(0xFF395067),
+                    color: AppColors.textSecondary,
                   ),
                 ),
               ],
@@ -474,7 +463,7 @@ class AppWidgets {
         ),
       ),
       barrierDismissible: false,
-      barrierColor: Colors.black.withOpacity(0.15),
+      barrierColor: AppColors.ink.withValues(alpha: 0.35),
     );
   }
 }

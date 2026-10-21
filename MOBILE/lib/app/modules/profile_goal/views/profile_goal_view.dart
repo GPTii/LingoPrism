@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../controllers/profile_goal_controller.dart';
+import 'package:lingoprism/app/core/theme/app_colors.dart';
 
 class ProfileGoalView extends GetView<ProfileGoalController> {
   const ProfileGoalView({super.key});
@@ -10,19 +11,19 @@ class ProfileGoalView extends GetView<ProfileGoalController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFE6F9FF),
+      backgroundColor: AppColors.primarySoft,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFE6F9FF),
+        backgroundColor: AppColors.primarySoft,
         elevation: 0,
         leading: IconButton(
           onPressed: Get.back,
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
-          color: const Color(0xFF0B1D28),
+          color: AppColors.textPrimary,
         ),
         title: Text(
           'Mục tiêu',
           style: TextStyle(
-            color: const Color(0xFF0B1D28),
+            color: AppColors.textPrimary,
             fontSize: 20.sp,
             fontWeight: FontWeight.w700,
           ),
@@ -52,7 +53,7 @@ class ProfileGoalView extends GetView<ProfileGoalController> {
                 child: Text(
                   message,
                   style: TextStyle(
-                    color: const Color(0xFFE8505B),
+                    color: AppColors.error,
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w600,
                   ),
@@ -68,7 +69,7 @@ class ProfileGoalView extends GetView<ProfileGoalController> {
                 child: ElevatedButton(
                   onPressed: isSaving ? null : controller.saveGoals,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF1CB0F6),
+                    backgroundColor: AppColors.primary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(24.r),
                     ),
@@ -118,7 +119,7 @@ class _GoalField extends StatelessWidget {
         Text(
           label,
           style: TextStyle(
-            color: const Color(0xFF0B1D28),
+            color: AppColors.textPrimary,
             fontSize: 15.sp,
             fontWeight: FontWeight.w600,
           ),
@@ -133,15 +134,15 @@ class _GoalField extends StatelessWidget {
             contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(18.r),
-              borderSide: const BorderSide(color: Color(0xFF1CB0F6), width: 2),
+              borderSide: const BorderSide(color: AppColors.primary, width: 2),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(18.r),
-              borderSide: const BorderSide(color: Color(0xFF1CB0F6), width: 2),
+              borderSide: const BorderSide(color: AppColors.primary, width: 2),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(18.r),
-              borderSide: const BorderSide(color: Color(0xFF1CB0F6), width: 2),
+              borderSide: const BorderSide(color: AppColors.primary, width: 2),
             ),
           ),
         ),

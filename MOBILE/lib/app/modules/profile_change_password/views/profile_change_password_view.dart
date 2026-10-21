@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../controllers/profile_change_password_controller.dart';
+import 'package:lingoprism/app/core/theme/app_colors.dart';
 
 class ProfileChangePasswordView
     extends GetView<ProfileChangePasswordController> {
@@ -11,19 +12,19 @@ class ProfileChangePasswordView
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFE6F9FF),
+      backgroundColor: AppColors.primarySoft,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFE6F9FF),
+        backgroundColor: AppColors.primarySoft,
         elevation: 0,
         leading: IconButton(
           onPressed: Get.back,
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
-          color: const Color(0xFF0B1D28),
+          color: AppColors.textPrimary,
         ),
         title: Text(
           'Đổi mật khẩu',
           style: TextStyle(
-            color: const Color(0xFF0B1D28),
+            color: AppColors.textPrimary,
             fontSize: 20.sp,
             fontWeight: FontWeight.w700,
           ),
@@ -56,7 +57,7 @@ class ProfileChangePasswordView
               return Text(
                 error,
                 style: TextStyle(
-                  color: const Color(0xFFE8505B),
+                  color: AppColors.error,
                   fontSize: 13.sp,
                   fontWeight: FontWeight.w600,
                 ),
@@ -71,7 +72,7 @@ class ProfileChangePasswordView
                 child: ElevatedButton(
                   onPressed: isSaving ? null : controller.submit,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF1CB0F6),
+                    backgroundColor: AppColors.primary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(26.r),
                     ),
@@ -129,7 +130,7 @@ class _PasswordFieldState extends State<_PasswordField> {
         Text(
           widget.label,
           style: TextStyle(
-            color: const Color(0xFF0B1D28),
+            color: AppColors.textPrimary,
             fontSize: 15.sp,
             fontWeight: FontWeight.w600,
           ),
@@ -145,20 +146,20 @@ class _PasswordFieldState extends State<_PasswordField> {
                 EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(18.r),
-              borderSide: const BorderSide(color: Color(0xFF1CB0F6), width: 2),
+              borderSide: const BorderSide(color: AppColors.primary, width: 2),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(18.r),
-              borderSide: const BorderSide(color: Color(0xFF1CB0F6), width: 2),
+              borderSide: const BorderSide(color: AppColors.primary, width: 2),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(18.r),
-              borderSide: const BorderSide(color: Color(0xFF1CB0F6), width: 2),
+              borderSide: const BorderSide(color: AppColors.primary, width: 2),
             ),
             suffixIcon: IconButton(
               icon: Icon(
                 _obscure ? Icons.visibility_off : Icons.visibility,
-                color: const Color(0xFF60718C),
+                color: AppColors.textSecondary,
               ),
               onPressed: () => setState(() {
                 _obscure = !_obscure;

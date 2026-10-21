@@ -2,7 +2,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import '../../../core/theme/app_widgets.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../../routes/app_pages.dart';
 import '../../camera_detection/controllers/camera_detection_controller.dart';
 import '../../review/controllers/review_controller.dart';
@@ -13,137 +13,16 @@ import '../../../data/services/auth_service.dart';
 import '../../../data/models/api/game.dart';
 import '../../../data/models/api/user.dart';
 import '../controllers/learning_tab_controller.dart';
+import '../../levels/levels_module.dart';
 
+const _monthNames = [
+  'Một', 'Hai', 'Ba', 'Tư', 'Năm', 'Sáu', 'Bảy', 'Tám', 'Chín', 'Mười', 'Mười Một', 'Mười Hai',
+];
+
+/// Home tab, same structure as the web home page: "today" on the ink surface with the goal
+/// drawn as light leaving Prismo, then the camera, the level path, shortcuts and quests.
 class LearningTabView extends GetView<HomeStatsController> {
   const LearningTabView({super.key});
-
-  // Widget vòng tròn progress dùng chung
-  Widget _buildProgressCircle({
-    required int current,
-    required int total,
-    required Color color,
-  }) {
-    final safeTotal = total <= 0 ? 1 : total;
-    final safeCurrent = current.clamp(0, safeTotal).toInt();
-    return SizedBox(
-      width: 65.w,
-      height: 65.h,
-      child: Stack(
-        children: [
-          // Vòng tròn nền
-          Center(
-            child: SizedBox(
-              width: 80.w,
-              height: 80.h,
-              child: CircularProgressIndicator(
-                value: safeCurrent / safeTotal,
-                strokeWidth: 8.w,
-                backgroundColor: Colors.white.withOpacity(0.3),
-                valueColor: AlwaysStoppedAnimation<Color>(color),
-              ),
-            ),
-          ),
-          // Text ở giữa
-          Center(
-            child: Text(
-              '$safeCurrent/$safeTotal',
-              style: TextStyle(
-                fontSize: 18.sp,
-                fontWeight: FontWeight.bold,
-                color: color,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Widget progress bar dùng chung cho nhiệm vụ
-  Widget _buildQuestProgressBar({
-    required int current,
-    required int total,
-    String? title,
-    String? imagePath,
-    double? devicePixelRatio,
-    VoidCallback? onTap,
-  }) {
-    final safeTotal = total <= 0 ? 1 : total;
-    final safeCurrent = current.clamp(0, safeTotal);
-    final percentage = ((safeCurrent / safeTotal) * 100).round();
-    final content = Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (title != null) ...[
-                Text(
-                  title,
-                  style: TextStyle(fontSize: 14.sp, color: Colors.black87),
-                ),
-                SizedBox(height: 8.h),
-              ],
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8.r),
-                child: LinearProgressIndicator(
-                  value: safeCurrent / safeTotal,
-                  backgroundColor: Colors.grey[200],
-                  valueColor: const AlwaysStoppedAnimation(Color(0xFF1CB0F6)),
-                  minHeight: 10.h,
-                ),
-              ),
-              SizedBox(height: 8.h),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    '$safeCurrent/$safeTotal',
-                    style: TextStyle(
-                      fontSize: 12.sp,
-                      color: Colors.grey,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  Text(
-                    '$percentage%',
-                    style: TextStyle(
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.bold,
-                      color: const Color(0xFF1CB0F6),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-        if (imagePath != null) ...[
-          SizedBox(width: 12.w),
-          Builder(
-            builder: (context) {
-              final ratio = devicePixelRatio ?? MediaQuery.of(context).devicePixelRatio;
-              return _buildOptimizedAsset(
-                imagePath: imagePath,
-                width: 60.w,
-                height: 60.h,
-                devicePixelRatio: ratio,
-                fallback: SizedBox(width: 60.w, height: 60.h),
-              );
-            },
-          ),
-        ],
-      ],
-    );
-
-    if (onTap == null) return content;
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: content,
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -151,7 +30,7 @@ class LearningTabView extends GetView<HomeStatsController> {
     final progressController = Get.put(LearningTabController());
 
     return Scaffold(
-      backgroundColor: const Color(0xFFE5FFFD),
+      backgroundColor: AppColors.background,
       body: Obx(() {
         final loading = controller.isLoading.value;
         final statsUser = controller.user.value;
@@ -159,10 +38,13 @@ class LearningTabView extends GetView<HomeStatsController> {
         final unread = controller.unreadNotifications.value;
         return Column(
           children: [
-            // AppBar với màu BBFFEE
             Container(
-              color: const Color(0xFFBBFFEE),
+              decoration: const BoxDecoration(
+                color: AppColors.surface,
+                border: Border(bottom: BorderSide(color: AppColors.line)),
+              ),
               child: SafeArea(
+                bottom: false,
                 child: _buildHeader(
                   devicePixelRatio,
                   user: statsUser,
@@ -171,80 +53,41 @@ class LearningTabView extends GetView<HomeStatsController> {
                 ),
               ),
             ),
-
-            // Scrollable content
             Expanded(
               child: loading
                   ? const Center(child: CircularProgressIndicator())
-                  : SingleChildScrollView(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                  : RefreshIndicator(
+                      color: AppColors.primary,
+                      onRefresh: progressController.refreshProgress,
+                      child: ListView(
+                        padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 32.h),
                         children: [
-                          // Card học với ảnh - flush with app bar
-                          _buildLearningCard(devicePixelRatio),
-
-                          // Content with padding
-                          Padding(
-                            padding: EdgeInsets.all(20.w),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // Học từ mới
-                                Obx(() => _buildVocabularyCard(
-                                      devicePixelRatio,
-                                      progressController.newLearned.value,
-                                      progressController.newTarget.value,
-                                    )),
-                                SizedBox(height: 20.h),
-
-                                // Ôn tập ngay
-                                Obx(() => _buildReviewCard(
-                                      devicePixelRatio,
-                                      progressController.reviewDone.value,
-                                      progressController.reviewDue.value,
-                                    )),
-                                SizedBox(height: 16.h),
-
-                                // Lối tắt: đề thi, học theo vị trí, hỏi giáo viên
-                                _buildQuickActions(),
-                                SizedBox(height: 16.h),
-
-                                // Nhiệm vụ
-                                Center(
-                                  child: Text(
-                                    'Nhiệm vụ',
-                                    style: TextStyle(
-                                      fontSize: 18.sp,
-                                      fontWeight: FontWeight.w800,
-                                      color: Colors.black87,
-
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(height: 16.h),
-
-                                // Nhiệm vụ tháng
-                                Obx(() {
-                                  final monthly = progressController.monthlyQuest.value;
-                                  final current = monthly?.completedCount ?? 0;
-                                  final total = progressController.monthlyTarget;
-                                  return _buildMonthlyQuest(
-                                    devicePixelRatio,
-                                    current: current,
-                                    total: total,
-                                  );
-                                }),
-                                SizedBox(height: 16.h),
-
-                                // Nhiệm vụ hàng ngày
-                                Obx(() => _buildDailyQuests(
-                                      devicePixelRatio,
-                                      progressController.dailyQuests,
-                                    )),
-                                SizedBox(height: 20.h),
-                              ],
-                            ),
-                          ),
+                          Obx(() => _buildTodayCard(
+                                devicePixelRatio,
+                                user: statsUser,
+                                learned: progressController.newLearned.value,
+                                target: progressController.newTarget.value,
+                                due: progressController.dueNow.value,
+                              )),
+                          SizedBox(height: 12.h),
+                          _buildCameraCard(),
+                          SizedBox(height: 20.h),
+                          const LevelPathCard(),
+                          SizedBox(height: 12.h),
+                          _buildQuickActions(),
+                          SizedBox(height: 28.h),
+                          _sectionTitle('Nhiệm vụ'),
+                          SizedBox(height: 12.h),
+                          Obx(() {
+                            final monthly = progressController.monthlyQuest.value;
+                            return _buildMonthlyQuest(
+                              devicePixelRatio,
+                              current: monthly?.completedCount ?? 0,
+                              total: progressController.monthlyTarget,
+                            );
+                          }),
+                          SizedBox(height: 12.h),
+                          Obx(() => _buildDailyQuests(devicePixelRatio, progressController.dailyQuests)),
                         ],
                       ),
                     ),
@@ -255,28 +98,177 @@ class LearningTabView extends GetView<HomeStatsController> {
     );
   }
 
-  Widget _buildQuickActions() {
-    Widget item(String emoji, String label, String route) => Expanded(
-          child: InkWell(
-            onTap: () => Get.toNamed(route),
-            borderRadius: BorderRadius.circular(16.r),
-            child: Container(
-              padding: EdgeInsets.symmetric(vertical: 14.h),
-              decoration: AppWidgets.questGradientDecoration(),
-              child: Column(children: [
-                Text(emoji, style: TextStyle(fontSize: 26.sp)),
-                SizedBox(height: 4.h),
-                Text(label, textAlign: TextAlign.center, style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w700)),
+  Widget _sectionTitle(String text) => Text(
+        text,
+        style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w700, color: AppColors.textPrimary, letterSpacing: -0.2),
+      );
+
+  /// Plain surface: a hairline, no shadow, no gradient.
+  BoxDecoration _surface({double radius = 16}) => BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(radius.r),
+        border: Border.all(color: AppColors.line),
+      );
+
+  String _greeting() {
+    final h = DateTime.now().hour;
+    return h < 11 ? 'Chào buổi sáng' : h < 14 ? 'Chào buổi trưa' : h < 18 ? 'Chào buổi chiều' : 'Chào buổi tối';
+  }
+
+  // ---------------------------------------------------------------- today
+  Widget _buildTodayCard(
+    double devicePixelRatio, {
+    required AppUser? user,
+    required int learned,
+    required int target,
+    required int due,
+  }) {
+    final safeTarget = target <= 0 ? 10 : target;
+    final done = learned >= safeTarget;
+    final line = done
+        ? 'Bạn đã đạt mục tiêu hôm nay. Ôn thêm vài từ để nhớ lâu hơn.'
+        : learned > 0
+            ? 'Còn ${safeTarget - learned} từ nữa là đạt mục tiêu hôm nay.'
+            : due > 0
+                ? '$due từ đến lịch ôn. Ôn trước, học từ mới sau.'
+                : 'Năm phút là đủ cho một lượt học hôm nay.';
+    final name = user?.displayName ?? '';
+
+    return Container(
+      decoration: BoxDecoration(color: AppColors.ink, borderRadius: BorderRadius.circular(24.r)),
+      padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 20.h),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (user != null)
+            Row(children: [
+              _LangGlyph(user: user),
+              SizedBox(width: 8.w),
+              Text('Đang học ${user.languageLabel.toLowerCase()}',
+                  style: TextStyle(color: Colors.white.withValues(alpha: 0.75), fontSize: 13.sp)),
+            ]),
+          SizedBox(height: 10.h),
+          Text(
+            name.isEmpty ? _greeting() : '${_greeting()}, $name',
+            style: TextStyle(color: Colors.white, fontSize: 24.sp, fontWeight: FontWeight.w800, height: 1.2, letterSpacing: -0.5),
+          ),
+          SizedBox(height: 6.h),
+          Text(line, style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 15.sp, height: 1.4)),
+          SizedBox(height: 16.h),
+          // Prismo and the light it gives off: the day's goal
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              _buildOptimizedAsset(
+                imagePath: done ? 'assets/brand/mascot/prismo_celebrate.png' : 'assets/brand/mascot/prismo_happy.png',
+                width: 72.w,
+                height: 72.w,
+                devicePixelRatio: devicePixelRatio,
+                fit: BoxFit.contain,
+              ),
+              SizedBox(width: 4.w),
+              Expanded(child: _GoalBeam(learned: learned, target: safeTarget)),
+            ],
+          ),
+          SizedBox(height: 16.h),
+          Row(children: [
+            Expanded(
+              child: _InkButton(
+                label: 'Học ${math.min(10, math.max(1, safeTarget - learned))} từ mới',
+                filled: true,
+                onTap: _handleNewLearningTap,
+              ),
+            ),
+            SizedBox(width: 10.w),
+            Expanded(
+              child: _InkButton(
+                label: due > 0 ? 'Ôn $due từ' : 'Ôn tập',
+                icon: Icons.replay_rounded,
+                onTap: _handleReviewTap,
+              ),
+            ),
+          ]),
+        ],
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------------- camera
+  Widget _buildCameraCard() {
+    void open() {
+      if (!Get.isRegistered<CameraDetectionController>()) {
+        Get.lazyPut(() => CameraDetectionController());
+      }
+      CameraDetectionController.to.takePhoto();
+    }
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: open,
+        borderRadius: BorderRadius.circular(16.r),
+        child: Ink(
+          decoration: _surface(),
+          padding: EdgeInsets.all(16.w),
+          child: Row(children: [
+            Container(
+              width: 52.w,
+              height: 52.w,
+              decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(14.r)),
+              child: Icon(Icons.photo_camera_rounded, color: Colors.white, size: 26.sp),
+            ),
+            SizedBox(width: 14.w),
+            Expanded(
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text('Chụp một đồ vật',
+                    style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+                SizedBox(height: 2.h),
+                Text('Nhận ra vật trong ảnh, cho ngay từ Việt · Anh · Trung.',
+                    style: TextStyle(fontSize: 13.sp, color: AppColors.textSecondary, height: 1.35)),
               ]),
+            ),
+            Icon(Icons.chevron_right_rounded, color: AppColors.textHint, size: 24.sp),
+          ]),
+        ),
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------------- shortcuts
+  Widget _buildQuickActions() {
+    Widget item(IconData icon, String label, String route) => Expanded(
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () => Get.toNamed(route),
+              borderRadius: BorderRadius.circular(14.r),
+              child: Ink(
+                padding: EdgeInsets.symmetric(vertical: 14.h, horizontal: 4.w),
+                decoration: _surface(radius: 14),
+                child: Column(children: [
+                  Icon(icon, size: 24.sp, color: AppColors.primary),
+                  SizedBox(height: 6.h),
+                  Text(label,
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w600, color: AppColors.textPrimary, height: 1.25)),
+                ]),
+              ),
             ),
           ),
         );
+    final learningVietnamese = Get.find<AuthService>().currentUser?.activeLanguage == 'vi';
     return Row(children: [
-      item('📝', 'Bài kiểm tra', Routes.examList),
-      SizedBox(width: 10.w),
-      item('🗺️', 'Học theo vị trí', Routes.poiMap),
-      SizedBox(width: 10.w),
-      item('💬', 'Hỏi giáo viên', Routes.supportChat),
+      if (learningVietnamese)
+        item(Icons.menu_book_rounded, 'Học đọc – viết', Routes.literacyMap)
+      else
+        item(Icons.edit_note_rounded, 'Luyện câu', Routes.sentencePractice),
+      SizedBox(width: 8.w),
+      item(Icons.fact_check_outlined, 'Bài kiểm tra', Routes.examList),
+      SizedBox(width: 8.w),
+      item(Icons.place_outlined, 'Học theo vị trí', Routes.poiMap),
+      SizedBox(width: 8.w),
+      item(Icons.forum_outlined, 'Hỏi giáo viên', Routes.supportChat),
     ]);
   }
 
@@ -333,13 +325,9 @@ class LearningTabView extends GetView<HomeStatsController> {
               Container(
                 width: 60.w,
                 height: 60.w,
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   shape: BoxShape.circle,
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF1CB0F6), Color(0xFF02D099)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
+                  color: AppColors.primary,
                 ),
                 child: const Icon(
                   Icons.celebration_outlined,
@@ -354,7 +342,7 @@ class LearningTabView extends GetView<HomeStatsController> {
                 style: TextStyle(
                   fontSize: 20.sp,
                   fontWeight: FontWeight.w700,
-                  color: Colors.black87,
+                  color: AppColors.textPrimary,
                 ),
               ),
               SizedBox(height: 10.h),
@@ -363,7 +351,7 @@ class LearningTabView extends GetView<HomeStatsController> {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 14.sp,
-                  color: Colors.grey[700],
+                  color: AppColors.textSecondary,
                 ),
               ),
               SizedBox(height: 20.h),
@@ -377,8 +365,8 @@ class LearningTabView extends GetView<HomeStatsController> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14.r),
                         ),
-                        side: const BorderSide(color: Color(0xFF1CB0F6)),
-                        foregroundColor: const Color(0xFF1CB0F6),
+                        side: const BorderSide(color: AppColors.lineStrong, width: 1.5),
+                        foregroundColor: AppColors.textPrimary,
                         textStyle: TextStyle(
                           fontWeight: FontWeight.w700,
                           fontSize: 14.sp,
@@ -389,40 +377,14 @@ class LearningTabView extends GetView<HomeStatsController> {
                   ),
                   SizedBox(width: 12.w),
                   Expanded(
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(14.r),
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFF3D8EF7), Color(0xFF1CB0F6)],
-                          begin: Alignment.centerLeft,
-                          end: Alignment.centerRight,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0xFF1CB0F6).withOpacity(0.3),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
+                    child: FilledButton(
+                      onPressed: () => Get.back(result: 'learn_more'),
+                      style: FilledButton.styleFrom(
+                        padding: EdgeInsets.symmetric(vertical: 12.h),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
+                        textStyle: TextStyle(fontWeight: FontWeight.w700, fontSize: 14.sp),
                       ),
-                      child: TextButton(
-                        onPressed: () => Get.back(result: 'learn_more'),
-                        style: TextButton.styleFrom(
-                          padding: EdgeInsets.symmetric(vertical: 12.h),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14.r),
-                          ),
-                          foregroundColor: Colors.white,
-                        ),
-                        child: Text(
-                          'Học thêm 10 từ mới',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w800,
-                            fontSize: 14.sp,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
+                      child: const Text('Học thêm 10 từ'),
                     ),
                   ),
                 ],
@@ -459,6 +421,7 @@ class LearningTabView extends GetView<HomeStatsController> {
     }
   }
 
+  // ---------------------------------------------------------------- header
   Widget _buildHeader(
     double devicePixelRatio, {
     required AppUser? user,
@@ -469,39 +432,31 @@ class LearningTabView extends GetView<HomeStatsController> {
     final gems = controller.gems.value;
 
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-          _buildStatItem('assets/images/vay.png', '$scales', const Color(0xFFB8C3D1), Routes.shop, devicePixelRatio),
-          _buildStatItem('assets/images/ngoc.png', '$gems', const Color(0xFF0571E6), Routes.shop, devicePixelRatio),
-          _buildStatItem(
-            StreakAssetResolver.assetByValue(streak),
-            '$streak',
-            const Color(0xFF4E67F8),
-            Routes.streak,
-            devicePixelRatio,
-          ),
+        children: [
+          _buildStatItem(StreakAssetResolver.assetByValue(streak), '$streak', 'Chuỗi ngày học', Routes.streak, devicePixelRatio),
+          _buildStatItem('assets/brand/icons/scale.png', '$scales', 'Vảy', Routes.shop, devicePixelRatio),
+          _buildStatItem('assets/brand/icons/gem.png', '$gems', 'Ngọc', Routes.shop, devicePixelRatio),
+          const Spacer(),
           Stack(
+            clipBehavior: Clip.none,
             children: [
-              _buildStatItem('assets/images/thongbao.png', '', Colors.black, Routes.notification, devicePixelRatio),
+              IconButton(
+                tooltip: 'Thông báo',
+                onPressed: () => Get.toNamed(Routes.notification),
+                icon: Icon(Icons.notifications_none_rounded, size: 26.sp, color: AppColors.textPrimary),
+              ),
               if (unreadNotifications > 0)
                 Positioned(
-                  right: 0,
-                  top: 0,
+                  right: 6,
+                  top: 6,
                   child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
-                    decoration: BoxDecoration(
-                      color: Colors.redAccent,
-                      borderRadius: BorderRadius.circular(10.r),
-                    ),
+                    padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 1.h),
+                    decoration: BoxDecoration(color: AppColors.error, borderRadius: BorderRadius.circular(10.r)),
                     child: Text(
                       unreadNotifications > 99 ? '99+' : '$unreadNotifications',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 10.sp,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: TextStyle(color: Colors.white, fontSize: 10.sp, fontWeight: FontWeight.w700),
                     ),
                   ),
                 ),
@@ -511,304 +466,120 @@ class LearningTabView extends GetView<HomeStatsController> {
       ),
     );
   }
-
 
   Widget _buildStatItem(
     String imagePath,
     String value,
-    Color textColor,
-    String? route,
+    String label,
+    String route,
     double devicePixelRatio,
   ) {
-    return GestureDetector(
-      onTap: route != null
-          ? () async {
-              try {
-                Get.log('LearningTab: navigate to $route');
-                await Get.toNamed(route);
-              } catch (e) {
-                Get.snackbar(
-                  'Lỗi',
-                  'Không thể mở màn hình: $e',
-                  snackPosition: SnackPosition.BOTTOM,
-                  duration: const Duration(seconds: 2),
-                );
-                Get.log('Navigate error: $e');
-              }
-            }
-          : null,
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 1.h),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20.r),
-        ),
-        child: Row(
-          children: [
-            _buildOptimizedAsset(
-              imagePath: imagePath,
-              width: 32.w,
-              height: 32.h,
-              devicePixelRatio: devicePixelRatio,
-              fallback: Icon(Icons.error, size: 20.sp, color: Colors.red),
-            ),
-            if (value.isNotEmpty) ...[
-              SizedBox(width: 4.w),
+    return Semantics(
+      button: true,
+      label: '$label: $value',
+      child: InkWell(
+        borderRadius: BorderRadius.circular(10.r),
+        onTap: () async {
+          try {
+            await Get.toNamed(route);
+          } catch (e) {
+            Get.log('Navigate error: $e');
+          }
+        },
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.h),
+          child: Row(
+            children: [
+              _buildOptimizedAsset(
+                imagePath: imagePath,
+                width: 24.w,
+                height: 24.w,
+                devicePixelRatio: devicePixelRatio,
+                fit: BoxFit.contain,
+                fallback: SizedBox(width: 24.w, height: 24.w),
+              ),
+              SizedBox(width: 5.w),
               Text(
                 value,
                 style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16.sp,
-                  color: textColor,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 15.sp,
+                  color: AppColors.textPrimary,
+                  fontFeatures: const [FontFeature.tabularFigures()],
                 ),
               ),
             ],
-          ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildLearningCard(double devicePixelRatio) {
-    return Container(
-      height: 140.h,
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Color(0xFF027DE0),
-            Color(0xFFB2FFF1),
-            Color(0xFF02D099),
-          ],
-        ),
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(16.r),
-          bottomRight: Radius.circular(16.r),
-        ),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(16.r),
-          bottomRight: Radius.circular(16.r),
-        ),
-        child: Stack(
-          children: [
-            // Penguin character positioned on the left
-            Positioned(
-              left: 15.w,
-              top: 10.h,
-              child: Transform(
-              alignment: Alignment.center,
-              transform: Matrix4.rotationY(math.pi),
-              child: _buildOptimizedAsset(
-                imagePath: 'assets/images/chimcanhcut/chim_chupanh.png',
-                width: 176.w,
-                height: 176.h,
-                devicePixelRatio: devicePixelRatio,
-                fit: BoxFit.contain,
-                fallback: Container(
-                  width: 140.w,
-                  height: 140.h,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.3),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.camera_alt,
-                    size: 50.sp,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
-          ),
-          // Text and button on the right side
-          Positioned(
-            right: 10.w,
-            left: 170.w,
-            top: 0,
-            bottom: 0,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
+  // ---------------------------------------------------------------- quests
+  Widget _buildQuestProgressBar({
+    required int current,
+    required int total,
+    String? title,
+    bool completed = false,
+    String? actionLabel,
+    VoidCallback? onTap,
+  }) {
+    final safeTotal = total <= 0 ? 1 : total;
+    final safeCurrent = current.clamp(0, safeTotal);
+    final content = Row(
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (title != null) ...[
                 Text(
-                  'Gửi ảnh',
-                  textAlign: TextAlign.center,
+                  title,
                   style: TextStyle(
-                    color: const Color(0xFF008BBE),
-                    fontSize: 20.sp,
-                    fontWeight: FontWeight.bold,
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w600,
+                    color: completed ? AppColors.textHint : AppColors.textPrimary,
+                    decoration: completed && actionLabel == null ? TextDecoration.lineThrough : null,
                   ),
                 ),
-                Text(
-                  'học ngay từ mới!',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: const Color(0xFF008BBE),
-                    fontSize: 20.sp,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-
-                SizedBox(height: 12.h),
-                AppWidgets.actionButton(
-                  text: 'Gửi ảnh',
-                  onPressed: () {
-                    // Đảm bảo controller được khởi tạo
-                    if (!Get.isRegistered<CameraDetectionController>()) {
-                      Get.lazyPut(() => CameraDetectionController());
-                    }
-                    // Gọi chức năng chụp ảnh
-                    CameraDetectionController.to.takePhoto();
-                  },
-                ),
+                SizedBox(height: 8.h),
               ],
-            ),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8.r),
+                child: LinearProgressIndicator(
+                  value: safeCurrent / safeTotal,
+                  backgroundColor: AppColors.surfaceMuted,
+                  valueColor: AlwaysStoppedAnimation(completed ? AppColors.beamMint : AppColors.primary),
+                  minHeight: 8.h,
+                ),
+              ),
+            ],
           ),
-          ],
         ),
-      ),
+        SizedBox(width: 12.w),
+        if (actionLabel != null)
+          FilledButton(
+            onPressed: onTap,
+            style: FilledButton.styleFrom(
+              minimumSize: Size(0, 36.h),
+              padding: EdgeInsets.symmetric(horizontal: 14.w),
+              textStyle: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w700),
+            ),
+            child: Text(actionLabel),
+          )
+        else
+          Text(
+            '$safeCurrent/$safeTotal',
+            style: TextStyle(
+              fontSize: 13.sp,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textSecondary,
+              fontFeatures: const [FontFeature.tabularFigures()],
+            ),
+          ),
+      ],
     );
-  }
-
-  Widget _buildVocabularyCard(double devicePixelRatio, int current, int total) {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-          stops: [0.0, 0.7, 1.0],
-          colors: [
-            Color.fromARGB(255, 255, 255, 255),
-            Color(0xFF02D099),
-            Color(0xFF027ED0),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(20.r),
-      ),
-      child: Stack(
-        children: [
-          // Nội dung chính
-          Padding(
-            padding: EdgeInsets.only(left: 40.w, top: 10.h, bottom: 10.h),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  // Vòng tròn progress
-                  _buildProgressCircle(
-                    current: current.clamp(0, total),
-                    total: total <= 0 ? 1 : total,
-                    color: const Color(0xFF3D8EF7),
-                  ),
-                  SizedBox(height: 12.h),
-                  // Nút học từ mới
-                  AppWidgets.actionButton(
-                    text: 'Học từ mới',
-                    onPressed: _handleNewLearningTap,
-                  ),
-                ],
-              ),
-            ),
-          ),
-          // Hình ảnh con chim positioned
-          Positioned(
-            right: 10.w,
-            bottom: -30.h,
-            child: _buildOptimizedAsset(
-              imagePath: 'assets/images/chimcanhcut/chim_nhachoc.png',
-              width: 160.w,
-              height: 160.h,
-              devicePixelRatio: devicePixelRatio,
-              fallback: Container(
-                width: 147.w,
-                height: 147.h,
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.5),
-                  borderRadius: BorderRadius.circular(12.r),
-                ),
-                child: Icon(
-                  Icons.school,
-                  size: 40.sp,
-                  color: const Color(0xFF1CB0F6),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildReviewCard(double devicePixelRatio, int current, int total) {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [
-            Color(0xFF027ED0),
-            Color(0xFF02D099),
-            Color.fromARGB(255, 255, 255, 255),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(20.r),
-      ),
-      child: Stack(
-        children: [
-          // Hình ảnh con chim positioned bên trái
-          Positioned(
-            left: 20.w,
-            bottom: -30.h,
-            child: _buildOptimizedAsset(
-              imagePath: 'assets/images/chimcanhcut/chim_mung.png',
-              width: 160.w,
-              height: 160.h,
-              devicePixelRatio: devicePixelRatio,
-              fallback: Container(
-                width: 147.w,
-                height: 147.h,
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.5),
-                  borderRadius: BorderRadius.circular(12.r),
-                ),
-                child: Icon(
-                  Icons.refresh,
-                  size: 40.sp,
-                  color: const Color(0xFF58CC02),
-                ),
-              ),
-            ),
-          ),
-
-          // Nội dung chính
-          Padding(
-            padding: EdgeInsets.only(right: 35.w, top: 10.h, bottom: 10.h),
-            child: Align(
-              alignment: Alignment.centerRight,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  // Vòng tròn progress
-                  _buildProgressCircle(
-                    current: current.clamp(0, total),
-                    total: total <= 0 ? 1 : total,
-                    color: const Color(0xFF3D8EF7),
-                  ),
-                  SizedBox(height: 12.h),
-                  // Nút ôn tập ngay
-                  AppWidgets.actionButton(
-                    text: 'Ôn tập ngay',
-                    onPressed: _handleReviewTap,
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-        ],
-      ),
-    );
+    return content;
   }
 
   Widget _buildMonthlyQuest(
@@ -816,46 +587,37 @@ class LearningTabView extends GetView<HomeStatsController> {
     required int current,
     required int total,
   }) {
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        Container(
-          decoration: AppWidgets.questGradientDecoration(),
-          child: Padding(
-            padding: EdgeInsets.all(20.w),
+    return Container(
+      decoration: _surface(),
+      padding: EdgeInsets.all(16.w),
+      child: Row(
+        children: [
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Nhiệm vụ\ntháng Mười',
-                  style: TextStyle(
-                    fontSize: 18.sp,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                  ),
+                  'Nhiệm vụ tháng ${_monthNames[DateTime.now().month - 1]}',
+                  style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
                 ),
+                SizedBox(height: 2.h),
+                Text('Hoàn thành nhiệm vụ ngày để nhận ngọc cuối tháng.',
+                    style: TextStyle(fontSize: 13.sp, color: AppColors.textSecondary)),
                 SizedBox(height: 12.h),
-                // Progress bar và số liệu
-                _buildQuestProgressBar(
-                  current: current,
-                  total: total,
-                ),
+                _buildQuestProgressBar(current: current, total: total, completed: current >= total),
               ],
             ),
           ),
-        ),
-        // Hình ảnh con chim positioned bên ngoài khung
-        Positioned(
-          right: 20.w,
-          top: -40.h,
-          child: _buildOptimizedAsset(
-            imagePath: 'assets/images/chimcanhcut/chim_muadong5.png',
-            width: 118.w,
-            height: 118.h,
+          SizedBox(width: 8.w),
+          _buildOptimizedAsset(
+            imagePath: 'assets/brand/mascot/prismo_explore.png',
+            width: 72.w,
+            height: 72.w,
             devicePixelRatio: devicePixelRatio,
+            fit: BoxFit.contain,
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -863,60 +625,36 @@ class LearningTabView extends GetView<HomeStatsController> {
     double devicePixelRatio,
     List<DailyQuest> quests,
   ) {
-    if (quests.isEmpty) {
-      return Container(
-        padding: EdgeInsets.all(20.w),
-        decoration: AppWidgets.questGradientDecoration(),
-        child: Text(
-          'Chưa có nhiệm vụ hôm nay',
-          style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600),
-        ),
-      );
-    }
-
     return Container(
-      padding: EdgeInsets.all(20.w),
-      decoration: AppWidgets.questGradientDecoration(),
+      padding: EdgeInsets.all(16.w),
+      decoration: _surface(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Nhiệm vụ hàng ngày',
-            style: TextStyle(
-              fontSize: 18.sp,
-              fontWeight: FontWeight.bold,
-            ),
+            'Nhiệm vụ hôm nay',
+            style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
           ),
-          SizedBox(height: 16.h),
-          ...List.generate(quests.length, (index) {
-            final quest = quests[index];
-            final bool completed = quest.completed;
-            final bool claimed = quest.rewardClaimed;
-            final imagePath = !completed
-                ? 'assets/images/chimcanhcut/chim_thoibong.png'
-                : claimed
-                    ? 'assets/images/chimcanhcut/chim_moqua.png'
-                    : 'assets/images/chimcanhcut/chim_camqua.png';
-
-            VoidCallback? onTap;
-            if (completed && !claimed) {
-              onTap = () async {
-                await Get.find<LearningTabController>().claim(quest);
-              };
-            }
-
-            return Padding(
-              padding: EdgeInsets.only(bottom: index == quests.length - 1 ? 0 : 16.h),
-              child: _buildQuestProgressBar(
-                current: quest.progress,
-                total: quest.target,
-                title: quest.title,
-                imagePath: imagePath,
-                devicePixelRatio: devicePixelRatio,
-                onTap: onTap,
-              ),
-            );
-          }),
+          SizedBox(height: 14.h),
+          if (quests.isEmpty)
+            Text('Hôm nay chưa có nhiệm vụ. Học một bài để mở nhiệm vụ mới.',
+                style: TextStyle(fontSize: 14.sp, color: AppColors.textSecondary))
+          else
+            ...List.generate(quests.length, (index) {
+              final quest = quests[index];
+              final canClaim = quest.completed && !quest.rewardClaimed;
+              return Padding(
+                padding: EdgeInsets.only(bottom: index == quests.length - 1 ? 0 : 16.h),
+                child: _buildQuestProgressBar(
+                  current: quest.progress,
+                  total: quest.target,
+                  title: quest.title,
+                  completed: quest.completed,
+                  actionLabel: canClaim ? 'Nhận ${quest.rewardScales} vảy' : null,
+                  onTap: canClaim ? () => Get.find<LearningTabController>().claim(quest) : null,
+                ),
+              );
+            }),
         ],
       ),
     );
@@ -951,6 +689,127 @@ class LearningTabView extends GetView<HomeStatsController> {
       cacheHeight: cacheHeight,
       filterQuality: FilterQuality.medium,
       errorBuilder: (context, error, stackTrace) => fallback ?? const SizedBox.shrink(),
+    );
+  }
+}
+
+/// The day's goal as light leaving Prismo: the three beams (one per language) grow with the
+/// words learned today and reach the end when the goal is met.
+class _GoalBeam extends StatelessWidget {
+  const _GoalBeam({required this.learned, required this.target});
+
+  final int learned;
+  final int target;
+
+  @override
+  Widget build(BuildContext context) {
+    final pct = (learned / target).clamp(0.0, 1.0);
+    return Semantics(
+      label: 'Mục tiêu hôm nay: $learned trên $target từ mới',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.horizontal(right: Radius.circular(20.r)),
+            child: Container(
+              height: 18.h,
+              color: Colors.white.withValues(alpha: 0.1),
+              alignment: Alignment.centerLeft,
+              child: TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0, end: math.max(pct, 0.03)),
+                duration: const Duration(milliseconds: 700),
+                curve: Curves.easeOutCubic,
+                builder: (context, v, _) => FractionallySizedBox(
+                  widthFactor: v,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.horizontal(right: Radius.circular(20.r)),
+                    child: const Column(children: [
+                      Expanded(child: ColoredBox(color: AppColors.beamAmber, child: SizedBox.expand())),
+                      Expanded(child: ColoredBox(color: AppColors.beamMint, child: SizedBox.expand())),
+                      Expanded(child: ColoredBox(color: AppColors.beamCoral, child: SizedBox.expand())),
+                    ]),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          SizedBox(height: 6.h),
+          Text.rich(
+            TextSpan(children: [
+              TextSpan(
+                text: '$learned/$target',
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 15.sp),
+              ),
+              TextSpan(text: '  từ mới hôm nay', style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 13.sp)),
+            ]),
+            style: const TextStyle(fontFeatures: [FontFeature.tabularFigures()]),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Buttons on the ink surface: white filled for the main action, a quiet tint for the other.
+class _InkButton extends StatelessWidget {
+  const _InkButton({required this.label, required this.onTap, this.filled = false, this.icon});
+
+  final String label;
+  final VoidCallback onTap;
+  final bool filled;
+  final IconData? icon;
+
+  @override
+  Widget build(BuildContext context) {
+    final fg = filled ? AppColors.ink : Colors.white;
+    return Material(
+      color: filled ? Colors.white : Colors.white.withValues(alpha: 0.1),
+      borderRadius: BorderRadius.circular(14.r),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(14.r),
+        child: SizedBox(
+          height: 48.h,
+          child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+            if (icon != null) ...[Icon(icon, size: 18.sp, color: fg), SizedBox(width: 6.w)],
+            Flexible(
+              child: Text(label,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(color: fg, fontWeight: FontWeight.w700, fontSize: 15.sp)),
+            ),
+          ]),
+        ),
+      ),
+    );
+  }
+}
+
+/// The language's own letters on its beam colour (same as the web): EN, 简 / 繁, VI.
+class _LangGlyph extends StatelessWidget {
+  const _LangGlyph({required this.user});
+
+  final AppUser user;
+
+  @override
+  Widget build(BuildContext context) {
+    final lang = user.activeLanguage;
+    final color = lang == 'zh' ? AppColors.beamCoral : lang == 'vi' ? AppColors.beamMint : AppColors.beamAmber;
+    final text = lang == 'zh' ? (user.zhScript == 'hant' ? '繁' : '简') : lang.toUpperCase();
+    return Container(
+      width: 20.w,
+      height: 20.w,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(5.r)),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: AppColors.ink,
+          fontWeight: FontWeight.w700,
+          fontSize: lang == 'zh' ? 12.sp : 9.sp,
+          height: 1,
+          locale: lang == 'zh' ? Locale.fromSubtags(languageCode: 'zh', scriptCode: user.zhScript == 'hant' ? 'Hant' : 'Hans') : null,
+        ),
+      ),
     );
   }
 }

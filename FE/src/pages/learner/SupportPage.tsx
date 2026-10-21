@@ -56,7 +56,7 @@ export function SupportChatBox({ conversationId, title }: { conversationId: numb
   }
 
   return (
-    <Card title={title ?? 'Hỏi giáo viên'} className="!rounded-2xl" styles={{ body: { display: 'flex', flexDirection: 'column', height: 520 } }}>
+    <Card title={title ?? 'Hỏi giáo viên'} className="!rounded-2xl" styles={{ body: { display: 'flex', flexDirection: 'column', height: 'min(520px, calc(100dvh - 180px))' } }}>
       <div className="flex-1 overflow-y-auto flex flex-col gap-2">
         {messages.map((m) => {
           const mine = m.sender?.id === me?.id

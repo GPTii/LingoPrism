@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import '../controllers/camera_detection_controller.dart';
+import 'package:lingoprism/app/core/theme/app_colors.dart';
 
 
 class CameraDetectionView extends GetView<CameraDetectionController> {
@@ -37,7 +38,7 @@ class CameraDetectionView extends GetView<CameraDetectionController> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           CircularProgressIndicator(
-            color: const Color(0xFF1CB0F6),
+            color: AppColors.primary,
           ),
           SizedBox(height: 20.h),
           Text(
@@ -112,7 +113,7 @@ class CameraDetectionView extends GetView<CameraDetectionController> {
           Icon(
             Icons.camera_alt_outlined,
             size: 80.sp,
-            color: const Color(0xFF1CB0F6),
+            color: AppColors.primary,
           ),
           SizedBox(height: 20.h),
           Text(
@@ -179,7 +180,7 @@ class CameraDetectionView extends GetView<CameraDetectionController> {
             child: Icon(
               icon,
               size: 50.sp,
-              color: const Color(0xFF1CB0F6),
+              color: AppColors.primary,
             ),
           ),
           SizedBox(height: 12.h),

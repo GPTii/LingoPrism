@@ -53,7 +53,7 @@ class VerifyCodeView extends GetView<ForgotPasswordController> {
                   margin: EdgeInsets.symmetric(horizontal: 16.w),
                   padding: EdgeInsets.all(24.w),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFE5FFFD),
+                    color: AppColors.background,
                     borderRadius: BorderRadius.circular(24.r),
                   ),
                   child: SingleChildScrollView(

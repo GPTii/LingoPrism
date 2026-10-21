@@ -6,6 +6,8 @@ import 'package:get/get.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_widgets.dart';
 import '../controllers/vocabulary_topic_controller.dart';
+import '../../levels/levels_module.dart' show levelColors;
+import '../../../core/widgets/word_picture.dart';
 
 class VocabularyTopicView extends GetView<VocabularyTopicController> {
   const VocabularyTopicView({super.key});
@@ -30,7 +32,7 @@ class VocabularyTopicView extends GetView<VocabularyTopicController> {
       floatingActionButton: FloatingActionButton(
         heroTag: 'vocabularyTopicFab',
         onPressed: controller.onAddVocabularyPressed,
-        backgroundColor: const Color(0xFF1CB0F6),
+        backgroundColor: AppColors.primary,
         child: Icon(Icons.add, size: 28.sp, color: Colors.white),
       ),
     );
@@ -61,19 +63,24 @@ class VocabularyTopicView extends GetView<VocabularyTopicController> {
             '${controller.totalWords} từ vựng',
             style: TextStyle(
               fontSize: 13.sp,
-              color: const Color(0xFF6F7B87),
+              color: AppColors.textSecondary,
             ),
           ),
           
         ],
       ),
       actions: [
+        IconButton(
+          tooltip: 'Luyện câu',
+          onPressed: controller.onSentencePressed,
+          icon: Icon(Icons.edit_note_rounded, size: 28.sp, color: AppColors.primary),
+        ),
         Padding(
           padding: EdgeInsets.only(right: 16.w),
           child: ElevatedButton(
             onPressed: controller.onFlashcardPressed,
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF1CB0F6),
+              backgroundColor: AppColors.primary,
               padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 10.h),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(22.r),
@@ -109,7 +116,7 @@ class _VocabularyCard extends StatelessWidget {
   Color _statusColor(VocabularyLearningStatus status) {
     switch (status) {
       case VocabularyLearningStatus.notStarted:
-        return const Color(0xFF1CB0F6);
+        return AppColors.primary;
       case VocabularyLearningStatus.learning:
         return const Color(0xFFF6A609);
       case VocabularyLearningStatus.learned:
@@ -161,6 +168,10 @@ class _VocabularyCard extends StatelessWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  if (item.card != null) ...[
+                    WordPicture(imageUrl: item.card!.image, emoji: item.card!.emoji, size: 64.w),
+                    SizedBox(width: 12.w),
+                  ],
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -183,6 +194,16 @@ class _VocabularyCard extends StatelessWidget {
                                 color: const Color(0xFF0077B6),
                               ),
                             ),
+                            if (item.card?.level != null)
+                              Container(
+                                padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                                decoration: BoxDecoration(
+                                  color: levelColors[item.card!.level! - 1],
+                                  borderRadius: BorderRadius.circular(8.r),
+                                ),
+                                child: Text('Cấp ${item.card!.level}',
+                                    style: TextStyle(fontSize: 11.sp, color: Colors.white, fontWeight: FontWeight.w700)),
+                              ),
                             IconButton(
                               padding: EdgeInsets.zero,
                               constraints: const BoxConstraints(),
@@ -190,7 +211,7 @@ class _VocabularyCard extends StatelessWidget {
                               icon: Icon(
                                 Icons.volume_up,
                                 size: 20.sp,
-                                color: const Color(0xFF1CB0F6),
+                                color: AppColors.primary,
                               ),
                             ),
                           ],
@@ -227,14 +248,14 @@ class _VocabularyCard extends StatelessWidget {
                 'EX: ${item.exampleEn}',
                 style: TextStyle(
                   fontSize: 13.sp,
-                  color: const Color(0xFF4A5568),
+                  color: AppColors.textSecondary,
                 ),
               ),
               Text(
                 'VD: ${item.exampleVi}',
                 style: TextStyle(
                   fontSize: 13.sp,
-                  color: const Color(0xFF4A5568),
+                  color: AppColors.textSecondary,
                 ),
               ),
             ],

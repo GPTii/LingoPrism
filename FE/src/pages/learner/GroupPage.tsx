@@ -70,12 +70,12 @@ export default function GroupPage() {
   return (
     <div className="max-w-5xl mx-auto flex flex-col gap-4">
       <Link to="/community" className="text-slate-500"><ArrowLeftOutlined /> Cộng đồng</Link>
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <h1 className="text-2xl font-bold m-0">{group?.name ?? 'Nhóm học'}</h1>
         <Button danger onClick={leave}>Rời nhóm</Button>
       </div>
       <div className="grid md:grid-cols-3 gap-4">
-        <Card className="md:col-span-2 !rounded-2xl" title="Trò chuyện" styles={{ body: { display: 'flex', flexDirection: 'column', height: 520 } }}>
+        <Card className="md:col-span-2 !rounded-2xl" title="Trò chuyện" styles={{ body: { display: 'flex', flexDirection: 'column', height: 'min(520px, calc(100dvh - 180px))' } }}>
           <div className="flex-1 overflow-y-auto flex flex-col gap-2 pr-1">
             {messages.map((m) => {
               const mine = m.user?.id === me?.id

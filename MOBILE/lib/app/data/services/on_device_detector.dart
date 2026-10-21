@@ -18,7 +18,8 @@ class OnDeviceBox {
   Map<String, dynamic> toJson() => {'label': label, 'confidence': confidence, 'bbox': bbox, 'top_k': topK};
 }
 
-/// Offline YOLO detection with TFLite (model exported by AI/scripts/train_eval_export.py).
+/// Offline YOLO detection with TFLite (AI/scripts/export_pretrained_oiv7.py --tflite, or a trained model
+/// exported by AI/scripts/train_eval_export.py – copy it here as lingoprism.tflite with its labels.txt).
 ///
 /// Supports YOLOv10 NMS-free output `[1, 300, 6]` (x1, y1, x2, y2, score, class) and
 /// YOLOv8/11 output `[1, 4 + nc, N]` (cx, cy, w, h, scores…) with NMS.
@@ -26,17 +27,18 @@ class OnDeviceDetector {
   OnDeviceDetector._();
   static final OnDeviceDetector instance = OnDeviceDetector._();
 
-  static const modelAsset = 'assets/ml_models/lingoprism_yolov10n.tflite';
+  static const modelAsset = 'assets/ml_models/lingoprism.tflite';
   static const labelsAsset = 'assets/ml_models/labels.txt';
   static const double confThreshold = 0.30;
   static const double iouThreshold = 0.45;
+  static const double sameObjectIou = 0.7; // boxes this close are one object whatever their labels (as on the server)
 
   Interpreter? _interpreter;
   List<String> _labels = const [];
   int _size = 640;
   bool _triedLoading = false;
 
-  String get modelName => 'yolov10n-tflite';
+  String get modelName => 'yolov8s-oiv7-tflite';
 
   Future<bool> get available async {
     await _ensureLoaded();
@@ -157,7 +159,11 @@ class OnDeviceDetector {
     boxes.sort((a, b) => b.confidence.compareTo(a.confidence));
     final kept = <OnDeviceBox>[];
     for (final b in boxes) {
-      final overlaps = kept.any((k) => k.label == b.label && _iou(k.bbox, b.bbox) > iouThreshold);
+      // a second label on the same object is already among the kept box's top-k alternatives
+      final overlaps = kept.any((k) {
+        final iou = _iou(k.bbox, b.bbox);
+        return iou >= sameObjectIou || (k.label == b.label && iou > iouThreshold);
+      });
       if (!overlaps) kept.add(b);
     }
     return kept;

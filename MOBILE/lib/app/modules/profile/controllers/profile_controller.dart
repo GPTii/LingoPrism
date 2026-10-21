@@ -6,19 +6,17 @@ import '../../../data/services/auth_service.dart';
 import '../../../data/services/game_service.dart';
 import '../../../routes/app_pages.dart';
 
-/// Tier name → rank image (same artwork as the SnapLingua leaderboard).
+/// The 10 league tiers, lowest first – tier i uses assets/brand/rank/rank_{i+1}.png (LingoPrism artwork).
+const leagueTierNames = [
+  'Tia Sáng', 'Ánh Đồng', 'Ánh Bạc', 'Ánh Vàng', 'Bạch Kim',
+  'Ngọc Lục', 'Lam Ngọc', 'Tử Ngọc', 'Cầu Vồng', 'Lăng Kính Huyền Thoại',
+];
+
+/// Tier name → rank image.
 ProfileRank rankForTier(String? tier) {
-  switch (tier) {
-    case 'Igloo Kim cương':
-      return const ProfileRank(title: 'Igloo Kim cương', iconPath: 'assets/images/rank/rank1.png');
-    case 'Igloo Vàng':
-      return const ProfileRank(title: 'Igloo Vàng', iconPath: 'assets/images/rank/rank3.png');
-    case 'Igloo Bạc':
-      return const ProfileRank(title: 'Igloo Bạc', iconPath: 'assets/images/rank/rank4.png');
-    case 'Igloo Đồng':
-      return const ProfileRank(title: 'Igloo Đồng', iconPath: 'assets/images/rank/rank5.png');
-  }
-  return const ProfileRank(title: 'Tân binh Igloo', iconPath: 'assets/images/rank/rank6.png');
+  final i = leagueTierNames.indexOf(tier ?? '');
+  final index = i < 0 ? 0 : i;
+  return ProfileRank(title: leagueTierNames[index], iconPath: 'assets/brand/rank/rank_${index + 1}.png');
 }
 
 class ProfileController extends GetxController {

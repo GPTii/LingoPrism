@@ -260,6 +260,15 @@ export interface DetectedItem {
   selected: boolean
   feedback: 'unknown' | 'correct' | 'wrong'
   card: WordCard | null
+  /** model not sure: ask "is it A / B / C?" (other likely objects, each with its word card) */
+  uncertain: boolean
+  alternatives: { label: string; confidence: number; card: WordCard }[]
+  /** object the learner picked instead of the model's answer ('' = none) */
+  corrected_label: string
+  corrected_card: WordCard | null
+  /** relabelled automatically from an earlier learner's error report */
+  learned: boolean
+  not_object: boolean
 }
 
 export interface DetectionResult {
@@ -345,8 +354,10 @@ export const learnApi = {
     form.append('source', 'web')
     return api.post<DetectionResult>('/detect/', form).then((r) => r.data)
   },
-  confirm: (id: number, items: { id: number; selected: boolean; feedback: string }[]) =>
-    api.post<DetectionResult & { saved: number }>(`/detections/${id}/confirm/`, { items }).then((r) => r.data),
+  confirm: (id: number, items: { id: number; selected: boolean; feedback: string; corrected_label?: string; not_object?: boolean }[]) =>
+    api.post<DetectionResult & { saved: number; reported: number }>(`/detections/${id}/confirm/`, { items }).then((r) => r.data),
+  /** every object the detector knows, with its word card (error report: "it is something else") */
+  detectLabels: () => api.get<{ label: string; card: WordCard }[]>('/detections/labels/').then((r) => r.data),
   detections: () => api.get<Paginated<DetectionResult>>('/detections/').then((r) => r.data.results),
   nearby: (lat: number, lng: number, radius = 3000) =>
     api.get<{ results: Poi[]; query_ms: number }>('/pois-nearby/', { params: { lat, lng, radius } }).then((r) => r.data),

@@ -1,3 +1,4 @@
+import '../../../core/utils/brand_assets.dart';
 import 'common.dart';
 import 'vocab.dart';
 
@@ -45,7 +46,7 @@ class Post {
   factory Post.fromJson(Map<String, dynamic> j) => Post(
         id: asInt(j['id']),
         author: Author.fromJson(asMap(j['author'])),
-        image: asString(j['image']),
+        image: brandAsset(asString(j['image'])),
         caption: asString(j['caption']),
         topicLabel: asString(j['topic_label']),
         likeCount: asInt(j['like_count']),
@@ -99,7 +100,7 @@ class StudyGroup {
         id: asInt(j['id']),
         name: asString(j['name']),
         description: asString(j['description']),
-        icon: asString(j['icon']),
+        icon: brandAsset(asString(j['icon'])),
         requireApproval: j['require_approval'] == true,
         memberCount: asInt(j['member_count']),
         myStatus: j['my_status'] as String?,

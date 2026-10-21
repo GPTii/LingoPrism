@@ -34,6 +34,11 @@ abstract class Routes {
   static const learningSession = _Paths.learningSession;
   static const cameraDetection = _Paths.cameraDetection;
   static const detectionResult = _Paths.detectionResult;
+  static const sentencePractice = _Paths.sentencePractice;
+  static const literacyMap = _Paths.literacyMap;
+  static const literacyLesson = _Paths.literacyLesson;
+  static const levelPath = _Paths.levelPath;
+  static const levelTest = _Paths.levelTest;
   static const examList = _Paths.examList;
   static const examTake = _Paths.examTake;
   static const examResult = _Paths.examResult;
@@ -75,6 +80,11 @@ abstract class _Paths {
   static const learningSession = '/learning-session';
   static const cameraDetection = '/camera-detection';
   static const detectionResult = '/detection-result';
+  static const sentencePractice = '/sentences';
+  static const literacyMap = '/literacy';
+  static const literacyLesson = '/literacy/lesson';
+  static const levelPath = '/levels';
+  static const levelTest = '/levels/test';
   static const examList = '/exams';
   static const examTake = '/exams/take';
   static const examResult = '/exams/result';

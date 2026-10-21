@@ -46,9 +46,11 @@ class VocabularyTopicItem {
     return VocabularyTopicItem(
       word: c.text,
       ipa: c.target?.reading ?? '',
-      translation: c.meaningVi,
+      translation: c.isVietnameseTarget ? c.emoji : c.meaningVi,
       exampleEn: ex?.text ?? '',
-      exampleVi: ex?.translationVi ?? '',
+      exampleVi: c.isVietnameseTarget
+          ? ''
+          : (ex?.translationVi.isNotEmpty ?? false) ? ex!.translationVi : (ex?.translationEn ?? ''),
       status: status,
       card: c,
     );
@@ -103,6 +105,11 @@ class VocabularyTopicController extends GetxController {
   /// Practice the whole topic as a study session (flashcards + quiz, graded by the server).
   void onPracticePressed() {
     Get.toNamed(Routes.learningSession, arguments: LearningSessionArguments(kind: 'practice', topic: topic.id, size: 15));
+  }
+
+  /// Sentence practice with verified example sentences containing this topic's words.
+  void onSentencePressed() {
+    Get.toNamed(Routes.sentencePractice, arguments: {'topic': topic.id, 'title': 'Luyện câu · $topicName'});
   }
 
   Future<void> saveTopic() async {

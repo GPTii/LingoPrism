@@ -33,7 +33,7 @@ export default function MemberProfilePage() {
           </div>
           {p.id !== me?.id && <Button type={p.is_following ? 'default' : 'primary'} onClick={toggle}>{p.is_following ? 'Đang theo dõi' : 'Theo dõi'}</Button>}
         </div>
-        <div className="grid grid-cols-5 gap-2 mt-4">
+        <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 mt-4">
           <Statistic title="XP" value={p.lifetime_xp} />
           <Statistic title="Streak" value={p.streak} />
           <Statistic title="Bài đăng" value={p.posts} />

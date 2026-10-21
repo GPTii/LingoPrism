@@ -10,6 +10,7 @@ import '../../home/controllers/learning_tab_controller.dart';
 import '../../../routes/app_pages.dart';
 import '../../profile/controllers/profile_controller.dart';
 import '../../../routes/app_pages.dart' as routes;
+import 'package:lingoprism/app/core/theme/app_colors.dart';
 
 class ProfileSettingsController extends GetxController {
   ProfileSettingsController({AuthService? authService})
@@ -122,7 +123,7 @@ class ProfileSettingsController extends GetxController {
           ElevatedButton(
             onPressed: () => Get.back(result: true),
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFE8505B),
+              backgroundColor: AppColors.error,
             ),
             child: const Text('Đăng xuất'),
           ),

@@ -12,9 +12,9 @@ import '../models/community_chat_models.dart';
 
 /// Sticker codes (shop items) → artwork shown in the chat.
 const stickerAssets = {
-  'sticker_ok': 'assets/images/chimcanhcut/chim_ok.png',
-  'sticker_love': 'assets/images/chimcanhcut/chim_yeu.png',
-  'sticker_sad': 'assets/images/chimcanhcut/chim_buon.png',
+  'sticker_ok': 'assets/brand/mascot/prismo_ok.png',
+  'sticker_love': 'assets/brand/mascot/prismo_love.png',
+  'sticker_sad': 'assets/brand/mascot/prismo_sad.png',
 };
 
 /// Realtime group chat over WebSocket (`/ws/groups/<id>/`), REST for history and as a fallback.

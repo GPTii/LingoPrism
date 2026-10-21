@@ -10,6 +10,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../controllers/learning_session_controller.dart';
 import '../../home/controllers/learning_tab_controller.dart';
+import '../../../core/widgets/word_picture.dart';
 
 // --- Start of Round 3 Models ---
 // Note: These model classes should ideally be in their own file (e.g., in app/data/models).
@@ -75,14 +76,14 @@ class LearningSessionView extends GetView<LearningSessionController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFE6F9FF),
+      backgroundColor: AppColors.primarySoft,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFE6F9FF),
+        backgroundColor: AppColors.primarySoft,
         elevation: 0,
         leading: IconButton(
           onPressed: Get.back,
           icon: const Icon(Icons.arrow_back_ios_new_rounded,
-              color: Color(0xFF0B1D28)),
+              color: AppColors.textPrimary),
         ),
         titleSpacing: 0,
         title: Obx(
@@ -91,7 +92,7 @@ class LearningSessionView extends GetView<LearningSessionController> {
                 ? 'Ôn tập: vòng ${controller.round}'
                 : 'Học từ mới: vòng ${controller.round}',
             style: TextStyle(
-              color: const Color(0xFF0B1D28),
+              color: AppColors.textPrimary,
               fontSize: 20.sp,
               fontWeight: FontWeight.w700,
             ),
@@ -108,7 +109,7 @@ class LearningSessionView extends GetView<LearningSessionController> {
               child: Text(
                 'Không có từ nào để học',
                 style: TextStyle(
-                  color: const Color(0xFF60718C),
+                  color: AppColors.textSecondary,
                   fontSize: 16.sp,
                 ),
               ),
@@ -136,7 +137,7 @@ class LearningSessionView extends GetView<LearningSessionController> {
                           Text(
                             'Tiến độ',
                             style: TextStyle(
-                              color: const Color(0xFF60718C),
+                              color: AppColors.textSecondary,
                               fontSize: 14.sp,
                               fontWeight: FontWeight.w600,
                             ),
@@ -144,7 +145,7 @@ class LearningSessionView extends GetView<LearningSessionController> {
                           Text(
                             '${controller.displayPosition}/${controller.displayTotal}',
                             style: TextStyle(
-                              color: const Color(0xFF0B1D28),
+                              color: AppColors.textPrimary,
                               fontSize: 16.sp,
                               fontWeight: FontWeight.w700,
                             ),
@@ -167,7 +168,7 @@ class LearningSessionView extends GetView<LearningSessionController> {
                             minHeight: 10.h,
                             backgroundColor: Colors.white,
                             valueColor: const AlwaysStoppedAnimation(
-                              Color(0xFF0A69C7),
+                              AppColors.primary,
                             ),
                           );
                         }),
@@ -221,11 +222,11 @@ class LearningSessionView extends GetView<LearningSessionController> {
                           : null,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: controller.isOnLastCard
-                            ? const Color(0xFF0A69C7)
+                            ? AppColors.primary
                             : const Color(0xFFE0E7EF),
                         foregroundColor: controller.isOnLastCard
                             ? Colors.white
-                            : const Color(0xFF60718C),
+                            : AppColors.textSecondary,
                         elevation: 0,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(24.r),
@@ -253,7 +254,7 @@ class LearningSessionView extends GetView<LearningSessionController> {
                               : null,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFFE4F1FF),
-                            foregroundColor: const Color(0xFF0A69C7),
+                            foregroundColor: AppColors.primary,
                             elevation: 0,
                             padding: EdgeInsets.symmetric(vertical: 14.h),
                             shape: RoundedRectangleBorder(
@@ -274,7 +275,7 @@ class LearningSessionView extends GetView<LearningSessionController> {
                               ? controller.markRemembered
                               : null,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF0A69C7),
+                            backgroundColor: AppColors.primary,
                             foregroundColor: Colors.white,
                             elevation: 0,
                             padding: EdgeInsets.symmetric(vertical: 14.h),
@@ -303,7 +304,7 @@ class LearningSessionView extends GetView<LearningSessionController> {
                       onPressed: controller.proceedToRoundThree,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
-                        foregroundColor: const Color(0xFF0A69C7),
+                        foregroundColor: AppColors.primary,
                         elevation: 8,
                         shadowColor: Colors.black.withOpacity(0.12),
                         shape: RoundedRectangleBorder(
@@ -718,7 +719,7 @@ class _RoundThreeContentState extends State<_RoundThreeContent> {
                       }
                     : null,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: enabled ? const Color(0xFF0A69C7) : const Color(0xFFBFD9FF),
+                  backgroundColor: enabled ? AppColors.primary : const Color(0xFFBFD9FF),
                   foregroundColor: Colors.white,
                   elevation: 0,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28.r)),
@@ -777,12 +778,12 @@ class _MultipleChoiceQuestionWidgetState extends State<_MultipleChoiceQuestionWi
           Text(
             "'${widget.question.questionWord}' có nghĩa là gì?",
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold, color: const Color(0xFF0B1D28)),
+            style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
           ),
           SizedBox(height: 40.h),
           ...widget.question.options.map((option) {
             Color? buttonColor = const Color(0xFFE0E7EF);
-            Color? textColor = const Color(0xFF60718C);
+            Color? textColor = AppColors.textSecondary;
             
             if (_selectedOption != null) {
               if (option == widget.question.correctOption) {
@@ -959,7 +960,7 @@ class _MatchingQuestionWidgetState extends State<_MatchingQuestionWidget> {
             ? Colors.green.shade800
             : isWrong
                 ? Colors.red.shade800
-                : const Color(0xFF0B1D28);
+                : AppColors.textPrimary;
 
         return Padding(
           padding: EdgeInsets.symmetric(horizontal: 2.w),
@@ -1226,7 +1227,7 @@ class _ListenAndTypeQuestionWidgetState extends State<_ListenAndTypeQuestionWidg
             Center(
               child: Ink(
                 decoration: const ShapeDecoration(
-                  color: Color(0xFF0A69C7),
+                  color: AppColors.primary,
                   shape: CircleBorder(),
                 ),
                 child: IconButton(
@@ -1356,7 +1357,7 @@ class _FlashcardContent extends StatelessWidget {
                                 ? 'Chạm để xem mặt trước'
                                 : 'Chạm để xem nghĩa tiếng Việt',
                             style: TextStyle(
-                              color: const Color(0xFF60718C),
+                              color: AppColors.textSecondary,
                               fontSize: 14.sp,
                             ),
                           ),
@@ -1412,7 +1413,7 @@ class _LearningCard extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            if (word.imageUrl != null && word.imageUrl!.isNotEmpty) ...[
+            if (!word.isVietnamese && word.imageUrl != null && word.imageUrl!.isNotEmpty) ...[
               Image.network(word.imageUrl!, height: 110.h, fit: BoxFit.contain, errorBuilder: (_, __, ___) => const SizedBox()),
               SizedBox(height: 10.h),
             ],
@@ -1422,27 +1423,27 @@ class _LearningCard extends StatelessWidget {
               style: TextStyle(
                 fontSize: 30.sp,
                 fontWeight: FontWeight.w700,
-                color: const Color(0xFF0B1D28),
+                color: AppColors.textPrimary,
               ),
             ),
             if (word.target != null && word.target!.isTraditional && word.target!.zhuyin.isNotEmpty)
-              LangText(word.target!.zhuyin, language: 'zh-Hant', style: TextStyle(fontSize: 14.sp, color: const Color(0xFF5F7089))),
+              LangText(word.target!.zhuyin, language: 'zh-Hant', style: TextStyle(fontSize: 14.sp, color: AppColors.textSecondary)),
             if (word.target != null && word.target!.measureWord.isNotEmpty)
               LangText('Lượng từ: ${word.target!.measureWord}', language: word.language,
-                  style: TextStyle(fontSize: 13.sp, color: const Color(0xFF5F7089))),
+                  style: TextStyle(fontSize: 13.sp, color: AppColors.textSecondary)),
             SizedBox(height: 12.h),
             Text(
               word.phonetic ?? '',
               style: TextStyle(
                 fontSize: 16.sp,
-                color: const Color(0xFF3B82F6),
+                color: AppColors.primary,
               ),
             ),
             SizedBox(height: 18.h),
             IconButton(
               onPressed: onSpeak,
               icon: const Icon(Icons.volume_up_rounded),
-              color: const Color(0xFF1CB0F6),
+              color: AppColors.primary,
             ),
             SizedBox(height: 18.h),
             Text(
@@ -1461,7 +1462,7 @@ class _LearningCard extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 15.sp,
-                  color: const Color(0xFF0B1D28),
+                  color: AppColors.textPrimary,
                 ),
               ),
               SizedBox(height: 14.h),
@@ -1474,7 +1475,7 @@ class _LearningCard extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 14.sp,
                   fontStyle: FontStyle.italic,
-                  color: const Color(0xFF5F7089),
+                  color: AppColors.textSecondary,
                 ),
               ),
           ],
@@ -1501,7 +1502,7 @@ class _NavigationButton extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           backgroundColor: onTap == null
               ? const Color(0xFFBFD9FF)
-              : const Color(0xFF0A69C7),
+              : AppColors.primary,
           foregroundColor: Colors.white,
           elevation: 0,
           padding: EdgeInsets.symmetric(vertical: 12.h),
@@ -1552,7 +1553,7 @@ class _FlashcardFront extends StatelessWidget {
             style: TextStyle(
               fontSize: 30.sp,
               fontWeight: FontWeight.w700,
-              color: const Color(0xFF0B1D28),
+              color: AppColors.textPrimary,
             ),
           ),
           SizedBox(height: 10.h),
@@ -1560,12 +1561,12 @@ class _FlashcardFront extends StatelessWidget {
             word.phonetic ?? '',
             style: TextStyle(
               fontSize: 16.sp,
-              color: const Color(0xFF3B82F6),
+              color: AppColors.primary,
             ),
           ),
           SizedBox(height: 24.h),
           Material(
-            color: const Color(0xFF0A69C7),
+            color: AppColors.primary,
             shape: const CircleBorder(),
             child: InkWell(
               onTap: onSpeak,
@@ -1589,7 +1590,7 @@ class _FlashcardFront extends StatelessWidget {
               style: TextStyle(
                 fontSize: 15.sp,
                 fontStyle: FontStyle.italic,
-                color: const Color(0xFF5F7089),
+                color: AppColors.textSecondary,
               ),
             ),
           ],
@@ -1628,6 +1629,9 @@ class _FlashcardBack extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          if (word.isVietnamese)
+            WordPicture(imageUrl: word.imageUrl, emoji: word.emoji, size: 200.w)
+          else
           Text(
             word.translation,
             textAlign: TextAlign.center,
@@ -1644,7 +1648,7 @@ class _FlashcardBack extends StatelessWidget {
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 16.sp,
-                color: const Color(0xFF60718C),
+                color: AppColors.textSecondary,
               ),
             ),
           ],
@@ -1693,7 +1697,7 @@ class _LessonCompletedScreenState extends State<_LessonCompletedScreen> {
     final percent = widget.summary.firstTryAccuracyPercent;
     final difficult = widget.summary.difficultResults;
     return Scaffold(
-      backgroundColor: const Color(0xFFE6F9FF),
+      backgroundColor: AppColors.primarySoft,
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.all(20.w),
@@ -1708,14 +1712,14 @@ class _LessonCompletedScreenState extends State<_LessonCompletedScreen> {
                 style: TextStyle(
                   fontSize: 26.sp,
                   fontWeight: FontWeight.w800,
-                  color: const Color(0xFF0B1D28),
+                  color: AppColors.textPrimary,
                 ),
               ),
               SizedBox(height: 16.h),
               Center(
                 child: SizedBox(
                   height: 200.h,
-                  child: Image.asset('assets/images/chimcanhcut/chim_nhachoc.png', fit: BoxFit.contain),
+                  child: Image.asset('assets/brand/mascot/prismo_reminder.png', fit: BoxFit.contain),
                 ),
               ),
               SizedBox(height: 12.h),
@@ -1735,7 +1739,7 @@ class _LessonCompletedScreenState extends State<_LessonCompletedScreen> {
                         ),
                         SizedBox(width: 4.w),
                         Image.asset(
-                          'assets/images/XP.png',
+                          'assets/brand/icons/xp.png',
                           width: 28.w,
                           height: 28.h,
                           errorBuilder: (_, __, ___) => Icon(
@@ -1752,19 +1756,19 @@ class _LessonCompletedScreenState extends State<_LessonCompletedScreen> {
                         Text(
                           widget.summary.scalesEarned > 0 ? '+${widget.summary.scalesEarned}' : '0',
                           style: AppTextStyles.h4.copyWith(
-                            color: widget.summary.scalesEarned > 0 ? const Color(0xFF0A69C7) : AppColors.textHint,
+                            color: widget.summary.scalesEarned > 0 ? AppColors.primary : AppColors.textHint,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
                         SizedBox(width: 4.w),
                         Image.asset(
-                          'assets/images/vay.png',
+                          'assets/brand/icons/scale.png',
                           width: 26.w,
                           height: 26.h,
                           errorBuilder: (_, __, ___) => Icon(
                             Icons.circle,
                             size: 24.sp,
-                            color: const Color(0xFF0A69C7),
+                            color: AppColors.primary,
                           ),
                         ),
                       ],
@@ -1777,13 +1781,13 @@ class _LessonCompletedScreenState extends State<_LessonCompletedScreen> {
               Text(
                 'Bạn đã trả lời đúng $percent%',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w600, color: const Color(0xFF0B1D28)),
+                style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
               ),
               SizedBox(height: 16.h),
               if (difficult.isNotEmpty) ...[
                 Text(
                   'Từ cần ôn thêm:',
-                  style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w700, color: const Color(0xFF0B1D28)),
+                  style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
                   textAlign: TextAlign.center,
                 ),
                 SizedBox(height: 8.h),
@@ -1824,7 +1828,7 @@ class _LessonCompletedScreenState extends State<_LessonCompletedScreen> {
                                   if (word.translation.isNotEmpty)
                                     Text(
                                       word.translation,
-                                      style: TextStyle(fontSize: 14.sp, color: const Color(0xFF60718C)),
+                                      style: TextStyle(fontSize: 14.sp, color: AppColors.textSecondary),
                                     ),
                                   Text(
                                     'Lần đúng đầu: ${result.firstTryCorrect == true ? 'Đúng' : 'Sai'}, lượt làm: ${result.attempts}',
@@ -1843,7 +1847,7 @@ class _LessonCompletedScreenState extends State<_LessonCompletedScreen> {
                 Text(
                   'Tuyệt vời! Bạn đã trả lời đúng tất cả ngay lần đầu.',
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 16.sp, color: const Color(0xFF0B1D28)),
+                  style: TextStyle(fontSize: 16.sp, color: AppColors.textPrimary),
                 ),
               ],
               const Spacer(),
@@ -1859,7 +1863,7 @@ class _LessonCompletedScreenState extends State<_LessonCompletedScreen> {
                     Get.back<void>();
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF0A69C7),
+                    backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
                     elevation: 0,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28.r)),
@@ -1963,7 +1967,7 @@ class _RoundThreePrompt extends StatelessWidget {
           width: 240.w,
           height: 240.w,
           child: Image.asset(
-            'assets/images/chimcanhcut/chim_nhachoc.png',
+            'assets/brand/mascot/prismo_reminder.png',
             fit: BoxFit.contain,
           ),
         ),

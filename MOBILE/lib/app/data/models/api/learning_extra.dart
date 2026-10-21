@@ -1,9 +1,25 @@
 import 'common.dart';
 import 'vocab.dart';
 
+/// Another object the model thinks it might be, with its word card ("Có phải: A / B / C?").
+class DetectionAlternative {
+  DetectionAlternative({required this.label, required this.confidence, required this.card});
+
+  final String label;
+  final double confidence;
+  final WordCard card;
+
+  factory DetectionAlternative.fromJson(Map<String, dynamic> j) => DetectionAlternative(
+        label: asString(j['label']),
+        confidence: asDouble(j['confidence']),
+        card: WordCard.fromJson(asMap(j['card'])),
+      );
+}
+
 class DetectedItem {
   DetectedItem({required this.id, required this.label, required this.confidence, required this.bbox, this.card,
-      this.selected = false, this.feedback = 'unknown'});
+      this.selected = false, this.feedback = 'unknown', this.uncertain = false, this.alternatives = const [],
+      this.learned = false});
 
   final int id;
   final String label;
@@ -12,6 +28,22 @@ class DetectedItem {
   final WordCard? card;
   bool selected;
   String feedback; // unknown | correct | wrong
+  final bool uncertain; // model not sure → ask the learner which object it is
+  final List<DetectionAlternative> alternatives;
+  final bool learned; // relabelled automatically from an earlier learner's error report
+  String? picked; // label the learner chose instead of the model's answer (error report)
+  WordCard? pickedCard; // its card when picked from the full list ("Vật khác…")
+  bool notObject = false; // error report: there is no such object here
+
+  /// The word shown for this object: the one the learner picked, else the model's answer.
+  WordCard? get shownCard {
+    if (picked == null) return card;
+    if (pickedCard != null) return pickedCard;
+    for (final a in alternatives) {
+      if (a.label == picked) return a.card;
+    }
+    return null;
+  }
 
   factory DetectedItem.fromJson(Map<String, dynamic> j) => DetectedItem(
         id: asInt(j['id']),
@@ -21,6 +53,9 @@ class DetectedItem {
         card: j['card'] is Map ? WordCard.fromJson(asMap(j['card'])) : null,
         selected: j['selected'] == true,
         feedback: asString(j['feedback'], 'unknown'),
+        uncertain: j['uncertain'] == true,
+        alternatives: asMapList(j['alternatives']).map(DetectionAlternative.fromJson).toList(),
+        learned: j['learned'] == true,
       );
 }
 

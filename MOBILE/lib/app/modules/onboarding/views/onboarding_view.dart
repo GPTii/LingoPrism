@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import '../controllers/onboarding_controller.dart';
+import 'package:lingoprism/app/core/theme/app_colors.dart';
 
 class OnboardingView extends GetView<OnboardingController> {
   const OnboardingView({super.key});
@@ -9,7 +10,7 @@ class OnboardingView extends GetView<OnboardingController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFE5FFFD),
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: Column(
           children: [
@@ -90,7 +91,7 @@ class OnboardingView extends GetView<OnboardingController> {
                             height: 8.h,
                             decoration: BoxDecoration(
                               color: controller.currentIndex == index
-                                  ? const Color(0xFF0088FF)
+                                  ? AppColors.primary
                                   : Colors.grey.shade300,
                               borderRadius: BorderRadius.circular(4.r),
                             ),
@@ -107,7 +108,7 @@ class OnboardingView extends GetView<OnboardingController> {
                               onPressed: controller.goToLogin,
                               style: OutlinedButton.styleFrom(
                                 padding: const EdgeInsets.symmetric(vertical: 16),
-                                side: const BorderSide(color: const Color(0xFF0088FF)),
+                                side: const BorderSide(color: AppColors.primary),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
@@ -116,7 +117,7 @@ class OnboardingView extends GetView<OnboardingController> {
                                 'Đăng nhập',
                                 style: TextStyle(
                                   fontSize: 16,
-                                  color: const Color(0xFF0088FF),
+                                  color: AppColors.primary,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -127,7 +128,7 @@ class OnboardingView extends GetView<OnboardingController> {
                             child: ElevatedButton(
                               onPressed: controller.goToRegister,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF0088FF),
+                                backgroundColor: AppColors.primary,
                                 padding: const EdgeInsets.symmetric(vertical: 16),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
@@ -151,7 +152,7 @@ class OnboardingView extends GetView<OnboardingController> {
                         child: ElevatedButton(
                           onPressed: controller.nextPage,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF0088FF),
+                            backgroundColor: AppColors.primary,
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
@@ -194,7 +195,7 @@ class OnboardingView extends GetView<OnboardingController> {
                 fontSize: 28.sp,
                 fontWeight: FontWeight.bold,
                 height: 1.2,
-                color: const Color(0xFF0088FF),
+                color: AppColors.primary,
               ),
             ),
             TextSpan(
@@ -230,7 +231,7 @@ class OnboardingView extends GetView<OnboardingController> {
                 fontSize: 28.sp,
                 fontWeight: FontWeight.bold,
                 height: 1.2,
-                color: const Color(0xFF0088FF),
+                color: AppColors.primary,
               ),
             ),
           ],

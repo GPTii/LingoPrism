@@ -94,6 +94,8 @@ class WordCard {
     required this.id,
     required this.slug,
     this.image,
+    this.emoji = '',
+    this.level,
     this.partOfSpeech = 'noun',
     this.difficulty = 1,
     this.yoloLabel = '',
@@ -107,6 +109,8 @@ class WordCard {
   final int id;
   final String slug;
   final String? image;
+  final String emoji; // picture for children (Unicode emoji)
+  final int? level; // 1–4 on the learning path of the active language
   final String partOfSpeech;
   final int difficulty;
   final String yoloLabel;
@@ -117,12 +121,17 @@ class WordCard {
   final PersonalInfo? personal;
 
   String get text => target?.text ?? slug;
+
+  /// Learning Vietnamese (children): the "meaning" is a picture, never an English gloss.
+  bool get isVietnameseTarget => target?.language == 'vi';
   bool get saved => personal != null;
 
   factory WordCard.fromJson(Map<String, dynamic> j) => WordCard(
         id: asInt(j['id']),
         slug: asString(j['slug']),
         image: j['image'] as String?,
+        emoji: asString(j['emoji']),
+        level: j['level'] == null ? null : asInt(j['level']),
         partOfSpeech: asString(j['part_of_speech'], 'noun'),
         difficulty: asInt(j['difficulty'], 1),
         yoloLabel: asString(j['yolo_label']),

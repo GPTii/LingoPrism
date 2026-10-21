@@ -5,6 +5,9 @@ import { useQueryClient } from '@tanstack/react-query'
 import { vocabApi, type WordCard } from '../api/vocab'
 import { errorMessage } from '../api/client'
 import TargetWord, { langTag } from './TargetWord'
+import { TokenLine } from './SentenceView'
+import WordPicture from './WordPicture'
+import { LEVEL_COLORS } from '../api/levels'
 
 const STATUS: Record<string, { label: string; color: string }> = {
   new: { label: 'Chưa học', color: 'default' },
@@ -74,9 +77,10 @@ export default function WordCardView({ card, topicId }: { card: WordCard; topicI
   }
 
   return (
-    <div className="rounded-2xl bg-white border border-slate-200 p-4 flex flex-col gap-3 hover:shadow-md transition">
+    <div className="relative rounded-2xl bg-white border border-slate-200 p-4 flex flex-col gap-3 hover:shadow-md transition">
+      {card.level && <Tag className="absolute top-2 left-2 z-10 m-0" color={LEVEL_COLORS[card.level - 1]}>Cấp {card.level}</Tag>}
       <div className="h-28 rounded-xl bg-brand-50 flex items-center justify-center overflow-hidden">
-        {card.image ? <img src={card.image} alt={card.meaning_vi} className="h-full object-contain" /> : <span className="text-4xl">🔺</span>}
+        <WordPicture image={card.image} emoji={card.emoji || '🖼️'} credit={card.image_credit} source={card.image_source} alt={card.meaning_vi} height="h-28" />
       </div>
       <TargetWord target={card.target} size="md" />
       <div className="text-center">
@@ -85,8 +89,12 @@ export default function WordCardView({ card, topicId }: { card: WordCard; topicI
       </div>
       {card.examples[0] && (
         <div className="text-sm text-slate-600 bg-slate-50 rounded-lg p-2">
-          <div lang={langTag(card.target.language)}>{card.examples[0].text}</div>
-          <div className="text-slate-400">{card.examples[0].translation_vi}</div>
+          {card.examples[0].tokens?.length ? (
+            <TokenLine tokens={card.examples[0].tokens} language={card.target.language} highlight={card.examples[0].target_tokens} size="text-base" />
+          ) : (
+            <div lang={langTag(card.target.language)}>{card.examples[0].text}</div>
+          )}
+          <div className="text-slate-400">{card.examples[0].translation_vi || card.examples[0].translation_en}</div>
         </div>
       )}
       <div className="flex items-center justify-between mt-auto">

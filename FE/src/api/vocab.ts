@@ -1,3 +1,4 @@
+import type { SentenceToken } from './sentences'
 import { api } from './client'
 import type { Paginated } from './types'
 
@@ -19,6 +20,10 @@ export interface WordCard {
   id: number
   slug: string
   image: string | null
+  image_credit?: string
+  level?: number | null // 1–4 on the learning path of the active language
+  image_source?: string
+  emoji: string
   part_of_speech: string
   difficulty: number
   audience: string
@@ -26,7 +31,7 @@ export interface WordCard {
   target: TargetText | null
   meaning_vi: string
   english: string | null
-  examples: { id: number; text: string; transliteration: string; translation_vi: string; translation_en: string; source: string }[]
+  examples: { id: number; text: string; transliteration: string; tokens: SentenceToken[]; target_tokens: number[]; translation_vi: string; translation_en: string; source: string; source_id: string }[]
   personal: { id: number; status: 'new' | 'learning' | 'mastered'; stage: number; due_at: string | null; last_reviewed_at: string | null } | null
 }
 
@@ -101,7 +106,7 @@ export const vocabApi = {
   answer: (sessionId: number, payload: { personal_word: number; question_type: string; correct: boolean; first_try?: boolean; graded?: boolean; response_ms?: number; answer?: string }) =>
     api.post(`/sessions/${sessionId}/answer/`, payload).then((r) => r.data),
   finish: (sessionId: number) =>
-    api.post<{ planned_count: number; completed_count: number; correct_first_try: number; xp_earned: number; needs_more_practice: number[] }>(`/sessions/${sessionId}/finish/`).then((r) => r.data),
+    api.post<{ planned_count: number; completed_count: number; correct_first_try: number; xp_earned: number; needs_more_practice: number[]; level_up: number | null }>(`/sessions/${sessionId}/finish/`).then((r) => r.data),
 }
 
 /** Name of a topic in the language being learned. */

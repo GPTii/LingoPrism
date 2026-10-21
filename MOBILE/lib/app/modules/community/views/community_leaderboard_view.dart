@@ -29,6 +29,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../controllers/community_controller.dart';
+import 'package:lingoprism/app/core/theme/app_colors.dart';
 
 /// Main leaderboard view widget displaying community league rankings
 ///
@@ -108,16 +109,16 @@ class _LeagueHeader extends StatelessWidget {
 
   /// Static rank asset paths for performance optimization
   static const List<String> _rankAssets = [
-    'assets/images/rank/rank1.png',
-    'assets/images/rank/rank2.png',
-    'assets/images/rank/rank3.png',
-    'assets/images/rank/rank4.png',
-    'assets/images/rank/rank5.png',
-    'assets/images/rank/rank6.png',
-    'assets/images/rank/rank7.png',
-    'assets/images/rank/rank8.png',
-    'assets/images/rank/rank9.png',
-    'assets/images/rank/rank10.png',
+    'assets/brand/rank/rank_1.png',
+    'assets/brand/rank/rank_2.png',
+    'assets/brand/rank/rank_3.png',
+    'assets/brand/rank/rank_4.png',
+    'assets/brand/rank/rank_5.png',
+    'assets/brand/rank/rank_6.png',
+    'assets/brand/rank/rank_7.png',
+    'assets/brand/rank/rank_8.png',
+    'assets/brand/rank/rank_9.png',
+    'assets/brand/rank/rank_10.png',
   ];
 
   /// Helper method to create remaining label from days remaining
@@ -142,7 +143,7 @@ class _LeagueHeader extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(20.w),
       decoration: BoxDecoration(
-        color: const Color(0xFFE6F9FF),
+        color: AppColors.primarySoft,
         borderRadius: BorderRadius.circular(28.r),
         border: Border.all(color: const Color(0xFF9ED1FF), width: 1.2),
         boxShadow: [
@@ -205,7 +206,7 @@ class _LeagueHeader extends StatelessWidget {
                   // Enhanced comparison for current rank with null safety
                   final bool isCurrent = asset == rankIcon && rankIcon.isNotEmpty;
                   final displayAsset =
-                      isUnlocked ? asset : 'assets/images/rank/rank?.png';
+                      isUnlocked ? asset : 'assets/brand/rank/rank_locked.png';
                   return RepaintBoundary(
                     key: ValueKey('rank_${index}_$isCurrent'),
                     child: Container(
@@ -216,7 +217,7 @@ class _LeagueHeader extends StatelessWidget {
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(26.r),
                       border: Border.all(
-                        color: isCurrent ? const Color(0xFF0A69C7) : Colors.transparent,
+                        color: isCurrent ? AppColors.primary : Colors.transparent,
                         width: 2.w,
                       ),
                       boxShadow: [
@@ -325,7 +326,7 @@ class _LeagueSection extends StatelessWidget {
               style: TextStyle(
                 fontSize: 13.sp,
                 fontWeight: FontWeight.w700,
-                color: const Color(0xFF1B2B40),
+                color: AppColors.textPrimary,
               ),
             ),
           ),
@@ -414,7 +415,7 @@ class _LeagueParticipantTile extends StatelessWidget {
               style: TextStyle(
                 fontSize: 16.sp,
                 fontWeight: FontWeight.w700,
-                color: const Color(0xFF1B2B40),
+                color: AppColors.textPrimary,
               ),
             ),
           ),
@@ -452,12 +453,12 @@ class _LeagueParticipantTile extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 18.sp,
                   fontWeight: FontWeight.w700,
-                  color: const Color(0xFF1B2B40),
+                  color: AppColors.textPrimary,
                 ),
               ),
               SizedBox(width: 6.w),
               Image.asset(
-                'assets/images/XP.png',
+                'assets/brand/icons/xp.png',
                 width: 26.w,
                 height: 26.w,
               ),
@@ -501,7 +502,7 @@ class _LeagueParticipantTile extends StatelessWidget {
   }
 
   ImageProvider _resolveAvatarProvider(String? avatarUrl) {
-    const placeholder = AssetImage('assets/images/chimcanhcut/chim_vui1.png');
+    const placeholder = AssetImage('assets/brand/avatar/avatar_1.png');
 
     // Enhanced null safety and validation
     final trimmed = avatarUrl?.trim() ?? '';
@@ -632,7 +633,7 @@ class _LeagueParticipantTile extends StatelessWidget {
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
       ),
-      border: Border.all(color: const Color(0xFFB0BEC5), width: 1.6),
+      border: Border.all(color: AppColors.textHint, width: 1.6),
       boxShadow: shadow,
     );
   }

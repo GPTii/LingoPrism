@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../controllers/profile_notification_controller.dart';
+import 'package:lingoprism/app/core/theme/app_colors.dart';
 
 class ProfileNotificationView extends GetView<ProfileNotificationController> {
   const ProfileNotificationView({super.key});
@@ -10,19 +11,19 @@ class ProfileNotificationView extends GetView<ProfileNotificationController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFE6F9FF),
+      backgroundColor: AppColors.primarySoft,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFE6F9FF),
+        backgroundColor: AppColors.primarySoft,
         elevation: 0,
         leading: IconButton(
           onPressed: Get.back,
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
-          color: const Color(0xFF0B1D28),
+          color: AppColors.textPrimary,
         ),
         title: Text(
           'Thông báo học tập',
           style: TextStyle(
-            color: const Color(0xFF0B1D28),
+            color: AppColors.textPrimary,
             fontSize: 20.sp,
             fontWeight: FontWeight.w700,
           ),
@@ -75,13 +76,13 @@ class ProfileNotificationView extends GetView<ProfileNotificationController> {
       child: Row(
         children: [
           Icon(Icons.notifications_active_rounded,
-              color: const Color(0xFF1CB0F6), size: 28.sp),
+              color: AppColors.primary, size: 28.sp),
           SizedBox(width: 12.w),
           Expanded(
             child: Text(
               'Nhắc học hằng ngày',
               style: TextStyle(
-                color: const Color(0xFF0B1D28),
+                color: AppColors.textPrimary,
                 fontSize: 16.sp,
                 fontWeight: FontWeight.w600,
               ),
@@ -89,7 +90,7 @@ class ProfileNotificationView extends GetView<ProfileNotificationController> {
           ),
           Obx(() => Switch.adaptive(
                 value: controller.notificationsEnabled.value,
-                activeColor: const Color(0xFF1CB0F6),
+                activeColor: AppColors.primary,
                 onChanged: controller.toggleNotifications,
               )),
         ],
@@ -101,7 +102,7 @@ class ProfileNotificationView extends GetView<ProfileNotificationController> {
     return Text(
       text,
       style: TextStyle(
-        color: const Color(0xFF0B1D28),
+        color: AppColors.textPrimary,
         fontSize: 15.sp,
         fontWeight: FontWeight.w700,
       ),
@@ -127,7 +128,7 @@ class ProfileNotificationView extends GetView<ProfileNotificationController> {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(18.r),
-            border: Border.all(color: const Color(0xFF1CB0F6), width: 2),
+            border: Border.all(color: AppColors.primary, width: 2),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -135,13 +136,13 @@ class ProfileNotificationView extends GetView<ProfileNotificationController> {
               Text(
                 formatted,
                 style: TextStyle(
-                  color: const Color(0xFF0B1D28),
+                  color: AppColors.textPrimary,
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w600,
                 ),
               ),
               Icon(Icons.chevron_right_rounded,
-                  color: const Color(0xFF1CB0F6), size: 24.sp),
+                  color: AppColors.primary, size: 24.sp),
             ],
           ),
         ),
@@ -157,7 +158,7 @@ class ProfileNotificationView extends GetView<ProfileNotificationController> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(18.r),
-          border: Border.all(color: const Color(0xFF1CB0F6), width: 2),
+          border: Border.all(color: AppColors.primary, width: 2),
         ),
         child: Column(
           children: controller.frequencies.map((item) {
@@ -167,14 +168,14 @@ class ProfileNotificationView extends GetView<ProfileNotificationController> {
               title: Text(
                 item,
                 style: TextStyle(
-                  color: const Color(0xFF0B1D28),
+                  color: AppColors.textPrimary,
                   fontSize: 15.sp,
                   fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                 ),
               ),
               trailing: isSelected
                   ? Icon(Icons.check_circle_rounded,
-                      color: const Color(0xFF1CB0F6), size: 22.sp)
+                      color: AppColors.primary, size: 22.sp)
                   : null,
               onTap: () => controller.updateFrequency(item),
             );
@@ -195,7 +196,7 @@ class ProfileNotificationView extends GetView<ProfileNotificationController> {
       child: Text(
         'Bạn đã tắt nhắc nhở học. Bật lại để được nhắc học vào thời gian bạn chọn.',
         style: TextStyle(
-          color: const Color(0xFF60718C),
+          color: AppColors.textSecondary,
           fontSize: 14.sp,
         ),
       ),
@@ -212,8 +213,8 @@ class ProfileNotificationView extends GetView<ProfileNotificationController> {
             icon: const Icon(Icons.notifications_active_outlined),
             label: const Text('Gửi thử thông báo'),
             style: OutlinedButton.styleFrom(
-              foregroundColor: const Color(0xFF1CB0F6),
-              side: const BorderSide(color: Color(0xFF1CB0F6), width: 1.6),
+              foregroundColor: AppColors.primary,
+              side: const BorderSide(color: AppColors.primary, width: 1.6),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14.r),
               ),
@@ -229,8 +230,8 @@ class ProfileNotificationView extends GetView<ProfileNotificationController> {
             icon: const Icon(Icons.schedule_outlined),
             label: const Text('Gửi thử trong 1 phút'),
             style: OutlinedButton.styleFrom(
-              foregroundColor: const Color(0xFF1CB0F6),
-              side: const BorderSide(color: Color(0xFF1CB0F6), width: 1.6),
+              foregroundColor: AppColors.primary,
+              side: const BorderSide(color: AppColors.primary, width: 1.6),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14.r),
               ),
@@ -241,9 +242,9 @@ class ProfileNotificationView extends GetView<ProfileNotificationController> {
         ),
         SizedBox(height: 10.h),
         Text(
-          'Snaplingua sẽ gửi thông báo qua hệ thống của thiết bị. Hãy đảm bảo bạn đã bật quyền thông báo cho ứng dụng.',
+          'LingoPrism sẽ gửi thông báo qua hệ thống của thiết bị. Hãy đảm bảo bạn đã bật quyền thông báo cho ứng dụng.',
           style: TextStyle(
-            color: const Color(0xFF60718C),
+            color: AppColors.textSecondary,
             fontSize: 12.sp,
           ),
         ),

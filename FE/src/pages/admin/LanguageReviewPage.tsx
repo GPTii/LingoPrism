@@ -3,9 +3,11 @@ import { Alert, App, Button, Card, Descriptions, Form, Input, Modal, Select, Spa
 import { CheckOutlined, CloseOutlined, EditOutlined, ReloadOutlined } from '@ant-design/icons'
 import { useState } from 'react'
 import dayjs from 'dayjs'
-import { adminVocabApi, LANG_LABEL, STATUS_TAG, type AdminReport, type AdminTranslation, type ReviewStatus } from '../../api/adminVocab'
+import { adminVocabApi, LANG_LABEL, STATUS_TAG, type AdminExample, type AdminReport, type AdminTranslation, type ReviewStatus } from '../../api/adminVocab'
 import { errorMessage } from '../../api/client'
 import { langTag } from '../../components/TargetWord'
+import { TokenLine } from '../../components/SentenceView'
+import CandidateQueue from './CandidateQueue'
 
 function SourcesView({ tr }: { tr: AdminTranslation }) {
   return (
@@ -98,7 +100,7 @@ function TranslationQueue() {
       <Modal title="Sửa bản dịch" open={!!editing} onOk={saveEdit} onCancel={() => setEditing(null)} okText="Lưu" width={640}>
         {editing && (
           <Form form={form} layout="vertical">
-            <Descriptions size="small" column={2} className="mb-4" items={[
+            <Descriptions size="small" column={{ xs: 1, sm: 2 }} className="mb-4" items={[
               { label: 'Khái niệm', children: editing.word_slug }, { label: 'Ngôn ngữ', children: LANG_LABEL[editing.language] },
             ]} />
             <Form.Item name="text" label="Nội dung" rules={[{ required: true }]}><Input lang={langTag(editing.language)} /></Form.Item>
@@ -153,6 +155,81 @@ function ReportsQueue() {
   )
 }
 
+function ExampleQueue() {
+  const { message } = App.useApp()
+  const queryClient = useQueryClient()
+  const [status, setStatus] = useState<ReviewStatus>('flagged')
+  const [language, setLanguage] = useState<string | undefined>()
+  const [search, setSearch] = useState('')
+  const [page, setPage] = useState(1)
+
+  const list = useQuery({
+    queryKey: ['admin-examples', status, language, search, page],
+    queryFn: () => adminVocabApi.examples({ status, language, page, search: search || undefined }),
+  })
+  const act = useMutation({
+    mutationFn: ({ id, to }: { id: number; to: ReviewStatus }) => adminVocabApi.setExampleStatus(id, to),
+    onSuccess: (ex) => {
+      message.success(`Trạng thái: ${STATUS_TAG[ex.status].label}`)
+      queryClient.invalidateQueries({ queryKey: ['admin-examples'] })
+    },
+    onError: (e) => message.error(errorMessage(e)),
+  })
+
+  return (
+    <div className="flex flex-col gap-3">
+      <Alert type="info" showIcon message="Câu ví dụ lấy từ Tatoeba (người bản xứ viết, CC BY 2.0 FR). Câu bị gắn cờ khi pinyin không khớp nguồn đối chiếu, lẫn chữ giản/phồn hoặc khác cách đọc Đài Loan – học viên không thấy cho tới khi được duyệt." />
+      <Space wrap>
+        <Select value={status} onChange={(v) => { setStatus(v); setPage(1) }} style={{ width: 150 }}
+          options={(['flagged', 'verified', 'rejected', 'draft'] as ReviewStatus[]).map((v) => ({ value: v, label: STATUS_TAG[v].label }))} />
+        <Select allowClear placeholder="Ngôn ngữ" value={language} onChange={(v) => { setLanguage(v); setPage(1) }} style={{ width: 170 }}
+          options={Object.entries(LANG_LABEL).map(([value, label]) => ({ value, label }))} />
+        <Input.Search allowClear placeholder="Tìm trong câu / bản dịch" onSearch={(v) => { setSearch(v); setPage(1) }} style={{ width: 260 }} />
+      </Space>
+      <Table<AdminExample>
+        rowKey="id"
+        loading={list.isLoading}
+        dataSource={list.data?.results}
+        scroll={{ x: 900 }}
+        pagination={{ current: page, total: list.data?.count, pageSize: 20, onChange: setPage, showSizeChanger: false }}
+        columns={[
+          { title: 'Từ', dataIndex: 'word_slug', width: 120 },
+          {
+            title: 'Câu', key: 'text',
+            render: (_, ex) => (
+              <div className="flex flex-col gap-1 items-start">
+                {ex.tokens.length ? <TokenLine tokens={ex.tokens} language={ex.language} highlight={ex.target_tokens} size="text-lg" /> : <span lang={langTag(ex.language)}>{ex.text}</span>}
+                <span className="text-slate-500 text-xs">{ex.translation_vi || ex.translation_en}</span>
+                {ex.source === 'tatoeba' && <a className="text-xs" href={`https://tatoeba.org/sentences/show/${ex.source_id}`} target="_blank" rel="noreferrer">Tatoeba #{ex.source_id}</a>}
+              </div>
+            ),
+          },
+          { title: 'Ngôn ngữ', dataIndex: 'language', width: 110, render: (v) => LANG_LABEL[v] ?? v },
+          {
+            title: 'Kiểm tra tự động', key: 'checks', width: 300,
+            render: (_, ex) => (
+              <div className="flex flex-col gap-1 text-xs">
+                {ex.checks.errors?.map((m, i) => <Tag key={i} color="red" className="whitespace-normal">{m}</Tag>)}
+                {ex.checks.warnings?.map((m, i) => <Tag key={`w${i}`} className="whitespace-normal">{m}</Tag>)}
+                {ex.checks.manual && <span className="text-slate-400">Duyệt tay: {ex.checks.manual.by} · {dayjs(ex.checks.manual.at).format('DD/MM HH:mm')}</span>}
+              </div>
+            ),
+          },
+          {
+            title: '', key: 'actions', width: 120,
+            render: (_, ex) => (
+              <Space>
+                {ex.status !== 'verified' && <Button size="small" type="primary" icon={<CheckOutlined />} title="Duyệt" onClick={() => act.mutate({ id: ex.id, to: 'verified' })} />}
+                {ex.status !== 'rejected' && <Button size="small" danger icon={<CloseOutlined />} title="Loại" onClick={() => act.mutate({ id: ex.id, to: 'rejected' })} />}
+              </Space>
+            ),
+          },
+        ]}
+      />
+    </div>
+  )
+}
+
 export default function LanguageReviewPage() {
   return (
     <Card title="Kiểm tra dữ liệu ngôn ngữ">
@@ -160,7 +237,9 @@ export default function LanguageReviewPage() {
         message="Học viên chỉ nhìn thấy bản dịch 'Đã kiểm tra'. Bản dịch lệch nguồn (CC-CEDICT, HSK, từ điển Bộ GD Đài Loan, CMUdict) hoặc bị nhiều học viên báo lỗi sẽ vào đây." />
       <Tabs items={[
         { key: 'queue', label: 'Hàng chờ bản dịch', children: <TranslationQueue /> },
+        { key: 'examples', label: 'Câu ví dụ', children: <ExampleQueue /> },
         { key: 'reports', label: 'Báo lỗi từ học viên', children: <ReportsQueue /> },
+        { key: 'candidates', label: 'Từ mới chờ duyệt (HSK)', children: <CandidateQueue /> },
       ]} />
     </Card>
   )

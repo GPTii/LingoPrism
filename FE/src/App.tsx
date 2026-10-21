@@ -10,6 +10,9 @@ import ProfilePage from './pages/learner/ProfilePage'
 import VocabPage from './pages/learner/VocabPage'
 import TopicPage from './pages/learner/TopicPage'
 import SessionPage from './pages/learner/SessionPage'
+import SentencePage from './pages/learner/SentencePage'
+import { LiteracyLessonPage, LiteracyMapPage } from './pages/learner/LiteracyPages'
+import LevelTestPage from './pages/learner/LevelTestPage'
 import CameraPage from './pages/learner/CameraPage'
 import CommunityPage from './pages/learner/CommunityPage'
 import GroupPage from './pages/learner/GroupPage'
@@ -26,6 +29,7 @@ import LanguageReviewPage from './pages/admin/LanguageReviewPage'
 import ExamsAdminPage from './pages/admin/ExamsAdminPage'
 import PoisAdminPage from './pages/admin/PoisAdminPage'
 import { BroadcastPage, DetectionsAdminPage, GamificationAdminPage, ModerationPage, SupportAdminPage } from './pages/admin/OperationsPages'
+import AlgorithmsPage from './pages/admin/AlgorithmsPage'
 
 export default function App() {
   return (
@@ -41,6 +45,10 @@ export default function App() {
           <Route path="vocab" element={<VocabPage />} />
           <Route path="vocab/topics/:id" element={<TopicPage />} />
           <Route path="learn" element={<SessionPage />} />
+          <Route path="sentences" element={<SentencePage />} />
+          <Route path="doc-viet" element={<LiteracyMapPage />} />
+          <Route path="doc-viet/:n" element={<LiteracyLessonPage />} />
+          <Route path="levels/:n/test" element={<LevelTestPage />} />
           <Route path="review" element={<Navigate to="/learn?kind=review" replace />} />
           <Route path="camera" element={<CameraPage />} />
           <Route path="community" element={<CommunityPage />} />
@@ -69,6 +77,7 @@ export default function App() {
             <Route path="notifications" element={<BroadcastPage />} />
             <Route path="gamification" element={<GamificationAdminPage />} />
             <Route path="detections" element={<DetectionsAdminPage />} />
+            <Route path="algorithms" element={<AlgorithmsPage />} />
           </Route>
         </Route>
       </Route>

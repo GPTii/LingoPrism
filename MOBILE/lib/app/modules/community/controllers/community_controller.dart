@@ -276,7 +276,7 @@ class CommunityLeagueInfo {
         tierId: '',
         name: 'Đang tải giải đấu',
         daysRemaining: 0,
-        rankIcon: 'assets/images/rank/rank6.png',
+        rankIcon: 'assets/brand/rank/rank_6.png',
         promotionCount: 0,
         safeThreshold: 0,
         demotionCount: 0,
@@ -434,7 +434,7 @@ class CommunityPostComment {
 }
 
 /// Community tab: feed of photo + vocabulary posts, study groups (one active group per learner,
-/// SnapLingua style) and the weekly Igloo league – all from the REST API.
+/// SnapLingua style) and the weekly league – all from the REST API.
 class CommunityController extends GetxController {
   static CommunityController get to => Get.find<CommunityController>();
 
@@ -712,7 +712,7 @@ class CommunityController extends GetxController {
 
   // ---------------------------------------------------------------- groups
 
-  static const _defaultGroupIcon = 'assets/images/nhom/nhom2.png';
+  static const _defaultGroupIcon = 'assets/brand/group/group_2.png';
 
   CommunityStudyGroup _toGroup(StudyGroup g, {String leaderId = '', String leaderName = ''}) => CommunityStudyGroup(
         groupId: '${g.id}',
@@ -755,7 +755,7 @@ class CommunityController extends GetxController {
   }
 
   /// Weekly group goal: the members' XP this week adds up towards milestones.
-  static const _milestones = [('Đảo băng', 300), ('Sông băng', 800), ('Núi băng', 1500), ('Cực quang', 3000)];
+  static const _milestones = [('Tia sáng', 300), ('Cầu vồng', 800), ('Ngọc lăng kính', 1500), ('Ánh sáng huyền thoại', 3000)];
 
   Future<void> _loadJoinedGroup(StudyGroup g) async {
     final members = await CommunityRepository.members(g.id);
@@ -939,7 +939,7 @@ class CommunityController extends GetxController {
                 name: m.isMe ? '${m.displayName} (bạn)' : m.displayName,
                 totalPoints: m.xp,
                 weeklyPoints: m.xp,
-                avatarUrl: m.avatar ?? 'assets/images/chimcanhcut/chim_vui1.png',
+                avatarUrl: m.avatar ?? 'assets/brand/avatar/avatar_1.png',
                 status: switch (m.zone) {
                   'promotion' => CommunityLeaderboardStatus.promotion,
                   'demotion' => CommunityLeaderboardStatus.demotion,

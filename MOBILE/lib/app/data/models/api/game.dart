@@ -1,3 +1,4 @@
+import '../../../core/utils/brand_assets.dart';
 import 'common.dart';
 
 class GameSummary {
@@ -162,7 +163,7 @@ class BadgeInfo {
         code: asString(j['code']),
         name: asString(j['name']),
         description: asString(j['description']),
-        icon: asString(j['icon']),
+        icon: brandAsset(asString(j['icon'])),
         owned: j['owned'] == true,
         awardedAt: parseDate(j['awarded_at']),
       );
@@ -183,7 +184,7 @@ class LeaderboardEntry {
         rank: asInt(j['rank']),
         userId: asInt(j['user_id']),
         displayName: asString(j['display_name']),
-        avatar: j['avatar'] as String?,
+        avatar: _brandOrNull(j['avatar'] as String?),
         xp: asInt(j['xp']),
         zone: asString(j['zone'], 'safe'),
         isMe: j['is_me'] == true,
@@ -199,7 +200,7 @@ class LeagueTierInfo {
   final String icon;
 
   factory LeagueTierInfo.fromJson(Map<String, dynamic> j) =>
-      LeagueTierInfo(code: asString(j['code']), name: asString(j['name']), order: asInt(j['order']), icon: asString(j['icon']));
+      LeagueTierInfo(code: asString(j['code']), name: asString(j['name']), order: asInt(j['order']), icon: brandAsset(asString(j['icon'])));
 }
 
 class Leaderboard {
@@ -249,7 +250,7 @@ class ShopItem {
         code: asString(j['code']),
         name: asString(j['name']),
         description: asString(j['description']),
-        image: asString(j['image']),
+        image: brandAsset(asString(j['image'])),
         effect: asString(j['effect']),
         costScales: j['cost_scales'] == null ? null : asInt(j['cost_scales']),
         costGems: j['cost_gems'] == null ? null : asInt(j['cost_gems']),
@@ -280,9 +281,11 @@ class AppNotification {
         kind: asString(j['kind']),
         title: asString(j['title']),
         body: asString(j['body']),
-        image: asString(j['image']),
+        image: brandAsset(asString(j['image'])),
         data: asMap(j['data']),
         read: j['read'] == true,
         createdAt: parseDate(j['created_at']) ?? DateTime.now(),
       );
 }
+
+String? _brandOrNull(String? path) => path == null ? null : brandAsset(path);

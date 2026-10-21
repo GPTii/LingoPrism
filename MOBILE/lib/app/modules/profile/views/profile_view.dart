@@ -9,6 +9,7 @@ import '../../community/controllers/community_controller.dart';
 import '../../community_detail/controllers/community_detail_controller.dart';
 import '../../../routes/app_pages.dart';
 import '../../../core/utils/streak_asset_resolver.dart';
+import 'package:lingoprism/app/core/theme/app_colors.dart';
 
 class ProfileView extends GetView<ProfileController> {
   const ProfileView({super.key});
@@ -16,15 +17,15 @@ class ProfileView extends GetView<ProfileController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFE6F9FF),
+      backgroundColor: AppColors.primarySoft,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFE6F9FF),
+        backgroundColor: AppColors.primarySoft,
         elevation: 0,
         titleSpacing: 20.w,
         title: Text(
           'Trang cá nhân',
           style: TextStyle(
-            color: const Color(0xFF0B1D28),
+            color: AppColors.textPrimary,
             fontSize: 20.sp,
             fontWeight: FontWeight.w700,
           ),
@@ -32,7 +33,7 @@ class ProfileView extends GetView<ProfileController> {
         actions: [
           IconButton(
             onPressed: controller.loadProfile,
-            icon: const Icon(Icons.refresh_rounded, color: Color(0xFF1CB0F6)),
+            icon: const Icon(Icons.refresh_rounded, color: AppColors.primary),
             tooltip: 'Làm mới',
           ),
           SizedBox(width: 4.w),
@@ -46,7 +47,7 @@ class ProfileView extends GetView<ProfileController> {
 
         return RefreshIndicator(
           onRefresh: controller.loadProfile,
-          color: const Color(0xFF1CB0F6),
+          color: AppColors.primary,
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
             padding: EdgeInsets.only(
@@ -71,7 +72,7 @@ class ProfileView extends GetView<ProfileController> {
                 Text(
                   'Các bài đăng gần đây',
                   style: TextStyle(
-                    color: const Color(0xFF0B1D28),
+                    color: AppColors.textPrimary,
                     fontSize: 18.sp,
                     fontWeight: FontWeight.w700,
                   ),
@@ -101,7 +102,7 @@ class ProfileView extends GetView<ProfileController> {
                     child: Text(
                       'Chưa có bài đăng nào',
                       style: TextStyle(
-                        color: const Color(0xFF60718C),
+                        color: AppColors.textSecondary,
                         fontSize: 15.sp,
                       ),
                       textAlign: TextAlign.center,
@@ -177,7 +178,7 @@ class ProfileHeader extends StatelessWidget {
                           child: Text(
                             summary.displayName,
                             style: TextStyle(
-                              color: const Color(0xFF0B1D28),
+                              color: AppColors.textPrimary,
                               fontWeight: FontWeight.w700,
                               fontSize: 20.sp,
                             ),
@@ -187,7 +188,7 @@ class ProfileHeader extends StatelessWidget {
                           IconButton(
                             onPressed: onSettingsTap,
                             icon: const Icon(Icons.settings_outlined),
-                            color: const Color(0xFF1B2B40),
+                            color: AppColors.textPrimary,
                             tooltip: 'Chỉnh sửa hồ sơ',
                           )
                         else if (showFollowButton)
@@ -209,7 +210,7 @@ class ProfileHeader extends StatelessWidget {
                                 '${summary.posts}',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                  color: const Color(0xFF0B1D28),
+                                  color: AppColors.textPrimary,
                                   fontSize: 16.sp,
                                   fontWeight: FontWeight.w700,
                                 ),
@@ -221,7 +222,7 @@ class ProfileHeader extends StatelessWidget {
                                 '${summary.followers}',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                  color: const Color(0xFF0B1D28),
+                                  color: AppColors.textPrimary,
                                   fontSize: 16.sp,
                                   fontWeight: FontWeight.w700,
                                 ),
@@ -233,7 +234,7 @@ class ProfileHeader extends StatelessWidget {
                                 '${summary.following}',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                  color: const Color(0xFF0B1D28),
+                                  color: AppColors.textPrimary,
                                   fontSize: 16.sp,
                                   fontWeight: FontWeight.w700,
                                 ),
@@ -249,7 +250,7 @@ class ProfileHeader extends StatelessWidget {
                                 'Ảnh đăng',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                  color: const Color(0xFF60718C),
+                                  color: AppColors.textSecondary,
                                   fontSize: 12.sp,
                                 ),
                               ),
@@ -260,7 +261,7 @@ class ProfileHeader extends StatelessWidget {
                                 'Người theo dõi',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                  color: const Color(0xFF60718C),
+                                  color: AppColors.textSecondary,
                                   fontSize: 12.sp,
                                 ),
                               ),
@@ -271,7 +272,7 @@ class ProfileHeader extends StatelessWidget {
                                 'Đang theo dõi',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                  color: const Color(0xFF60718C),
+                                  color: AppColors.textSecondary,
                                   fontSize: 12.sp,
                                 ),
                               ),
@@ -320,7 +321,7 @@ class ProfileOverviewSection extends StatelessWidget {
       ProfileOverviewItemData(
         title: 'Kinh nghiệm',
         value: summary.experience.toString(),
-        iconPath: 'assets/images/XP.png',
+        iconPath: 'assets/brand/icons/xp.png',
         background: const Color(0xFFE9F7FF),
       ),
     ];
@@ -331,7 +332,7 @@ class ProfileOverviewSection extends StatelessWidget {
         Text(
           'Tổng quan',
           style: TextStyle(
-            color: const Color(0xFF0B1D28),
+            color: AppColors.textPrimary,
             fontSize: 18.sp,
             fontWeight: FontWeight.w700,
           ),
@@ -452,7 +453,7 @@ class ProfileOverviewCard extends StatelessWidget {
                 Text(
                   data.title,
                   style: TextStyle(
-                    color: const Color(0xFF60718C),
+                    color: AppColors.textSecondary,
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w500,
                   ),
@@ -463,7 +464,7 @@ class ProfileOverviewCard extends StatelessWidget {
                 Text(
                   data.value,
                   style: TextStyle(
-                    color: const Color(0xFF0B1D28),
+                    color: AppColors.textPrimary,
                     fontSize: 15.sp,
                     fontWeight: FontWeight.w700,
                   ),
@@ -491,14 +492,14 @@ class ProfileAvatarImage extends StatelessWidget {
       child: Container(
         width: 84.w,
         height: 84.w,
-        color: const Color(0xFFE6F9FF),
+        color: AppColors.primarySoft,
         child: _buildImage(),
       ),
     );
   }
 
   Widget _buildImage() {
-    const placeholder = 'assets/images/chimcanhcut/chim_vui1.png';
+    const placeholder = 'assets/brand/avatar/avatar_1.png';
     if (url == null || url!.isEmpty) {
       return Image.asset(placeholder, fit: BoxFit.cover);
     }
@@ -608,18 +609,18 @@ class _FollowButton extends StatelessWidget {
               ? null
               : const LinearGradient(
                   colors: [
-                    Color(0xFF1CB0F6),
-                    Color(0xFF0A69C7),
+                    AppColors.primary,
+                    AppColors.primary,
                   ],
                   begin: Alignment.centerLeft,
                   end: Alignment.centerRight,
                 ),
-          color: isFollowing ? const Color(0xFFE6F4FF) : null,
+          color: isFollowing ? AppColors.primarySoft : null,
           boxShadow: isFollowing
               ? null
               : [
                   BoxShadow(
-                    color: const Color(0xFF0A69C7).withValues(alpha: 0.25),
+                    color: AppColors.primary.withValues(alpha: 0.25),
                     blurRadius: 14.r,
                     offset: Offset(0, 6.h),
                   ),
@@ -639,7 +640,7 @@ class _FollowButton extends StatelessWidget {
                         strokeWidth: 2,
                         valueColor: AlwaysStoppedAnimation<Color>(
                           isFollowing
-                              ? const Color(0xFF0A69C7)
+                              ? AppColors.primary
                               : Colors.white,
                         ),
                       ),
@@ -648,7 +649,7 @@ class _FollowButton extends StatelessWidget {
                       isFollowing ? 'Đang theo dõi' : 'Theo dõi',
                       style: TextStyle(
                         color:
-                            isFollowing ? const Color(0xFF0A69C7) : Colors.white,
+                            isFollowing ? AppColors.primary : Colors.white,
                         fontWeight: FontWeight.w700,
                         fontSize: 14.sp,
                       ),
@@ -689,7 +690,7 @@ class ProfileAdaptiveImage extends StatelessWidget {
         fit: BoxFit.cover,
         errorBuilder: (_, __, ___) {
           return Image.asset(
-            'assets/images/chimcanhcut/chim_ok.png',
+            'assets/brand/mascot/prismo_ok.png',
             fit: BoxFit.cover,
           );
         },
@@ -705,7 +706,7 @@ class ProfileAdaptiveImage extends StatelessWidget {
       File(trimmedPath),
       fit: BoxFit.cover,
       errorBuilder: (_, __, ___) => Image.asset(
-        'assets/images/chimcanhcut/chim_ok.png',
+        'assets/brand/mascot/prismo_ok.png',
         fit: BoxFit.cover,
       ),
     );

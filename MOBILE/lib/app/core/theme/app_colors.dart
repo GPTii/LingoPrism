@@ -1,73 +1,89 @@
 import 'package:flutter/material.dart';
 
+/// LingoPrism colours – the same tokens as the web (FE/src/index.css).
+///
+/// The violet is the brand; the three beams leaving the prism (amber · mint · coral)
+/// stand for the three languages and for the day's progress – they carry meaning,
+/// they are not decoration.
 class AppColors {
   AppColors._();
 
-  // Primary gradient colors
-  static const Color primaryBlue = Color(0xFF0571E6);
-  static const Color primaryGreen = Color(0xFF90F3A7);
-  static const Color primaryAccent = Color(0xFF0088FF);
+  // Brand
+  static const Color primary = Color(0xFF6D4AFF);
+  static const Color primaryDark = Color(0xFF5533E0);
+  static const Color primarySoft = Color(0xFFF2EFFF);
+  static const Color ink = Color(0xFF1B1538);
+  static const Color inkSoft = Color(0xFF2A2350);
 
-  // Background colors
-  static const Color backgroundLight = Color(0xFFE5FFFD);
-  static const Color backgroundWhite = Colors.white;
-  static const Color backgroundOverlay = Color(0x70FFFFFF);
-  static const Color appBarBackground = Color(0xFFBBFFEE);
+  // The three beams (one per language: EN amber · 中文 coral · VI mint)
+  static const Color beamAmber = Color(0xFFFFB020);
+  static const Color beamMint = Color(0xFF10C79A);
+  static const Color beamCoral = Color(0xFFFF6B81);
 
-  // Text colors
-  static const Color textPrimary = Color(0xFF1A1A1A);
-  static const Color textSecondary = Color(0xFF6B7280);
-  static const Color textHint = Color(0xFF9CA3AF);
+  // Surfaces
+  static const Color background = Color(0xFFF5F4F9);
+  static const Color surface = Colors.white;
+  static const Color surfaceMuted = Color(0xFFF0EEF6);
+  static const Color line = Color(0xFFE7E4F0);
+  static const Color lineStrong = Color(0xFFD3CEE3);
+
+  // Text (all ≥ 4.5:1 on white)
+  static const Color textPrimary = Color(0xFF1B1538);
+  static const Color textSecondary = Color(0xFF5D5878);
+  static const Color textHint = Color(0xFF767190);
   static const Color textWhite = Colors.white;
-  static const Color textError = Color(0xFFEF4444);
+  static const Color textError = Color(0xFFE11D48);
 
-  // Button colors
-  static const Color buttonActive = Color(0xFF0088FF);
-  static const Color buttonDisabled = Color(0xFFBDBDBD);
-  static const Color buttonSuccess = Color(0xFF10B981);
-  static const Color buttonDanger = Color(0xFFEF4444);
+  // States
+  static const Color success = Color(0xFF0E9F7B);
+  static const Color successSoft = Color(0xFFE3F8F1);
+  static const Color error = Color(0xFFE11D48);
+  static const Color errorSoft = Color(0xFFFDE8EC);
 
-  // Card and surface colors
-  static const Color cardBackground = Color(0xFFFFFFFF);
-  static const Color surfaceLight = Color(0xFFF9FAFB);
+  // ---- older names, kept so every screen follows the same palette ----
+  static const Color primaryBlue = primary;
+  static const Color primaryGreen = beamMint;
+  static const Color primaryAccent = primary;
 
-  // Accent colors for learning features
-  static const Color streakFire = Color(0xFFFF6B35);
-  static const Color gemBlue = Color(0xFF3B82F6);
-  static const Color heartRed = Color(0xFFEF4444);
-  static const Color xpGold = Color(0xFFFBBF24);
+  static const Color backgroundLight = background;
+  static const Color backgroundWhite = surface;
+  static const Color backgroundOverlay = surfaceMuted;
+  static const Color appBarBackground = surface;
 
-  // Social colors
+  static const Color buttonActive = primary;
+  static const Color buttonDisabled = lineStrong;
+  static const Color buttonSuccess = success;
+  static const Color buttonDanger = error;
+
+  static const Color cardBackground = surface;
+  static const Color surfaceLight = surfaceMuted;
+
+  static const Color streakFire = Color(0xFFFF8A3D);
+  static const Color gemBlue = primary;
+  static const Color heartRed = error;
+  static const Color xpGold = beamAmber;
+
   static const Color google = Color(0xFF4285F4);
   static const Color facebook = Color(0xFF1877F2);
 
-  // Progress colors
-  static const Color progressComplete = Color(0xFF10B981);
-  static const Color progressCurrent = Color(0xFF3B82F6);
-  static const Color progressLocked = Color(0xFFD1D5DB);
+  static const Color progressComplete = beamMint;
+  static const Color progressCurrent = primary;
+  static const Color progressLocked = lineStrong;
 
-  // Gradients
+  /// Was the violet → sky → mint sweep; now the ink surface, flat, so the screens
+  /// that still ask for "the brand background" get one calm colour.
   static const LinearGradient primaryGradient = LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    stops: [0.0, 0.43, 1.0],
-    colors: [
-      Color(0xFF0571E6), // 0%
-      Color(0xFF90F3A7), // 43%
-      Color(0xFF0088FF), // 100%
-    ],
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [ink, ink],
   );
 
   static const LinearGradient cardGradient = LinearGradient(
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
-    colors: [
-      Color(0xFFE5FFFD),
-      Color(0xFFFFFFFF),
-    ],
+    colors: [surface, surface],
   );
 
-  // Shadow colors
-  static const Color shadow = Color(0x1A000000);
-  static const Color shadowLight = Color(0x0D000000);
+  static const Color shadow = Color(0x1F1B1538);
+  static const Color shadowLight = Color(0x0D1B1538);
 }

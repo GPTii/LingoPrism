@@ -30,6 +30,7 @@ import 'package:get/get.dart';
 
 import '../controllers/community_chat_controller.dart';
 import '../models/community_chat_models.dart';
+import 'package:lingoprism/app/core/theme/app_colors.dart';
 
 /// Main chat view widget for community group conversations
 ///
@@ -55,12 +56,12 @@ class CommunityChatView extends GetView<CommunityChatController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFE6F9FF),
+      backgroundColor: AppColors.primarySoft,
       body: SafeArea(
         child: Column(
           children: [
             _ChatHeader(controller: controller),
-            Divider(height: 1.h, color: const Color(0xFFE0E6EE)),
+            Divider(height: 1.h, color: AppColors.line),
             Expanded(
               child: Obx(
                 () => _buildMessagesList(),
@@ -117,7 +118,7 @@ class CommunityChatView extends GetView<CommunityChatController> {
             Icon(
               Icons.chat_bubble_outline,
               size: 48.w,
-              color: const Color(0xFFB0BEC5),
+              color: AppColors.textHint,
             ),
             SizedBox(height: 16.h),
             Text(
@@ -125,7 +126,7 @@ class CommunityChatView extends GetView<CommunityChatController> {
               style: TextStyle(
                 fontSize: 16.sp,
                 fontWeight: FontWeight.w600,
-                color: const Color(0xFF5D6A7C),
+                color: AppColors.textSecondary,
               ),
             ),
             SizedBox(height: 8.h),
@@ -164,7 +165,7 @@ class _ChatHeader extends StatelessWidget {
           IconButton(
             onPressed: () => _safeNavigationBack(),
             icon: const Icon(Icons.arrow_back_ios_new_rounded),
-            color: const Color(0xFF1A1D1F),
+            color: AppColors.textPrimary,
           ),
           Container(
             width: 60.w,
@@ -173,7 +174,7 @@ class _ChatHeader extends StatelessWidget {
               color: Colors.white,
               borderRadius: BorderRadius.circular(20.r),
               border: Border.all(
-                color: const Color(0xFFE0E6EE),
+                color: AppColors.line,
                 width: 1.0,
               ),
             ),
@@ -190,7 +191,7 @@ class _ChatHeader extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 17.sp,
                     fontWeight: FontWeight.w700,
-                    color: const Color(0xFF1A1D1F),
+                    color: AppColors.textPrimary,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -200,7 +201,7 @@ class _ChatHeader extends StatelessWidget {
                   '${details.group.validatedMemberCount} thành viên',
                   style: TextStyle(
                     fontSize: 13.sp,
-                    color: const Color(0xFF5D6A7C),
+                    color: AppColors.textSecondary,
                   ),
                 ),
               ],
@@ -249,7 +250,7 @@ class _ChatHeader extends StatelessWidget {
           child: Icon(
             Icons.groups,
             size: 24.w,
-            color: const Color(0xFF5D6A7C),
+            color: AppColors.textSecondary,
           ),
         );
       },
@@ -276,10 +277,10 @@ class _ChatBubble extends StatelessWidget {
     final alignment =
         message.isCurrentUser ? Alignment.centerRight : Alignment.centerLeft;
     final bubbleColor = message.isCurrentUser
-        ? const Color(0xFF1CB0F6)
+        ? AppColors.primary
         : const Color(0xFFF1F5FF);
     final textColor =
-        message.isCurrentUser ? Colors.white : const Color(0xFF1B2B40);
+        message.isCurrentUser ? Colors.white : AppColors.textPrimary;
 
     return Container(
       margin: EdgeInsets.only(
@@ -496,14 +497,14 @@ class _StickerImage extends StatelessWidget {
         color: const Color(0xFFF0F4F8),
         borderRadius: BorderRadius.circular(12.r),
         border: Border.all(
-          color: const Color(0xFFE0E6EE),
+          color: AppColors.line,
           width: 1.0,
         ),
       ),
       child: Icon(
         Icons.image_not_supported_outlined,
         size: 24.w,
-        color: const Color(0xFF5D6A7C),
+        color: AppColors.textSecondary,
       ),
     );
   }
@@ -597,7 +598,7 @@ class _ChatInputState extends State<_ChatInput> {
       top: false,
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-        color: const Color(0xFFE6F9FF),
+        color: AppColors.primarySoft,
         child: Row(
           children: [
             Expanded(
@@ -606,7 +607,7 @@ class _ChatInputState extends State<_ChatInput> {
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(26.r),
                   border: Border.all(
-                    color: const Color(0xFFE0E6EE),
+                    color: AppColors.line,
                     width: 1.0,
                   ),
                   boxShadow: [
@@ -635,15 +636,15 @@ class _ChatInputState extends State<_ChatInput> {
                     hintStyle: TextStyle(
                       fontSize: 14.sp,
                       color: _isSending
-                          ? const Color(0xFFB0BEC5)
+                          ? AppColors.textHint
                           : const Color(0xFF7D8AA2),
                     ),
                   ),
                   style: TextStyle(
                     fontSize: 14.sp,
                     color: _isSending
-                        ? const Color(0xFFB0BEC5)
-                        : const Color(0xFF1B2B40),
+                        ? AppColors.textHint
+                        : AppColors.textPrimary,
                   ),
                   onSubmitted: (_) => _handleSend(),
                   onChanged: (_) => _handleTextChange(),
@@ -662,7 +663,7 @@ class _ChatInputState extends State<_ChatInput> {
                         child: const CircularProgressIndicator(
                           strokeWidth: 2.0,
                           valueColor: AlwaysStoppedAnimation<Color>(
-                            Color(0xFF1CB0F6),
+                            AppColors.primary,
                           ),
                         ),
                       ),
@@ -673,9 +674,9 @@ class _ChatInputState extends State<_ChatInput> {
                           : null,
                       icon: const Icon(Icons.send_rounded),
                       color: _controller.text.trim().isNotEmpty
-                          ? const Color(0xFF1CB0F6)
-                          : const Color(0xFFB0BEC5),
-                      disabledColor: const Color(0xFFB0BEC5),
+                          ? AppColors.primary
+                          : AppColors.textHint,
+                      disabledColor: AppColors.textHint,
                     ),
             ),
           ],

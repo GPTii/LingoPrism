@@ -1,5 +1,5 @@
-import { App, Button, Input, Progress, Result, Spin } from 'antd'
-import { CheckCircleFilled, CloseCircleFilled, SoundOutlined } from '@ant-design/icons'
+import { App, Button, Input, Result, Spin } from 'antd'
+import { CloseOutlined, SoundOutlined } from '@ant-design/icons'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
@@ -9,6 +9,27 @@ import { errorMessage } from '../../api/client'
 import { useAuth } from '../../auth/store'
 import TargetWord, { langTag } from '../../components/TargetWord'
 import { speak } from '../../lib/speech'
+import WordPicture from '../../components/WordPicture'
+import { Prismo, XpIcon } from '../../components/brand/Brand'
+
+const PRAISE = ['Chính xác!', 'Tuyệt vời!', 'Giỏi quá!', 'Quá đỉnh!', 'Chuẩn luôn!']
+
+/** a burst of colourful confetti when the lesson is done */
+function Confetti() {
+  const bits = useMemo(() => Array.from({ length: 36 }, (_, i) => ({
+    x: (Math.random() - 0.5) * 700, y: -Math.random() * 380 - 80, r: Math.random() * 540,
+    c: ['#6d4aff', '#3fa9f5', '#10c79a', '#ffb020', '#ff6b81'][i % 5], d: Math.random() * 0.25,
+  })), [])
+  return (
+    <div className="pointer-events-none absolute left-1/2 top-40 z-10">
+      {bits.map((b, i) => (
+        <motion.span key={i} className="absolute block h-3 w-2 rounded-sm" style={{ background: b.c }}
+          initial={{ x: 0, y: 0, opacity: 1, rotate: 0 }} animate={{ x: b.x, y: [0, b.y, b.y + 520], opacity: [1, 1, 0], rotate: b.r }}
+          transition={{ duration: 2.2, delay: b.d, ease: 'easeOut' }} />
+      ))}
+    </div>
+  )
+}
 
 interface Step {
   item: SessionItem
@@ -30,7 +51,7 @@ function buildSteps(session: StudySession, kid: boolean): Step[] {
     const mc = [by.choose_meaning, by.choose_pinyin, by.choose_target].filter(Boolean)
     if (mc.length) quiz.push({ item, question: mc[Math.floor(Math.random() * mc.length)], graded: false, firstTry: true })
     const typed = !kid && !isZh ? (session.language === 'en' && Math.random() < 0.5 ? by.listen_type : by.type_target) : undefined
-    const graded = typed ?? by.choose_target ?? by.choose_meaning ?? by.type_target
+    const graded = typed ?? by.choose_target ?? by.choose_meaning ?? by.type_target ?? by.listen_type
     if (graded) final.push({ item, question: graded, graded: true, firstTry: true })
   }
   return [...flash, ...quiz, ...final]
@@ -45,7 +66,7 @@ export default function SessionPage() {
   const [session, setSession] = useState<StudySession | null>(null)
   const [steps, setSteps] = useState<Step[]>([])
   const [index, setIndex] = useState(0)
-  const [feedback, setFeedback] = useState<null | { correct: boolean; answer: string }>(null)
+  const [feedback, setFeedback] = useState<null | { correct: boolean; answer: string; picked: string; praise: string }>(null)
   const [typed, setTyped] = useState('')
   const [flipped, setFlipped] = useState(false)
   const [summary, setSummary] = useState<Summary | null>(null)
@@ -105,7 +126,7 @@ export default function SessionPage() {
     } else {
       correct = true
     }
-    setFeedback({ correct, answer: 'answer' in q ? q.answer : '' })
+    setFeedback({ correct, answer: 'answer' in q ? q.answer : '', picked: answer, praise: PRAISE[Math.floor(Math.random() * PRAISE.length)] })
     if (!correct) setSteps((s) => [...s, { ...step, graded: false, firstTry: false }])
     vocabApi.answer(session.id, {
       personal_word: step.item.personal_word, question_type: q.type, correct, first_try: step.firstTry,
@@ -118,51 +139,81 @@ export default function SessionPage() {
     const card = step.item.card
     return (
       <div className="flex flex-col items-center gap-2">
-        {card.image && <img src={card.image} alt="" className="h-32 object-contain" />}
-        <div className="text-2xl font-semibold text-slate-800">{card.meaning_vi}</div>
+        {/* learning Vietnamese (children): the picture alone is the prompt – the Vietnamese word is the answer */}
+        <WordPicture image={card.image} emoji={card.emoji} credit={card.image_credit} source={card.image_source}
+          height={session?.language === 'vi' ? 'h-48' : 'h-32'} />
+        {session?.language !== 'vi' && <div className="text-2xl font-black text-slate-800">{card.meaning_vi}</div>}
       </div>
     )
-  }, [step])
+  }, [step, session?.language])
 
   if (error) return <Result status="info" title={error} extra={<Button type="primary" onClick={() => navigate('/vocab')}>Chọn chủ đề để học</Button>} />
   if (!session) return <div className="flex justify-center py-20"><Spin size="large" /></div>
   if (summary) {
     const missed = session.items.filter((i) => summary.needs_more_practice.includes(i.personal_word))
+    const perfect = summary.correct_first_try === summary.completed_count
     return (
-      <Result
-        status="success"
-        title="Chúc mừng bạn đã hoàn thành bài học!"
-        subTitle={`Đúng ngay lần đầu ${summary.correct_first_try}/${summary.completed_count} từ · +${summary.xp_earned} XP`}
-        extra={[
-          <Button key="home" onClick={() => navigate('/')}>Về trang chủ</Button>,
-          <Button key="again" type="primary" onClick={() => window.location.reload()}>Học tiếp</Button>,
-        ]}
-      >
+      <div className="relative max-w-xl mx-auto flex flex-col items-center text-center gap-5 pt-4">
+        <Confetti />
+        <Prismo mood="celebrate" size={170} className="animate-pop" />
+        <h1 className="text-3xl font-extrabold text-slate-800 m-0">
+          {summary.level_up ? `Bạn đã lên Cấp ${summary.level_up}!` : perfect ? 'Hoàn hảo! Không sai câu nào!' : 'Hoàn thành bài học!'}
+        </h1>
+        <div className="grid grid-cols-2 gap-3 w-full">
+          <div className="lp-card p-4">
+            <div className="num text-3xl font-bold text-slate-800 flex items-center justify-center gap-1.5"><XpIcon size={28} />+{summary.xp_earned}</div>
+            <div className="text-sm text-slate-500 mt-1">kinh nghiệm</div>
+          </div>
+          <div className="lp-card p-4">
+            <div className="num text-3xl font-bold text-slate-800">{summary.correct_first_try}/{summary.completed_count}</div>
+            <div className="text-sm text-slate-500 mt-1">đúng ngay lần đầu</div>
+          </div>
+        </div>
         {missed.length > 0 && (
-          <div className="text-center">
-            <div className="font-medium mb-2">Từ cần ôn thêm:</div>
+          <div className="lp-card p-4 w-full">
+            <div className="font-bold text-slate-700 mb-2">Từ cần ôn thêm</div>
             <div className="flex flex-wrap justify-center gap-2">
-              {missed.map((i) => <span key={i.item_id} lang={zhTag} className="px-3 py-1 rounded-full bg-amber-50 text-amber-700">{i.card.target?.text} – {i.card.meaning_vi}</span>)}
+              {missed.map((i) => <span key={i.item_id} lang={zhTag} className="px-3 py-1 rounded-full bg-amber-50 text-amber-700 font-bold">{i.card.target?.text} – {i.card.meaning_vi}</span>)}
             </div>
           </div>
         )}
-      </Result>
+        <div className="flex flex-wrap justify-center gap-3 w-full">
+          <Button size="large" onClick={() => navigate('/')}>Về trang chủ</Button>
+          <Button size="large" type="primary" onClick={() => window.location.reload()}>Học tiếp</Button>
+        </div>
+      </div>
     )
   }
   if (!step) return null
   const q = step.question
 
   return (
-    <div className="max-w-2xl mx-auto flex flex-col gap-6">
-      <Progress percent={progress} showInfo={false} strokeColor="#14b8a6" />
+    <div className="max-w-2xl mx-auto flex flex-col gap-5 pb-36">
+      <div className="flex items-center gap-3">
+        <button type="button" onClick={() => navigate('/')} aria-label="Thoát bài học"
+          className="h-10 w-10 rounded-xl grid place-items-center text-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 cursor-pointer transition">
+          <CloseOutlined />
+        </button>
+        <div className="flex-1 h-3 rounded-full bg-slate-100 overflow-hidden" role="progressbar" aria-valuemin={0} aria-valuemax={steps.length}
+          aria-valuenow={Math.min(index, steps.length)} aria-label="Tiến độ bài học">
+          <motion.div className="h-full rounded-full prism-bg" initial={false} animate={{ width: `${Math.max(progress, 3)}%` }}
+            transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }} />
+        </div>
+        <span className="num text-sm font-bold text-slate-500 w-14 text-right">{Math.min(index + 1, steps.length)}/{steps.length}</span>
+      </div>
       <AnimatePresence mode="wait">
-        <motion.div key={index} initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -40 }}
-          className="rounded-3xl bg-white border border-slate-200 p-8 min-h-80 flex flex-col items-center justify-center gap-6">
+        <motion.div key={index} initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -16 }}
+          transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+          className="lp-card p-6 sm:p-8 min-h-80 flex flex-col items-center justify-center gap-6">
           {q.type === 'flashcard' && (
             <button type="button" onClick={() => setFlipped(!flipped)} className="w-full flex flex-col items-center gap-4 cursor-pointer">
-              {step.item.card.image && <img src={step.item.card.image} alt="" className="h-32 object-contain" />}
+              {session.language !== 'vi' && <WordPicture image={step.item.card.image} credit={step.item.card.image_credit} source={step.item.card.image_source} />}
               <TargetWord target={q.front} size="xl" />
-              {flipped ? <div className="text-2xl text-slate-700">{q.back}</div> : <div className="text-slate-400">Chạm để xem nghĩa tiếng Việt</div>}
+              {session.language === 'vi'
+                ? (flipped
+                    ? <WordPicture image={step.item.card.image} emoji={step.item.card.emoji || '—'} credit={step.item.card.image_credit} source={step.item.card.image_source} height="h-48" />
+                    : <div className="text-slate-400">Chạm để xem hình</div>)
+                : (flipped ? <div className="text-2xl text-slate-700">{q.back || '—'}</div> : <div className="text-slate-400">Chạm để xem nghĩa tiếng Việt</div>)}
             </button>
           )}
 
@@ -173,11 +224,11 @@ export default function SessionPage() {
               {q.type === 'choose_pinyin' && <div lang={zhTag} className="text-5xl font-semibold">{q.prompt}</div>}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
                 {q.options.map((opt) => {
-                  const state = feedback ? (opt === q.answer ? 'right' : 'idle') : 'idle'
+                  const state = !feedback ? '' : opt === q.answer ? 'is-right' : opt === feedback.picked ? 'is-wrong' : 'opacity-60'
                   return (
                     <button key={opt} type="button" disabled={!!feedback} onClick={() => submit(opt)}
                       lang={q.type === 'choose_target' ? zhTag : undefined}
-                      className={`rounded-2xl border-2 px-4 py-4 text-lg font-medium transition cursor-pointer ${state === 'right' ? 'border-green-500 bg-green-50' : 'border-slate-200 hover:border-brand-500'}`}>
+                      className={`btn-3d px-4 py-4 text-lg font-semibold text-slate-700 cursor-pointer disabled:cursor-default ${state}`}>
                       {opt}
                     </button>
                   )
@@ -189,9 +240,12 @@ export default function SessionPage() {
           {(q.type === 'type_target' || q.type === 'listen_type') && (
             <>
               {q.type === 'type_target' ? meaningPrompt : (
-                <Button size="large" shape="circle" icon={<SoundOutlined />} onClick={() => speak(q.audio.text, q.audio.tts_locale)} />
+                <button type="button" onClick={() => speak(q.audio.text, q.audio.tts_locale)} aria-label="Nghe lại"
+                  className="h-24 w-24 rounded-3xl prism-bg text-white text-4xl grid place-items-center cursor-pointer hover:bg-brand-700 active:scale-95 transition">
+                  <SoundOutlined />
+                </button>
               )}
-              <div className="text-slate-500">{q.type === 'listen_type' ? 'Nghe phát âm và gõ lại từ đã nghe.' : 'Gõ lại từ bằng ngôn ngữ đang học'}</div>
+              <div className="text-slate-500 font-semibold">{q.type === 'listen_type' ? 'Nghe phát âm và gõ lại từ đã nghe.' : 'Gõ lại từ bằng ngôn ngữ đang học'}</div>
               <Input size="large" value={typed} lang={zhTag} disabled={!!feedback} autoFocus
                 onChange={(e) => setTyped(e.target.value)} onPressEnter={() => typed && submit(typed)} className="max-w-sm text-center" />
               {!feedback && <Button type="primary" size="large" disabled={!typed} onClick={() => submit(typed)}>Kiểm tra</Button>}
@@ -200,17 +254,27 @@ export default function SessionPage() {
         </motion.div>
       </AnimatePresence>
 
-      {q.type === 'flashcard' ? (
-        <Button type="primary" size="large" block onClick={next}>Tiếp tục</Button>
-      ) : feedback && (
-        <div className={`rounded-2xl p-4 flex items-center justify-between ${feedback.correct ? 'bg-green-50' : 'bg-red-50'}`}>
-          <div className="flex items-center gap-3 text-lg">
-            {feedback.correct ? <CheckCircleFilled className="text-green-600" /> : <CloseCircleFilled className="text-red-500" />}
-            {feedback.correct ? 'Chính xác!' : <span>Đáp án đúng: <b lang={zhTag}>{feedback.answer}</b></span>}
-          </div>
-          <Button type="primary" size="large" onClick={next}>Tiếp tục</Button>
+      {/* answer bar: fixed at the bottom like a game, green / red with Prismo's reaction */}
+      <div className={`fixed inset-x-0 bottom-0 z-40 border-t-2 transition-colors md:left-[88px] lg:left-60 ${
+        feedback ? (feedback.correct ? 'bg-green-50 border-green-300' : 'bg-red-50 border-red-400') : 'bg-white border-slate-200'}`}
+        style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}>
+        <div className="max-w-2xl mx-auto px-4 pt-3 flex items-center gap-3">
+          {feedback ? (
+            <>
+              <Prismo mood={feedback.correct ? 'celebrate' : 'sad'} size={64} className="animate-pop shrink-0" />
+              <div className="flex-1 min-w-0">
+                <div className={`text-xl font-bold ${feedback.correct ? 'text-emerald-600' : 'text-red-500'}`}>
+                  {feedback.correct ? feedback.praise : 'Chưa đúng rồi'}
+                </div>
+                {!feedback.correct && <div className="text-slate-700 font-bold break-words">Đáp án: <span lang={zhTag}>{feedback.answer}</span></div>}
+              </div>
+            </>
+          ) : <div className="flex-1" />}
+          {q.type === 'flashcard'
+            ? <Button type="primary" size="large" className="min-w-36" onClick={next}>Tiếp tục</Button>
+            : feedback && <Button type="primary" size="large" danger={!feedback.correct} className="min-w-36" onClick={next}>Tiếp tục</Button>}
         </div>
-      )}
+      </div>
     </div>
   )
 }

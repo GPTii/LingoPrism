@@ -9,6 +9,7 @@ import '../../community/controllers/community_controller.dart';
 import '../../community/views/community_view.dart';
 import '../../profile/controllers/profile_controller.dart';
 import '../../profile/views/profile_view.dart';
+import 'package:lingoprism/app/core/theme/app_colors.dart';
 
 class HomeView extends GetView<HomeController> {
   const HomeView({super.key});
@@ -37,55 +38,40 @@ class HomeView extends GetView<HomeController> {
             return const LearningTabView();
         }
       }),
-      bottomNavigationBar: Obx(() => BottomAppBar(
-        shape: const CircularNotchedRectangle(),
-        notchMargin: 8.w,
-        color: Colors.white,
-        elevation: 8,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _buildNavItem(
-              icon: Icons.home,
-              label: 'Trang chủ',
-              index: 0,
-              isActive: controller.currentIndex == 0,
+      bottomNavigationBar: Obx(() => DecoratedBox(
+            decoration: const BoxDecoration(border: Border(top: BorderSide(color: AppColors.line))),
+            child: BottomAppBar(
+              shape: const CircularNotchedRectangle(),
+              notchMargin: 6.w,
+              color: AppColors.surface,
+              surfaceTintColor: Colors.transparent,
+              elevation: 0,
+              height: 68.h,
+              padding: EdgeInsets.zero,
+              child: Row(
+                children: [
+                  _buildNavItem(icon: Icons.home_outlined, activeIcon: Icons.home_rounded, label: 'Trang chủ', index: 0),
+                  _buildNavItem(icon: Icons.replay_outlined, activeIcon: Icons.replay_rounded, label: 'Ôn tập', index: 1),
+                  SizedBox(width: 64.w), // room for the camera button
+                  _buildNavItem(icon: Icons.people_outline_rounded, activeIcon: Icons.people_rounded, label: 'Cộng đồng', index: 2),
+                  _buildNavItem(icon: Icons.person_outline_rounded, activeIcon: Icons.person_rounded, label: 'Hồ sơ', index: 3),
+                ],
+              ),
             ),
-            _buildNavItem(
-              icon: Icons.book,
-              label: 'Ôn tập',
-              index: 1,
-              isActive: controller.currentIndex == 1,
-            ),
-            SizedBox(width: 40.w), // Khoảng cách cho FloatingActionButton
-            _buildNavItem(
-              icon: Icons.people,
-              label: 'Cộng đồng',
-              index: 2,
-              isActive: controller.currentIndex == 2,
-            ),
-            _buildNavItem(
-              icon: Icons.person,
-              label: 'Hồ sơ',
-              index: 3,
-              isActive: controller.currentIndex == 3,
-            ),
-          ],
-        ),
-      )),
+          )),
+      // the camera – the heart of the app – raised in the middle
       floatingActionButton: FloatingActionButton(
         heroTag: 'homeCameraFab',
+        tooltip: 'Chụp ảnh học từ',
         onPressed: () {
-          // Ensure CameraDetectionController is initialized
           if (!Get.isRegistered<CameraDetectionController>()) {
             Get.lazyPut(() => CameraDetectionController());
           }
-          // Call takePhoto to open camera and detect vocabulary
           CameraDetectionController.to.takePhoto();
         },
-        backgroundColor: const Color(0xFF1CB0F6),
-        elevation: 4,
-        child: Icon(Icons.camera_alt, size: 30.sp, color: Colors.white),
+        backgroundColor: AppColors.primary,
+        elevation: 0,
+        child: Icon(Icons.photo_camera_rounded, size: 28.sp, color: Colors.white),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
@@ -93,29 +79,42 @@ class HomeView extends GetView<HomeController> {
 
   Widget _buildNavItem({
     required IconData icon,
+    required IconData activeIcon,
     required String label,
     required int index,
-    required bool isActive,
   }) {
-    return GestureDetector(
-      onTap: () => controller.changeTab(index),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            icon,
-            size: 24.sp,
-            color: isActive ? const Color(0xFF1CB0F6) : Colors.grey,
+    final isActive = controller.currentIndex == index;
+    final color = isActive ? AppColors.primary : AppColors.textSecondary;
+    return Expanded(
+      child: Semantics(
+        selected: isActive,
+        button: true,
+        child: InkResponse(
+          onTap: () => controller.changeTab(index),
+          radius: 36,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 180),
+                curve: Curves.easeOutCubic,
+                padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 3.h),
+                decoration: BoxDecoration(
+                  color: isActive ? AppColors.primarySoft : Colors.transparent,
+                  borderRadius: BorderRadius.circular(20.r),
+                ),
+                child: Icon(isActive ? activeIcon : icon, size: 23.sp, color: color),
+              ),
+              SizedBox(height: 3.h),
+              Text(
+                label,
+                maxLines: 1,
+                style: TextStyle(color: color, fontSize: 11.5.sp, fontWeight: isActive ? FontWeight.w700 : FontWeight.w500),
+              ),
+            ],
           ),
-          SizedBox(height: 4.h),
-          Text(
-            label,
-            style: TextStyle(
-              color: isActive ? const Color(0xFF1CB0F6) : Colors.grey,
-              fontSize: 12.sp,
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

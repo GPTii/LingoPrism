@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../controllers/profile_guide_controller.dart';
+import 'package:lingoprism/app/core/theme/app_colors.dart';
 
 class ProfileGuideView extends GetView<ProfileGuideController> {
   const ProfileGuideView({super.key});
@@ -10,19 +11,19 @@ class ProfileGuideView extends GetView<ProfileGuideController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFE6F9FF),
+      backgroundColor: AppColors.primarySoft,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFE6F9FF),
+        backgroundColor: AppColors.primarySoft,
         elevation: 0,
         leading: IconButton(
           onPressed: Get.back,
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
-          color: const Color(0xFF0B1D28),
+          color: AppColors.textPrimary,
         ),
         title: Text(
           'Hướng dẫn sử dụng',
           style: TextStyle(
-            color: const Color(0xFF0B1D28),
+            color: AppColors.textPrimary,
             fontSize: 20.sp,
             fontWeight: FontWeight.w700,
           ),
@@ -40,7 +41,7 @@ class ProfileGuideView extends GetView<ProfileGuideController> {
                     end: Alignment.bottomRight,
                     colors: [
                       const Color(0xFFB6F3FF).withOpacity(0.45),
-                      const Color(0xFFE6F9FF),
+                      AppColors.primarySoft,
                     ],
                   ),
                 ),
@@ -55,7 +56,7 @@ class ProfileGuideView extends GetView<ProfileGuideController> {
                 _heroCard(),
                 SizedBox(height: 18.h),
                 _section(
-                  title: '1. Bắt đầu với SnapLingua',
+                  title: '1. Bắt đầu với LingoPrism',
                   accentIcon: Icons.rocket_launch_rounded,
                   bullets: const [
                     'Đăng nhập hoặc tạo tài khoản để đồng bộ tiến trình học.',
@@ -119,14 +120,14 @@ class ProfileGuideView extends GetView<ProfileGuideController> {
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [Color(0xFF0A69C7), Color(0xFF1CB0F6)],
+          colors: [AppColors.primary, AppColors.primary],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(18.r),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF0A69C7).withOpacity(0.18),
+            color: AppColors.primary.withOpacity(0.18),
             blurRadius: 18.r,
             offset: Offset(0, 10.h),
           ),
@@ -143,7 +144,7 @@ class ProfileGuideView extends GetView<ProfileGuideController> {
               shape: BoxShape.circle,
             ),
             child: Icon(Icons.school_rounded,
-                color: const Color(0xFF0A69C7), size: 28.sp),
+                color: AppColors.primary, size: 28.sp),
           ),
           SizedBox(width: 12.w),
           Expanded(
@@ -151,7 +152,7 @@ class ProfileGuideView extends GetView<ProfileGuideController> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Tận dụng SnapLingua hiệu quả',
+                  'Tận dụng LingoPrism hiệu quả',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 16.sp,
@@ -209,7 +210,7 @@ class ProfileGuideView extends GetView<ProfileGuideController> {
                   ),
                   child: Icon(
                     accentIcon,
-                    color: const Color(0xFF0A69C7),
+                    color: AppColors.primary,
                     size: 18.sp,
                   ),
                 ),
@@ -218,7 +219,7 @@ class ProfileGuideView extends GetView<ProfileGuideController> {
                 child: Text(
                   title,
                   style: TextStyle(
-                    color: const Color(0xFF0B1D28),
+                    color: AppColors.textPrimary,
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w700,
                   ),
@@ -259,14 +260,14 @@ class ProfileGuideView extends GetView<ProfileGuideController> {
       padding: EdgeInsets.all(14.w),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [Color(0xFF0A69C7), Color(0xFF1CB0F6)],
+          colors: [AppColors.primary, AppColors.primary],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF0A69C7).withOpacity(0.2),
+            color: AppColors.primary.withOpacity(0.2),
             blurRadius: 16.r,
             offset: Offset(0, 10.h),
           ),

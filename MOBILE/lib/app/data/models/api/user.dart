@@ -1,3 +1,4 @@
+import '../../../core/utils/brand_assets.dart';
 import 'common.dart';
 
 class UserGoal {
@@ -63,7 +64,7 @@ class AppUser {
   final int gems;
   final UserGoal? goal;
 
-  static const String defaultAvatar = 'assets/images/chimcanhcut/chim_vui1.png';
+  static const String defaultAvatar = 'assets/brand/avatar/avatar_1.png';
 
   bool get isKid => learnerType == 'kid';
   bool get isStaff => role == 'admin' || role == 'staff';
@@ -90,8 +91,8 @@ class AppUser {
         id: asInt(j['id']),
         email: asString(j['email']),
         displayName: asString(j['display_name']),
-        avatar: j['avatar'] as String?,
-        avatarPreset: asString(j['avatar_preset']),
+        avatar: _brandOrNull(j['avatar'] as String?),
+        avatarPreset: brandAsset(asString(j['avatar_preset'])),
         bio: asString(j['bio']),
         role: asString(j['role'], 'learner'),
         learnerType: asString(j['learner_type'], 'adult'),
@@ -139,3 +140,5 @@ class AppUser {
           },
       };
 }
+
+String? _brandOrNull(String? path) => path == null ? null : brandAsset(path);

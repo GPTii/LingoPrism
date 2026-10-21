@@ -222,7 +222,7 @@ class _CustomCameraViewState extends State<CustomCameraView> {
         backgroundColor: Colors.black,
         body: Center(
           child: CircularProgressIndicator(
-            color: Color(0xFF1CB0F6),
+            color: AppColors.primary,
           ),
         ),
       );
@@ -259,7 +259,7 @@ class _CustomCameraViewState extends State<CustomCameraView> {
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: [
-                          const Color(0xFF1CB0F6).withOpacity(0.08),
+                          AppColors.primary.withOpacity(0.08),
                           const Color(0xFF50E3D6).withOpacity(0.08),
                         ],
                         begin: Alignment.centerLeft,
@@ -267,7 +267,7 @@ class _CustomCameraViewState extends State<CustomCameraView> {
                       ),
                       borderRadius: BorderRadius.circular(20.r),
                       border: Border.all(
-                        color: const Color(0xFF1CB0F6).withOpacity(0.2),
+                        color: AppColors.primary.withOpacity(0.2),
                         width: 1,
                       ),
                     ),
@@ -278,7 +278,7 @@ class _CustomCameraViewState extends State<CustomCameraView> {
                           children: [
                             Icon(
                               Icons.camera_alt_rounded,
-                              color: const Color(0xFF1CB0F6),
+                              color: AppColors.primary,
                               size: 20.sp,
                             ),
                             SizedBox(width: 8.w),
@@ -303,9 +303,9 @@ class _CustomCameraViewState extends State<CustomCameraView> {
                             ),
                             children: [
                               TextSpan(
-                                text: 'SnapLingua',
+                                text: 'LingoPrism',
                                 style: TextStyle(
-                                  color: const Color(0xFF1CB0F6),
+                                  color: AppColors.primary,
                                   fontWeight: FontWeight.bold,
                                   fontSize: 14.sp,
                                 ),
@@ -445,7 +445,7 @@ class _CustomCameraViewState extends State<CustomCameraView> {
                   decoration: const BoxDecoration(
                     shape: BoxShape.circle,
                     gradient: LinearGradient(
-                      colors: [Color.fromARGB(255, 80, 227, 214), Color(0xFF1CB0F6)],
+                      colors: [Color.fromARGB(255, 80, 227, 214), AppColors.primary],
                     ),
                   ),
                 ),
@@ -463,7 +463,7 @@ class _CustomCameraViewState extends State<CustomCameraView> {
                       height: _isTakingPicture ? 48.w : 64.w,
                       decoration: const BoxDecoration(
                         gradient: LinearGradient(
-                          colors: [Color.fromARGB(255, 80, 227, 214), Color(0xFF1CB0F6)],
+                          colors: [Color.fromARGB(255, 80, 227, 214), AppColors.primary],
                         ),
                         shape: BoxShape.circle,
                       ),

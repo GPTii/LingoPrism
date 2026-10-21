@@ -14,9 +14,9 @@ class AddVocabularyCategoryView
     final bottomPadding = MediaQuery.of(context).viewInsets.bottom;
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      backgroundColor: const Color(0xFFE5FFFD),
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFE5FFFD),
+        backgroundColor: AppColors.background,
         elevation: 0,
         leading: IconButton(
           onPressed: () => Get.back(),
@@ -80,7 +80,7 @@ class AddVocabularyCategoryView
                     onPressed:
                         controller.canSave.value ? controller.onSave : null,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF1CB0F6),
+                      backgroundColor: AppColors.primary,
                       disabledBackgroundColor: const Color(0xFF9ACFE8),
                       elevation: 0,
                       padding: EdgeInsets.symmetric(vertical: 16.h),
@@ -133,7 +133,7 @@ class _IconPickerSection extends StatelessWidget {
                   shape: BoxShape.circle,
                   border: Border.all(
                     color: error == null
-                        ? const Color(0xFF1CB0F6)
+                        ? AppColors.primary
                         : Colors.redAccent,
                     width: 2,
                   ),
@@ -152,7 +152,7 @@ class _IconPickerSection extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 32.sp,
                             fontWeight: FontWeight.bold,
-                            color: const Color(0xFF1CB0F6),
+                            color: AppColors.primary,
                           ),
                         )
                       : Text(
@@ -208,7 +208,7 @@ class _NameField extends StatelessWidget {
                   borderRadius: BorderRadius.circular(24.r),
                   borderSide: BorderSide(
                     color: error == null
-                        ? const Color(0xFFE0E7FF)
+                        ? AppColors.primarySoft
                         : Colors.redAccent,
                     width: 1.5,
                   ),
@@ -217,7 +217,7 @@ class _NameField extends StatelessWidget {
                   borderRadius: BorderRadius.circular(24.r),
                   borderSide: BorderSide(
                     color: error == null
-                        ? const Color(0xFF1CB0F6)
+                        ? AppColors.primary
                         : Colors.redAccent,
                     width: 1.8,
                   ),

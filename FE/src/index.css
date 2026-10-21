@@ -1,16 +1,172 @@
 @import "tailwindcss";
 
+/* `dark:` utilities follow the class set by src/theme/ThemeRoot.tsx (light / dark / device) */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+ * LingoPrism: a prism splits one beam into three colours – one snap, three languages.
+ * The violet is the brand; the three beams (amber · mint · coral) are kept for meaning –
+ * the languages, the day's progress, right / wrong – never sprinkled as decoration.
+ */
 @theme {
-  --color-brand-50: #e5fffd;
-  --color-brand-100: #b8f5f0;
-  --color-brand-500: #14b8a6;
-  --color-brand-600: #0d9488;
-  --color-brand-700: #0f766e;
-  --font-sans: "Inter", "Segoe UI", system-ui, sans-serif;
+  --color-brand-50: #f2efff;
+  --color-brand-100: #e5dfff;
+  --color-brand-200: #cdc2ff;
+  --color-brand-300: #b09fff;
+  --color-brand-400: #8f75ff;
+  --color-brand-500: #7c5cff;
+  --color-brand-600: #6d4aff;
+  --color-brand-700: #5533e0;
+  --color-ink: #1b1538;
+  --color-prism-amber: #ffb020;
+  --color-prism-mint: #10c79a;
+  --color-prism-coral: #ff6b81;
+  --color-prism-cyan: #06b6d4;
+  --font-sans: "Be Vietnam Pro", "Segoe UI", system-ui, sans-serif;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  /* `font-black` stops at 800: heavy enough for a title, never shouting */
+  --font-weight-black: 800;
 }
+
+:root {
+  --page-bg: #f5f4f9;
+  --surface: #ffffff;
+  --surface-2: #f0eef6;
+  --line: #e7e4f0;
+  --line-strong: #d3cee3;
+  --ink: #1b1538;
+  --ink-soft: #2a2350;
+  --shadow-pop: 0 12px 32px -12px rgb(27 21 56 / 0.28);
+  /* the three beams, as hard bands: the one place the spectrum is drawn */
+  --beams: linear-gradient(180deg, #ffb020 0 33.3%, #10c79a 33.3% 66.6%, #ff6b81 66.6% 100%);
+}
+
+/* dark: the slate scale is turned around, so every page written with slate-* / bg-white follows */
+.dark {
+  --page-bg: #0f0d1a;
+  --surface: #181527;
+  --surface-2: #201c33;
+  --line: #2a2640;
+  --line-strong: #3b3558;
+  --ink: #211a44;
+  --ink-soft: #2a2254;
+  --shadow-pop: 0 14px 34px -14px rgb(0 0 0 / 0.7);
+  --color-slate-50: #1e1a31;
+  --color-slate-100: #26213d;
+  --color-slate-200: #2f2a49;
+  --color-slate-300: #474068;
+  --color-slate-400: #8d87ab;
+  --color-slate-500: #a8a3c4;
+  --color-slate-600: #c3bfda;
+  --color-slate-700: #dad7ea;
+  --color-slate-800: #eeedf6;
+  --color-slate-900: #f8f7fc;
+  --color-brand-50: #221c45;
+  --color-brand-100: #2c2460;
+  --color-brand-500: #9a85ff;
+  --color-brand-600: #a995ff;
+  --color-brand-700: #c3b6ff;
+  --color-green-50: #0f2a24;
+  --color-emerald-50: #0f2a24;
+  --color-red-50: #33141f;
+  --color-red-100: #431726;
+  --color-amber-50: #332508;
+  --color-amber-100: #3a2b0c;
+  --color-pink-100: #3b1530;
+  --color-sky-50: #0d2236;
+  --color-red-700: #fda4af;
+  --color-amber-700: #fcd34d;
+  --color-green-700: #86efac;
+}
+.dark .bg-white { background-color: var(--surface); }
+.dark .bg-white\/80 { background-color: rgb(24 21 39 / 0.8); }
+.dark .bg-white\/60 { background-color: rgb(24 21 39 / 0.6); }
+.dark .bg-white\/90 { background-color: rgb(24 21 39 / 0.9); }
+.dark .border-slate-200 { border-color: var(--line); }
 
 /* Chinese text must render with a font matching its script (Han unification). */
 :lang(zh-Hans) { font-family: "Noto Sans SC", "Microsoft YaHei", sans-serif; }
 :lang(zh-Hant) { font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif; }
 
-body { margin: 0; background: #f6fbfb; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--page-bg); overflow-x: hidden; transition: background-color 0.25s;
+  -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+}
+img, video, canvas { max-width: 100%; }
+h1, h2, h3 { text-wrap: balance; letter-spacing: -0.02em; }
+p { text-wrap: pretty; }
+
+/* plain links take the brand colour; anything with its own text-* utility wins (utilities layer) */
+@layer base {
+  a { color: var(--color-brand-600); }
+  a:hover { color: var(--color-brand-700); }
+}
+
+/* ---------- the parts of the browser nobody draws ---------- */
+::selection { background: color-mix(in oklab, var(--color-brand-500) 28%, transparent); color: inherit; }
+* { caret-color: var(--color-brand-600); }
+:focus-visible { outline: 2px solid var(--color-brand-500); outline-offset: 2px; border-radius: 6px; }
+a { text-underline-offset: 3px; }
+.num, .ant-statistic-content, .ant-progress-text, .ant-table { font-variant-numeric: tabular-nums; }
+* { scrollbar-width: thin; scrollbar-color: var(--line-strong) transparent; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: 99px; border: 3px solid var(--page-bg); }
+::-webkit-scrollbar-track { background: transparent; }
+
+/* ---------- learner area ---------- */
+/* the brand word: solid violet, no gradient text */
+.prism-text { color: var(--color-brand-600); }
+/* filled brand surfaces keep the full violet in both themes, so white on it stays readable */
+.prism-bg { background: #6d4aff; }
+.prism-warm-bg { background: var(--ink); }
+.ink-bg { background: var(--ink); }
+.beams { background: var(--beams); }
+
+/* one elevation: a hairline on a white surface, no drifting shadow */
+.lp-card { background: var(--surface); border: 1px solid var(--line); border-radius: 1rem; }
+.lift { transition: transform 150ms var(--ease-out), border-color 150ms var(--ease-out), background-color 150ms var(--ease-out); }
+.lift:hover { transform: translateY(-1px); border-color: var(--line-strong); }
+.lift:active { transform: scale(0.985); }
+
+/* buttons: flat, named for their action, pressed by a small scale */
+.learner .ant-btn { font-weight: 700; transition: transform 120ms var(--ease-out), background-color 150ms, border-color 150ms, color 150ms; }
+.learner .ant-btn:not(:disabled):active { transform: scale(0.97); }
+.learner .ant-btn-variant-outlined:not(:disabled), .learner .ant-btn-variant-dashed:not(:disabled) { border-width: 1.5px; }
+
+/* answer choices: a quiet tile that fills with the beam colour when judged */
+.btn-3d {
+  border-radius: 0.875rem; border: 1.5px solid var(--line-strong); background: var(--surface);
+  transition: transform 120ms var(--ease-out), border-color 150ms, background-color 150ms, color 150ms;
+}
+.btn-3d:not(:disabled):hover { border-color: var(--color-brand-400); background: color-mix(in oklab, var(--color-brand-500) 5%, var(--surface)); }
+.btn-3d:not(:disabled):active { transform: scale(0.98); }
+.btn-3d.is-right { border-color: #10c79a; background: color-mix(in oklab, #10c79a 14%, var(--surface)); }
+.btn-3d.is-wrong { border-color: #f43f5e; background: color-mix(in oklab, #f43f5e 11%, var(--surface)); }
+
+.learner .ant-progress-bg { background: var(--color-brand-600) !important; }
+.learner .ant-segmented { padding: 3px; border-radius: 12px; }
+.learner .ant-segmented-item { border-radius: 9px; font-weight: 600; }
+
+/* entrances: from an already-visible state, ease-out, no overshoot */
+@keyframes lp-pop { from { transform: scale(0.96); opacity: 0 } to { transform: scale(1); opacity: 1 } }
+@keyframes lp-rise { from { transform: translateY(6px); opacity: 0 } to { transform: none; opacity: 1 } }
+.animate-pop { animation: lp-pop 260ms var(--ease-out) both; }
+.animate-rise { animation: lp-rise 320ms var(--ease-out) both; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+
+/* ---------- every screen size ---------- */
+/* wide tables scroll sideways inside their card instead of stretching the page */
+.ant-table-wrapper .ant-table-content, .ant-table-wrapper .ant-table-body { overflow-x: auto; }
+@media (max-width: 640px) {
+  .ant-input-search, .ant-select:not(.ant-select-borderless) { max-width: 100%; }
+  .ant-card .ant-card-head { padding: 0 12px; }
+  .ant-card .ant-card-body { padding: 12px; }
+  .ant-card .ant-card-head-wrapper { flex-wrap: wrap; gap: 4px; }
+  .ant-card .ant-card-extra { margin-inline-start: 0; padding-bottom: 8px; }
+  .ant-modal { max-width: calc(100vw - 16px); }
+  /* narrow screen: columns keep a readable width and the table scrolls sideways */
+  .ant-table-cell:not(.ant-table-selection-column) { min-width: 7rem; }
+}

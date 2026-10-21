@@ -1,3 +1,4 @@
+import '../../../core/utils/brand_assets.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/network/api_client.dart';
@@ -19,13 +20,7 @@ class CommunityCreateGroupController extends GetxController {
   final RxBool canSubmit = false.obs;
   final RxBool isSubmitting = false.obs;
 
-  static const List<String> iconAssets = [
-    'assets/images/chimcanhcut/chim_hocnhom.png',
-    'assets/images/chimcanhcut/chim_hocnhom1.png',
-    'assets/images/chimcanhcut/chim_hocnhom2.png',
-    'assets/images/chimcanhcut/chim_hocnhom3.png',
-    'assets/images/chimcanhcut/chim_hocnhom4.png',
-  ];
+  static const List<String> iconAssets = BrandAssets.groupIcons;
 
   @override
   void onInit() {

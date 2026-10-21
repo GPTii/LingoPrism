@@ -9,6 +9,7 @@ import '../views/custom_camera_view.dart';
 import '../../../core/network/api_client.dart';
 import '../../../data/models/api/learning_extra.dart';
 import '../../../data/repositories/repositories.dart';
+import '../../../data/services/offline_detections.dart';
 import '../../../data/services/on_device_detector.dart';
 
 class CameraDetectionController extends GetxController {
@@ -20,6 +21,20 @@ class CameraDetectionController extends GetxController {
 
   File? get image => _image.value;
   bool get isLoading => _isLoading.value;
+
+  @override
+  void onInit() {
+    super.onInit();
+    _sync(); // results saved while offline go up as soon as the server answers
+  }
+
+  Future<void> _sync() async {
+    final n = await OfflineDetections.flush();
+    if (n > 0) {
+      Get.snackbar('Đã đồng bộ', 'Đã gửi $n kết quả nhận diện lúc offline lên máy chủ.',
+          snackPosition: SnackPosition.BOTTOM, duration: const Duration(seconds: 2));
+    }
+  }
 
   /// Chụp ảnh từ camera với khung vuông
   Future<void> takePhoto() async {
@@ -107,16 +122,20 @@ class CameraDetectionController extends GetxController {
     }
   }
 
-  /// Detect on the server (YOLOv10 ONNX); fall back to the on-device TFLite model when the
-  /// server has no model or the network is down. Both paths are logged for statistics / VIP.
+  /// Detect on the server (ONNX ensemble); fall back to the on-device TFLite model when the server has no model or
+  /// the network is down. Online, the phone's result is logged for statistics / VIP; offline, the word cards come
+  /// from the copy kept on the phone and what the learner saves is queued (OfflineDetections).
   Future<void> _uploadAndDetect() async {
     final file = _image.value;
     if (file == null) return;
     _isLoading.value = true;
     try {
       DetectionResult result;
+      List<Map<String, dynamic>>? offlineItems;
       try {
         result = await DetectionRepository.detectOnServer(file.path);
+        OfflineDetections.refreshLabels();
+        _sync();
       } on ApiException catch (e) {
         if (!(e.isNetwork || e.statusCode == 503)) rethrow;
         if (!await OnDeviceDetector.instance.available) {
@@ -125,14 +144,23 @@ class CameraDetectionController extends GetxController {
               : e.message);
         }
         final (boxes, ms) = await OnDeviceDetector.instance.detect(file);
-        result = await DetectionRepository.logOnDevice(
-            OnDeviceDetector.instance.modelName, ms, boxes.map((b) => b.toJson()).toList());
+        final items = boxes.map((b) => b.toJson()).toList();
+        try {
+          result = await DetectionRepository.logOnDevice(OnDeviceDetector.instance.modelName, ms, items);
+        } on ApiException catch (e2) {
+          if (!e2.isNetwork) rethrow;
+          if (!OfflineDetections.hasLabels) {
+            throw ApiException('Đang offline và máy chưa có bộ từ vựng. Hãy nhận diện một lần khi có mạng để tải về.');
+          }
+          result = OfflineDetections.result(OnDeviceDetector.instance.modelName, ms, items);
+          offlineItems = items;
+        }
       }
       if (result.items.isEmpty) {
         _showError('Không phát hiện được đối tượng nào. Hãy thử chụp gần và rõ hơn.');
         return;
       }
-      Get.toNamed(Routes.detectionResult, arguments: {'result': result, 'image': file});
+      Get.toNamed(Routes.detectionResult, arguments: {'result': result, 'image': file, 'offline_items': offlineItems});
     } catch (e) {
       _showError(ApiClient.toApiException(e).message);
     } finally {

@@ -65,7 +65,7 @@ class CommunityChatMessage {
   String get validatedSenderName {
     final trimmed = senderName.trim();
     if (trimmed.isEmpty) {
-      return isCurrentUser ? 'Bạn' : 'Thành viên SnapLingua';
+      return isCurrentUser ? 'Bạn' : 'Thành viên LingoPrism';
     }
     // Limit name length for display
     if (trimmed.length > 50) {
@@ -193,7 +193,7 @@ class CommunityStudyGroup {
   String get validatedAssetImage {
     final trimmed = assetImage.trim();
     if (trimmed.isEmpty || !trimmed.startsWith('assets/')) {
-      return 'assets/images/nhom/nhom_default.png';
+      return 'assets/brand/group/group_default.png';
     }
     return trimmed;
   }

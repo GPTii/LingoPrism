@@ -1,20 +1,47 @@
 import type { ReactNode } from 'react'
+import { LangGlyph, Logo, Prismo } from './brand/Brand'
 
+const LANGS = [
+  { glyph: <LangGlyph lang="en" size={28} />, word: 'apple', name: 'Tiếng Anh' },
+  { glyph: <LangGlyph lang="zh" size={28} />, word: <span lang="zh-Hans">苹果</span>, name: 'Tiếng Trung' },
+  { glyph: <LangGlyph lang="vi" size={28} />, word: 'quả táo', name: 'Tiếng Việt' },
+]
+
+/** Login / register / password pages: the brand and Prismo on one side, the form on the other. */
 export default function AuthCard({ title, subtitle, children }: { title: string; subtitle?: string; children: ReactNode }) {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-brand-50 via-white to-sky-50 p-4">
-      <div className="w-full max-w-md rounded-3xl bg-white shadow-xl shadow-brand-100/60 p-8">
-        <div className="flex items-center gap-3 mb-6">
-          <img src="/logo.png" alt="LingoPrism" className="h-12 w-12 rounded-2xl" />
+    <div className="learner min-h-screen grid lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
+      <aside className="hidden lg:flex ink-bg text-white flex-col justify-between p-12 xl:p-16">
+        <Logo inverse />
+        <div className="flex flex-col gap-8 max-w-md">
+          <Prismo mood="happy" size={150} />
           <div>
-            <div className="text-xl font-bold text-slate-800">LingoPrism</div>
-            <div className="text-xs text-slate-500">One snap. Three languages.</div>
+            <h2 className="text-[2.75rem] font-extrabold leading-[1.08] m-0 text-white">Một lần chụp.<br />Ba thứ tiếng.</h2>
+            <p className="text-lg text-white/75 mt-4 mb-0">
+              Chụp đồ vật quanh bạn và học ngay tên của nó bằng ba thứ tiếng. Mỗi ngày vài phút, lịch ôn tự nhắc đúng lúc sắp quên.
+            </p>
           </div>
+          {/* one snap of an apple, as the three beams see it */}
+          <ul className="m-0 p-0 list-none flex flex-col gap-3">
+            {LANGS.map((l) => (
+              <li key={l.name} className="flex items-center gap-3">
+                {l.glyph}
+                <span className="text-xl font-semibold">{l.word}</span>
+                <span className="text-sm text-white/55">{l.name}</span>
+              </li>
+            ))}
+          </ul>
         </div>
-        <h1 className="text-2xl font-semibold text-slate-800">{title}</h1>
-        {subtitle ? <p className="text-slate-500 mt-1 mb-6">{subtitle}</p> : <div className="mb-4" />}
-        {children}
-      </div>
+        <p className="text-sm text-white/50 m-0">Việt · Anh · Trung giản thể · Trung phồn thể</p>
+      </aside>
+      <main className="flex items-center justify-center p-4 sm:p-8">
+        <div className="w-full max-w-[420px] animate-rise">
+          <div className="lg:hidden mb-8"><Logo /></div>
+          <h1 className="text-3xl font-extrabold text-slate-800 m-0">{title}</h1>
+          {subtitle ? <p className="text-slate-500 mt-2 mb-7">{subtitle}</p> : <div className="mb-6" />}
+          {children}
+        </div>
+      </main>
     </div>
   )
 }

@@ -87,7 +87,7 @@ export function ExamTakePage() {
   if (!data) return <Result status="error" title={errorMessage(started.error)} />
   return (
     <div className="max-w-3xl mx-auto flex flex-col gap-4">
-      <div className="flex items-center justify-between sticky top-16 bg-[#f6fbfb] py-2 z-10">
+      <div className="flex flex-wrap items-center justify-between gap-2 sticky top-14 md:top-16 bg-[#f6fbfb] py-2 z-10">
         <h1 className="text-xl font-bold m-0">{data.title}</h1>
         {left !== null && <Tag color={left < 60 ? 'red' : 'blue'} className="!text-base">{String(Math.floor(left / 60)).padStart(2, '0')}:{String(left % 60).padStart(2, '0')}</Tag>}
       </div>

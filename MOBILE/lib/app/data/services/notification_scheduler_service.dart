@@ -14,9 +14,9 @@ class NotificationSchedulerService extends GetxService {
 
   static NotificationSchedulerService get to => Get.find();
 
-  static const String _channelId = 'snaplingua_daily_reminders';
+  static const String _channelId = 'lingoprism_daily_reminders';
   static const String _channelName = 'Nhắc nhở học tập';
-  static const String _channelDescription = 'Thông báo nhắc học từ SnapLingua';
+  static const String _channelDescription = 'Thông báo nhắc học từ LingoPrism';
 
   final FlutterLocalNotificationsPlugin _notificationsPlugin;
 
@@ -98,7 +98,7 @@ class NotificationSchedulerService extends GetxService {
 
     await _notificationsPlugin.show(
       DateTime.now().millisecondsSinceEpoch ~/ 1000,
-      'SnapLingua nhắc học (test)',
+      'LingoPrism nhắc học (test)',
       'Nếu bạn thấy được thông báo này thì quyền đã ok.',
       details,
     );
@@ -130,7 +130,7 @@ class NotificationSchedulerService extends GetxService {
     if (_canScheduleExact) {
       await _notificationsPlugin.zonedSchedule(
         DateTime.now().millisecondsSinceEpoch ~/ 1000,
-        'SnapLingua nhắc học (test hẹn giờ)',
+        'LingoPrism nhắc học (test hẹn giờ)',
         'Thông báo test hẹn giờ sau ${delay.inMinutes} phút.',
         scheduled,
         details,
@@ -230,7 +230,7 @@ class NotificationSchedulerService extends GetxService {
 
         await _notificationsPlugin.zonedSchedule(
           notificationId,
-          'SnapLingua nhắc học',
+          'LingoPrism nhắc học',
           message,
           scheduledDate,
           notificationDetails,
@@ -326,8 +326,8 @@ class NotificationSchedulerService extends GetxService {
   static const List<String> _notificationMessages = <String>[
     'Học thêm một chút để giữ streak nhé!',
     'Đã đến giờ luyện từ vựng rồi đó!',
-    'Hoàn thành mục tiêu hôm nay cùng SnapLingua nào!',
+    'Hoàn thành mục tiêu hôm nay cùng LingoPrism nào!',
     'Chinh phục thêm vài từ mới bạn nhé!',
-    'Giữ phong độ học tập thôi, SnapLingua đồng hành cùng bạn.',
+    'Giữ phong độ học tập thôi, LingoPrism đồng hành cùng bạn.',
   ];
 }

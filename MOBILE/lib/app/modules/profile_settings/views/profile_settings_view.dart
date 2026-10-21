@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../controllers/profile_settings_controller.dart';
+import 'package:lingoprism/app/core/theme/app_colors.dart';
 
 class ProfileSettingsView extends GetView<ProfileSettingsController> {
   const ProfileSettingsView({super.key});
@@ -10,19 +11,19 @@ class ProfileSettingsView extends GetView<ProfileSettingsController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFE6F9FF),
+      backgroundColor: AppColors.primarySoft,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFE6F9FF),
+        backgroundColor: AppColors.primarySoft,
         elevation: 0,
         leading: IconButton(
           onPressed: Get.back,
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
-          color: const Color(0xFF0B1D28),
+          color: AppColors.textPrimary,
         ),
         title: Text(
           'Cài đặt',
           style: TextStyle(
-            color: const Color(0xFF0B1D28),
+            color: AppColors.textPrimary,
             fontSize: 20.sp,
             fontWeight: FontWeight.w700,
           ),
@@ -71,7 +72,7 @@ class ProfileSettingsView extends GetView<ProfileSettingsController> {
                 child: ElevatedButton(
                   onPressed: isProcessing ? null : controller.logout,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFE8505B),
+                    backgroundColor: AppColors.error,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(18.r),
                     ),
@@ -140,7 +141,7 @@ class _SettingsTile extends StatelessWidget {
               child: Text(
                 label,
                 style: TextStyle(
-                  color: const Color(0xFF0B1D28),
+                  color: AppColors.textPrimary,
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w600,
                 ),
@@ -148,7 +149,7 @@ class _SettingsTile extends StatelessWidget {
             ),
             Icon(
               Icons.chevron_right_rounded,
-              color: const Color(0xFF1CB0F6),
+              color: AppColors.primary,
               size: 24.sp,
             ),
           ],

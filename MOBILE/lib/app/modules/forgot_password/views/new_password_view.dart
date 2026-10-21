@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import '../controllers/forgot_password_controller.dart';
+import 'package:lingoprism/app/core/theme/app_colors.dart';
 
 class NewPasswordView extends GetView<ForgotPasswordController> {
   const NewPasswordView({super.key});
@@ -16,9 +17,9 @@ class NewPasswordView extends GetView<ForgotPasswordController> {
             end: Alignment.bottomRight,
             stops: [0.0, 0.43, 1.0],
             colors: [
-              Color(0xFF0571E6),
-              Color(0xFF90F3A7),
-              Color(0xFF0088FF),
+              AppColors.primary,
+              Color(0xFF7CE3C3),
+              AppColors.primary,
             ],
           ),
         ),
@@ -60,7 +61,7 @@ class NewPasswordView extends GetView<ForgotPasswordController> {
                   margin: EdgeInsets.symmetric(horizontal: 16.w),
                   padding: EdgeInsets.all(24.w),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFE5FFFD),
+                    color: AppColors.background,
                     borderRadius: BorderRadius.circular(24.r),
                   ),
                   child: SingleChildScrollView(
@@ -72,7 +73,7 @@ class NewPasswordView extends GetView<ForgotPasswordController> {
                           width: 80.w,
                           height: 80.h,
                           decoration: const BoxDecoration(
-                            color: Color(0xFF0088FF),
+                            color: AppColors.primary,
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
@@ -262,7 +263,7 @@ class NewPasswordView extends GetView<ForgotPasswordController> {
                                     : controller.resetPassword,
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: controller.canResetPassword && !controller.isLoading
-                                      ? const Color(0xFF0088FF)
+                                      ? AppColors.primary
                                       : const Color(0xFFBDBDBD),
                                   padding: EdgeInsets.symmetric(vertical: 16.h),
                                   shape: RoundedRectangleBorder(

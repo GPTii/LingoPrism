@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../controllers/profile_edit_controller.dart';
+import 'package:lingoprism/app/core/theme/app_colors.dart';
 
 class ProfileEditView extends GetView<ProfileEditController> {
   const ProfileEditView({super.key});
@@ -11,19 +12,19 @@ class ProfileEditView extends GetView<ProfileEditController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFE6F9FF),
+      backgroundColor: AppColors.primarySoft,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFE6F9FF),
+        backgroundColor: AppColors.primarySoft,
         elevation: 0,
         leading: IconButton(
           onPressed: Get.back,
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
-          color: const Color(0xFF0B1D28),
+          color: AppColors.textPrimary,
         ),
         title: Text(
           'Cập nhật hồ sơ',
           style: TextStyle(
-            color: const Color(0xFF0B1D28),
+            color: AppColors.textPrimary,
             fontSize: 20.sp,
             fontWeight: FontWeight.w700,
           ),
@@ -53,7 +54,7 @@ class ProfileEditView extends GetView<ProfileEditController> {
                     child: Text(
                       'THAY ẢNH ĐẠI DIỆN',
                       style: TextStyle(
-                        color: const Color(0xFF1CB0F6),
+                        color: AppColors.primary,
                         fontWeight: FontWeight.w700,
                         fontSize: 14.sp,
                         letterSpacing: 0.5,
@@ -69,7 +70,7 @@ class ProfileEditView extends GetView<ProfileEditController> {
               child: Text(
                 'Tên',
                 style: TextStyle(
-                  color: const Color(0xFF0B1D28),
+                  color: AppColors.textPrimary,
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w700,
                 ),
@@ -86,17 +87,17 @@ class ProfileEditView extends GetView<ProfileEditController> {
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(18.r),
                   borderSide:
-                      const BorderSide(color: Color(0xFF1CB0F6), width: 2),
+                      const BorderSide(color: AppColors.primary, width: 2),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(18.r),
                   borderSide:
-                      const BorderSide(color: Color(0xFF1CB0F6), width: 2),
+                      const BorderSide(color: AppColors.primary, width: 2),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(18.r),
                   borderSide:
-                      const BorderSide(color: Color(0xFF1CB0F6), width: 2),
+                      const BorderSide(color: AppColors.primary, width: 2),
                 ),
               ),
             ),
@@ -109,7 +110,7 @@ class ProfileEditView extends GetView<ProfileEditController> {
                 child: Text(
                   error,
                   style: TextStyle(
-                    color: const Color(0xFFE8505B),
+                    color: AppColors.error,
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w600,
                   ),
@@ -125,7 +126,7 @@ class ProfileEditView extends GetView<ProfileEditController> {
                 child: ElevatedButton(
                   onPressed: isSaving ? null : controller.saveProfile,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF1CB0F6),
+                    backgroundColor: AppColors.primary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(26.r),
                     ),
@@ -175,7 +176,7 @@ class ProfileEditView extends GetView<ProfileEditController> {
               Text(
                 'Chọn ảnh đại diện',
                 style: TextStyle(
-                  color: const Color(0xFF0B1D28),
+                  color: AppColors.textPrimary,
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w700,
                 ),
@@ -188,17 +189,17 @@ class ProfileEditView extends GetView<ProfileEditController> {
                     await controller.pickAvatarFromDevice();
                     if (context.mounted) Get.back();
                   },
-                  icon: const Icon(Icons.photo_library_rounded, color: Color(0xFF1CB0F6)),
+                  icon: const Icon(Icons.photo_library_rounded, color: AppColors.primary),
                   label: Text(
                     'Chọn từ thiết bị',
                     style: TextStyle(
-                      color: const Color(0xFF1CB0F6),
+                      color: AppColors.primary,
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
                   style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Color(0xFF1CB0F6), width: 2),
+                    side: const BorderSide(color: AppColors.primary, width: 2),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16.r),
                     ),

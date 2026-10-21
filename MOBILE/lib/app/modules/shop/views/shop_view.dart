@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import '../controllers/shop_controller.dart';
 import '../../../core/theme/app_widgets.dart';
+import 'package:lingoprism/app/core/theme/app_colors.dart';
 
 class ShopView extends GetView<ShopController> {
   const ShopView({super.key});
@@ -10,9 +11,9 @@ class ShopView extends GetView<ShopController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFE5FFFD),
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFBBFFEE),
+        backgroundColor: AppColors.primarySoft,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
@@ -33,7 +34,7 @@ class ShopView extends GetView<ShopController> {
             child: Row(
               children: [
                 Image.asset(
-                  'assets/images/vay.png',
+                  'assets/brand/icons/scale.png',
                   width: 33.w,
                   height: 33.h,
                   errorBuilder: (context, error, stackTrace) {
@@ -46,7 +47,7 @@ class ShopView extends GetView<ShopController> {
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16.sp,
-                        color: const Color(0xFFB8C3D1),
+                        color: AppColors.lineStrong,
                       ),
                     )),
               ],
@@ -58,7 +59,7 @@ class ShopView extends GetView<ShopController> {
             child: Row(
               children: [
                 Image.asset(
-                  'assets/images/ngoc.png',
+                  'assets/brand/icons/gem.png',
                   width: 33.w,
                   height: 33.h,
                   errorBuilder: (context, error, stackTrace) {
@@ -71,7 +72,7 @@ class ShopView extends GetView<ShopController> {
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16.sp,
-                        color: const Color(0xFF0571E6),
+                        color: AppColors.primary,
                       ),
                     )),
               ],
@@ -199,7 +200,7 @@ class ShopView extends GetView<ShopController> {
     return Column(
       children: [
         _buildShopItem(
-          'assets/images/XPx2.png',
+          'assets/brand/icons/xp_x2.png',
           'Vảy tăng tốc',
           'Nhận đôi XP\nnhận được trong 15 phút',
           150,
@@ -207,7 +208,7 @@ class ShopView extends GetView<ShopController> {
         ),
         SizedBox(height: 12.h),
         _buildShopItem(
-          'assets/images/streak/streakbang.png',
+          'assets/brand/icons/streak_freeze.png',
           'Đá băng',
           'Giữ chuỗi streak\nkhi nghỉ 1 ngày',
           200,
@@ -215,15 +216,15 @@ class ShopView extends GetView<ShopController> {
         ),
         SizedBox(height: 12.h),
         _buildShopItem(
-          'assets/images/binhcucquang.png',
-          'Bình cực quang',
+          'assets/brand/icons/xp_potion.png',
+          'Bình ánh sáng',
           'Tăng 25% XP\ntoàn app trong 24 giờ',
           2,
           false,
         ),
         SizedBox(height: 12.h),
         _buildShopItem(
-          'assets/images/chimcanhcut/chim_ok.png',
+          'assets/brand/mascot/prismo_ok.png',
           'Sticker OK',
           'Dùng sticker trong\nchat nhóm & bình luận',
           2,
@@ -231,7 +232,7 @@ class ShopView extends GetView<ShopController> {
         ),
         SizedBox(height: 12.h),
         _buildShopItem(
-          'assets/images/chimcanhcut/chim_yeu.png',
+          'assets/brand/mascot/prismo_love.png',
           'Sticker yêu ngất ngây',
           'Dùng sticker trong\nchat nhóm & bình luận',
           2,
@@ -239,7 +240,7 @@ class ShopView extends GetView<ShopController> {
         ),
         SizedBox(height: 12.h),
         _buildShopItem(
-          'assets/images/chimcanhcut/chim_buon.png',
+          'assets/brand/mascot/prismo_sad.png',
           'Sticker buồn hiu',
           'Dùng sticker trong\nchat nhóm & bình luận',
           2,
@@ -312,7 +313,7 @@ class ShopView extends GetView<ShopController> {
             Row(
               children: [
                 Image.asset(
-                  isCoins ? 'assets/images/vay.png' : 'assets/images/ngoc.png',
+                  isCoins ? 'assets/brand/icons/scale.png' : 'assets/brand/icons/gem.png',
                   height: 35.h,
                 ),
                 SizedBox(width: 4.w),
@@ -321,7 +322,7 @@ class ShopView extends GetView<ShopController> {
                   style: TextStyle(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.bold,
-                    color: isCoins ? const Color(0xFFB8C3D1) : const Color(0xFF0571E6),
+                    color: isCoins ? AppColors.lineStrong : AppColors.primary,
                   ),
                 ),
               ],

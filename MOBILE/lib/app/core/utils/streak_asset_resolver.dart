@@ -1,5 +1,5 @@
 class StreakAssetResolver {
-  static const String _basePath = 'assets/images/streak';
+  static const String _basePath = 'assets/brand/icons';
 
   /// Returns the streak badge asset for the given streak count.
   ///
@@ -10,7 +10,7 @@ class StreakAssetResolver {
     required bool hasActivityToday,
   }) {
     if (!hasActivityToday) {
-      return '$_basePath/streak0.png';
+      return '$_basePath/streak_0.png';
     }
 
     return assetByValue(streak);
@@ -20,20 +20,20 @@ class StreakAssetResolver {
   /// whether the user has completed today's streak action.
   static String assetByValue(int streak) {
     if (streak <= 0) {
-      return '$_basePath/streak1.png';
+      return '$_basePath/streak_1.png';
     }
     if (streak <= 6) {
-      return '$_basePath/streak2.png';
+      return '$_basePath/streak_2.png';
     }
     if (streak <= 13) {
-      return '$_basePath/streak3.png';
+      return '$_basePath/streak_3.png';
     }
     if (streak <= 20) {
-      return '$_basePath/streak4.png';
+      return '$_basePath/streak_4.png';
     }
     if (streak <= 29) {
-      return '$_basePath/streak5.png';
+      return '$_basePath/streak_5.png';
     }
-    return '$_basePath/streak6.png';
+    return '$_basePath/streak_6.png';
   }
 }

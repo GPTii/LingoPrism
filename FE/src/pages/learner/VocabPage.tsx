@@ -1,11 +1,14 @@
 import { useQuery } from '@tanstack/react-query'
-import { Input, Progress, Segmented, Skeleton, Empty } from 'antd'
+import { Input, Segmented, Skeleton, Empty } from 'antd'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { vocabApi, topicTargetName } from '../../api/vocab'
 import { useAuth } from '../../auth/store'
 import WordCardView from '../../components/WordCardView'
 import { langTag } from '../../components/TargetWord'
+
+/** every topic its own colour (stable: by id) */
+export const TOPIC_TINTS = ['#6d4aff', '#3fa9f5', '#10c79a', '#ff8a3d', '#ec4899', '#ffb020', '#8b5cf6', '#14b8a6', '#ff6b81', '#0ea5e9']
 
 export default function VocabPage() {
   const user = useAuth((s) => s.user)
@@ -21,9 +24,12 @@ export default function VocabPage() {
 
   return (
     <div className="max-w-6xl mx-auto flex flex-col gap-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-bold text-slate-800 m-0">Thư viện từ vựng</h1>
-        <Input.Search placeholder="Tìm nhanh từ vựng (Việt, Anh, Trung)…" allowClear onSearch={setSearch} style={{ maxWidth: 360 }} />
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="text-3xl font-extrabold text-slate-800 m-0">Thư viện từ vựng</h1>
+          <div className="text-slate-500 mt-1">Chọn một chủ đề – mỗi từ đều có đủ Việt · Anh · Trung, ảnh thật và câu ví dụ.</div>
+        </div>
+        <Input.Search size="large" placeholder="Tìm nhanh từ vựng (Việt, Anh, Trung)…" allowClear onSearch={setSearch} style={{ maxWidth: 380 }} />
       </div>
 
       {search ? (
@@ -37,18 +43,32 @@ export default function VocabPage() {
         </section>
       ) : (
         <>
-          <Segmented value={tab} onChange={(v) => setTab(v as typeof tab)} options={[{ value: 'topics', label: 'Chủ đề' }, { value: 'library', label: 'Từ của tôi' }]} />
+          <Segmented size="large" value={tab} onChange={(v) => setTab(v as typeof tab)} options={[{ value: 'topics', label: 'Chủ đề' }, { value: 'library', label: 'Từ của tôi' }]} />
           {tab === 'topics' && (
             topics.isLoading ? <Skeleton active /> : (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {topics.data?.results.filter((t) => t.word_count > 0).map((t) => (
-                  <Link key={t.id} to={`/vocab/topics/${t.id}`} className="rounded-2xl bg-white border border-slate-200 p-5 hover:shadow-md hover:border-brand-500 transition flex flex-col gap-2">
-                    <span className="text-4xl">{t.icon || '📘'}</span>
-                    <span className="font-semibold text-slate-800">{t.name_vi}</span>
-                    <span lang={zhTag} className="text-sm text-slate-500">{topicTargetName(t, lang, script)}</span>
-                    <Progress percent={Math.round((t.learned_count / Math.max(t.word_count, 1)) * 100)} size="small" format={() => `${t.learned_count}/${t.word_count}`} />
-                  </Link>
-                ))}
+                {topics.data?.results.filter((t) => t.word_count > 0).map((t) => {
+                  const tint = TOPIC_TINTS[t.id % TOPIC_TINTS.length]
+                  const pct = Math.round((t.learned_count / Math.max(t.word_count, 1)) * 100)
+                  return (
+                    <Link key={t.id} to={`/vocab/topics/${t.id}`} className="lift lp-card overflow-hidden flex flex-col">
+                      <div className="relative h-24 grid place-items-center" style={{ background: `${tint}17` }}>
+                        <span className="text-5xl">{t.icon || '📘'}</span>
+                        {pct >= 100 && <span className="absolute top-2 right-2 rounded-md bg-[#fff] px-2 py-0.5 text-xs font-bold text-[#0e9f7b]">Đã học xong</span>}
+                      </div>
+                      <div className="p-4 flex flex-col gap-1 flex-1">
+                        <span className="font-bold text-slate-800 leading-tight">{t.name_vi}</span>
+                        <span lang={zhTag} className="text-sm font-semibold text-slate-500 truncate">{topicTargetName(t, lang, script)}</span>
+                        <div className="mt-auto pt-2 flex items-center gap-2">
+                          <div className="h-2 flex-1 rounded-full bg-slate-100 overflow-hidden">
+                            <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: tint }} />
+                          </div>
+                          <span className="num text-xs font-semibold text-slate-500">{t.learned_count}/{t.word_count}</span>
+                        </div>
+                      </div>
+                    </Link>
+                  )
+                })}
               </div>
             )
           )}

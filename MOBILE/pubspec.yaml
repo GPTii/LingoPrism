@@ -31,7 +31,7 @@ dependencies:
   path_provider: ^2.1.1
 
   # ML/AI On-device
-  tflite_flutter: ^0.10.4
+  tflite_flutter: ^0.11.0
   # Using existing TFLite infrastructure instead of ONNX due to package availability
 
   # Networking
@@ -98,32 +98,40 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/images/
-    - assets/images/chimcanhcut/
-    - assets/images/streak/
-    - assets/images/rank/
-    - assets/images/nhom/
-    - assets/animations/
+    # LingoPrism's own artwork (drawn by tool/brand_assets.py)
+    - assets/brand/
+    - assets/brand/mascot/
+    - assets/brand/avatar/
+    - assets/brand/icons/
+    - assets/brand/rank/
+    - assets/brand/group/
     - assets/icons/
     - assets/ml_models/
     - assets/models/  # ONNX models directory
     - assets/sounds/
 
   fonts:
-    - family: Gilroy
+    # Be Vietnam Pro – SIL Open Font License (assets/fonts/BeVietnamPro-OFL.txt), same font as the web
+    - family: BeVietnamPro
       fonts:
-        - asset: assets/fonts/SVN-Gilroy Regular.otf
-        - asset: assets/fonts/SVN-Gilroy Light.otf
-          weight: 300
-        - asset: assets/fonts/SVN-Gilroy Medium.otf
+        - asset: assets/fonts/BeVietnamPro-Regular.ttf
+        - asset: assets/fonts/BeVietnamPro-Medium.ttf
           weight: 500
-        - asset: assets/fonts/SVN-Gilroy Bold.otf
+        - asset: assets/fonts/BeVietnamPro-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/BeVietnamPro-Bold.ttf
           weight: 700
+        - asset: assets/fonts/BeVietnamPro-ExtraBold.ttf
+          weight: 800
+        # w900 in older screens falls back to ExtraBold
+        - asset: assets/fonts/BeVietnamPro-ExtraBold.ttf
+          weight: 900
 
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: "assets/images/logo.png"
+  image_path: "assets/brand/logo.png"
+  image_path_ios: "assets/brand/logo_square.png"
   remove_alpha_ios: true
-  adaptive_icon_background: "#E5FFFD"
-  adaptive_icon_foreground: "assets/images/logo.png"
+  adaptive_icon_background: "#5B3BE8"
+  adaptive_icon_foreground: "assets/brand/logo_foreground.png"

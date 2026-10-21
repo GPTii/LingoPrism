@@ -87,11 +87,11 @@ class CommunityView extends GetView<CommunityController> {
         fontSize: 12.sp,
         fontWeight: FontWeight.w500,
       ),
-      labelColor: const Color(0xFF0A69C7),
-      unselectedLabelColor: const Color(0xFF1A1D1F),
+      labelColor: AppColors.primary,
+      unselectedLabelColor: AppColors.textPrimary,
       indicator: UnderlineTabIndicator(
         borderSide: BorderSide(
-          color: const Color(0xFF0A69C7),
+          color: AppColors.primary,
           width: 3.h,
         ),
         insets: EdgeInsets.symmetric(horizontal: 12.w),
@@ -183,11 +183,11 @@ class _EmptyFeedState extends StatelessWidget {
           Icon(
             Icons.wifi_off_rounded,
             size: 48.w,
-            color: const Color(0xFF0A69C7),
+            color: AppColors.primary,
           )
         else
           Image.asset(
-            'assets/images/chimcanhcut/chim_xinloi.png',
+            'assets/brand/mascot/prismo_sorry.png',
             width: 150.w,
             
           ),
@@ -199,7 +199,7 @@ class _EmptyFeedState extends StatelessWidget {
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 14.sp,
-              color: const Color(0xFF1A1D1F),
+              color: AppColors.textPrimary,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -208,7 +208,7 @@ class _EmptyFeedState extends StatelessWidget {
         ElevatedButton(
           onPressed: onRetry,
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF0A69C7),
+            backgroundColor: AppColors.primary,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(14.r),
             ),
@@ -303,12 +303,12 @@ class _JoinedHeader extends StatelessWidget {
                     IconButton(
                       onPressed: onOpenChat,
                       icon: const Icon(Icons.chat_bubble_outline_rounded),
-                      color: const Color(0xFF0A69C7),
+                      color: AppColors.primary,
                     ),
                     IconButton(
                       onPressed: onLeave,
                       icon: const Icon(Icons.logout_rounded),
-                      color: const Color(0xFFE65F5C),
+                      color: AppColors.error,
                     ),
                   ],
                 ),
@@ -373,7 +373,7 @@ class _MilestoneOverview extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 20.sp,
                         fontWeight: FontWeight.w700,
-                        color: const Color(0xFF0A69C7),
+                        color: AppColors.primary,
                       ),
                     ),
                   ],
@@ -396,7 +396,7 @@ class _MilestoneOverview extends StatelessWidget {
             style: TextStyle(
               fontSize: 28.sp,
               fontWeight: FontWeight.w800,
-              color: const Color(0xFF0A69C7),
+              color: AppColors.primary,
             ),
           ),
           Text(
@@ -432,7 +432,7 @@ class _MilestoneIcons extends StatelessWidget {
                     margin: EdgeInsets.symmetric(horizontal: 4.w),
                     decoration: BoxDecoration(
                       color: milestone.isReached
-                          ? const Color(0xFF0A69C7).withValues(alpha: 0.12)
+                          ? AppColors.primary.withValues(alpha: 0.12)
                           : const Color(0xFFE6ECF5),
                       borderRadius: BorderRadius.circular(18.r),
                     ),
@@ -440,7 +440,7 @@ class _MilestoneIcons extends StatelessWidget {
                     child: Icon(
                       Icons.emoji_events_rounded,
                       color: milestone.isReached
-                          ? const Color(0xFF0A69C7)
+                          ? AppColors.primary
                           : const Color(0xFF9BA8B8),
                     ),
                   ),
@@ -451,7 +451,7 @@ class _MilestoneIcons extends StatelessWidget {
                       fontSize: 12.sp,
                       fontWeight: FontWeight.w600,
                       color: milestone.isReached
-                          ? const Color(0xFF0A69C7)
+                          ? AppColors.primary
                           : const Color(0xFF7D8DA3),
                     ),
                   ),
@@ -542,7 +542,7 @@ class _LeaderboardCard extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 16.sp,
                         fontWeight: FontWeight.w700,
-                        color: const Color(0xFF1B2B40),
+                        color: AppColors.textPrimary,
                       ),
                     ),
                     SizedBox(width: 10.w),
@@ -554,7 +554,7 @@ class _LeaderboardCard extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 15.sp,
                             fontWeight: FontWeight.w700,
-                            color: const Color(0xFF1B2B40),
+                            color: AppColors.textPrimary,
                             decoration: TextDecoration.underline,
                             decorationStyle: TextDecorationStyle.dotted,
                           ),
@@ -570,13 +570,13 @@ class _LeaderboardCard extends StatelessWidget {
                 Row(
                   children: [
                     Icon(Icons.water_drop,
-                        color: const Color(0xFF0A69C7), size: 18.sp),
+                        color: AppColors.primary, size: 18.sp),
                     SizedBox(width: 4.w),
                     Text(
                       '${member.weeklyPoints}',
                       style: TextStyle(
                         fontSize: 13.sp,
-                        color: const Color(0xFF0A69C7),
+                        color: AppColors.primary,
                       ),
                     ),
                   ],
@@ -675,7 +675,7 @@ class _StudyGroupCard extends StatelessWidget {
                           ),
                           decoration: BoxDecoration(
                             color:
-                                const Color(0xFF0A69C7).withValues(alpha: 0.1),
+                                AppColors.primary.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(16.r),
                           ),
                           child: Text(
@@ -683,7 +683,7 @@ class _StudyGroupCard extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 11.sp,
                               fontWeight: FontWeight.w600,
-                              color: const Color(0xFF0A69C7),
+                              color: AppColors.primary,
                             ),
                           ),
                         ),
@@ -694,7 +694,7 @@ class _StudyGroupCard extends StatelessWidget {
                     'Yêu cầu: ${group.requirement}',
                     style: TextStyle(
                       fontSize: 13.sp,
-                      color: const Color(0xFF4F6274),
+                      color: AppColors.textSecondary,
                     ),
                   ),
                   SizedBox(height: 4.h),
@@ -704,7 +704,7 @@ class _StudyGroupCard extends StatelessWidget {
                       'Trưởng nhóm: ${group.leaderName}',
                       style: TextStyle(
                         fontSize: 12.sp,
-                        color: const Color(0xFF0A69C7),
+                        color: AppColors.primary,
                         decoration: TextDecoration.underline,
                         decorationStyle: TextDecorationStyle.dotted,
                       ),
@@ -721,12 +721,12 @@ class _StudyGroupCard extends StatelessWidget {
                 shape: BoxShape.circle,
                 color: Colors.white,
                 border: Border.all(
-                  color: const Color(0xFF0A69C7),
+                  color: AppColors.primary,
                   width: 1.6,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF0A69C7).withValues(alpha: 0.18),
+                    color: AppColors.primary.withValues(alpha: 0.18),
                     blurRadius: 10.r,
                     offset: Offset(0, 6.h),
                   ),
@@ -738,7 +738,7 @@ class _StudyGroupCard extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 15.sp,
                   fontWeight: FontWeight.w700,
-                  color: const Color(0xFF0A69C7),
+                  color: AppColors.primary,
                 ),
               ),
             ),
@@ -911,7 +911,7 @@ class _FeedCard extends StatelessWidget {
                             ),
                             minimumSize: Size.zero,
                             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                            backgroundColor: const Color(0xFF0A69C7),
+                            backgroundColor: AppColors.primary,
                             foregroundColor: Colors.white,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(20.r),
@@ -954,7 +954,7 @@ class _FeedCard extends StatelessWidget {
         IconButton(
           icon: Icon(
             Icons.more_vert,
-            color: const Color(0xFF6F7B87),
+            color: AppColors.textSecondary,
             size: 22.sp,
           ),
           onPressed: () => _onPostMenuPressed(context),
@@ -1024,7 +1024,7 @@ class _FeedCard extends StatelessWidget {
     try {
       final avatar = _normalizeImagePath(post.authorAvatar ?? '');
       if (avatar.isEmpty) {
-        return const AssetImage('assets/images/chimcanhcut/chim_vui1.png');
+        return const AssetImage('assets/brand/avatar/avatar_1.png');
       }
 
       if (avatar.startsWith('data:image')) {
@@ -1070,7 +1070,7 @@ class _FeedCard extends StatelessWidget {
       debugPrint('Error loading avatar: $e');
     }
 
-    return const AssetImage('assets/images/chimcanhcut/chim_vui1.png');
+    return const AssetImage('assets/brand/avatar/avatar_1.png');
   }
 
   void _openAuthorProfile(BuildContext context) {
@@ -1163,7 +1163,7 @@ class _FeedCard extends StatelessWidget {
 
   Widget _buildFallbackImage() {
     return Image.asset(
-      'assets/images/chimcanhcut/chim_vui1.png',
+      'assets/brand/avatar/avatar_1.png',
       fit: BoxFit.cover,
     );
   }
@@ -1228,7 +1228,7 @@ class _FeedCard extends StatelessWidget {
             label: post.likes.value.toString(),
             color: post.isLiked.value
                 ? const Color(0xFFFF3A30)
-                : const Color(0xFF6F7B87),
+                : AppColors.textSecondary,
             onTap: () => communityController.toggleLike(post),
           ),
         ),
@@ -1238,16 +1238,16 @@ class _FeedCard extends StatelessWidget {
             icon: isExpanded ? Icons.chat_bubble : Icons.chat_bubble_outline,
             label: post.comments.value.toString(),
             color:
-                isExpanded ? const Color(0xFF0A69C7) : const Color(0xFF6F7B87),
+                isExpanded ? AppColors.primary : AppColors.textSecondary,
             labelColor:
-                isExpanded ? const Color(0xFF0A69C7) : const Color(0xFF6F7B87),
+                isExpanded ? AppColors.primary : AppColors.textSecondary,
             onTap: () => communityController.showComments(post),
           );
         }),
         Obx(() {
           final isVocabulary = post.isVocabularyExpanded.value;
           final iconColor =
-              isVocabulary ? const Color(0xFFFFBE3B) : const Color(0xFF6F7B87);
+              isVocabulary ? const Color(0xFFFFBE3B) : AppColors.textSecondary;
           return _ActionItem(
             icon: isVocabulary ? Icons.bookmark : Icons.bookmark_border,
             label: post.bookmarks.value.toString(),
@@ -1289,7 +1289,7 @@ class _FeedCard extends StatelessWidget {
                     'Chưa có bình luận nào. Hãy chia sẻ cảm nghĩ của bạn nhé!',
                     style: TextStyle(
                       fontSize: 13.sp,
-                      color: const Color(0xFF5F6C7B),
+                      color: AppColors.textSecondary,
                     ),
                   )
                 : Column(
@@ -1333,7 +1333,7 @@ class _FeedCard extends StatelessWidget {
       final selectedTopic = vocabulary.topic.value ?? 'chọn chủ đề';
 
       final borderColor = isSelected
-          ? const Color(0xFF008DFF)
+          ? AppColors.primary
           : const Color(0xFF00A3FF).withValues(alpha: 0.6);
       final gradientColors = isSelected
           ? const [Color(0xFFEAF7FF), Color(0xFFD6EDFF)]
@@ -1374,15 +1374,15 @@ class _FeedCard extends StatelessWidget {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: const Color(0xFF008DFF),
+                        color: AppColors.primary,
                         width: isSelected ? 2.4 : 2,
                       ),
                       color:
-                          isSelected ? const Color(0xFF008DFF) : Colors.white,
+                          isSelected ? AppColors.primary : Colors.white,
                       boxShadow: isSelected
                           ? [
                               BoxShadow(
-                                color: const Color(0xFF008DFF)
+                                color: AppColors.primary
                                     .withValues(alpha: 0.25),
                                 blurRadius: 12.r,
                                 offset: Offset(0, 4.h),
@@ -1409,7 +1409,7 @@ class _FeedCard extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w700,
-                          color: const Color(0xFF0F1D37),
+                          color: AppColors.textPrimary,
                         ),
                       ),
                       if (vocabulary.translation.isNotEmpty) ...[
@@ -1429,7 +1429,7 @@ class _FeedCard extends StatelessWidget {
                           vocabulary.phonetic,
                           style: TextStyle(
                             fontSize: 12.sp,
-                            color: const Color(0xFF6F7B87),
+                            color: AppColors.textSecondary,
                           ),
                         ),
                       ],
@@ -1448,7 +1448,7 @@ class _FeedCard extends StatelessWidget {
                       boxShadow: [
                         BoxShadow(
                           color:
-                              const Color(0xFF008DFF).withValues(alpha: 0.18),
+                              AppColors.primary.withValues(alpha: 0.18),
                           blurRadius: 14.r,
                           offset: Offset(0, 6.h),
                         ),
@@ -1456,7 +1456,7 @@ class _FeedCard extends StatelessWidget {
                     ),
                     child: Icon(
                       Icons.volume_up_rounded,
-                      color: const Color(0xFF008DFF),
+                      color: AppColors.primary,
                       size: 22.sp,
                     ),
                   ),
@@ -1471,7 +1471,7 @@ class _FeedCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w600,
-                    color: const Color(0xFF5F6C7B),
+                    color: AppColors.textSecondary,
                   ),
                 ),
                 SizedBox(width: 8.w),
@@ -1482,7 +1482,7 @@ class _FeedCard extends StatelessWidget {
                     padding:
                         EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF008DFF),
+                      color: AppColors.primary,
                       borderRadius: BorderRadius.circular(18.r),
                     ),
                     child: Row(
@@ -1549,7 +1549,7 @@ class _FeedCard extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 12.sp,
                   fontWeight: FontWeight.w600,
-                  color: const Color(0xFF5F6C7B),
+                  color: AppColors.textSecondary,
                 ),
               ),
             ),
@@ -1631,7 +1631,7 @@ class _FeedCard extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 18.sp,
                           fontWeight: FontWeight.w700,
-                          color: const Color(0xFF0F1D37),
+                          color: AppColors.textPrimary,
                         ),
                       ),
                     ),
@@ -1641,7 +1641,7 @@ class _FeedCard extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w600,
-                        color: const Color(0xFF4F5B6A),
+                        color: AppColors.textSecondary,
                       ),
                     ),
                     SizedBox(height: 12.h),
@@ -1658,7 +1658,7 @@ class _FeedCard extends StatelessWidget {
                               fontWeight: FontWeight.w600,
                               color: isActive
                                   ? Colors.white
-                                  : const Color(0xFF0F1D37),
+                                  : AppColors.textPrimary,
                             ),
                           ),
                           selected: isActive,
@@ -1671,14 +1671,14 @@ class _FeedCard extends StatelessWidget {
                                       offset: topicOption.length);
                             });
                           },
-                          selectedColor: const Color(0xFF008DFF),
+                          selectedColor: AppColors.primary,
                           backgroundColor: const Color(0xFFE4F2FF),
                           pressElevation: 0,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20.r),
                             side: BorderSide(
                               color: isActive
-                                  ? const Color(0xFF008DFF)
+                                  ? AppColors.primary
                                   : const Color(0xFFCCE6FF),
                             ),
                           ),
@@ -1691,7 +1691,7 @@ class _FeedCard extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 13.sp,
                         fontWeight: FontWeight.w500,
-                        color: const Color(0xFF4F5B6A),
+                        color: AppColors.textSecondary,
                       ),
                     ),
                     SizedBox(height: 8.h),
@@ -1706,12 +1706,12 @@ class _FeedCard extends StatelessWidget {
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16.r),
                           borderSide:
-                              const BorderSide(color: Color(0xFFE0E7FF)),
+                              const BorderSide(color: AppColors.primarySoft),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16.r),
                           borderSide:
-                              const BorderSide(color: Color(0xFF008DFF)),
+                              const BorderSide(color: AppColors.primary),
                         ),
                       ),
                     ),
@@ -1770,7 +1770,7 @@ class _FeedCard extends StatelessWidget {
                           }
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF008DFF),
+                          backgroundColor: AppColors.primary,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(18.r),
                           ),
@@ -1896,7 +1896,7 @@ class _FeedCard extends StatelessWidget {
                       width: 48.w,
                       height: 4.h,
                       decoration: BoxDecoration(
-                        color: const Color(0xFFE0E6EE),
+                        color: AppColors.line,
                         borderRadius: BorderRadius.circular(12.r),
                       ),
                     ),
@@ -1962,12 +1962,12 @@ class _FeedCard extends StatelessWidget {
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(16.r),
                               color: isSelected
-                                  ? const Color(0xFFE6F4FF)
+                                  ? AppColors.primarySoft
                                   : Colors.white,
                               border: Border.all(
                                 color: isSelected
-                                    ? const Color(0xFF0A69C7)
-                                    : const Color(0xFFD6DEEA),
+                                    ? AppColors.primary
+                                    : AppColors.line,
                                 width: 1.2,
                               ),
                             ),
@@ -1980,7 +1980,7 @@ class _FeedCard extends StatelessWidget {
                                     shape: BoxShape.circle,
                                     border: Border.all(
                                       color: isSelected
-                                          ? const Color(0xFF0A69C7)
+                                          ? AppColors.primary
                                           : const Color(0xFF7C8AA0),
                                       width: 2,
                                     ),
@@ -1992,7 +1992,7 @@ class _FeedCard extends StatelessWidget {
                                     height: 10.w,
                                     decoration: BoxDecoration(
                                       color: isSelected
-                                          ? const Color(0xFF0A69C7)
+                                          ? AppColors.primary
                                           : Colors.transparent,
                                       shape: BoxShape.circle,
                                     ),
@@ -2033,13 +2033,13 @@ class _FeedCard extends StatelessWidget {
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(18.r),
                           borderSide: const BorderSide(
-                            color: Color(0xFFD6DEEA),
+                            color: AppColors.line,
                           ),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(18.r),
                           borderSide: const BorderSide(
-                            color: Color(0xFF0A69C7),
+                            color: AppColors.primary,
                             width: 1.4,
                           ),
                         ),
@@ -2105,7 +2105,7 @@ class _FeedCard extends StatelessWidget {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: alreadyReported
                             ? const Color(0xFFCFD7E3)
-                            : const Color(0xFFE8505B),
+                            : AppColors.error,
                         foregroundColor: Colors.white,
                         disabledForegroundColor: Colors.white,
                         elevation: 0,
@@ -2156,7 +2156,7 @@ class _NavButton extends StatelessWidget {
           height: 38.w,
           child: Icon(
             icon,
-            color: enabled ? const Color(0xFF008DFF) : const Color(0xFFB0BEC5),
+            color: enabled ? AppColors.primary : AppColors.textHint,
             size: 20.sp,
           ),
         ),
@@ -2192,7 +2192,7 @@ class _CommentPreviewString extends StatelessWidget {
             style: TextStyle(
               fontSize: 13.sp,
               fontWeight: FontWeight.w700,
-              color: const Color(0xFF0A69C7),
+              color: AppColors.primary,
             ),
           ),
         ),
@@ -2214,7 +2214,7 @@ class _CommentPreviewString extends StatelessWidget {
                 content.isNotEmpty ? content : 'Bình luận không có nội dung',
                 style: TextStyle(
                   fontSize: 13.sp,
-                  color: const Color(0xFF4A5568),
+                  color: AppColors.textSecondary,
                   height: 1.3,
                   fontStyle: content.isEmpty ? FontStyle.italic : FontStyle.normal,
                 ),
@@ -2225,7 +2225,7 @@ class _CommentPreviewString extends StatelessWidget {
         SizedBox(width: 12.w),
         Icon(
           Icons.favorite_border,
-          color: const Color(0xFFB0BEC5),
+          color: AppColors.textHint,
           size: 18.sp,
         ),
       ],
@@ -2300,10 +2300,10 @@ class _PrimaryActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = isActive
-        ? const [Color(0xFF0AA0FF), Color(0xFF0070FF)]
+        ? const [AppColors.primary, Color(0xFF0070FF)]
         : const [Color(0xFFB7DAFF), Color(0xFF8BBEFF)];
     final shadowColor =
-        isActive ? const Color(0xFF0AA0FF) : const Color(0xFF8BBEFF);
+        isActive ? AppColors.primary : const Color(0xFF8BBEFF);
 
     return GestureDetector(
       onTap: onTap,

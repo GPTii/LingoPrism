@@ -52,7 +52,7 @@ export default function RegisterPage() {
         >
           <Input.Password size="large" autoComplete="new-password" />
         </Form.Item>
-        <Button type="primary" htmlType="submit" size="large" block loading={loading}>Đăng ký</Button>
+        <Button type="primary" htmlType="submit" size="large" block loading={loading}>Tạo tài khoản</Button>
       </Form>
       <p className="text-center text-slate-500 mt-6">
         Đã có tài khoản? <Link to="/login">Đăng nhập</Link>

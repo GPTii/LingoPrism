@@ -1,12 +1,15 @@
-import { Avatar, Dropdown, Layout, Menu } from 'antd'
+import { Avatar, Button, Drawer, Dropdown, Grid, Layout, Menu } from 'antd'
+import { useEffect, useState } from 'react'
 import {
   AlertOutlined, AuditOutlined, BookOutlined, CameraOutlined, DashboardOutlined, EnvironmentOutlined,
   FileDoneOutlined, LogoutOutlined, MessageOutlined, NotificationOutlined, TrophyOutlined,
   UserOutlined, HomeOutlined,
+  ExperimentOutlined, MenuOutlined,
 } from '@ant-design/icons'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/store'
 import { useLogout } from '../auth/useLogout'
+import { LogoMark } from '../components/brand/Brand'
 
 const ITEMS = [
   { key: '/admin', icon: <DashboardOutlined />, label: 'Tổng quan' },
@@ -20,6 +23,7 @@ const ITEMS = [
   { key: '/admin/notifications', icon: <NotificationOutlined />, label: 'Thông báo' },
   { key: '/admin/gamification', icon: <TrophyOutlined />, label: 'Game hóa' },
   { key: '/admin/detections', icon: <CameraOutlined />, label: 'Nhận diện YOLO' },
+  { key: '/admin/algorithms', icon: <ExperimentOutlined />, label: 'Thuật toán AI' },
 ]
 
 export default function AdminLayout() {
@@ -29,17 +33,40 @@ export default function AdminLayout() {
   const logout = useLogout()
   const selected = ITEMS.map((i) => i.key).filter((k) => location.pathname.startsWith(k)).sort((a, b) => b.length - a.length)[0]
 
+  const screens = Grid.useBreakpoint()
+  const wide = screens.lg ?? true // laptop and larger: fixed sidebar; tablet / phone: menu in a drawer
+  const [open, setOpen] = useState(false)
+  useEffect(() => setOpen(false), [location.pathname])
+  const logo = (
+    <div className="flex items-center gap-2 px-5 h-16">
+      <LogoMark size={32} />
+      <span className="font-bold text-slate-800">LingoPrism Admin</span>
+    </div>
+  )
+  const menu = <Menu mode="inline" selectedKeys={[selected]} items={ITEMS} onClick={(e) => navigate(e.key)} className="!border-e-0" />
+
   return (
     <Layout className="min-h-screen">
-      <Layout.Sider width={232} theme="light" breakpoint="lg" collapsedWidth={64} className="border-r border-slate-200">
-        <div className="flex items-center gap-2 px-5 h-16">
-          <img src="/logo.png" alt="" className="h-8 w-8 rounded-lg" />
-          <span className="font-bold text-slate-800">LingoPrism Admin</span>
-        </div>
-        <Menu mode="inline" selectedKeys={[selected]} items={ITEMS} onClick={(e) => navigate(e.key)} />
-      </Layout.Sider>
-      <Layout>
-        <Layout.Header className="!bg-white !px-6 flex items-center justify-end border-b border-slate-200">
+      {wide ? (
+        <Layout.Sider width={232} theme="light" className="border-r border-slate-200 !sticky top-0 h-screen overflow-y-auto">
+          {logo}
+          {menu}
+        </Layout.Sider>
+      ) : (
+        <Drawer open={open} onClose={() => setOpen(false)} placement="left" width={260} styles={{ body: { padding: 0 } }}
+          title={null} closable={false}>
+          {logo}
+          {menu}
+        </Drawer>
+      )}
+      <Layout className="min-w-0">
+        <Layout.Header className="!px-3 md:!px-6 flex items-center justify-between gap-2 border-b border-slate-200 sticky top-0 z-10">
+          {wide ? <span /> : (
+            <div className="flex items-center gap-2">
+              <Button type="text" icon={<MenuOutlined />} onClick={() => setOpen(true)} aria-label="Menu" />
+              <span className="font-bold text-slate-800 hidden min-[400px]:inline">LingoPrism Admin</span>
+            </div>
+          )}
           <Dropdown
             trigger={['click']}
             menu={{
@@ -51,12 +78,14 @@ export default function AdminLayout() {
           >
             <button className="flex items-center gap-2 cursor-pointer">
               <Avatar src={user?.avatar ?? undefined} icon={<UserOutlined />} />
-              <span>{user?.display_name}</span>
+              <span className="hidden sm:inline max-w-48 truncate">{user?.display_name}</span>
             </button>
           </Dropdown>
         </Layout.Header>
-        <Layout.Content className="p-6">
-          <Outlet />
+        <Layout.Content className="p-3 md:p-6">
+          <div className="mx-auto w-full max-w-[1600px]">
+            <Outlet />
+          </div>
         </Layout.Content>
       </Layout>
     </Layout>

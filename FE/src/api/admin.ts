@@ -62,6 +62,36 @@ export interface DetectionLog {
   items: { label: string; confidence: number; feedback: string; corrected_label: string }[]
 }
 
+/** A learner's detection error report, remembered by what the object looks like (correction memory). */
+export interface DetectionReport {
+  id: number
+  user: string
+  wrong_label: string
+  /** '' = "not an object" */
+  correct_label: string
+  status: 'pending' | 'approved' | 'rejected'
+  disputes: number
+  /** times the server already fixed a detection with it */
+  applied: number
+  /** distinct learners who reported the same mistake */
+  same_reports: number
+  crop: string | null
+  photo: string | null
+  reviewed_by: string | null
+  exported_at: string | null
+  created_at: string
+}
+
+export interface DetectionReportSummary {
+  pending: number
+  approved: number
+  rejected: number
+  approved_not_exported: number
+  applied: number
+  memory_enabled: boolean
+  consensus_users: number
+}
+
 export interface DetectionStats {
   per_label: { label: string; count: number; avg_confidence: number; wrong: number; correct: number }[]
   confusion: { label: string; corrected_label: string; count: number }[]
@@ -107,6 +137,11 @@ export const adminApi = {
   // detections
   detections: (page = 1) => api.get<Paginated<DetectionLog>>('/admin/detections/', { params: { page } }).then((r) => r.data),
   detectionStats: () => api.get<DetectionStats>('/admin/detections/stats/').then((r) => r.data),
+  detectionReports: (status: string | undefined, page = 1) =>
+    api.get<Paginated<DetectionReport>>('/admin/detection-reports/', { params: { status, page } }).then((r) => r.data),
+  detectionReportSummary: () => api.get<DetectionReportSummary>('/admin/detection-reports/summary/').then((r) => r.data),
+  reviewDetectionReport: (id: number, approve: boolean) => api.post(`/admin/detection-reports/${id}/${approve ? 'approve' : 'reject'}/`),
+  exportDetectionReports: () => api.get<Blob>('/admin/detection-reports/export/', { responseType: 'blob' }).then((r) => r.data),
   modelVersions: () => api.get<Paginated<ModelVersion>>('/admin/model-versions/').then((r) => r.data.results),
   activateModel: (id: number) => api.patch(`/admin/model-versions/${id}/`, { is_active: true }),
   // gamification

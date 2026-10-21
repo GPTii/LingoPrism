@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import '../controllers/notification_controller.dart';
 import '../../../core/theme/app_widgets.dart';
 import '../../../data/models/notification_item.dart';
+import 'package:lingoprism/app/core/theme/app_colors.dart';
 
 class NotificationView extends GetView<NotificationController> {
   const NotificationView({super.key});
@@ -12,7 +13,7 @@ class NotificationView extends GetView<NotificationController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFE5FFFD),
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         elevation: 0,
         leading: IconButton(
@@ -81,7 +82,7 @@ class NotificationView extends GetView<NotificationController> {
                     'Thử lại',
                     style: TextStyle(
                       fontSize: 14.sp,
-                      color: const Color(0xFF1CB0F6),
+                      color: AppColors.primary,
                     ),
                   ),
                 ),
@@ -105,7 +106,7 @@ class NotificationView extends GetView<NotificationController> {
         final notifications = controller.notifications;
         return RefreshIndicator(
           onRefresh: () => controller.loadNotifications(),
-          color: const Color(0xFF1CB0F6),
+          color: AppColors.primary,
           backgroundColor: Colors.white,
           child: ListView.builder(
             padding: EdgeInsets.all(20.w),
@@ -422,13 +423,13 @@ class NotificationView extends GetView<NotificationController> {
 
   String? _fallbackAsset(NotificationItem notification) {
     if (notification.type == NotificationType.follow) {
-      return 'assets/images/chimcanhcut/chim_xinchao.png';
+      return 'assets/brand/mascot/prismo_hello.png';
     }
     if (notification.type == NotificationType.postReaction) {
-      return 'assets/images/chimcanhcut/chim_yeu.png';
+      return 'assets/brand/mascot/prismo_love.png';
     }
     if (notification.type == NotificationType.postComment) {
-      return 'assets/images/chimcanhcut/chim_hocnhom.png';
+      return 'assets/brand/mascot/prismo_group.png';
     }
     return null;
   }

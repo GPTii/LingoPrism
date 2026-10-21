@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../controllers/streak_controller.dart';
 import '../../../core/theme/app_widgets.dart';
 import '../../../core/utils/streak_asset_resolver.dart';
+import 'package:lingoprism/app/core/theme/app_colors.dart';
 
 class StreakView extends GetView<StreakController> {
   const StreakView({super.key});
@@ -17,13 +18,13 @@ class StreakView extends GetView<StreakController> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded,
-              color: Color(0xFF1B2B40)),
+              color: AppColors.textPrimary),
           onPressed: () => Get.back(),
         ),
         title: Text(
           'Streak',
           style: TextStyle(
-            color: const Color(0xFF1B2B40),
+            color: AppColors.textPrimary,
             fontSize: 24.sp,
             fontWeight: FontWeight.w800,
           ),
@@ -46,7 +47,7 @@ class StreakView extends GetView<StreakController> {
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 16.sp,
-                      color: const Color(0xFF1B2B40),
+                      color: AppColors.textPrimary,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -125,7 +126,7 @@ class StreakView extends GetView<StreakController> {
                     'Chuỗi hiện tại',
                     style: TextStyle(
                       fontSize: 16.sp,
-                      color: const Color(0xFF60718C),
+                      color: AppColors.textSecondary,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -201,16 +202,16 @@ class StreakView extends GetView<StreakController> {
                 ),
                 controller.studyDaysInMonth.value.toString(),
                 'ngày học',
-                const Color(0xFF1CB0F6),
+                AppColors.primary,
               ),
             ),
             SizedBox(width: 12.w),
             Expanded(
               child: _buildStatCard(
-                'assets/images/streak/streakbang.png',
+                'assets/brand/icons/streak_freeze.png',
                 controller.freezeItemsUsed.value.toString(),
                 'số đá băng\nđã dùng',
-                const Color(0xFF1CB0F6),
+                AppColors.primary,
                 imageSize: 65.w,
               ),
             ),

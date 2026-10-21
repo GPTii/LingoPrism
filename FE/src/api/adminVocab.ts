@@ -1,3 +1,4 @@
+import type { SentenceToken } from './sentences'
 import { api } from './client'
 import type { Paginated } from './types'
 
@@ -54,7 +55,27 @@ export interface AdminReport {
   created_at: string
 }
 
+export interface AdminExample {
+  id: number
+  word: number
+  word_slug: string
+  language: string
+  text: string
+  transliteration: string
+  translation_vi: string
+  translation_en: string
+  source: string
+  source_id: string
+  license: string
+  status: ReviewStatus
+  tokens: SentenceToken[]
+  target_tokens: number[]
+  checks: { errors?: string[]; warnings?: string[]; reviewed?: boolean; manual?: { by: string; status: string; at: string } }
+}
+
 export const adminVocabApi = {
+  examples: (params: Record<string, unknown>) => api.get<Paginated<AdminExample>>('/admin/examples/', { params }).then((r) => r.data),
+  setExampleStatus: (id: number, status: ReviewStatus) => api.patch<AdminExample>(`/admin/examples/${id}/`, { status }).then((r) => r.data),
   stats: () => api.get<{ words: number; topics: number; translations: Record<string, Record<string, number>>; open_reports: number }>('/admin/vocab-stats/').then((r) => r.data),
   words: (params: Record<string, unknown>) => api.get<Paginated<AdminWord>>('/admin/words/', { params }).then((r) => r.data),
   updateWord: (id: number, data: Partial<AdminWord>) => api.patch<AdminWord>(`/admin/words/${id}/`, data).then((r) => r.data),

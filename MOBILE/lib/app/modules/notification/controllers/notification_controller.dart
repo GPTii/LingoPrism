@@ -30,12 +30,12 @@ class NotificationController extends GetxController {
       };
 
   static String _defaultImage(String kind) => switch (kind) {
-        'xp_milestone' => 'assets/images/XP.png',
-        'league' => 'assets/images/rank/rank5.png',
-        'reminder' => 'assets/images/streak/streak1.png',
-        'location' => 'assets/images/chimcanhcut/chim_muadong.png',
-        'exam' => 'assets/images/chimcanhcut/chim_totnghiep.png',
-        _ => 'assets/images/thongbao.png',
+        'xp_milestone' => 'assets/brand/icons/xp.png',
+        'league' => 'assets/brand/rank/rank_5.png',
+        'reminder' => 'assets/brand/icons/streak_1.png',
+        'location' => 'assets/brand/mascot/prismo_explore.png',
+        'exam' => 'assets/brand/mascot/prismo_graduate.png',
+        _ => 'assets/brand/icons/bell.png',
       };
 
   Future<void> loadNotifications({bool silent = false}) async {
