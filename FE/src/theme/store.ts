@@ -1,30 +1,34 @@
-import { useEffect, useState } from 'react'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
-export type ThemeMode = 'light' | 'dark' | 'system'
+export type ThemeMode = 'light' | 'dark'
 
 interface ThemeState {
   mode: ThemeMode
   setMode: (mode: ThemeMode) => void
+  toggle: () => void
 }
 
-/** Light / dark / follow the device – remembered in this browser. Dark first: the prism's light reads best on a dark ground. */
+/** Light or dark – remembered in this browser. Dark first: the prism's light reads best on a dark ground. */
 export const useThemeMode = create<ThemeState>()(
-  persist((set) => ({ mode: 'dark', setMode: (mode) => set({ mode }) }), { name: 'lingoprism-theme-v2' }),
+  persist(
+    (set, get) => ({
+      mode: 'dark',
+      setMode: (mode) => set({ mode }),
+      toggle: () => set({ mode: get().mode === 'dark' ? 'light' : 'dark' }),
+    }),
+    {
+      name: 'lingoprism-theme-v2',
+      // an older "follow the device" choice becomes dark
+      merge: (persisted, current) => {
+        const mode = (persisted as Partial<ThemeState> | undefined)?.mode
+        return { ...current, mode: mode === 'light' ? 'light' : 'dark' }
+      },
+    },
+  ),
 )
 
-const media = () => window.matchMedia('(prefers-color-scheme: dark)')
-
-/** The theme actually shown: 'system' resolved with the device setting, kept in sync when it changes. */
+/** The theme actually shown. */
 export function useIsDark(): boolean {
-  const mode = useThemeMode((s) => s.mode)
-  const [systemDark, setSystemDark] = useState(() => media().matches)
-  useEffect(() => {
-    const m = media()
-    const on = (e: MediaQueryListEvent) => setSystemDark(e.matches)
-    m.addEventListener('change', on)
-    return () => m.removeEventListener('change', on)
-  }, [])
-  return mode === 'dark' || (mode === 'system' && systemDark)
+  return useThemeMode((s) => s.mode) === 'dark'
 }

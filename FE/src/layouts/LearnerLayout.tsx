@@ -5,7 +5,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { gameApi } from '../api/app'
 import { authApi } from '../api/auth'
 import {
-  AppstoreOutlined, BookOutlined, CameraFilled, CameraOutlined, DesktopOutlined, EnvironmentOutlined, EditOutlined,
+  AppstoreOutlined, BookOutlined, CameraFilled, CameraOutlined, EnvironmentOutlined, EditOutlined,
   FileDoneOutlined, FormOutlined, HomeOutlined, LogoutOutlined, MoonOutlined, RedoOutlined, SettingOutlined,
   SunOutlined, TrophyOutlined, TeamOutlined, UserOutlined, BellOutlined, MessageOutlined,
 } from '@ant-design/icons'
@@ -38,7 +38,6 @@ const NAV: { to: string; label: string; short?: string; icon: React.ReactNode; o
 const THEMES: { mode: ThemeMode; label: string; icon: React.ReactNode }[] = [
   { mode: 'light', label: 'Sáng', icon: <SunOutlined /> },
   { mode: 'dark', label: 'Tối', icon: <MoonOutlined /> },
-  { mode: 'system', label: 'Theo máy', icon: <DesktopOutlined /> },
 ]
 
 const LANGUAGES = [
@@ -48,28 +47,28 @@ const LANGUAGES = [
   { value: 'vi', label: 'Tiếng Việt', glyph: <LangGlyph lang="vi" /> },
 ]
 
+/** Light / dark. Full: two side-by-side choices; compact: one button that flips to the other. */
 function ThemeSwitch({ full = false }: { full?: boolean }) {
-  const { mode, setMode } = useThemeMode()
+  const { mode, setMode, toggle } = useThemeMode()
   if (full) {
     return (
-      <div className="grid grid-cols-3 gap-2">
+      <div role="radiogroup" aria-label="Giao diện" className="grid grid-cols-2 gap-1 rounded-xl bg-slate-100 p-1">
         {THEMES.map((t) => (
-          <button key={t.mode} type="button" onClick={() => setMode(t.mode)}
-            aria-pressed={mode === t.mode}
-            className={`btn-3d py-2 flex flex-col items-center gap-0.5 text-xs font-semibold cursor-pointer ${mode === t.mode ? '!border-brand-500 text-brand-700' : 'text-slate-500'}`}>
-            <span className="text-base">{t.icon}</span>{t.label}
+          <button key={t.mode} type="button" role="radio" aria-checked={mode === t.mode} onClick={() => setMode(t.mode)}
+            className={`h-9 rounded-lg inline-flex items-center justify-center gap-2 text-sm font-semibold cursor-pointer transition-colors ${
+              mode === t.mode ? 'bg-[var(--surface)] text-slate-900 shadow-[0_1px_2px_rgb(0_0_0/0.12)]' : 'text-slate-500 hover:text-slate-800'}`}>
+            {t.icon}{t.label}
           </button>
         ))}
       </div>
     )
   }
-  const i = THEMES.findIndex((t) => t.mode === mode)
-  const next = THEMES[(i + 1) % THEMES.length]
+  const other = THEMES.find((t) => t.mode !== mode)!
   return (
-    <Tooltip title={`Giao diện: ${THEMES[i].label} – bấm để chuyển sang ${next.label.toLowerCase()}`}>
-      <button type="button" onClick={() => setMode(next.mode)} aria-label="Đổi giao diện sáng / tối"
+    <Tooltip title={`Chuyển sang giao diện ${other.label.toLowerCase()}`}>
+      <button type="button" onClick={toggle} aria-label={`Chuyển sang giao diện ${other.label.toLowerCase()}`}
         className="h-10 w-10 rounded-xl grid place-items-center text-lg text-slate-600 hover:bg-slate-100 cursor-pointer transition">
-        {THEMES[i].icon}
+        {other.icon}
       </button>
     </Tooltip>
   )
@@ -139,7 +138,7 @@ export default function LearnerLayout() {
   return (
     <ConfigProvider theme={{ token: { borderRadius: 10, controlHeightLG: 48, fontSizeLG: 16 }, components: { Card: { borderRadiusLG: 16, headerFontSize: 17 } } }}>
       <div className="learner min-h-screen flex relative">
-        <SideNav groups={groups} footer={<ThemeSwitch />} />
+        <SideNav groups={groups} footer={(collapsed) => <ThemeSwitch full={!collapsed} />} />
 
         <div className="flex-1 flex flex-col min-w-0 relative z-[1]">
           <header className="h-14 md:h-16 flex items-center justify-between gap-2 px-3 md:px-8 bg-[var(--page-bg)] sticky top-0 z-20">

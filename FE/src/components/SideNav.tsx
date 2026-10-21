@@ -126,7 +126,7 @@ function Leaves({ items, active, onPick }: { items: NavLeaf[]; active: string | 
  * Left navigation: groups that fold open like a dropdown, each with its own small links.
  * Folded down to a rail, a group's links fly out beside its icon instead.
  */
-export default function SideNav({ groups, footer }: { groups: NavGroup[]; footer?: ReactNode }) {
+export default function SideNav({ groups, footer }: { groups: NavGroup[]; footer?: (collapsed: boolean) => ReactNode }) {
   const active = useActiveLink(groups)
   const activeGroup = groups.find((g) => g.to === active || g.children?.some((c) => c.to === active))?.key
   const [collapsed, setCollapsed] = useState<boolean>(() => read('lingoprism-nav-collapsed', false))
@@ -171,7 +171,7 @@ export default function SideNav({ groups, footer }: { groups: NavGroup[]; footer
           })}
         </nav>
         <div className="mt-auto pt-4 flex flex-col items-center gap-2">
-          {footer}
+          {footer?.(true)}
           <Tooltip title="Mở rộng menu" placement="right">
             <button type="button" onClick={() => setCollapsed(false)} aria-label="Mở rộng menu"
               className="h-10 w-10 rounded-xl grid place-items-center text-lg text-slate-500 hover:bg-slate-100 cursor-pointer"><MenuUnfoldOutlined /></button>
@@ -225,7 +225,7 @@ export default function SideNav({ groups, footer }: { groups: NavGroup[]; footer
           )
         })}
       </nav>
-      {footer && <div className="mt-auto pt-5">{footer}</div>}
+      {footer && <div className="mt-auto pt-5">{footer(false)}</div>}
     </aside>
   )
 }

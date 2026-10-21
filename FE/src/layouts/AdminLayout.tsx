@@ -4,12 +4,13 @@ import {
   AlertOutlined, AuditOutlined, BookOutlined, CameraOutlined, DashboardOutlined, EnvironmentOutlined,
   FileDoneOutlined, LogoutOutlined, MessageOutlined, NotificationOutlined, TrophyOutlined,
   UserOutlined, HomeOutlined,
-  ExperimentOutlined, MenuOutlined,
+  ExperimentOutlined, MenuOutlined, MoonOutlined, SunOutlined,
 } from '@ant-design/icons'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/store'
 import { useLogout } from '../auth/useLogout'
 import { LogoMark } from '../components/brand/Brand'
+import { useThemeMode } from '../theme/store'
 
 const ITEMS = [
   { key: '/admin', icon: <DashboardOutlined />, label: 'Tổng quan' },
@@ -31,6 +32,8 @@ export default function AdminLayout() {
   const location = useLocation()
   const user = useAuth((s) => s.user)
   const logout = useLogout()
+  const { mode, toggle: toggleTheme } = useThemeMode()
+  const dark = mode === 'dark'
   const selected = ITEMS.map((i) => i.key).filter((k) => location.pathname.startsWith(k)).sort((a, b) => b.length - a.length)[0]
 
   const screens = Grid.useBreakpoint()
@@ -67,6 +70,9 @@ export default function AdminLayout() {
               <span className="font-bold text-slate-800 hidden min-[400px]:inline">LingoPrism Admin</span>
             </div>
           )}
+          <div className="flex items-center gap-2">
+          <Button type="text" onClick={toggleTheme} aria-label={dark ? 'Chuyển sang giao diện sáng' : 'Chuyển sang giao diện tối'}
+            icon={dark ? <SunOutlined /> : <MoonOutlined />} />
           <Dropdown
             trigger={['click']}
             menu={{
@@ -81,6 +87,7 @@ export default function AdminLayout() {
               <span className="hidden sm:inline max-w-48 truncate">{user?.display_name}</span>
             </button>
           </Dropdown>
+          </div>
         </Layout.Header>
         <Layout.Content className="p-3 md:p-6">
           <div className="mx-auto w-full max-w-[1600px]">
