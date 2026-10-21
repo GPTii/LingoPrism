@@ -44,7 +44,7 @@ class VocabularyTopicView extends GetView<VocabularyTopicController> {
       elevation: 0,
       leading: IconButton(
         onPressed: () => Get.back(),
-        icon: Icon(Icons.arrow_back, size: 24.sp, color: Colors.black),
+        icon: Icon(Icons.arrow_back, size: 24.sp, color: AppColors.textPrimary),
       ),
       titleSpacing: 0,
       title: Column(
@@ -55,7 +55,7 @@ class VocabularyTopicView extends GetView<VocabularyTopicController> {
             style: TextStyle(
               fontSize: 18.sp,
               fontWeight: FontWeight.bold,
-              color: Colors.black,
+              color: AppColors.textPrimary,
             ),
           ),
           SizedBox(height: 4.h),
@@ -137,14 +137,14 @@ class _VocabularyCard extends StatelessWidget {
             _ActionButton(
               label: 'Sửa',
               icon: Icons.edit_outlined,
-              backgroundColor: const Color(0xFFFFE9F0),
+              backgroundColor: AppColors.tint(const Color(0xFFFFE9F0)),
               foregroundColor: const Color(0xFFE64980),
               onTap: () => controller.onEditVocabulary(index),
             ),
             _ActionButton(
               label: 'Xoá',
               icon: Icons.delete_outline,
-              backgroundColor: const Color(0xFFFFF2E5),
+              backgroundColor: AppColors.tint(const Color(0xFFFFF2E5)),
               foregroundColor: const Color(0xFFF97316),
               onTap: () => controller.onDeleteVocabulary(index),
             ),

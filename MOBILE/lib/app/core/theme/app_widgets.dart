@@ -139,7 +139,7 @@ class AppWidgets {
         title: Text(
           title,
           textAlign: TextAlign.center,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
             color: AppColors.textPrimary,
@@ -148,7 +148,7 @@ class AppWidgets {
         content: Text(
           message,
           textAlign: TextAlign.center,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 15,
             color: AppColors.textSecondary,
             height: 1.4,
@@ -167,7 +167,7 @@ class AppWidgets {
             ),
             child: Text(
               buttonText,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
                 color: AppColors.primary,
@@ -205,7 +205,7 @@ class AppWidgets {
         title: Text(
           title,
           textAlign: TextAlign.center,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
             color: AppColors.textPrimary,
@@ -214,7 +214,7 @@ class AppWidgets {
         content: Text(
           message,
           textAlign: TextAlign.center,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 15,
             color: AppColors.textSecondary,
             height: 1.4,
@@ -233,7 +233,7 @@ class AppWidgets {
             ),
             child: Text(
               buttonText,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
                 color: AppColors.error,
@@ -275,7 +275,7 @@ class AppWidgets {
         title: Text(
           title,
           textAlign: TextAlign.center,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
             color: AppColors.textPrimary,
@@ -284,7 +284,7 @@ class AppWidgets {
         content: Text(
           message,
           textAlign: TextAlign.center,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 15,
             color: AppColors.textSecondary,
             height: 1.4,
@@ -303,11 +303,11 @@ class AppWidgets {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    side: const BorderSide(color: AppColors.lineStrong, width: 1.5),
+                    side: BorderSide(color: AppColors.lineStrong, width: 1.5),
                   ),
                   child: Text(
                     cancelText,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 16,
                       color: AppColors.textSecondary,
                     ),
@@ -368,7 +368,7 @@ class AppWidgets {
         title: Text(
           title,
           textAlign: TextAlign.center,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
             color: AppColors.textPrimary,
@@ -377,7 +377,7 @@ class AppWidgets {
         content: Text(
           message,
           textAlign: TextAlign.center,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 15,
             color: AppColors.textSecondary,
             height: 1.4,
@@ -396,7 +396,7 @@ class AppWidgets {
             ),
             child: Text(
               buttonText,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
                 color: AppColors.success,
@@ -428,7 +428,7 @@ class AppWidgets {
             padding: const EdgeInsets.all(20),
             margin: const EdgeInsets.symmetric(horizontal: 32),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.surface,
               borderRadius: BorderRadius.circular(18),
               border: Border.all(color: AppColors.line),
             ),
@@ -442,7 +442,7 @@ class AppWidgets {
                   fit: BoxFit.contain,
                 ),
                 const SizedBox(height: 14),
-                const CircularProgressIndicator(
+                CircularProgressIndicator(
                   strokeWidth: 3,
                   valueColor: AlwaysStoppedAnimation(AppColors.primary),
                 ),
@@ -450,7 +450,7 @@ class AppWidgets {
                 Text(
                   message,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
                     height: 1.4,
                     fontWeight: FontWeight.w500,

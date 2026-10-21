@@ -20,7 +20,7 @@ class CommunityMemberProfileView
         elevation: 0,
         leading: IconButton(
           onPressed: Get.back,
-          icon: const Icon(Icons.arrow_back_ios_new_rounded,
+          icon: Icon(Icons.arrow_back_ios_new_rounded,
               color: AppColors.textPrimary),
         ),
         titleSpacing: 0,
@@ -76,9 +76,9 @@ class CommunityMemberProfileView
                   width: double.infinity,
                   padding: EdgeInsets.symmetric(vertical: 36.h),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppColors.surface,
                     borderRadius: BorderRadius.circular(20.r),
-                    border: const Border.fromBorderSide(BorderSide(color: AppColors.line)),),
+                    border: Border.fromBorderSide(BorderSide(color: AppColors.line)),),
                   child: Text(
                     'Chưa có bài đăng nào',
                     style: TextStyle(

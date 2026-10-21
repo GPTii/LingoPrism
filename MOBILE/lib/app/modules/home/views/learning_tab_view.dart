@@ -15,6 +15,7 @@ import '../../../data/models/api/game.dart';
 import '../../../data/models/api/user.dart';
 import '../controllers/learning_tab_controller.dart';
 import '../../levels/levels_module.dart';
+import '../../../core/theme/theme_service.dart';
 import '../../../data/repositories/repositories.dart';
 import '../../../data/models/api/vocab.dart';
 import '../../../core/widgets/target_word.dart';
@@ -103,7 +104,7 @@ class LearningTabView extends GetView<HomeStatsController> {
   BoxDecoration _surface({double radius = 16}) => BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(radius.r),
-        border: const Border.fromBorderSide(BorderSide(color: AppColors.line)),
+        border: Border.fromBorderSide(BorderSide(color: AppColors.line)),
       );
 
   String _greeting() {
@@ -318,7 +319,7 @@ class LearningTabView extends GetView<HomeStatsController> {
     final selection = await Get.dialog<String>(
       Dialog(
         insetPadding: EdgeInsets.symmetric(horizontal: 20.w),
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.surface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24.r)),
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 24.h),
@@ -328,7 +329,7 @@ class LearningTabView extends GetView<HomeStatsController> {
               Container(
                 width: 60.w,
                 height: 60.w,
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: AppColors.primary,
                 ),
@@ -368,7 +369,7 @@ class LearningTabView extends GetView<HomeStatsController> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14.r),
                         ),
-                        side: const BorderSide(color: AppColors.lineStrong, width: 1.5),
+                        side: BorderSide(color: AppColors.lineStrong, width: 1.5),
                         foregroundColor: AppColors.textPrimary,
                         textStyle: TextStyle(
                           fontWeight: FontWeight.w700,
@@ -442,6 +443,11 @@ class LearningTabView extends GetView<HomeStatsController> {
           _buildStatItem('assets/brand/icons/scale.png', '$scales', 'Vảy', Routes.shop, devicePixelRatio),
           _buildStatItem('assets/brand/icons/gem.png', '$gems', 'Ngọc', Routes.shop, devicePixelRatio),
           const Spacer(),
+          IconButton(
+            tooltip: ThemeService.isDark ? 'Giao diện sáng' : 'Giao diện tối',
+            onPressed: ThemeService.toggle,
+            icon: Icon(ThemeService.isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined, size: 24.sp, color: Colors.white),
+          ),
           Stack(
             clipBehavior: Clip.none,
             children: [
@@ -869,7 +875,7 @@ class _TodayWordState extends State<_TodayWord> {
               decoration: BoxDecoration(
                 color: AppColors.surface,
                 borderRadius: BorderRadius.circular(20.r),
-                border: const Border.fromBorderSide(BorderSide(color: AppColors.line)),
+                border: Border.fromBorderSide(BorderSide(color: AppColors.line)),
               ),
               child: Column(children: [
                 if (zh.image != null)

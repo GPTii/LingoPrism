@@ -16,14 +16,14 @@ class VocabularyFlashcardView extends GetView<VocabularyFlashcardController> {
         backgroundColor: AppColors.primarySoft,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: Get.back,
         ),
         title: Obx(
           () => Text(
             '${controller.currentIndex + 1}/${controller.total}',
-            style: const TextStyle(
-              color: Colors.black,
+            style: TextStyle(
+              color: AppColors.textPrimary,
               fontSize: 20,
               fontWeight: FontWeight.w700,
             ),
@@ -207,7 +207,7 @@ class _PillButton extends StatelessWidget {
       child: TextButton(
         onPressed: onPressed,
         style: TextButton.styleFrom(
-          backgroundColor: Colors.white,
+          backgroundColor: AppColors.surface,
           foregroundColor: textColor,
           disabledForegroundColor: AppColors.textHint,
           padding: const EdgeInsets.symmetric(horizontal: 28),
@@ -240,9 +240,9 @@ class _CompletionSection extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.fromLTRB(24, 20, 24, 20 + bottomInset),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
       ),
       child: ElevatedButton(
         onPressed: onComplete,
@@ -346,7 +346,7 @@ class _FlashcardFront extends StatelessWidget {
             children: [
               Text(
                 item.word,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.w700,
                   color: AppColors.textPrimary,
@@ -356,7 +356,7 @@ class _FlashcardFront extends StatelessWidget {
               const SizedBox(height: 12),
               Text(
                 item.ipa,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 18,
                   fontStyle: FontStyle.italic,
                   color: AppColors.textSecondary,
@@ -412,7 +412,7 @@ class _FlashcardBack extends StatelessWidget {
             children: [
               Text(
                 item.translation,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w700,
                   color: AppColors.textPrimary,
@@ -422,7 +422,7 @@ class _FlashcardBack extends StatelessWidget {
               const SizedBox(height: 16),
               Text(
                 item.exampleVi,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 15,
                   color: AppColors.textSecondary,
                   height: 1.5,
@@ -432,7 +432,7 @@ class _FlashcardBack extends StatelessWidget {
               const SizedBox(height: 12),
               Text(
                 item.exampleEn,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 15,
                   color: AppColors.textSecondary,
                   height: 1.5,
@@ -460,7 +460,7 @@ class _EmptyState extends StatelessWidget {
           onPressed: onBack,
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
         ),
-        const Expanded(
+        Expanded(
           child: Center(
             child: Text(
               'Không có thẻ từ vựng để hiển thị.',

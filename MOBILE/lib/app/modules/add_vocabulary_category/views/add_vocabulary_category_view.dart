@@ -20,9 +20,9 @@ class AddVocabularyCategoryView
         elevation: 0,
         leading: IconButton(
           onPressed: () => Get.back(),
-          icon: const Icon(
+          icon: Icon(
             Icons.arrow_back,
-            color: Colors.black,
+            color: AppColors.textPrimary,
           ),
         ),
       ),
@@ -60,9 +60,9 @@ class AddVocabularyCategoryView
               ),
             ),
             Container(
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
                 border: Border.fromBorderSide(BorderSide(color: AppColors.line)),),
               padding: EdgeInsets.fromLTRB(24.w, 16.h, 24.w,
                   bottomPadding > 0 ? bottomPadding + 16 : 24.h),
@@ -122,7 +122,7 @@ class _IconPickerSection extends StatelessWidget {
                 width: 64.w,
                 height: 64.w,
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: AppColors.surface,
                   shape: BoxShape.circle,
                   border: Border.all(
                     color: error == null
@@ -184,7 +184,7 @@ class _NameField extends StatelessWidget {
               decoration: InputDecoration(
                 hintText: 'Nhập tên chủ đề...',
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: AppColors.surface,
                 contentPadding: EdgeInsets.symmetric(
                   horizontal: 20.w,
                   vertical: 18.h,
@@ -239,7 +239,7 @@ class _RequiredLabel extends StatelessWidget {
           fontWeight: FontWeight.w600,
         ),
         children: [
-          const TextSpan(
+          TextSpan(
             text: '* ',
             style: TextStyle(
               color: AppColors.error,

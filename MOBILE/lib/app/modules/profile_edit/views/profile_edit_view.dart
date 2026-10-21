@@ -45,7 +45,7 @@ class ProfileEditView extends GetView<ProfileEditController> {
                     child: Container(
                       width: 140.w,
                       height: 140.w,
-                      color: Colors.white,
+                      color: AppColors.surface,
                       child: _avatarWidget(avatar),
                     ),
                   ),
@@ -81,23 +81,23 @@ class ProfileEditView extends GetView<ProfileEditController> {
               controller: controller.nameController,
               decoration: InputDecoration(
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: AppColors.surface,
                 contentPadding:
                     EdgeInsets.symmetric(horizontal: 18.w, vertical: 14.h),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(18.r),
                   borderSide:
-                      const BorderSide(color: AppColors.primary, width: 2),
+                      BorderSide(color: AppColors.primary, width: 2),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(18.r),
                   borderSide:
-                      const BorderSide(color: AppColors.primary, width: 2),
+                      BorderSide(color: AppColors.primary, width: 2),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(18.r),
                   borderSide:
-                      const BorderSide(color: AppColors.primary, width: 2),
+                      BorderSide(color: AppColors.primary, width: 2),
                 ),
               ),
             ),
@@ -162,7 +162,7 @@ class ProfileEditView extends GetView<ProfileEditController> {
   void _showAvatarPicker(BuildContext context) {
     showModalBottomSheet<void>(
       context: context,
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
       ),
@@ -189,7 +189,7 @@ class ProfileEditView extends GetView<ProfileEditController> {
                     await controller.pickAvatarFromDevice();
                     if (context.mounted) Get.back();
                   },
-                  icon: const Icon(Icons.photo_library_rounded, color: AppColors.primary),
+                  icon: Icon(Icons.photo_library_rounded, color: AppColors.primary),
                   label: Text(
                     'Chọn từ thiết bị',
                     style: TextStyle(
@@ -199,7 +199,7 @@ class ProfileEditView extends GetView<ProfileEditController> {
                     ),
                   ),
                   style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: AppColors.primary, width: 2),
+                    side: BorderSide(color: AppColors.primary, width: 2),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16.r),
                     ),

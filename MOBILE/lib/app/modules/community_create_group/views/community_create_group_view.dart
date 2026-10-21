@@ -145,9 +145,9 @@ class _IconSelector extends StatelessWidget {
             Container(
               width: 80.w,
               height: 80.w,
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.white,
+                color: AppColors.surface,
                 border: Border.fromBorderSide(BorderSide(color: AppColors.line)),),
               alignment: Alignment.center,
               child: imagePath != null
@@ -182,7 +182,7 @@ class _IconSelector extends StatelessWidget {
                       height: 60.w,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: Colors.white,
+                        color: AppColors.surface,
                         border: Border.all(
                           color: isActive
                               ? AppColors.primary
@@ -230,9 +230,9 @@ class _GroupTextField extends StatelessWidget {
         SizedBox(height: 10.h),
         Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.surface,
             borderRadius: BorderRadius.circular(24.r),
-            border: const Border.fromBorderSide(BorderSide(color: AppColors.line)),),
+            border: Border.fromBorderSide(BorderSide(color: AppColors.line)),),
           child: TextFormField(
             controller: controller,
             decoration: InputDecoration(

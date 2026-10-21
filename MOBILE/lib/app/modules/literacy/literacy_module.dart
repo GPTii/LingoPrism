@@ -74,7 +74,7 @@ class LiteracyMapView extends GetView<LiteracyMapController> {
                 padding: EdgeInsets.all(16.w),
                 decoration: BoxDecoration(
                   color: AppColors.surface,
-                  border: const Border.fromBorderSide(BorderSide(color: AppColors.line)),
+                  border: Border.fromBorderSide(BorderSide(color: AppColors.line)),
                   borderRadius: BorderRadius.circular(16.r),),
                 child: Row(children: [
                   Image.asset('assets/brand/mascot/prismo_happy.png', width: 56.w, height: 56.w),
@@ -278,7 +278,7 @@ class LiteracyLessonView extends GetView<LiteracyLessonController> {
                 child: Container(
                   width: double.infinity,
                   padding: EdgeInsets.all(18.w),
-                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20.r)),
+                  decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(20.r)),
                   child: controller.intro != null ? _intro(controller.intro!) : _exercise(controller.exercise!),
                 ),
               ),
@@ -309,7 +309,7 @@ class LiteracyLessonView extends GetView<LiteracyLessonController> {
         spacing: 2.w,
         children: [
           for (var i = 0; i < steps.length; i++) ...[
-            if (i > 0) const Text('–', style: TextStyle(color: AppColors.textHint)),
+            if (i > 0) Text('–', style: TextStyle(color: AppColors.textHint)),
             InkWell(
               onTap: () => _say(steps[i]),
               child: Padding(

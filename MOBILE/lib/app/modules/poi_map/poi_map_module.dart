@@ -156,8 +156,8 @@ class PoiMapView extends GetView<PoiMapController> {
                     Expanded(child: Text(p.name, style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w700))),
                   ]),
                   Text('${p.categoryLabel}${p.distanceM != null ? ' · cách ${(p.distanceM! / 1000).toStringAsFixed(1)} km' : ''}',
-                      style: const TextStyle(color: AppColors.textSecondary)),
-                  if (p.address.isNotEmpty) Text(p.address, style: const TextStyle(color: AppColors.textSecondary)),
+                      style: TextStyle(color: AppColors.textSecondary)),
+                  if (p.address.isNotEmpty) Text(p.address, style: TextStyle(color: AppColors.textSecondary)),
                   SizedBox(height: 8.h),
                   Wrap(spacing: 8, children: [
                     for (final t in p.topics)

@@ -16,13 +16,13 @@ class ShopView extends GetView<ShopController> {
         backgroundColor: AppColors.primarySoft,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Get.back(),
         ),
         title: Text(
           'Cửa hàng',
           style: TextStyle(
-            color: Colors.black,
+            color: AppColors.textPrimary,
             fontSize: 24.sp,
             fontWeight: FontWeight.bold,
           ),
@@ -155,7 +155,7 @@ class ShopView extends GetView<ShopController> {
       margin: EdgeInsets.symmetric(horizontal: 6.w),
       padding: EdgeInsets.all(8.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(44.r),
       ),
       child: Column(

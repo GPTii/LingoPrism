@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import 'app/core/theme/app_theme.dart';
+import 'app/core/theme/theme_service.dart';
 import 'app/core/widgets/target_word.dart';
 import 'app/data/services/auth_service.dart';
 import 'app/data/services/service_binding.dart';
@@ -13,6 +14,7 @@ void main() async {
 
   // Local storage, API client, auth session, local notifications
   await AppInitializer.initialize();
+  ThemeService.init(); // light / dark chosen on this device
 
   runApp(const LingoPrismApp());
 }
@@ -31,7 +33,7 @@ class LingoPrismApp extends StatelessWidget {
           title: 'LingoPrism',
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
-          themeMode: ThemeMode.light,
+          themeMode: ThemeService.mode,
           initialBinding: ServiceBinding(),
           initialRoute: AppPages.initial,
           getPages: AppPages.routes,

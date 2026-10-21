@@ -35,7 +35,7 @@ class ProfileGuideView extends GetView<ProfileGuideController> {
             child: IgnorePointer(
               ignoring: true,
               child: DecoratedBox(
-                decoration: const BoxDecoration(color: AppColors.background),
+                decoration: BoxDecoration(color: AppColors.background),
               ),
             ),
           ),
@@ -125,8 +125,8 @@ class ProfileGuideView extends GetView<ProfileGuideController> {
           Container(
             width: 52.w,
             height: 52.w,
-            decoration: const BoxDecoration(
-              color: Colors.white,
+            decoration: BoxDecoration(
+              color: AppColors.surface,
               shape: BoxShape.circle,
             ),
             child: Icon(Icons.school_rounded,
@@ -171,9 +171,9 @@ class ProfileGuideView extends GetView<ProfileGuideController> {
       width: double.infinity,
       padding: EdgeInsets.all(14.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(16.r),
-        border: const Border.fromBorderSide(BorderSide(color: AppColors.line)),),
+        border: Border.fromBorderSide(BorderSide(color: AppColors.line)),),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

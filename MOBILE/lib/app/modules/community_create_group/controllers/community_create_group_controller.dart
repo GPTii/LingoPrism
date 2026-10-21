@@ -5,7 +5,6 @@ import '../../../core/network/api_client.dart';
 import '../../../data/repositories/repositories.dart';
 import 'package:lingoprism/app/data/services/auth_service.dart';
 
-import '../../community/models/community_models.dart';
 
 enum StudyGroupApprovalMode { auto, require }
 

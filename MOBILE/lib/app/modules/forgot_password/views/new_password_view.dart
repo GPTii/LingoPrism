@@ -11,7 +11,7 @@ class NewPasswordView extends GetView<ForgotPasswordController> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           color: AppColors.primary,),
         child: SafeArea(
           child: Column(
@@ -62,7 +62,7 @@ class NewPasswordView extends GetView<ForgotPasswordController> {
                         Container(
                           width: 80.w,
                           height: 80.h,
-                          decoration: const BoxDecoration(
+                          decoration: BoxDecoration(
                             color: AppColors.primary,
                             shape: BoxShape.circle,
                           ),
@@ -104,7 +104,7 @@ class NewPasswordView extends GetView<ForgotPasswordController> {
                           children: [
                             Obx(() => Container(
                                   decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.7),
+                                    color: AppColors.surface.withOpacity(0.7),
                                     borderRadius: BorderRadius.circular(12.r),
                                   ),
                                   child: TextField(
@@ -164,7 +164,7 @@ class NewPasswordView extends GetView<ForgotPasswordController> {
                           children: [
                             Obx(() => Container(
                                   decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.7),
+                                    color: AppColors.surface.withOpacity(0.7),
                                     borderRadius: BorderRadius.circular(12.r),
                                   ),
                                   child: TextField(

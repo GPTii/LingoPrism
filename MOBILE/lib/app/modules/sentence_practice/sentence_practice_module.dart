@@ -146,7 +146,7 @@ class TokenLine extends StatelessWidget {
             Container(
               width: 56.w,
               margin: EdgeInsets.symmetric(horizontal: 4.w),
-              decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: AppColors.buttonActive, width: 3))),
+              decoration: BoxDecoration(border: Border(bottom: BorderSide(color: AppColors.buttonActive, width: 3))),
               child: Text(' ', style: TextStyle(fontSize: fontSize.sp)),
             )
           else
@@ -193,7 +193,7 @@ class SentenceCard extends StatelessWidget {
           children: [
             Flexible(child: TokenLine(tokens: sentence.tokens, language: sentence.language, highlight: sentence.targetTokens, fontSize: fontSize)),
             IconButton(
-              icon: const Icon(Icons.volume_up_rounded, color: AppColors.buttonActive),
+              icon: Icon(Icons.volume_up_rounded, color: AppColors.buttonActive),
               onPressed: () => TtsService.to.speak(sentence.text, sentence.ttsLocale),
             ),
           ],
@@ -290,7 +290,7 @@ class SentencePracticeView extends GetView<SentencePracticeController> {
             child: Container(
               width: double.infinity,
               padding: EdgeInsets.all(18.w),
-              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20.r)),
+              decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(20.r)),
               child: Column(
                 children: [
                   Text(_titles[ex.type] ?? '', style: TextStyle(fontSize: 14.sp, color: AppColors.textSecondary, fontWeight: FontWeight.w600)),
@@ -322,7 +322,7 @@ class SentencePracticeView extends GetView<SentencePracticeController> {
               decoration: BoxDecoration(
                 border: Border.all(color: AppColors.lineStrong, width: 2),
                 borderRadius: BorderRadius.circular(12.r),
-                color: Colors.white,
+                color: AppColors.surface,
               ),
               child: Column(mainAxisSize: MainAxisSize.min, children: [
                 if (reading) Text(zhuyin && t.zhuyin.isNotEmpty ? t.zhuyin : t.pinyin, style: TextStyle(fontSize: 10.sp, color: AppColors.textHint)),
@@ -341,7 +341,7 @@ class SentencePracticeView extends GetView<SentencePracticeController> {
         constraints: BoxConstraints(minHeight: 60.h),
         width: double.infinity,
         padding: EdgeInsets.only(bottom: 8.h),
-        decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: AppColors.lineStrong, width: 2))),
+        decoration: BoxDecoration(border: Border(bottom: BorderSide(color: AppColors.lineStrong, width: 2))),
         child: Wrap(alignment: WrapAlignment.center, spacing: 8.w, runSpacing: 8.h, children: [
           for (var pos = 0; pos < controller.picked.length; pos++)
             tile(ex.tiles[controller.picked[pos]], onTap: () => controller.unpick(pos)),

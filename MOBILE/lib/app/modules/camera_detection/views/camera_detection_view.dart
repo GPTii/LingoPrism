@@ -37,7 +37,7 @@ class CameraDetectionView extends GetView<CameraDetectionController> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const CircularProgressIndicator(
+          CircularProgressIndicator(
             color: AppColors.primary,
           ),
           SizedBox(height: 20.h),
@@ -166,9 +166,9 @@ class CameraDetectionView extends GetView<CameraDetectionController> {
         children: [
           Container(
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.surface,
               borderRadius: BorderRadius.circular(16.r),
-              border: const Border.fromBorderSide(BorderSide(color: AppColors.line)),),
+              border: Border.fromBorderSide(BorderSide(color: AppColors.line)),),
             padding: EdgeInsets.all(20.w),
             child: Icon(
               icon,

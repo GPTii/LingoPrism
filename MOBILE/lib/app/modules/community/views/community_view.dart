@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:characters/characters.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -11,7 +10,6 @@ import '../controllers/community_controller.dart';
 import '../../community_detail/controllers/community_detail_controller.dart';
 import '../../community_detail/views/community_detail_view.dart';
 import '../../community_detail/bindings/community_detail_binding.dart';
-import '../../../routes/app_pages.dart';
 import 'study_group_tab_view.dart';
 import 'community_leaderboard_view.dart';
 
@@ -246,9 +244,9 @@ class _JoinedHeader extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(26.r),
-        border: const Border.fromBorderSide(BorderSide(color: AppColors.line)),),
+        border: Border.fromBorderSide(BorderSide(color: AppColors.line)),),
       child: Row(
         children: [
           Container(
@@ -476,13 +474,13 @@ class _LeaderboardCard extends StatelessWidget {
   Color _backgroundForRank(int rank) {
     switch (rank) {
       case 1:
-        return const Color(0xFFFFF1AA);
+        return AppColors.tint(const Color(0xFFFFF1AA));
       case 2:
         return AppColors.primarySoft;
       case 3:
-        return const Color(0xFFFFDEBB);
+        return AppColors.tint(const Color(0xFFFFDEBB));
       default:
-        return const Color(0xFFE7FFE2);
+        return AppColors.tint(const Color(0xFFE7FFE2));
     }
   }
 
@@ -504,7 +502,7 @@ class _LeaderboardCard extends StatelessWidget {
       child: Row(
         children: [
           CircleAvatar(
-            backgroundColor: Colors.white,
+            backgroundColor: AppColors.surface,
             radius: 26.r,
             backgroundImage: NetworkImage(member.avatarUrl),
           ),
@@ -608,7 +606,7 @@ class _StudyGroupCard extends StatelessWidget {
               width: 56.w,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(18.r),
-                color: Colors.white,
+                color: AppColors.surface,
               ),
               padding: EdgeInsets.all(6.w),
               child: _GroupImage(path: group.assetImage, size: 72.w),
@@ -682,7 +680,7 @@ class _StudyGroupCard extends StatelessWidget {
               height: 42.w,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.white,
+                color: AppColors.surface,
                 border: Border.all(
                   color: AppColors.primary,
                   width: 1.6,
@@ -785,9 +783,9 @@ class _FeedCard extends StatelessWidget {
         margin: EdgeInsets.only(bottom: 20.h),
         padding: EdgeInsets.all(16.w),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(32.r),
-          border: const Border.fromBorderSide(BorderSide(color: AppColors.line)),),
+          border: Border.fromBorderSide(BorderSide(color: AppColors.line)),),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -1284,8 +1282,8 @@ class _FeedCard extends StatelessWidget {
           ? AppColors.primary
           : AppColors.primary.withValues(alpha: 0.6);
       final gradientColors = isSelected
-          ? const [AppColors.primarySoft, AppColors.primaryTint]
-          : const [AppColors.primarySoft, AppColors.primarySoft];
+          ? [AppColors.primarySoft, AppColors.primaryTint]
+          : [AppColors.primarySoft, AppColors.primarySoft];
       final hasMultiple = total > 1;
 
       Widget card = Container(
@@ -1368,9 +1366,9 @@ class _FeedCard extends StatelessWidget {
                     width: 40.w,
                     height: 40.w,
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppColors.surface,
                       borderRadius: BorderRadius.circular(20.r),
-                      border: const Border.fromBorderSide(BorderSide(color: AppColors.line)),),
+                      border: Border.fromBorderSide(BorderSide(color: AppColors.line)),),
                     child: Icon(
                       Icons.volume_up_rounded,
                       color: AppColors.primary,
@@ -1511,7 +1509,7 @@ class _FeedCard extends StatelessWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
       ),
@@ -1623,12 +1621,12 @@ class _FeedCard extends StatelessWidget {
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16.r),
                           borderSide:
-                              const BorderSide(color: AppColors.primarySoft),
+                              BorderSide(color: AppColors.primarySoft),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16.r),
                           borderSide:
-                              const BorderSide(color: AppColors.primary),
+                              BorderSide(color: AppColors.primary),
                         ),
                       ),
                     ),
@@ -1793,7 +1791,7 @@ class _FeedCard extends StatelessWidget {
           final bottomInset = MediaQuery.of(sheetContext).viewInsets.bottom;
           return Container(
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.surface,
               borderRadius: BorderRadius.vertical(top: Radius.circular(32.r)),
             ),
             padding: EdgeInsets.only(
@@ -1834,7 +1832,7 @@ class _FeedCard extends StatelessWidget {
                       padding: EdgeInsets.all(12.w),
                       margin: EdgeInsets.only(bottom: 12.h),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFFF3B0),
+                        color: AppColors.tint(const Color(0xFFFFF3B0)),
                         borderRadius: BorderRadius.circular(16.r),
                         border: Border.all(color: const Color(0xFFFFD57E)),
                       ),
@@ -1949,13 +1947,13 @@ class _FeedCard extends StatelessWidget {
                         fillColor: AppColors.primarySoft,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(18.r),
-                          borderSide: const BorderSide(
+                          borderSide: BorderSide(
                             color: AppColors.line,
                           ),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(18.r),
-                          borderSide: const BorderSide(
+                          borderSide: BorderSide(
                             color: AppColors.primary,
                             width: 1.4,
                           ),
@@ -2062,7 +2060,7 @@ class _NavButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final enabled = onTap != null;
     return Material(
-      color: Colors.white,
+      color: AppColors.surface,
       shape: const CircleBorder(),
       elevation: 0,
       child: InkWell(
@@ -2217,8 +2215,8 @@ class _PrimaryActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = isActive
-        ? const [AppColors.primary, AppColors.primary]
-        : const [AppColors.primaryTint, AppColors.primaryLight];
+        ? [AppColors.primary, AppColors.primary]
+        : [AppColors.primaryTint, AppColors.primaryLight];
     final shadowColor =
         isActive ? AppColors.primary : AppColors.primaryLight;
 

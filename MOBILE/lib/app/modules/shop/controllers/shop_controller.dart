@@ -85,7 +85,7 @@ class ShopController extends GetxController {
               // Item name
               Text(
                 itemName,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                   color: AppColors.textPrimary,
@@ -96,7 +96,7 @@ class ShopController extends GetxController {
               // Item description
               Text(
                 itemDescription,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 14,
                   color: AppColors.textSecondary,
                 ),
@@ -130,7 +130,7 @@ class ShopController extends GetxController {
               ),
               const SizedBox(height: 24),
               // Confirm message
-              const Text(
+              Text(
                 'Bạn có muốn mua vật phẩm này không?',
                 style: TextStyle(
                   fontSize: 16,
@@ -150,9 +150,9 @@ class ShopController extends GetxController {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        side: const BorderSide(color: AppColors.textHint),
+                        side: BorderSide(color: AppColors.textHint),
                       ),
-                      child: const Text(
+                      child: Text(
                         'Hủy',
                         style: TextStyle(
                           fontSize: 16,

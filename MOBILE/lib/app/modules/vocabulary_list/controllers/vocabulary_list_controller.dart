@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../../vocabulary_flashcard/bindings/vocabulary_flashcard_binding.dart';
 import '../../vocabulary_flashcard/views/vocabulary_flashcard_view.dart';
 import '../../vocabulary_topic/controllers/vocabulary_topic_controller.dart';
+import 'package:lingoprism/app/core/theme/app_colors.dart';
 
 /// Simple data model for previewing vocabulary content without backend data.
 class VocabularyItem {
@@ -183,9 +184,9 @@ class VocabularyListController extends GetxController {
     Get.bottomSheet(
       Container(
         padding: const EdgeInsets.all(20),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,

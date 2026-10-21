@@ -501,7 +501,7 @@ class SurveyView extends GetView<SurveyController> {
                 SizedBox(height: 40.h),
 
                 // Happy Prismo
-                Container(
+                SizedBox(
                   width: 200.w,
                   height: 200.h,
                   child: Image.asset(
@@ -878,7 +878,7 @@ class SurveyView extends GetView<SurveyController> {
         fit: BoxFit.contain,
         errorBuilder: (context, error, stackTrace) {
           return Container(
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               color: AppColors.buttonActive,
               shape: BoxShape.circle,
             ),

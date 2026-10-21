@@ -62,7 +62,7 @@ class ExamListView extends GetView<ExamListController> {
             itemBuilder: (_, i) {
               final e = controller.exams[i];
               return Material(
-                color: Colors.white,
+                color: AppColors.surface,
                 borderRadius: BorderRadius.circular(16.r),
                 child: ListTile(
                   contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
@@ -219,7 +219,7 @@ class ExamTakeView extends GetView<ExamTakeController> {
     return Container(
       margin: EdgeInsets.only(bottom: 12.h),
       padding: EdgeInsets.all(14.w),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14.r)),
+      decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(14.r)),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text('Câu $n (${q.points.toStringAsFixed(q.points % 1 == 0 ? 0 : 1)} điểm)',
             style: TextStyle(color: AppColors.textSecondary, fontSize: 12.sp)),
@@ -278,7 +278,7 @@ class ExamResultView extends GetView<ExamResultController> {
         return ListView(padding: EdgeInsets.all(16.w), children: [
           Container(
             padding: EdgeInsets.all(20.w),
-            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16.r)),
+            decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(16.r)),
             child: Column(children: [
               Text(r.examTitle, style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w700), textAlign: TextAlign.center),
               SizedBox(height: 8.h),
@@ -308,13 +308,13 @@ class ExamResultView extends GetView<ExamResultController> {
     return Container(
       margin: EdgeInsets.only(bottom: 10.h),
       padding: EdgeInsets.all(14.w),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14.r), border: Border(left: BorderSide(color: color, width: 4))),
+      decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(14.r), border: Border(left: BorderSide(color: color, width: 4))),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text('Câu $n: ${a.prompt}', style: const TextStyle(fontWeight: FontWeight.w600)),
         SizedBox(height: 6.h),
         Text('Bạn trả lời: $yours'),
-        if (a.questionKind != 'essay' && a.isCorrect == false) Text('Đáp án: $correct', style: const TextStyle(color: AppColors.buttonSuccess)),
-        if (a.explanation.isNotEmpty) Text(a.explanation, style: const TextStyle(color: AppColors.textSecondary)),
+        if (a.questionKind != 'essay' && a.isCorrect == false) Text('Đáp án: $correct', style: TextStyle(color: AppColors.buttonSuccess)),
+        if (a.explanation.isNotEmpty) Text(a.explanation, style: TextStyle(color: AppColors.textSecondary)),
         if (a.score != null) Text('Điểm: ${a.score!.toStringAsFixed(1)} / ${a.points.toStringAsFixed(1)}'),
         if (a.isCorrect == null) const Text('Chờ giáo viên chấm', style: TextStyle(color: Colors.orange)),
         if (a.feedback.isNotEmpty) Text('Nhận xét: ${a.feedback}', style: const TextStyle(fontStyle: FontStyle.italic)),

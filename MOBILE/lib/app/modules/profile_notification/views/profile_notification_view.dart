@@ -63,9 +63,9 @@ class ProfileNotificationView extends GetView<ProfileNotificationController> {
     return Container(
       padding: EdgeInsets.all(18.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(22.r),
-        border: const Border.fromBorderSide(BorderSide(color: AppColors.line)),),
+        border: Border.fromBorderSide(BorderSide(color: AppColors.line)),),
       child: Row(
         children: [
           Icon(Icons.notifications_active_rounded,
@@ -119,7 +119,7 @@ class ProfileNotificationView extends GetView<ProfileNotificationController> {
         child: Container(
           padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 14.h),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.surface,
             borderRadius: BorderRadius.circular(18.r),
             border: Border.all(color: AppColors.primary, width: 2),
           ),
@@ -149,7 +149,7 @@ class ProfileNotificationView extends GetView<ProfileNotificationController> {
       return Container(
         padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 6.h),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(18.r),
           border: Border.all(color: AppColors.primary, width: 2),
         ),
@@ -182,7 +182,7 @@ class ProfileNotificationView extends GetView<ProfileNotificationController> {
     return Container(
       padding: EdgeInsets.all(18.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(18.r),
         border: Border.all(color: AppColors.primaryTint, width: 1.5),
       ),
@@ -207,7 +207,7 @@ class ProfileNotificationView extends GetView<ProfileNotificationController> {
             label: const Text('Gửi thử thông báo'),
             style: OutlinedButton.styleFrom(
               foregroundColor: AppColors.primary,
-              side: const BorderSide(color: AppColors.primary, width: 1.6),
+              side: BorderSide(color: AppColors.primary, width: 1.6),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14.r),
               ),
@@ -224,7 +224,7 @@ class ProfileNotificationView extends GetView<ProfileNotificationController> {
             label: const Text('Gửi thử trong 1 phút'),
             style: OutlinedButton.styleFrom(
               foregroundColor: AppColors.primary,
-              side: const BorderSide(color: AppColors.primary, width: 1.6),
+              side: BorderSide(color: AppColors.primary, width: 1.6),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14.r),
               ),

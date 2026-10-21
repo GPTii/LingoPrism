@@ -10,6 +10,7 @@ import '../../../routes/app_pages.dart';
 import '../../learning_session/controllers/learning_session_controller.dart';
 import '../../vocabulary_flashcard/bindings/vocabulary_flashcard_binding.dart';
 import '../../vocabulary_flashcard/views/vocabulary_flashcard_view.dart';
+import 'package:lingoprism/app/core/theme/app_colors.dart';
 
 enum VocabularyLearningStatus { notStarted, learning, learned }
 
@@ -135,7 +136,7 @@ class VocabularyTopicController extends GetxController {
       Container(
         height: Get.height * 0.75,
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
-        decoration: const BoxDecoration(color: Colors.white, borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+        decoration: BoxDecoration(color: AppColors.surface, borderRadius: const BorderRadius.vertical(top: Radius.circular(24))),
         child: Column(
           children: [
             const Text('Thêm từ vào chủ đề', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),

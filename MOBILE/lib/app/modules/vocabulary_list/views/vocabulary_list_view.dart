@@ -57,8 +57,8 @@ class VocabularyListView extends GetView<VocabularyListController> {
   Widget _buildHeader() {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-      decoration: const BoxDecoration(
-        color: Colors.white,
+      decoration: BoxDecoration(
+        color: AppColors.surface,
         border: Border.fromBorderSide(BorderSide(color: AppColors.line)),),
       child: Row(
         children: [
@@ -79,7 +79,7 @@ class VocabularyListView extends GetView<VocabularyListController> {
               style: TextStyle(
                 fontSize: 24.sp,
                 fontWeight: FontWeight.bold,
-                color: Colors.black,
+                color: AppColors.textPrimary,
               ),
             ),
           ),
@@ -140,7 +140,7 @@ class VocabularyListView extends GetView<VocabularyListController> {
                   style: TextStyle(
                     fontSize: 24.sp,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black,
+                    color: AppColors.textPrimary,
                   ),
                 ),
               ),

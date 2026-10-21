@@ -258,8 +258,8 @@ class _DetectionResultViewState extends State<DetectionResultView> {
     return Container(
       margin: EdgeInsets.only(bottom: 12.h),
       padding: EdgeInsets.all(12.w),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16.r),
-          border: const Border.fromBorderSide(BorderSide(color: AppColors.line))),
+      decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(16.r),
+          border: Border.fromBorderSide(BorderSide(color: AppColors.line))),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -326,7 +326,7 @@ class _DetectionResultViewState extends State<DetectionResultView> {
         backgroundColor: AppColors.backgroundLight,
         elevation: 0,
         title: Text('Kết quả nhận diện', style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
-        iconTheme: const IconThemeData(color: AppColors.textPrimary),
+        iconTheme: IconThemeData(color: AppColors.textPrimary),
       ),
       body: ListView(
         padding: EdgeInsets.all(16.w),
@@ -353,11 +353,11 @@ class _DetectionResultViewState extends State<DetectionResultView> {
           ..._items.map(_itemTile),
           SizedBox(height: 8.h),
           DropdownButtonFormField<Topic?>(
-            value: topic,
+            initialValue: topic,
             decoration: InputDecoration(
               labelText: 'Chọn chủ đề cho tất cả từ (không bắt buộc)',
               filled: true,
-              fillColor: Colors.white,
+              fillColor: AppColors.surface,
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r)),
             ),
             items: [

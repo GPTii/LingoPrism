@@ -82,7 +82,7 @@ class LearningSessionView extends GetView<LearningSessionController> {
         elevation: 0,
         leading: IconButton(
           onPressed: Get.back,
-          icon: const Icon(Icons.arrow_back_ios_new_rounded,
+          icon: Icon(Icons.arrow_back_ios_new_rounded,
               color: AppColors.textPrimary),
         ),
         titleSpacing: 0,
@@ -166,8 +166,8 @@ class LearningSessionView extends GetView<LearningSessionController> {
                           return LinearProgressIndicator(
                             value: value,
                             minHeight: 10.h,
-                            backgroundColor: Colors.white,
-                            valueColor: const AlwaysStoppedAnimation(
+                            backgroundColor: AppColors.surface,
+                            valueColor: AlwaysStoppedAnimation(
                               AppColors.primary,
                             ),
                           );
@@ -303,7 +303,7 @@ class LearningSessionView extends GetView<LearningSessionController> {
                     child: ElevatedButton(
                       onPressed: controller.proceedToRoundThree,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
+                        backgroundColor: AppColors.surface,
                         foregroundColor: AppColors.primary,
                         elevation: 0,
                         shape: RoundedRectangleBorder(
@@ -813,7 +813,7 @@ class _MultipleChoiceQuestionWidgetState extends State<_MultipleChoiceQuestionWi
                 child: Text(option),
               ),
             );
-          }).toList(),
+          }),
         ],
       ),
     );
@@ -1101,10 +1101,10 @@ class _ScrambleQuestionWidgetState extends State<_ScrambleQuestionWidget> {
                 hintText: 'Câu trả lời của bạn',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16.r),
-                  borderSide: const BorderSide(color: AppColors.textHint),
+                  borderSide: BorderSide(color: AppColors.textHint),
                 ),
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: AppColors.surface,
                 suffixIcon: _isCorrect == null
                     ? null
                     : Icon(
@@ -1119,7 +1119,7 @@ class _ScrambleQuestionWidgetState extends State<_ScrambleQuestionWidget> {
               Text(
                 'Đáp án đúng: ${widget.question.correctWord}',
                 textAlign: TextAlign.center,
-                style: const TextStyle(
+                style: TextStyle(
                   color: AppColors.error,
                   fontWeight: FontWeight.w600,
                 ),
@@ -1229,9 +1229,9 @@ class _ListenAndTypeQuestionWidgetState extends State<_ListenAndTypeQuestionWidg
             SizedBox(height: 16.h),
             Center(
               child: Ink(
-                decoration: const ShapeDecoration(
+                decoration: ShapeDecoration(
                   color: AppColors.primary,
-                  shape: CircleBorder(),
+                  shape: const CircleBorder(),
                 ),
                 child: IconButton(
                   icon: Icon(Icons.volume_up_rounded, size: 20.sp),
@@ -1250,10 +1250,10 @@ class _ListenAndTypeQuestionWidgetState extends State<_ListenAndTypeQuestionWidg
                 hintText: 'Gõ lại từ tiếng Anh',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16.r),
-                  borderSide: const BorderSide(color: AppColors.textHint),
+                  borderSide: BorderSide(color: AppColors.textHint),
                 ),
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: AppColors.surface,
                 suffixIcon: _isCorrect == null
                     ? null
                     : Icon(
@@ -1267,7 +1267,7 @@ class _ListenAndTypeQuestionWidgetState extends State<_ListenAndTypeQuestionWidg
               Text(
                 'Đáp án đúng: ${word.word}',
                 textAlign: TextAlign.center,
-                style: const TextStyle(color: AppColors.error, fontWeight: FontWeight.w600),
+                style: TextStyle(color: AppColors.error, fontWeight: FontWeight.w600),
               ),
             ],
             SizedBox(height: 24.h),
@@ -1387,9 +1387,9 @@ class _LearningCard extends StatelessWidget {
   Color _backgroundByStatus() {
     switch (word.status) {
       case 'learning':
-        return const Color(0xFFFFF3CD);
+        return AppColors.tint(const Color(0xFFFFF3CD));
       case 'mastered':
-        return const Color(0xFFE0F7EC);
+        return AppColors.tint(const Color(0xFFE0F7EC));
       default:
         return AppColors.primarySoft;
     }
@@ -1536,9 +1536,9 @@ class _FlashcardFront extends StatelessWidget {
       width: double.infinity,
       height: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(32.r),
-        border: const Border.fromBorderSide(BorderSide(color: AppColors.line)),),
+        border: Border.fromBorderSide(BorderSide(color: AppColors.line)),),
       padding: EdgeInsets.symmetric(horizontal: 28.w, vertical: 32.h),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -1790,9 +1790,9 @@ class _LessonCompletedScreenState extends State<_LessonCompletedScreen> {
                 Container(
                   constraints: BoxConstraints(maxHeight: 180.h),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppColors.surface,
                     borderRadius: BorderRadius.circular(16.r),
-                    border: const Border.fromBorderSide(BorderSide(color: AppColors.line)),),
+                    border: Border.fromBorderSide(BorderSide(color: AppColors.line)),),
                   child: ListView.builder(
                     padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 16.w),
                     itemCount: difficult.length,

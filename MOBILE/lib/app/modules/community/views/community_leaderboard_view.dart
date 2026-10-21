@@ -70,21 +70,21 @@ class CommunityLeaderboardView extends StatelessWidget {
               children: [
                 _LeagueSection(
                   title: 'Top Thăng Hạng',
-                  color: const Color(0xFFBFF7AF),
+                  color: AppColors.tint(const Color(0xFFBFF7AF)),
                   participants: controller.promotionLeaders,
                   onParticipantTap: controller.openLeaderboardProfile,
                 ),
                 SizedBox(height: 16.h),
                 _LeagueSection(
                   title: 'Top An Toàn',
-                  color: const Color(0xFFFFF3B0),
+                  color: AppColors.tint(const Color(0xFFFFF3B0)),
                   participants: controller.safeLeaders,
                   onParticipantTap: controller.openLeaderboardProfile,
                 ),
                 SizedBox(height: 16.h),
                 _LeagueSection(
                   title: 'Top Tụt Hạng',
-                  color: const Color(0xFFFFC2C0),
+                  color: AppColors.tint(const Color(0xFFFFC2C0)),
                   participants: controller.demotionLeaders,
                   onParticipantTap: controller.openLeaderboardProfile,
                 ),
@@ -206,7 +206,7 @@ class _LeagueHeader extends StatelessWidget {
                     margin: EdgeInsets.only(right: index == _rankAssets.length - 1 ? 0 : 14.w),
                     padding: EdgeInsets.all(14.w),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppColors.surface,
                       borderRadius: BorderRadius.circular(26.r),
                       border: Border.all(
                         color: isCurrent ? AppColors.primary : Colors.transparent,
@@ -286,8 +286,8 @@ class _LeagueSection extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(28.r),
-        color: Colors.white,
-        border: const Border.fromBorderSide(BorderSide(color: AppColors.line)),),
+        color: AppColors.surface,
+        border: Border.fromBorderSide(BorderSide(color: AppColors.line)),),
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 18.h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -358,11 +358,11 @@ class _LeagueParticipantTile extends StatelessWidget {
   Color get _background {
     switch (participant.status) {
       case CommunityLeaderboardStatus.promotion:
-        return const Color(0xFFBFF7AF);
+        return AppColors.tint(const Color(0xFFBFF7AF));
       case CommunityLeaderboardStatus.safe:
-        return const Color(0xFFFFF3B0);
+        return AppColors.tint(const Color(0xFFFFF3B0));
       case CommunityLeaderboardStatus.demotion:
-        return const Color(0xFFFFC2C0);
+        return AppColors.tint(const Color(0xFFFFC2C0));
     }
   }
 
@@ -607,7 +607,7 @@ class _LeagueParticipantTile extends StatelessWidget {
   BoxDecoration _buildBronzeDecoration(BorderRadius borderRadius, List<BoxShadow> shadow) {
     return BoxDecoration(
       borderRadius: borderRadius,
-      color: const Color(0xFFFFD7B5),
+      color: AppColors.tint(const Color(0xFFFFD7B5)),
       border: Border.all(color: const Color(0xFFFFA64D), width: 1.6),);
   }
 

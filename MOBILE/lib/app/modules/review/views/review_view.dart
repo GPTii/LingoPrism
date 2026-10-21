@@ -61,9 +61,9 @@ class ReviewView extends GetView<ReviewController> {
             padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.surface,
                 borderRadius: BorderRadius.circular(12.r),
-                border: const Border.fromBorderSide(BorderSide(color: AppColors.line)),),
+                border: Border.fromBorderSide(BorderSide(color: AppColors.line)),),
               child: TextField(
                 controller: controller.searchController,
                 onChanged: controller.onSearchChanged,
@@ -176,9 +176,9 @@ class ReviewView extends GetView<ReviewController> {
           child: Container(
             padding: EdgeInsets.all(16.w),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.surface,
               borderRadius: BorderRadius.circular(16.r),
-              border: const Border.fromBorderSide(BorderSide(color: AppColors.line)),),
+              border: Border.fromBorderSide(BorderSide(color: AppColors.line)),),
             child: Row(
               children: [
                 SizedBox(
@@ -211,9 +211,9 @@ class ReviewView extends GetView<ReviewController> {
         child: Container(
           padding: EdgeInsets.all(16.w),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.surface,
             borderRadius: BorderRadius.circular(16.r),
-            border: const Border.fromBorderSide(BorderSide(color: AppColors.line)),),
+            border: Border.fromBorderSide(BorderSide(color: AppColors.line)),),
         
         ),
       );
@@ -269,7 +269,7 @@ class ReviewView extends GetView<ReviewController> {
             onPressed: isSaving ? null : () => controller.onSaveTopic(topic),
             style: OutlinedButton.styleFrom(
               foregroundColor: AppColors.primaryAccent,
-              side: const BorderSide(color: AppColors.primaryAccent),
+              side: BorderSide(color: AppColors.primaryAccent),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12.r),
               ),
@@ -296,9 +296,9 @@ class ReviewView extends GetView<ReviewController> {
     Get.bottomSheet(
       Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
-          border: const Border.fromBorderSide(BorderSide(color: AppColors.line)),),
+          border: Border.fromBorderSide(BorderSide(color: AppColors.line)),),
         child: SafeArea(
           top: false,
           child: SizedBox(
@@ -334,7 +334,7 @@ class ReviewView extends GetView<ReviewController> {
                       backgroundColor:
                           AppColors.progressLocked.withOpacity(0.3),
                       valueColor:
-                          const AlwaysStoppedAnimation(AppColors.primaryAccent),
+                          AlwaysStoppedAnimation(AppColors.primaryAccent),
                     ),
                   Expanded(
                     child: topics.isEmpty && !isLoading
@@ -379,7 +379,7 @@ class ReviewView extends GetView<ReviewController> {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(14.r),
         border: Border.all(
           color: AppColors.shadow.withValues(alpha: 0.08),
@@ -474,7 +474,7 @@ class ReviewView extends GetView<ReviewController> {
                 margin: EdgeInsets.symmetric(horizontal: 6.w),
                 height: 90.h,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFFE9F0),
+                  color: AppColors.tint(const Color(0xFFFFE9F0)),
                   borderRadius: BorderRadius.circular(18.r),
                 ),
                 padding: EdgeInsets.symmetric(horizontal: 20.w),
@@ -507,7 +507,7 @@ class ReviewView extends GetView<ReviewController> {
                 margin: EdgeInsets.symmetric(horizontal: 6.w),
                 height: 90.h,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFFF2E5),
+                  color: AppColors.tint(const Color(0xFFFFF2E5)),
                   borderRadius: BorderRadius.circular(18.r),
                 ),
                 padding: EdgeInsets.symmetric(horizontal: 20.w),
@@ -538,9 +538,9 @@ class ReviewView extends GetView<ReviewController> {
           margin: EdgeInsets.only(bottom: 16.h),
           padding: EdgeInsets.all(16.w),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.surface,
             borderRadius: BorderRadius.circular(16.r),
-            border: const Border.fromBorderSide(BorderSide(color: AppColors.line)),),
+            border: Border.fromBorderSide(BorderSide(color: AppColors.line)),),
           child: Row(
             children: [
               // Icon
@@ -700,13 +700,13 @@ class ReviewView extends GetView<ReviewController> {
             Container(
               padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.55),
+                color: AppColors.surfaceMuted,
                 borderRadius: BorderRadius.circular(12.r),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.folder_outlined,
                     size: 16,
                     color: AppColors.primary,

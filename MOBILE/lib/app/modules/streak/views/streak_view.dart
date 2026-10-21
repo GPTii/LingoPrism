@@ -17,7 +17,7 @@ class StreakView extends GetView<StreakController> {
         backgroundColor: AppColors.primarySoft,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded,
+          icon: Icon(Icons.arrow_back_ios_new_rounded,
               color: AppColors.textPrimary),
           onPressed: () => Get.back(),
         ),
@@ -95,7 +95,7 @@ class StreakView extends GetView<StreakController> {
         width: double.infinity,
         padding: EdgeInsets.symmetric(vertical: 24.h, horizontal: 18.w),
         decoration: BoxDecoration(
-          color: const Color(0xFFFFF4E8),
+          color: AppColors.tint(const Color(0xFFFFF4E8)),
           borderRadius: BorderRadius.circular(28.r),
           boxShadow: [
             BoxShadow(
@@ -268,7 +268,7 @@ class StreakView extends GetView<StreakController> {
       return Container(
         padding: EdgeInsets.all(16.w),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(20.r),
         ),
         child: Column(

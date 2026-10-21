@@ -108,12 +108,12 @@ class OnboardingView extends GetView<OnboardingController> {
                               onPressed: controller.goToLogin,
                               style: OutlinedButton.styleFrom(
                                 padding: const EdgeInsets.symmetric(vertical: 16),
-                                side: const BorderSide(color: AppColors.primary),
+                                side: BorderSide(color: AppColors.primary),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                               ),
-                              child: const Text(
+                              child: Text(
                                 'Đăng nhập',
                                 style: TextStyle(
                                   fontSize: 16,
@@ -190,7 +190,7 @@ class OnboardingView extends GetView<OnboardingController> {
         text: TextSpan(
           children: [
             TextSpan(
-              text: lines[0] + '\n',
+              text: '${lines[0]}\n',
               style: TextStyle(
                 fontSize: 28.sp,
                 fontWeight: FontWeight.bold,
@@ -217,7 +217,7 @@ class OnboardingView extends GetView<OnboardingController> {
         text: TextSpan(
           children: [
             TextSpan(
-              text: lines[0] + '\n',
+              text: '${lines[0]}\n',
               style: TextStyle(
                 fontSize: 28.sp,
                 fontWeight: FontWeight.bold,

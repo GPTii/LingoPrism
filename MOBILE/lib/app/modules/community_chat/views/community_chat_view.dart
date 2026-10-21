@@ -171,7 +171,7 @@ class _ChatHeader extends StatelessWidget {
             width: 60.w,
             height: 60.w,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.surface,
               borderRadius: BorderRadius.circular(20.r),
               border: Border.all(
                 color: AppColors.line,
@@ -604,7 +604,7 @@ class _ChatInputState extends State<_ChatInput> {
             Expanded(
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: AppColors.surface,
                   borderRadius: BorderRadius.circular(26.r),
                   border: Border.all(
                     color: AppColors.line,
@@ -652,7 +652,7 @@ class _ChatInputState extends State<_ChatInput> {
                       child: SizedBox(
                         width: 20.w,
                         height: 20.w,
-                        child: const CircularProgressIndicator(
+                        child: CircularProgressIndicator(
                           strokeWidth: 2.0,
                           valueColor: AlwaysStoppedAnimation<Color>(
                             AppColors.primary,

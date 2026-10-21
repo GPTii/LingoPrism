@@ -11,7 +11,7 @@ class LoginView extends GetView<LoginController> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(gradient: AppColors.primaryGradient),
+        decoration: BoxDecoration(gradient: AppColors.primaryGradient),
         child: SafeArea(
           child: Column(
             children: [
@@ -93,7 +93,7 @@ class LoginView extends GetView<LoginController> {
                               children: [
                                 Container(
                                   decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.7),
+                                    color: AppColors.surface.withOpacity(0.7),
                                     borderRadius: BorderRadius.circular(12.r),
                                   ),
                                   child: TextField(
@@ -139,7 +139,7 @@ class LoginView extends GetView<LoginController> {
                               children: [
                                 Obx(() => Container(
                                       decoration: BoxDecoration(
-                                        color: Colors.white.withOpacity(0.7),
+                                        color: AppColors.surface.withOpacity(0.7),
                                         borderRadius: BorderRadius.circular(12.r),
                                       ),
                                       child: TextField(

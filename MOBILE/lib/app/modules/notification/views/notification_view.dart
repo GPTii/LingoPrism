@@ -17,13 +17,13 @@ class NotificationView extends GetView<NotificationController> {
       appBar: AppBar(
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Get.back(),
         ),
         title: Text(
           'Thông báo',
           style: TextStyle(
-            color: Colors.black,
+            color: AppColors.textPrimary,
             fontSize: 24.sp,
             fontWeight: FontWeight.bold,
           ),
@@ -56,7 +56,7 @@ class NotificationView extends GetView<NotificationController> {
         }
 
         final error = controller.error.value;
-        if (error != null && error.isNotEmpty) {
+        if (error.isNotEmpty) {
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -107,7 +107,7 @@ class NotificationView extends GetView<NotificationController> {
         return RefreshIndicator(
           onRefresh: () => controller.loadNotifications(),
           color: AppColors.primary,
-          backgroundColor: Colors.white,
+          backgroundColor: AppColors.surface,
           child: ListView.builder(
             padding: EdgeInsets.all(20.w),
             itemCount: notifications.length,

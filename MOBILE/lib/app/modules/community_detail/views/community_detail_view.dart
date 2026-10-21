@@ -114,7 +114,7 @@ class CommunityDetailView extends GetView<CommunityDetailController> {
           final bottomInset = MediaQuery.of(sheetContext).viewInsets.bottom;
           return Container(
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.surface,
               borderRadius: BorderRadius.vertical(top: Radius.circular(32.r)),
             ),
             padding: EdgeInsets.only(
@@ -155,7 +155,7 @@ class CommunityDetailView extends GetView<CommunityDetailController> {
                       padding: EdgeInsets.all(12.w),
                       margin: EdgeInsets.only(bottom: 12.h),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFFF3B0),
+                        color: AppColors.tint(const Color(0xFFFFF3B0)),
                         borderRadius: BorderRadius.circular(16.r),
                         border: Border.all(color: const Color(0xFFFFD57E)),
                       ),
@@ -270,13 +270,13 @@ class CommunityDetailView extends GetView<CommunityDetailController> {
                         fillColor: AppColors.primarySoft,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(18.r),
-                          borderSide: const BorderSide(
+                          borderSide: BorderSide(
                             color: AppColors.line,
                           ),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(18.r),
-                          borderSide: const BorderSide(
+                          borderSide: BorderSide(
                             color: AppColors.primary,
                             width: 1.4,
                           ),
@@ -470,7 +470,7 @@ class _PostImage extends StatelessWidget {
           width: double.infinity,
           height: 200,
           color: AppColors.lineStrong,
-          child: const Icon(
+          child: Icon(
             Icons.error_outline,
             size: 50,
             color: AppColors.textHint,
@@ -536,7 +536,7 @@ class _FeedCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(20.r),
-        border: const Border.fromBorderSide(BorderSide(color: AppColors.line)),),
+        border: Border.fromBorderSide(BorderSide(color: AppColors.line)),),
       padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 20.h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -936,7 +936,7 @@ class _DetectedVocabularyItem extends StatelessWidget {
         padding: EdgeInsets.all(18.w),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(28.r),
-          color: Colors.white,
+          color: AppColors.surface,
           border: Border.all(color: AppColors.primaryTint),),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -991,7 +991,7 @@ class _DetectedVocabularyItem extends StatelessWidget {
                 Container(
                   width: 38.w,
                   height: 38.w,
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     color: AppColors.primarySoft,
                     shape: BoxShape.circle,
                   ),
@@ -1048,7 +1048,7 @@ void _showTopicPicker(
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
-    backgroundColor: Colors.white,
+    backgroundColor: AppColors.surface,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
     ),
@@ -1159,11 +1159,11 @@ void _showTopicPicker(
                       ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16.r),
-                        borderSide: const BorderSide(color: AppColors.primarySoft),
+                        borderSide: BorderSide(color: AppColors.primarySoft),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16.r),
-                        borderSide: const BorderSide(color: AppColors.primary),
+                        borderSide: BorderSide(color: AppColors.primary),
                       ),
                     ),
                   ),
@@ -1254,9 +1254,9 @@ class _CommentItem extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(22.r),
-        border: const Border.fromBorderSide(BorderSide(color: AppColors.line)),),
+        border: Border.fromBorderSide(BorderSide(color: AppColors.line)),),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1467,8 +1467,8 @@ class _NavButton extends StatelessWidget {
       child: Container(
         width: 44.w,
         height: 44.w,
-        decoration: const BoxDecoration(
-          color: Colors.white,
+        decoration: BoxDecoration(
+          color: AppColors.surface,
           shape: BoxShape.circle,
           border: Border.fromBorderSide(BorderSide(color: AppColors.line)),),
         child: Icon(

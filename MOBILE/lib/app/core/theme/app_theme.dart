@@ -13,30 +13,22 @@ class AppTheme {
   static const _radius = 14.0;
   static final _shape = RoundedRectangleBorder(borderRadius: BorderRadius.circular(_radius));
 
-  static ThemeData get lightTheme => _build(
-        brightness: Brightness.light,
-        background: AppColors.background,
-        surface: AppColors.surface,
-        surfaceMuted: AppColors.surfaceMuted,
-        line: AppColors.line,
-        lineStrong: AppColors.lineStrong,
-        text: AppColors.textPrimary,
-        textSecondary: AppColors.textSecondary,
-        primary: AppColors.primary,
-        primarySoft: AppColors.primarySoft,
-      );
+  static ThemeData get lightTheme => _from(AppPalette.light, Brightness.light);
+  static ThemeData get darkTheme => _from(AppPalette.dark, Brightness.dark);
 
-  static ThemeData get darkTheme => _build(
-        brightness: Brightness.dark,
-        background: const Color(0xFF0F0D1A),
-        surface: const Color(0xFF181527),
-        surfaceMuted: const Color(0xFF201C33),
-        line: const Color(0xFF2A2640),
-        lineStrong: const Color(0xFF3B3558),
-        text: const Color(0xFFEEEDF6),
-        textSecondary: const Color(0xFFA8A3C4),
-        primary: const Color(0xFFA995FF),
-        primarySoft: const Color(0xFF221C45),
+  static ThemeData _from(AppPalette p, Brightness b) => _build(
+        brightness: b,
+        background: p.background,
+        surface: p.surface,
+        surfaceMuted: p.surfaceMuted,
+        line: p.line,
+        lineStrong: p.lineStrong,
+        text: p.textPrimary,
+        textSecondary: p.textSecondary,
+        primary: p.primary,
+        primarySoft: p.primarySoft,
+        ink: p.ink,
+        error: p.error,
       );
 
   static ThemeData _build({
@@ -50,18 +42,20 @@ class AppTheme {
     required Color textSecondary,
     required Color primary,
     required Color primarySoft,
+    required Color ink,
+    required Color error,
   }) {
     final dark = brightness == Brightness.dark;
     final scheme = ColorScheme.fromSeed(
-      seedColor: AppColors.primary,
+      seedColor: primary,
       brightness: brightness,
       primary: primary,
-      onPrimary: dark ? AppColors.ink : Colors.white,
+      onPrimary: Colors.white,
       primaryContainer: primarySoft,
-      onPrimaryContainer: dark ? const Color(0xFFC3B6FF) : AppColors.primaryDark,
+      onPrimaryContainer: dark ? const Color(0xFFC3B6FF) : const Color(0xFF5533E0),
       secondary: AppColors.beamMint,
       tertiary: AppColors.beamAmber,
-      error: AppColors.error,
+      error: error,
       surface: surface,
       onSurface: text,
       onSurfaceVariant: textSecondary,
@@ -147,8 +141,8 @@ class AppTheme {
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: lineStrong)),
         enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: lineStrong)),
         focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: primary, width: 2)),
-        errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.error, width: 1.5)),
-        focusedErrorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.error, width: 2)),
+        errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: error, width: 1.5)),
+        focusedErrorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: error, width: 2)),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
         hintStyle: AppTextStyles.hintText.copyWith(fontFamily: fontFamily),
         errorStyle: AppTextStyles.errorText.copyWith(fontFamily: fontFamily),
@@ -175,7 +169,7 @@ class AppTheme {
         shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
       ),
       snackBarTheme: SnackBarThemeData(
-        backgroundColor: dark ? surfaceMuted : AppColors.ink,
+        backgroundColor: dark ? surfaceMuted : ink,
         contentTextStyle: TextStyle(fontFamily: fontFamily, color: dark ? text : Colors.white, fontSize: 14),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),

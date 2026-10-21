@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
+import '../../../core/theme/theme_service.dart';
 import '../controllers/profile_settings_controller.dart';
 import 'package:lingoprism/app/core/theme/app_colors.dart';
 
@@ -11,9 +12,9 @@ class ProfileSettingsView extends GetView<ProfileSettingsController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.primarySoft,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.primarySoft,
+        backgroundColor: AppColors.background,
         elevation: 0,
         leading: IconButton(
           onPressed: Get.back,
@@ -34,6 +35,8 @@ class ProfileSettingsView extends GetView<ProfileSettingsController> {
         padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 24.h),
         child: Column(
           children: [
+            const _ThemeChoice(),
+            SizedBox(height: 14.h),
             _SettingsTile(
               label: 'Ngôn ngữ học',
               onTap: controller.openLanguage,
@@ -122,7 +125,7 @@ class _SettingsTile extends StatelessWidget {
       borderRadius: BorderRadius.circular(18.r),
       child: Ink(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(18.r),
           border: Border.all(color: AppColors.primaryTint, width: 2),),
         padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 14.h),
@@ -148,5 +151,66 @@ class _SettingsTile extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+
+/// Giao diện: Sáng / Tối side by side; the choice is kept on the device.
+class _ThemeChoice extends StatefulWidget {
+  const _ThemeChoice();
+
+  @override
+  State<_ThemeChoice> createState() => _ThemeChoiceState();
+}
+
+class _ThemeChoiceState extends State<_ThemeChoice> {
+  @override
+  Widget build(BuildContext context) {
+    final dark = ThemeService.isDark;
+    Widget option(String label, IconData icon, bool selected, ThemeMode mode) => Expanded(
+          child: Semantics(
+            selected: selected,
+            button: true,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(10.r),
+              onTap: selected ? null : () async {
+                await ThemeService.set(mode);
+                if (mounted) setState(() {});
+              },
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 180),
+                height: 44.h,
+                decoration: BoxDecoration(
+                  color: selected ? AppColors.surface : Colors.transparent,
+                  borderRadius: BorderRadius.circular(10.r),
+                  border: selected ? Border.all(color: AppColors.lineStrong) : null,
+                ),
+                child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                  Icon(icon, size: 18.sp, color: selected ? AppColors.textPrimary : AppColors.textSecondary),
+                  SizedBox(width: 8.w),
+                  Text(label,
+                      style: TextStyle(
+                        fontSize: 15.sp,
+                        fontWeight: FontWeight.w600,
+                        color: selected ? AppColors.textPrimary : AppColors.textSecondary,
+                      )),
+                ]),
+              ),
+            ),
+          ),
+        );
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Text('Giao diện', style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+      SizedBox(height: 8.h),
+      Container(
+        padding: EdgeInsets.all(4.w),
+        decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(14.r)),
+        child: Row(children: [
+          option('Sáng', Icons.light_mode_outlined, !dark, ThemeMode.light),
+          SizedBox(width: 4.w),
+          option('Tối', Icons.dark_mode_outlined, dark, ThemeMode.dark),
+        ]),
+      ),
+    ]);
   }
 }

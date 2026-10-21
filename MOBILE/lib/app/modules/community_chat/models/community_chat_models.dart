@@ -11,6 +11,7 @@
 ///
 /// Author: Claude Code Assistant
 /// Last updated: November 2024
+library;
 
 /// Represents a chat message in a community group
 ///

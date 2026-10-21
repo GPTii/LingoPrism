@@ -218,7 +218,7 @@ class _CustomCameraViewState extends State<CustomCameraView> {
   @override
   Widget build(BuildContext context) {
     if (!_isInitialized || _controller == null) {
-      return const Scaffold(
+      return Scaffold(
         backgroundColor: Colors.black,
         body: Center(
           child: CircularProgressIndicator(
@@ -442,7 +442,7 @@ class _CustomCameraViewState extends State<CustomCameraView> {
                 Container(
                   width: 80.w,
                   height: 80.w,
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: AppColors.backgroundLight,
                   ),
@@ -451,7 +451,7 @@ class _CustomCameraViewState extends State<CustomCameraView> {
                       duration: const Duration(milliseconds: 200),
                       width: _isTakingPicture ? 48.w : 64.w,
                       height: _isTakingPicture ? 48.w : 64.w,
-                      decoration: const BoxDecoration(
+                      decoration: BoxDecoration(
                         color: AppColors.primary,
                         shape: BoxShape.circle,),
                     ),
@@ -474,7 +474,7 @@ class _CustomCameraViewState extends State<CustomCameraView> {
   Widget _buildCircleButton({
     required IconData icon,
     required VoidCallback? onTap,
-    Color background = AppColors.textSecondary,
+    Color? background,
     Color foreground = Colors.white,
     double? size,
   }) {
@@ -484,7 +484,7 @@ class _CustomCameraViewState extends State<CustomCameraView> {
         width: size ?? 44.w,
         height: size ?? 44.w,
         decoration: BoxDecoration(
-          color: background,
+          color: background ?? AppColors.textSecondary,
           shape: BoxShape.circle,
         ),
         child: Icon(

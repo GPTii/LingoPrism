@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lingoprism/app/core/theme/app_colors.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../models/community_models.dart';
@@ -14,7 +15,7 @@ class TournamentNoticeBanner extends StatelessWidget {
       width: double.infinity,
       padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 16.h),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFE0B2),
+        color: AppColors.tint(const Color(0xFFFFE0B2)),
         borderRadius: BorderRadius.circular(24.r),
         boxShadow: [
           BoxShadow(

@@ -39,7 +39,7 @@ class HomeView extends GetView<HomeController> {
         }
       }),
       bottomNavigationBar: Obx(() => DecoratedBox(
-            decoration: const BoxDecoration(border: Border(top: BorderSide(color: AppColors.line))),
+            decoration: BoxDecoration(border: Border(top: BorderSide(color: AppColors.line))),
             child: BottomAppBar(
               shape: const CircularNotchedRectangle(),
               notchMargin: 6.w,

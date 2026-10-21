@@ -16,7 +16,7 @@ class VerifyCodeView extends GetView<ForgotPasswordController> {
 
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: AppColors.primaryGradient,
         ),
         child: SafeArea(
@@ -64,7 +64,7 @@ class VerifyCodeView extends GetView<ForgotPasswordController> {
                         Container(
                           width: 80.w,
                           height: 80.h,
-                          decoration: const BoxDecoration(
+                          decoration: BoxDecoration(
                             color: AppColors.primaryBlue,
                             shape: BoxShape.circle,
                           ),
@@ -140,20 +140,20 @@ class VerifyCodeView extends GetView<ForgotPasswordController> {
                                     fillColor: AppColors.cardBackground,
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12.r),
-                                      borderSide: const BorderSide(
+                                      borderSide: BorderSide(
                                         color: AppColors.surfaceLight,
                                       ),
                                     ),
                                     focusedBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12.r),
-                                      borderSide: const BorderSide(
+                                      borderSide: BorderSide(
                                         color: AppColors.primaryBlue,
                                         width: 2,
                                       ),
                                     ),
                                     enabledBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12.r),
-                                      borderSide: const BorderSide(
+                                      borderSide: BorderSide(
                                         color: AppColors.surfaceLight,
                                       ),
                                     ),

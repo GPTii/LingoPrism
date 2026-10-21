@@ -13,7 +13,8 @@ import 'package:lingoprism/app/core/theme/app_colors.dart';
 
 /// Lộ trình 4 cấp độ (BE /levels/): progress per level, choosing the level, skip test.
 
-const levelColors = [Color(0xFF22C55E), AppColors.primary, Color(0xFFF59E0B), AppColors.error];
+// same as the web (FE/src/api/levels.ts): dark enough for white numbers and coloured labels
+const levelColors = [Color(0xFF0E9F7B), Color(0xFF1F7ED0), Color(0xFFB26F00), Color(0xFFE0445E)];
 
 // ====================================================================== path
 
@@ -67,7 +68,7 @@ class LevelPathCard extends StatelessWidget {
         child: Container(
           padding: EdgeInsets.all(14.w),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.surface,
             borderRadius: BorderRadius.circular(16.r),
             border: Border.all(color: color, width: 2),
           ),
@@ -150,7 +151,7 @@ class _LevelTile extends GetView<LevelPathController> {
             if (row.current)
               Chip(label: const Text('Đang học'), backgroundColor: color.withValues(alpha: 0.15))
             else if (!row.unlocked)
-              const Icon(Icons.lock_outline, color: AppColors.textHint),
+              Icon(Icons.lock_outline, color: AppColors.textHint),
           ]),
           Text(row.description, style: TextStyle(fontSize: 13.sp, color: AppColors.textSecondary)),
           SizedBox(height: 8.h),

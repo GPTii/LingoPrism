@@ -65,7 +65,7 @@ class StudyGroupTabView extends StatelessWidget {
               child: Container(
                 width: double.infinity,
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: AppColors.surface,
                   borderRadius: BorderRadius.vertical(top: Radius.circular(32.r)),
                 ),
                 padding: EdgeInsets.only(
@@ -111,21 +111,21 @@ class StudyGroupTabView extends StatelessWidget {
                         fillColor: AppColors.primarySoft,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(18.r),
-                          borderSide: const BorderSide(
+                          borderSide: BorderSide(
                             color: AppColors.primaryTint,
                             width: 1.2,
                           ),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(18.r),
-                          borderSide: const BorderSide(
+                          borderSide: BorderSide(
                             color: AppColors.primaryTint,
                             width: 1.2,
                           ),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(18.r),
-                          borderSide: const BorderSide(
+                          borderSide: BorderSide(
                             color: AppColors.primary,
                             width: 1.4,
                           ),
@@ -245,9 +245,9 @@ class GroupSearchBar extends StatelessWidget {
           child: Container(
             height: 48.h,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.surface,
               borderRadius: BorderRadius.circular(28.r),
-              border: const Border.fromBorderSide(BorderSide(color: AppColors.line)),),
+              border: Border.fromBorderSide(BorderSide(color: AppColors.line)),),
             alignment: Alignment.center,
             child: Obx(() {
               final hasText = controller.groupSearchQuery.value.isNotEmpty;
@@ -722,9 +722,9 @@ class _PointsSummary extends StatelessWidget {
           Container(
             width: 48.w,
             height: 48.w,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: Colors.white,
+              color: AppColors.surface,
               border: Border.fromBorderSide(BorderSide(color: AppColors.line)),),
             alignment: Alignment.center,
             child: Image.asset(
@@ -1005,9 +1005,9 @@ class LeaderboardTile extends StatelessWidget {
         child: Container(
           width: 48.w,
           height: 48.w,
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: Colors.white,
+            color: AppColors.surface,
           ),
           alignment: Alignment.center,
           child: avatarContent,
@@ -1021,7 +1021,7 @@ class LeaderboardTile extends StatelessWidget {
         height: 34.w,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: Colors.white,
+          color: AppColors.surface,
           border: Border.all(
             color: colors.primary.withValues(alpha: 0.18),
             width: 1.2,
@@ -1043,7 +1043,7 @@ class LeaderboardTile extends StatelessWidget {
       return Container(
         padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 9.h),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(22.r),
           border: Border.all(
             color: colors.primary.withValues(alpha: 0.12),
@@ -1145,16 +1145,16 @@ class LeaderboardTile extends StatelessWidget {
     switch (index) {
       case 0:
         return _LeaderboardColors(
-          background: const [Color(0xFFFFF4D8), Color(0xFFFFD58D)],
+          background: [AppColors.tint(const Color(0xFFFFF4D8)), const Color(0xFFFFD58D)],
           primary: const Color(0xFF7F4A00),
           secondary: const Color(0xFFB47305),
           shadow: const Color(0xFFFFD06A),
           border: const Color(0xFFFFCB59),
-          badgeBackground: const Color(0xFFFFF1D9),
+          badgeBackground: AppColors.tint(const Color(0xFFFFF1D9)),
         );
       case 1:
         return _LeaderboardColors(
-          background: const [AppColors.primarySoft, AppColors.primaryTint],
+          background: [AppColors.primarySoft, AppColors.primaryTint],
           primary: AppColors.ink,
           secondary: AppColors.textSecondary,
           shadow: AppColors.primaryLight,
@@ -1163,16 +1163,16 @@ class LeaderboardTile extends StatelessWidget {
         );
       case 2:
         return _LeaderboardColors(
-          background: const [Color(0xFFFFECD9), Color(0xFFFFCFA0)],
+          background: [AppColors.tint(const Color(0xFFFFECD9)), const Color(0xFFFFCFA0)],
           primary: const Color(0xFF6E3600),
           secondary: const Color(0xFF9C5A26),
           shadow: const Color(0xFFFFB574),
           border: const Color(0xFFFFB168),
-          badgeBackground: const Color(0xFFFFECD9),
+          badgeBackground: AppColors.tint(const Color(0xFFFFECD9)),
         );
       default:
         return _LeaderboardColors(
-          background: const [AppColors.primarySoft, AppColors.primarySoft],
+          background: [AppColors.primarySoft, AppColors.primarySoft],
           primary: AppColors.primaryDark,
           secondary: AppColors.textSecondary,
           shadow: AppColors.primaryTint,
@@ -1215,7 +1215,7 @@ class StudyGroupCard extends StatelessWidget {
               width: 56.w,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(18.r),
-                color: Colors.white,
+                color: AppColors.surface,
               ),
               padding: EdgeInsets.all(6.w),
               child: GroupImage(path: group.assetImage, size: 72.w),
@@ -1289,7 +1289,7 @@ class StudyGroupCard extends StatelessWidget {
               height: 42.w,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.white,
+                color: AppColors.surface,
                 border: Border.all(
                   color: AppColors.primary,
                   width: 1.6,

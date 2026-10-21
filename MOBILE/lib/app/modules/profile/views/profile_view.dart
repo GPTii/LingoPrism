@@ -33,7 +33,7 @@ class ProfileView extends GetView<ProfileController> {
         actions: [
           IconButton(
             onPressed: controller.loadProfile,
-            icon: const Icon(Icons.refresh_rounded, color: AppColors.primary),
+            icon: Icon(Icons.refresh_rounded, color: AppColors.primary),
             tooltip: 'Làm mới',
           ),
           SizedBox(width: 4.w),
@@ -89,9 +89,9 @@ class ProfileView extends GetView<ProfileController> {
                     width: double.infinity,
                     padding: EdgeInsets.symmetric(vertical: 36.h),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppColors.surface,
                       borderRadius: BorderRadius.circular(20.r),
-                      border: const Border.fromBorderSide(BorderSide(color: AppColors.line)),),
+                      border: Border.fromBorderSide(BorderSide(color: AppColors.line)),),
                     child: Text(
                       'Chưa có bài đăng nào',
                       style: TextStyle(
@@ -142,9 +142,9 @@ class ProfileHeader extends StatelessWidget {
       width: double.infinity,
       padding: EdgeInsets.all(20.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(28.r),
-        border: const Border.fromBorderSide(BorderSide(color: AppColors.line)),),
+        border: Border.fromBorderSide(BorderSide(color: AppColors.line)),),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -296,13 +296,13 @@ class ProfileOverviewSection extends StatelessWidget {
         title: 'Streak',
         value: summary.streak.toString(),
         iconPath: StreakAssetResolver.assetByValue(summary.streak),
-        background: const Color(0xFFFFF3E9),
+        background: AppColors.tint(const Color(0xFFFFF3E9)),
       ),
       ProfileOverviewItemData(
         title: 'Nhóm',
         value: summary.groupName,
         iconPath: summary.groupIcon,
-        background: const Color(0xFFEFF8EC),
+        background: AppColors.tint(const Color(0xFFEFF8EC)),
       ),
       ProfileOverviewItemData(
         title: 'Kinh nghiệm',
@@ -407,7 +407,7 @@ class ProfileOverviewCard extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(22.r),
         border: Border.all(color: data.background, width: 2),),
       child: Row(
@@ -697,7 +697,7 @@ class ProfileErrorBanner extends StatelessWidget {
       width: double.infinity,
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFF2F2),
+        color: AppColors.tint(const Color(0xFFFFF2F2)),
         borderRadius: BorderRadius.circular(16.r),
         border: Border.all(color: const Color(0xFFFF6B6B)),
       ),
