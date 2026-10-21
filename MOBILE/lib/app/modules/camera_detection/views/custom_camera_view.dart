@@ -257,14 +257,7 @@ class _CustomCameraViewState extends State<CustomCameraView> {
                     margin: EdgeInsets.only(bottom: 20.h),
                     padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          AppColors.primary.withOpacity(0.08),
-                          const Color(0xFF50E3D6).withOpacity(0.08),
-                        ],
-                        begin: Alignment.centerLeft,
-                        end: Alignment.centerRight,
-                      ),
+                      color: AppColors.primarySoft,
                       borderRadius: BorderRadius.circular(20.r),
                       border: Border.all(
                         color: AppColors.primary.withOpacity(0.2),
@@ -286,7 +279,7 @@ class _CustomCameraViewState extends State<CustomCameraView> {
                               'Chụp lại vật bạn muốn học',
                               style: TextStyle(
                                 fontSize: 15.sp,
-                                color: Colors.black87,
+                                color: AppColors.textPrimary,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -298,7 +291,7 @@ class _CustomCameraViewState extends State<CustomCameraView> {
                           text: TextSpan(
                             style: TextStyle(
                               fontSize: 14.sp,
-                              color: Colors.black54,
+                              color: AppColors.textSecondary,
                               height: 1.3,
                             ),
                             children: [
@@ -384,7 +377,7 @@ class _CustomCameraViewState extends State<CustomCameraView> {
                         padding:
                             EdgeInsets.symmetric(horizontal: 18.w, vertical: 10.h),
                         decoration: BoxDecoration(
-                          color: Colors.black54,
+                          color: AppColors.textSecondary,
                           borderRadius: BorderRadius.circular(24.r),
                         ),
                         child: Text(
@@ -444,10 +437,7 @@ class _CustomCameraViewState extends State<CustomCameraView> {
                   height: 96.w,
                   decoration: const BoxDecoration(
                     shape: BoxShape.circle,
-                    gradient: LinearGradient(
-                      colors: [Color.fromARGB(255, 80, 227, 214), AppColors.primary],
-                    ),
-                  ),
+                    color: Colors.white,),
                 ),
                 Container(
                   width: 80.w,
@@ -462,11 +452,8 @@ class _CustomCameraViewState extends State<CustomCameraView> {
                       width: _isTakingPicture ? 48.w : 64.w,
                       height: _isTakingPicture ? 48.w : 64.w,
                       decoration: const BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [Color.fromARGB(255, 80, 227, 214), AppColors.primary],
-                        ),
-                        shape: BoxShape.circle,
-                      ),
+                        color: AppColors.primary,
+                        shape: BoxShape.circle,),
                     ),
                   ),
                 ),
@@ -487,7 +474,7 @@ class _CustomCameraViewState extends State<CustomCameraView> {
   Widget _buildCircleButton({
     required IconData icon,
     required VoidCallback? onTap,
-    Color background = Colors.black54,
+    Color background = AppColors.textSecondary,
     Color foreground = Colors.white,
     double? size,
   }) {

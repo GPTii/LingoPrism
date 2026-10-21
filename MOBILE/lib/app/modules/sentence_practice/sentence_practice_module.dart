@@ -206,7 +206,7 @@ class SentenceCard extends StatelessWidget {
         if (sentence.source.url.isNotEmpty)
           TextButton(
             onPressed: () => launchUrl(Uri.parse(sentence.source.url), mode: LaunchMode.externalApplication),
-            child: Text(sentence.source.label, style: TextStyle(fontSize: 11.sp, color: Colors.grey)),
+            child: Text(sentence.source.label, style: TextStyle(fontSize: 11.sp, color: AppColors.textHint)),
           ),
       ],
     );
@@ -262,7 +262,7 @@ class SentencePracticeView extends GetView<SentencePracticeController> {
         child: Padding(
           padding: EdgeInsets.all(24.w),
           child: Column(mainAxisSize: MainAxisSize.min, children: [
-            Text('🎉', style: TextStyle(fontSize: 56.sp)),
+            Image.asset('assets/brand/mascot/prismo_celebrate.png', width: 120.w, height: 120.w),
             SizedBox(height: 12.h),
             Text('Hoàn thành bài luyện câu!', style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w700)),
             SizedBox(height: 8.h),
@@ -320,12 +320,12 @@ class SentencePracticeView extends GetView<SentencePracticeController> {
             child: Container(
               padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
               decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey.shade300, width: 2),
+                border: Border.all(color: AppColors.lineStrong, width: 2),
                 borderRadius: BorderRadius.circular(12.r),
                 color: Colors.white,
               ),
               child: Column(mainAxisSize: MainAxisSize.min, children: [
-                if (reading) Text(zhuyin && t.zhuyin.isNotEmpty ? t.zhuyin : t.pinyin, style: TextStyle(fontSize: 10.sp, color: Colors.grey)),
+                if (reading) Text(zhuyin && t.zhuyin.isNotEmpty ? t.zhuyin : t.pinyin, style: TextStyle(fontSize: 10.sp, color: AppColors.textHint)),
                 Text(t.text, locale: locale, style: TextStyle(fontSize: 18.sp)),
               ]),
             ),
@@ -341,7 +341,7 @@ class SentencePracticeView extends GetView<SentencePracticeController> {
         constraints: BoxConstraints(minHeight: 60.h),
         width: double.infinity,
         padding: EdgeInsets.only(bottom: 8.h),
-        decoration: BoxDecoration(border: Border(bottom: BorderSide(color: Colors.grey.shade300, width: 2))),
+        decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: AppColors.lineStrong, width: 2))),
         child: Wrap(alignment: WrapAlignment.center, spacing: 8.w, runSpacing: 8.h, children: [
           for (var pos = 0; pos < controller.picked.length; pos++)
             tile(ex.tiles[controller.picked[pos]], onTap: () => controller.unpick(pos)),
@@ -375,8 +375,8 @@ class SentencePracticeView extends GetView<SentencePracticeController> {
           width: double.infinity,
           padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
           decoration: BoxDecoration(
-            color: right ? Colors.green.shade50 : Colors.white,
-            border: Border.all(color: right ? Colors.green : Colors.grey.shade300, width: 2),
+            color: right ? AppColors.successSoft : Colors.white,
+            border: Border.all(color: right ? AppColors.success : AppColors.lineStrong, width: 2),
             borderRadius: BorderRadius.circular(16.r),
           ),
           child: language != null
@@ -418,12 +418,12 @@ class SentencePracticeView extends GetView<SentencePracticeController> {
   Widget _feedback(SentenceCheck res) => Container(
         width: double.infinity,
         padding: EdgeInsets.all(16.w),
-        color: res.correct ? Colors.green.shade50 : Colors.red.shade50,
+        color: res.correct ? AppColors.successSoft : AppColors.errorSoft,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Row(children: [
-              Icon(res.correct ? Icons.check_circle : Icons.cancel, color: res.correct ? Colors.green : Colors.red),
+              Icon(res.correct ? Icons.check_circle : Icons.cancel, color: res.correct ? AppColors.success : Colors.red),
               SizedBox(width: 8.w),
               Text(res.correct ? 'Chính xác!${res.xp > 0 ? ' +${res.xp} XP' : ''}' : 'Chưa đúng – câu đúng là:',
                   style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w700)),

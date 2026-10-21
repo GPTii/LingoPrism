@@ -24,6 +24,7 @@ export default function TargetWord({ target, size = 'lg', showReading = true }: 
           onClick={(e) => { e.stopPropagation(); speak(target.text, target.tts_locale) }}
           className="text-brand-600 hover:text-brand-700 text-xl cursor-pointer"
           title="Nghe phát âm"
+          aria-label="Nghe phát âm"
         >
           <SoundOutlined />
         </button>

@@ -202,3 +202,29 @@ export function LangGlyph({ lang, script = 'hans', size = 22 }: { lang: 'en' | '
     </span>
   )
 }
+
+/** An earned badge: a faceted medal in the prism colours; greyed out while still locked. */
+export function BadgeMedal({ size = 44, owned = true, seed = 0 }: { size?: number; owned?: boolean; seed?: number }) {
+  const beams = ['#ffb020', '#10c79a', '#ff6b81', '#7c5cff']
+  const c = owned ? beams[seed % beams.length] : '#c9c5d8'
+  return (
+    <svg width={size} height={size} viewBox="0 0 48 48" aria-hidden>
+      <path d="M16 4h16l-4 12h-8z" fill={owned ? '#5533e0' : '#b4afc8'} />
+      <path d="M24 13l11.3 6.5v13L24 39l-11.3-6.5v-13z" fill={c} />
+      <path d="M24 13l11.3 6.5L24 26l-11.3-6.5z" fill="#fff" opacity="0.35" />
+      <path d="M24 26v13l-11.3-6.5v-13z" fill="#000" opacity="0.08" />
+      <path d="M24 19.5l1.9 3.9 4.3.6-3.1 3 .7 4.3-3.8-2-3.8 2 .7-4.3-3.1-3 4.3-.6z" fill="#fff" opacity={owned ? 0.95 : 0.6} />
+    </svg>
+  )
+}
+
+/** Đá băng (streak freeze): a small ice block. */
+export function FreezeIcon({ size = 22, className = '' }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" className={className} aria-hidden>
+      <rect x="3.5" y="3.5" width="17" height="17" rx="4" fill="#7dd3fc" />
+      <path d="M3.5 9 L20.5 9 M9 3.5 L9 20.5" stroke="#e0f6ff" strokeWidth="1.4" opacity="0.8" />
+      <path d="M13 6.5 l3.5 3.5" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  )
+}

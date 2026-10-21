@@ -509,7 +509,7 @@ class SurveyView extends GetView<SurveyController> {
                     fit: BoxFit.contain,
                     errorBuilder: (context, error, stackTrace) {
                       return Container(
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           color: AppColors.xpGold,
                           shape: BoxShape.circle,
                         ),
@@ -600,7 +600,7 @@ class SurveyView extends GetView<SurveyController> {
     return Container(
       height: 400.h,
       decoration: BoxDecoration(
-        color: const Color(0xFFCCEDFF),
+        color: AppColors.primaryTint,
         borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
       ),
       child: Column(
@@ -820,7 +820,7 @@ class SurveyView extends GetView<SurveyController> {
       child: Container(
         padding: EdgeInsets.symmetric(vertical: 16.h),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFB3D9FF) : const Color(0xFFF5F5F5),
+          color: isSelected ? AppColors.primaryTint : AppColors.background,
           borderRadius: BorderRadius.circular(25.r),
           border: isSelected ? Border.all(
             color: AppColors.primaryBlue,

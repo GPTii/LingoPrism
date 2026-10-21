@@ -92,7 +92,7 @@ class ShopView extends GetView<ShopController> {
                 style: TextStyle(
                   fontSize: 24.sp,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+                  color: AppColors.textPrimary,
                 ),
               ),
             ),
@@ -111,7 +111,7 @@ class ShopView extends GetView<ShopController> {
                 style: TextStyle(
                   fontSize: 24.sp,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+                  color: AppColors.textPrimary,
                 ),
               ),
             ),
@@ -178,7 +178,7 @@ class ShopView extends GetView<ShopController> {
             style: TextStyle(
               fontSize: 12.sp,
               fontWeight: FontWeight.w600,
-              color: Colors.black87,
+              color: AppColors.textPrimary,
             ),
           ),
           SizedBox(height: 2.h),
@@ -187,7 +187,7 @@ class ShopView extends GetView<ShopController> {
             quantity,
             style: TextStyle(
               fontSize: 12.sp,
-              color: isOutOfStock ? Colors.grey : const Color(0xFF6B4EFF),
+              color: isOutOfStock ? AppColors.textHint : AppColors.primaryLight,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -294,7 +294,7 @@ class ShopView extends GetView<ShopController> {
                     style: TextStyle(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+                      color: AppColors.textPrimary,
                     ),
                   ),
                   SizedBox(height: 4.h),
@@ -302,7 +302,7 @@ class ShopView extends GetView<ShopController> {
                     description,
                     style: TextStyle(
                       fontSize: 12.sp,
-                      color: Colors.black87,
+                      color: AppColors.textPrimary,
                     ),
                   ),
                 ],

@@ -91,14 +91,7 @@ class ProfileView extends GetView<ProfileController> {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(20.r),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.04),
-                          blurRadius: 12.r,
-                          offset: Offset(0, 6.h),
-                        ),
-                      ],
-                    ),
+                      border: const Border.fromBorderSide(BorderSide(color: AppColors.line)),),
                     child: Text(
                       'Chưa có bài đăng nào',
                       style: TextStyle(
@@ -151,14 +144,7 @@ class ProfileHeader extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(28.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 14.r,
-            offset: Offset(0, 6.h),
-          ),
-        ],
-      ),
+        border: const Border.fromBorderSide(BorderSide(color: AppColors.line)),),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -304,7 +290,7 @@ class ProfileOverviewSection extends StatelessWidget {
         title: 'Rank hiện tại',
         value: summary.rankTitle,
         iconPath: summary.rankIcon,
-        background: const Color(0xFFE7F3FF),
+        background: AppColors.primarySoft,
       ),
       ProfileOverviewItemData(
         title: 'Streak',
@@ -322,7 +308,7 @@ class ProfileOverviewSection extends StatelessWidget {
         title: 'Kinh nghiệm',
         value: summary.experience.toString(),
         iconPath: 'assets/brand/icons/xp.png',
-        background: const Color(0xFFE9F7FF),
+        background: AppColors.primarySoft,
       ),
     ];
 
@@ -423,15 +409,7 @@ class ProfileOverviewCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(22.r),
-        border: Border.all(color: data.background, width: 2),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 10.r,
-            offset: Offset(0, 4.h),
-          ),
-        ],
-      ),
+        border: Border.all(color: data.background, width: 2),),
       child: Row(
         children: [
           Container(
@@ -605,26 +583,7 @@ class _FollowButton extends StatelessWidget {
       child: DecoratedBox(
         decoration: BoxDecoration(
           borderRadius: borderRadius,
-          gradient: isFollowing
-              ? null
-              : const LinearGradient(
-                  colors: [
-                    AppColors.primary,
-                    AppColors.primary,
-                  ],
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
-                ),
-          color: isFollowing ? AppColors.primarySoft : null,
-          boxShadow: isFollowing
-              ? null
-              : [
-                  BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.25),
-                    blurRadius: 14.r,
-                    offset: Offset(0, 6.h),
-                  ),
-                ],
+          color: isFollowing ? AppColors.primarySoft : AppColors.primary,
         ),
         child: Material(
           color: Colors.transparent,

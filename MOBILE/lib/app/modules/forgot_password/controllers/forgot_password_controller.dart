@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../routes/app_pages.dart';
 import '../../../data/services/auth_service.dart';
+import 'package:lingoprism/app/core/theme/app_colors.dart';
 
 class ForgotPasswordController extends GetxController {
   static ForgotPasswordController get to => Get.find();
@@ -164,7 +165,7 @@ class ForgotPasswordController extends GetxController {
   static String _resetToken = '';
 
   void _snack(String title, String msg, bool ok) => Get.snackbar(title, msg,
-      snackPosition: SnackPosition.BOTTOM, backgroundColor: ok ? Colors.green : Colors.red, colorText: Colors.white);
+      snackPosition: SnackPosition.BOTTOM, backgroundColor: ok ? AppColors.success : Colors.red, colorText: Colors.white);
 
   // Send reset code
   Future<void> sendResetCode() async {
@@ -325,7 +326,7 @@ class ForgotPasswordController extends GetxController {
         'Thành công',
         'Mã xác thực chính xác',
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.green,
+        backgroundColor: AppColors.success,
         colorText: Colors.white,
       );
 
@@ -368,7 +369,7 @@ class ForgotPasswordController extends GetxController {
         'Thành công',
         'Mật khẩu đã được thay đổi thành công',
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.green,
+        backgroundColor: AppColors.success,
         colorText: Colors.white,
       );
 

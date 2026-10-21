@@ -1,11 +1,13 @@
 import { useQuery } from '@tanstack/react-query'
-import { Input, Segmented, Skeleton, Empty } from 'antd'
+import { Input, Segmented, Skeleton } from 'antd'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { vocabApi, topicTargetName } from '../../api/vocab'
 import { useAuth } from '../../auth/store'
 import WordCardView from '../../components/WordCardView'
 import { langTag } from '../../components/TargetWord'
+import { EmptyState, PageHeader } from '../../components/ui'
+import { Prismo } from '../../components/brand/Brand'
 
 /** every topic its own colour (stable: by id) */
 export const TOPIC_TINTS = ['#6d4aff', '#3fa9f5', '#10c79a', '#ff8a3d', '#ec4899', '#ffb020', '#8b5cf6', '#14b8a6', '#ff6b81', '#0ea5e9']
@@ -24,22 +26,17 @@ export default function VocabPage() {
 
   return (
     <div className="max-w-6xl mx-auto flex flex-col gap-6">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-3xl font-extrabold text-slate-800 m-0">Thư viện từ vựng</h1>
-          <div className="text-slate-500 mt-1">Chọn một chủ đề – mỗi từ đều có đủ Việt · Anh · Trung, ảnh thật và câu ví dụ.</div>
-        </div>
-        <Input.Search size="large" placeholder="Tìm nhanh từ vựng (Việt, Anh, Trung)…" allowClear onSearch={setSearch} style={{ maxWidth: 380 }} />
-      </div>
+      <PageHeader title="Thư viện từ vựng" description="Chọn một chủ đề – mỗi từ đều có đủ Việt · Anh · Trung, ảnh thật và câu ví dụ."
+        actions={<Input.Search size="large" placeholder="Tìm từ (Việt, Anh, Trung)…" aria-label="Tìm từ vựng" allowClear onSearch={setSearch} style={{ width: 340, maxWidth: '100%' }} />} />
 
       {search ? (
         <section>
-          <h2 className="text-lg font-semibold mb-3">Kết quả cho “{search}”</h2>
+          <h2 className="text-lg font-bold text-slate-800 mb-3">Kết quả cho “{search}”</h2>
           {found.isLoading ? <Skeleton active /> : found.data?.results.length ? (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {found.data.results.map((c) => <WordCardView key={c.id} card={c} />)}
             </div>
-          ) : <Empty description="Không tìm thấy từ nào" />}
+          ) : <div className="lp-card"><EmptyState art={<Prismo mood="think" size={80} />} title={`Không có từ nào khớp “${search}”`} description="Thử từ khác, hoặc gõ nghĩa tiếng Việt." /></div>}
         </section>
       ) : (
         <>
@@ -77,7 +74,7 @@ export default function VocabPage() {
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {library.data.results.map((c) => <WordCardView key={c.id} card={c} />)}
               </div>
-            ) : <Empty description="Bạn chưa lưu từ nào. Hãy mở một chủ đề hoặc chụp ảnh để lưu từ mới!" />
+            ) : <div className="lp-card"><EmptyState art={<Prismo mood="wow" size={80} />} title="Thư viện của bạn còn trống" description="Mở một chủ đề rồi bấm “Lưu từ”, hoặc chụp ảnh một đồ vật để lưu từ mới." /></div>
           )}
         </>
       )}

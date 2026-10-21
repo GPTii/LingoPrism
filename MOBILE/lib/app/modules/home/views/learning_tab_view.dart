@@ -107,7 +107,7 @@ class LearningTabView extends GetView<HomeStatsController> {
   BoxDecoration _surface({double radius = 16}) => BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(radius.r),
-        border: Border.all(color: AppColors.line),
+        border: const Border.fromBorderSide(BorderSide(color: AppColors.line)),
       );
 
   String _greeting() {

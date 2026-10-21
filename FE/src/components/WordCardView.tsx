@@ -1,4 +1,4 @@
-import { App, Button, Form, Input, Modal, Select, Tag } from 'antd'
+import { App, Button, Form, Input, Modal, Select } from 'antd'
 import { FlagOutlined, PlusOutlined, CheckOutlined } from '@ant-design/icons'
 import { useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
@@ -9,10 +9,10 @@ import { TokenLine } from './SentenceView'
 import WordPicture from './WordPicture'
 import { LEVEL_COLORS } from '../api/levels'
 
-const STATUS: Record<string, { label: string; color: string }> = {
-  new: { label: 'Chưa học', color: 'default' },
-  learning: { label: 'Đang học', color: 'blue' },
-  mastered: { label: 'Đã thuộc', color: 'green' },
+const STATUS: Record<string, { label: string; className: string }> = {
+  new: { label: 'Chưa học', className: 'text-slate-500' },
+  learning: { label: 'Đang học', className: 'text-brand-600' },
+  mastered: { label: 'Đã thuộc', className: 'text-emerald-600' },
 }
 
 const REASONS = [
@@ -41,8 +41,8 @@ export function ReportButton({ card }: { card: WordCard }) {
   }
   return (
     <>
-      <Button size="small" type="text" icon={<FlagOutlined />} onClick={(e) => { e.stopPropagation(); setOpen(true) }}>Báo lỗi</Button>
-      <Modal title="Báo lỗi từ vựng" open={open} onOk={submit} onCancel={() => setOpen(false)} okText="Gửi" cancelText="Huỷ">
+      <Button size="small" type="text" icon={<FlagOutlined />} className="!text-slate-500" onClick={(e) => { e.stopPropagation(); setOpen(true) }}>Báo lỗi</Button>
+      <Modal title="Báo lỗi từ vựng" open={open} onOk={submit} onCancel={() => setOpen(false)} okText="Gửi báo lỗi" cancelText="Huỷ">
         <Form form={form} layout="vertical">
           <Form.Item name="reason" label="Lỗi gì?" rules={[{ required: true, message: 'Chọn loại lỗi' }]}>
             <Select options={REASONS} />
@@ -77,15 +77,19 @@ export default function WordCardView({ card, topicId }: { card: WordCard; topicI
   }
 
   return (
-    <div className="relative rounded-2xl bg-white border border-slate-200 p-4 flex flex-col gap-3 hover:shadow-md transition">
-      {card.level && <Tag className="absolute top-2 left-2 z-10 m-0" color={LEVEL_COLORS[card.level - 1]}>Cấp {card.level}</Tag>}
-      <div className="h-28 rounded-xl bg-brand-50 flex items-center justify-center overflow-hidden">
+    <div className="relative lp-card p-4 flex flex-col gap-3 transition-colors hover:border-[var(--line-strong)]">
+      {card.level && (
+        <span className="absolute top-3 left-3 z-10 rounded-md px-1.5 py-0.5 text-[11px] font-bold text-white" style={{ background: LEVEL_COLORS[card.level - 1] }}>
+          Cấp {card.level}
+        </span>
+      )}
+      <div className="h-28 rounded-xl bg-slate-50 flex items-center justify-center overflow-hidden">
         <WordPicture image={card.image} emoji={card.emoji || '🖼️'} credit={card.image_credit} source={card.image_source} alt={card.meaning_vi} height="h-28" />
       </div>
       <TargetWord target={card.target} size="md" />
       <div className="text-center">
-        <div className="font-medium text-slate-700">{card.meaning_vi}</div>
-        {card.english && <div className="text-xs text-slate-400">{card.english}</div>}
+        <div className="font-semibold text-slate-700">{card.meaning_vi}</div>
+        {card.english && <div className="text-xs text-slate-500">{card.english}</div>}
       </div>
       {card.examples[0] && (
         <div className="text-sm text-slate-600 bg-slate-50 rounded-lg p-2">
@@ -94,14 +98,16 @@ export default function WordCardView({ card, topicId }: { card: WordCard; topicI
           ) : (
             <div lang={langTag(card.target.language)}>{card.examples[0].text}</div>
           )}
-          <div className="text-slate-400">{card.examples[0].translation_vi || card.examples[0].translation_en}</div>
+          <div className="text-slate-500">{card.examples[0].translation_vi || card.examples[0].translation_en}</div>
         </div>
       )}
       <div className="flex items-center justify-between mt-auto">
         {card.personal ? (
-          <Tag color={STATUS[card.personal.status].color} icon={<CheckOutlined />}>{STATUS[card.personal.status].label}</Tag>
+          <span className={`inline-flex items-center gap-1 text-sm font-semibold ${STATUS[card.personal.status].className}`}>
+            <CheckOutlined /> {STATUS[card.personal.status].label}
+          </span>
         ) : (
-          <Button size="small" type="primary" ghost icon={<PlusOutlined />} loading={saving} onClick={add}>Lưu</Button>
+          <Button size="small" type="primary" icon={<PlusOutlined />} loading={saving} onClick={add}>Lưu từ</Button>
         )}
         <ReportButton card={card} />
       </div>

@@ -47,7 +47,7 @@ export default function ForgotPasswordPage() {
           <Form.Item name="email" label="Email" rules={[{ required: true, type: 'email', message: 'Email không hợp lệ' }]}>
             <Input size="large" />
           </Form.Item>
-          <Button type="primary" htmlType="submit" size="large" block loading={loading}>Gửi mã</Button>
+          <Button type="primary" htmlType="submit" size="large" block loading={loading}>Gửi mã xác minh</Button>
         </Form>
       )}
       {step === 1 && (

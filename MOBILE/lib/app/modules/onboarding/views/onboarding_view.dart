@@ -66,7 +66,7 @@ class OnboardingView extends GetView<OnboardingController> {
                                 fontSize: 16.sp,
                                 fontWeight: FontWeight.bold,
                                 height: 1.5,
-                                color: Colors.black54,
+                                color: AppColors.textSecondary,
                               ),
                             ),
                           ),
@@ -92,7 +92,7 @@ class OnboardingView extends GetView<OnboardingController> {
                             decoration: BoxDecoration(
                               color: controller.currentIndex == index
                                   ? AppColors.primary
-                                  : Colors.grey.shade300,
+                                  : AppColors.lineStrong,
                               borderRadius: BorderRadius.circular(4.r),
                             ),
                           ),
@@ -204,7 +204,7 @@ class OnboardingView extends GetView<OnboardingController> {
                 fontSize: 28.sp,
                 fontWeight: FontWeight.bold,
                 height: 1.2,
-                color: Colors.black87,
+                color: AppColors.textPrimary,
               ),
             ),
           ],
@@ -222,7 +222,7 @@ class OnboardingView extends GetView<OnboardingController> {
                 fontSize: 28.sp,
                 fontWeight: FontWeight.bold,
                 height: 1.2,
-                color: Colors.black87,
+                color: AppColors.textPrimary,
               ),
             ),
             TextSpan(

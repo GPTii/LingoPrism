@@ -89,12 +89,12 @@ class CommunityCreateGroupView extends GetView<CommunityCreateGroupController> {
                       style: ElevatedButton.styleFrom(
                         elevation: 0,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(32.r),
+                          borderRadius: BorderRadius.circular(14.r),
                         ),
                         backgroundColor: controller.canSubmit.value &&
                                 !controller.isSubmitting.value
                             ? AppColors.primary
-                            : const Color(0xFFD2D4DB),
+                            : AppColors.line,
                         foregroundColor: Colors.white,
                         textStyle: TextStyle(
                           fontSize: 15.sp,
@@ -145,17 +145,10 @@ class _IconSelector extends StatelessWidget {
             Container(
               width: 80.w,
               height: 80.w,
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 shape: BoxShape.circle,
                 color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 10.r,
-                    offset: Offset(0, 6.h),
-                  ),
-                ],
-              ),
+                border: Border.fromBorderSide(BorderSide(color: AppColors.line)),),
               alignment: Alignment.center,
               child: imagePath != null
                   ? Padding(
@@ -167,7 +160,7 @@ class _IconSelector extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w600,
-                        color: const Color(0xFF6D7B8C),
+                        color: AppColors.textSecondary,
                       ),
                     ),
             ),
@@ -193,17 +186,9 @@ class _IconSelector extends StatelessWidget {
                         border: Border.all(
                           color: isActive
                               ? AppColors.primary
-                              : const Color(0xFFD4E5F7),
+                              : AppColors.primaryTint,
                           width: isActive ? 2 : 1,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.05),
-                            blurRadius: 10.r,
-                            offset: Offset(0, 6.h),
-                          ),
-                        ],
-                      ),
+                        ),),
                       padding: EdgeInsets.all(8.w),
                       child: Image.asset(asset, fit: BoxFit.contain),
                     ),
@@ -247,14 +232,7 @@ class _GroupTextField extends StatelessWidget {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(24.r),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
-                blurRadius: 12.r,
-                offset: Offset(0, 6.h),
-              ),
-            ],
-          ),
+            border: const Border.fromBorderSide(BorderSide(color: AppColors.line)),),
           child: TextFormField(
             controller: controller,
             decoration: InputDecoration(
@@ -265,7 +243,7 @@ class _GroupTextField extends StatelessWidget {
               hintText: hintText,
               hintStyle: TextStyle(
                 fontSize: 13.sp,
-                color: const Color(0xFF8A97A6),
+                color: AppColors.textHint,
               ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(24.r),
@@ -296,9 +274,9 @@ class _ApprovalToggle extends StatelessWidget {
                 label: 'Không duyệt',
                 isActive: selected == StudyGroupApprovalMode.auto,
                 activeColor: AppColors.primary,
-                inactiveColor: const Color(0xFFD6E2F2),
+                inactiveColor: AppColors.primaryTint,
                 activeTextColor: Colors.white,
-                inactiveTextColor: const Color(0xFF516579),
+                inactiveTextColor: AppColors.textSecondary,
                 onTap: () =>
                     controller.setApprovalMode(StudyGroupApprovalMode.auto),
               ),
@@ -308,10 +286,10 @@ class _ApprovalToggle extends StatelessWidget {
               child: _ApprovalButton(
                 label: 'Cần duyệt',
                 isActive: selected == StudyGroupApprovalMode.require,
-                activeColor: const Color(0xFF8E96A3),
-                inactiveColor: const Color(0xFFE1E4EA),
+                activeColor: AppColors.textHint,
+                inactiveColor: AppColors.line,
                 activeTextColor: Colors.white,
-                inactiveTextColor: const Color(0xFF5E6470),
+                inactiveTextColor: AppColors.textSecondary,
                 onTap: () =>
                     controller.setApprovalMode(StudyGroupApprovalMode.require),
               ),

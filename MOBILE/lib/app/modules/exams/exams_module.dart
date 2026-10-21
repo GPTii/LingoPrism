@@ -286,7 +286,7 @@ class ExamResultView extends GetView<ExamResultController> {
                   style: TextStyle(fontSize: 28.sp, fontWeight: FontWeight.w800, color: AppColors.buttonActive)),
               Text(r.waitingForTeacher
                   ? 'Đang chờ giáo viên chấm phần tự luận'
-                  : (r.passed ? 'Đạt 🎉' : 'Chưa đạt – cố gắng lần sau nhé!')),
+                  : (r.passed ? 'Bạn đã đạt bài kiểm tra.' : 'Chưa đạt – cố gắng lần sau nhé!')),
               if (r.feedback.isNotEmpty) Padding(padding: EdgeInsets.only(top: 8.h), child: Text('Nhận xét: ${r.feedback}')),
             ]),
           ),
@@ -313,8 +313,8 @@ class ExamResultView extends GetView<ExamResultController> {
         Text('Câu $n: ${a.prompt}', style: const TextStyle(fontWeight: FontWeight.w600)),
         SizedBox(height: 6.h),
         Text('Bạn trả lời: $yours'),
-        if (a.questionKind != 'essay' && a.isCorrect == false) Text('Đáp án: $correct', style: TextStyle(color: AppColors.buttonSuccess)),
-        if (a.explanation.isNotEmpty) Text(a.explanation, style: TextStyle(color: AppColors.textSecondary)),
+        if (a.questionKind != 'essay' && a.isCorrect == false) Text('Đáp án: $correct', style: const TextStyle(color: AppColors.buttonSuccess)),
+        if (a.explanation.isNotEmpty) Text(a.explanation, style: const TextStyle(color: AppColors.textSecondary)),
         if (a.score != null) Text('Điểm: ${a.score!.toStringAsFixed(1)} / ${a.points.toStringAsFixed(1)}'),
         if (a.isCorrect == null) const Text('Chờ giáo viên chấm', style: TextStyle(color: Colors.orange)),
         if (a.feedback.isNotEmpty) Text('Nhận xét: ${a.feedback}', style: const TextStyle(fontStyle: FontStyle.italic)),

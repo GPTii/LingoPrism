@@ -40,7 +40,7 @@ class NotificationView extends GetView<NotificationController> {
               child: Text(
                 'Đánh dấu đã đọc',
                 style: TextStyle(
-                  color: Colors.black87,
+                  color: AppColors.textPrimary,
                   fontSize: 14.sp,
                 ),
               ),
@@ -71,7 +71,7 @@ class NotificationView extends GetView<NotificationController> {
                   error,
                   style: TextStyle(
                     fontSize: 16.sp,
-                    color: Colors.black54,
+                    color: AppColors.textSecondary,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -97,7 +97,7 @@ class NotificationView extends GetView<NotificationController> {
               'Chưa có thông báo',
               style: TextStyle(
                 fontSize: 16.sp,
-                color: Colors.black54,
+                color: AppColors.textSecondary,
               ),
             ),
           );
@@ -183,7 +183,7 @@ class NotificationView extends GetView<NotificationController> {
                             style: TextStyle(
                               fontSize: 14.sp,
                               fontWeight: FontWeight.bold,
-                              color: Colors.black87,
+                              color: AppColors.textPrimary,
                             ),
                           ),
                         ),
@@ -196,7 +196,7 @@ class NotificationView extends GetView<NotificationController> {
                       notification.formattedDate,
                       style: TextStyle(
                         fontSize: 12.sp,
-                        color: Colors.black54,
+                        color: AppColors.textSecondary,
                       ),
                     ),
                   ],
@@ -216,7 +216,7 @@ class NotificationView extends GetView<NotificationController> {
               notification.subtitle!,
               style: TextStyle(
                 fontSize: 12.sp,
-                color: Colors.black87,
+                color: AppColors.textPrimary,
               ),
             ),
           ],
@@ -254,7 +254,7 @@ class NotificationView extends GetView<NotificationController> {
                         style: TextStyle(
                           fontSize: 14.sp,
                           fontWeight: FontWeight.bold,
-                          color: Colors.black87,
+                          color: AppColors.textPrimary,
                         ),
                       ),
                     ),
@@ -267,7 +267,7 @@ class NotificationView extends GetView<NotificationController> {
                   notification.formattedDate,
                   style: TextStyle(
                     fontSize: 12.sp,
-                    color: Colors.black54,
+                    color: AppColors.textSecondary,
                   ),
                 ),
                 if (notification.subtitle != null) ...[
@@ -276,7 +276,7 @@ class NotificationView extends GetView<NotificationController> {
                     notification.subtitle!,
                     style: TextStyle(
                       fontSize: 12.sp,
-                      color: Colors.black87,
+                      color: AppColors.textPrimary,
                     ),
                   ),
                 ],
@@ -382,13 +382,13 @@ class NotificationView extends GetView<NotificationController> {
       width: resolvedWidth,
       height: resolvedHeight,
       decoration: BoxDecoration(
-        color: Colors.grey.shade200,
+        color: AppColors.line,
         borderRadius: BorderRadius.circular(12.r),
       ),
       child: Icon(
         Icons.image,
         size: resolvedWidth * 0.5,
-        color: Colors.grey.shade400,
+        color: AppColors.textHint,
       ),
     );
   }
@@ -400,13 +400,13 @@ class NotificationView extends GetView<NotificationController> {
       width: resolvedWidth,
       height: resolvedHeight,
       decoration: BoxDecoration(
-        color: Colors.grey.shade200,
+        color: AppColors.line,
         borderRadius: BorderRadius.circular(12.r),
       ),
       child: Icon(
         Icons.broken_image,
         size: resolvedWidth * 0.5,
-        color: Colors.grey.shade400,
+        color: AppColors.textHint,
       ),
     );
   }

@@ -251,7 +251,7 @@ class _CompletionSection extends StatelessWidget {
           foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(vertical: 18),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(28),
+            borderRadius: BorderRadius.circular(14),
           ),
           textStyle: const TextStyle(
             fontSize: 16,
@@ -335,7 +335,7 @@ class _FlashcardFront extends StatelessWidget {
     final controller = Get.find<VocabularyFlashcardController>();
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFFBFE6FF),
+        color: AppColors.primaryTint,
         borderRadius: BorderRadius.circular(28),
       ),
       child: Center(
@@ -401,7 +401,7 @@ class _FlashcardBack extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFFBFE6FF),
+        color: AppColors.primaryTint,
         borderRadius: BorderRadius.circular(28),
       ),
       child: Center(

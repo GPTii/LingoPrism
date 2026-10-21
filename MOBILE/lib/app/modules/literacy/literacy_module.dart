@@ -73,11 +73,11 @@ class LiteracyMapView extends GetView<LiteracyMapController> {
                 margin: EdgeInsets.all(16.w),
                 padding: EdgeInsets.all(16.w),
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(colors: [Color(0xFFFFF1C1), Color(0xFFFFD6E8)]),
-                  borderRadius: BorderRadius.circular(20.r),
-                ),
+                  color: AppColors.surface,
+                  border: const Border.fromBorderSide(BorderSide(color: AppColors.line)),
+                  borderRadius: BorderRadius.circular(16.r),),
                 child: Row(children: [
-                  Text('📖', style: TextStyle(fontSize: 44.sp)),
+                  Image.asset('assets/brand/mascot/prismo_happy.png', width: 56.w, height: 56.w),
                   SizedBox(width: 12.w),
                   Expanded(
                     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -85,7 +85,7 @@ class LiteracyMapView extends GetView<LiteracyMapController> {
                       SizedBox(height: 8.h),
                       LinearProgressIndicator(
                           value: controller.lessons.isEmpty ? 0 : done / controller.lessons.length,
-                          minHeight: 8.h, color: Colors.orange, backgroundColor: Colors.white),
+                          minHeight: 8.h, color: AppColors.primary, backgroundColor: AppColors.surfaceMuted),
                       SizedBox(height: 4.h),
                       Text('$done/${controller.lessons.length} bài', style: TextStyle(fontSize: 12.sp)),
                     ]),
@@ -111,9 +111,9 @@ class LiteracyMapView extends GetView<LiteracyMapController> {
   }
 
   Widget _tile(LitLessonInfo l) {
-    final color = l.locked ? Colors.grey.shade200 : (l.status == 'done' ? Colors.green.shade50 : Colors.white);
-    final border = l.locked ? Colors.grey.shade300 : (l.status == 'done' ? Colors.green.shade300 : Colors.orange.shade300);
-    final big = l.review ? '✍️' : l.units.take(3).map((u) => u.display).join(' ');
+    final color = l.locked ? AppColors.line : (l.status == 'done' ? AppColors.successSoft : Colors.white);
+    final border = l.locked ? AppColors.line : (l.status == 'done' ? AppColors.beamMint : AppColors.primaryLight);
+    final big = l.review ? 'Ôn' : l.units.take(3).map((u) => u.display).join(' ');
     return InkWell(
       onTap: () => controller.open(l),
       borderRadius: BorderRadius.circular(16.r),
@@ -121,16 +121,16 @@ class LiteracyMapView extends GetView<LiteracyMapController> {
         padding: EdgeInsets.all(8.w),
         decoration: BoxDecoration(color: color, border: Border.all(color: border, width: 2), borderRadius: BorderRadius.circular(16.r)),
         child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-          Text('Bài ${l.n}', style: TextStyle(fontSize: 11.sp, color: Colors.grey)),
+          Text('Bài ${l.n}', style: TextStyle(fontSize: 11.sp, color: AppColors.textHint)),
           SizedBox(height: 4.h),
           l.locked
-              ? Icon(Icons.lock_rounded, color: Colors.grey, size: 28.sp)
+              ? Icon(Icons.lock_rounded, color: AppColors.textHint, size: 28.sp)
               : Text(big, textAlign: TextAlign.center, maxLines: 1, overflow: TextOverflow.ellipsis,
                   style: TextStyle(fontSize: 22.sp, fontWeight: FontWeight.w800)),
           SizedBox(height: 4.h),
           Text(l.title, textAlign: TextAlign.center, maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 11.sp)),
           Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-            for (var s = 1; s <= 3; s++) Icon(Icons.star_rounded, size: 16.sp, color: s <= l.stars ? Colors.amber : Colors.grey.shade300),
+            for (var s = 1; s <= 3; s++) Icon(Icons.star_rounded, size: 16.sp, color: s <= l.stars ? Colors.amber : AppColors.lineStrong),
           ]),
         ]),
       ),
@@ -309,7 +309,7 @@ class LiteracyLessonView extends GetView<LiteracyLessonController> {
         spacing: 2.w,
         children: [
           for (var i = 0; i < steps.length; i++) ...[
-            if (i > 0) Text('–', style: TextStyle(color: Colors.grey.shade400)),
+            if (i > 0) const Text('–', style: TextStyle(color: AppColors.textHint)),
             InkWell(
               onTap: () => _say(steps[i]),
               child: Padding(
@@ -326,7 +326,7 @@ class LiteracyLessonView extends GetView<LiteracyLessonController> {
   Widget _intro(LitIntro intro) {
     final u = intro.unit;
     return Column(children: [
-      Text(u.kind == 'am' ? 'Âm mới' : u.kind == 'van' ? 'Vần mới' : 'Dấu thanh mới', style: TextStyle(color: Colors.grey, fontSize: 14.sp)),
+      Text(u.kind == 'am' ? 'Âm mới' : u.kind == 'van' ? 'Vần mới' : 'Dấu thanh mới', style: TextStyle(color: AppColors.textHint, fontSize: 14.sp)),
       InkWell(onTap: () => _say(u.spoken),
           child: Text(u.display, style: TextStyle(fontSize: 80.sp, fontWeight: FontWeight.w800, color: AppColors.buttonActive))),
       Text(u.kind == 'thanh' ? u.label : 'đọc là “${u.spoken}”', style: TextStyle(fontSize: 18.sp)),
@@ -337,7 +337,7 @@ class LiteracyLessonView extends GetView<LiteracyLessonController> {
           width: double.infinity,
           margin: EdgeInsets.only(bottom: 8.h),
           padding: EdgeInsets.symmetric(vertical: 6.h),
-          decoration: BoxDecoration(color: Colors.grey.shade100, borderRadius: BorderRadius.circular(14.r)),
+          decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(14.r)),
           child: _spell(e.spell),
         ),
       if (intro.words.isNotEmpty) ...[
@@ -349,7 +349,7 @@ class LiteracyLessonView extends GetView<LiteracyLessonController> {
               borderRadius: BorderRadius.circular(14.r),
               child: Container(
                 padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
-                decoration: BoxDecoration(border: Border.all(color: Colors.grey.shade300, width: 2), borderRadius: BorderRadius.circular(14.r)),
+                decoration: BoxDecoration(border: Border.all(color: AppColors.lineStrong, width: 2), borderRadius: BorderRadius.circular(14.r)),
                 child: Column(children: [WordPicture(imageUrl: w.image, emoji: w.emoji, size: 72.w), SizedBox(height: 4.h), Text(w.text, style: TextStyle(fontSize: 16.sp))]),
               ),
             ),
@@ -375,11 +375,11 @@ class LiteracyLessonView extends GetView<LiteracyLessonController> {
             child: Container(
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: res == null ? Colors.white : o == res.expected ? Colors.green.shade50
-                    : o == controller.picked.value ? Colors.red.shade50 : Colors.white,
+                color: res == null ? Colors.white : o == res.expected ? AppColors.successSoft
+                    : o == controller.picked.value ? AppColors.errorSoft : Colors.white,
                 border: Border.all(
-                    color: res == null ? (o == controller.picked.value ? AppColors.buttonActive : Colors.grey.shade300)
-                        : o == res.expected ? Colors.green : o == controller.picked.value ? Colors.red : Colors.grey.shade300,
+                    color: res == null ? (o == controller.picked.value ? AppColors.buttonActive : AppColors.lineStrong)
+                        : o == res.expected ? AppColors.success : o == controller.picked.value ? Colors.red : AppColors.lineStrong,
                     width: 2),
                 borderRadius: BorderRadius.circular(16.r),
               ),
@@ -426,7 +426,7 @@ class LiteracyLessonView extends GetView<LiteracyLessonController> {
 
   Widget _build(LitExercise ex) {
     Widget row(String key, String label, List<(String, String)> opts) => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(label, style: TextStyle(fontSize: 13.sp, color: Colors.grey)),
+          Text(label, style: TextStyle(fontSize: 13.sp, color: AppColors.textHint)),
           SizedBox(height: 4.h),
           Wrap(spacing: 8.w, runSpacing: 8.h, children: [
             for (final (value, text) in opts)
@@ -495,7 +495,7 @@ class LiteracyLessonView extends GetView<LiteracyLessonController> {
       if (ex.sourceUrl.isNotEmpty)
         TextButton(
           onPressed: () => launchUrl(Uri.parse(ex.sourceUrl), mode: LaunchMode.externalApplication),
-          child: Text(ex.sourceLabel, style: TextStyle(fontSize: 11.sp, color: Colors.grey)),
+          child: Text(ex.sourceLabel, style: TextStyle(fontSize: 11.sp, color: AppColors.textHint)),
         ),
     ]);
   }
@@ -503,10 +503,10 @@ class LiteracyLessonView extends GetView<LiteracyLessonController> {
   Widget _feedback(LitCheck r) => Container(
         width: double.infinity,
         padding: EdgeInsets.all(16.w),
-        color: r.correct ? Colors.green.shade50 : Colors.red.shade50,
+        color: r.correct ? AppColors.successSoft : AppColors.errorSoft,
         child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
           Row(children: [
-            Icon(r.correct ? Icons.check_circle : Icons.cancel, color: r.correct ? Colors.green : Colors.red),
+            Icon(r.correct ? Icons.check_circle : Icons.cancel, color: r.correct ? AppColors.success : Colors.red),
             SizedBox(width: 8.w),
             Text(r.correct ? 'Đúng rồi!${r.xp > 0 ? ' +${r.xp} XP' : ''}' : 'Chưa đúng rồi, xem lại nhé:',
                 style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.w700)),
@@ -517,7 +517,7 @@ class LiteracyLessonView extends GetView<LiteracyLessonController> {
               for (final d in r.diff)
                 Text(
                   d.ok ? d.expected : (d.expected.isEmpty ? '(thừa: ${d.given})' : '${d.expected} (con viết: ${d.given.isEmpty ? '…' : d.given}${d.hint.isNotEmpty ? ' – ${d.hint}' : ''})'),
-                  style: TextStyle(fontSize: 18.sp, color: d.ok ? Colors.green.shade800 : Colors.red.shade700, fontWeight: FontWeight.w600),
+                  style: TextStyle(fontSize: 18.sp, color: d.ok ? AppColors.success : AppColors.error, fontWeight: FontWeight.w600),
                 ),
             ]),
           ],
@@ -531,13 +531,13 @@ class LiteracyLessonView extends GetView<LiteracyLessonController> {
         child: Padding(
           padding: EdgeInsets.all(24.w),
           child: Column(mainAxisSize: MainAxisSize.min, children: [
-            Text(f.passed ? '🎉' : '💪', style: TextStyle(fontSize: 64.sp)),
+            Image.asset(f.passed ? 'assets/brand/mascot/prismo_celebrate.png' : 'assets/brand/mascot/prismo_think.png', width: 120.w, height: 120.w),
             SizedBox(height: 8.h),
             Text(f.passed ? 'Giỏi lắm! Con đã xong bài học.' : 'Cố lên! Mình học lại bài này nhé.',
                 textAlign: TextAlign.center, style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w800)),
             SizedBox(height: 8.h),
             Row(mainAxisSize: MainAxisSize.min, children: [
-              for (var s = 1; s <= 3; s++) Icon(Icons.star_rounded, size: 40.sp, color: s <= f.stars ? Colors.amber : Colors.grey.shade300),
+              for (var s = 1; s <= 3; s++) Icon(Icons.star_rounded, size: 40.sp, color: s <= f.stars ? Colors.amber : AppColors.lineStrong),
             ]),
             Text('Đúng ngay lần đầu ${f.correct}/${f.total} câu', style: TextStyle(fontSize: 15.sp, color: AppColors.textSecondary)),
             SizedBox(height: 20.h),

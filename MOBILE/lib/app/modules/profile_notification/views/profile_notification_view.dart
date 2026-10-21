@@ -65,14 +65,7 @@ class ProfileNotificationView extends GetView<ProfileNotificationController> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(22.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 12.r,
-            offset: Offset(0, 6.h),
-          ),
-        ],
-      ),
+        border: const Border.fromBorderSide(BorderSide(color: AppColors.line)),),
       child: Row(
         children: [
           Icon(Icons.notifications_active_rounded,
@@ -191,7 +184,7 @@ class ProfileNotificationView extends GetView<ProfileNotificationController> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(18.r),
-        border: Border.all(color: const Color(0xFFB4DBF4), width: 1.5),
+        border: Border.all(color: AppColors.primaryTint, width: 1.5),
       ),
       child: Text(
         'Bạn đã tắt nhắc nhở học. Bật lại để được nhắc học vào thời gian bạn chọn.',

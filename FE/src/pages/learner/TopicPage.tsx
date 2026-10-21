@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { App, Button, Segmented, Skeleton } from 'antd'
-import { ArrowLeftOutlined, FormOutlined, PlayCircleOutlined, SaveOutlined } from '@ant-design/icons'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { FormOutlined, PlayCircleOutlined, SaveOutlined } from '@ant-design/icons'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useState } from 'react'
 import { vocabApi, topicTargetName } from '../../api/vocab'
 import { errorMessage } from '../../api/client'
@@ -9,6 +9,7 @@ import { useAuth } from '../../auth/store'
 import WordCardView from '../../components/WordCardView'
 import { langTag } from '../../components/TargetWord'
 import { TOPIC_TINTS } from './VocabPage'
+import { PageHeader } from '../../components/ui'
 
 export default function TopicPage() {
   const { id } = useParams()
@@ -40,29 +41,28 @@ export default function TopicPage() {
 
   return (
     <div className="max-w-6xl mx-auto flex flex-col gap-6">
-      <Link to="/vocab" className="text-slate-500 font-bold"><ArrowLeftOutlined /> Chủ đề</Link>
-      {topic.data && (() => {
+      {topic.data ? (() => {
         const tint = TOPIC_TINTS[topic.data.id % TOPIC_TINTS.length]
         return (
-          <div className="relative overflow-hidden lp-card p-5 sm:p-6 flex flex-wrap items-center justify-between gap-4"
-            style={{ background: `linear-gradient(135deg, ${tint}22, var(--surface) 60%)` }}>
-            <div className="flex items-center gap-4">
-              <span className="h-20 w-20 rounded-3xl grid place-items-center text-5xl shrink-0" style={{ background: `${tint}26` }}>{topic.data.icon}</span>
-              <div>
-                <h1 className="text-3xl font-black text-slate-800 m-0">{topic.data.name_vi}</h1>
-                <div lang={lang === 'zh' ? langTag(script === 'hant' ? 'zh-Hant' : 'zh-Hans') : undefined} className="text-slate-500 font-bold text-lg">
-                  {topicTargetName(topic.data, lang, script)}
-                </div>
-              </div>
-            </div>
-            <div className="flex flex-wrap gap-2">
+          <PageHeader back={{ to: '/vocab', label: 'Tất cả chủ đề' }}
+            title={
+              <span className="flex items-center gap-4">
+                <span className="h-16 w-16 rounded-2xl grid place-items-center text-4xl shrink-0" style={{ background: `${tint}1f` }}>{topic.data.icon}</span>
+                <span className="min-w-0">
+                  {topic.data.name_vi}
+                  <span lang={lang === 'zh' ? langTag(script === 'hant' ? 'zh-Hant' : 'zh-Hans') : undefined} className="block text-lg font-semibold text-slate-500 mt-0.5">
+                    {topicTargetName(topic.data, lang, script)}
+                  </span>
+                </span>
+              </span>
+            }
+            actions={<>
               <Button type="primary" size="large" icon={<PlayCircleOutlined />} onClick={() => navigate(`/learn?kind=practice&topic=${topicId}`)}>Luyện tập chủ đề</Button>
               <Button size="large" icon={<SaveOutlined />} loading={saving} onClick={saveAll}>Lưu cả chủ đề</Button>
               <Button size="large" icon={<FormOutlined />} onClick={() => navigate(`/sentences?topic=${topicId}`)}>Luyện câu</Button>
-            </div>
-          </div>
+            </>} />
         )
-      })()}
+      })() : <Skeleton active paragraph={{ rows: 1 }} />}
       {words.isLoading ? <Skeleton active /> : (
         <>
           <Segmented<number | 'all'> value={level} onChange={(v) => setLevel(v as number | 'all')}

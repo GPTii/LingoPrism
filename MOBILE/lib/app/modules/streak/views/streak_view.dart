@@ -12,9 +12,9 @@ class StreakView extends GetView<StreakController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFEAFBFF),
+      backgroundColor: AppColors.primarySoft,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFEAFBFF),
+        backgroundColor: AppColors.primarySoft,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded,
@@ -95,11 +95,7 @@ class StreakView extends GetView<StreakController> {
         width: double.infinity,
         padding: EdgeInsets.symmetric(vertical: 24.h, horizontal: 18.w),
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [Color(0xFFFFF4E8), Color(0xFFE5F5FF)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
+          color: const Color(0xFFFFF4E8),
           borderRadius: BorderRadius.circular(28.r),
           boxShadow: [
             BoxShadow(
@@ -107,8 +103,7 @@ class StreakView extends GetView<StreakController> {
               blurRadius: 18.r,
               offset: Offset(0, 12.h),
             ),
-          ],
-        ),
+          ],),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -136,7 +131,7 @@ class StreakView extends GetView<StreakController> {
                     style: TextStyle(
                       fontSize: 56.sp,
                       fontWeight: FontWeight.w800,
-                      color: const Color(0xFF3037B3),
+                      color: AppColors.primary,
                       height: 1.0,
                     ),
                   ),
@@ -145,7 +140,7 @@ class StreakView extends GetView<StreakController> {
                     style: TextStyle(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.w600,
-                      color: const Color(0xFF3037B3),
+                      color: AppColors.primary,
                     ),
                   ),
                 ],
@@ -169,7 +164,7 @@ class StreakView extends GetView<StreakController> {
             style: TextStyle(
               fontSize: 24.sp,
               fontWeight: FontWeight.bold,
-              color: Colors.black87,
+              color: AppColors.textPrimary,
             ),
           ),
           Row(
@@ -177,12 +172,12 @@ class StreakView extends GetView<StreakController> {
               IconButton(
                 onPressed: controller.previousMonth,
                 icon: const Icon(Icons.chevron_left),
-                color: Colors.black54,
+                color: AppColors.textSecondary,
               ),
               IconButton(
                 onPressed: controller.nextMonth,
                 icon: const Icon(Icons.chevron_right),
-                color: Colors.black54,
+                color: AppColors.textSecondary,
               ),
             ],
           ),
@@ -249,14 +244,14 @@ class StreakView extends GetView<StreakController> {
                   style: TextStyle(
                     fontSize: 32.sp,
                     fontWeight: FontWeight.bold,
-                    color: const Color(0xFF4840B2),
+                    color: AppColors.primary,
                   ),
                 ),
                 Text(
                   label,
                   style: TextStyle(
                     fontSize: 12.sp,
-                    color: const Color(0xFF4840B2),
+                    color: AppColors.primary,
                   ),
                 ),
               ],
@@ -301,7 +296,7 @@ class StreakView extends GetView<StreakController> {
               style: TextStyle(
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w600,
-                color: Colors.black54,
+                color: AppColors.textSecondary,
               ),
             ),
           ),
@@ -367,11 +362,11 @@ class StreakView extends GetView<StreakController> {
       backgroundColor = const Color(0xFFFFA500); // Orange
       textColor = Colors.white;
     } else if (isTodayDate) {
-      backgroundColor = const Color(0xFF5DDEF4); // Light blue (today)
+      backgroundColor = AppColors.primaryLight; // Light blue (today)
       textColor = Colors.white;
     } else {
-      backgroundColor = const Color(0xFFB8E6F0); // Very light blue
-      textColor = const Color(0xFF5B4FFF);
+      backgroundColor = AppColors.primaryTint; // Very light blue
+      textColor = AppColors.primaryLight;
     }
 
     return Center(

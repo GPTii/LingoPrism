@@ -138,7 +138,7 @@ class AppTheme {
         style: TextButton.styleFrom(
           foregroundColor: primary,
           minimumSize: const Size(48, 44),
-          textStyle: TextStyle(fontFamily: fontFamily, fontSize: 15, fontWeight: FontWeight.w600),
+          textStyle: const TextStyle(fontFamily: fontFamily, fontSize: 15, fontWeight: FontWeight.w600),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
@@ -198,8 +198,8 @@ class AppTheme {
         unselectedLabelColor: textSecondary,
         indicatorColor: primary,
         dividerColor: line,
-        labelStyle: TextStyle(fontFamily: fontFamily, fontWeight: FontWeight.w700, fontSize: 14),
-        unselectedLabelStyle: TextStyle(fontFamily: fontFamily, fontWeight: FontWeight.w600, fontSize: 14),
+        labelStyle: const TextStyle(fontFamily: fontFamily, fontWeight: FontWeight.w700, fontSize: 14),
+        unselectedLabelStyle: const TextStyle(fontFamily: fontFamily, fontWeight: FontWeight.w600, fontSize: 14),
       ),
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: surface,

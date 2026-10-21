@@ -12,6 +12,8 @@ class AppColors {
   static const Color primary = Color(0xFF6D4AFF);
   static const Color primaryDark = Color(0xFF5533E0);
   static const Color primarySoft = Color(0xFFF2EFFF);
+  static const Color primaryTint = Color(0xFFCDC2FF);
+  static const Color primaryLight = Color(0xFF8F75FF);
   static const Color ink = Color(0xFF1B1538);
   static const Color inkSoft = Color(0xFF2A2350);
 

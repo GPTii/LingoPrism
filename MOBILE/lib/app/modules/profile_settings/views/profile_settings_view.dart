@@ -124,15 +124,7 @@ class _SettingsTile extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(18.r),
-          border: Border.all(color: const Color(0xFFB4DBF4), width: 2),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              blurRadius: 12.r,
-              offset: Offset(0, 6.h),
-            ),
-          ],
-        ),
+          border: Border.all(color: AppColors.primaryTint, width: 2),),
         padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 14.h),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,

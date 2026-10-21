@@ -70,7 +70,7 @@ class RegisterView extends GetView<RegisterController> {
                                     style: TextStyle(
                                       fontSize: 24.sp,
                                       fontWeight: FontWeight.bold,
-                                      color: Colors.black87,
+                                      color: AppColors.textPrimary,
                                     ),
                                   ),
                                   SizedBox(height: 6.h),
@@ -78,7 +78,7 @@ class RegisterView extends GetView<RegisterController> {
                                     'và bắt đầu học tập ngay hôm nay!',
                                     style: TextStyle(
                                       fontSize: 16.sp,
-                                      color: Colors.black54,
+                                      color: AppColors.textSecondary,
                                     ),
                                   ),
                                 ],
@@ -102,7 +102,7 @@ class RegisterView extends GetView<RegisterController> {
                                     decoration: InputDecoration(
                                       hintText: 'Email',
                                       hintStyle: TextStyle(
-                                        color: Colors.black54,
+                                        color: AppColors.textSecondary,
                                         fontSize: 16.sp,
                                       ),
                                       border: OutlineInputBorder(
@@ -148,7 +148,7 @@ class RegisterView extends GetView<RegisterController> {
                                         decoration: InputDecoration(
                                           hintText: 'Mật khẩu',
                                           hintStyle: TextStyle(
-                                            color: Colors.black54,
+                                            color: AppColors.textSecondary,
                                             fontSize: 16.sp,
                                           ),
                                           suffixIcon: IconButton(
@@ -157,7 +157,7 @@ class RegisterView extends GetView<RegisterController> {
                                               controller.isPasswordVisible
                                                   ? Icons.visibility
                                                   : Icons.visibility_off,
-                                              color: Colors.black54,
+                                              color: AppColors.textSecondary,
                                             ),
                                           ),
                                           border: OutlineInputBorder(
@@ -203,7 +203,7 @@ class RegisterView extends GetView<RegisterController> {
                                         decoration: InputDecoration(
                                           hintText: 'Nhập lại mật khẩu',
                                           hintStyle: TextStyle(
-                                            color: Colors.black54,
+                                            color: AppColors.textSecondary,
                                             fontSize: 16.sp,
                                           ),
                                           suffixIcon: IconButton(
@@ -212,7 +212,7 @@ class RegisterView extends GetView<RegisterController> {
                                               controller.isConfirmPasswordVisible
                                                   ? Icons.visibility
                                                   : Icons.visibility_off,
-                                              color: Colors.black54,
+                                              color: AppColors.textSecondary,
                                             ),
                                           ),
                                           border: OutlineInputBorder(
@@ -290,7 +290,7 @@ class RegisterView extends GetView<RegisterController> {
                                 'hoặc tiếp tục với',
                                 style: TextStyle(
                                   fontSize: 14.sp,
-                                  color: Colors.black54,
+                                  color: AppColors.textSecondary,
                                 ),
                               ),
                             ),
@@ -350,7 +350,7 @@ class RegisterView extends GetView<RegisterController> {
                                     text: 'Đã có tài khoản? ',
                                     style: TextStyle(
                                       fontSize: 14.sp,
-                                      color: Colors.black54,
+                                      color: AppColors.textSecondary,
                                     ),
                                     children: [
                                       TextSpan(

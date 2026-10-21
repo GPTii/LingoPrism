@@ -12,17 +12,7 @@ class NewPasswordView extends GetView<ForgotPasswordController> {
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            stops: [0.0, 0.43, 1.0],
-            colors: [
-              AppColors.primary,
-              Color(0xFF7CE3C3),
-              AppColors.primary,
-            ],
-          ),
-        ),
+          color: AppColors.primary,),
         child: SafeArea(
           child: Column(
             children: [
@@ -91,7 +81,7 @@ class NewPasswordView extends GetView<ForgotPasswordController> {
                           style: TextStyle(
                             fontSize: 24.sp,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black87,
+                            color: AppColors.textPrimary,
                           ),
                         ),
 
@@ -102,7 +92,7 @@ class NewPasswordView extends GetView<ForgotPasswordController> {
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 16.sp,
-                            color: Colors.black54,
+                            color: AppColors.textSecondary,
                           ),
                         ),
 
@@ -123,12 +113,12 @@ class NewPasswordView extends GetView<ForgotPasswordController> {
                                     decoration: InputDecoration(
                                       hintText: 'Mật khẩu mới',
                                       hintStyle: TextStyle(
-                                        color: Colors.black54,
+                                        color: AppColors.textSecondary,
                                         fontSize: 16.sp,
                                       ),
                                       prefixIcon: Icon(
                                         Icons.lock_outline,
-                                        color: Colors.black54,
+                                        color: AppColors.textSecondary,
                                         size: 20.sp,
                                       ),
                                       suffixIcon: IconButton(
@@ -137,7 +127,7 @@ class NewPasswordView extends GetView<ForgotPasswordController> {
                                           controller.isNewPasswordVisible
                                               ? Icons.visibility
                                               : Icons.visibility_off,
-                                          color: Colors.black54,
+                                          color: AppColors.textSecondary,
                                         ),
                                       ),
                                       border: OutlineInputBorder(
@@ -183,12 +173,12 @@ class NewPasswordView extends GetView<ForgotPasswordController> {
                                     decoration: InputDecoration(
                                       hintText: 'Xác nhận mật khẩu',
                                       hintStyle: TextStyle(
-                                        color: Colors.black54,
+                                        color: AppColors.textSecondary,
                                         fontSize: 16.sp,
                                       ),
                                       prefixIcon: Icon(
                                         Icons.lock_outline,
-                                        color: Colors.black54,
+                                        color: AppColors.textSecondary,
                                         size: 20.sp,
                                       ),
                                       suffixIcon: IconButton(
@@ -197,7 +187,7 @@ class NewPasswordView extends GetView<ForgotPasswordController> {
                                           controller.isConfirmPasswordVisible
                                               ? Icons.visibility
                                               : Icons.visibility_off,
-                                          color: Colors.black54,
+                                          color: AppColors.textSecondary,
                                         ),
                                       ),
                                       border: OutlineInputBorder(
@@ -243,7 +233,7 @@ class NewPasswordView extends GetView<ForgotPasswordController> {
                                 style: TextStyle(
                                   fontSize: 14.sp,
                                   fontWeight: FontWeight.w600,
-                                  color: Colors.black87,
+                                  color: AppColors.textPrimary,
                                 ),
                               ),
                               SizedBox(height: 8.h),
@@ -264,7 +254,7 @@ class NewPasswordView extends GetView<ForgotPasswordController> {
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: controller.canResetPassword && !controller.isLoading
                                       ? AppColors.primary
-                                      : const Color(0xFFBDBDBD),
+                                      : AppColors.lineStrong,
                                   padding: EdgeInsets.symmetric(vertical: 16.h),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(12.r),
@@ -309,14 +299,14 @@ class NewPasswordView extends GetView<ForgotPasswordController> {
           Icon(
             Icons.check_circle_outline,
             size: 16.sp,
-            color: Colors.green,
+            color: AppColors.success,
           ),
           SizedBox(width: 8.w),
           Text(
             text,
             style: TextStyle(
               fontSize: 12.sp,
-              color: Colors.black54,
+              color: AppColors.textSecondary,
             ),
           ),
         ],

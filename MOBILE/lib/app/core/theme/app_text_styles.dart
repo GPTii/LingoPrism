@@ -8,25 +8,29 @@ class AppTextStyles {
   // Headers
   static TextStyle get h1 => TextStyle(
         fontSize: 32.sp,
-        fontWeight: FontWeight.bold,
+        fontWeight: FontWeight.w800,
+        letterSpacing: -0.8,
         color: AppColors.textPrimary,
       );
 
   static TextStyle get h2 => TextStyle(
         fontSize: 28.sp,
-        fontWeight: FontWeight.bold,
+        fontWeight: FontWeight.w800,
+        letterSpacing: -0.6,
         color: AppColors.textPrimary,
       );
 
   static TextStyle get h3 => TextStyle(
         fontSize: 24.sp,
-        fontWeight: FontWeight.bold,
+        fontWeight: FontWeight.w700,
+        letterSpacing: -0.4,
         color: AppColors.textPrimary,
       );
 
   static TextStyle get h4 => TextStyle(
         fontSize: 20.sp,
-        fontWeight: FontWeight.w600,
+        fontWeight: FontWeight.w700,
+        letterSpacing: -0.2,
         color: AppColors.textPrimary,
       );
 
@@ -39,6 +43,7 @@ class AppTextStyles {
 
   static TextStyle get bodyMedium => TextStyle(
         fontSize: 16.sp,
+        height: 1.45,
         fontWeight: FontWeight.normal,
         color: AppColors.textPrimary,
       );
@@ -90,13 +95,15 @@ class AppTextStyles {
   // App-specific styles
   static TextStyle get appTitle => TextStyle(
         fontSize: 28.sp,
-        fontWeight: FontWeight.bold,
+        fontWeight: FontWeight.w800,
+        letterSpacing: -0.6,
         color: AppColors.textWhite,
       );
 
   static TextStyle get loginTitle => TextStyle(
         fontSize: 24.sp,
-        fontWeight: FontWeight.bold,
+        fontWeight: FontWeight.w800,
+        letterSpacing: -0.4,
         color: AppColors.textPrimary,
       );
 
@@ -145,7 +152,8 @@ class AppTextStyles {
 
   static TextStyle get wordText => TextStyle(
         fontSize: 24.sp,
-        fontWeight: FontWeight.bold,
+        fontWeight: FontWeight.w700,
+        letterSpacing: -0.3,
         color: AppColors.textPrimary,
       );
 
@@ -153,6 +161,5 @@ class AppTextStyles {
         fontSize: 16.sp,
         fontWeight: FontWeight.normal,
         color: AppColors.textSecondary,
-        fontStyle: FontStyle.italic,
       );
 }

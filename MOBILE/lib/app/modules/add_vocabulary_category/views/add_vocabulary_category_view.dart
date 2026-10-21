@@ -40,7 +40,7 @@ class AddVocabularyCategoryView
                       style: TextStyle(
                         fontSize: 28.sp,
                         fontWeight: FontWeight.w700,
-                        color: const Color(0xFF081C36),
+                        color: AppColors.ink,
                       ),
                     ),
                     SizedBox(height: 24.h),
@@ -48,7 +48,7 @@ class AddVocabularyCategoryView
                       'Vui lòng chọn icon và đặt tên cho chủ đề mới của bạn.',
                       style: TextStyle(
                         fontSize: 14.sp,
-                        color: const Color(0xFF4B5B6C),
+                        color: AppColors.textSecondary,
                       ),
                     ),
                     SizedBox(height: 32.h),
@@ -63,14 +63,7 @@ class AddVocabularyCategoryView
               decoration: const BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-                boxShadow: [
-                  BoxShadow(
-                    color: Color.fromRGBO(15, 23, 42, 0.08),
-                    blurRadius: 20,
-                    offset: Offset(0, -4),
-                  ),
-                ],
-              ),
+                border: Border.fromBorderSide(BorderSide(color: AppColors.line)),),
               padding: EdgeInsets.fromLTRB(24.w, 16.h, 24.w,
                   bottomPadding > 0 ? bottomPadding + 16 : 24.h),
               child: SizedBox(
@@ -81,11 +74,11 @@ class AddVocabularyCategoryView
                         controller.canSave.value ? controller.onSave : null,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
-                      disabledBackgroundColor: const Color(0xFF9ACFE8),
+                      disabledBackgroundColor: AppColors.primaryLight,
                       elevation: 0,
                       padding: EdgeInsets.symmetric(vertical: 16.h),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(28.r),
+                        borderRadius: BorderRadius.circular(14.r),
                       ),
                     ),
                     child: Text(
@@ -134,17 +127,9 @@ class _IconPickerSection extends StatelessWidget {
                   border: Border.all(
                     color: error == null
                         ? AppColors.primary
-                        : Colors.redAccent,
+                        : AppColors.error,
                     width: 2,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.shadow.withValues(alpha: 0.12),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
+                  ),),
                 child: Center(
                   child: icon == null
                       ? Text(
@@ -168,7 +153,7 @@ class _IconPickerSection extends StatelessWidget {
                 error,
                 style: TextStyle(
                   fontSize: 12.sp,
-                  color: Colors.redAccent,
+                  color: AppColors.error,
                 ),
               ),
             ],
@@ -209,7 +194,7 @@ class _NameField extends StatelessWidget {
                   borderSide: BorderSide(
                     color: error == null
                         ? AppColors.primarySoft
-                        : Colors.redAccent,
+                        : AppColors.error,
                     width: 1.5,
                   ),
                 ),
@@ -218,7 +203,7 @@ class _NameField extends StatelessWidget {
                   borderSide: BorderSide(
                     color: error == null
                         ? AppColors.primary
-                        : Colors.redAccent,
+                        : AppColors.error,
                     width: 1.8,
                   ),
                 ),
@@ -250,14 +235,14 @@ class _RequiredLabel extends StatelessWidget {
         text: '',
         style: TextStyle(
           fontSize: 14.sp,
-          color: const Color(0xFF081C36),
+          color: AppColors.ink,
           fontWeight: FontWeight.w600,
         ),
         children: [
           const TextSpan(
             text: '* ',
             style: TextStyle(
-              color: Colors.redAccent,
+              color: AppColors.error,
               fontWeight: FontWeight.w600,
             ),
           ),

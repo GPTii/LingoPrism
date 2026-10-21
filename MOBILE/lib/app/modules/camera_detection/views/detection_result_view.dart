@@ -200,7 +200,7 @@ class _DetectionResultViewState extends State<DetectionResultView> {
                   ),
                   alignment: Alignment.topLeft,
                   child: Container(
-                    color: Colors.black54,
+                    color: AppColors.textSecondary,
                     padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
                     child: Text(
                         it.picked != null
@@ -242,7 +242,7 @@ class _DetectionResultViewState extends State<DetectionResultView> {
           ActionChip(avatar: const Icon(Icons.search, size: 18), label: const Text('Vật khác…'), onPressed: () => _pickOther(it)),
           ChoiceChip(
             selected: it.notObject,
-            selectedColor: Colors.red.shade100,
+            selectedColor: AppColors.errorSoft,
             onSelected: (_) => _notObject(it),
             label: const Text('Không phải đồ vật'),
           ),
@@ -259,7 +259,7 @@ class _DetectionResultViewState extends State<DetectionResultView> {
       margin: EdgeInsets.only(bottom: 12.h),
       padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16.r),
-          boxShadow: const [BoxShadow(color: AppColors.shadowLight, blurRadius: 8, offset: Offset(0, 2))]),
+          border: const Border.fromBorderSide(BorderSide(color: AppColors.line))),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -285,7 +285,7 @@ class _DetectionResultViewState extends State<DetectionResultView> {
                   Padding(
                     padding: EdgeInsets.only(bottom: 4.h),
                     child: Text('✓ Đã học từ báo lỗi của người dùng',
-                        style: TextStyle(fontSize: 12.sp, color: Colors.purple, fontWeight: FontWeight.w600)),
+                        style: TextStyle(fontSize: 12.sp, color: AppColors.primary, fontWeight: FontWeight.w600)),
                   ),
                 Text('${it.picked != null ? 'Bạn đã chọn' : it.notObject ? 'Đã báo: không phải đồ vật' : 'Độ tin cậy ${(it.confidence * 100).round()}%'}'
                     '${card?.personal != null ? ' · đã có trong thư viện (${card!.personal!.statusLabel})' : ''}',

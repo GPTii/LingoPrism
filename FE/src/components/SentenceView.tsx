@@ -39,7 +39,7 @@ export default function SentenceView({ sentence, showTranslation = true }: { sen
     <div className="flex flex-col items-center gap-3 text-center">
       <div className="flex items-center gap-3">
         <TokenLine tokens={sentence.tokens} language={sentence.language} highlight={sentence.target_tokens} />
-        <button type="button" title="Nghe câu" className="text-brand-600 hover:text-brand-700 text-xl cursor-pointer"
+        <button type="button" title="Nghe câu" aria-label="Nghe câu" className="text-brand-600 hover:text-brand-700 text-xl cursor-pointer"
           onClick={() => speak(sentence.text, sentence.tts_locale)}>
           <SoundOutlined />
         </button>
@@ -50,7 +50,7 @@ export default function SentenceView({ sentence, showTranslation = true }: { sen
         </div>
       )}
       {sentence.source.url && (
-        <a href={sentence.source.url} target="_blank" rel="noreferrer" className="text-xs text-slate-400 hover:text-slate-600">
+        <a href={sentence.source.url} target="_blank" rel="noreferrer" className="text-xs !text-slate-500 hover:!text-slate-700">
           Câu #{sentence.source.id} · {sentence.source.name} · {sentence.source.license}
         </a>
       )}

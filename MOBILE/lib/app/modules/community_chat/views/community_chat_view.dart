@@ -134,7 +134,7 @@ class CommunityChatView extends GetView<CommunityChatController> {
               'Hãy bắt đầu cuộc trò chuyện với nhóm',
               style: TextStyle(
                 fontSize: 14.sp,
-                color: const Color(0xFF7D8AA2),
+                color: AppColors.textHint,
               ),
               textAlign: TextAlign.center,
             ),
@@ -244,7 +244,7 @@ class _ChatHeader extends StatelessWidget {
           width: double.infinity,
           height: double.infinity,
           decoration: BoxDecoration(
-            color: const Color(0xFFF0F4F8),
+            color: AppColors.primarySoft,
             borderRadius: BorderRadius.circular(12.r),
           ),
           child: Icon(
@@ -278,7 +278,7 @@ class _ChatBubble extends StatelessWidget {
         message.isCurrentUser ? Alignment.centerRight : Alignment.centerLeft;
     final bubbleColor = message.isCurrentUser
         ? AppColors.primary
-        : const Color(0xFFF1F5FF);
+        : AppColors.primarySoft;
     final textColor =
         message.isCurrentUser ? Colors.white : AppColors.textPrimary;
 
@@ -304,7 +304,7 @@ class _ChatBubble extends StatelessWidget {
               style: TextStyle(
                 fontSize: 12.sp,
                 fontWeight: message.isLeader ? FontWeight.w700 : FontWeight.w500,
-                color: const Color(0xFF6B7B8E),
+                color: AppColors.textSecondary,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -494,7 +494,7 @@ class _StickerImage extends StatelessWidget {
       width: 64.w,
       height: 64.w,
       decoration: BoxDecoration(
-        color: const Color(0xFFF0F4F8),
+        color: AppColors.primarySoft,
         borderRadius: BorderRadius.circular(12.r),
         border: Border.all(
           color: AppColors.line,
@@ -609,15 +609,7 @@ class _ChatInputState extends State<_ChatInput> {
                   border: Border.all(
                     color: AppColors.line,
                     width: 1.0,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.05),
-                      blurRadius: 12.r,
-                      offset: Offset(0, 4.h),
-                    ),
-                  ],
-                ),
+                  ),),
                 padding: EdgeInsets.symmetric(horizontal: 16.w),
                 child: TextField(
                   controller: _controller,
@@ -637,7 +629,7 @@ class _ChatInputState extends State<_ChatInput> {
                       fontSize: 14.sp,
                       color: _isSending
                           ? AppColors.textHint
-                          : const Color(0xFF7D8AA2),
+                          : AppColors.textHint,
                     ),
                   ),
                   style: TextStyle(

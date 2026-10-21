@@ -35,16 +35,7 @@ class ProfileGuideView extends GetView<ProfileGuideController> {
             child: IgnorePointer(
               ignoring: true,
               child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      const Color(0xFFB6F3FF).withOpacity(0.45),
-                      AppColors.primarySoft,
-                    ],
-                  ),
-                ),
+                decoration: const BoxDecoration(color: AppColors.background),
               ),
             ),
           ),
@@ -119,11 +110,7 @@ class ProfileGuideView extends GetView<ProfileGuideController> {
       width: double.infinity,
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [AppColors.primary, AppColors.primary],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: AppColors.primary,
         borderRadius: BorderRadius.circular(18.r),
         boxShadow: [
           BoxShadow(
@@ -131,15 +118,14 @@ class ProfileGuideView extends GetView<ProfileGuideController> {
             blurRadius: 18.r,
             offset: Offset(0, 10.h),
           ),
-        ],
-      ),
+        ],),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
             width: 52.w,
             height: 52.w,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: Colors.white,
               shape: BoxShape.circle,
             ),
@@ -187,14 +173,7 @@ class ProfileGuideView extends GetView<ProfileGuideController> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 10.r,
-            offset: Offset(0, 6.h),
-          ),
-        ],
-      ),
+        border: const Border.fromBorderSide(BorderSide(color: AppColors.line)),),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -205,7 +184,7 @@ class ProfileGuideView extends GetView<ProfileGuideController> {
                 Container(
                   padding: EdgeInsets.all(8.w),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFE6F2FF),
+                    color: AppColors.primarySoft,
                     borderRadius: BorderRadius.circular(12.r),
                   ),
                   child: Icon(
@@ -240,7 +219,7 @@ class ProfileGuideView extends GetView<ProfileGuideController> {
                       item,
                       style: TextStyle(
                         fontSize: 14.sp,
-                        color: const Color(0xFF405166),
+                        color: AppColors.textSecondary,
                         height: 1.4,
                       ),
                     ),
@@ -259,11 +238,7 @@ class ProfileGuideView extends GetView<ProfileGuideController> {
       width: double.infinity,
       padding: EdgeInsets.all(14.w),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [AppColors.primary, AppColors.primary],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: AppColors.primary,
         borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
@@ -271,8 +246,7 @@ class ProfileGuideView extends GetView<ProfileGuideController> {
             blurRadius: 16.r,
             offset: Offset(0, 10.h),
           ),
-        ],
-      ),
+        ],),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

@@ -64,11 +64,24 @@ class PoiMapController extends GetxController {
 class PoiMapView extends GetView<PoiMapController> {
   const PoiMapView({super.key});
 
-  static const _icons = {
-    'market': '🛒', 'supermarket': '🏬', 'hospital': '🏥', 'school': '🏫', 'park': '🌳', 'zoo': '🦁', 'museum': '🏛️',
-    'airport': '✈️', 'station': '🚉', 'religious': '⛪', 'restaurant': '🍜', 'stadium': '🏟️', 'landmark': '📍',
-    'library': '📚', 'theater': '🎭',
+  static const _icons = <String, IconData>{
+    'market': Icons.storefront_rounded, 'supermarket': Icons.shopping_cart_rounded, 'hospital': Icons.local_hospital_rounded,
+    'school': Icons.school_rounded, 'park': Icons.park_rounded, 'zoo': Icons.pets_rounded, 'museum': Icons.museum_rounded,
+    'airport': Icons.flight_rounded, 'station': Icons.train_rounded, 'religious': Icons.temple_buddhist_rounded,
+    'restaurant': Icons.restaurant_rounded, 'stadium': Icons.stadium_rounded, 'landmark': Icons.place_rounded,
+    'library': Icons.local_library_rounded, 'theater': Icons.theater_comedy_rounded,
   };
+
+  /// map pin: the category's icon on a violet drop with a white ring
+  static Widget _pin(String category, {bool selected = false}) => Container(
+        decoration: BoxDecoration(
+          color: selected ? AppColors.ink : AppColors.primary,
+          shape: BoxShape.circle,
+          border: Border.all(color: Colors.white, width: 2.5),
+        ),
+        alignment: Alignment.center,
+        child: Icon(_icons[category] ?? Icons.place_rounded, color: Colors.white, size: 20),
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -102,7 +115,7 @@ class PoiMapView extends GetView<PoiMapController> {
                 MarkerLayer(markers: [
                   if (controller.me.value != null)
                     Marker(point: controller.me.value!, width: 22, height: 22,
-                        child: Container(decoration: BoxDecoration(color: Colors.blue, shape: BoxShape.circle, border: Border.all(color: Colors.white, width: 3)))),
+                        child: Container(decoration: BoxDecoration(color: AppColors.primary, shape: BoxShape.circle, border: Border.all(color: Colors.white, width: 3)))),
                   for (final p in controller.pois)
                     Marker(
                       point: LatLng(p.lat, p.lng),
@@ -110,7 +123,7 @@ class PoiMapView extends GetView<PoiMapController> {
                       height: 40,
                       child: GestureDetector(
                         onTap: () => controller.selected.value = p,
-                        child: Text(_icons[p.category] ?? '📍', style: const TextStyle(fontSize: 28)),
+                        child: Obx(() => _pin(p.category, selected: controller.selected.value?.id == p.id)),
                       ),
                     ),
                 ]),
@@ -137,7 +150,11 @@ class PoiMapView extends GetView<PoiMapController> {
               child: Padding(
                 padding: EdgeInsets.all(14.w),
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
-                  Text('${_icons[p.category] ?? '📍'} ${p.name}', style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w700)),
+                  Row(children: [
+                    Icon(_icons[p.category] ?? Icons.place_rounded, color: AppColors.primary, size: 20.sp),
+                    SizedBox(width: 6.w),
+                    Expanded(child: Text(p.name, style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w700))),
+                  ]),
                   Text('${p.categoryLabel}${p.distanceM != null ? ' · cách ${(p.distanceM! / 1000).toStringAsFixed(1)} km' : ''}',
                       style: const TextStyle(color: AppColors.textSecondary)),
                   if (p.address.isNotEmpty) Text(p.address, style: const TextStyle(color: AppColors.textSecondary)),

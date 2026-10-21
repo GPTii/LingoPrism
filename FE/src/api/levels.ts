@@ -46,4 +46,5 @@ export const levelsApi = {
     api.post<LevelTestResult>(`/levels/${level}/test/`, { token, answers }).then((r) => r.data),
 }
 
-export const LEVEL_COLORS = ['#22c55e', '#0ea5e9', '#f59e0b', '#ef4444']
+// dark enough for white numbers on them and for coloured text on a white card (≥ 4:1)
+export const LEVEL_COLORS = ['#0e9f7b', '#1f7ed0', '#b26f00', '#e0445e']

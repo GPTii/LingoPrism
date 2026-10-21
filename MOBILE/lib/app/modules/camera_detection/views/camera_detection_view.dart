@@ -11,7 +11,7 @@ class CameraDetectionView extends GetView<CameraDetectionController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF1F1F39),
+      backgroundColor: AppColors.textPrimary,
       body: SafeArea(
         child: Obx(() {
           if (controller.isLoading) {
@@ -37,7 +37,7 @@ class CameraDetectionView extends GetView<CameraDetectionController> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          CircularProgressIndicator(
+          const CircularProgressIndicator(
             color: AppColors.primary,
           ),
           SizedBox(height: 20.h),
@@ -58,7 +58,7 @@ class CameraDetectionView extends GetView<CameraDetectionController> {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
       decoration: BoxDecoration(
-        color: const Color(0xFF1F1F39),
+        color: AppColors.textPrimary,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.1),
@@ -96,7 +96,7 @@ class CameraDetectionView extends GetView<CameraDetectionController> {
   Widget _buildCaptureSection() {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFFEAF2FF),
+        color: AppColors.primarySoft,
         borderRadius: BorderRadius.circular(24.r),
         boxShadow: [
           BoxShadow(
@@ -121,7 +121,7 @@ class CameraDetectionView extends GetView<CameraDetectionController> {
             style: TextStyle(
               fontSize: 22.sp,
               fontWeight: FontWeight.bold,
-              color: Colors.black87,
+              color: AppColors.textPrimary,
             ),
             textAlign: TextAlign.center,
           ),
@@ -130,7 +130,7 @@ class CameraDetectionView extends GetView<CameraDetectionController> {
             'Chụp hoặc chọn ảnh để nhận diện đối tượng\nvà học từ vựng tiếng Anh',
             style: TextStyle(
               fontSize: 14.sp,
-              color: Colors.black54,
+              color: AppColors.textSecondary,
             ),
             textAlign: TextAlign.center,
           ),
@@ -168,14 +168,7 @@ class CameraDetectionView extends GetView<CameraDetectionController> {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(16.r),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.3),
-                  blurRadius: 8,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
+              border: const Border.fromBorderSide(BorderSide(color: AppColors.line)),),
             padding: EdgeInsets.all(20.w),
             child: Icon(
               icon,
@@ -189,7 +182,7 @@ class CameraDetectionView extends GetView<CameraDetectionController> {
             style: TextStyle(
               fontSize: 16.sp,
               fontWeight: FontWeight.w600,
-              color: Colors.black87,
+              color: AppColors.textPrimary,
             ),
           ),
         ],

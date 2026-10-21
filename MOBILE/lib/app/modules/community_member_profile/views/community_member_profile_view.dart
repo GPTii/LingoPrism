@@ -78,14 +78,7 @@ class CommunityMemberProfileView
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(20.r),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.04),
-                        blurRadius: 12.r,
-                        offset: Offset(0, 6.h),
-                      ),
-                    ],
-                  ),
+                    border: const Border.fromBorderSide(BorderSide(color: AppColors.line)),),
                   child: Text(
                     'Chưa có bài đăng nào',
                     style: TextStyle(

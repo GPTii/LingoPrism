@@ -127,7 +127,7 @@ export default function LearnerLayout() {
   const onTab = bottom.some((i) => i && isActive(i.to)) || isActive('/camera')
 
   return (
-    <ConfigProvider theme={{ token: { borderRadius: 14, controlHeightLG: 48, fontSizeLG: 17 }, components: { Card: { borderRadiusLG: 24 } } }}>
+    <ConfigProvider theme={{ token: { borderRadius: 10, controlHeightLG: 48, fontSizeLG: 16 }, components: { Card: { borderRadiusLG: 16, headerFontSize: 17 } } }}>
       <div className="learner min-h-screen flex relative">
         {/* tablet: icons only; laptop and larger: icons + labels */}
         <aside className="hidden md:flex md:w-[88px] lg:w-60 shrink-0 flex-col bg-white border-r border-slate-200 px-3 py-5 sticky top-0 h-screen overflow-y-auto z-10">

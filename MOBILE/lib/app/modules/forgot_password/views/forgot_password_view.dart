@@ -80,7 +80,7 @@ class ForgotPasswordView extends GetView<ForgotPasswordController> {
                           style: TextStyle(
                             fontSize: 24.sp,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black87,
+                            color: AppColors.textPrimary,
                           ),
                         ),
 
@@ -91,7 +91,7 @@ class ForgotPasswordView extends GetView<ForgotPasswordController> {
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 16.sp,
-                            color: Colors.black54,
+                            color: AppColors.textSecondary,
                           ),
                         ),
 
@@ -112,12 +112,12 @@ class ForgotPasswordView extends GetView<ForgotPasswordController> {
                                 decoration: InputDecoration(
                                   hintText: 'Nhập email của bạn',
                                   hintStyle: TextStyle(
-                                    color: Colors.black54,
+                                    color: AppColors.textSecondary,
                                     fontSize: 16.sp,
                                   ),
                                   prefixIcon: Icon(
                                     Icons.email_outlined,
-                                    color: Colors.black54,
+                                    color: AppColors.textSecondary,
                                     size: 20.sp,
                                   ),
                                   border: OutlineInputBorder(

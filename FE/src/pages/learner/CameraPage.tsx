@@ -1,11 +1,19 @@
-import { App, Button, Checkbox, Empty, Select, Spin, Tag, Tooltip, Upload } from 'antd'
+import { App, Button, Checkbox, Select, Spin, Tooltip, Upload } from 'antd'
 import { CameraOutlined, DislikeOutlined, LikeOutlined } from '@ant-design/icons'
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { learnApi, type DetectedItem, type DetectionResult } from '../../api/app'
 import type { WordCard } from '../../api/vocab'
 import { errorMessage } from '../../api/client'
 import TargetWord, { langTag } from '../../components/TargetWord'
+import { Prismo } from '../../components/brand/Brand'
+import { EmptyState, PageHeader } from '../../components/ui'
+
+/** a small status word under the result, coloured by what it means */
+const Note = ({ tone, children }: { tone: 'violet' | 'amber' | 'red' | 'green' | 'slate'; children: ReactNode }) => {
+  const cls = { violet: 'bg-brand-50 text-brand-700', amber: 'bg-amber-50 text-amber-700', red: 'bg-red-50 text-red-700', green: 'bg-green-50 text-green-700', slate: 'bg-slate-100 text-slate-600' }[tone]
+  return <span className={`num rounded-md px-2 py-0.5 text-xs font-semibold ${cls}`}>{children}</span>
+}
 
 /** picked: the object the learner says it is (error report); notObject: "there is no object here" */
 type Item = DetectedItem & { picked?: string; pickedCard?: WordCard; notObject?: boolean }
@@ -77,14 +85,13 @@ export default function CameraPage() {
 
   return (
     <div className="max-w-5xl mx-auto flex flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-800 m-0">Gửi ảnh, học ngay từ mới!</h1>
-        <p className="text-slate-500">YOLOv10 nhận diện đồ vật trong ảnh và hiển thị từ vựng theo ngôn ngữ bạn đang học.</p>
-      </div>
-      <Upload.Dragger accept="image/*" showUploadList={false} beforeUpload={detect} disabled={loading}>
-        <p className="text-4xl text-brand-600"><CameraOutlined /></p>
-        <p className="font-medium">Kéo thả hoặc bấm để chọn ảnh</p>
-        <p className="text-slate-400 text-sm">JPG/PNG, tối đa 10 MB</p>
+      <PageHeader title="Chụp một đồ vật" description="Máy nhận ra đồ vật trong ảnh và cho bạn từ vựng theo ngôn ngữ đang học. Nhận sai thì bấm sửa – lần sau hệ thống sẽ nhận đúng." />
+      <Upload.Dragger accept="image/*" showUploadList={false} beforeUpload={detect} disabled={loading} className="[&_.ant-upload-drag]:!rounded-2xl">
+        <div className="flex flex-col items-center gap-2 py-4">
+          <span className="h-16 w-16 rounded-2xl prism-bg grid place-items-center text-3xl text-white"><CameraOutlined /></span>
+          <span className="font-semibold text-slate-800 text-lg">Chọn hoặc kéo thả một ảnh</span>
+          <span className="text-slate-500 text-sm">Trên điện thoại, bấm để chụp trực tiếp · JPG hoặc PNG, tối đa 10 MB</span>
+        </div>
       </Upload.Dragger>
 
       {(preview || loading) && (
@@ -95,51 +102,61 @@ export default function CameraPage() {
               i.bbox.length === 4 ? (
                 <div key={i.id} className={`absolute border-2 rounded ${i.notObject ? 'border-red-500 opacity-40' : i.feedback === 'wrong' && !i.picked ? 'border-red-500' : i.uncertain && !i.picked && i.feedback === 'unknown' ? 'border-amber-400 border-dashed' : 'border-emerald-400'}`}
                   style={{ left: `${i.bbox[0] * 100}%`, top: `${i.bbox[1] * 100}%`, width: `${(i.bbox[2] - i.bbox[0]) * 100}%`, height: `${(i.bbox[3] - i.bbox[1]) * 100}%` }}>
-                  <span lang={shownCard(i)?.target ? langTag(shownCard(i)!.target!.language) : undefined} className="absolute -top-6 left-0 bg-black/60 text-white text-xs px-1.5 py-0.5 rounded">
+                  <span lang={shownCard(i)?.target ? langTag(shownCard(i)!.target!.language) : undefined} className="num absolute -top-6 left-0 bg-[#1b1538]/85 text-white text-xs font-semibold px-1.5 py-0.5 rounded-md whitespace-nowrap">
                     {shownCard(i)?.target?.text ?? i.picked ?? i.label}{!i.picked && ` ${Math.round(i.confidence * 100)}%`}{i.uncertain && !i.picked && i.feedback === 'unknown' && ' ?'}
                   </span>
                 </div>
               ) : null,
             )}
-            {loading && <div className="absolute inset-0 flex items-center justify-center bg-white/60"><Spin size="large" tip="Đang nhận diện…" /></div>}
+            {loading && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-white/70 text-slate-700 font-semibold">
+                <Spin size="large" />Đang tìm đồ vật trong ảnh…
+              </div>
+            )}
           </div>
 
           <div className="flex flex-col gap-3">
             {result && (
-              <div className="text-xs text-slate-500">
-                {result.device === 'server' ? 'Máy chủ' : 'Thiết bị'} · {result.model}{result.inference_ms != null && ` · ${result.inference_ms} ms`}
+              <div className="num text-xs text-slate-500">
+                {result.items.length} đồ vật · nhận diện trên {result.device === 'server' ? 'máy chủ' : 'thiết bị'}{result.inference_ms != null && ` trong ${result.inference_ms} ms`}
               </div>
             )}
-            {result?.items.length === 0 && <Empty description="Không có đối tượng" />}
+            {result?.items.length === 0 && (
+              <div className="lp-card">
+                <EmptyState art={<Prismo mood="think" size={88} />} title="Chưa thấy đồ vật nào"
+                  description="Thử chụp gần hơn, đủ sáng, để đồ vật chiếm phần lớn khung hình." />
+              </div>
+            )}
             {(result?.items as Item[] | undefined)?.map((i) => {
               const c = shownCard(i)
               const asking = (i.uncertain || i.feedback === 'wrong') && !result!.confirmed
               const listed = new Set([i.label, ...i.alternatives.map((a) => a.label)])
               return (
-              <div key={i.id} className="rounded-2xl bg-white border border-slate-200 p-4 flex gap-3 items-start">
+              <div key={i.id} className="lp-card p-4 flex gap-3 items-start">
                 <Checkbox checked={i.selected} disabled={!c || (i.feedback === 'wrong' && !i.picked) || result!.confirmed}
                   onChange={(e) => update(i.id, { selected: e.target.checked })} />
                 <div className="flex-1">
-                  {c?.target ? <TargetWord target={c.target} size="md" /> : <div className="font-medium">{i.picked ?? i.label}</div>}
+                  {c?.target ? <TargetWord target={c.target} size="md" /> : <div className="font-semibold text-slate-800">{i.picked ?? i.label}</div>}
                   <div className="text-center text-slate-600">{c?.meaning_vi ?? 'Chưa có trong bộ từ vựng đã kiểm tra'}</div>
-                  <div className="flex justify-center gap-2 mt-1">
-                    {i.picked ? <Tag color="blue">Bạn đã chọn</Tag> : i.notObject ? <Tag color="red">Không phải đồ vật</Tag> : <Tag color={i.uncertain ? 'orange' : undefined}>{Math.round(i.confidence * 100)}%</Tag>}
+                  <div className="flex flex-wrap justify-center gap-1.5 mt-2">
+                    {i.picked ? <Note tone="violet">Bạn đã chọn</Note> : i.notObject ? <Note tone="red">Không phải đồ vật</Note>
+                      : <Note tone={i.uncertain ? 'amber' : 'slate'}>Chắc {Math.round(i.confidence * 100)}%</Note>}
                     {i.learned && !i.picked && (
                       <Tooltip title="Mô hình từng nhận sai vật trông giống thế này; hệ thống đã tự sửa theo báo lỗi của người dùng">
-                        <Tag color="purple">Đã học từ báo lỗi</Tag>
+                        <span><Note tone="violet">Đã sửa nhờ báo lỗi</Note></span>
                       </Tooltip>
                     )}
-                    {c?.personal && <Tag color="green">Đã có trong thư viện</Tag>}
+                    {c?.personal && <Note tone="green">Đã có trong thư viện</Note>}
                   </div>
                   {asking && (
                     <div className="mt-3 text-center">
-                      <div className="text-xs text-slate-500 mb-1">{i.feedback === 'wrong' && !i.picked ? 'Vậy đây là gì?' : 'Chưa chắc lắm – có phải là:'}</div>
+                      <div className="text-sm font-semibold text-slate-600 mb-1.5">{i.feedback === 'wrong' && !i.picked ? 'Vậy đây là gì?' : 'Chưa chắc lắm – có phải là:'}</div>
                       <div className="flex flex-wrap justify-center gap-1.5">
                         {[{ label: i.label, card: i.card }, ...i.alternatives].map((a) => a.card && (
                           <Button key={a.label} size="small" type={(i.picked ?? (i.feedback === 'correct' ? i.label : '')) === a.label ? 'primary' : 'default'}
                             onClick={() => pick(i, a.label)}>
                             <span lang={a.card.target ? langTag(a.card.target.language) : undefined}>{a.card.target?.text ?? a.label}</span>
-                            {a.card.meaning_vi && <span className="text-slate-400 ml-1">({a.card.meaning_vi})</span>}
+                            {a.card.meaning_vi && <span className="opacity-70 ml-1">({a.card.meaning_vi})</span>}
                           </Button>
                         ))}
                       </div>
@@ -162,11 +179,11 @@ export default function CameraPage() {
                 </div>
                 <div className="flex flex-col">
                   <Tooltip title="Nhận diện đúng">
-                    <Button type="text" icon={<LikeOutlined className={i.feedback === 'correct' ? 'text-emerald-600' : ''} />}
+                    <Button type="text" aria-label="Nhận diện đúng" aria-pressed={i.feedback === 'correct'} icon={<LikeOutlined className={i.feedback === 'correct' ? 'text-emerald-600' : ''} />}
                       onClick={() => (i.feedback === 'correct' ? update(i.id, { feedback: 'unknown' }) : pick(i, i.label))} />
                   </Tooltip>
                   <Tooltip title="Nhận diện sai">
-                    <Button type="text" icon={<DislikeOutlined className={i.feedback === 'wrong' ? 'text-red-500' : ''} />}
+                    <Button type="text" aria-label="Nhận diện sai" aria-pressed={i.feedback === 'wrong'} icon={<DislikeOutlined className={i.feedback === 'wrong' ? 'text-red-500' : ''} />}
                       onClick={() => update(i.id, { feedback: i.feedback === 'wrong' ? 'unknown' : 'wrong', selected: false, picked: undefined, pickedCard: undefined, notObject: false })} />
                   </Tooltip>
                 </div>
@@ -175,7 +192,7 @@ export default function CameraPage() {
             })}
             {result && result.items.length > 0 && (
               <Button type="primary" size="large" loading={saving} disabled={result.confirmed} onClick={save}>
-                {result.confirmed ? 'Đã lưu' : 'Lưu từ đã chọn'}
+                {result.confirmed ? 'Đã lưu vào thư viện' : `Lưu ${result.items.filter((x) => x.selected).length} từ đã chọn`}
               </Button>
             )}
           </div>

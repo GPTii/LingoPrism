@@ -1,5 +1,5 @@
-import { App, Button, Progress, Result, Spin } from 'antd'
-import { CheckCircleFilled, CloseCircleFilled, SoundOutlined } from '@ant-design/icons'
+import { App, Button, Progress, Spin } from 'antd'
+import { CheckCircleFilled, CloseCircleFilled, CloseOutlined, SoundOutlined } from '@ant-design/icons'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
@@ -10,6 +10,8 @@ import { useAuth } from '../../auth/store'
 import SentenceView, { TokenLine } from '../../components/SentenceView'
 import { langTag } from '../../components/TargetWord'
 import { speak } from '../../lib/speech'
+import { Prismo } from '../../components/brand/Brand'
+import { EmptyState } from '../../components/ui'
 
 const TITLES: Record<SentenceExercise['type'], string> = {
   arrange: 'Sắp xếp các từ thành câu đúng',
@@ -78,50 +80,73 @@ export default function SentencePage() {
     } else setIndex(index + 1)
   }
 
-  if (error) return <Result status="warning" title={error} extra={<Button onClick={() => navigate('/vocab')}>Về trang từ vựng</Button>} />
+  if (error) {
+    return (
+      <div className="lp-card max-w-xl mx-auto">
+        <EmptyState art={<Prismo mood="sad" size={96} />} title="Không mở được bài luyện câu" description={error}
+          action={<Button onClick={() => navigate('/vocab')}>Về trang từ vựng</Button>} />
+      </div>
+    )
+  }
   if (!exercises) return <div className="flex justify-center py-20"><Spin size="large" /></div>
   if (exercises.length === 0) {
     return (
-      <Result status="info" title="Chưa có câu luyện tập cho phần này"
-        subTitle="Câu luyện tập chỉ lấy từ nguồn đã kiểm tra (Tatoeba, người bản xứ). Hãy học thêm từ hoặc chọn chủ đề khác."
-        extra={<Button type="primary" onClick={() => navigate('/vocab')}>Chọn chủ đề</Button>} />
+      <div className="lp-card max-w-xl mx-auto">
+        <EmptyState art={<Prismo mood="think" size={96} />} title="Chưa có câu luyện tập cho phần này"
+          description="Câu luyện tập chỉ lấy từ nguồn đã kiểm tra (Tatoeba, người bản xứ). Hãy học thêm từ hoặc chọn chủ đề khác."
+          action={<Button type="primary" onClick={() => navigate('/vocab')}>Chọn chủ đề</Button>} />
+      </div>
     )
   }
   if (!ex) {
     return (
-      <Result status="success" title="Hoàn thành bài luyện câu!"
-        subTitle={`Đúng ${score.correct}/${exercises.length} câu · +${score.xp} XP`}
-        extra={[
-          <Button key="home" onClick={() => navigate('/')}>Về trang chủ</Button>,
-          <Button key="again" type="primary" onClick={() => window.location.reload()}>Luyện tiếp</Button>,
-        ]} />
+      <div className="max-w-xl mx-auto flex flex-col items-center text-center gap-4 pt-4">
+        <Prismo mood={score.correct === exercises.length ? 'celebrate' : 'happy'} size={150} className="animate-pop" />
+        <h1 className="text-3xl font-extrabold text-slate-800 m-0">Xong bài luyện câu</h1>
+        <p className="num text-lg text-slate-600 m-0">Đúng {score.correct}/{exercises.length} câu · +{score.xp} XP</p>
+        <div className="flex flex-wrap justify-center gap-3 mt-2">
+          <Button size="large" onClick={() => navigate('/')}>Về trang chủ</Button>
+          <Button size="large" type="primary" onClick={() => window.location.reload()}>Luyện tiếp 10 câu</Button>
+        </div>
+      </div>
     )
   }
 
   const optionClass = (opt: string, answer: string | null) => {
-    if (!result) return 'border-slate-200 hover:border-brand-500'
-    return opt === answer ? 'border-green-500 bg-green-50' : 'border-slate-200 opacity-60'
+    if (!result) return ''
+    return opt === answer ? 'is-right' : 'opacity-60'
   }
 
   return (
     <div className="max-w-2xl mx-auto flex flex-col gap-6">
-      <Progress percent={Math.round((index / exercises.length) * 100)} showInfo={false} strokeColor="#14b8a6" />
+      <div className="flex items-center gap-3">
+        <button type="button" onClick={() => navigate(-1)} aria-label="Thoát bài luyện"
+          className="h-10 w-10 rounded-xl grid place-items-center text-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 cursor-pointer transition">
+          <CloseOutlined />
+        </button>
+        <Progress percent={Math.round((index / exercises.length) * 100)} showInfo={false} className="flex-1 m-0" />
+        <span className="num text-sm font-bold text-slate-500">{index + 1}/{exercises.length}</span>
+      </div>
       <AnimatePresence mode="wait">
-        <motion.div key={index} initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -40 }}
-          className="rounded-3xl bg-white border border-slate-200 p-6 sm:p-8 min-h-80 flex flex-col items-center gap-6">
-          <div className="text-slate-500 font-medium">{TITLES[ex.type]}</div>
+        <motion.div key={index} initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -16 }}
+          transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+          className="lp-card p-6 sm:p-8 min-h-80 flex flex-col items-center gap-6">
+          <div className="text-slate-600 font-semibold">{TITLES[ex.type]}</div>
 
           {(ex.type === 'arrange' || ex.type === 'listen') && (
             <>
               {ex.type === 'arrange' && ex.prompt && <div className="text-xl text-slate-800 text-center">{ex.prompt.text}</div>}
               {ex.type === 'listen' && ex.tts && (
-                <Button size="large" shape="circle" icon={<SoundOutlined />} onClick={() => speak(ex.tts!.text, ex.tts!.locale)} />
+                <button type="button" aria-label="Nghe lại câu" onClick={() => speak(ex.tts!.text, ex.tts!.locale)}
+                  className="h-20 w-20 rounded-3xl prism-bg text-white text-3xl grid place-items-center cursor-pointer hover:bg-brand-700 active:scale-95 transition">
+                  <SoundOutlined />
+                </button>
               )}
-              <div lang={tag} className="w-full min-h-16 border-b-2 border-slate-200 flex flex-wrap gap-2 pb-3 justify-center">
+              <div lang={tag} className="w-full min-h-16 rounded-xl bg-slate-50 flex flex-wrap gap-2 p-3 justify-center items-center">
                 {picked.map((ti, pos) => (
                   <button key={`${ti}-${pos}`} type="button" disabled={!!result}
                     onClick={() => setPicked(picked.filter((_, p) => p !== pos))}
-                    className="rounded-xl border-2 border-brand-300 bg-brand-50 px-3 py-2 text-xl cursor-pointer">
+                    className="btn-3d !border-brand-400 !bg-brand-50 text-brand-700 px-3 py-2 text-xl cursor-pointer animate-pop">
                     {ex.tiles[ti].t}
                   </button>
                 ))}
@@ -130,8 +155,8 @@ export default function SentencePage() {
                 {ex.tiles.map((tile, ti) => (
                   <button key={ti} type="button" disabled={picked.includes(ti) || !!result}
                     onClick={() => setPicked([...picked, ti])}
-                    className={`rounded-xl border-2 px-3 py-2 text-xl flex flex-col items-center cursor-pointer transition ${picked.includes(ti) ? 'opacity-0' : 'border-slate-200 hover:border-brand-500'}`}>
-                    {isZh && ex.type === 'arrange' && <span className="text-xs text-slate-400">{showZhuyin && tile.z ? tile.z : tile.p}</span>}
+                    className={`btn-3d px-3 py-2 text-xl text-slate-800 flex flex-col items-center cursor-pointer ${picked.includes(ti) ? 'invisible' : ''}`}>
+                    {isZh && ex.type === 'arrange' && <span className="text-xs text-slate-500">{showZhuyin && tile.z ? tile.z : tile.p}</span>}
                     {tile.t}
                   </button>
                 ))}
@@ -152,7 +177,7 @@ export default function SentencePage() {
               <div lang={tag} className="grid grid-cols-2 gap-3 w-full">
                 {ex.options.map((opt) => (
                   <button key={opt} type="button" disabled={!!result} onClick={() => submit(opt)}
-                    className={`rounded-2xl border-2 px-4 py-3 text-xl font-medium transition cursor-pointer ${optionClass(opt, result?.answer ?? null)}`}>
+                    className={`btn-3d px-4 py-3 text-xl font-medium text-slate-800 cursor-pointer disabled:cursor-default ${optionClass(opt, result?.answer ?? null)}`}>
                     {opt}
                   </button>
                 ))}
@@ -166,7 +191,7 @@ export default function SentencePage() {
               <div className="grid grid-cols-1 gap-3 w-full">
                 {ex.options.map((opt) => (
                   <button key={opt} type="button" disabled={!!result} onClick={() => submit(opt)}
-                    className={`rounded-2xl border-2 px-4 py-3 text-left transition cursor-pointer ${optionClass(opt, result?.sentence.translation?.text ?? null)}`}>
+                    className={`btn-3d px-4 py-3 text-left text-slate-800 cursor-pointer disabled:cursor-default ${optionClass(opt, result?.sentence.translation?.text ?? null)}`}>
                     {opt}
                   </button>
                 ))}
@@ -177,9 +202,9 @@ export default function SentencePage() {
       </AnimatePresence>
 
       {result && (
-        <div className={`rounded-2xl p-4 flex flex-col sm:flex-row gap-4 sm:items-center justify-between ${result.correct ? 'bg-green-50' : 'bg-red-50'}`}>
+        <div className={`rounded-2xl p-4 flex flex-col sm:flex-row gap-4 sm:items-center justify-between animate-rise ${result.correct ? 'bg-green-50' : 'bg-red-50'}`}>
           <div className="flex flex-col gap-2">
-            <div className="flex items-center gap-2 text-lg font-medium">
+            <div className="flex items-center gap-2 text-lg font-bold text-slate-800">
               {result.correct ? <CheckCircleFilled className="text-green-600" /> : <CloseCircleFilled className="text-red-500" />}
               {result.correct ? `Chính xác!${result.xp ? ` +${result.xp} XP` : ''}` : 'Chưa đúng – câu đúng là:'}
             </div>

@@ -40,7 +40,7 @@ export default function AdminLayout() {
   const logo = (
     <div className="flex items-center gap-2 px-5 h-16">
       <LogoMark size={32} />
-      <span className="font-bold text-slate-800">LingoPrism Admin</span>
+      <span className="font-extrabold tracking-[-0.02em] text-slate-800">LingoPrism <span className="font-semibold text-slate-500">Quản trị</span></span>
     </div>
   )
   const menu = <Menu mode="inline" selectedKeys={[selected]} items={ITEMS} onClick={(e) => navigate(e.key)} className="!border-e-0" />

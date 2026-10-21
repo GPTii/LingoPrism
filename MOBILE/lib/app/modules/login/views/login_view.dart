@@ -70,7 +70,7 @@ class LoginView extends GetView<LoginController> {
                                     style: TextStyle(
                                       fontSize: 24.sp,
                                       fontWeight: FontWeight.bold,
-                                      color: Colors.black87,
+                                      color: AppColors.textPrimary,
                                     ),
                                   ),
                                   SizedBox(height: 6.h),
@@ -78,7 +78,7 @@ class LoginView extends GetView<LoginController> {
                                     'để tiếp tục vươn tới mục tiêu!',
                                     style: TextStyle(
                                       fontSize: 16.sp,
-                                      color: Colors.black54,
+                                      color: AppColors.textSecondary,
                                     ),
                                   ),
                                 ],
@@ -102,7 +102,7 @@ class LoginView extends GetView<LoginController> {
                                     decoration: InputDecoration(
                                       hintText: 'Email',
                                       hintStyle: TextStyle(
-                                        color: Colors.black54,
+                                        color: AppColors.textSecondary,
                                         fontSize: 16.sp,
                                       ),
                                       border: OutlineInputBorder(
@@ -148,7 +148,7 @@ class LoginView extends GetView<LoginController> {
                                         decoration: InputDecoration(
                                           hintText: 'Mật khẩu',
                                           hintStyle: TextStyle(
-                                            color: Colors.black54,
+                                            color: AppColors.textSecondary,
                                             fontSize: 16.sp,
                                           ),
                                           suffixIcon: IconButton(
@@ -157,7 +157,7 @@ class LoginView extends GetView<LoginController> {
                                               controller.isPasswordVisible
                                                   ? Icons.visibility
                                                   : Icons.visibility_off,
-                                              color: Colors.black54,
+                                              color: AppColors.textSecondary,
                                             ),
                                           ),
                                           border: OutlineInputBorder(
@@ -194,7 +194,7 @@ class LoginView extends GetView<LoginController> {
                                 child: Text(
                                   'Quên mật khẩu?',
                                   style: TextStyle(
-                                    color: Colors.black54,
+                                    color: AppColors.textSecondary,
                                     fontSize: 14.sp,
                                   ),
                                 ),
@@ -250,7 +250,7 @@ class LoginView extends GetView<LoginController> {
                                 'hoặc tiếp tục với',
                                 style: TextStyle(
                                   fontSize: 14.sp,
-                                  color: Colors.black54,
+                                  color: AppColors.textSecondary,
                                 ),
                               ),
                             ),
@@ -310,7 +310,7 @@ class LoginView extends GetView<LoginController> {
                                     text: 'Chưa có tài khoản? ',
                                     style: TextStyle(
                                       fontSize: 14.sp,
-                                      color: Colors.black54,
+                                      color: AppColors.textSecondary,
                                     ),
                                     children: [
                                       TextSpan(

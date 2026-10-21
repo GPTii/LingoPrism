@@ -14,11 +14,7 @@ class TournamentNoticeBanner extends StatelessWidget {
       width: double.infinity,
       padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 16.h),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFFFFE0B2), Color(0xFFFFF3E0)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: const Color(0xFFFFE0B2),
         borderRadius: BorderRadius.circular(24.r),
         boxShadow: [
           BoxShadow(
@@ -26,8 +22,7 @@ class TournamentNoticeBanner extends StatelessWidget {
             blurRadius: 18.r,
             offset: Offset(0, 10.h),
           ),
-        ],
-      ),
+        ],),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

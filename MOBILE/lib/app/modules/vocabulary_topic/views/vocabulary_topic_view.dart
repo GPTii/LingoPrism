@@ -83,7 +83,7 @@ class VocabularyTopicView extends GetView<VocabularyTopicController> {
               backgroundColor: AppColors.primary,
               padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 10.h),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(22.r),
+                borderRadius: BorderRadius.circular(14.r),
               ),
               elevation: 0,
             ),
@@ -191,7 +191,7 @@ class _VocabularyCard extends StatelessWidget {
                               item.ipa,
                               style: TextStyle(
                                 fontSize: 14.sp,
-                                color: const Color(0xFF0077B6),
+                                color: AppColors.primaryDark,
                               ),
                             ),
                             if (item.card?.level != null)

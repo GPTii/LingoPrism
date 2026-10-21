@@ -94,7 +94,7 @@ class StudyGroupTabView extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 18.sp,
                         fontWeight: FontWeight.w700,
-                        color: const Color(0xFF15233B),
+                        color: AppColors.ink,
                       ),
                     ),
                     SizedBox(height: 16.h),
@@ -105,27 +105,27 @@ class StudyGroupTabView extends StatelessWidget {
                         hintText: 'Giới thiệu bản thân với trưởng nhóm',
                         hintStyle: TextStyle(
                           fontSize: 14.sp,
-                          color: const Color(0xFF7A8AA6),
+                          color: AppColors.textHint,
                         ),
                         filled: true,
-                        fillColor: const Color(0xFFF5F9FF),
+                        fillColor: AppColors.primarySoft,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(18.r),
-                          borderSide: BorderSide(
-                            color: const Color(0xFFD4E6FF),
+                          borderSide: const BorderSide(
+                            color: AppColors.primaryTint,
                             width: 1.2,
                           ),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(18.r),
-                          borderSide: BorderSide(
-                            color: const Color(0xFFD4E6FF),
+                          borderSide: const BorderSide(
+                            color: AppColors.primaryTint,
                             width: 1.2,
                           ),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(18.r),
-                          borderSide: BorderSide(
+                          borderSide: const BorderSide(
                             color: AppColors.primary,
                             width: 1.4,
                           ),
@@ -145,7 +145,7 @@ class StudyGroupTabView extends StatelessWidget {
                           foregroundColor: Colors.white,
                           padding: EdgeInsets.symmetric(vertical: 14.h),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(22.r),
+                            borderRadius: BorderRadius.circular(14.r),
                           ),
                         ),
                         onPressed: () {
@@ -247,14 +247,7 @@ class GroupSearchBar extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(28.r),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
-                  blurRadius: 10.r,
-                  offset: Offset(0, 6.h),
-                ),
-              ],
-            ),
+              border: const Border.fromBorderSide(BorderSide(color: AppColors.line)),),
             alignment: Alignment.center,
             child: Obx(() {
               final hasText = controller.groupSearchQuery.value.isNotEmpty;
@@ -265,7 +258,7 @@ class GroupSearchBar extends StatelessWidget {
                   hintText: 'Tìm nhóm',
                   hintStyle: TextStyle(
                     fontSize: 14.sp,
-                    color: const Color(0xFF7B8FA5),
+                    color: AppColors.textHint,
                   ),
                   prefixIcon: Icon(
                     Icons.search_rounded,
@@ -276,7 +269,7 @@ class GroupSearchBar extends StatelessWidget {
                       ? IconButton(
                           icon: Icon(
                             Icons.close_rounded,
-                            color: const Color(0xFF7B8FA5),
+                            color: AppColors.textHint,
                             size: 20.sp,
                           ),
                           onPressed: () {
@@ -304,22 +297,14 @@ class GroupSearchBar extends StatelessWidget {
             height: 52.w,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              gradient: const LinearGradient(
-                colors: [
-                  AppColors.primary,
-                  AppColors.primary,
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
+              color: AppColors.primary,
               boxShadow: [
                 BoxShadow(
                   color: AppColors.primary.withValues(alpha: 0.28),
                   blurRadius: 14.r,
                   offset: Offset(0, 8.h),
                 ),
-              ],
-            ),
+              ],),
             child: Icon(
               Icons.add_rounded,
               color: Colors.white,
@@ -402,11 +387,7 @@ class GroupHeaderCard extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(20.w),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [AppColors.primary, AppColors.primary],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: AppColors.primary,
         borderRadius: BorderRadius.circular(30.r),
         boxShadow: [
           BoxShadow(
@@ -414,8 +395,7 @@ class GroupHeaderCard extends StatelessWidget {
             blurRadius: 24.r,
             offset: Offset(0, 14.h),
           ),
-        ],
-      ),
+        ],),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -584,15 +564,7 @@ class _HeaderActionButton extends StatelessWidget {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: resolvedBackground,
-          border: Border.all(color: resolvedBorder, width: 1.4),
-          boxShadow: [
-            BoxShadow(
-              color: resolvedBorder.withValues(alpha: 0.2),
-              blurRadius: 12.r,
-              offset: Offset(0, 8.h),
-            ),
-          ],
-        ),
+          border: Border.all(color: resolvedBorder, width: 1.4),),
         alignment: Alignment.center,
         child: Icon(icon, color: resolvedIcon, size: 20.sp),
       ),
@@ -647,21 +619,9 @@ class MilestoneOverview extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(22.w),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFFE9F8FF), Colors.white],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-        ),
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(28.r),
-        border: Border.all(color: const Color(0xFF91C7FF), width: 1.2),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 18.r,
-            offset: Offset(0, 10.h),
-          ),
-        ],
-      ),
+        border: Border.all(color: AppColors.primaryLight, width: 1.2),),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -677,7 +637,7 @@ class MilestoneOverview extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 15.sp,
                         fontWeight: FontWeight.w600,
-                        color: const Color(0xFF294263),
+                        color: AppColors.primaryDark,
                       ),
                     ),
                     SizedBox(height: 6.h),
@@ -762,17 +722,10 @@ class _PointsSummary extends StatelessWidget {
           Container(
             width: 48.w,
             height: 48.w,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               shape: BoxShape.circle,
               color: Colors.white,
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.primary.withValues(alpha: 0.16),
-                  blurRadius: 12.r,
-                  offset: Offset(0, 8.h),
-                )
-              ],
-            ),
+              border: Border.fromBorderSide(BorderSide(color: AppColors.line)),),
             alignment: Alignment.center,
             child: Image.asset(
               'assets/brand/icons/xp.png',
@@ -872,7 +825,7 @@ class ProgressStep extends StatelessWidget {
     final imagePath = _isUnlocked
         ? 'assets/brand/group/group_$nhomIndex.png'
         : 'assets/brand/rank/rank_locked.png';
-    final textColor = _isUnlocked ? AppColors.primary : const Color(0xFF63748D);
+    final textColor = _isUnlocked ? AppColors.primary : AppColors.textSecondary;
     final textWeight = _isUnlocked || isCurrent ? FontWeight.w700 : FontWeight.w600;
 
     return Column(
@@ -884,20 +837,11 @@ class ProgressStep extends StatelessWidget {
           height: 96.w,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(28.r),
-            color: _isUnlocked ? Colors.white : const Color(0xFFE8EEF7),
+            color: _isUnlocked ? Colors.white : AppColors.primarySoft,
             border: Border.all(
-              color: _isUnlocked ? Colors.white : const Color(0xFFCBD7E9),
+              color: _isUnlocked ? Colors.white : AppColors.primaryTint,
               width: 1.1,
-            ),
-            boxShadow: [
-              if (_isUnlocked)
-                BoxShadow(
-                  color: AppColors.primary.withValues(alpha: 0.16),
-                  blurRadius: 16.r,
-                  offset: Offset(0, 12.h),
-                ),
-            ],
-          ),
+            ),),
           padding: EdgeInsets.all(12.w),
           child: Image.asset(
             imagePath,
@@ -1104,15 +1048,7 @@ class LeaderboardTile extends StatelessWidget {
           border: Border.all(
             color: colors.primary.withValues(alpha: 0.12),
             width: 1,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: colors.shadow.withValues(alpha: 0.18),
-              blurRadius: 12.r,
-              offset: Offset(0, 6.h),
-            ),
-          ],
-        ),
+          ),),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -1144,20 +1080,8 @@ class LeaderboardTile extends StatelessWidget {
         padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 18.h),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(24.r),
-          gradient: LinearGradient(
-            colors: colors.background,
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          border: Border.all(color: borderColor, width: isHighlighted ? 1.6 : 1.2),
-          boxShadow: [
-            BoxShadow(
-              color: shadowColor,
-              blurRadius: 16.r,
-              offset: Offset(0, 10.h),
-            ),
-          ],
-        ),
+          color: (colors.background).first,
+          border: Border.all(color: borderColor, width: isHighlighted ? 1.6 : 1.2),),
         child: Row(
           children: [
             buildRankBadge(),
@@ -1230,12 +1154,12 @@ class LeaderboardTile extends StatelessWidget {
         );
       case 1:
         return _LeaderboardColors(
-          background: const [Color(0xFFEEF4FF), Color(0xFFDDE6F8)],
-          primary: const Color(0xFF283C57),
-          secondary: const Color(0xFF4B5F7A),
-          shadow: const Color(0xFFB7C6DF),
-          border: const Color(0xFFC3D1E6),
-          badgeBackground: const Color(0xFFEFF4FF),
+          background: const [AppColors.primarySoft, AppColors.primaryTint],
+          primary: AppColors.ink,
+          secondary: AppColors.textSecondary,
+          shadow: AppColors.primaryLight,
+          border: AppColors.primaryTint,
+          badgeBackground: AppColors.primarySoft,
         );
       case 2:
         return _LeaderboardColors(
@@ -1248,12 +1172,12 @@ class LeaderboardTile extends StatelessWidget {
         );
       default:
         return _LeaderboardColors(
-          background: const [Color(0xFFF6F8FF), Color(0xFFE5EDFF)],
-          primary: const Color(0xFF25476F),
-          secondary: const Color(0xFF4E6B94),
-          shadow: const Color(0xFFB7C9E6),
-          border: const Color(0xFFC1D1EC),
-          badgeBackground: const Color(0xFFF3F7FF),
+          background: const [AppColors.primarySoft, AppColors.primarySoft],
+          primary: AppColors.primaryDark,
+          secondary: AppColors.textSecondary,
+          shadow: AppColors.primaryTint,
+          border: AppColors.primaryTint,
+          badgeBackground: AppColors.primarySoft,
         );
     }
   }
@@ -1278,26 +1202,11 @@ class StudyGroupCard extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(26.r),
-          gradient: const LinearGradient(
-            colors: [
-              Color(0xFFE9F5FF),
-              Color(0xFFFFFFFF),
-            ],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
+          color: AppColors.surface,
           border: Border.all(
-            color: const Color(0xFF8FC2FF),
+            color: AppColors.primaryLight,
             width: 1.2,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.06),
-              blurRadius: 18.r,
-              offset: Offset(0, 10.h),
-            ),
-          ],
-        ),
+          ),),
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
         child: Row(
           children: [
@@ -1324,7 +1233,7 @@ class StudyGroupCard extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 16.sp,
                             fontWeight: FontWeight.w700,
-                            color: const Color(0xFF204675),
+                            color: AppColors.primaryDark,
                           ),
                         ),
                       ),
@@ -1384,15 +1293,7 @@ class StudyGroupCard extends StatelessWidget {
                 border: Border.all(
                   color: AppColors.primary,
                   width: 1.6,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.18),
-                    blurRadius: 10.r,
-                    offset: Offset(0, 6.h),
-                  ),
-                ],
-              ),
+                ),),
               alignment: Alignment.center,
               child: Text(
                 '${group.memberCount}',

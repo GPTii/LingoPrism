@@ -145,7 +145,7 @@ class CommunityDetailView extends GetView<CommunityDetailController> {
                     style: TextStyle(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.w800,
-                      color: const Color(0xFF11243A),
+                      color: AppColors.ink,
                     ),
                   ),
                   SizedBox(height: 14.h),
@@ -219,7 +219,7 @@ class CommunityDetailView extends GetView<CommunityDetailController> {
                                     border: Border.all(
                                       color: isSelected
                                           ? AppColors.primary
-                                          : const Color(0xFF7C8AA0),
+                                          : AppColors.textHint,
                                       width: 2,
                                     ),
                                   ),
@@ -243,7 +243,7 @@ class CommunityDetailView extends GetView<CommunityDetailController> {
                                     style: TextStyle(
                                       fontSize: 14.sp,
                                       fontWeight: FontWeight.w500,
-                                      color: const Color(0xFF22303F),
+                                      color: AppColors.textPrimary,
                                     ),
                                   ),
                                 ),
@@ -264,10 +264,10 @@ class CommunityDetailView extends GetView<CommunityDetailController> {
                         hintText: 'Mô tả chi tiết hơn...',
                         hintStyle: TextStyle(
                           fontSize: 13.sp,
-                          color: const Color(0xFF8A93A3),
+                          color: AppColors.textHint,
                         ),
                         filled: true,
-                        fillColor: const Color(0xFFF6F9FD),
+                        fillColor: AppColors.primarySoft,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(18.r),
                           borderSide: const BorderSide(
@@ -342,13 +342,13 @@ class CommunityDetailView extends GetView<CommunityDetailController> {
                             },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: alreadyReported
-                            ? const Color(0xFFCFD7E3)
+                            ? AppColors.line
                             : AppColors.error,
                         foregroundColor: Colors.white,
                         disabledForegroundColor: Colors.white,
                         elevation: 0,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(28.r),
+                          borderRadius: BorderRadius.circular(14.r),
                         ),
                         textStyle: TextStyle(
                           fontSize: 15.sp,
@@ -469,11 +469,11 @@ class _PostImage extends StatelessWidget {
         return Container(
           width: double.infinity,
           height: 200,
-          color: Colors.grey[300],
+          color: AppColors.lineStrong,
           child: const Icon(
             Icons.error_outline,
             size: 50,
-            color: Colors.grey,
+            color: AppColors.textHint,
           ),
         );
       },
@@ -534,24 +534,9 @@ class _FeedCard extends StatelessWidget {
         vocabularyItems.isNotEmpty ? vocabularyItems.first : null;
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(32.r),
-        gradient: const LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Color(0xFFE9FBFF),
-            Colors.white,
-          ],
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.shadow.withValues(alpha: 0.18),
-            blurRadius: 20.r,
-            offset: Offset(0, 14.h),
-          ),
-        ],
-      ),
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(20.r),
+        border: const Border.fromBorderSide(BorderSide(color: AppColors.line)),),
       padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 20.h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -642,7 +627,7 @@ class _ActionRow extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 14.h),
       decoration: BoxDecoration(
-        color: const Color(0xFFF3F9FF),
+        color: AppColors.primarySoft,
         borderRadius: BorderRadius.circular(24.r),
       ),
       child: Row(
@@ -775,9 +760,9 @@ class _CommentComposerState extends State<_CommentComposer> {
       // Handle error gracefully
       debugPrint('Error adding comment: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Không thể thêm bình luận. Vui lòng thử lại.'),
-          duration: const Duration(seconds: 3),
+        const SnackBar(
+          content: Text('Không thể thêm bình luận. Vui lòng thử lại.'),
+          duration: Duration(seconds: 3),
           behavior: SnackBarBehavior.floating,
           backgroundColor: Colors.red,
         ),
@@ -790,7 +775,7 @@ class _CommentComposerState extends State<_CommentComposer> {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
       decoration: BoxDecoration(
-        color: const Color(0xFFF6F8FF),
+        color: AppColors.primarySoft,
         borderRadius: BorderRadius.circular(24.r),
       ),
       child: Row(
@@ -798,7 +783,7 @@ class _CommentComposerState extends State<_CommentComposer> {
           Expanded(
             child: TextField(
               controller: _textController,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 hintText: 'Viết bình luận của bạn...',
                 border: InputBorder.none,
               ),
@@ -952,15 +937,7 @@ class _DetectedVocabularyItem extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(28.r),
           color: Colors.white,
-          border: Border.all(color: const Color(0xFFBFE5FF)),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.primary.withValues(alpha: 0.08),
-              blurRadius: 18.r,
-              offset: Offset(0, 10.h),
-            ),
-          ],
-        ),
+          border: Border.all(color: AppColors.primaryTint),),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -1015,7 +992,7 @@ class _DetectedVocabularyItem extends StatelessWidget {
                   width: 38.w,
                   height: 38.w,
                   decoration: const BoxDecoration(
-                    color: Color(0xFFE6F3FF),
+                    color: AppColors.primarySoft,
                     shape: BoxShape.circle,
                   ),
                   child: IconButton(
@@ -1096,7 +1073,7 @@ void _showTopicPicker(
                       width: 42.w,
                       height: 4.h,
                       decoration: BoxDecoration(
-                        color: Colors.grey[300],
+                        color: AppColors.lineStrong,
                         borderRadius: BorderRadius.circular(2.r),
                       ),
                     ),
@@ -1149,14 +1126,14 @@ void _showTopicPicker(
                           });
                         },
                         selectedColor: AppColors.primary,
-                        backgroundColor: const Color(0xFFE4F2FF),
+                        backgroundColor: AppColors.primarySoft,
                         pressElevation: 0,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20.r),
                           side: BorderSide(
                             color: isActive
                                 ? AppColors.primary
-                                : const Color(0xFFCCE6FF),
+                                : AppColors.primaryTint,
                           ),
                         ),
                       );
@@ -1279,20 +1256,13 @@ class _CommentItem extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(22.r),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.shadow.withValues(alpha: 0.08),
-            blurRadius: 16.r,
-            offset: Offset(0, 10.h),
-          ),
-        ],
-      ),
+        border: const Border.fromBorderSide(BorderSide(color: AppColors.line)),),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           CircleAvatar(
             radius: 22.r,
-            backgroundColor: const Color(0xFFE1F3FF),
+            backgroundColor: AppColors.primarySoft,
             backgroundImage: comment.avatarUrl.isNotEmpty
                 ? _AvatarImageProvider.from(comment.avatarUrl)
                 : null,
@@ -1454,22 +1424,14 @@ class _PrimaryActionButton extends StatelessWidget {
         padding: EdgeInsets.symmetric(vertical: 16.h),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(30.r),
-          gradient: const LinearGradient(
-            colors: [
-              Color(0xFF6DDCFF),
-              Color(0xFF2196F3),
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
+          color: AppColors.primaryLight,
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF2196F3).withValues(alpha: 0.25),
+              color: AppColors.primary.withValues(alpha: 0.25),
               blurRadius: 20.r,
               offset: Offset(0, 10.h),
             ),
-          ],
-        ),
+          ],),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -1505,17 +1467,10 @@ class _NavButton extends StatelessWidget {
       child: Container(
         width: 44.w,
         height: 44.w,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           color: Colors.white,
           shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.08),
-              blurRadius: 12.r,
-              offset: Offset(0, 6.h),
-            ),
-          ],
-        ),
+          border: Border.fromBorderSide(BorderSide(color: AppColors.line)),),
         child: Icon(
           icon,
           color: AppColors.textSecondary,
@@ -1539,7 +1494,7 @@ class _SelectIndicator extends StatelessWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         border: Border.all(
-          color: isActive ? AppColors.primary : const Color(0xFF94A5BE),
+          color: isActive ? AppColors.primary : AppColors.textHint,
           width: 2,
         ),
         color: isActive ? AppColors.primary : Colors.transparent,
@@ -1564,7 +1519,7 @@ class _TopicButton extends StatelessWidget {
       style: ElevatedButton.styleFrom(
         backgroundColor: AppColors.primary,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24.r),
+          borderRadius: BorderRadius.circular(14.r),
         ),
         padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 10.h),
         elevation: 0,

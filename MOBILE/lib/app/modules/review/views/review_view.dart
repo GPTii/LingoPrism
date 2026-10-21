@@ -63,14 +63,7 @@ class ReviewView extends GetView<ReviewController> {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(12.r),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.shadow.withValues(alpha: 0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
+                border: const Border.fromBorderSide(BorderSide(color: AppColors.line)),),
               child: TextField(
                 controller: controller.searchController,
                 onChanged: controller.onSearchChanged,
@@ -149,7 +142,7 @@ class ReviewView extends GetView<ReviewController> {
         heroTag: 'reviewAddCategoryFab',
         onPressed: controller.onAddCategory,
         backgroundColor: AppColors.primaryAccent,
-        elevation: 4,
+        elevation: 0,
         child: Icon(
           Icons.add,
           size: 32.sp,
@@ -185,14 +178,7 @@ class ReviewView extends GetView<ReviewController> {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(16.r),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.shadow.withValues(alpha: 0.05),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
+              border: const Border.fromBorderSide(BorderSide(color: AppColors.line)),),
             child: Row(
               children: [
                 SizedBox(
@@ -227,14 +213,7 @@ class ReviewView extends GetView<ReviewController> {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(16.r),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.shadow.withValues(alpha: 0.07),
-                blurRadius: 18,
-                offset: const Offset(0, 8),
-              ),
-            ],
-          ),
+            border: const Border.fromBorderSide(BorderSide(color: AppColors.line)),),
         
         ),
       );
@@ -319,14 +298,7 @@ class ReviewView extends GetView<ReviewController> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.shadow.withValues(alpha: 0.1),
-              blurRadius: 24,
-              offset: const Offset(0, -4),
-            ),
-          ],
-        ),
+          border: const Border.fromBorderSide(BorderSide(color: AppColors.line)),),
         child: SafeArea(
           top: false,
           child: SizedBox(
@@ -568,14 +540,7 @@ class ReviewView extends GetView<ReviewController> {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(16.r),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.shadow.withValues(alpha: 0.08),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
+            border: const Border.fromBorderSide(BorderSide(color: AppColors.line)),),
           child: Row(
             children: [
               // Icon
@@ -583,7 +548,7 @@ class ReviewView extends GetView<ReviewController> {
                 width: 56.w,
                 height: 56.w,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF6BA5F2).withValues(alpha: 0.15),
+                  color: AppColors.primaryLight.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(12.r),
                 ),
                 child: Center(
@@ -677,14 +642,14 @@ class ReviewView extends GetView<ReviewController> {
                             style: AppTextStyles.bodyMedium.copyWith(
                               fontWeight: FontWeight.w800,
                               fontSize: 18.sp,
-                              color: const Color(0xFF023047),
+                              color: AppColors.ink,
                             ),
                           ),
                           Text(
                             item.ipa,
                             style: AppTextStyles.captionMedium.copyWith(
                               fontSize: 14.sp,
-                              color: const Color(0xFF0096C7),
+                              color: AppColors.primary,
                               fontWeight: FontWeight.w600,
                             ),
                             maxLines: 1,
@@ -705,7 +670,7 @@ class ReviewView extends GetView<ReviewController> {
                         item.translation,
                         style: AppTextStyles.bodyMedium.copyWith(
                           fontWeight: FontWeight.w600,
-                          color: const Color(0xFF0F172A),
+                          color: AppColors.ink,
                         ),
                       ),
                     ],

@@ -1,12 +1,13 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { App, Avatar, Button, Card, Input, List, Tag } from 'antd'
-import { ArrowLeftOutlined, UserOutlined } from '@ant-design/icons'
+import { App, Button, Input, Popconfirm } from 'antd'
+import { CrownFilled } from '@ant-design/icons'
 import { useEffect, useRef, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { communityApi, type ChatMessage } from '../../api/app'
 import { errorMessage } from '../../api/client'
 import { useAuth } from '../../auth/store'
 import { LiveSocket } from '../../lib/ws'
+import { PageHeader, Section, UserAvatar } from '../../components/ui'
 
 /** Study group: realtime chat (WebSocket) + members ranked by this week's XP. */
 export default function GroupPage() {
@@ -69,20 +70,21 @@ export default function GroupPage() {
 
   return (
     <div className="max-w-5xl mx-auto flex flex-col gap-4">
-      <Link to="/community" className="text-slate-500"><ArrowLeftOutlined /> Cộng đồng</Link>
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <h1 className="text-2xl font-bold m-0">{group?.name ?? 'Nhóm học'}</h1>
-        <Button danger onClick={leave}>Rời nhóm</Button>
-      </div>
+      <PageHeader back={{ to: '/community', label: 'Cộng đồng' }} title={group?.name ?? 'Nhóm học'} description={group?.description || undefined}
+        actions={
+          <Popconfirm title="Rời nhóm này?" description="Bạn có thể xin vào lại sau." okText="Rời nhóm" cancelText="Ở lại" onConfirm={leave}>
+            <Button danger>Rời nhóm</Button>
+          </Popconfirm>
+        } />
       <div className="grid md:grid-cols-3 gap-4">
-        <Card className="md:col-span-2 !rounded-2xl" title="Trò chuyện" styles={{ body: { display: 'flex', flexDirection: 'column', height: 'min(520px, calc(100dvh - 180px))' } }}>
-          <div className="flex-1 overflow-y-auto flex flex-col gap-2 pr-1">
+        <Section title="Trò chuyện" className="md:col-span-2" bodyClassName="flex flex-col h-[min(520px,calc(100dvh-200px))]">
+          <div className="flex-1 overflow-y-auto flex flex-col gap-2 pr-1" aria-live="polite">
             {messages.map((m) => {
               const mine = m.user?.id === me?.id
               return (
                 <div key={m.id} className={`flex ${mine ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`max-w-[75%] rounded-2xl px-3 py-2 ${mine ? 'bg-brand-600 text-white' : 'bg-slate-100'}`}>
-                    {!mine && <div className="text-xs font-semibold opacity-70">{m.user?.display_name}{m.user && leaderIds.has(m.user.id) && ' 👑'}</div>}
+                  <div className={`max-w-[75%] rounded-2xl px-3 py-2 ${mine ? 'bg-[#6d4aff] text-white rounded-br-md' : 'bg-slate-100 text-slate-800 rounded-bl-md'}`}>
+                    {!mine && <div className="text-xs font-semibold text-slate-500">{m.user?.display_name}{m.user && leaderIds.has(m.user.id) && <CrownFilled className="text-amber-500 ml-1" aria-label="trưởng nhóm" />}</div>}
                     <div>{m.kind === 'sticker' ? `[sticker ${m.sticker}]` : m.content}</div>
                   </div>
                 </div>
@@ -90,21 +92,25 @@ export default function GroupPage() {
             })}
             <div ref={bottom} />
           </div>
-          <Input.Search className="mt-3" placeholder="Nhập tin nhắn…" enterButton="Gửi" value={text} onChange={(e) => setText(e.target.value)} onSearch={send} />
-        </Card>
+          <Input.Search className="mt-3" placeholder="Nhập tin nhắn…" enterButton="Gửi" aria-label="Tin nhắn" value={text} onChange={(e) => setText(e.target.value)} onSearch={send} />
+        </Section>
         <div className="flex flex-col gap-4">
-          <Card className="!rounded-2xl" title={`Thành viên (${active.length})`}>
-            <List dataSource={active} renderItem={(m, i) => (
-              <List.Item>
-                <span className="w-6 font-bold">{i + 1}</span>
-                <Avatar size="small" src={m.user.avatar?.startsWith('assets/') ? undefined : m.user.avatar} icon={<UserOutlined />} />
-                <span className="flex-1 ml-2">{m.user.display_name} {m.role === 'leader' && <Tag color="gold">Trưởng nhóm</Tag>}</span>
-                <span className="text-sm">{m.weekly_xp} XP</span>
-              </List.Item>
-            )} />
-          </Card>
+          <Section title="XP tuần này" extra={<span className="num text-sm text-slate-500">{active.length} thành viên</span>}>
+            <ol className="m-0 p-0 list-none flex flex-col gap-2.5">
+              {active.map((m, i) => (
+                <li key={m.id} className="flex items-center gap-2.5">
+                  <span className="num w-5 text-sm font-bold text-slate-500">{i + 1}</span>
+                  <UserAvatar name={m.user.display_name} src={m.user.avatar} size={30} />
+                  <span className="flex-1 min-w-0 truncate text-slate-800">
+                    {m.user.display_name}{m.role === 'leader' && <CrownFilled className="text-amber-500 ml-1" aria-label="trưởng nhóm" />}
+                  </span>
+                  <span className="num text-sm font-semibold text-slate-600">{m.weekly_xp} XP</span>
+                </li>
+              ))}
+            </ol>
+          </Section>
           {pending.length > 0 && (
-            <Card className="!rounded-2xl" title="Yêu cầu tham gia">
+            <Section title="Yêu cầu tham gia">
               {pending.map((m) => (
                 <div key={m.id} className="flex items-center justify-between py-1">
                   <div><div className="font-medium">{m.user.display_name}</div><div className="text-xs text-slate-500">{m.request_message}</div></div>
@@ -114,7 +120,7 @@ export default function GroupPage() {
                   </div>
                 </div>
               ))}
-            </Card>
+            </Section>
           )}
         </div>
       </div>

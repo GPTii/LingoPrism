@@ -224,7 +224,7 @@ class AddVocabularyCategoryController extends GetxController {
                   width: 48,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
+                    color: AppColors.lineStrong,
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
@@ -254,7 +254,7 @@ class AddVocabularyCategoryController extends GetxController {
                               style: const TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.w600,
-                                color: Color(0xFF1F2937),
+                                color: AppColors.textPrimary,
                               ),
                             ),
                             const SizedBox(height: 12),
@@ -284,7 +284,7 @@ class AddVocabularyCategoryController extends GetxController {
                                       color: isSelected
                                           ? AppColors.primary
                                               .withValues(alpha: 0.18)
-                                          : const Color(0xFFF5F8FF),
+                                          : AppColors.primarySoft,
                                       borderRadius: BorderRadius.circular(16),
                                       border: Border.all(
                                         color: isSelected

@@ -1,10 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
-import { App, Avatar, Button, Card, Skeleton, Statistic } from 'antd'
-import { UserOutlined } from '@ant-design/icons'
+import { App, Button, Skeleton } from 'antd'
 import { useParams } from 'react-router-dom'
 import { communityApi } from '../../api/app'
 import { errorMessage } from '../../api/client'
 import { useAuth } from '../../auth/store'
+import { StreakIcon, XpIcon } from '../../components/brand/Brand'
+import { Facts, PageHeader, Section, UserAvatar } from '../../components/ui'
 
 export default function MemberProfilePage() {
   const { id } = useParams()
@@ -12,7 +13,7 @@ export default function MemberProfilePage() {
   const { message } = App.useApp()
   const profile = useQuery({ queryKey: ['profile', id], queryFn: () => communityApi.profile(Number(id)) })
   const p = profile.data
-  if (!p) return <Skeleton active />
+  if (!p) return <div className="max-w-3xl mx-auto lp-card p-6"><Skeleton active avatar /></div>
   const toggle = async () => {
     try {
       await communityApi.follow(p.id, !p.is_following)
@@ -22,28 +23,37 @@ export default function MemberProfilePage() {
     }
   }
   return (
-    <div className="max-w-3xl mx-auto flex flex-col gap-4">
-      <Card className="!rounded-2xl">
-        <div className="flex items-center gap-4">
-          <Avatar size={72} src={p.avatar?.startsWith('assets/') ? undefined : p.avatar} icon={<UserOutlined />} />
-          <div className="flex-1">
-            <div className="text-xl font-bold">{p.display_name}</div>
-            <div className="text-slate-500">{p.bio}</div>
-            {p.groups[0] && <div className="text-sm">Nhóm: {p.groups[0].name}</div>}
+    <div className="max-w-3xl mx-auto flex flex-col gap-6">
+      <PageHeader back={{ to: '/community', label: 'Cộng đồng' }}
+        title={
+          <span className="flex items-center gap-4">
+            <UserAvatar name={p.display_name} src={p.avatar} size={64} />
+            <span className="min-w-0">
+              {p.display_name}
+              {p.groups[0] && <span className="block text-base font-medium text-slate-500 mt-0.5">Nhóm {p.groups[0].name}</span>}
+            </span>
+          </span>
+        }
+        description={p.bio || undefined}
+        actions={p.id !== me?.id && (
+          <Button size="large" type={p.is_following ? 'default' : 'primary'} onClick={toggle}>{p.is_following ? 'Đang theo dõi' : 'Theo dõi'}</Button>
+        )} />
+      <Section>
+        <Facts items={[
+          { label: 'tổng XP', value: p.lifetime_xp.toLocaleString('vi-VN'), icon: <XpIcon size={22} /> },
+          { label: 'ngày liên tiếp', value: p.streak, icon: <StreakIcon size={22} /> },
+          { label: 'bài đăng', value: p.posts },
+          { label: 'người theo dõi', value: p.followers },
+          { label: 'đang theo dõi', value: p.following },
+        ]} />
+      </Section>
+      {p.recent_posts.length > 0 && (
+        <Section title="Ảnh gần đây">
+          <div className="grid grid-cols-3 gap-2">
+            {p.recent_posts.map((r) => <img key={r.id} src={r.image} alt="" loading="lazy" className="aspect-square w-full object-cover rounded-xl bg-slate-100" />)}
           </div>
-          {p.id !== me?.id && <Button type={p.is_following ? 'default' : 'primary'} onClick={toggle}>{p.is_following ? 'Đang theo dõi' : 'Theo dõi'}</Button>}
-        </div>
-        <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 mt-4">
-          <Statistic title="XP" value={p.lifetime_xp} />
-          <Statistic title="Streak" value={p.streak} />
-          <Statistic title="Bài đăng" value={p.posts} />
-          <Statistic title="Người theo dõi" value={p.followers} />
-          <Statistic title="Đang theo dõi" value={p.following} />
-        </div>
-      </Card>
-      <div className="grid grid-cols-3 gap-2">
-        {p.recent_posts.map((r) => <img key={r.id} src={r.image} alt="" className="aspect-square object-cover rounded-xl" />)}
-      </div>
+        </Section>
+      )}
     </div>
   )
 }

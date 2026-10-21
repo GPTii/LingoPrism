@@ -1,12 +1,21 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { App, Button, Calendar, Card, Progress, Statistic, Tag } from 'antd'
+import { App, Button, Calendar, Progress, Skeleton } from 'antd'
+import { CheckOutlined, ThunderboltFilled } from '@ant-design/icons'
 import dayjs, { type Dayjs } from 'dayjs'
 import { useState } from 'react'
 import { gameApi } from '../../api/app'
 import { errorMessage } from '../../api/client'
-import { GemIcon, ScaleIcon, StreakIcon, XpIcon } from '../../components/brand/Brand'
+import { BadgeMedal, FreezeIcon, GemIcon, Prismo, ScaleIcon, StreakIcon, XpIcon } from '../../components/brand/Brand'
+import { Facts, PageHeader, Section } from '../../components/ui'
 
-const Ice = () => <span className="inline-block h-4 w-4 rounded-[5px] bg-sky-300/80 border border-sky-400 align-middle" />
+/** the item drawn from the brand set: ice block, Prismo sticker, or the XP star */
+const itemIcon = (i: { code: string; effect: string }) =>
+  i.effect === 'streak_freeze' ? <FreezeIcon size={26} />
+    : i.effect === 'sticker' ? <Prismo size={30} mood={i.code.includes('sad') ? 'sad' : i.code.includes('love') ? 'celebrate' : 'happy'} />
+      : <XpIcon size={26} />
+
+const price = (i: { cost_scales: number | null; cost_gems: number | null }) =>
+  i.cost_scales ? <>{i.cost_scales} <ScaleIcon size={16} /></> : <>{i.cost_gems} <GemIcon size={16} /></>
 
 /** Thành tích: streak calendar, quests, badges and the shop (Vảy / Ngọc). */
 export default function AchievementsPage() {
@@ -22,97 +31,127 @@ export default function AchievementsPage() {
     queryFn: () => gameApi.progress(month.startOf('month').format('YYYY-MM-DD'), month.endOf('month').format('YYYY-MM-DD')),
   })
   const days = new Map(progress.data?.map((d) => [d.date, d]))
-  const refresh = () => ['game-summary', 'quests', 'shop'].forEach((k) => queryClient.invalidateQueries({ queryKey: [k] }))
+  const refresh = () => ['game-summary', 'quests', 'shop', 'badges'].forEach((k) => queryClient.invalidateQueries({ queryKey: [k] }))
   const act = useMutation({
-    mutationFn: (fn: () => Promise<unknown>) => fn(),
-    onSuccess: () => { message.success('Thành công'); refresh() },
+    mutationFn: ({ fn }: { fn: () => Promise<unknown>; done: string }) => fn(),
+    onSuccess: (_, v) => { message.success(v.done); refresh() },
     onError: (e) => message.error(errorMessage(e)),
   })
   const s = summary.data
+  const owned = badges.data?.filter((b) => b.owned).length ?? 0
 
   const cell = (d: Dayjs) => {
     const p = days.get(d.format('YYYY-MM-DD'))
     if (!p) return null
-    return <div className="flex justify-center">{p.freeze_used ? <Ice /> : p.active ? <StreakIcon size={20} /> : null}</div>
+    return <div className="flex justify-center">{p.freeze_used ? <FreezeIcon size={18} /> : p.active ? <StreakIcon size={18} /> : null}</div>
   }
 
   return (
     <div className="max-w-6xl mx-auto flex flex-col gap-6">
-      <h1 className="text-3xl font-black text-slate-800 m-0">Thành tích</h1>
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-        <Card className="lp-card !border-0"><Statistic title="Chuỗi ngày học" value={s?.streak ?? 0} prefix={<StreakIcon size={26} active={!!s?.studied_today} />} suffix="ngày" /></Card>
-        <Card className="lp-card !border-0"><Statistic title="Tổng XP" value={s?.lifetime_xp ?? 0} prefix={<XpIcon size={26} />} /></Card>
-        <Card className="lp-card !border-0"><Statistic title="XP hôm nay" value={s?.today_xp ?? 0} suffix={`/ ${s?.daily_xp_cap ?? 500}`} /></Card>
-        <Card className="lp-card !border-0"><Statistic title="Vảy" value={s?.scales ?? 0} prefix={<ScaleIcon size={26} />} /></Card>
-        <Card className="lp-card !border-0"><Statistic title="Ngọc" value={s?.gems ?? 0} prefix={<GemIcon size={26} />} /></Card>
-      </div>
-      {s?.active_boosts.length ? <div>{s.active_boosts.map((b) => <Tag key={b.item} color="gold">⚡ {b.name} x{b.multiplier} đến {dayjs(b.expires_at).format('HH:mm DD/MM')}</Tag>)}</div> : null}
+      <PageHeader title="Thành tích" description="Chuỗi ngày học, nhiệm vụ, huy hiệu và cửa hàng đổi vảy, ngọc." />
+
+      <Section>
+        <Facts items={[
+          { label: 'ngày học liên tiếp', value: s?.streak ?? 0, icon: <StreakIcon size={24} active={!!s?.studied_today} /> },
+          { label: 'tổng kinh nghiệm', value: (s?.lifetime_xp ?? 0).toLocaleString('vi-VN'), icon: <XpIcon size={24} /> },
+          { label: 'XP hôm nay', value: s?.today_xp ?? 0, hint: `/ ${s?.daily_xp_cap ?? 500}` },
+          { label: 'vảy', value: s?.scales ?? 0, icon: <ScaleIcon size={24} /> },
+          { label: 'ngọc', value: s?.gems ?? 0, icon: <GemIcon size={24} /> },
+        ]} />
+        {s?.active_boosts.length ? (
+          <div className="mt-4 flex flex-wrap gap-2">
+            {s.active_boosts.map((b) => (
+              <span key={b.item} className="inline-flex items-center gap-1.5 rounded-lg bg-amber-50 text-amber-700 px-2.5 py-1 text-sm font-semibold">
+                <ThunderboltFilled /> {b.name} ×{b.multiplier} đến {dayjs(b.expires_at).format('HH:mm DD/MM')}
+              </span>
+            ))}
+          </div>
+        ) : null}
+      </Section>
 
       <div className="grid lg:grid-cols-2 gap-6">
-        <Card title="Nhiệm vụ hằng ngày" className="!rounded-2xl">
-          <div className="flex flex-col gap-4">
-            {quests.data?.quests.map((q) => (
-              <div key={q.id}>
-                <div className="flex justify-between items-center">
-                  <span>{q.title}</span>
-                  {q.completed && !q.reward_claimed ? (
-                    <Button size="small" type="primary" onClick={() => act.mutate(() => gameApi.claim(q.id))}>Nhận {q.reward_scales} <ScaleIcon size={16} /></Button>
-                  ) : q.reward_claimed ? <Tag color="green">Đã nhận</Tag> : null}
-                </div>
-                <Progress percent={Math.round((q.progress / q.target) * 100)} format={() => `${q.progress}/${q.target}`} />
-              </div>
-            ))}
-            {quests.data && (
-              <div className="border-t pt-3">
-                <div className="flex justify-between items-center">
-                  <span className="font-medium">Nhiệm vụ tháng: hoàn thành {quests.data.monthly.target} nhiệm vụ</span>
-                  {quests.data.monthly.completed_count >= quests.data.monthly.target && !quests.data.monthly.reward_claimed && (
-                    <Button size="small" type="primary" onClick={() => act.mutate(gameApi.claimMonthly)}>Nhận {quests.data.monthly.reward_gems} <GemIcon size={16} /></Button>
-                  )}
-                </div>
-                <Progress percent={Math.round((quests.data.monthly.completed_count / quests.data.monthly.target) * 100)}
-                  format={() => `${quests.data!.monthly.completed_count}/${quests.data!.monthly.target}`} strokeColor="#8b5cf6" />
-              </div>
-            )}
-          </div>
-        </Card>
-
-        <Card title="Lịch học" className="!rounded-2xl">
-          <Calendar fullscreen={false} value={month} onPanelChange={(d) => setMonth(d)} cellRender={(d, info) => (info.type === 'date' ? cell(d) : null)} />
-          <div className="text-xs text-slate-500"><StreakIcon size={14} /> ngày có học · <Ice /> dùng Đá băng giữ streak · Đá băng còn: {s?.streak_freezes ?? 0}</div>
-        </Card>
-      </div>
-
-      <Card title="Huy hiệu" className="!rounded-2xl">
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-          {badges.data?.map((b) => (
-            <div key={b.code} className={`text-center p-3 rounded-xl ${b.owned ? 'bg-amber-50' : 'opacity-40 grayscale'}`}>
-              <div className="text-3xl">🏅</div>
-              <div className="font-medium">{b.name}</div>
-              <div className="text-xs text-slate-500">{b.description}</div>
-            </div>
-          ))}
-        </div>
-      </Card>
-
-      <Card title="Cửa hàng" className="!rounded-2xl">
-        <div className="grid md:grid-cols-3 gap-4">
-          {shop.data?.map((i) => (
-            <div key={i.id} className="rounded-xl border border-slate-200 p-4 flex flex-col gap-2">
-              <div className="font-semibold">{i.name} {i.owned > 0 && <Tag>x{i.owned}</Tag>}</div>
-              <div className="text-sm text-slate-500 flex-1">{i.description}</div>
-              <div className="flex gap-2">
-                <Button type="primary" onClick={() => act.mutate(() => gameApi.buy(i.id))}>
-                  {i.cost_scales ? <>{i.cost_scales} <ScaleIcon size={16} /></> : <>{i.cost_gems} <GemIcon size={16} /></>}
-                </Button>
-                {i.owned > 0 && (i.effect === 'xp_double_15m' || i.effect === 'xp_plus25_24h') && (
-                  <Button onClick={() => act.mutate(() => gameApi.use(i.id))}>Dùng</Button>
+        <Section title="Nhiệm vụ hằng ngày">
+          {quests.isLoading ? <Skeleton active /> : (
+            <ul className="m-0 p-0 list-none flex flex-col gap-4">
+              {quests.data?.quests.map((q) => (
+                <li key={q.id}>
+                  <div className="flex justify-between items-center gap-3">
+                    <span className={`font-medium ${q.reward_claimed ? 'text-slate-400' : 'text-slate-700'}`}>{q.title}</span>
+                    {q.completed && !q.reward_claimed ? (
+                      <Button size="small" type="primary" loading={act.isPending}
+                        onClick={() => act.mutate({ fn: () => gameApi.claim(q.id), done: `Đã nhận ${q.reward_scales} vảy` })}>
+                        Nhận {q.reward_scales} <ScaleIcon size={14} />
+                      </Button>
+                    ) : q.reward_claimed ? <span className="text-sm font-semibold text-emerald-600"><CheckOutlined /> Đã nhận</span> : null}
+                  </div>
+                  <Progress percent={Math.round((q.progress / Math.max(q.target, 1)) * 100)} format={() => `${q.progress}/${q.target}`}
+                    strokeColor={q.completed ? '#10c79a' : undefined} />
+                </li>
+              ))}
+            </ul>
+          )}
+          {quests.data && (
+            <div className="mt-5 pt-5 border-t border-slate-200">
+              <div className="flex justify-between items-center gap-3">
+                <span className="font-semibold text-slate-700">Nhiệm vụ tháng: hoàn thành {quests.data.monthly.target} nhiệm vụ</span>
+                {quests.data.monthly.completed_count >= quests.data.monthly.target && !quests.data.monthly.reward_claimed && (
+                  <Button size="small" type="primary"
+                    onClick={() => act.mutate({ fn: gameApi.claimMonthly, done: `Đã nhận ${quests.data!.monthly.reward_gems} ngọc` })}>
+                    Nhận {quests.data.monthly.reward_gems} <GemIcon size={14} />
+                  </Button>
                 )}
               </div>
+              <Progress percent={Math.round((quests.data.monthly.completed_count / Math.max(quests.data.monthly.target, 1)) * 100)}
+                format={() => `${quests.data!.monthly.completed_count}/${quests.data!.monthly.target}`} />
             </div>
+          )}
+        </Section>
+
+        <Section title="Lịch học">
+          <Calendar fullscreen={false} value={month} onPanelChange={(d) => setMonth(d)} cellRender={(d, info) => (info.type === 'date' ? cell(d) : null)} />
+          <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-slate-500">
+            <span className="inline-flex items-center gap-1"><StreakIcon size={14} /> ngày có học</span>
+            <span className="inline-flex items-center gap-1"><FreezeIcon size={14} /> dùng Đá băng giữ chuỗi</span>
+            <span>Đá băng còn: <b className="num text-slate-700">{s?.streak_freezes ?? 0}</b></span>
+          </div>
+        </Section>
+      </div>
+
+      <Section title="Huy hiệu" extra={badges.data && <span className="num text-sm text-slate-500">{owned}/{badges.data.length} đã có</span>}>
+        <ul className="m-0 p-0 list-none grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-x-4 gap-y-6">
+          {badges.data?.map((b, i) => (
+            <li key={b.code} className={`flex flex-col items-center text-center gap-1 ${b.owned ? '' : 'opacity-60'}`}>
+              <BadgeMedal owned={b.owned} seed={i} size={52} />
+              <div className={`font-semibold leading-snug ${b.owned ? 'text-slate-800' : 'text-slate-500'}`}>{b.name}</div>
+              <div className="text-xs text-slate-500 max-w-[22ch]">{b.description}</div>
+              {b.owned && b.awarded_at && <div className="text-xs text-emerald-600 font-medium">{dayjs(b.awarded_at).format('DD/MM/YYYY')}</div>}
+            </li>
           ))}
-        </div>
-      </Card>
+        </ul>
+      </Section>
+
+      <Section title="Cửa hàng" extra={<span className="text-sm text-slate-500">Đổi vảy và ngọc lấy vật phẩm hỗ trợ</span>}>
+        <ul className="m-0 p-0 list-none grid md:grid-cols-3 gap-3">
+          {shop.data?.map((i) => (
+            <li key={i.id} className="rounded-xl bg-slate-50 p-4 flex flex-col gap-2">
+              <div className="flex items-center gap-2 font-semibold text-slate-800">
+                {itemIcon(i)}
+                <span className="flex-1">{i.name}</span>
+                {i.owned > 0 && <span className="num text-sm font-medium text-slate-500">đang có {i.owned}</span>}
+              </div>
+              <div className="text-sm text-slate-500 flex-1">{i.description}</div>
+              <div className="flex gap-2 pt-1">
+                <Button type="primary" onClick={() => act.mutate({ fn: () => gameApi.buy(i.id), done: `Đã mua ${i.name}` })}>
+                  Mua · {price(i)}
+                </Button>
+                {i.owned > 0 && (i.effect === 'xp_double_15m' || i.effect === 'xp_plus25_24h') && (
+                  <Button onClick={() => act.mutate({ fn: () => gameApi.use(i.id), done: `Đã dùng ${i.name}` })}>Dùng ngay</Button>
+                )}
+              </div>
+            </li>
+          ))}
+        </ul>
+      </Section>
     </div>
   )
 }

@@ -57,16 +57,9 @@ class VocabularyListView extends GetView<VocabularyListController> {
   Widget _buildHeader() {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+        border: Border.fromBorderSide(BorderSide(color: AppColors.line)),),
       child: Row(
         children: [
           // Back button
@@ -101,7 +94,7 @@ class VocabularyListView extends GetView<VocabularyListController> {
               foregroundColor: Colors.white,
               padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20.r),
+                borderRadius: BorderRadius.circular(14.r),
               ),
               elevation: 0,
             ),
@@ -127,7 +120,7 @@ class VocabularyListView extends GetView<VocabularyListController> {
       margin: EdgeInsets.only(bottom: 12.h),
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        color: const Color(0xFFE5F8FF),
+        color: AppColors.primarySoft,
         borderRadius: BorderRadius.circular(16.r),
         border: Border.all(
           color: AppColors.primary,
@@ -192,7 +185,7 @@ class VocabularyListView extends GetView<VocabularyListController> {
                 icon: Icon(
                   Icons.more_vert,
                   size: 24.sp,
-                  color: Colors.black54,
+                  color: AppColors.textSecondary,
                 ),
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
@@ -210,7 +203,7 @@ class VocabularyListView extends GetView<VocabularyListController> {
                 vocab.phonetic!,
                 style: TextStyle(
                   fontSize: 14.sp,
-                  color: Colors.black54,
+                  color: AppColors.textSecondary,
                   fontStyle: FontStyle.italic,
                 ),
               ),
@@ -223,7 +216,7 @@ class VocabularyListView extends GetView<VocabularyListController> {
               vocab.translation,
               style: TextStyle(
                 fontSize: 14.sp,
-                color: Colors.black87,
+                color: AppColors.textPrimary,
               ),
             ),
           ),
@@ -236,7 +229,7 @@ class VocabularyListView extends GetView<VocabularyListController> {
                 'VD: ${vocab.example}',
                 style: TextStyle(
                   fontSize: 13.sp,
-                  color: Colors.black54,
+                  color: AppColors.textSecondary,
                 ),
               ),
             ),
@@ -254,14 +247,14 @@ class VocabularyListView extends GetView<VocabularyListController> {
           Icon(
             Icons.book_outlined,
             size: 80.sp,
-            color: Colors.grey,
+            color: AppColors.textHint,
           ),
           SizedBox(height: 16.h),
           Text(
             'Chưa có từ vựng nào',
             style: TextStyle(
               fontSize: 18.sp,
-              color: Colors.grey,
+              color: AppColors.textHint,
             ),
           ),
           SizedBox(height: 8.h),
@@ -269,7 +262,7 @@ class VocabularyListView extends GetView<VocabularyListController> {
             'Nhấn nút + để thêm từ mới',
             style: TextStyle(
               fontSize: 14.sp,
-              color: Colors.grey,
+              color: AppColors.textHint,
             ),
           ),
         ],
@@ -287,7 +280,7 @@ class VocabularyListView extends GetView<VocabularyListController> {
       case 'mastered':
         return AppColors.success; // Green
       default:
-        return Colors.grey;
+        return AppColors.textHint;
     }
   }
 

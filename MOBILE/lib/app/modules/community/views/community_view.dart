@@ -248,21 +248,14 @@ class _JoinedHeader extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(26.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
-            blurRadius: 18.r,
-            offset: Offset(0, 10.h),
-          ),
-        ],
-      ),
+        border: const Border.fromBorderSide(BorderSide(color: AppColors.line)),),
       child: Row(
         children: [
           Container(
             height: 62.h,
             width: 62.h,
             decoration: BoxDecoration(
-              color: const Color(0xFFEAF6FF),
+              color: AppColors.primarySoft,
               borderRadius: BorderRadius.circular(20.r),
             ),
             padding: EdgeInsets.all(10.w),
@@ -278,7 +271,7 @@ class _JoinedHeader extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 18.sp,
                     fontWeight: FontWeight.w700,
-                    color: const Color(0xFF1B2D49),
+                    color: AppColors.ink,
                   ),
                 ),
                 SizedBox(height: 6.h),
@@ -286,7 +279,7 @@ class _JoinedHeader extends StatelessWidget {
                   '${details.group.memberCount} thành viên • Trưởng nhóm: ${details.group.leaderName}',
                   style: TextStyle(
                     fontSize: 13.sp,
-                    color: const Color(0xFF56677E),
+                    color: AppColors.textSecondary,
                   ),
                 ),
               ],
@@ -331,24 +324,9 @@ class _MilestoneOverview extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(18.w),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [
-            Color(0xFFE9F8FF),
-            Color(0xFFFFFFFF),
-          ],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-        ),
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(28.r),
-        border: Border.all(color: const Color(0xFF91C7FF), width: 1.2),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 18.r,
-            offset: Offset(0, 10.h),
-          ),
-        ],
-      ),
+        border: Border.all(color: AppColors.primaryLight, width: 1.2),),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -364,7 +342,7 @@ class _MilestoneOverview extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 15.sp,
                         fontWeight: FontWeight.w600,
-                        color: const Color(0xFF32455C),
+                        color: AppColors.textPrimary,
                       ),
                     ),
                     SizedBox(height: 4.h),
@@ -383,7 +361,7 @@ class _MilestoneOverview extends StatelessWidget {
                 _formatRemainingTime(details.daysRemaining),
                 style: TextStyle(
                   fontSize: 13.sp,
-                  color: const Color(0xFF4A5A70),
+                  color: AppColors.textSecondary,
                 ),
               ),
             ],
@@ -403,7 +381,7 @@ class _MilestoneOverview extends StatelessWidget {
             'Điểm tích luỹ',
             style: TextStyle(
               fontSize: 13.sp,
-              color: const Color(0xFF516376),
+              color: AppColors.textSecondary,
             ),
           ),
         ],
@@ -433,7 +411,7 @@ class _MilestoneIcons extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: milestone.isReached
                           ? AppColors.primary.withValues(alpha: 0.12)
-                          : const Color(0xFFE6ECF5),
+                          : AppColors.primarySoft,
                       borderRadius: BorderRadius.circular(18.r),
                     ),
                     alignment: Alignment.center,
@@ -441,7 +419,7 @@ class _MilestoneIcons extends StatelessWidget {
                       Icons.emoji_events_rounded,
                       color: milestone.isReached
                           ? AppColors.primary
-                          : const Color(0xFF9BA8B8),
+                          : AppColors.textHint,
                     ),
                   ),
                   SizedBox(height: 6.h),
@@ -452,7 +430,7 @@ class _MilestoneIcons extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                       color: milestone.isReached
                           ? AppColors.primary
-                          : const Color(0xFF7D8DA3),
+                          : AppColors.textHint,
                     ),
                   ),
                 ],
@@ -500,7 +478,7 @@ class _LeaderboardCard extends StatelessWidget {
       case 1:
         return const Color(0xFFFFF1AA);
       case 2:
-        return const Color(0xFFE4F1FF);
+        return AppColors.primarySoft;
       case 3:
         return const Color(0xFFFFDEBB);
       default:
@@ -590,7 +568,7 @@ class _LeaderboardCard extends StatelessWidget {
             style: TextStyle(
               fontSize: 18.sp,
               fontWeight: FontWeight.w700,
-              color: const Color(0xFF25405F),
+              color: AppColors.primaryDark,
             ),
           ),
         ],
@@ -617,26 +595,11 @@ class _StudyGroupCard extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(26.r),
-          gradient: const LinearGradient(
-            colors: [
-              Color(0xFFE9F5FF),
-              Color(0xFFFFFFFF),
-            ],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
+          color: AppColors.surface,
           border: Border.all(
-            color: const Color(0xFF8FC2FF),
+            color: AppColors.primaryLight,
             width: 1.2,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.06),
-              blurRadius: 18.r,
-              offset: Offset(0, 10.h),
-            ),
-          ],
-        ),
+          ),),
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
         child: Row(
           children: [
@@ -663,7 +626,7 @@ class _StudyGroupCard extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 16.sp,
                             fontWeight: FontWeight.w700,
-                            color: const Color(0xFF204675),
+                            color: AppColors.primaryDark,
                           ),
                         ),
                       ),
@@ -723,15 +686,7 @@ class _StudyGroupCard extends StatelessWidget {
                 border: Border.all(
                   color: AppColors.primary,
                   width: 1.6,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.18),
-                    blurRadius: 10.r,
-                    offset: Offset(0, 6.h),
-                  ),
-                ],
-              ),
+                ),),
               alignment: Alignment.center,
               child: Text(
                 '${group.memberCount}',
@@ -761,7 +716,7 @@ class _GroupImage extends StatelessWidget {
       return Icon(
         Icons.group_outlined,
         size: size * 0.6,
-        color: Colors.grey,
+        color: AppColors.textHint,
       );
     }
 
@@ -793,7 +748,7 @@ class _GroupImage extends StatelessWidget {
               return Icon(
                 Icons.group_outlined,
                 size: size * 0.6,
-                color: Colors.grey,
+                color: AppColors.textHint,
               );
             },
           )
@@ -808,7 +763,7 @@ class _GroupImage extends StatelessWidget {
               return Icon(
                 Icons.group_outlined,
                 size: size * 0.6,
-                color: Colors.grey,
+                color: AppColors.textHint,
               );
             },
           );
@@ -832,14 +787,7 @@ class _FeedCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(32.r),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.08),
-              blurRadius: 20.r,
-              offset: Offset(0, 12.h),
-            ),
-          ],
-        ),
+          border: const Border.fromBorderSide(BorderSide(color: AppColors.line)),),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -885,7 +833,7 @@ class _FeedCard extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 16.sp,
                             fontWeight: FontWeight.w700,
-                            color: const Color(0xFF202124),
+                            color: AppColors.textPrimary,
                             decoration: TextDecoration.underline,
                             decorationStyle: TextDecorationStyle.dotted,
                           ),
@@ -914,7 +862,7 @@ class _FeedCard extends StatelessWidget {
                             backgroundColor: AppColors.primary,
                             foregroundColor: Colors.white,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20.r),
+                              borderRadius: BorderRadius.circular(14.r),
                             ),
                           ),
                           child: post.isFollowActionPending.value
@@ -945,7 +893,7 @@ class _FeedCard extends StatelessWidget {
                 post.postedAt,
                 style: TextStyle(
                   fontSize: 12.sp,
-                  color: const Color(0xFF8A8F9A),
+                  color: AppColors.textHint,
                 ),
               ),
             ],
@@ -1280,9 +1228,9 @@ class _FeedCard extends StatelessWidget {
             width: double.infinity,
             padding: EdgeInsets.all(16.w),
             decoration: BoxDecoration(
-              color: const Color(0xFFF2F8FF),
+              color: AppColors.primarySoft,
               borderRadius: BorderRadius.circular(20.r),
-              border: Border.all(color: const Color(0xFFC7E0FF)),
+              border: Border.all(color: AppColors.primaryTint),
             ),
             child: highlightComments.isEmpty
                 ? Text(
@@ -1334,10 +1282,10 @@ class _FeedCard extends StatelessWidget {
 
       final borderColor = isSelected
           ? AppColors.primary
-          : const Color(0xFF00A3FF).withValues(alpha: 0.6);
+          : AppColors.primary.withValues(alpha: 0.6);
       final gradientColors = isSelected
-          ? const [Color(0xFFEAF7FF), Color(0xFFD6EDFF)]
-          : const [Color(0xFFF5FBFF), Color(0xFFE7F5FF)];
+          ? const [AppColors.primarySoft, AppColors.primaryTint]
+          : const [AppColors.primarySoft, AppColors.primarySoft];
       final hasMultiple = total > 1;
 
       Widget card = Container(
@@ -1345,19 +1293,7 @@ class _FeedCard extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(24.r),
           border: Border.all(color: borderColor, width: 1.8),
-          gradient: LinearGradient(
-            colors: gradientColors,
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: borderColor.withValues(alpha: 0.15),
-              blurRadius: 24.r,
-              offset: Offset(0, 12.h),
-            ),
-          ],
-        ),
+          color: (gradientColors).first,),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -1378,18 +1314,7 @@ class _FeedCard extends StatelessWidget {
                         width: isSelected ? 2.4 : 2,
                       ),
                       color:
-                          isSelected ? AppColors.primary : Colors.white,
-                      boxShadow: isSelected
-                          ? [
-                              BoxShadow(
-                                color: AppColors.primary
-                                    .withValues(alpha: 0.25),
-                                blurRadius: 12.r,
-                                offset: Offset(0, 4.h),
-                              ),
-                            ]
-                          : [],
-                    ),
+                          isSelected ? AppColors.primary : Colors.white,),
                     child: isSelected
                         ? Icon(
                             Icons.check,
@@ -1418,7 +1343,7 @@ class _FeedCard extends StatelessWidget {
                           vocabulary.translation,
                           style: TextStyle(
                             fontSize: 14.sp,
-                            color: const Color(0xFF16687E),
+                            color: AppColors.primaryDark,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -1445,15 +1370,7 @@ class _FeedCard extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(20.r),
-                      boxShadow: [
-                        BoxShadow(
-                          color:
-                              AppColors.primary.withValues(alpha: 0.18),
-                          blurRadius: 14.r,
-                          offset: Offset(0, 6.h),
-                        ),
-                      ],
-                    ),
+                      border: const Border.fromBorderSide(BorderSide(color: AppColors.line)),),
                     child: Icon(
                       Icons.volume_up_rounded,
                       color: AppColors.primary,
@@ -1619,7 +1536,7 @@ class _FeedCard extends StatelessWidget {
                         width: 42.w,
                         height: 4.h,
                         decoration: BoxDecoration(
-                          color: Colors.grey[300],
+                          color: AppColors.lineStrong,
                           borderRadius: BorderRadius.circular(2.r),
                         ),
                       ),
@@ -1672,14 +1589,14 @@ class _FeedCard extends StatelessWidget {
                             });
                           },
                           selectedColor: AppColors.primary,
-                          backgroundColor: const Color(0xFFE4F2FF),
+                          backgroundColor: AppColors.primarySoft,
                           pressElevation: 0,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20.r),
                             side: BorderSide(
                               color: isActive
                                   ? AppColors.primary
-                                  : const Color(0xFFCCE6FF),
+                                  : AppColors.primaryTint,
                             ),
                           ),
                         );
@@ -1907,7 +1824,7 @@ class _FeedCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.w800,
-                      color: const Color(0xFF11243A),
+                      color: AppColors.ink,
                     ),
                   ),
                   SizedBox(height: 14.h),
@@ -1981,7 +1898,7 @@ class _FeedCard extends StatelessWidget {
                                     border: Border.all(
                                       color: isSelected
                                           ? AppColors.primary
-                                          : const Color(0xFF7C8AA0),
+                                          : AppColors.textHint,
                                       width: 2,
                                     ),
                                   ),
@@ -2005,7 +1922,7 @@ class _FeedCard extends StatelessWidget {
                                     style: TextStyle(
                                       fontSize: 14.sp,
                                       fontWeight: FontWeight.w500,
-                                      color: const Color(0xFF22303F),
+                                      color: AppColors.textPrimary,
                                     ),
                                   ),
                                 ),
@@ -2026,10 +1943,10 @@ class _FeedCard extends StatelessWidget {
                         hintText: 'Mô tả chi tiết hơn...',
                         hintStyle: TextStyle(
                           fontSize: 13.sp,
-                          color: const Color(0xFF8A93A3),
+                          color: AppColors.textHint,
                         ),
                         filled: true,
-                        fillColor: const Color(0xFFF6F9FD),
+                        fillColor: AppColors.primarySoft,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(18.r),
                           borderSide: const BorderSide(
@@ -2104,13 +2021,13 @@ class _FeedCard extends StatelessWidget {
                             },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: alreadyReported
-                            ? const Color(0xFFCFD7E3)
+                            ? AppColors.line
                             : AppColors.error,
                         foregroundColor: Colors.white,
                         disabledForegroundColor: Colors.white,
                         elevation: 0,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(28.r),
+                          borderRadius: BorderRadius.circular(14.r),
                         ),
                         textStyle: TextStyle(
                           fontSize: 15.sp,
@@ -2147,7 +2064,7 @@ class _NavButton extends StatelessWidget {
     return Material(
       color: Colors.white,
       shape: const CircleBorder(),
-      elevation: 6,
+      elevation: 0,
       child: InkWell(
         onTap: onTap,
         customBorder: const CircleBorder(),
@@ -2186,7 +2103,7 @@ class _CommentPreviewString extends StatelessWidget {
       children: [
         CircleAvatar(
           radius: 18.r,
-          backgroundColor: const Color(0xFFD6EAFF),
+          backgroundColor: AppColors.primaryTint,
           child: Text(
             initial,
             style: TextStyle(
@@ -2206,7 +2123,7 @@ class _CommentPreviewString extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 13.sp,
                   fontWeight: FontWeight.w600,
-                  color: const Color(0xFF1A2A3B),
+                  color: AppColors.ink,
                 ),
               ),
               SizedBox(height: 4.h),
@@ -2300,10 +2217,10 @@ class _PrimaryActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = isActive
-        ? const [AppColors.primary, Color(0xFF0070FF)]
-        : const [Color(0xFFB7DAFF), Color(0xFF8BBEFF)];
+        ? const [AppColors.primary, AppColors.primary]
+        : const [AppColors.primaryTint, AppColors.primaryLight];
     final shadowColor =
-        isActive ? AppColors.primary : const Color(0xFF8BBEFF);
+        isActive ? AppColors.primary : AppColors.primaryLight;
 
     return GestureDetector(
       onTap: onTap,
@@ -2312,19 +2229,14 @@ class _PrimaryActionButton extends StatelessWidget {
         padding: EdgeInsets.symmetric(vertical: 14.h),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(32.r),
-          gradient: LinearGradient(
-            colors: colors,
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
+          color: (colors).first,
           boxShadow: [
             BoxShadow(
               color: shadowColor.withValues(alpha: isActive ? 0.3 : 0.18),
               blurRadius: 20.r,
               offset: Offset(0, 12.h),
             ),
-          ],
-        ),
+          ],),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,

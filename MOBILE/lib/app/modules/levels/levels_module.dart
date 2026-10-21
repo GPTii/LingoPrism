@@ -13,7 +13,7 @@ import 'package:lingoprism/app/core/theme/app_colors.dart';
 
 /// Lộ trình 4 cấp độ (BE /levels/): progress per level, choosing the level, skip test.
 
-const levelColors = [Color(0xFF22C55E), Color(0xFF0EA5E9), Color(0xFFF59E0B), AppColors.error];
+const levelColors = [Color(0xFF22C55E), AppColors.primary, Color(0xFFF59E0B), AppColors.error];
 
 // ====================================================================== path
 
@@ -85,7 +85,7 @@ class LevelPathCard extends StatelessWidget {
                 LinearProgressIndicator(value: row.percent / 100, color: color, backgroundColor: color.withValues(alpha: 0.15)),
                 SizedBox(height: 4.h),
                 Text('${row.started}/${row.total} từ · mở cấp tiếp khi đạt ${p.unlockPercent}%',
-                    style: TextStyle(fontSize: 12.sp, color: Colors.black54)),
+                    style: TextStyle(fontSize: 12.sp, color: AppColors.textSecondary)),
               ]),
             ),
             const Icon(Icons.chevron_right),
@@ -113,7 +113,7 @@ class LevelPathView extends GetView<LevelPathController> {
           child: ListView(padding: EdgeInsets.all(16.w), children: [
             Text('Học xong ${p.unlockPercent}% số từ của một cấp thì mở cấp tiếp theo. '
                 'Đã biết rồi? Làm bài kiểm tra ${p.testSize} câu, đúng từ ${p.testPass} câu là qua.',
-                style: TextStyle(fontSize: 13.sp, color: Colors.black54)),
+                style: TextStyle(fontSize: 13.sp, color: AppColors.textSecondary)),
             SizedBox(height: 12.h),
             for (final r in p.levels) _LevelTile(row: r, next: r.level < p.levels.length ? p.levels[r.level] : null, lang: p.language),
           ]),
@@ -134,7 +134,7 @@ class _LevelTile extends GetView<LevelPathController> {
 
   @override
   Widget build(BuildContext context) {
-    final color = row.unlocked ? levelColors[row.level - 1] : Colors.grey;
+    final color = row.unlocked ? levelColors[row.level - 1] : AppColors.textHint;
     return Card(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(14.r),
@@ -145,14 +145,14 @@ class _LevelTile extends GetView<LevelPathController> {
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Row(children: [
             Text('Cấp ${row.level} · ${row.name}', style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.w800, color: color)),
-            if (lang == 'zh') Text('  ${_zhHint[row.level - 1]}', style: TextStyle(fontSize: 12.sp, color: Colors.black45)),
+            if (lang == 'zh') Text('  ${_zhHint[row.level - 1]}', style: TextStyle(fontSize: 12.sp, color: AppColors.textHint)),
             const Spacer(),
             if (row.current)
               Chip(label: const Text('Đang học'), backgroundColor: color.withValues(alpha: 0.15))
             else if (!row.unlocked)
-              const Icon(Icons.lock_outline, color: Colors.grey),
+              const Icon(Icons.lock_outline, color: AppColors.textHint),
           ]),
-          Text(row.description, style: TextStyle(fontSize: 13.sp, color: Colors.black54)),
+          Text(row.description, style: TextStyle(fontSize: 13.sp, color: AppColors.textSecondary)),
           SizedBox(height: 8.h),
           LinearProgressIndicator(value: row.percent / 100, color: color, backgroundColor: color.withValues(alpha: 0.15)),
           SizedBox(height: 4.h),
@@ -241,7 +241,7 @@ class LevelTestView extends GetView<LevelTestController> {
           LinearProgressIndicator(value: controller.answers.length / t.questions.length),
           SizedBox(height: 8.h),
           Text('Đúng từ ${t.pass}/${t.questions.length} câu để mở cấp ${controller.level + 1}',
-              style: TextStyle(fontSize: 13.sp, color: Colors.black54)),
+              style: TextStyle(fontSize: 13.sp, color: AppColors.textSecondary)),
           SizedBox(height: 24.h),
           if (q.word != null) ...[
             Text('Từ này nghĩa là gì?', textAlign: TextAlign.center, style: TextStyle(fontSize: 15.sp)),
@@ -276,7 +276,8 @@ class LevelTestView extends GetView<LevelTestController> {
         child: Padding(
           padding: EdgeInsets.all(24.w),
           child: Column(mainAxisSize: MainAxisSize.min, children: [
-            Text(r.passed ? '🎉' : '💪', style: TextStyle(fontSize: 64.sp)),
+            Image.asset(r.passed ? 'assets/brand/mascot/prismo_celebrate.png' : 'assets/brand/mascot/prismo_think.png', width: 120.w, height: 120.w),
+            SizedBox(height: 8.h),
             Text(r.passed ? 'Bạn đã mở Cấp ${r.unlocked}!' : 'Chưa qua – đúng ${r.score}/${r.total} câu',
                 textAlign: TextAlign.center, style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w800)),
             SizedBox(height: 8.h),
@@ -286,7 +287,7 @@ class LevelTestView extends GetView<LevelTestController> {
             FilledButton(
               onPressed: () {
                 Get.back();
-                if (r.passed) Get.toNamed(Routes.learningSession, arguments: LearningSessionArguments(kind: 'learn'));
+                if (r.passed) Get.toNamed(Routes.learningSession, arguments: const LearningSessionArguments(kind: 'learn'));
               },
               child: Text(r.passed ? 'Học từ mới' : 'Quay lại'),
             ),

@@ -223,13 +223,13 @@ class LearningSessionView extends GetView<LearningSessionController> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: controller.isOnLastCard
                             ? AppColors.primary
-                            : const Color(0xFFE0E7EF),
+                            : AppColors.surfaceMuted,
                         foregroundColor: controller.isOnLastCard
                             ? Colors.white
                             : AppColors.textSecondary,
                         elevation: 0,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(24.r),
+                          borderRadius: BorderRadius.circular(14.r),
                         ),
                         textStyle: TextStyle(
                           fontSize: 15.sp,
@@ -253,12 +253,12 @@ class LearningSessionView extends GetView<LearningSessionController> {
                               ? controller.markForgotten
                               : null,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFE4F1FF),
+                            backgroundColor: AppColors.primarySoft,
                             foregroundColor: AppColors.primary,
                             elevation: 0,
                             padding: EdgeInsets.symmetric(vertical: 14.h),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(24.r),
+                              borderRadius: BorderRadius.circular(14.r),
                             ),
                             textStyle: TextStyle(
                               fontSize: 15.sp,
@@ -280,7 +280,7 @@ class LearningSessionView extends GetView<LearningSessionController> {
                             elevation: 0,
                             padding: EdgeInsets.symmetric(vertical: 14.h),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(24.r),
+                              borderRadius: BorderRadius.circular(14.r),
                             ),
                             textStyle: TextStyle(
                               fontSize: 15.sp,
@@ -305,10 +305,9 @@ class LearningSessionView extends GetView<LearningSessionController> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
                         foregroundColor: AppColors.primary,
-                        elevation: 8,
-                        shadowColor: Colors.black.withOpacity(0.12),
+                        elevation: 0,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(28.r),
+                          borderRadius: BorderRadius.circular(14.r),
                         ),
                         textStyle: TextStyle(
                           fontSize: 16.sp,
@@ -719,10 +718,10 @@ class _RoundThreeContentState extends State<_RoundThreeContent> {
                       }
                     : null,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: enabled ? AppColors.primary : const Color(0xFFBFD9FF),
+                  backgroundColor: enabled ? AppColors.primary : AppColors.primaryTint,
                   foregroundColor: Colors.white,
                   elevation: 0,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28.r)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
                   textStyle: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w700),
                 ),
                 child: Text(label),
@@ -782,16 +781,19 @@ class _MultipleChoiceQuestionWidgetState extends State<_MultipleChoiceQuestionWi
           ),
           SizedBox(height: 40.h),
           ...widget.question.options.map((option) {
-            Color? buttonColor = const Color(0xFFE0E7EF);
-            Color? textColor = AppColors.textSecondary;
-            
+            Color? buttonColor = AppColors.surface;
+            Color? textColor = AppColors.textPrimary;
+            Color borderColor = AppColors.lineStrong;
+
             if (_selectedOption != null) {
               if (option == widget.question.correctOption) {
-                buttonColor = Colors.green.shade100;
-                textColor = Colors.green.shade800;
+                buttonColor = AppColors.successSoft;
+                textColor = AppColors.success;
+                borderColor = AppColors.beamMint;
               } else if (option == _selectedOption) {
-                buttonColor = Colors.red.shade100;
-                textColor = Colors.red.shade800;
+                buttonColor = AppColors.errorSoft;
+                textColor = AppColors.error;
+                borderColor = AppColors.error;
               }
             }
 
@@ -804,7 +806,8 @@ class _MultipleChoiceQuestionWidgetState extends State<_MultipleChoiceQuestionWi
                   foregroundColor: textColor,
                   elevation: 0,
                   minimumSize: Size(double.infinity, 52.h),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+                  side: BorderSide(color: borderColor, width: 1.5),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
                   textStyle: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600),
                 ),
                 child: Text(option),
@@ -949,17 +952,17 @@ class _MatchingQuestionWidgetState extends State<_MatchingQuestionWidget> {
 
         Color bgColor = Colors.white;
         if (matched) {
-          bgColor = Colors.green.shade100;
+          bgColor = AppColors.successSoft;
         } else if (isWrong) {
-          bgColor = Colors.red.shade100;
+          bgColor = AppColors.errorSoft;
         } else if (isSelected) {
-          bgColor = Colors.blue.shade100;
+          bgColor = AppColors.primarySoft;
         }
 
         final Color fgColor = matched
-            ? Colors.green.shade800
+            ? AppColors.success
             : isWrong
-                ? Colors.red.shade800
+                ? AppColors.error
                 : AppColors.textPrimary;
 
         return Padding(
@@ -973,7 +976,7 @@ class _MatchingQuestionWidgetState extends State<_MatchingQuestionWidget> {
                 foregroundColor: fgColor,
                 disabledBackgroundColor: bgColor,
                 disabledForegroundColor: fgColor,
-                elevation: 2,
+                elevation: 0,
                 minimumSize: Size.fromHeight(54.h),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16.r),
@@ -1074,7 +1077,7 @@ class _ScrambleQuestionWidgetState extends State<_ScrambleQuestionWidget> {
             Container(
               padding: EdgeInsets.all(12.w),
               decoration: BoxDecoration(
-                color: Colors.blue.shade50,
+                color: AppColors.primarySoft,
                 borderRadius: BorderRadius.circular(12.r),
               ),
               child: Text(
@@ -1098,7 +1101,7 @@ class _ScrambleQuestionWidgetState extends State<_ScrambleQuestionWidget> {
                 hintText: 'Câu trả lời của bạn',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16.r),
-                  borderSide: const BorderSide(color: Colors.grey),
+                  borderSide: const BorderSide(color: AppColors.textHint),
                 ),
                 filled: true,
                 fillColor: Colors.white,
@@ -1106,7 +1109,7 @@ class _ScrambleQuestionWidgetState extends State<_ScrambleQuestionWidget> {
                     ? null
                     : Icon(
                         _isCorrect! ? Icons.check_circle : Icons.cancel,
-                        color: _isCorrect! ? Colors.green : Colors.red,
+                        color: _isCorrect! ? AppColors.success : Colors.red,
                       ),
               ),
             ),
@@ -1116,8 +1119,8 @@ class _ScrambleQuestionWidgetState extends State<_ScrambleQuestionWidget> {
               Text(
                 'Đáp án đúng: ${widget.question.correctWord}',
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Colors.red.shade700,
+                style: const TextStyle(
+                  color: AppColors.error,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -1126,7 +1129,7 @@ class _ScrambleQuestionWidgetState extends State<_ScrambleQuestionWidget> {
             Text(
               'Nhấn "Kiểm tra" để chấm điểm, sau đó chọn "Tiếp tục" để sang câu mới.',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 13.sp, color: const Color(0xFF4E5D6A)),
+              style: TextStyle(fontSize: 13.sp, color: AppColors.textSecondary),
             ),
           ],
         );
@@ -1247,7 +1250,7 @@ class _ListenAndTypeQuestionWidgetState extends State<_ListenAndTypeQuestionWidg
                 hintText: 'Gõ lại từ tiếng Anh',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16.r),
-                  borderSide: const BorderSide(color: Colors.grey),
+                  borderSide: const BorderSide(color: AppColors.textHint),
                 ),
                 filled: true,
                 fillColor: Colors.white,
@@ -1255,7 +1258,7 @@ class _ListenAndTypeQuestionWidgetState extends State<_ListenAndTypeQuestionWidg
                     ? null
                     : Icon(
                         _isCorrect! ? Icons.check_circle : Icons.cancel,
-                        color: _isCorrect! ? Colors.green : Colors.red,
+                        color: _isCorrect! ? AppColors.success : Colors.red,
                       ),
               ),
             ),
@@ -1264,14 +1267,14 @@ class _ListenAndTypeQuestionWidgetState extends State<_ListenAndTypeQuestionWidg
               Text(
                 'Đáp án đúng: ${word.word}',
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.red.shade700, fontWeight: FontWeight.w600),
+                style: const TextStyle(color: AppColors.error, fontWeight: FontWeight.w600),
               ),
             ],
             SizedBox(height: 24.h),
             Text(
               'Nhấn "Kiểm tra" để chấm điểm rồi bấm "Tiếp tục" để sang câu mới.',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 13.sp, color: const Color(0xFF4E5D6A)),
+              style: TextStyle(fontSize: 13.sp, color: AppColors.textSecondary),
             ),
           ],
         );
@@ -1388,7 +1391,7 @@ class _LearningCard extends StatelessWidget {
       case 'mastered':
         return const Color(0xFFE0F7EC);
       default:
-        return const Color(0xFFE8F5FF);
+        return AppColors.primarySoft;
     }
   }
 
@@ -1501,13 +1504,13 @@ class _NavigationButton extends StatelessWidget {
         onPressed: onTap,
         style: ElevatedButton.styleFrom(
           backgroundColor: onTap == null
-              ? const Color(0xFFBFD9FF)
+              ? AppColors.primaryTint
               : AppColors.primary,
           foregroundColor: Colors.white,
           elevation: 0,
           padding: EdgeInsets.symmetric(vertical: 12.h),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24.r),
+            borderRadius: BorderRadius.circular(14.r),
           ),
         ),
         child: Icon(icon, size: 20.sp),
@@ -1535,14 +1538,7 @@ class _FlashcardFront extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(32.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 22.r,
-            offset: Offset(0, 12.h),
-          ),
-        ],
-      ),
+        border: const Border.fromBorderSide(BorderSide(color: AppColors.line)),),
       padding: EdgeInsets.symmetric(horizontal: 28.w, vertical: 32.h),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -1615,7 +1611,7 @@ class _FlashcardBack extends StatelessWidget {
       width: double.infinity,
       height: double.infinity,
       decoration: BoxDecoration(
-        color: const Color(0xFFEFF8FF),
+        color: AppColors.primarySoft,
         borderRadius: BorderRadius.circular(32.r),
         boxShadow: [
           BoxShadow(
@@ -1796,14 +1792,7 @@ class _LessonCompletedScreenState extends State<_LessonCompletedScreen> {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(16.r),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 12,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
+                    border: const Border.fromBorderSide(BorderSide(color: AppColors.line)),),
                   child: ListView.builder(
                     padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 16.w),
                     itemCount: difficult.length,
@@ -1832,7 +1821,7 @@ class _LessonCompletedScreenState extends State<_LessonCompletedScreen> {
                                     ),
                                   Text(
                                     'Lần đúng đầu: ${result.firstTryCorrect == true ? 'Đúng' : 'Sai'}, lượt làm: ${result.attempts}',
-                                    style: TextStyle(fontSize: 12.sp, color: const Color(0xFF9AA5B1)),
+                                    style: TextStyle(fontSize: 12.sp, color: AppColors.textHint),
                                   ),
                                 ],
                               ),
@@ -1866,7 +1855,7 @@ class _LessonCompletedScreenState extends State<_LessonCompletedScreen> {
                     backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
                     elevation: 0,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28.r)),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
                     textStyle: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w700),
                   ),
                   child: const Text('Tiếp tục'),
@@ -1959,7 +1948,7 @@ class _RoundThreePrompt extends StatelessWidget {
           style: TextStyle(
             fontSize: 28.sp,
             fontWeight: FontWeight.w700,
-            color: const Color(0xFF172B4D),
+            color: AppColors.ink,
           ),
         ),
         SizedBox(height: 32.h),

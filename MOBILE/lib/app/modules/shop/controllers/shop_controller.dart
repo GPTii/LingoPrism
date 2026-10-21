@@ -64,7 +64,7 @@ class ShopController extends GetxController {
   }) async {
     final result = await Get.dialog<bool>(
       Dialog(
-        backgroundColor: const Color(0xFFCCEDFF),
+        backgroundColor: AppColors.primaryTint,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
         ),
@@ -88,7 +88,7 @@ class ShopController extends GetxController {
                 style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+                  color: AppColors.textPrimary,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -98,7 +98,7 @@ class ShopController extends GetxController {
                 itemDescription,
                 style: const TextStyle(
                   fontSize: 14,
-                  color: Colors.black54,
+                  color: AppColors.textSecondary,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -134,7 +134,7 @@ class ShopController extends GetxController {
                 'Bạn có muốn mua vật phẩm này không?',
                 style: TextStyle(
                   fontSize: 16,
-                  color: Colors.black87,
+                  color: AppColors.textPrimary,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -150,13 +150,13 @@ class ShopController extends GetxController {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        side: const BorderSide(color: Colors.grey),
+                        side: const BorderSide(color: AppColors.textHint),
                       ),
                       child: const Text(
                         'Hủy',
                         style: TextStyle(
                           fontSize: 16,
-                          color: Colors.black54,
+                          color: AppColors.textSecondary,
                         ),
                       ),
                     ),

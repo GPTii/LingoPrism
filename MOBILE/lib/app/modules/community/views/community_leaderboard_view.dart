@@ -145,15 +145,7 @@ class _LeagueHeader extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.primarySoft,
         borderRadius: BorderRadius.circular(28.r),
-        border: Border.all(color: const Color(0xFF9ED1FF), width: 1.2),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 18.r,
-            offset: Offset(0, 10.h),
-          ),
-        ],
-      ),
+        border: Border.all(color: AppColors.primaryTint, width: 1.2),),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -169,7 +161,7 @@ class _LeagueHeader extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 16.sp,
                         fontWeight: FontWeight.w600,
-                        color: const Color(0xFF113355),
+                        color: AppColors.ink,
                       ),
                     ),
                     SizedBox(height: 6.h),
@@ -178,7 +170,7 @@ class _LeagueHeader extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 22.sp,
                         fontWeight: FontWeight.w800,
-                        color: const Color(0xFF0A2C60),
+                        color: AppColors.ink,
                       ),
                     ),
                   ],
@@ -189,7 +181,7 @@ class _LeagueHeader extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 15.sp,
                   fontWeight: FontWeight.w600,
-                  color: const Color(0xFF7F8A99),
+                  color: AppColors.textSecondary,
                 ),
               ),
             ],
@@ -219,15 +211,7 @@ class _LeagueHeader extends StatelessWidget {
                       border: Border.all(
                         color: isCurrent ? AppColors.primary : Colors.transparent,
                         width: 2.w,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.05),
-                          blurRadius: 16.r,
-                          offset: Offset(0, 8.h),
-                        ),
-                      ],
-                    ),
+                      ),),
                     child: Opacity(
                       opacity: isUnlocked ? 1 : 0.35,
                       child: Image.asset(
@@ -242,13 +226,13 @@ class _LeagueHeader extends StatelessWidget {
                             width: 56.w,
                             height: 56.w,
                             decoration: BoxDecoration(
-                              color: Colors.grey.shade200,
+                              color: AppColors.line,
                               borderRadius: BorderRadius.circular(8.r),
                             ),
                             child: Icon(
                               Icons.emoji_events,
                               size: 28.w,
-                              color: Colors.grey.shade400,
+                              color: AppColors.textHint,
                             ),
                           );
                         },
@@ -268,7 +252,7 @@ class _LeagueHeader extends StatelessWidget {
               'Giới hạn XP: ${league.xpCapDescription!}',
               style: TextStyle(
                 fontSize: 12.sp,
-                color: const Color(0xFF6A7B94),
+                color: AppColors.textSecondary,
                 height: 1.3,
               ),
             ),
@@ -303,14 +287,7 @@ class _LeagueSection extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(28.r),
         color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 18.r,
-            offset: Offset(0, 10.h),
-          ),
-        ],
-      ),
+        border: const Border.fromBorderSide(BorderSide(color: AppColors.line)),),
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 18.h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -436,7 +413,7 @@ class _LeagueParticipantTile extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 15.sp,
                       fontWeight: FontWeight.w700,
-                      color: const Color(0xFF20324A),
+                      color: AppColors.ink,
                       decoration: TextDecoration.underline,
                       decorationStyle: TextDecorationStyle.dotted,
                     ),
@@ -614,42 +591,24 @@ class _LeagueParticipantTile extends StatelessWidget {
   BoxDecoration _buildGoldDecoration(BorderRadius borderRadius, List<BoxShadow> shadow) {
     return BoxDecoration(
       borderRadius: borderRadius,
-      gradient: const LinearGradient(
-        colors: [Color(0xFFFFE066), Color(0xFFFFB347)],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      ),
-      border: Border.all(color: const Color(0xFFFFC107), width: 1.6),
-      boxShadow: shadow,
-    );
+      color: const Color(0xFFFFE066),
+      border: Border.all(color: const Color(0xFFFFC107), width: 1.6),);
   }
 
   /// Silver medal decoration for 2nd place
   BoxDecoration _buildSilverDecoration(BorderRadius borderRadius, List<BoxShadow> shadow) {
     return BoxDecoration(
       borderRadius: borderRadius,
-      gradient: const LinearGradient(
-        colors: [Color(0xFFE0E0E0), Color(0xFFC9D6FF)],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      ),
-      border: Border.all(color: AppColors.textHint, width: 1.6),
-      boxShadow: shadow,
-    );
+      color: AppColors.line,
+      border: Border.all(color: AppColors.textHint, width: 1.6),);
   }
 
   /// Bronze medal decoration for 3rd place
   BoxDecoration _buildBronzeDecoration(BorderRadius borderRadius, List<BoxShadow> shadow) {
     return BoxDecoration(
       borderRadius: borderRadius,
-      gradient: const LinearGradient(
-        colors: [Color(0xFFFFD7B5), Color(0xFFFF8C42)],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      ),
-      border: Border.all(color: const Color(0xFFFFA64D), width: 1.6),
-      boxShadow: shadow,
-    );
+      color: const Color(0xFFFFD7B5),
+      border: Border.all(color: const Color(0xFFFFA64D), width: 1.6),);
   }
 
   /// Default decoration for other ranks
@@ -660,8 +619,6 @@ class _LeagueParticipantTile extends StatelessWidget {
       border: Border.all(
         color: _borderColor,
         width: 1.4,
-      ),
-      boxShadow: shadow,
-    );
+      ),);
   }
 }

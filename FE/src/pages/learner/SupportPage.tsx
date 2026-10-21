@@ -1,9 +1,11 @@
-import { App, Card, Input, Spin } from 'antd'
+import { App, Input, Skeleton } from 'antd'
 import { useEffect, useRef, useState } from 'react'
 import { communityApi, type ChatMessage } from '../../api/app'
 import { errorMessage } from '../../api/client'
 import { useAuth } from '../../auth/store'
 import { LiveSocket } from '../../lib/ws'
+import { Prismo } from '../../components/brand/Brand'
+import { PageHeader, Section } from '../../components/ui'
 
 /** Chat used by learners (their own conversation) and staff (any conversation id from the admin inbox). */
 export function SupportChatBox({ conversationId, title }: { conversationId: number; title?: string }) {
@@ -56,26 +58,32 @@ export function SupportChatBox({ conversationId, title }: { conversationId: numb
   }
 
   return (
-    <Card title={title ?? 'Hỏi giáo viên'} className="!rounded-2xl" styles={{ body: { display: 'flex', flexDirection: 'column', height: 'min(520px, calc(100dvh - 180px))' } }}>
-      <div className="flex-1 overflow-y-auto flex flex-col gap-2">
+    <Section title={title} bodyClassName="flex flex-col h-[min(560px,calc(100dvh-220px))]">
+      <div className="flex-1 overflow-y-auto flex flex-col gap-2" aria-live="polite">
+        {messages.length === 0 && (
+          <div className="m-auto flex flex-col items-center text-center gap-2 text-slate-500 max-w-[40ch]">
+            <Prismo mood="happy" size={80} />
+            Hỏi bất cứ điều gì về từ vựng, phát âm hay bài kiểm tra. Giáo viên sẽ trả lời ngay tại đây.
+          </div>
+        )}
         {messages.map((m) => {
           const mine = m.sender?.id === me?.id
           return (
             <div key={m.id} className={`flex ${mine ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[75%] rounded-2xl px-3 py-2 ${mine ? 'bg-brand-600 text-white' : 'bg-slate-100'}`}>
-                {!mine && <div className="text-xs font-semibold opacity-70">{m.sender?.display_name}{m.sender?.is_staff && ' · giáo viên'}</div>}
+              <div className={`max-w-[75%] rounded-2xl px-3 py-2 ${mine ? 'bg-[#6d4aff] text-white rounded-br-md' : 'bg-slate-100 text-slate-800 rounded-bl-md'}`}>
+                {!mine && <div className="text-xs font-semibold text-slate-500">{m.sender?.display_name}{m.sender?.is_staff && ' · giáo viên'}</div>}
                 <div>{m.content}</div>
-                {mine && <div className="text-[10px] opacity-70 text-right">{m.id < 0 ? 'Đang gửi…' : m.read_at ? 'Đã xem' : 'Đã gửi'}</div>}
+                {mine && <div className="text-[11px] text-white/75 text-right">{m.id < 0 ? 'Đang gửi…' : m.read_at ? 'Đã xem' : 'Đã gửi'}</div>}
               </div>
             </div>
           )
         })}
         <div ref={bottom} />
       </div>
-      {typing && <div className="text-xs text-slate-400">Đang nhập…</div>}
-      <Input.Search className="mt-2" placeholder="Nhập tin nhắn…" enterButton="Gửi" value={text}
+      {typing && <div className="text-xs text-slate-500">Đang nhập…</div>}
+      <Input.Search className="mt-2" placeholder="Nhập tin nhắn…" enterButton="Gửi" aria-label="Tin nhắn" value={text}
         onChange={(e) => { setText(e.target.value); socket.current?.send({ action: 'typing' }) }} onSearch={send} />
-    </Card>
+    </Section>
   )
 }
 
@@ -84,8 +92,9 @@ export default function SupportPage() {
   const [id, setId] = useState<number | null>(null)
   useEffect(() => { communityApi.openSupport().then((c) => setId(c.id)).catch((e) => message.error(errorMessage(e))) }, [message])
   return (
-    <div className="max-w-3xl mx-auto">
-      {id ? <SupportChatBox conversationId={id} /> : <Spin />}
+    <div className="max-w-3xl mx-auto flex flex-col gap-6">
+      <PageHeader title="Hỏi giáo viên" description="Nhắn riêng với giáo viên. Bạn sẽ nhận thông báo khi có câu trả lời." />
+      {id ? <SupportChatBox conversationId={id} /> : <div className="lp-card p-6"><Skeleton active /></div>}
     </div>
   )
 }
