@@ -91,6 +91,18 @@ class GoogleLoginView(APIView):
 
 
 @extend_schema(tags=["auth"])
+class GoogleConfigView(APIView):
+    """The public Web client ID for the "Sign in with Google" button; null when Google sign-in is off."""
+
+    permission_classes = [AllowAny]
+    authentication_classes = []
+
+    @extend_schema(responses={200: None})
+    def get(self, request):
+        return Response({"client_id": settings.GOOGLE_WEB_CLIENT_ID or None})
+
+
+@extend_schema(tags=["auth"])
 class LogoutView(APIView):
     serializer_class = s.LogoutSerializer
     @extend_schema(request=s.LogoutSerializer, responses={205: None})

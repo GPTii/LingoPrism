@@ -2,6 +2,7 @@ import { Button, Form, Input, App } from 'antd'
 import { Link, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import AuthCard from '../../components/AuthCard'
+import GoogleButton from '../../components/GoogleButton'
 import { authApi } from '../../api/auth'
 import { errorMessage } from '../../api/client'
 import { useAuth } from '../../auth/store'
@@ -54,6 +55,7 @@ export default function RegisterPage() {
         </Form.Item>
         <Button type="primary" htmlType="submit" size="large" block loading={loading}>Tạo tài khoản</Button>
       </Form>
+      <div className="mt-5"><GoogleButton text="signup_with" /></div>
       <p className="text-center text-slate-500 mt-6">
         Đã có tài khoản? <Link to="/login">Đăng nhập</Link>
       </p>

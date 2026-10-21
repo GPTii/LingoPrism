@@ -64,3 +64,29 @@ def test_admin_users_requires_admin(client):
     res = register(client)
     client.credentials(HTTP_AUTHORIZATION=f"Bearer {res.data['tokens']['access']}")
     assert client.get("/api/v1/admin/users/").status_code == 403
+
+
+def test_google_config_is_off_without_client_ids(client, settings):
+    settings.GOOGLE_WEB_CLIENT_ID = ""
+    assert client.get("/api/v1/auth/google/config/").data == {"client_id": None}
+
+
+def test_google_config_returns_the_public_web_client(client, settings):
+    settings.GOOGLE_WEB_CLIENT_ID = "123-web.apps.googleusercontent.com"
+    assert client.get("/api/v1/auth/google/config/").data == {"client_id": "123-web.apps.googleusercontent.com"}
+
+
+def test_google_login_accepts_only_our_audiences(client, settings, monkeypatch):
+    from google.oauth2 import id_token as google_id_token
+
+    settings.GOOGLE_CLIENT_IDS = ["123-web.apps.googleusercontent.com"]
+    info = {"aud": "999-other.apps.googleusercontent.com", "sub": "g-1", "email": "g@example.com", "email_verified": True, "name": "G"}
+    monkeypatch.setattr(google_id_token, "verify_oauth2_token", lambda token, req: info)
+    assert client.post("/api/v1/auth/google/", {"id_token": "x"}, format="json").status_code == 400
+
+    info["aud"] = "123-web.apps.googleusercontent.com"
+    res = client.post("/api/v1/auth/google/", {"id_token": "x"}, format="json")
+    assert res.status_code == 200
+    assert res.data["user"]["email"] == "g@example.com"
+    # the same Google account signs in to the same user next time
+    assert client.post("/api/v1/auth/google/", {"id_token": "x"}, format="json").data["user"]["id"] == res.data["user"]["id"]

@@ -155,6 +155,8 @@ CORS_ALLOWED_ORIGINS = env.list("CORS_ALLOWED_ORIGINS", default=["http://localho
 CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=["http://localhost:5173"])
 
 GOOGLE_CLIENT_IDS = env.list("GOOGLE_CLIENT_IDS", default=[])
+# the "Web application" client the web page signs in with (public; defaults to the first accepted ID)
+GOOGLE_WEB_CLIENT_ID = env("GOOGLE_WEB_CLIENT_ID", default="") or (GOOGLE_CLIENT_IDS[0] if GOOGLE_CLIENT_IDS else "")
 
 EMAIL_BACKEND = env("EMAIL_BACKEND", default="django.core.mail.backends.console.EmailBackend")
 EMAIL_HOST = env("EMAIL_HOST", default="smtp.gmail.com")

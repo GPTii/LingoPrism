@@ -1,6 +1,12 @@
 import 'package:google_sign_in/google_sign_in.dart';
 
-const String _serverClientId = String.fromEnvironment('GOOGLE_SERVER_CLIENT_ID');
+/// The "Web application" OAuth client of the LingoPrism Google Cloud project. A client ID is public
+/// (it is not the client secret); the Android client (package com.lingoprism.app + the signing key's
+/// SHA-1) is matched by Google itself. Override with --dart-define=GOOGLE_SERVER_CLIENT_ID=… if needed.
+const String _serverClientId = String.fromEnvironment(
+  'GOOGLE_SERVER_CLIENT_ID',
+  defaultValue: '456874322298-c4gor0fd840q17ov372sviemahcohodf.apps.googleusercontent.com',
+);
 
 class GoogleSignInService {
   static bool get configured => _serverClientId.isNotEmpty;
@@ -10,8 +16,7 @@ class GoogleSignInService {
       'email',
       'profile',
     ],
-    // Web OAuth client ID (same value as GOOGLE_CLIENT_IDS on the backend), passed with
-    // --dart-define=GOOGLE_SERVER_CLIENT_ID=xxx.apps.googleusercontent.com
+    // the ID token's audience is this Web client; the backend's GOOGLE_CLIENT_IDS must contain it
     serverClientId: _serverClientId.isEmpty ? null : _serverClientId,
   );
 

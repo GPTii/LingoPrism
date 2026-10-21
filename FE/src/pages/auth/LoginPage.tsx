@@ -2,6 +2,7 @@ import { Button, Form, Input, App } from 'antd'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import AuthCard from '../../components/AuthCard'
+import GoogleButton from '../../components/GoogleButton'
 import { authApi } from '../../api/auth'
 import { errorMessage } from '../../api/client'
 import { isStaffRole, useAuth } from '../../auth/store'
@@ -41,6 +42,7 @@ export default function LoginPage() {
         </div>
         <Button type="primary" htmlType="submit" size="large" block loading={loading}>Đăng nhập</Button>
       </Form>
+      <div className="mt-5"><GoogleButton text="signin_with" /></div>
       <p className="text-center text-slate-500 mt-6">
         Chưa có tài khoản? <Link to="/register">Đăng ký</Link>
       </p>
