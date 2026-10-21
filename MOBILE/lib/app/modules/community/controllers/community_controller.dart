@@ -326,20 +326,8 @@ class CommunityPost {
         comments = (initialComments?.length ?? comments).obs,
         bookmarks = bookmarks.obs,
         isLiked = isLiked.obs,
-        commentMessages = ((initialComments != null)
-                ? List<CommunityPostComment>.from(initialComments)
-                : List<CommunityPostComment>.generate(
-                    comments,
-                    (index) => CommunityPostComment(
-                      id: 'placeholder_$index',
-                      userId: '',
-                      userName: 'Người dùng ${index + 1}',
-                      avatarUrl: '',
-                      content: 'Bình luận ${index + 1}',
-                      createdAt: DateTime.now(),
-                    ),
-                  ))
-            .obs,
+        // real comments only: never invent placeholder ones
+        commentMessages = List<CommunityPostComment>.from(initialComments ?? const <CommunityPostComment>[]).obs,
         isCommentsExpanded = false.obs,
         isVocabularyExpanded = true.obs,
         isSendingComment = isSendingComment.obs,

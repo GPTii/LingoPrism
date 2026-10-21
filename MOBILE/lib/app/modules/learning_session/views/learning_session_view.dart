@@ -759,8 +759,6 @@ class _MultipleChoiceQuestionWidgetState extends State<_MultipleChoiceQuestionWi
     setState(() {
       _selectedOption = option;
       _isCorrect = option == widget.question.correctOption;
-      // TODO: Call controller callback here
-      // widget.onAnswered(option);
     });
     // Chốt kết quả ngay lần chọn đầu tiên (không cho chọn lại).
     Future.delayed(const Duration(milliseconds: 50), () {
@@ -1056,7 +1054,6 @@ class _ScrambleQuestionWidgetState extends State<_ScrambleQuestionWidget> {
     final answer = _textController.text.trim();
     setState(() {
       _isCorrect = answer.toLowerCase() == widget.question.correctWord.toLowerCase();
-      // TODO: Call controller callback `widget.onAnswered(answer)`
     });
     // Mark completed (user đã kiểm tra). Nút "Tiếp tục" sẽ đưa sang câu kế tiếp
     widget.onCompleted(_isCorrect ?? false);
