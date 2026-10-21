@@ -8,6 +8,7 @@ import '../models/api/sentence.dart';
 import '../models/api/social.dart';
 import '../models/api/user.dart';
 import '../models/api/vocab.dart';
+import '../services/offline_learning.dart';
 
 ApiClient get _api => ApiClient.to;
 
@@ -110,19 +111,48 @@ class VocabRepository {
 }
 
 class LearningRepository {
-  static Future<StudySession> start(String kind, {int? topic, int? size}) async =>
-      StudySession.fromJson(asMap(await _api.post('/sessions/', data: {'kind': kind, 'topic': topic, 'size': size})));
-
-  static Future<void> answer(int sessionId, {required int personalWord, required String questionType, required bool correct,
-      bool firstTry = true, bool graded = false, int? responseMs, String answer = ''}) {
-    return _api.post('/sessions/$sessionId/answer/', data: {
-      'personal_word': personalWord, 'question_type': questionType, 'correct': correct, 'first_try': firstTry,
-      'graded': graded, 'response_ms': responseMs, 'answer': answer,
-    });
+  /// A new session from the server; offline, the one kept on the phone (OfflineLearning) for a
+  /// general learn / review lesson.
+  static Future<StudySession> start(String kind, {int? topic, int? size}) async {
+    try {
+      return StudySession.fromJson(asMap(await _api.post('/sessions/', data: {'kind': kind, 'topic': topic, 'size': size})));
+    } catch (e) {
+      if (topic == null && OfflineLearning.isNetworkError(e)) {
+        final kept = OfflineLearning.takeSession(kind);
+        if (kept != null) return StudySession.fromJson(kept);
+      }
+      rethrow;
+    }
   }
 
-  static Future<SessionSummary> finish(int sessionId) async =>
-      SessionSummary.fromJson(asMap(await _api.post('/sessions/$sessionId/finish/')));
+  /// Offline, the answer waits on the phone and is sent when the connection is back.
+  static Future<void> answer(int sessionId, {required int personalWord, required String questionType, required bool correct,
+      bool firstTry = true, bool graded = false, int? responseMs, String answer = ''}) async {
+    final path = '/sessions/$sessionId/answer/';
+    final data = <String, dynamic>{
+      'personal_word': personalWord, 'question_type': questionType, 'correct': correct, 'first_try': firstTry,
+      'graded': graded, 'response_ms': responseMs, 'answer': answer,
+    };
+    try {
+      await _api.post(path, data: data);
+    } catch (e) {
+      if (!OfflineLearning.isNetworkError(e)) rethrow;
+      await OfflineLearning.enqueue(path, data);
+    }
+  }
+
+  /// Offline, "finish" is queued too and the summary comes back without XP (it arrives on sync).
+  static Future<SessionSummary> finish(int sessionId) async {
+    final path = '/sessions/$sessionId/finish/';
+    try {
+      await OfflineLearning.flush(); // answers first, then the finish
+      return SessionSummary.fromJson(asMap(await _api.post(path)));
+    } catch (e) {
+      if (!OfflineLearning.isNetworkError(e)) rethrow;
+      await OfflineLearning.enqueue(path, const {});
+      return SessionSummary.fromJson(const {});
+    }
+  }
 }
 
 class GameRepository {

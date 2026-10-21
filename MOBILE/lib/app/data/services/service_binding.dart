@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'offline_learning.dart';
 import 'package:get_storage/get_storage.dart';
 
 import '../../core/network/api_client.dart';
@@ -44,6 +45,7 @@ class AppInitializer {
     RealtimeService.to.start();
     GameService.to.refreshAll();
     LocationService.to.startGeofencing();
+    OfflineLearning.start(); // send answers made offline, keep lessons ready for the next time
   }
 
   static Future<void> onSessionEnded() async {

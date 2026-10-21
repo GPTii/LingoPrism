@@ -68,6 +68,14 @@ class LearningTabView extends GetView<HomeStatsController> {
                           const _TodayWord(),
                           SizedBox(height: 24.h),
                           _buildCameraCard(),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: TextButton.icon(
+                              onPressed: () => Get.toNamed(Routes.liveCamera),
+                              icon: const Icon(Icons.center_focus_strong_rounded, size: 18),
+                              label: const Text('Camera trực tiếp (thử nghiệm)'),
+                            ),
+                          ),
                           SizedBox(height: 20.h),
                           const LevelPathCard(),
                           SizedBox(height: 12.h),

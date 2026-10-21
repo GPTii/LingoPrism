@@ -42,6 +42,7 @@ abstract class Routes {
   static const examList = _Paths.examList;
   static const stats = _Paths.stats;
   static const speakPractice = _Paths.speakPractice;
+  static const liveCamera = _Paths.liveCamera;
   static const examTake = _Paths.examTake;
   static const examResult = _Paths.examResult;
   static const supportChat = _Paths.supportChat;
@@ -90,6 +91,7 @@ abstract class _Paths {
   static const examList = '/exams';
   static const stats = '/stats';
   static const speakPractice = '/speak';
+  static const liveCamera = '/live-camera';
   static const examTake = '/exams/take';
   static const examResult = '/exams/result';
   static const supportChat = '/support';
