@@ -32,7 +32,8 @@ export interface WordCard {
   meaning_vi: string
   english: string | null
   examples: { id: number; text: string; transliteration: string; tokens: SentenceToken[]; target_tokens: number[]; translation_vi: string; translation_en: string; source: string; source_id: string }[]
-  personal: { id: number; status: 'new' | 'learning' | 'mastered'; stage: number; due_at: string | null; last_reviewed_at: string | null } | null
+  /** recall: FSRS estimate (0–1) that I still remember the word today; null before the first review */
+  personal: { id: number; status: 'new' | 'learning' | 'mastered'; stage: number; due_at: string | null; last_reviewed_at: string | null; recall?: number | null } | null
 }
 
 export interface Topic {

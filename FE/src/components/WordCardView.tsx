@@ -101,6 +101,21 @@ export default function WordCardView({ card, topicId }: { card: WordCard; topicI
           <div className="text-slate-500">{card.examples[0].translation_vi || card.examples[0].translation_en}</div>
         </div>
       )}
+      {card.personal?.recall != null && (() => {
+        const r = card.personal.recall
+        const color = r >= 0.85 ? '#10c79a' : r >= 0.6 ? '#ffb020' : '#ff6b81'
+        return (
+          <div title="Ước tính theo FSRS: khả năng bạn còn nhớ từ này hôm nay">
+            <div className="flex justify-between text-xs text-slate-500 mb-1">
+              <span>Nhớ khoảng</span>
+              <span className="num font-semibold text-slate-700">{Math.round(r * 100)}%</span>
+            </div>
+            <div className="h-1.5 rounded-full bg-slate-100 overflow-hidden">
+              <div className="h-full rounded-full" style={{ width: `${Math.round(r * 100)}%`, background: color }} />
+            </div>
+          </div>
+        )
+      })()}
       <div className="flex items-center justify-between mt-auto">
         {card.personal ? (
           <span className={`inline-flex items-center gap-1 text-sm font-semibold ${STATUS[card.personal.status].className}`}>
