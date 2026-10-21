@@ -9,9 +9,9 @@ interface ThemeState {
   setMode: (mode: ThemeMode) => void
 }
 
-/** Light / dark / follow the device – remembered in this browser. */
+/** Light / dark / follow the device – remembered in this browser. Dark first: the prism's light reads best on a dark ground. */
 export const useThemeMode = create<ThemeState>()(
-  persist((set) => ({ mode: 'system', setMode: (mode) => set({ mode }) }), { name: 'lingoprism-theme' }),
+  persist((set) => ({ mode: 'dark', setMode: (mode) => set({ mode }) }), { name: 'lingoprism-theme-v2' }),
 )
 
 const media = () => window.matchMedia('(prefers-color-scheme: dark)')

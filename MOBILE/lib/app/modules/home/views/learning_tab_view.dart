@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import '../../../core/theme/app_colors.dart';
@@ -14,6 +15,9 @@ import '../../../data/models/api/game.dart';
 import '../../../data/models/api/user.dart';
 import '../controllers/learning_tab_controller.dart';
 import '../../levels/levels_module.dart';
+import '../../../data/repositories/repositories.dart';
+import '../../../data/models/api/vocab.dart';
+import '../../../core/widgets/target_word.dart';
 
 const _monthNames = [
   'Một', 'Hai', 'Ba', 'Tư', 'Năm', 'Sáu', 'Bảy', 'Tám', 'Chín', 'Mười', 'Mười Một', 'Mười Hai',
@@ -36,40 +40,31 @@ class LearningTabView extends GetView<HomeStatsController> {
         final statsUser = controller.user.value;
         final streak = controller.streak.value;
         final unread = controller.unreadNotifications.value;
-        return Column(
-          children: [
-            Container(
-              decoration: const BoxDecoration(
-                color: AppColors.surface,
-                border: Border(bottom: BorderSide(color: AppColors.line)),
-              ),
-              child: SafeArea(
-                bottom: false,
-                child: _buildHeader(
-                  devicePixelRatio,
-                  user: statsUser,
-                  streak: streak,
-                  unreadNotifications: unread,
-                ),
-              ),
-            ),
-            Expanded(
-              child: loading
-                  ? const Center(child: CircularProgressIndicator())
-                  : RefreshIndicator(
-                      color: AppColors.primary,
-                      onRefresh: progressController.refreshProgress,
-                      child: ListView(
-                        padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 32.h),
-                        children: [
-                          Obx(() => _buildTodayCard(
-                                devicePixelRatio,
-                                user: statsUser,
-                                learned: progressController.newLearned.value,
-                                target: progressController.newTarget.value,
-                                due: progressController.dueNow.value,
-                              )),
-                          SizedBox(height: 12.h),
+        if (loading) return const Center(child: CircularProgressIndicator());
+        return AnnotatedRegion<SystemUiOverlayStyle>(
+          value: SystemUiOverlayStyle.light,
+          child: RefreshIndicator(
+            color: AppColors.primary,
+            onRefresh: progressController.refreshProgress,
+            child: ListView(
+              padding: EdgeInsets.zero,
+              children: [
+                // the prism: full-bleed ink that holds the header, the greeting and the day's light
+                Obx(() => _buildTodayCard(
+                      devicePixelRatio,
+                      user: statsUser,
+                      learned: progressController.newLearned.value,
+                      target: progressController.newTarget.value,
+                      due: progressController.dueNow.value,
+                      header: _buildHeader(devicePixelRatio, user: statsUser, streak: streak, unreadNotifications: unread),
+                    )),
+                Padding(
+                  padding: EdgeInsets.fromLTRB(16.w, 24.h, 16.w, 32.h),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                          const _TodayWord(),
+                          SizedBox(height: 24.h),
                           _buildCameraCard(),
                           SizedBox(height: 20.h),
                           const LevelPathCard(),
@@ -88,11 +83,12 @@ class LearningTabView extends GetView<HomeStatsController> {
                           }),
                           SizedBox(height: 12.h),
                           Obx(() => _buildDailyQuests(devicePixelRatio, progressController.dailyQuests)),
-                        ],
-                      ),
-                    ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         );
       }),
     );
@@ -122,6 +118,7 @@ class LearningTabView extends GetView<HomeStatsController> {
     required int learned,
     required int target,
     required int due,
+    required Widget header,
   }) {
     final safeTarget = target <= 0 ? 10 : target;
     final done = learned >= safeTarget;
@@ -135,11 +132,16 @@ class LearningTabView extends GetView<HomeStatsController> {
     final name = user?.displayName ?? '';
 
     return Container(
-      decoration: BoxDecoration(color: AppColors.ink, borderRadius: BorderRadius.circular(24.r)),
-      padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 20.h),
+      decoration: BoxDecoration(
+        color: AppColors.ink,
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(28.r)),
+      ),
+      padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 28.h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          SafeArea(bottom: false, child: Transform.translate(offset: Offset(-8.w, 0), child: header)),
+          SizedBox(height: 12.h),
           if (user != null)
             Row(children: [
               _LangGlyph(user: user),
@@ -149,30 +151,30 @@ class LearningTabView extends GetView<HomeStatsController> {
             ]),
           SizedBox(height: 10.h),
           Text(
-            name.isEmpty ? _greeting() : '${_greeting()}, $name',
-            style: TextStyle(color: Colors.white, fontSize: 24.sp, fontWeight: FontWeight.w800, height: 1.2, letterSpacing: -0.5),
+            name.isEmpty ? _greeting() : '${_greeting()},\n$name',
+            style: TextStyle(color: Colors.white, fontSize: 34.sp, fontWeight: FontWeight.w800, height: 1.08, letterSpacing: -1.0),
           ),
-          SizedBox(height: 6.h),
-          Text(line, style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 15.sp, height: 1.4)),
-          SizedBox(height: 16.h),
+          SizedBox(height: 10.h),
+          Text(line, style: TextStyle(color: Colors.white.withValues(alpha: 0.72), fontSize: 15.sp, height: 1.4)),
+          SizedBox(height: 18.h),
           // Prismo and the light it gives off: the day's goal
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               _buildOptimizedAsset(
                 imagePath: done ? 'assets/brand/mascot/prismo_celebrate.png' : 'assets/brand/mascot/prismo_happy.png',
-                width: 72.w,
-                height: 72.w,
+                width: 76.w,
+                height: 76.w,
                 devicePixelRatio: devicePixelRatio,
                 fit: BoxFit.contain,
               ),
-              SizedBox(width: 4.w),
               Expanded(child: _GoalBeam(learned: learned, target: safeTarget)),
             ],
           ),
-          SizedBox(height: 16.h),
+          SizedBox(height: 20.h),
           Row(children: [
             Expanded(
+              flex: 3,
               child: _InkButton(
                 label: 'Học ${math.min(10, math.max(1, safeTarget - learned))} từ mới',
                 filled: true,
@@ -181,6 +183,7 @@ class LearningTabView extends GetView<HomeStatsController> {
             ),
             SizedBox(width: 10.w),
             Expanded(
+              flex: 2,
               child: _InkButton(
                 label: due > 0 ? 'Ôn $due từ' : 'Ôn tập',
                 icon: Icons.replay_rounded,
@@ -445,7 +448,7 @@ class LearningTabView extends GetView<HomeStatsController> {
               IconButton(
                 tooltip: 'Thông báo',
                 onPressed: () => Get.toNamed(Routes.notification),
-                icon: Icon(Icons.notifications_none_rounded, size: 26.sp, color: AppColors.textPrimary),
+                icon: Icon(Icons.notifications_none_rounded, size: 26.sp, color: Colors.white),
               ),
               if (unreadNotifications > 0)
                 Positioned(
@@ -504,7 +507,7 @@ class LearningTabView extends GetView<HomeStatsController> {
                 style: TextStyle(
                   fontWeight: FontWeight.w700,
                   fontSize: 15.sp,
-                  color: AppColors.textPrimary,
+                  color: Colors.white,
                   fontFeatures: const [FontFeature.tabularFigures()],
                 ),
               ),
@@ -701,6 +704,8 @@ class _GoalBeam extends StatelessWidget {
   final int learned;
   final int target;
 
+  static const _bands = [AppColors.beamAmber, AppColors.beamMint, AppColors.beamCoral];
+
   @override
   Widget build(BuildContext context) {
     final pct = (learned / target).clamp(0.0, 1.0);
@@ -709,31 +714,28 @@ class _GoalBeam extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ClipRRect(
-            borderRadius: BorderRadius.horizontal(right: Radius.circular(20.r)),
-            child: Container(
-              height: 18.h,
-              color: Colors.white.withValues(alpha: 0.1),
-              alignment: Alignment.centerLeft,
-              child: TweenAnimationBuilder<double>(
-                tween: Tween(begin: 0, end: math.max(pct, 0.03)),
-                duration: const Duration(milliseconds: 700),
-                curve: Curves.easeOutCubic,
-                builder: (context, v, _) => FractionallySizedBox(
-                  widthFactor: v,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.horizontal(right: Radius.circular(20.r)),
-                    child: const Column(children: [
-                      Expanded(child: ColoredBox(color: AppColors.beamAmber, child: SizedBox.expand())),
-                      Expanded(child: ColoredBox(color: AppColors.beamMint, child: SizedBox.expand())),
-                      Expanded(child: ColoredBox(color: AppColors.beamCoral, child: SizedBox.expand())),
-                    ]),
+          // light leaving the prism: three beams, as long as today's progress
+          for (var i = 0; i < 3; i++) ...[
+            if (i > 0) SizedBox(height: 3.h),
+            ClipRRect(
+              borderRadius: BorderRadius.horizontal(right: Radius.circular(10.r)),
+              child: Container(
+                height: 9.h,
+                color: _bands[i].withValues(alpha: 0.16),
+                alignment: Alignment.centerLeft,
+                child: TweenAnimationBuilder<double>(
+                  tween: Tween(begin: 0, end: math.max(pct, 0.03)),
+                  duration: Duration(milliseconds: 900 + i * 80),
+                  curve: Curves.easeOutCubic,
+                  builder: (context, v, _) => FractionallySizedBox(
+                    widthFactor: v,
+                    child: ColoredBox(color: _bands[i], child: const SizedBox.expand()),
                   ),
                 ),
               ),
             ),
-          ),
-          SizedBox(height: 6.h),
+          ],
+          SizedBox(height: 8.h),
           Text.rich(
             TextSpan(children: [
               TextSpan(
@@ -761,15 +763,15 @@ class _InkButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fg = filled ? AppColors.ink : Colors.white;
+    const fg = Colors.white;
     return Material(
-      color: filled ? Colors.white : Colors.white.withValues(alpha: 0.1),
+      color: filled ? AppColors.primary : Colors.white.withValues(alpha: 0.1),
       borderRadius: BorderRadius.circular(14.r),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(14.r),
         child: SizedBox(
-          height: 48.h,
+          height: 52.h,
           child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
             if (icon != null) ...[Icon(icon, size: 18.sp, color: fg), SizedBox(width: 6.w)],
             Flexible(
@@ -810,6 +812,107 @@ class _LangGlyph extends StatelessWidget {
           locale: lang == 'zh' ? Locale.fromSubtags(languageCode: 'zh', scriptCode: user.zhScript == 'hant' ? 'Hant' : 'Hans') : null,
         ),
       ),
+    );
+  }
+}
+
+/// "Từ của hôm nay": one verified word seen through all three beams – English, Chinese
+/// (in the learner's script) and Vietnamese – the same word for everyone on the same day.
+class _TodayWord extends StatefulWidget {
+  const _TodayWord();
+
+  @override
+  State<_TodayWord> createState() => _TodayWordState();
+}
+
+class _TodayWordState extends State<_TodayWord> {
+  late final Future<(WordCard, WordCard?)?> _future = _load();
+
+  static int get _day => DateTime.now().difference(DateTime(2026)).inDays;
+
+  Future<(WordCard, WordCard?)?> _load() async {
+    final script = AuthService.to.user.value?.zhScript ?? 'hans';
+    final (count, _) = await VocabRepository.wordPage('zh', script, 1, pageSize: 1);
+    if (count == 0) return null;
+    final pages = (count / 50).ceil();
+    final (_, list) = await VocabRepository.wordPage('zh', script, _day % pages + 1);
+    if (list.isEmpty) return null;
+    final start = _day % list.length;
+    final ordered = [...list.sublist(start), ...list.sublist(0, start)];
+    final zh = ordered.firstWhere((w) => w.image != null && w.partOfSpeech == 'noun',
+        orElse: () => ordered.firstWhere((w) => w.image != null, orElse: () => ordered.first));
+    final en = await VocabRepository.word(zh.id, 'en');
+    return (zh, en);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<(WordCard, WordCard?)?>(
+      future: _future,
+      builder: (context, snap) {
+        final data = snap.data;
+        if (data == null) return const SizedBox.shrink();
+        final (zh, en) = data;
+        final rows = [
+          ('EN', 'Tiếng Anh', AppColors.beamAmber, en?.target?.text ?? zh.english ?? '', (en?.target?.ipa ?? '').isEmpty ? '' : '/${en!.target!.ipa}/', en?.target),
+          (zh.target?.language == 'zh-Hant' ? '繁' : '简', 'Tiếng Trung', AppColors.beamCoral, zh.target?.text ?? '', zh.target?.pinyin ?? '', zh.target),
+          ('VI', 'Tiếng Việt', AppColors.beamMint, zh.meaningVi, '', null),
+        ];
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Từ của hôm nay',
+                style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w700, color: AppColors.textPrimary, letterSpacing: -0.2)),
+            SizedBox(height: 12.h),
+            Container(
+              padding: EdgeInsets.all(16.w),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(20.r),
+                border: const Border.fromBorderSide(BorderSide(color: AppColors.line)),
+              ),
+              child: Column(children: [
+                if (zh.image != null)
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(14.r),
+                    child: Image.network(zh.image!, height: 150.h, width: double.infinity, fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => const SizedBox.shrink()),
+                  ),
+                for (final r in rows)
+                  Container(
+                    margin: EdgeInsets.only(top: 14.h),
+                    padding: EdgeInsets.only(top: 10.h),
+                    decoration: BoxDecoration(border: Border(top: BorderSide(color: r.$3, width: 3))),
+                    child: Row(children: [
+                      Container(
+                        width: 22.w,
+                        height: 22.w,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(color: r.$3, borderRadius: BorderRadius.circular(5.r)),
+                        child: Text(r.$1, style: TextStyle(color: AppColors.ink, fontWeight: FontWeight.w700, fontSize: r.$1.length > 1 ? 9.sp : 12.sp, height: 1)),
+                      ),
+                      SizedBox(width: 12.w),
+                      Expanded(
+                        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                          Text(r.$4.isEmpty ? '—' : r.$4,
+                              style: TextStyle(
+                                fontSize: 26.sp,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.textPrimary,
+                                height: 1.15,
+                                locale: r.$6 != null && r.$6!.language.startsWith('zh') ? localeFor(r.$6!.language) : null,
+                              )),
+                          if (r.$5.isNotEmpty) Text(r.$5, style: TextStyle(fontSize: 13.sp, color: AppColors.textSecondary)),
+                        ]),
+                      ),
+                      Text(r.$2, style: TextStyle(fontSize: 12.sp, color: AppColors.textHint)),
+                    ]),
+                  ),
+              ]),
+            ),
+          ],
+        );
+      },
     );
   }
 }

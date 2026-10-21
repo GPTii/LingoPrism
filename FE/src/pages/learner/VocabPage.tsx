@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { Input, Segmented, Skeleton } from 'antd'
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { vocabApi, topicTargetName } from '../../api/vocab'
 import { useAuth } from '../../auth/store'
 import WordCardView from '../../components/WordCardView'
@@ -16,7 +16,9 @@ export default function VocabPage() {
   const user = useAuth((s) => s.user)
   const lang = user?.active_language ?? 'en'
   const script = user?.zh_script ?? 'hans'
-  const [tab, setTab] = useState<'topics' | 'library'>('topics')
+  const [params, setParams] = useSearchParams()
+  const tab: 'topics' | 'library' = params.get('tab') === 'library' ? 'library' : 'topics'
+  const setTab = (t: typeof tab) => setParams(t === 'library' ? { tab: t } : {}, { replace: true })
   const [search, setSearch] = useState('')
 
   const topics = useQuery({ queryKey: ['topics', lang, script], queryFn: () => vocabApi.topics() })

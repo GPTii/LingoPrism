@@ -2,7 +2,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { App, Button, Calendar, Progress, Skeleton } from 'antd'
 import { CheckOutlined, ThunderboltFilled } from '@ant-design/icons'
 import dayjs, { type Dayjs } from 'dayjs'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import { gameApi } from '../../api/app'
 import { errorMessage } from '../../api/client'
 import { BadgeMedal, FreezeIcon, GemIcon, Prismo, ScaleIcon, StreakIcon, XpIcon } from '../../components/brand/Brand'
@@ -37,6 +38,16 @@ export default function AchievementsPage() {
     onSuccess: (_, v) => { message.success(v.done); refresh() },
     onError: (e) => message.error(errorMessage(e)),
   })
+  // menu links like /achievements#shop land on their section (and highlight it briefly)
+  const { hash } = useLocation()
+  useEffect(() => {
+    if (!hash) return
+    const t = window.setTimeout(() => {
+      const el = document.getElementById(hash.slice(1))
+      el?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 60)
+    return () => window.clearTimeout(t)
+  }, [hash, badges.isSuccess, shop.isSuccess])
   const s = summary.data
   const owned = badges.data?.filter((b) => b.owned).length ?? 0
 
@@ -70,7 +81,7 @@ export default function AchievementsPage() {
       </Section>
 
       <div className="grid lg:grid-cols-2 gap-6">
-        <Section title="Nhiệm vụ hằng ngày">
+        <Section id="quests" title="Nhiệm vụ hằng ngày">
           {quests.isLoading ? <Skeleton active /> : (
             <ul className="m-0 p-0 list-none flex flex-col gap-4">
               {quests.data?.quests.map((q) => (
@@ -107,7 +118,7 @@ export default function AchievementsPage() {
           )}
         </Section>
 
-        <Section title="Lịch học">
+        <Section id="calendar" title="Lịch học">
           <Calendar fullscreen={false} value={month} onPanelChange={(d) => setMonth(d)} cellRender={(d, info) => (info.type === 'date' ? cell(d) : null)} />
           <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-slate-500">
             <span className="inline-flex items-center gap-1"><StreakIcon size={14} /> ngày có học</span>
@@ -117,7 +128,7 @@ export default function AchievementsPage() {
         </Section>
       </div>
 
-      <Section title="Huy hiệu" extra={badges.data && <span className="num text-sm text-slate-500">{owned}/{badges.data.length} đã có</span>}>
+      <Section id="badges" title="Huy hiệu" extra={badges.data && <span className="num text-sm text-slate-500">{owned}/{badges.data.length} đã có</span>}>
         <ul className="m-0 p-0 list-none grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-x-4 gap-y-6">
           {badges.data?.map((b, i) => (
             <li key={b.code} className={`flex flex-col items-center text-center gap-1 ${b.owned ? '' : 'opacity-60'}`}>
@@ -130,7 +141,7 @@ export default function AchievementsPage() {
         </ul>
       </Section>
 
-      <Section title="Cửa hàng" extra={<span className="text-sm text-slate-500">Đổi vảy và ngọc lấy vật phẩm hỗ trợ</span>}>
+      <Section id="shop" title="Cửa hàng" extra={<span className="text-sm text-slate-500">Đổi vảy và ngọc lấy vật phẩm hỗ trợ</span>}>
         <ul className="m-0 p-0 list-none grid md:grid-cols-3 gap-3">
           {shop.data?.map((i) => (
             <li key={i.id} className="rounded-xl bg-slate-50 p-4 flex flex-col gap-2">

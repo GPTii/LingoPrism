@@ -1,11 +1,12 @@
 import { useQuery } from '@tanstack/react-query'
 import { Progress, Skeleton } from 'antd'
-import { ArrowRightOutlined, BookOutlined, CameraFilled, CheckCircleFilled, EditOutlined, RedoOutlined } from '@ant-design/icons'
+import { ArrowRightOutlined, BookOutlined, CameraFilled, CheckCircleFilled, EditOutlined } from '@ant-design/icons'
 import { Link, useNavigate } from 'react-router-dom'
 import { vocabApi } from '../../api/vocab'
 import { gameApi } from '../../api/app'
 import { useAuth } from '../../auth/store'
 import LevelPath from '../../components/LevelPath'
+import TodayWord from '../../components/TodayWord'
 import { LangGlyph, Prismo, ScaleIcon, StreakIcon, XpIcon, type Mood } from '../../components/brand/Brand'
 
 const LANG_NAME: Record<string, string> = { en: 'tiếng Anh', zh: 'tiếng Trung', vi: 'tiếng Việt' }
@@ -16,21 +17,28 @@ function greeting() {
 }
 
 /**
- * The day's goal drawn as light leaving Prismo: the three beams (one per language) grow with
- * the words learned today and reach the edge when the goal is met.
+ * The signature of the page: Prismo splits light into three beams that run across the whole width.
+ * How far the light reaches is how much of today's goal is done.
  */
-function GoalBeam({ learned, target }: { learned: number; target: number }) {
+function Spectrum({ learned, target, mood }: { learned: number; target: number; mood: Mood }) {
   const pct = Math.min(100, Math.round((learned / Math.max(target, 1)) * 100))
+  const bands = ['#ffb020', '#10c79a', '#ff6b81']
   return (
-    <div className="w-full">
-      <div className="h-[18px] rounded-r-full bg-white/10 overflow-hidden" role="progressbar" aria-valuemin={0} aria-valuemax={target}
-        aria-valuenow={learned} aria-label="Mục tiêu từ mới hôm nay">
-        <div className="h-full beams rounded-r-full transition-[width] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]"
-          style={{ width: `${Math.max(pct, 3)}%` }} />
-      </div>
-      <div className="mt-2 flex items-baseline justify-between text-sm text-white/75">
-        <span><span className="num text-white font-bold text-base">{learned}/{target}</span> từ mới hôm nay</span>
-        {pct >= 100 && <span className="text-[#ffd27a] font-semibold">Đã đạt mục tiêu</span>}
+    <div className="flex items-center gap-1 sm:gap-2">
+      <Prismo mood={mood} size={104} className="shrink-0 -mr-3 relative z-[1] -mt-6" />
+      <div className="flex-1 min-w-0" role="progressbar" aria-valuemin={0} aria-valuemax={target} aria-valuenow={learned} aria-label="Mục tiêu từ mới hôm nay">
+        <div className="flex flex-col gap-[3px]">
+          {bands.map((c, i) => (
+            <div key={c} className="h-[7px] sm:h-[9px] rounded-r-full overflow-hidden" style={{ background: `${c}24` }}>
+              <div className="h-full rounded-r-full transition-[width] duration-1000 ease-[cubic-bezier(0.22,1,0.36,1)]"
+                style={{ width: `${Math.max(pct, 2)}%`, background: c, transitionDelay: `${i * 80}ms` }} />
+            </div>
+          ))}
+        </div>
+        <div className="mt-3 pl-4 flex items-baseline justify-between gap-4 text-slate-500">
+          <span><b className="num text-slate-900 text-lg">{learned}/{target}</b> từ mới hôm nay</span>
+          {pct >= 100 && <span className="font-semibold text-[#10c79a]">Đã đạt mục tiêu</span>}
+        </div>
       </div>
     </div>
   )
@@ -40,6 +48,7 @@ export default function HomePage() {
   const user = useAuth((s) => s.user)
   const navigate = useNavigate()
   const lang = user?.active_language ?? 'en'
+  const script = user?.zh_script ?? 'hans'
   const summary = useQuery({ queryKey: ['summary', lang, user?.zh_script], queryFn: vocabApi.summary })
   const game = useQuery({ queryKey: ['game-summary'], queryFn: gameApi.summary })
   const quests = useQuery({ queryKey: ['quests'], queryFn: gameApi.quests })
@@ -58,72 +67,71 @@ export default function HomePage() {
         : 'Năm phút là đủ cho một lượt học hôm nay.'
 
   const facts = [
-    { icon: <StreakIcon size={20} active={!!g?.studied_today} />, value: g?.streak ?? 0, label: 'ngày liên tiếp' },
-    { icon: <XpIcon size={20} />, value: g?.today_xp ?? 0, label: 'XP hôm nay' },
-    { icon: <BookOutlined className="text-[#8fd8ff]" />, value: s?.learning ?? 0, label: 'từ đang học' },
+    { icon: <StreakIcon size={22} active={!!g?.studied_today} />, value: g?.streak ?? 0, label: 'ngày liên tiếp' },
+    { icon: <XpIcon size={22} />, value: g?.today_xp ?? 0, label: 'XP hôm nay' },
+    { icon: <BookOutlined className="text-[#8f75ff]" />, value: s?.learning ?? 0, label: 'từ đang học' },
     { icon: <CheckCircleFilled className="text-[#10c79a]" />, value: s?.mastered ?? 0, label: 'từ đã thuộc' },
   ]
-  const script = user?.zh_script ?? 'hans'
 
   return (
-    <div className="max-w-6xl mx-auto flex flex-col gap-5 md:gap-6">
-      {/* today: the one strong surface on the page */}
-      <section className="ink-bg text-white rounded-3xl overflow-hidden animate-rise">
-        <div className="grid md:grid-cols-[1fr_minmax(260px,380px)] gap-6 md:gap-4 p-6 sm:p-8 md:p-10">
-          <div className="min-w-0 flex flex-col">
-            <div className="flex items-center gap-2 text-white/75 text-sm">
-              <LangGlyph lang={lang} script={script} size={20} />
-              Đang học {LANG_NAME[lang]}{lang === 'zh' ? (script === 'hant' ? ' phồn thể' : ' giản thể') : ''}
-            </div>
-            <h1 className="text-[1.75rem] sm:text-4xl font-extrabold leading-[1.15] mt-3 mb-2 text-white">
-              {greeting()}, {user?.display_name}
-            </h1>
-            <p className="text-white/80 text-base sm:text-lg m-0 max-w-[46ch]">{line}</p>
-            <div className="flex flex-wrap gap-3 mt-6">
-              <button type="button" onClick={() => navigate('/learn?kind=learn')}
-                className="cursor-pointer rounded-xl bg-[#fff] text-[#1b1538] font-bold px-5 h-12 text-base hover:bg-[#f2efff] active:scale-[0.97] transition">
-                Học {target} từ mới
-              </button>
-              <button type="button" disabled={!due} onClick={() => navigate('/learn?kind=review')}
-                className="cursor-pointer rounded-xl bg-white/10 font-bold px-5 h-12 text-base inline-flex items-center gap-2 hover:bg-white/15 active:scale-[0.97] transition disabled:opacity-45 disabled:cursor-not-allowed">
-                <RedoOutlined /> {due ? `Ôn ${due} từ đến hạn` : 'Chưa có từ cần ôn'}
-              </button>
-            </div>
+    <div className="max-w-6xl mx-auto flex flex-col gap-14 md:gap-20 pb-6">
+      {/* today */}
+      <section className="flex flex-col gap-8 pt-4 md:pt-10 animate-rise">
+        <div>
+          <div className="flex items-center gap-2 text-slate-500">
+            <LangGlyph lang={lang} script={script} size={20} />
+            Đang học {LANG_NAME[lang]}{lang === 'zh' ? (script === 'hant' ? ' phồn thể' : ' giản thể') : ''}
           </div>
-          <div className="flex items-center md:items-end gap-2 md:flex-col md:justify-end">
-            <Prismo mood={mood} size={124} className="shrink-0 md:self-start" />
-            <div className="flex-1 w-full md:-mt-10 md:pl-[110px]"><GoalBeam learned={learned} target={target} /></div>
-          </div>
+          <h1 className="text-[2.5rem] sm:text-6xl xl:text-7xl font-extrabold text-slate-900 leading-[1.02] tracking-[-0.035em] mt-4 mb-0">
+            {greeting()},<br />{user?.display_name}
+          </h1>
+          <p className="text-lg sm:text-xl text-slate-500 mt-5 mb-0 max-w-[48ch]">{line}</p>
         </div>
-        <dl className="m-0 grid grid-cols-2 sm:grid-cols-4 gap-x-6 gap-y-3 px-6 sm:px-8 md:px-10 py-4 bg-white/[0.06]">
+
+        <Spectrum learned={learned} target={target} mood={mood} />
+
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+          <button type="button" onClick={() => navigate('/learn?kind=learn')}
+            className="cursor-pointer rounded-2xl bg-[#6d4aff] text-white font-bold px-7 h-14 text-lg hover:bg-[#5533e0] active:scale-[0.97] transition">
+            Học {target} từ mới
+          </button>
+          {due > 0 ? (
+            <Link to="/learn?kind=review" className="group text-lg font-semibold !text-slate-800 inline-flex items-center gap-2">
+              Ôn {due} từ đến hạn <ArrowRightOutlined className="transition-transform group-hover:translate-x-1" />
+            </Link>
+          ) : <span className="text-slate-500">Chưa có từ nào cần ôn</span>}
+        </div>
+
+        <dl className="m-0 flex flex-wrap gap-x-10 gap-y-4">
           {facts.map((f) => (
-            <div key={f.label} className="flex items-center gap-2.5 min-w-0">
-              <span className="text-lg leading-none">{f.icon}</span>
-              <dt className="order-last text-sm text-white/70 truncate">{f.label}</dt>
-              <dd className="m-0 num text-xl font-bold">{loading ? '–' : f.value}</dd>
+            <div key={f.label} className="flex items-center gap-2.5">
+              <span className="text-xl leading-none">{f.icon}</span>
+              <dt className="order-last text-slate-500">{f.label}</dt>
+              <dd className="m-0 num text-2xl font-bold text-slate-900">{loading ? '–' : f.value}</dd>
             </div>
           ))}
         </dl>
       </section>
 
+      <TodayWord />
+
       <div className="grid lg:grid-cols-5 gap-5 md:gap-6">
         {/* camera: the heart of LingoPrism */}
         <button type="button" onClick={() => navigate('/camera')}
-          className="lift lp-card lg:col-span-3 p-5 sm:p-6 text-left cursor-pointer flex items-center gap-5 group">
-          <span className="h-16 w-16 rounded-2xl prism-bg grid place-items-center text-3xl text-white shrink-0 transition-transform duration-150 group-hover:scale-[1.04]">
-            <CameraFilled />
+          className="lift lp-card lg:col-span-3 p-6 sm:p-8 text-left cursor-pointer flex flex-col justify-between gap-8 group min-h-56">
+          <span className="h-14 w-14 rounded-2xl prism-bg grid place-items-center text-2xl text-white"><CameraFilled /></span>
+          <span>
+            <span className="block text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-[-0.02em]">Chụp một đồ vật</span>
+            <span className="flex items-end justify-between gap-4 mt-2">
+              <span className="text-slate-500 max-w-[44ch]">Máy nhận ra vật trong ảnh và cho bạn ngay tên của nó bằng tiếng Việt, tiếng Anh và tiếng Trung.</span>
+              <ArrowRightOutlined className="text-xl text-slate-400 transition-transform duration-150 group-hover:translate-x-1" />
+            </span>
           </span>
-          <span className="flex-1 min-w-0">
-            <span className="block text-xl font-bold text-slate-800">Chụp một đồ vật</span>
-            <span className="block text-slate-500 mt-1">Máy nhận ra vật trong ảnh và cho bạn ngay từ tiếng Việt, tiếng Anh và tiếng Trung.</span>
-          </span>
-          <ArrowRightOutlined className="text-slate-400 text-lg hidden sm:block transition-transform duration-150 group-hover:translate-x-0.5" />
         </button>
 
-        {/* today's quests */}
-        <section className="lp-card lg:col-span-2 p-5">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold text-slate-800 m-0">Nhiệm vụ hôm nay</h2>
+        <section className="lp-card lg:col-span-2 p-6">
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="text-lg font-bold text-slate-900 m-0">Nhiệm vụ hôm nay</h2>
             <Link to="/achievements" className="text-sm font-semibold">Xem tất cả</Link>
           </div>
           {quests.isLoading ? <Skeleton active paragraph={{ rows: 3 }} title={false} /> : (

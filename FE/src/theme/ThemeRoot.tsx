@@ -20,7 +20,7 @@ export default function ThemeRoot({ children }: { children: ReactNode }) {
     const root = document.documentElement
     root.classList.toggle('dark', dark)
     root.style.colorScheme = dark ? 'dark' : 'light'
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', dark ? '#0f0d1a' : '#f5f4f9')
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', dark ? '#0c0a17' : '#f5f4f9')
   }, [dark])
 
   return (
@@ -38,20 +38,20 @@ export default function ThemeRoot({ children }: { children: ReactNode }) {
           colorTextSecondary: dark ? '#a8a3c4' : '#5d5878',
           borderRadius: 10,
           fontFamily: '"Be Vietnam Pro", "Segoe UI", system-ui, sans-serif',
-          colorBgLayout: dark ? '#0f0d1a' : '#f5f4f9',
-          colorBgContainer: dark ? '#181527' : '#ffffff',
-          colorBgElevated: dark ? '#201c33' : '#ffffff',
-          colorBorder: dark ? '#3b3558' : '#d3cee3',
-          colorBorderSecondary: dark ? '#2a2640' : '#e7e4f0',
+          colorBgLayout: dark ? '#0c0a17' : '#f5f4f9',
+          colorBgContainer: dark ? '#15122a' : '#ffffff',
+          colorBgElevated: dark ? '#1d1934' : '#ffffff',
+          colorBorder: dark ? '#3a3458' : '#d3cee3',
+          colorBorderSecondary: dark ? '#29243f' : '#e7e4f0',
           boxShadowSecondary: dark ? '0 14px 34px -14px rgb(0 0 0 / 0.7)' : '0 12px 32px -12px rgb(27 21 56 / 0.28)',
           motionEaseOut: 'cubic-bezier(0.22, 1, 0.36, 1)',
         },
         components: {
-          Layout: { headerBg: dark ? '#181527' : '#ffffff', siderBg: dark ? '#181527' : '#ffffff', bodyBg: dark ? '#0f0d1a' : '#f5f4f9' },
+          Layout: { headerBg: dark ? '#15122a' : '#ffffff', siderBg: dark ? '#15122a' : '#ffffff', bodyBg: dark ? '#0c0a17' : '#f5f4f9' },
           Menu: { itemBg: 'transparent', itemBorderRadius: 8, itemSelectedColor: dark ? '#c3b6ff' : '#5533e0' },
           Button: { primaryShadow: 'none', defaultShadow: 'none', dangerShadow: 'none', fontWeight: 600 },
           Card: { boxShadowTertiary: 'none' },
-          Table: { headerBg: dark ? '#201c33' : '#f5f4f9', headerColor: dark ? '#a8a3c4' : '#5d5878' },
+          Table: { headerBg: dark ? '#1d1934' : '#f5f4f9', headerColor: dark ? '#a8a3c4' : '#5d5878' },
         },
       }}
     >

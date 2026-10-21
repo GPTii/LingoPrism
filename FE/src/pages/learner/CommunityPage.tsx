@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { App, Button, Form, Input, Modal, Select, Segmented, Skeleton, Switch, Upload } from 'antd'
 import { HeartFilled, HeartOutlined, MessageOutlined, SaveOutlined, FlagOutlined, PlusOutlined, CrownFilled } from '@ant-design/icons'
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import 'dayjs/locale/vi'
@@ -250,7 +250,11 @@ function LeaderboardTab() {
 
 export default function CommunityPage() {
   const user = useAuth((s) => s.user)
-  const [tab, setTab] = useState<'feed' | 'groups' | 'leaderboard'>(user?.learner_type === 'kid' ? 'leaderboard' : 'feed')
+  const [params, setParams] = useSearchParams()
+  const isKidUser = user?.learner_type === 'kid'
+  const asked = params.get('tab') as 'feed' | 'groups' | 'leaderboard' | null
+  const tab = isKidUser ? 'leaderboard' : asked && ['feed', 'groups', 'leaderboard'].includes(asked) ? asked : 'feed'
+  const setTab = (t: typeof tab) => setParams({ tab: t }, { replace: true })
   const feed = useQuery({ queryKey: ['feed'], queryFn: () => communityApi.feed(), enabled: tab === 'feed' })
   const isKid = user?.learner_type === 'kid'
   return (

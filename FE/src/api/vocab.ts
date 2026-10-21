@@ -94,6 +94,11 @@ export const vocabApi = {
   createTopic: (name_vi: string, icon: string) => api.post<Topic>('/topics/', { name_vi, icon, visibility: 'private' }).then((r) => r.data),
   deleteTopic: (id: number) => api.delete(`/topics/${id}/`),
   searchWords: (search: string) => api.get<Paginated<WordCard>>('/words/', { params: { search, page_size: 30 } }).then((r) => r.data),
+  /** one page of verified words that have a translation in `lang` (the server only lists checked data) */
+  wordPage: (lang: string, script: string, page: number, pageSize = 1) =>
+    api.get<Paginated<WordCard>>('/words/', { params: { lang, script, page, page_size: pageSize } }).then((r) => r.data),
+  /** the same word seen through another language */
+  word: (id: number, lang: string, script?: string) => api.get<WordCard>(`/words/${id}/`, { params: { lang, script } }).then((r) => r.data),
   byLabels: (labels: string[]) => api.get<Record<string, WordCard>>('/words/by-labels/', { params: { labels: labels.join(',') } }).then((r) => r.data),
   report: (word: number, translation: number | undefined, reason: string, details: string) =>
     api.post('/reports/', { word, translation, reason, details }),

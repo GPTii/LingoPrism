@@ -23,8 +23,8 @@ export function PageHeader({ title, description, back, actions }: {
       )}
       <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
         <div className="min-w-0">
-          <h1 className="text-[1.75rem] sm:text-3xl font-extrabold text-slate-800 m-0 leading-tight">{title}</h1>
-          {description && <p className="text-slate-500 mt-1.5 mb-0 max-w-[65ch]">{description}</p>}
+          <h1 className="text-[2rem] sm:text-5xl font-extrabold text-slate-900 m-0 leading-[1.05] tracking-[-0.03em]">{title}</h1>
+          {description && <p className="text-lg text-slate-500 mt-3 mb-0 max-w-[60ch]">{description}</p>}
         </div>
         {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
       </div>
@@ -32,7 +32,8 @@ export function PageHeader({ title, description, back, actions }: {
   )
 }
 
-export function Section({ title, extra, children, className = '', bodyClassName = '' }: {
+export function Section({ id, title, extra, children, className = '', bodyClassName = '' }: {
+  id?: string
   title?: ReactNode
   extra?: ReactNode
   children: ReactNode
@@ -40,7 +41,7 @@ export function Section({ title, extra, children, className = '', bodyClassName 
   bodyClassName?: string
 }) {
   return (
-    <section className={`lp-card ${className}`}>
+    <section id={id} className={`lp-card scroll-mt-20 ${className}`}>
       {(title || extra) && (
         <div className="flex flex-wrap items-center justify-between gap-2 px-5 pt-4 sm:px-6 sm:pt-5">
           {title && <h2 className="text-lg font-bold text-slate-800 m-0">{title}</h2>}

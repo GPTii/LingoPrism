@@ -255,7 +255,7 @@ export default function SessionPage() {
       </AnimatePresence>
 
       {/* answer bar: fixed at the bottom like a game, green / red with Prismo's reaction */}
-      <div className={`fixed inset-x-0 bottom-0 z-40 border-t-2 transition-colors md:left-[88px] lg:left-60 ${
+      <div className={`fixed inset-x-0 bottom-0 z-40 border-t-2 transition-colors md:left-[var(--nav-w,256px)] ${
         feedback ? (feedback.correct ? 'bg-green-50 border-green-300' : 'bg-red-50 border-red-400') : 'bg-white border-slate-200'}`}
         style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}>
         <div className="max-w-2xl mx-auto px-4 pt-3 flex items-center gap-3">

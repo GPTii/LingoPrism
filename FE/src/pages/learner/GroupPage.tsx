@@ -46,7 +46,7 @@ export default function GroupPage() {
     return () => { off(); s.close() }
   }, [groupId, message])
 
-  useEffect(() => bottom.current?.scrollIntoView({ behavior: 'smooth' }), [messages])
+  useEffect(() => { bottom.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages])
 
   const send = async () => {
     const content = text.trim()

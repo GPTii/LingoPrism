@@ -70,6 +70,21 @@ class VocabRepository {
   static Future<List<WordCard>> search(String term) async =>
       ApiClient.results(await _api.get('/words/', query: {'search': term, 'page_size': 50})).map(WordCard.fromJson).toList();
 
+  /// One page of verified words that have a translation in [lang] (the server lists checked data only).
+  static Future<(int, List<WordCard>)> wordPage(String lang, String script, int page, {int pageSize = 50}) async {
+    final d = asMap(await _api.get('/words/', query: {'lang': lang, 'script': script, 'page': page, 'page_size': pageSize}));
+    return (asInt(d['count']), ApiClient.results(d).map(WordCard.fromJson).toList());
+  }
+
+  /// The same word seen through another language; null when it has no verified translation there.
+  static Future<WordCard?> word(int id, String lang, {String? script}) async {
+    try {
+      return WordCard.fromJson(asMap(await _api.get('/words/$id/', query: {'lang': lang, 'script': script})));
+    } catch (_) {
+      return null;
+    }
+  }
+
   static Future<Map<String, WordCard>> byLabels(List<String> labels) async {
     final d = asMap(await _api.get('/words/by-labels/', query: {'labels': labels.join(',')}));
     return d.map((k, v) => MapEntry(k, WordCard.fromJson(asMap(v))));

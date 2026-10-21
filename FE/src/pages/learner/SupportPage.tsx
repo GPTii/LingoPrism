@@ -44,7 +44,7 @@ export function SupportChatBox({ conversationId, title }: { conversationId: numb
     return () => { off(); s.close() }
   }, [conversationId, me?.id, message])
 
-  useEffect(() => bottom.current?.scrollIntoView({ behavior: 'smooth' }), [messages])
+  useEffect(() => { bottom.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages])
 
   const send = async () => {
     const content = text.trim()

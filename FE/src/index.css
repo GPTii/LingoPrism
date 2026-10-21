@@ -43,11 +43,11 @@
 
 /* dark: the slate scale is turned around, so every page written with slate-* / bg-white follows */
 .dark {
-  --page-bg: #0f0d1a;
-  --surface: #181527;
-  --surface-2: #201c33;
-  --line: #2a2640;
-  --line-strong: #3b3558;
+  --page-bg: #0c0a17;
+  --surface: #15122a;
+  --surface-2: #1d1934;
+  --line: #29243f;
+  --line-strong: #3a3458;
   --ink: #211a44;
   --ink-soft: #2a2254;
   --shadow-pop: 0 14px 34px -14px rgb(0 0 0 / 0.7);
@@ -79,7 +79,7 @@
   --color-green-700: #86efac;
 }
 .dark .bg-white { background-color: var(--surface); }
-.dark .bg-white\/80 { background-color: rgb(24 21 39 / 0.8); }
+.dark .bg-white\/80 { background-color: rgb(21 18 42 / 0.8); }
 .dark .bg-white\/60 { background-color: rgb(24 21 39 / 0.6); }
 .dark .bg-white\/90 { background-color: rgb(24 21 39 / 0.9); }
 .dark .border-slate-200 { border-color: var(--line); }

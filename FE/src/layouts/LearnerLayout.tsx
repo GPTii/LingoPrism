@@ -14,22 +14,25 @@ import { isStaffRole, useAuth } from '../auth/store'
 import { useLogout } from '../auth/useLogout'
 import type { User } from '../api/types'
 import { useUnread, useUserEvents } from '../lib/useUserEvents'
-import { GemIcon, LangGlyph, Logo, LogoMark, ScaleIcon, StreakIcon } from '../components/brand/Brand'
+import { GemIcon, LangGlyph, Logo, ScaleIcon, StreakIcon } from '../components/brand/Brand'
 import { useThemeMode, type ThemeMode } from '../theme/store'
+import SideNav, { navGroups } from '../components/SideNav'
+import ErrorBoundary from '../components/ErrorBoundary'
+import { vocabApi } from '../api/vocab'
 
 /** One quiet colour system: the page you are on is marked, the rest stay out of the way. */
-const NAV: { to: string; label: string; icon: React.ReactNode; only?: string }[] = [
-  { to: '/', label: 'Trang chủ', icon: <HomeOutlined /> },
+const NAV: { to: string; label: string; short?: string; icon: React.ReactNode; only?: string }[] = [
+  { to: '/', label: 'Trang chủ', short: 'Hôm nay', icon: <HomeOutlined /> },
   { to: '/vocab', label: 'Từ vựng', icon: <BookOutlined /> },
-  { to: '/doc-viet', label: 'Học đọc – viết', icon: <EditOutlined />, only: 'vi' },
+  { to: '/doc-viet', label: 'Học đọc – viết', short: 'Đọc viết', icon: <EditOutlined />, only: 'vi' },
   { to: '/review', label: 'Ôn tập', icon: <RedoOutlined /> },
   { to: '/sentences', label: 'Luyện câu', icon: <FormOutlined /> },
-  { to: '/camera', label: 'Nhận diện', icon: <CameraOutlined /> },
+  { to: '/camera', label: 'Nhận diện', short: 'Chụp ảnh', icon: <CameraOutlined /> },
   { to: '/exams', label: 'Đề thi', icon: <FileDoneOutlined /> },
   { to: '/community', label: 'Cộng đồng', icon: <TeamOutlined /> },
   { to: '/map', label: 'Bản đồ', icon: <EnvironmentOutlined /> },
   { to: '/achievements', label: 'Thành tích', icon: <TrophyOutlined /> },
-  { to: '/support', label: 'Hỏi giáo viên', icon: <MessageOutlined /> },
+  { to: '/support', label: 'Hỏi giáo viên', short: 'Giáo viên', icon: <MessageOutlined /> },
 ]
 
 const THEMES: { mode: ThemeMode; label: string; icon: React.ReactNode }[] = [
@@ -93,6 +96,13 @@ export default function LearnerLayout() {
   const unread = useUnread((s) => s.unread)
   useUserEvents()
   const game = useQuery({ queryKey: ['game-summary'], queryFn: gameApi.summary, enabled: !!user })
+  const library = useQuery({ queryKey: ['summary', user?.active_language, user?.zh_script], queryFn: vocabApi.summary, enabled: !!user })
+  const quests = useQuery({ queryKey: ['quests'], queryFn: gameApi.quests, enabled: !!user })
+  const groups = navGroups({
+    due: library.data?.due,
+    unread,
+    quests: quests.data?.quests.filter((q) => !q.completed).length,
+  }).map((g) => ({ ...g, children: g.children?.filter((c) => !c.only || c.only === user?.active_language) }))
 
   useEffect(() => {
     const onNoVoice = (e: Event) =>
@@ -129,31 +139,10 @@ export default function LearnerLayout() {
   return (
     <ConfigProvider theme={{ token: { borderRadius: 10, controlHeightLG: 48, fontSizeLG: 16 }, components: { Card: { borderRadiusLG: 16, headerFontSize: 17 } } }}>
       <div className="learner min-h-screen flex relative">
-        {/* tablet: icons only; laptop and larger: icons + labels */}
-        <aside className="hidden md:flex md:w-[88px] lg:w-60 shrink-0 flex-col bg-white border-r border-slate-200 px-3 py-5 sticky top-0 h-screen overflow-y-auto z-10">
-          <NavLink to="/" className="flex items-center justify-center lg:justify-start lg:px-2 mb-7">
-            <span className="lg:hidden"><LogoMark size={40} /></span>
-            <span className="hidden lg:inline"><Logo /></span>
-          </NavLink>
-          <nav className="flex flex-col gap-0.5" aria-label="Mục chính">
-            {nav.map((item) => {
-              const active = isActive(item.to)
-              return (
-                <NavLink key={item.to} to={item.to} title={item.label} aria-current={active ? 'page' : undefined}
-                  className={`flex items-center justify-center lg:justify-start gap-3 rounded-xl h-11 px-3 font-semibold transition-colors ${
-                    active ? 'bg-brand-50 text-brand-700' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800'}`}>
-                  <span className="text-[18px] leading-none">{item.icon}</span>
-                  <span className="hidden lg:inline text-[15px]">{item.label}</span>
-                </NavLink>
-              )
-            })}
-          </nav>
-          <div className="mt-auto pt-6 hidden lg:block"><ThemeSwitch full /></div>
-          <div className="mt-auto pt-6 lg:hidden flex justify-center"><ThemeSwitch /></div>
-        </aside>
+        <SideNav groups={groups} footer={<ThemeSwitch />} />
 
         <div className="flex-1 flex flex-col min-w-0 relative z-[1]">
-          <header className="h-14 md:h-16 flex items-center justify-between gap-2 px-3 md:px-6 bg-white border-b border-slate-200 sticky top-0 z-20">
+          <header className="h-14 md:h-16 flex items-center justify-between gap-2 px-3 md:px-8 bg-[var(--page-bg)] sticky top-0 z-20">
             <NavLink to="/" className="md:hidden shrink-0"><Logo compact={!screens.sm} size={32} /></NavLink>
             <div className="flex-1" />
             <div className="flex items-center gap-1.5 sm:gap-2.5 text-sm">
@@ -193,14 +182,14 @@ export default function LearnerLayout() {
               </Dropdown>
             </div>
           </header>
-          <main className={`flex-1 p-3 sm:p-4 md:p-6 xl:p-8 md:pb-8 ${focus ? 'pb-4' : 'pb-28'}`}>
+          <main className={`flex-1 px-3 sm:px-4 md:px-8 xl:px-12 pt-2 md:pt-4 md:pb-12 ${focus ? 'pb-4' : 'pb-28'}`}>
             <div className="mx-auto w-full max-w-7xl 2xl:max-w-[1600px]">
-              <Outlet />
+              <ErrorBoundary key={location.pathname}><Outlet /></ErrorBoundary>
             </div>
           </main>
 
           {/* phone: the camera – the heart of the app – raised in the middle */}
-          {!focus && <nav aria-label="Mục chính" className="md:hidden fixed bottom-0 inset-x-0 z-30 bg-white border-t border-slate-200 grid grid-cols-5 items-end pt-1.5"
+          {!focus && <nav aria-label="Mục chính" className="md:hidden fixed bottom-0 inset-x-0 z-30 bg-[var(--surface)] border-t border-slate-200 grid grid-cols-5 items-end pt-1.5"
             style={{ paddingBottom: 'max(0.4rem, env(safe-area-inset-bottom))' }}>
             {bottom.map((item, i) => item ? (
               <NavLink key={item.to} to={item.to}
@@ -222,15 +211,21 @@ export default function LearnerLayout() {
               Thêm
             </button>
           </nav>}
-          <Drawer open={moreOpen} onClose={() => setMoreOpen(false)} placement="bottom" height="auto" title="Tất cả mục"
+          <Drawer open={moreOpen} onClose={() => setMoreOpen(false)} placement="bottom" size="auto" title="Tất cả mục"
             styles={{ body: { paddingBottom: 'max(16px, env(safe-area-inset-bottom))' } }}>
-            <nav className="grid grid-cols-3 gap-2">
-              {[...nav, { to: '/profile', label: 'Hồ sơ', icon: <UserOutlined /> }].map((item) => (
-                <NavLink key={item.to} to={item.to}
-                  className={`btn-3d flex flex-col items-center gap-1.5 py-3 px-1 text-xs font-semibold text-center ${isActive(item.to) ? '!border-brand-500 text-brand-700' : 'text-slate-700'}`}>
-                  <span className="text-xl">{item.icon}</span>
-                  {item.label}
-                </NavLink>
+            <nav className="flex flex-col gap-4" aria-label="Tất cả mục">
+              {groups.filter((g) => g.children).map((g) => (
+                <section key={g.key}>
+                  <h3 className="flex items-center gap-2 text-sm font-bold text-slate-800 m-0 mb-1.5"><span className="text-slate-500">{g.icon}</span>{g.label}</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {g.children!.map((c) => (
+                      <NavLink key={c.to} to={c.to} onClick={() => setMoreOpen(false)}
+                        className="rounded-full bg-slate-100 px-3 py-1.5 text-sm font-medium !text-slate-700 inline-flex items-center gap-1.5">
+                        {c.label}{c.count ? <span className="num rounded-full bg-[#6d4aff] text-white text-[11px] font-bold px-1.5">{c.count}</span> : null}
+                      </NavLink>
+                    ))}
+                  </div>
+                </section>
               ))}
             </nav>
             <div className="mt-5 text-sm font-semibold text-slate-500 mb-2">Giao diện</div>
