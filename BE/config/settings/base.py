@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "apps.chat",
     "apps.detection",
     "apps.gis",
+    "apps.audit",
 ]
 
 MIDDLEWARE = [
@@ -52,6 +53,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "apps.audit.middleware.AuditLogMiddleware",  # admin / staff changes → AuditLog
 ]
 
 ROOT_URLCONF = "config.urls"

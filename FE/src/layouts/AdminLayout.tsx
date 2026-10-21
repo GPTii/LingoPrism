@@ -4,7 +4,7 @@ import {
   AlertOutlined, AuditOutlined, BookOutlined, CameraOutlined, DashboardOutlined, EnvironmentOutlined,
   FileDoneOutlined, LogoutOutlined, MessageOutlined, NotificationOutlined, TrophyOutlined,
   UserOutlined, HomeOutlined,
-  ExperimentOutlined, MenuOutlined, MoonOutlined, SunOutlined,
+  ExperimentOutlined, MenuOutlined, MoonOutlined, SunOutlined, HistoryOutlined,
 } from '@ant-design/icons'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/store'
@@ -25,6 +25,7 @@ const ITEMS = [
   { key: '/admin/gamification', icon: <TrophyOutlined />, label: 'Game hóa' },
   { key: '/admin/detections', icon: <CameraOutlined />, label: 'Nhận diện YOLO' },
   { key: '/admin/algorithms', icon: <ExperimentOutlined />, label: 'Thuật toán AI' },
+  { key: '/admin/audit', icon: <HistoryOutlined />, label: 'Nhật ký thao tác', adminOnly: true },
 ]
 
 export default function AdminLayout() {
@@ -34,6 +35,8 @@ export default function AdminLayout() {
   const logout = useLogout()
   const { mode, toggle: toggleTheme } = useThemeMode()
   const dark = mode === 'dark'
+  // the audit log is for admins only (the API answers 403 to staff)
+  const items = ITEMS.filter((i) => !('adminOnly' in i) || user?.role === 'admin').map(({ key, icon, label }) => ({ key, icon, label }))
   const selected = ITEMS.map((i) => i.key).filter((k) => location.pathname.startsWith(k)).sort((a, b) => b.length - a.length)[0]
 
   const screens = Grid.useBreakpoint()
@@ -46,7 +49,7 @@ export default function AdminLayout() {
       <span className="font-extrabold tracking-[-0.02em] text-slate-800">LingoPrism <span className="font-semibold text-slate-500">Quản trị</span></span>
     </div>
   )
-  const menu = <Menu mode="inline" selectedKeys={[selected]} items={ITEMS} onClick={(e) => navigate(e.key)} className="!border-e-0" />
+  const menu = <Menu mode="inline" selectedKeys={[selected]} items={items} onClick={(e) => navigate(e.key)} className="!border-e-0" />
 
   return (
     <Layout className="min-h-screen">

@@ -68,6 +68,23 @@ class ProfileView extends GetView<ProfileController> {
                 ),
                 SizedBox(height: 24.h),
                 ProfileOverviewSection(summary: profileSummary),
+                SizedBox(height: 12.h),
+                // the learner's own numbers: by day, question type, topic, hardest words
+                Material(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(16.r),
+                  child: ListTile(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16.r),
+                      side: BorderSide(color: AppColors.line),
+                    ),
+                    leading: Icon(Icons.insights_rounded, color: AppColors.primary),
+                    title: Text('Thống kê học tập', style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+                    subtitle: Text('Tỉ lệ đúng, tiến độ theo chủ đề, từ hay sai', style: TextStyle(color: AppColors.textSecondary)),
+                    trailing: Icon(Icons.chevron_right_rounded, color: AppColors.textHint),
+                    onTap: () => Get.toNamed(Routes.stats),
+                  ),
+                ),
                 SizedBox(height: 28.h),
                 Text(
                   'Các bài đăng gần đây',

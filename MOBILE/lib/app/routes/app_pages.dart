@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import '../modules/exams/exams_module.dart';
+import '../modules/stats/stats_module.dart';
 import '../modules/levels/levels_module.dart';
 import '../modules/literacy/literacy_module.dart';
 import '../modules/sentence_practice/sentence_practice_module.dart';
@@ -235,6 +236,7 @@ class AppPages {
       name: _Paths.detectionResult,
       page: () => const DetectionResultView(),
     ),
+      GetPage(name: _Paths.stats, page: () => const StatsView()),
       GetPage(name: _Paths.examList, page: () => const ExamListView(), binding: BindingsBuilder(() => Get.lazyPut(() => ExamListController()))),
     GetPage(name: _Paths.examTake, page: () => const ExamTakeView(), binding: BindingsBuilder(() => Get.lazyPut(() => ExamTakeController()))),
     GetPage(name: _Paths.examResult, page: () => const ExamResultView(), binding: BindingsBuilder(() => Get.lazyPut(() => ExamResultController()))),

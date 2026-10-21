@@ -86,7 +86,23 @@ export interface LibrarySummary {
   due: number
 }
 
+export interface LearningStats {
+  language: string
+  days: number
+  words: { total: number; new: number; learning: number; mastered: number }
+  answers: number
+  accuracy: number | null
+  first_try_accuracy: number | null
+  active_days: number
+  daily: { date: string; answers: number; correct: number }[]
+  by_question_type: { type: string; label: string; answers: number; accuracy: number | null }[]
+  by_topic: { id: number; name: string; icon: string; words: number; mastered: number; answers: number; accuracy: number | null }[]
+  hardest: { card: WordCard; answers: number; wrong: number }[]
+}
+
 export const vocabApi = {
+  /** my learning figures over the last `days` days (language being learned) */
+  stats: (days = 30) => api.get<LearningStats>('/stats/learning/', { params: { days } }).then((r) => r.data),
   topics: (params?: Record<string, unknown>) => api.get<Paginated<Topic>>('/topics/', { params: { page_size: 100, ...params } }).then((r) => r.data),
   topic: (id: number) => api.get<Topic>(`/topics/${id}/`).then((r) => r.data),
   topicWords: (id: number, page = 1) => api.get<Paginated<WordCard>>(`/topics/${id}/words/`, { params: { page, page_size: 50 } }).then((r) => r.data),

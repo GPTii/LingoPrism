@@ -19,6 +19,7 @@ api_v1 = [
     path("", include("apps.chat.urls")),
     path("", include("apps.detection.urls")),
     path("", include("apps.gis.urls")),
+    path("", include("apps.audit.urls")),
     path("admin/dashboard/", DashboardView.as_view(), name="admin-dashboard"),
 ]
 

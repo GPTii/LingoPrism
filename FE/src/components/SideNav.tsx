@@ -45,6 +45,7 @@ export function navGroups(counts: { due?: number; unread?: number; quests?: numb
     },
     {
       key: 'rewards', label: 'Thành tích', icon: <TrophyOutlined />, children: [
+        { to: '/stats', label: 'Thống kê học tập' },
         { to: '/achievements#quests', label: 'Nhiệm vụ', count: counts.quests },
         { to: '/achievements#calendar', label: 'Lịch học' },
         { to: '/achievements#badges', label: 'Huy hiệu' },

@@ -40,6 +40,7 @@ abstract class Routes {
   static const levelPath = _Paths.levelPath;
   static const levelTest = _Paths.levelTest;
   static const examList = _Paths.examList;
+  static const stats = _Paths.stats;
   static const examTake = _Paths.examTake;
   static const examResult = _Paths.examResult;
   static const supportChat = _Paths.supportChat;
@@ -86,6 +87,7 @@ abstract class _Paths {
   static const levelPath = '/levels';
   static const levelTest = '/levels/test';
   static const examList = '/exams';
+  static const stats = '/stats';
   static const examTake = '/exams/take';
   static const examResult = '/exams/result';
   static const supportChat = '/support';

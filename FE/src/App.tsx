@@ -22,6 +22,7 @@ import MemberProfilePage from './pages/learner/MemberProfilePage'
 import { ExamListPage, ExamResultPage, ExamTakePage } from './pages/learner/ExamsPages'
 import MapPage from './pages/learner/MapPage'
 import AchievementsPage from './pages/learner/AchievementsPage'
+import StatsPage from './pages/learner/StatsPage'
 import SupportPage from './pages/learner/SupportPage'
 import NotificationsPage from './pages/learner/NotificationsPage'
 import DashboardPage from './pages/admin/DashboardPage'
@@ -32,6 +33,7 @@ import ExamsAdminPage from './pages/admin/ExamsAdminPage'
 import PoisAdminPage from './pages/admin/PoisAdminPage'
 import { BroadcastPage, DetectionsAdminPage, GamificationAdminPage, ModerationPage, SupportAdminPage } from './pages/admin/OperationsPages'
 import AlgorithmsPage from './pages/admin/AlgorithmsPage'
+import AuditLogPage from './pages/admin/AuditLogPage'
 
 export default function App() {
   return (
@@ -64,6 +66,7 @@ export default function App() {
           <Route path="map" element={<MapPage />} />
           <Route path="shop" element={<AchievementsPage />} />
           <Route path="achievements" element={<AchievementsPage />} />
+          <Route path="stats" element={<StatsPage />} />
           <Route path="support" element={<SupportPage />} />
           <Route path="notifications" element={<NotificationsPage />} />
         </Route>
@@ -82,6 +85,7 @@ export default function App() {
             <Route path="gamification" element={<GamificationAdminPage />} />
             <Route path="detections" element={<DetectionsAdminPage />} />
             <Route path="algorithms" element={<AlgorithmsPage />} />
+            <Route path="audit" element={<AuditLogPage />} />
           </Route>
         </Route>
       </Route>
