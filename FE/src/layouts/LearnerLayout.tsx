@@ -4,35 +4,32 @@ import { useEffect, useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { gameApi, messagesApi } from '../api/app'
 import { authApi } from '../api/auth'
-import {
-  AppstoreOutlined, BookOutlined, CameraFilled, CameraOutlined, EnvironmentOutlined, EditOutlined,
-  FileDoneOutlined, FormOutlined, HomeOutlined, LogoutOutlined, MoonOutlined, RedoOutlined, SettingOutlined,
-  SunOutlined, TrophyOutlined, TeamOutlined, UserOutlined, BellOutlined, MessageOutlined,
-} from '@ant-design/icons'
+import { CameraFilled, LogoutOutlined, MoonOutlined, SettingOutlined, SunOutlined, UserOutlined } from '@ant-design/icons'
 import { Navigate, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { isStaffRole, useAuth } from '../auth/store'
 import { useLogout } from '../auth/useLogout'
 import type { User } from '../api/types'
 import { useUnread, useUserEvents } from '../lib/useUserEvents'
 import { GemIcon, LangGlyph, Logo, ScaleIcon, StreakIcon } from '../components/brand/Brand'
+import { AppIcon, type AppIconName } from '../components/brand/AppIcon'
 import { useThemeMode, type ThemeMode } from '../theme/store'
 import SideNav, { navGroups } from '../components/SideNav'
 import ErrorBoundary from '../components/ErrorBoundary'
 import { vocabApi } from '../api/vocab'
 
 /** One quiet colour system: the page you are on is marked, the rest stay out of the way. */
-const NAV: { to: string; label: string; short?: string; icon: React.ReactNode; only?: string }[] = [
-  { to: '/', label: 'Trang chủ', short: 'Hôm nay', icon: <HomeOutlined /> },
-  { to: '/vocab', label: 'Từ vựng', icon: <BookOutlined /> },
-  { to: '/doc-viet', label: 'Học đọc – viết', short: 'Đọc viết', icon: <EditOutlined />, only: 'vi' },
-  { to: '/review', label: 'Ôn tập', icon: <RedoOutlined /> },
-  { to: '/sentences', label: 'Luyện câu', icon: <FormOutlined /> },
-  { to: '/camera', label: 'Nhận diện', short: 'Chụp ảnh', icon: <CameraOutlined /> },
-  { to: '/exams', label: 'Đề thi', icon: <FileDoneOutlined /> },
-  { to: '/community', label: 'Cộng đồng', icon: <TeamOutlined /> },
-  { to: '/map', label: 'Bản đồ', icon: <EnvironmentOutlined /> },
-  { to: '/achievements', label: 'Thành tích', icon: <TrophyOutlined /> },
-  { to: '/support', label: 'Hỏi giáo viên', short: 'Giáo viên', icon: <MessageOutlined /> },
+const NAV: { to: string; label: string; short?: string; icon: AppIconName; only?: string }[] = [
+  { to: '/', label: 'Trang chủ', short: 'Hôm nay', icon: 'home' },
+  { to: '/vocab', label: 'Từ vựng', icon: 'vocab' },
+  { to: '/doc-viet', label: 'Học đọc – viết', short: 'Đọc viết', icon: 'pencil', only: 'vi' },
+  { to: '/review', label: 'Ôn tập', icon: 'review' },
+  { to: '/sentences', label: 'Luyện câu', icon: 'tiles' },
+  { to: '/camera', label: 'Nhận diện', short: 'Chụp ảnh', icon: 'camera' },
+  { to: '/exams', label: 'Đề thi', icon: 'exam' },
+  { to: '/community', label: 'Cộng đồng', icon: 'community' },
+  { to: '/map', label: 'Bản đồ', icon: 'pin' },
+  { to: '/achievements', label: 'Thành tích', icon: 'trophy' },
+  { to: '/support', label: 'Hỏi giáo viên', short: 'Giáo viên', icon: 'cap' },
 ]
 
 const THEMES: { mode: ThemeMode; label: string; icon: React.ReactNode }[] = [
@@ -175,8 +172,8 @@ export default function LearnerLayout() {
               <span className="md:hidden"><ThemeSwitch /></span>
               <Badge count={unread} size="small" offset={[-4, 4]}>
                 <button type="button" onClick={() => navigate('/notifications')} aria-label="Thông báo"
-                  className="h-10 w-10 rounded-xl grid place-items-center text-lg text-slate-600 hover:bg-slate-100 cursor-pointer transition">
-                  <BellOutlined />
+                  className="h-10 w-10 rounded-xl grid place-items-center hover:bg-slate-100 cursor-pointer transition">
+                  <AppIcon name="bell" size={26} />
                 </button>
               </Badge>
               <Dropdown menu={{ items: menu }} placement="bottomRight" trigger={['click']}>
@@ -199,7 +196,8 @@ export default function LearnerLayout() {
             {bottom.map((item, i) => item ? (
               <NavLink key={item.to} to={item.to}
                 className={`flex flex-col items-center gap-0.5 min-h-12 text-[11px] font-semibold ${isActive(item.to) ? 'text-brand-700' : 'text-slate-500'}`}>
-                <span className={`text-xl px-4 py-0.5 rounded-full transition-colors ${isActive(item.to) ? 'bg-brand-50' : ''}`}>{item.icon}</span>
+                <span className={`px-3.5 py-0.5 rounded-xl border-2 transition-colors ${isActive(item.to) ? 'bg-brand-50 border-brand-200' : 'border-transparent'}`}>
+                  <AppIcon name={item.icon} size={28} /></span>
                 {item.label}
               </NavLink>
             ) : (
@@ -212,7 +210,7 @@ export default function LearnerLayout() {
             ))}
             <button type="button" onClick={() => setMoreOpen(true)}
               className={`flex flex-col items-center gap-0.5 min-h-12 text-[11px] font-semibold cursor-pointer ${onTab ? 'text-slate-500' : 'text-brand-700'}`}>
-              <span className={`text-xl px-4 py-0.5 rounded-full ${onTab ? '' : 'bg-brand-50'}`}><AppstoreOutlined /></span>
+              <span className={`px-3.5 py-0.5 rounded-xl border-2 ${onTab ? 'border-transparent' : 'bg-brand-50 border-brand-200'}`}><AppIcon name="more" size={28} /></span>
               Thêm
             </button>
           </nav>}
@@ -221,12 +219,12 @@ export default function LearnerLayout() {
             <nav className="flex flex-col gap-4" aria-label="Tất cả mục">
               {groups.filter((g) => g.children).map((g) => (
                 <section key={g.key}>
-                  <h3 className="flex items-center gap-2 text-sm font-bold text-slate-800 m-0 mb-1.5"><span className="text-slate-500">{g.icon}</span>{g.label}</h3>
+                  <h3 className="flex items-center gap-2 text-sm font-bold text-slate-800 m-0 mb-1.5"><AppIcon name={g.icon} size={24} />{g.label}</h3>
                   <div className="flex flex-wrap gap-2">
                     {g.children!.map((c) => (
                       <NavLink key={c.to} to={c.to} onClick={() => setMoreOpen(false)}
-                        className="rounded-full bg-slate-100 px-3 py-1.5 text-sm font-medium !text-slate-700 inline-flex items-center gap-1.5">
-                        {c.label}{c.count ? <span className="num rounded-full bg-[#6d4aff] text-white text-[11px] font-bold px-1.5">{c.count}</span> : null}
+                        className="rounded-full bg-slate-100 pl-1.5 pr-3 py-1 text-sm font-medium !text-slate-700 inline-flex items-center gap-1.5">
+                        <AppIcon name={c.icon} size={22} />{c.label}{c.count ? <span className="num rounded-full bg-brand-600 text-white text-[11px] font-bold px-1.5">{c.count}</span> : null}
                       </NavLink>
                     ))}
                   </div>

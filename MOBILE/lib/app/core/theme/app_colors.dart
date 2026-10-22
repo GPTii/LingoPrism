@@ -30,21 +30,21 @@ class AppPalette {
   final Color success, successSoft, error, errorSoft;
 
   static const light = AppPalette(
-    primary: Color(0xFF6D4AFF),
-    primaryDark: Color(0xFF5533E0),
-    primarySoft: Color(0xFFF2EFFF),
-    primaryTint: Color(0xFFCDC2FF),
-    primaryLight: Color(0xFF8F75FF),
-    ink: Color(0xFF1B1538),
-    inkSoft: Color(0xFF2A2350),
-    background: Color(0xFFF5F4F9),
+    primary: Color(0xFF1899F0),
+    primaryDark: Color(0xFF0F7AC4),
+    primarySoft: Color(0xFFE8F5FE),
+    primaryTint: Color(0xFFA6D8FB),
+    primaryLight: Color(0xFF3DABF4),
+    ink: Color(0xFF15233B),
+    inkSoft: Color(0xFF1F3150),
+    background: Color(0xFFF6F8FB),
     surface: Colors.white,
-    surfaceMuted: Color(0xFFF0EEF6),
-    line: Color(0xFFE7E4F0),
-    lineStrong: Color(0xFFD3CEE3),
-    textPrimary: Color(0xFF1B1538), // all text ≥ 4.5:1 on its surface
-    textSecondary: Color(0xFF5D5878),
-    textHint: Color(0xFF767190),
+    surfaceMuted: Color(0xFFEEF2F7),
+    line: Color(0xFFE3E8EF),
+    lineStrong: Color(0xFFCDD6E1),
+    textPrimary: Color(0xFF15233B), // all text ≥ 4.5:1 on its surface
+    textSecondary: Color(0xFF556273),
+    textHint: Color(0xFF6B7787),
     success: Color(0xFF0E9F7B),
     successSoft: Color(0xFFE3F8F1),
     error: Color(0xFFE11D48),
@@ -53,21 +53,21 @@ class AppPalette {
 
   /// Same as the web's dark theme (FE/src/index.css `.dark`).
   static const dark = AppPalette(
-    primary: Color(0xFF7C5CFF),
-    primaryDark: Color(0xFF6D4AFF),
-    primarySoft: Color(0xFF221C45),
-    primaryTint: Color(0xFF2C2460),
-    primaryLight: Color(0xFFA995FF),
-    ink: Color(0xFF211A44),
-    inkSoft: Color(0xFF2A2254),
-    background: Color(0xFF0C0A17),
-    surface: Color(0xFF15122A),
-    surfaceMuted: Color(0xFF1D1934),
-    line: Color(0xFF29243F),
-    lineStrong: Color(0xFF3A3458),
-    textPrimary: Color(0xFFEEEDF6),
-    textSecondary: Color(0xFFA8A3C4),
-    textHint: Color(0xFF8D87AB),
+    primary: Color(0xFF1899F0),
+    primaryDark: Color(0xFF0F6FB0),
+    primarySoft: Color(0xFF0E2236),
+    primaryTint: Color(0xFF12304D),
+    primaryLight: Color(0xFF3FA9F5),
+    ink: Color(0xFF14233B),
+    inkSoft: Color(0xFF1B2D4A),
+    background: Color(0xFF0B111B),
+    surface: Color(0xFF131B28),
+    surfaceMuted: Color(0xFF1A2433),
+    line: Color(0xFF243043),
+    lineStrong: Color(0xFF33415A),
+    textPrimary: Color(0xFFE8EDF3),
+    textSecondary: Color(0xFF9AA8BB),
+    textHint: Color(0xFF8292A8),
     success: Color(0xFF3DDBA5),
     successSoft: Color(0xFF0F2A24),
     error: Color(0xFFFB7185),
@@ -77,7 +77,7 @@ class AppPalette {
 
 /// LingoPrism colours – the same tokens as the web.
 ///
-/// The violet is the brand; the three beams leaving the prism (amber · mint · coral)
+/// The blue is the brand; the three beams leaving the prism (amber · mint · coral)
 /// stand for the three languages and for the day's progress – they carry meaning,
 /// they are not decoration.
 ///
@@ -170,6 +170,6 @@ class AppColors {
   /// A pale tint chosen for the light theme; in dark it becomes the same hue, quietly, on the dark surface.
   static Color tint(Color light) => isDark ? Color.alphaBlend(light.withValues(alpha: 0.16), _p.surface) : light;
 
-  static Color get shadow => isDark ? const Color(0x66000000) : const Color(0x1F1B1538);
-  static Color get shadowLight => isDark ? const Color(0x33000000) : const Color(0x0D1B1538);
+  static Color get shadow => isDark ? const Color(0x66000000) : const Color(0x1F15233B);
+  static Color get shadowLight => isDark ? const Color(0x33000000) : const Color(0x0D15233B);
 }

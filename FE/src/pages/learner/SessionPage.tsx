@@ -46,7 +46,7 @@ function ResultCard({ label, color, delay, children }: { label: string; color: s
 function Confetti() {
   const bits = useMemo(() => Array.from({ length: 36 }, (_, i) => ({
     x: (Math.random() - 0.5) * 700, y: -Math.random() * 380 - 80, r: Math.random() * 540,
-    c: ['#6d4aff', '#3fa9f5', '#10c79a', '#ffb020', '#ff6b81'][i % 5], d: Math.random() * 0.25,
+    c: ['#1899f0', '#ce82ff', '#10c79a', '#ffb020', '#ff6b81'][i % 5], d: Math.random() * 0.25,
   })), [])
   return (
     <div className="pointer-events-none absolute left-1/2 top-40 z-10">

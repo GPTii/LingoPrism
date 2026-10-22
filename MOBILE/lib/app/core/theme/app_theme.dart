@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'app_colors.dart';
 import 'app_text_styles.dart';
 
-/// One theme for every screen: flat surfaces, one elevation (a hairline), the violet for actions,
+/// One theme for every screen: flat surfaces, one elevation (a hairline), the blue for actions,
 /// Be Vietnam Pro for every text (drawn for Vietnamese diacritics).
 class AppTheme {
   AppTheme._();
@@ -52,7 +52,7 @@ class AppTheme {
       primary: primary,
       onPrimary: Colors.white,
       primaryContainer: primarySoft,
-      onPrimaryContainer: dark ? const Color(0xFFC3B6FF) : const Color(0xFF5533E0),
+      onPrimaryContainer: dark ? const Color(0xFF8FD0FB) : const Color(0xFF0F7AC4),
       secondary: AppColors.beamMint,
       tertiary: AppColors.beamAmber,
       error: error,

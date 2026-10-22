@@ -16,6 +16,7 @@ import '../../../data/models/api/user.dart';
 import '../controllers/learning_tab_controller.dart';
 import '../../levels/levels_module.dart';
 import '../../../core/widgets/prismo.dart';
+import '../../../core/widgets/app_icon.dart';
 import '../../../core/theme/theme_service.dart';
 import '../../../data/repositories/repositories.dart';
 import '../../../data/models/api/vocab.dart';
@@ -222,12 +223,7 @@ class LearningTabView extends GetView<HomeStatsController> {
           decoration: _surface(),
           padding: EdgeInsets.all(16.w),
           child: Row(children: [
-            Container(
-              width: 52.w,
-              height: 52.w,
-              decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(14.r)),
-              child: Icon(Icons.photo_camera_rounded, color: Colors.white, size: 26.sp),
-            ),
+            AppIcon('camera', size: 52.w),
             SizedBox(width: 14.w),
             Expanded(
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -247,7 +243,7 @@ class LearningTabView extends GetView<HomeStatsController> {
 
   // ---------------------------------------------------------------- shortcuts
   Widget _buildQuickActions() {
-    Widget item(IconData icon, String label, String route) => Expanded(
+    Widget item(String icon, String label, String route) => Expanded(
           child: Material(
             color: Colors.transparent,
             child: InkWell(
@@ -257,7 +253,7 @@ class LearningTabView extends GetView<HomeStatsController> {
                 padding: EdgeInsets.symmetric(vertical: 14.h, horizontal: 4.w),
                 decoration: _surface(radius: 14),
                 child: Column(children: [
-                  Icon(icon, size: 24.sp, color: AppColors.primary),
+                  AppIcon(icon, size: 34.sp),
                   SizedBox(height: 6.h),
                   Text(label,
                       textAlign: TextAlign.center,
@@ -272,21 +268,21 @@ class LearningTabView extends GetView<HomeStatsController> {
     return Column(children: [
       Row(children: [
         if (learningVietnamese)
-          item(Icons.menu_book_rounded, 'Học đọc – viết', Routes.literacyMap)
+          item('pencil', 'Học đọc – viết', Routes.literacyMap)
         else
-          item(Icons.edit_note_rounded, 'Luyện câu', Routes.sentencePractice),
+          item('tiles', 'Luyện câu', Routes.sentencePractice),
         SizedBox(width: 8.w),
-        item(Icons.record_voice_over_outlined, 'Luyện phát âm', Routes.speakPractice),
+        item('mic', 'Luyện phát âm', Routes.speakPractice),
         SizedBox(width: 8.w),
-        item(Icons.fact_check_outlined, 'Bài kiểm tra', Routes.examList),
+        item('exam', 'Bài kiểm tra', Routes.examList),
       ]),
       SizedBox(height: 8.h),
       Row(children: [
-        item(Icons.place_outlined, 'Học theo vị trí', Routes.poiMap),
+        item('pin', 'Học theo vị trí', Routes.poiMap),
         SizedBox(width: 8.w),
-        item(Icons.forum_outlined, 'Hỏi giáo viên', Routes.supportChat),
+        item('cap', 'Hỏi giáo viên', Routes.supportChat),
         SizedBox(width: 8.w),
-        item(Icons.insights_rounded, 'Thống kê', Routes.stats),
+        item('chart', 'Thống kê', Routes.stats),
       ]),
     ]);
   }

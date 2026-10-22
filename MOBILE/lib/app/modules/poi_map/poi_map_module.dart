@@ -72,7 +72,7 @@ class PoiMapView extends GetView<PoiMapController> {
     'library': Icons.local_library_rounded, 'theater': Icons.theater_comedy_rounded,
   };
 
-  /// map pin: the category's icon on a violet drop with a white ring
+  /// map pin: the category's icon on a blue drop with a white ring
   static Widget _pin(String category, {bool selected = false}) => Container(
         decoration: BoxDecoration(
           color: selected ? AppColors.ink : AppColors.primary,

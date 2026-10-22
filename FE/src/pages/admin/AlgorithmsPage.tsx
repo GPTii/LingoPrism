@@ -32,10 +32,10 @@ function LineChart({ series, height = 180, xLabel = 'thế hệ' }: { series: { 
   const y = (v: number) => H - pad + 8 - ((v - min) / (max - min || 1)) * (H - pad - 8)
   return (
     <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ maxHeight: height }}>
-      <line x1={pad} y1={H - pad + 8} x2={W} y2={H - pad + 8} stroke="#d3cee3" />
-      <text x={2} y={y(max) + 4} fontSize="11" fill="#5d5878">{max.toFixed(3)}</text>
-      <text x={2} y={y(min)} fontSize="11" fill="#5d5878">{min.toFixed(3)}</text>
-      <text x={W / 2} y={H - 4} fontSize="11" fill="#5d5878" textAnchor="middle">{xLabel}</text>
+      <line x1={pad} y1={H - pad + 8} x2={W} y2={H - pad + 8} stroke="#cdd6e1" />
+      <text x={2} y={y(max) + 4} fontSize="11" fill="#556273">{max.toFixed(3)}</text>
+      <text x={2} y={y(min)} fontSize="11" fill="#556273">{min.toFixed(3)}</text>
+      <text x={W / 2} y={H - 4} fontSize="11" fill="#556273" textAnchor="middle">{xLabel}</text>
       {series.map((s) => (
         <g key={s.name}>
           <polyline fill="none" stroke={s.color} strokeWidth={2} points={s.values.map((v, i) => `${x(i)},${y(v)}`).join(' ')} />
@@ -53,7 +53,7 @@ function Bars({ rows }: { rows: { label: string; value: number | null; color?: s
         <div key={r.label} className="flex items-center gap-2 text-xs">
           <span className="w-44 shrink-0 text-slate-600">{r.label}</span>
           <div className="flex-1 bg-slate-100 rounded h-4">
-            <div className="h-4 rounded" style={{ width: `${Math.round((r.value ?? 0) * 100)}%`, background: r.color ?? '#6d4aff' }} />
+            <div className="h-4 rounded" style={{ width: `${Math.round((r.value ?? 0) * 100)}%`, background: r.color ?? '#1899f0' }} />
           </div>
           <span className="w-12 text-right">{r.value == null ? '–' : `${Math.round(r.value * 100)}%`}</span>
         </div>
@@ -80,17 +80,17 @@ function Scatter({ rows, chosen, label }: { rows: any[]; chosen: any; label: (r:
   const x0 = Math.min(...xs) - 0.01, x1 = Math.max(...xs) + 0.01, y0 = 0, y1 = Math.min(1, Math.max(...ys) + 0.05)
   const x = (v: number) => pad + ((v - x0) / (x1 - x0)) * (W - pad - 10)
   const y = (v: number) => H - pad - ((v - y0) / (y1 - y0)) * (H - pad - 10)
-  const color = (r: any) => (r.priority === 'due' ? '#6d4aff' : r.priority.startsWith('vip_due') ? '#10c79a' : '#ffb020')
+  const color = (r: any) => (r.priority === 'due' ? '#1899f0' : r.priority.startsWith('vip_due') ? '#10c79a' : '#ffb020')
   return (
     <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ maxHeight: H }}>
-      <line x1={pad} y1={H - pad} x2={W} y2={H - pad} stroke="#d3cee3" /><line x1={pad} y1={0} x2={pad} y2={H - pad} stroke="#d3cee3" />
-      <text x={W / 2} y={H - 8} fontSize="11" fill="#5d5878" textAnchor="middle">tỉ lệ nhớ – mọi từ →</text>
-      <text x={12} y={H / 2} fontSize="11" fill="#5d5878" textAnchor="middle" transform={`rotate(-90 12 ${H / 2})`}>từ dễ nhầm qua ảnh →</text>
-      {[x0, x1].map((v) => <text key={v} x={x(v)} y={H - pad + 14} fontSize="10" fill="#8d87ab" textAnchor="middle">{Math.round(v * 100)}%</text>)}
-      {[y0, y1].map((v) => <text key={v} x={pad - 4} y={y(v) + 4} fontSize="10" fill="#8d87ab" textAnchor="end">{Math.round(v * 100)}%</text>)}
+      <line x1={pad} y1={H - pad} x2={W} y2={H - pad} stroke="#cdd6e1" /><line x1={pad} y1={0} x2={pad} y2={H - pad} stroke="#cdd6e1" />
+      <text x={W / 2} y={H - 8} fontSize="11" fill="#556273" textAnchor="middle">tỉ lệ nhớ – mọi từ →</text>
+      <text x={12} y={H / 2} fontSize="11" fill="#556273" textAnchor="middle" transform={`rotate(-90 12 ${H / 2})`}>từ dễ nhầm qua ảnh →</text>
+      {[x0, x1].map((v) => <text key={v} x={x(v)} y={H - pad + 14} fontSize="10" fill="#8292a8" textAnchor="middle">{Math.round(v * 100)}%</text>)}
+      {[y0, y1].map((v) => <text key={v} x={pad - 4} y={y(v) + 4} fontSize="10" fill="#8292a8" textAnchor="end">{Math.round(v * 100)}%</text>)}
       {rows.map((r, i) => (
         <circle key={i} cx={x(r.recall_all)} cy={y(r.recall_confusable ?? 0)} r={r === chosen ? 7 : r.pareto ? 5 : 3.5}
-          fill={color(r)} fillOpacity={r.eligible ? 0.95 : 0.35} stroke={r === chosen ? '#1b1538' : 'none'} strokeWidth={2}>
+          fill={color(r)} fillOpacity={r.eligible ? 0.95 : 0.35} stroke={r === chosen ? '#15233b' : 'none'} strokeWidth={2}>
           <title>{`${label(r)}: ${(r.recall_all * 100).toFixed(1)}% / ${((r.recall_confusable ?? 0) * 100).toFixed(1)}%`}</title>
         </circle>
       ))}
@@ -102,7 +102,7 @@ const PRIORITY_LABEL: Record<string, string> = { due: 'theo hạn', vip: 'VIP', 
   risk_only: 'nguy cơ quên', vip_due1: 'VIP lai 1 ngày', vip_due3: 'VIP lai 3 ngày', vip_due7: 'VIP lai 7 ngày' }
 const SCHED_LABEL: Record<string, string> = { leitner: 'Leitner', sm2: 'SM-2', fsrs: 'FSRS', fsrs_ga: 'FSRS+GA' }
 const VIP_PRIO: Record<string, string> = { due: 'theo hạn', vip: 'VIP thuần', vip_hybrid: 'VIP lai' }
-const VIP_COLOR: Record<string, string> = { due: '#6d4aff', vip: '#ffb020', vip_hybrid: '#10c79a' }
+const VIP_COLOR: Record<string, string> = { due: '#1899f0', vip: '#ffb020', vip_hybrid: '#10c79a' }
 const comboLabel = (r: any) => SCHED_LABEL[r.scheduler] + (r.retention && r.scheduler.startsWith('fsrs') ? ` r=${r.retention}` : '')
   + (r.priority === 'due' ? '' : ` + ${PRIORITY_LABEL[r.priority]}`)
 
@@ -206,7 +206,7 @@ export default function AlgorithmsPage() {
                     { label: 'mAP50', children: <b>{r.metrics.map50?.toFixed(3)}</b> }, { label: 'mAP50-95', children: <b>{r.metrics.map50_95?.toFixed(3)}</b> }]} />
                   {r.curves?.map50 && <>
                     <div className="font-medium mt-3">Quá trình huấn luyện (tập validation)</div>
-                    <LineChart xLabel="epoch" height={220} series={[{ name: 'mAP50', color: '#6d4aff', values: r.curves.map50 },
+                    <LineChart xLabel="epoch" height={220} series={[{ name: 'mAP50', color: '#1899f0', values: r.curves.map50 },
                       { name: 'mAP50-95', color: '#10c79a', values: r.curves.map50_95 }, { name: 'precision', color: '#ffb020', values: r.curves.precision },
                       { name: 'recall', color: '#ef4444', values: r.curves.recall }]} />
                   </>}
@@ -259,8 +259,8 @@ export default function AlgorithmsPage() {
             <Space direction="vertical" className="w-full">
               <div className="flex flex-wrap justify-between gap-2">{meta(ex.ga)}<RunButton kind="ga" onDone={refresh} /></div>
               <div className="text-sm text-slate-600">Tối ưu 17 tham số FSRS: quần thể {ga.population}, {ga.generations} thế hệ, chọn lọc tournament, lai ghép BLX-α, đột biến Gauss, giữ 2 cá thể tốt nhất. Huấn luyện trên {ga.train_cards} thẻ, đánh giá trên {ga.test_cards} thẻ chưa dùng.</div>
-              <LineChart series={[{ name: 'tốt nhất', color: '#6d4aff', values: ga.history.map((h: any) => h.best) },
-                { name: 'trung bình', color: '#8d87ab', values: ga.history.map((h: any) => h.mean) }]} />
+              <LineChart series={[{ name: 'tốt nhất', color: '#1899f0', values: ga.history.map((h: any) => h.best) },
+                { name: 'trung bình', color: '#8292a8', values: ga.history.map((h: any) => h.mean) }]} />
               <Table size="small" pagination={false} rowKey="model"
                 dataSource={Object.entries(ga.test).map(([model, m]: any) => ({ model, ...m }))}
                 columns={[{ title: 'Trên tập kiểm tra', dataIndex: 'model', render: (v) => MODEL_LABEL[v] ?? v },
@@ -282,9 +282,9 @@ export default function AlgorithmsPage() {
                 </div>
                 <Row gutter={16}>
                   <Col xs={24} md={12}><div className="font-medium mb-1">Toàn bộ từ</div>
-                    <Bars rows={vipRes.rows.map((r: any) => ({ label: `${MODEL_LABEL[r.scheduler]} · ${VIP_PRIO[r.priority] ?? r.priority}`, value: r.recall_all, color: VIP_COLOR[r.priority] ?? '#6d4aff' }))} /></Col>
+                    <Bars rows={vipRes.rows.map((r: any) => ({ label: `${MODEL_LABEL[r.scheduler]} · ${VIP_PRIO[r.priority] ?? r.priority}`, value: r.recall_all, color: VIP_COLOR[r.priority] ?? '#1899f0' }))} /></Col>
                   <Col xs={24} md={12}><div className="font-medium mb-1">Từ dễ nhầm thị giác</div>
-                    <Bars rows={vipRes.rows.map((r: any) => ({ label: `${MODEL_LABEL[r.scheduler]} · ${VIP_PRIO[r.priority] ?? r.priority}`, value: r.recall_confusable, color: VIP_COLOR[r.priority] ?? '#6d4aff' }))} /></Col>
+                    <Bars rows={vipRes.rows.map((r: any) => ({ label: `${MODEL_LABEL[r.scheduler]} · ${VIP_PRIO[r.priority] ?? r.priority}`, value: r.recall_confusable, color: VIP_COLOR[r.priority] ?? '#1899f0' }))} /></Col>
                 </Row>
                 <div className="text-xs text-slate-400">{vipRes.note}</div>
               </>}

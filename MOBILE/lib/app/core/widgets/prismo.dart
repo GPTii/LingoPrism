@@ -112,7 +112,7 @@ class _PrismoPainter extends CustomPainter {
   final PrismoMood mood;
   final double eyeOpen; // 1 open … 0 closed (blink)
 
-  static const _ink = Color(0xFF2A1F5C);
+  static const _ink = Color(0xFF15233B);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -138,7 +138,7 @@ class _PrismoPainter extends CustomPainter {
     }
 
     // feet
-    final feet = Paint()..color = const Color(0xFF4A2FD6);
+    final feet = Paint()..color = const Color(0xFF0B5A94);
     canvas.drawOval(Rect.fromCenter(center: const Offset(62, 132), width: 22, height: 12), feet);
     canvas.drawOval(Rect.fromCenter(center: const Offset(98, 132), width: 22, height: 12), feet);
 
@@ -151,7 +151,7 @@ class _PrismoPainter extends CustomPainter {
     final grad = const LinearGradient(
       begin: Alignment(-0.6, -1),
       end: Alignment(0.6, 1),
-      colors: [Color(0xFF8F74FF), Color(0xFF6D4AFF), Color(0xFF3FB5E8)],
+      colors: [Color(0xFF62C6FF), Color(0xFF1899F0), Color(0xFF0F6FB0)],
       stops: [0, 0.6, 1],
     ).createShader(const Rect.fromLTWH(20, 16, 120, 106));
     canvas.drawPath(body, Paint()..shader = grad);
@@ -192,7 +192,7 @@ class _PrismoPainter extends CustomPainter {
             style: TextStyle(
                 fontSize: mood == PrismoMood.think ? 26 : 20,
                 fontWeight: FontWeight.w800,
-                color: mood == PrismoMood.think ? const Color(0xFFFFB020) : const Color(0xFF8F74FF))),
+                color: mood == PrismoMood.think ? const Color(0xFFFFB020) : const Color(0xFF3DABF4))),
         textDirection: TextDirection.ltr,
       )..layout();
       tp.paint(canvas, Offset(mood == PrismoMood.think ? 114 : 112, mood == PrismoMood.think ? 38 : 40));

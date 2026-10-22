@@ -10,6 +10,7 @@ import '../../community/views/community_view.dart';
 import '../../profile/controllers/profile_controller.dart';
 import '../../profile/views/profile_view.dart';
 import 'package:lingoprism/app/core/theme/app_colors.dart';
+import 'package:lingoprism/app/core/widgets/app_icon.dart';
 
 class HomeView extends GetView<HomeController> {
   const HomeView({super.key});
@@ -50,11 +51,11 @@ class HomeView extends GetView<HomeController> {
               padding: EdgeInsets.zero,
               child: Row(
                 children: [
-                  _buildNavItem(icon: Icons.home_outlined, activeIcon: Icons.home_rounded, label: 'Trang chủ', index: 0),
-                  _buildNavItem(icon: Icons.replay_outlined, activeIcon: Icons.replay_rounded, label: 'Ôn tập', index: 1),
+                  _buildNavItem(icon: 'home', label: 'Trang chủ', index: 0),
+                  _buildNavItem(icon: 'review', label: 'Ôn tập', index: 1),
                   SizedBox(width: 64.w), // room for the camera button
-                  _buildNavItem(icon: Icons.people_outline_rounded, activeIcon: Icons.people_rounded, label: 'Cộng đồng', index: 2),
-                  _buildNavItem(icon: Icons.person_outline_rounded, activeIcon: Icons.person_rounded, label: 'Hồ sơ', index: 3),
+                  _buildNavItem(icon: 'community', label: 'Cộng đồng', index: 2),
+                  _buildNavItem(icon: 'profile', label: 'Hồ sơ', index: 3),
                 ],
               ),
             ),
@@ -78,8 +79,7 @@ class HomeView extends GetView<HomeController> {
   }
 
   Widget _buildNavItem({
-    required IconData icon,
-    required IconData activeIcon,
+    required String icon,
     required String label,
     required int index,
   }) {
@@ -99,12 +99,18 @@ class HomeView extends GetView<HomeController> {
               AnimatedContainer(
                 duration: const Duration(milliseconds: 180),
                 curve: Curves.easeOutCubic,
-                padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 3.h),
+                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 2.h),
                 decoration: BoxDecoration(
                   color: isActive ? AppColors.primarySoft : Colors.transparent,
-                  borderRadius: BorderRadius.circular(20.r),
+                  border: Border.all(color: isActive ? AppColors.primaryTint : Colors.transparent, width: 2),
+                  borderRadius: BorderRadius.circular(12.r),
                 ),
-                child: Icon(isActive ? activeIcon : icon, size: 23.sp, color: color),
+                child: AnimatedScale(
+                  scale: isActive ? 1.08 : 1,
+                  duration: const Duration(milliseconds: 220),
+                  curve: Curves.easeOutBack,
+                  child: AppIcon(icon, size: 28.sp),
+                ),
               ),
               SizedBox(height: 3.h),
               Text(

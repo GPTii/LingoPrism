@@ -42,7 +42,7 @@ export default function NotificationsPage() {
               <li key={n.id}>
                 <button type="button" onClick={() => open(n.id, n.data.route)}
                   className={`w-full text-left flex gap-3 rounded-xl p-3 cursor-pointer transition-colors hover:bg-slate-50 ${n.read ? '' : 'bg-brand-50/70'}`}>
-                  <span className={`mt-0.5 h-9 w-9 shrink-0 rounded-full grid place-items-center ${n.read ? 'bg-slate-100 text-slate-500' : 'bg-[#6d4aff] text-white'}`}>
+                  <span className={`mt-0.5 h-9 w-9 shrink-0 rounded-full grid place-items-center ${n.read ? 'bg-slate-100 text-slate-500' : 'bg-brand-600 text-white'}`}>
                     <BellOutlined />
                   </span>
                   <span className="flex-1 min-w-0">

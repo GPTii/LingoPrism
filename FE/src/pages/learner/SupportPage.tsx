@@ -70,7 +70,7 @@ export function SupportChatBox({ conversationId, title }: { conversationId: numb
           const mine = m.sender?.id === me?.id
           return (
             <div key={m.id} className={`flex ${mine ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[75%] rounded-2xl px-3 py-2 ${mine ? 'bg-[#6d4aff] text-white rounded-br-md' : 'bg-slate-100 text-slate-800 rounded-bl-md'}`}>
+              <div className={`max-w-[75%] rounded-2xl px-3 py-2 ${mine ? 'bg-brand-600 text-white rounded-br-md' : 'bg-slate-100 text-slate-800 rounded-bl-md'}`}>
                 {!mine && <div className="text-xs font-semibold text-slate-500">{m.sender?.display_name}{m.sender?.is_staff && ' · giáo viên'}</div>}
                 <div>{m.content}</div>
                 {mine && <div className="text-[11px] text-white/75 text-right">{m.id < 0 ? 'Đang gửi…' : m.read_at ? 'Đã xem' : 'Đã gửi'}</div>}

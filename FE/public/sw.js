@@ -2,7 +2,7 @@
 // - built files (/assets/*, hashed names) and icons: cache first – they never change under the same name
 // - pages: network first, the cached shell when offline
 // - the API, WebSocket and media are never cached (always fresh, always the signed-in user's own data)
-const VERSION = 'lp-v1'
+const VERSION = 'lp-v2'
 const SHELL = ['/', '/manifest.webmanifest', '/logo.svg', '/theme-init.js', '/icons/icon-192.png']
 
 self.addEventListener('install', (event) => {

@@ -13,8 +13,8 @@ import PhotoDialogue from '../../components/PhotoDialogue'
 import { EmptyState, PageHeader } from '../../components/ui'
 
 /** a small status word under the result, coloured by what it means */
-const Note = ({ tone, children }: { tone: 'violet' | 'amber' | 'red' | 'green' | 'slate'; children: ReactNode }) => {
-  const cls = { violet: 'bg-brand-50 text-brand-700', amber: 'bg-amber-50 text-amber-700', red: 'bg-red-50 text-red-700', green: 'bg-green-50 text-green-700', slate: 'bg-slate-100 text-slate-600' }[tone]
+const Note = ({ tone, children }: { tone: 'brand' | 'amber' | 'red' | 'green' | 'slate'; children: ReactNode }) => {
+  const cls = { brand: 'bg-brand-50 text-brand-700', amber: 'bg-amber-50 text-amber-700', red: 'bg-red-50 text-red-700', green: 'bg-green-50 text-green-700', slate: 'bg-slate-100 text-slate-600' }[tone]
   return <span className={`num rounded-md px-2 py-0.5 text-xs font-semibold ${cls}`}>{children}</span>
 }
 
@@ -139,7 +139,7 @@ export default function CameraPage() {
               i.bbox.length === 4 ? (
                 <div key={i.id} className={`absolute border-2 rounded ${i.notObject ? 'border-red-500 opacity-40' : i.feedback === 'wrong' && !i.picked ? 'border-red-500' : i.uncertain && !i.picked && i.feedback === 'unknown' ? 'border-amber-400 border-dashed' : 'border-emerald-400'}`}
                   style={{ left: `${i.bbox[0] * 100}%`, top: `${i.bbox[1] * 100}%`, width: `${(i.bbox[2] - i.bbox[0]) * 100}%`, height: `${(i.bbox[3] - i.bbox[1]) * 100}%` }}>
-                  <span lang={shownCard(i)?.target ? langTag(shownCard(i)!.target!.language) : undefined} className="num absolute -top-6 left-0 bg-[#1b1538]/85 text-white text-xs font-semibold px-1.5 py-0.5 rounded-md whitespace-nowrap">
+                  <span lang={shownCard(i)?.target ? langTag(shownCard(i)!.target!.language) : undefined} className="num absolute -top-6 left-0 bg-[#15233b]/85 text-white text-xs font-semibold px-1.5 py-0.5 rounded-md whitespace-nowrap">
                     {shownCard(i)?.target?.text ?? i.picked ?? i.label}{!i.picked && ` ${Math.round(i.confidence * 100)}%`}{i.uncertain && !i.picked && i.feedback === 'unknown' && ' ?'}
                   </span>
                 </div>
@@ -176,11 +176,11 @@ export default function CameraPage() {
                   {c?.target ? <TargetWord target={c.target} size="md" /> : <div className="font-semibold text-slate-800">{i.picked ?? i.label}</div>}
                   <div className="text-center text-slate-600">{c?.meaning_vi ?? 'Chưa có trong bộ từ vựng đã kiểm tra'}</div>
                   <div className="flex flex-wrap justify-center gap-1.5 mt-2">
-                    {i.picked ? <Note tone="violet">Bạn đã chọn</Note> : i.notObject ? <Note tone="red">Không phải đồ vật</Note>
+                    {i.picked ? <Note tone="brand">Bạn đã chọn</Note> : i.notObject ? <Note tone="red">Không phải đồ vật</Note>
                       : <Note tone={i.uncertain ? 'amber' : 'slate'}>Chắc {Math.round(i.confidence * 100)}%</Note>}
                     {i.learned && !i.picked && (
                       <Tooltip title="Mô hình từng nhận sai vật trông giống thế này; hệ thống đã tự sửa theo báo lỗi của người dùng">
-                        <span><Note tone="violet">Đã sửa nhờ báo lỗi</Note></span>
+                        <span><Note tone="brand">Đã sửa nhờ báo lỗi</Note></span>
                       </Tooltip>
                     )}
                     {c?.personal && <Note tone="green">Đã có trong thư viện</Note>}

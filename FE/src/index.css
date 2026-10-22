@@ -5,19 +5,19 @@
 
 /*
  * LingoPrism: a prism splits one beam into three colours – one snap, three languages.
- * The violet is the brand; the three beams (amber · mint · coral) are kept for meaning –
+ * The blue is the brand; the three beams (amber · mint · coral) are kept for meaning –
  * the languages, the day's progress, right / wrong – never sprinkled as decoration.
  */
 @theme {
-  --color-brand-50: #f2efff;
-  --color-brand-100: #e5dfff;
-  --color-brand-200: #cdc2ff;
-  --color-brand-300: #b09fff;
-  --color-brand-400: #8f75ff;
-  --color-brand-500: #7c5cff;
-  --color-brand-600: #6d4aff;
-  --color-brand-700: #5533e0;
-  --color-ink: #1b1538;
+  --color-brand-50: #e8f5fe;
+  --color-brand-100: #d0ebfd;
+  --color-brand-200: #a6d8fb;
+  --color-brand-300: #6fc0f8;
+  --color-brand-400: #3dabf4;
+  --color-brand-500: #239ff2;
+  --color-brand-600: #1899f0;
+  --color-brand-700: #0f7ac4;
+  --color-ink: #15233b;
   --color-prism-amber: #ffb020;
   --color-prism-mint: #10c79a;
   --color-prism-coral: #ff6b81;
@@ -29,43 +29,44 @@
 }
 
 :root {
-  --page-bg: #f5f4f9;
+  --page-bg: #f6f8fb;
   --surface: #ffffff;
-  --surface-2: #f0eef6;
-  --line: #e7e4f0;
-  --line-strong: #d3cee3;
-  --ink: #1b1538;
-  --ink-soft: #2a2350;
-  --shadow-pop: 0 12px 32px -12px rgb(27 21 56 / 0.28);
+  --surface-2: #eef2f7;
+  --line: #e3e8ef;
+  --line-strong: #cdd6e1;
+  --ink: #15233b;
+  --ink-soft: #1f3150;
+  --shadow-pop: 0 12px 32px -12px rgb(21 35 59 / 0.28);
   /* the three beams, as hard bands: the one place the spectrum is drawn */
   --beams: linear-gradient(180deg, #ffb020 0 33.3%, #10c79a 33.3% 66.6%, #ff6b81 66.6% 100%);
 }
 
 /* dark: the slate scale is turned around, so every page written with slate-* / bg-white follows */
 .dark {
-  --page-bg: #0c0a17;
-  --surface: #15122a;
-  --surface-2: #1d1934;
-  --line: #29243f;
-  --line-strong: #3a3458;
-  --ink: #211a44;
-  --ink-soft: #2a2254;
+  --page-bg: #0b111b;
+  --surface: #131b28;
+  --surface-2: #1a2433;
+  --line: #243043;
+  --line-strong: #33415a;
+  --ink: #14233b;
+  --ink-soft: #1b2d4a;
   --shadow-pop: 0 14px 34px -14px rgb(0 0 0 / 0.7);
-  --color-slate-50: #1e1a31;
-  --color-slate-100: #26213d;
-  --color-slate-200: #2f2a49;
-  --color-slate-300: #474068;
-  --color-slate-400: #8d87ab;
-  --color-slate-500: #a8a3c4;
-  --color-slate-600: #c3bfda;
-  --color-slate-700: #dad7ea;
-  --color-slate-800: #eeedf6;
-  --color-slate-900: #f8f7fc;
-  --color-brand-50: #221c45;
-  --color-brand-100: #2c2460;
-  --color-brand-500: #9a85ff;
-  --color-brand-600: #a995ff;
-  --color-brand-700: #c3b6ff;
+  --color-slate-50: #182131;
+  --color-slate-100: #1e293b;
+  --color-slate-200: #263246;
+  --color-slate-300: #3b4a63;
+  --color-slate-400: #8292a8;
+  --color-slate-500: #9aa8bb;
+  --color-slate-600: #b7c2d1;
+  --color-slate-700: #d3dbe5;
+  --color-slate-800: #e8edf3;
+  --color-slate-900: #f5f7fa;
+  --color-brand-50: #0e2236;
+  --color-brand-100: #12304d;
+  --color-brand-200: #1d4f7a;
+  --color-brand-500: #3fa9f5;
+  --color-brand-600: #1899f0;
+  --color-brand-700: #6fc0f8;
   --color-green-50: #0f2a24;
   --color-emerald-50: #0f2a24;
   --color-red-50: #33141f;
@@ -79,9 +80,9 @@
   --color-green-700: #86efac;
 }
 .dark .bg-white { background-color: var(--surface); }
-.dark .bg-white\/80 { background-color: rgb(21 18 42 / 0.8); }
-.dark .bg-white\/60 { background-color: rgb(24 21 39 / 0.6); }
-.dark .bg-white\/90 { background-color: rgb(24 21 39 / 0.9); }
+.dark .bg-white\/80 { background-color: rgb(19 27 40 / 0.8); }
+.dark .bg-white\/60 { background-color: rgb(19 27 40 / 0.6); }
+.dark .bg-white\/90 { background-color: rgb(19 27 40 / 0.9); }
 .dark .border-slate-200 { border-color: var(--line); }
 
 /* Chinese text must render with a font matching its script (Han unification). */
@@ -115,10 +116,10 @@ a { text-underline-offset: 3px; }
 ::-webkit-scrollbar-track { background: transparent; }
 
 /* ---------- learner area ---------- */
-/* the brand word: solid violet, no gradient text */
+/* the brand word: solid blue, no gradient text */
 .prism-text { color: var(--color-brand-600); }
-/* filled brand surfaces keep the full violet in both themes, so white on it stays readable */
-.prism-bg { background: #6d4aff; }
+/* filled brand surfaces keep the full blue in both themes, so white on it stays readable */
+.prism-bg { background: #1899f0; }
 .prism-warm-bg { background: var(--ink); }
 .ink-bg { background: var(--ink); }
 .beams { background: var(--beams); }
@@ -141,12 +142,12 @@ a { text-underline-offset: 3px; }
 .learner .ant-btn:not(:disabled):not(.ant-btn-variant-text):not(.ant-btn-variant-link) { box-shadow: 0 var(--lip-h) 0 var(--lip); }
 .learner .ant-btn:not(:disabled):not(.ant-btn-variant-text):not(.ant-btn-variant-link):active { transform: translateY(var(--lip-h)); box-shadow: 0 0 0 var(--lip); }
 .learner .ant-btn-sm { --lip-h: 3px; }
-/* a hand-made violet button (home CTA, the big speaker) on the same lip */
-.btn-lip { box-shadow: 0 5px 0 #4a2fc4; transition: transform 80ms var(--ease-out), box-shadow 80ms var(--ease-out), background-color 150ms; }
-.btn-lip:active { transform: translateY(5px); box-shadow: 0 0 0 #4a2fc4; }
+/* a hand-made blue button (home CTA, the big speaker) on the same lip */
+.btn-lip { box-shadow: 0 5px 0 #0f6fb0; transition: transform 80ms var(--ease-out), box-shadow 80ms var(--ease-out), background-color 150ms; }
+.btn-lip:active { transform: translateY(5px); box-shadow: 0 0 0 #0f6fb0; }
 /* a button joined to an input (search) is part of the field: no lip of its own */
 .learner .ant-input-group-addon .ant-btn, .learner .ant-input-search-button { box-shadow: none !important; transform: none !important; }
-.learner .ant-btn-variant-solid { --lip: var(--color-brand-700); }
+.learner .ant-btn-variant-solid { --lip: #0f6fb0; }
 .learner .ant-btn-variant-solid.ant-btn-color-dangerous { --lip: #be123c; }
 .learner .ant-btn-variant-solid.lp-ok, .learner .ant-btn-variant-solid.lp-ok:hover { background: #0e9f7b !important; --lip: #0a7a5e; }
 .learner .ant-btn-variant-outlined:not(:disabled), .learner .ant-btn-variant-dashed:not(:disabled) { border-width: 1.5px; }

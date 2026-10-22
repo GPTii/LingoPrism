@@ -226,7 +226,7 @@ function LeaderboardTab() {
   const [scope, setScope] = useState<'league' | 'friends' | 'global'>('league')
   const board = useQuery({ queryKey: ['leaderboard', scope], queryFn: () => gameApi.leaderboard(scope) })
   const zoneColor = { promotion: 'bg-emerald-50', safe: '', demotion: 'bg-red-50' } as const
-  const medal = ['#ffb020', '#a8a3c4', '#e08a4f']
+  const medal = ['#ffb020', '#9aa8bb', '#e08a4f']
   return (
     <div className="flex flex-col gap-4">
       <Segmented value={scope} onChange={(v) => setScope(v as typeof scope)} options={[

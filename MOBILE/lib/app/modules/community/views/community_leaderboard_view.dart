@@ -84,7 +84,7 @@ class CommunityLeaderboardView extends StatelessWidget {
                   SizedBox(height: 10.h),
                   _LeagueSection(
                     title: 'Bạn bè',
-                    color: AppColors.tint(const Color(0xFFE4DCFF)),
+                    color: AppColors.tint(const Color(0xFFD0EBFD)),
                     participants: controller.friendsBoard.toList(),
                     onParticipantTap: controller.openLeaderboardProfile,
                   ),

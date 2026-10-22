@@ -32,7 +32,7 @@ function ThreadList({ threads, active }: { threads: DirectThread[]; active?: num
               </span>
               <span className="flex items-center justify-between gap-2">
                 <span className={`truncate text-sm ${t.unread ? 'text-slate-800' : 'text-slate-500'}`}>{t.last_message?.content}</span>
-                {t.unread > 0 && <span className="num shrink-0 rounded-full bg-[#6d4aff] px-1.5 text-xs font-bold text-white">{t.unread}</span>}
+                {t.unread > 0 && <span className="num shrink-0 rounded-full bg-brand-600 px-1.5 text-xs font-bold text-white">{t.unread}</span>}
               </span>
             </span>
           </Link>
@@ -136,7 +136,7 @@ function Conversation({ id }: { id: number }) {
           return (
             <div key={m.id} className={`flex flex-col ${mine ? 'items-end' : 'items-start'}`}>
               <div title={dayjs(m.created_at).format('HH:mm DD/MM/YYYY')}
-                className={`max-w-[75%] whitespace-pre-wrap break-words rounded-2xl px-3 py-2 ${mine ? 'bg-[#6d4aff] text-white rounded-br-md' : 'bg-slate-100 text-slate-800 rounded-bl-md'}`}>
+                className={`max-w-[75%] whitespace-pre-wrap break-words rounded-2xl px-3 py-2 ${mine ? 'bg-brand-600 text-white rounded-br-md' : 'bg-slate-100 text-slate-800 rounded-bl-md'}`}>
                 {m.content}
               </div>
               {lastMine && <span className="text-[11px] text-slate-500 mt-0.5">{m.id < 0 ? 'Đang gửi…' : m.read_at ? 'Đã xem' : 'Đã gửi'}</span>}

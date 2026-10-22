@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { Progress, Skeleton } from 'antd'
-import { ArrowRightOutlined, BookOutlined, CameraFilled, CheckCircleFilled, EditOutlined } from '@ant-design/icons'
+import { ArrowRightOutlined, CheckCircleFilled } from '@ant-design/icons'
 import { Link, useNavigate } from 'react-router-dom'
 import { vocabApi } from '../../api/vocab'
 import { gameApi } from '../../api/app'
@@ -8,6 +8,7 @@ import { useAuth } from '../../auth/store'
 import LevelPath from '../../components/LevelPath'
 import TodayWord from '../../components/TodayWord'
 import { LangGlyph, Prismo, ScaleIcon, StreakIcon, XpIcon, type Mood } from '../../components/brand/Brand'
+import { AppIcon } from '../../components/brand/AppIcon'
 
 const LANG_NAME: Record<string, string> = { en: 'tiếng Anh', zh: 'tiếng Trung', vi: 'tiếng Việt' }
 
@@ -67,10 +68,10 @@ export default function HomePage() {
         : 'Năm phút là đủ cho một lượt học hôm nay.'
 
   const facts = [
-    { icon: <StreakIcon size={22} active={!!g?.studied_today} />, value: g?.streak ?? 0, label: 'ngày liên tiếp' },
-    { icon: <XpIcon size={22} />, value: g?.today_xp ?? 0, label: 'XP hôm nay' },
-    { icon: <BookOutlined className="text-[#8f75ff]" />, value: s?.learning ?? 0, label: 'từ đang học' },
-    { icon: <CheckCircleFilled className="text-[#10c79a]" />, value: s?.mastered ?? 0, label: 'từ đã thuộc' },
+    { icon: <StreakIcon size={30} active={!!g?.studied_today} />, value: g?.streak ?? 0, label: 'ngày liên tiếp' },
+    { icon: <XpIcon size={30} />, value: g?.today_xp ?? 0, label: 'XP hôm nay' },
+    { icon: <AppIcon name="book" size={30} />, value: s?.learning ?? 0, label: 'từ đang học' },
+    { icon: <AppIcon name="check" size={30} />, value: s?.mastered ?? 0, label: 'từ đã thuộc' },
   ]
 
   return (
@@ -92,7 +93,7 @@ export default function HomePage() {
 
         <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
           <button type="button" onClick={() => navigate('/learn?kind=learn')}
-            className="cursor-pointer rounded-2xl bg-[#6d4aff] text-white font-bold px-7 h-14 text-lg hover:bg-[#5533e0] btn-lip">
+            className="cursor-pointer rounded-2xl bg-brand-600 text-white font-bold px-7 h-14 text-lg hover:bg-brand-700 btn-lip">
             Học {target} từ mới
           </button>
           {due > 0 ? (
@@ -119,7 +120,7 @@ export default function HomePage() {
         {/* camera: the heart of LingoPrism */}
         <button type="button" onClick={() => navigate('/camera')}
           className="lift lp-card lg:col-span-3 p-6 sm:p-8 text-left cursor-pointer flex flex-col justify-between gap-8 group min-h-56">
-          <span className="h-14 w-14 rounded-2xl prism-bg grid place-items-center text-2xl text-white"><CameraFilled /></span>
+          <AppIcon name="camera" size={64} className="transition-transform duration-200 group-hover:-rotate-6 group-hover:scale-105" />
           <span>
             <span className="block text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-[-0.02em]">Chụp một đồ vật</span>
             <span className="flex items-end justify-between gap-4 mt-2">
@@ -162,7 +163,7 @@ export default function HomePage() {
       <div className={`grid gap-5 md:gap-6 ${user?.active_language === 'vi' ? 'md:grid-cols-2' : ''}`}>
         {user?.active_language === 'vi' && (
           <Link to="/doc-viet" className="lift lp-card p-5 flex items-center gap-4 group">
-            <EditOutlined className="text-2xl text-slate-500" />
+            <AppIcon name="pencil" size={44} />
             <div className="flex-1 min-w-0">
               <div className="font-bold text-slate-800 text-lg">Học đọc – viết tiếng Việt</div>
               <div className="text-slate-500 text-sm">Âm, dấu thanh, vần, đánh vần, nghe rồi viết lại</div>
@@ -171,7 +172,7 @@ export default function HomePage() {
           </Link>
         )}
         <Link to="/vocab" className="lift lp-card p-5 flex items-center gap-4 group">
-          <BookOutlined className="text-2xl text-slate-500" />
+          <AppIcon name="shapes" size={44} />
           <div className="flex-1 min-w-0">
             <div className="font-bold text-slate-800 text-lg">Học theo chủ đề</div>
             <div className="text-slate-500 text-sm">Động vật, thực phẩm, đồ vật, giao thông… mỗi từ có đủ Việt · Anh · Trung</div>

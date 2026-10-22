@@ -64,7 +64,7 @@ export default function PoisAdminPage() {
             <>
               <Marker position={[lat, lng]} icon={pinActive} draggable
                 eventHandlers={{ dragend: (e) => { const ll = (e.target as L.Marker).getLatLng(); form.setFieldsValue({ lat: ll.lat, lng: ll.lng }) } }} />
-              <Circle center={[lat, lng]} radius={radius ?? 150} pathOptions={{ color: '#6d4aff' }} />
+              <Circle center={[lat, lng]} radius={radius ?? 150} pathOptions={{ color: '#1899f0' }} />
             </>
           )}
         </MapContainer>

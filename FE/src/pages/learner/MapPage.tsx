@@ -21,12 +21,12 @@ const ICONS: Record<string, ReactNode> = {
 }
 const iconOf = (category: string) => ICONS[category] ?? <EnvironmentFilled />
 
-/** Map pin: the category's icon on a violet drop. */
+/** Map pin: the category's icon on a blue drop. */
 const pinIcon = (category: string) => L.divIcon({
   className: '',
   iconSize: [34, 40],
   iconAnchor: [17, 38],
-  html: `<div style="width:34px;height:34px;border-radius:17px 17px 17px 4px;transform:rotate(-45deg);background:#6d4aff;border:2px solid #fff;display:grid;place-items:center;box-shadow:0 4px 10px -4px rgb(27 21 56 / .5)">
+  html: `<div style="width:34px;height:34px;border-radius:17px 17px 17px 4px;transform:rotate(-45deg);background:#1899f0;border:2px solid #fff;display:grid;place-items:center;box-shadow:0 4px 10px -4px rgb(21 35 59 / .5)">
     <span style="transform:rotate(45deg);color:#fff;font-size:16px;line-height:0">${renderToStaticMarkup(<>{iconOf(category)}</>)}</span></div>`,
 })
 const meIcon = L.divIcon({ html: '<div style="width:18px;height:18px;border-radius:50%;background:#10c79a;border:3px solid white;box-shadow:0 0 0 4px rgb(16 199 154 / .25)"></div>', className: '', iconSize: [18, 18] })
@@ -91,7 +91,7 @@ export default function MapPage() {
                 </Popup>
               </Marker>
             ))}
-            {pois.map((p) => <Circle key={`c${p.id}`} center={[p.lat, p.lng]} radius={p.radius_m} pathOptions={{ color: '#6d4aff', weight: 1, fillOpacity: 0.06 }} />)}
+            {pois.map((p) => <Circle key={`c${p.id}`} center={[p.lat, p.lng]} radius={p.radius_m} pathOptions={{ color: '#1899f0', weight: 1, fillOpacity: 0.06 }} />)}
           </MapContainer>
         </div>
         <div className="flex flex-col gap-2 lg:max-h-[560px] overflow-y-auto">

@@ -9,15 +9,15 @@ import { Facts } from '../../components/ui'
 
 const LANG: Record<string, string> = { en: 'Tiếng Anh', vi: 'Tiếng Việt', zh: 'Tiếng Trung' }
 
-/** One series per chart, so one colour: the brand violet (lighter step in dark mode). */
+/** One series per chart, so one colour: the brand blue (lighter step in dark mode). */
 function DailyColumns({ data, label, dark }: { data: { date: string; value: number }[]; label: string; dark: boolean }) {
-  const ink = dark ? '#a8a3c4' : '#5d5878'
+  const ink = dark ? '#9aa8bb' : '#556273'
   return (
     <Column data={data} xField="date" yField="value" height={240} theme={dark ? 'classicDark' : 'classic'}
-      style={{ fill: dark ? '#a995ff' : '#6d4aff', radiusTopLeft: 4, radiusTopRight: 4, maxWidth: 22 }}
+      style={{ fill: dark ? '#3fa9f5' : '#1899f0', radiusTopLeft: 4, radiusTopRight: 4, maxWidth: 22 }}
       axis={{
         x: { labelFill: ink, line: false, tick: false },
-        y: { labelFill: ink, grid: true, gridStroke: dark ? '#2a2640' : '#e7e4f0', gridLineDash: [0, 0], gridStrokeOpacity: 1 },
+        y: { labelFill: ink, grid: true, gridStroke: dark ? '#222c3d' : '#e3e8ef', gridLineDash: [0, 0], gridStrokeOpacity: 1 },
       }}
       tooltip={{ title: (d: { date: string }) => d.date, items: [{ channel: 'y', name: label }] }} />
   )

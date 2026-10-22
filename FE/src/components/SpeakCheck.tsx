@@ -54,7 +54,7 @@ export default function SpeakCheck({ text, language, locale, onScore, compact = 
         <button type="button" onClick={go} aria-pressed={state === 'listening'}
           aria-label={state === 'listening' ? 'Dừng nghe' : 'Nói thử'}
           className={`h-11 px-4 rounded-full font-semibold inline-flex items-center gap-2 cursor-pointer transition-colors ${
-            state === 'listening' ? 'bg-[#ff6b81] text-white' : 'bg-[#6d4aff] text-white hover:bg-[#5533e0]'}`}>
+            state === 'listening' ? 'bg-[#ff6b81] text-white' : 'bg-brand-600 text-white hover:bg-brand-700'}`}>
           {state === 'listening' ? <><LoadingOutlined /> Đang nghe…</> : <><AudioOutlined /> Nói thử</>}
         </button>
       </div>

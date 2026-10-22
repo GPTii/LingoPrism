@@ -109,6 +109,7 @@ flutter:
     - assets/brand/rank/
     - assets/brand/group/
     - assets/icons/
+    - assets/icons/ui/
     - assets/ml_models/
     - assets/models/  # ONNX models directory
     - assets/sounds/
@@ -136,5 +137,5 @@ flutter_launcher_icons:
   image_path: "assets/brand/logo.png"
   image_path_ios: "assets/brand/logo_square.png"
   remove_alpha_ios: true
-  adaptive_icon_background: "#5B3BE8"
+  adaptive_icon_background: "#1585DC"
   adaptive_icon_foreground: "assets/brand/logo_foreground.png"

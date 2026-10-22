@@ -21,7 +21,7 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <ThemeRoot>
-        {/* no wrapper element: antd's `.ant-app a { color }` would repaint every NavLink violet */}
+        {/* no wrapper element: antd's `.ant-app a { color }` would repaint every NavLink blue */}
         <AntApp component={false}>
           <BrowserRouter>
             <App />

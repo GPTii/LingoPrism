@@ -83,7 +83,7 @@ export default function GroupPage() {
               const mine = m.user?.id === me?.id
               return (
                 <div key={m.id} className={`flex ${mine ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`max-w-[75%] rounded-2xl px-3 py-2 ${mine ? 'bg-[#6d4aff] text-white rounded-br-md' : 'bg-slate-100 text-slate-800 rounded-bl-md'}`}>
+                  <div className={`max-w-[75%] rounded-2xl px-3 py-2 ${mine ? 'bg-brand-600 text-white rounded-br-md' : 'bg-slate-100 text-slate-800 rounded-bl-md'}`}>
                     {!mine && <div className="text-xs font-semibold text-slate-500">{m.user?.display_name}{m.user && leaderIds.has(m.user.id) && <CrownFilled className="text-amber-500 ml-1" aria-label="trưởng nhóm" />}</div>}
                     <div>{m.kind === 'sticker' ? `[sticker ${m.sticker}]` : m.content}</div>
                   </div>

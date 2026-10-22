@@ -14,7 +14,7 @@ import { EmptyState, Facts, PageHeader, Section } from '../../components/ui'
 const pct = (v: number | null) => (v == null ? '–' : `${Math.round(v * 100)}%`)
 
 /** A thin horizontal meter with its value at the end (accuracy, mastered share). */
-function Meter({ value, color = '#6d4aff' }: { value: number | null; color?: string }) {
+function Meter({ value, color = '#1899f0' }: { value: number | null; color?: string }) {
   return (
     <div className="grid grid-cols-[minmax(0,1fr)_3rem] items-center gap-3">
       <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
@@ -32,7 +32,7 @@ export default function StatsPage() {
   const dark = useIsDark()
   const q = useQuery({ queryKey: ['learning-stats', days, user?.active_language, user?.zh_script], queryFn: () => vocabApi.stats(days) })
   const s = q.data
-  const ink = dark ? '#a8a3c4' : '#5d5878'
+  const ink = dark ? '#9aa8bb' : '#556273'
   // two series → two named colours and a legend; wrong answers in the coral beam, right ones in mint
   const chart = s?.daily.flatMap((d) => [
     { date: dayjs(d.date).format('DD/MM'), kind: 'Đúng', value: d.correct },
@@ -71,7 +71,7 @@ export default function StatsPage() {
               style={{ radiusTopLeft: 3, radiusTopRight: 3, maxWidth: 18 }}
               axis={{
                 x: { labelFill: ink, line: false, tick: false, labelAutoHide: true },
-                y: { labelFill: ink, grid: true, gridStroke: dark ? '#29243f' : '#e7e4f0', gridLineDash: [0, 0], gridStrokeOpacity: 1 },
+                y: { labelFill: ink, grid: true, gridStroke: dark ? '#243043' : '#e3e8ef', gridLineDash: [0, 0], gridStrokeOpacity: 1 },
               }}
               legend={{ color: { position: 'top', itemLabelFill: ink } }} />
           </Section>

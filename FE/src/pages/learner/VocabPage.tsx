@@ -10,7 +10,7 @@ import { EmptyState, PageHeader } from '../../components/ui'
 import { Prismo } from '../../components/brand/Brand'
 
 /** every topic its own colour (stable: by id) */
-export const TOPIC_TINTS = ['#6d4aff', '#3fa9f5', '#10c79a', '#ff8a3d', '#ec4899', '#ffb020', '#8b5cf6', '#14b8a6', '#ff6b81', '#0ea5e9']
+export const TOPIC_TINTS = ['#1899f0', '#7c5cff', '#10c79a', '#ff8a3d', '#ec4899', '#ffb020', '#8b5cf6', '#14b8a6', '#ff6b81', '#0ea5e9']
 
 export default function VocabPage() {
   const user = useAuth((s) => s.user)

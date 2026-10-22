@@ -90,7 +90,7 @@ export function EmptyState({ title, description, action, art }: {
 }
 
 /**
- * A person: their photo, or the first letter of their name on a violet tint (never a blank silhouette).
+ * A person: their photo, or the first letter of their name on a blue tint (never a blank silhouette).
  * Preset avatars ("assets/…") are mobile app artwork, so the web shows the letter for them.
  */
 export function UserAvatar({ name, src, size = 36 }: { name?: string | null; src?: string | null; size?: number }) {
