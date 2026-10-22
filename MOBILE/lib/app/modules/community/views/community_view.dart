@@ -282,7 +282,7 @@ class _JoinedHeader extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 18.sp,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.ink,
+                    color: AppColors.textPrimary,
                   ),
                 ),
                 SizedBox(height: 6.h),
@@ -1835,7 +1835,7 @@ class _FeedCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.w800,
-                      color: AppColors.ink,
+                      color: AppColors.textPrimary,
                     ),
                   ),
                   SizedBox(height: 14.h),
@@ -2134,7 +2134,7 @@ class _CommentPreviewString extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 13.sp,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.ink,
+                  color: AppColors.textPrimary,
                 ),
               ),
               SizedBox(height: 4.h),

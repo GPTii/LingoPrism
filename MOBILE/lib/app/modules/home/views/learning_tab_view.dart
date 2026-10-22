@@ -46,14 +46,14 @@ class LearningTabView extends GetView<HomeStatsController> {
         final unread = controller.unreadNotifications.value;
         if (loading) return const Center(child: CircularProgressIndicator());
         return AnnotatedRegion<SystemUiOverlayStyle>(
-          value: SystemUiOverlayStyle.light,
+          value: AppColors.isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
           child: RefreshIndicator(
             color: AppColors.primary,
             onRefresh: progressController.refreshProgress,
             child: ListView(
               padding: EdgeInsets.zero,
               children: [
-                // the prism: full-bleed ink that holds the header, the greeting and the day's light
+                // the top block: the header, the greeting and the day's light (white in light mode, ink in dark)
                 Obx(() => _buildTodayCard(
                       devicePixelRatio,
                       user: statsUser,
@@ -145,8 +145,9 @@ class LearningTabView extends GetView<HomeStatsController> {
 
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.ink,
+        color: _Hero.bg,
         borderRadius: BorderRadius.vertical(bottom: Radius.circular(28.r)),
+        border: AppColors.isDark ? null : Border(bottom: BorderSide(color: AppColors.line)),
       ),
       padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 28.h),
       child: Column(
@@ -159,15 +160,15 @@ class LearningTabView extends GetView<HomeStatsController> {
               _LangGlyph(user: user),
               SizedBox(width: 8.w),
               Text('Đang học ${user.languageLabel.toLowerCase()}',
-                  style: TextStyle(color: Colors.white.withValues(alpha: 0.75), fontSize: 13.sp)),
+                  style: TextStyle(color: _Hero.soft, fontSize: 13.sp)),
             ]),
           SizedBox(height: 10.h),
           Text(
             name.isEmpty ? _greeting() : '${_greeting()},\n$name',
-            style: TextStyle(color: Colors.white, fontSize: 34.sp, fontWeight: FontWeight.w800, height: 1.08, letterSpacing: -1.0),
+            style: TextStyle(color: _Hero.fg, fontSize: 34.sp, fontWeight: FontWeight.w800, height: 1.08, letterSpacing: -1.0),
           ),
           SizedBox(height: 10.h),
-          Text(line, style: TextStyle(color: Colors.white.withValues(alpha: 0.72), fontSize: 15.sp, height: 1.4)),
+          Text(line, style: TextStyle(color: _Hero.soft, fontSize: 15.sp, height: 1.4)),
           SizedBox(height: 18.h),
           // Prismo and the light it gives off: the day's goal
           Row(
@@ -457,7 +458,7 @@ class LearningTabView extends GetView<HomeStatsController> {
           IconButton(
             tooltip: ThemeService.isDark ? 'Giao diện sáng' : 'Giao diện tối',
             onPressed: ThemeService.toggle,
-            icon: Icon(ThemeService.isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined, size: 24.sp, color: Colors.white),
+            icon: Icon(ThemeService.isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined, size: 24.sp, color: _Hero.soft),
           ),
           Stack(
             clipBehavior: Clip.none,
@@ -465,7 +466,7 @@ class LearningTabView extends GetView<HomeStatsController> {
               IconButton(
                 tooltip: 'Thông báo',
                 onPressed: () => Get.toNamed(Routes.notification),
-                icon: Icon(Icons.notifications_none_rounded, size: 26.sp, color: Colors.white),
+                icon: AppIcon('bell', size: 28.sp),
               ),
               if (unreadNotifications > 0)
                 Positioned(
@@ -524,7 +525,7 @@ class LearningTabView extends GetView<HomeStatsController> {
                 style: TextStyle(
                   fontWeight: FontWeight.w700,
                   fontSize: 15.sp,
-                  color: Colors.white,
+                  color: _Hero.fg,
                   fontFeatures: const [FontFeature.tabularFigures()],
                 ),
               ),
@@ -757,9 +758,9 @@ class _GoalBeam extends StatelessWidget {
             TextSpan(children: [
               TextSpan(
                 text: '$learned/$target',
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 15.sp),
+                style: TextStyle(color: _Hero.fg, fontWeight: FontWeight.w700, fontSize: 15.sp),
               ),
-              TextSpan(text: '  từ mới hôm nay', style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 13.sp)),
+              TextSpan(text: '  từ mới hôm nay', style: TextStyle(color: _Hero.soft, fontSize: 13.sp)),
             ]),
             style: const TextStyle(fontFeatures: [FontFeature.tabularFigures()]),
           ),
@@ -769,7 +770,14 @@ class _GoalBeam extends StatelessWidget {
   }
 }
 
-/// Buttons on the ink surface: white filled for the main action, a quiet tint for the other.
+/// The top block's colours: white surface and dark text in light mode, the ink surface and white text in dark.
+class _Hero {
+  static Color get bg => AppColors.isDark ? AppColors.ink : AppColors.surface;
+  static Color get fg => AppColors.isDark ? Colors.white : AppColors.textPrimary;
+  static Color get soft => AppColors.isDark ? Colors.white.withValues(alpha: 0.72) : AppColors.textSecondary;
+}
+
+/// Buttons on the top block: blue filled for the main action, a quiet tint for the other.
 class _InkButton extends StatelessWidget {
   const _InkButton({required this.label, required this.onTap, this.filled = false, this.icon});
 
@@ -780,9 +788,9 @@ class _InkButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const fg = Colors.white;
+    final fg = filled ? Colors.white : _Hero.fg;
     return Material(
-      color: filled ? AppColors.primary : Colors.white.withValues(alpha: 0.1),
+      color: filled ? AppColors.primary : (AppColors.isDark ? Colors.white.withValues(alpha: 0.1) : AppColors.surfaceMuted),
       borderRadius: BorderRadius.circular(14.r),
       child: InkWell(
         onTap: onTap,

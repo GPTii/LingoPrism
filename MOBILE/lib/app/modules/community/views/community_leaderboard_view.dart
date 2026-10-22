@@ -203,7 +203,7 @@ class _LeagueHeader extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 16.sp,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.ink,
+                        color: AppColors.textPrimary,
                       ),
                     ),
                     SizedBox(height: 6.h),
@@ -212,7 +212,7 @@ class _LeagueHeader extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 22.sp,
                         fontWeight: FontWeight.w800,
-                        color: AppColors.ink,
+                        color: AppColors.textPrimary,
                       ),
                     ),
                   ],
@@ -455,7 +455,7 @@ class _LeagueParticipantTile extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 15.sp,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.ink,
+                      color: AppColors.textPrimary,
                       decoration: TextDecoration.underline,
                       decorationStyle: TextDecorationStyle.dotted,
                     ),

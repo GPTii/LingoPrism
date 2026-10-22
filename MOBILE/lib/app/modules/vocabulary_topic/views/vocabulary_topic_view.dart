@@ -13,6 +13,9 @@ import 'package:lingoprism/app/core/navigation/back.dart';
 class VocabularyTopicView extends GetView<VocabularyTopicController> {
   const VocabularyTopicView({super.key});
 
+  static Color get _bg => AppColors.isDark ? AppColors.ink : AppColors.surface;
+  static Color get _fg => AppColors.isDark ? Colors.white : AppColors.textPrimary;
+
   @override
   Widget build(BuildContext context) {
     final topic = controller.topic;
@@ -26,16 +29,18 @@ class VocabularyTopicView extends GetView<VocabularyTopicController> {
             pinned: true,
             stretch: true,
             expandedHeight: 210.h,
-            backgroundColor: AppColors.ink,
-            foregroundColor: Colors.white,
+            // white with dark text in light mode, the ink surface in dark
+            backgroundColor: _bg,
+            foregroundColor: _fg,
+            surfaceTintColor: Colors.transparent,
             leading: IconButton(onPressed: goBack, icon: Icon(Icons.arrow_back, size: 24.sp)),
             title: Obx(() => Text('${controller.topicName} · ${controller.totalWords} từ',
-                style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w700, color: Colors.white))),
+                style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w700, color: _fg))),
             actions: [
               IconButton(
                 tooltip: 'Luyện câu',
                 onPressed: controller.onSentencePressed,
-                icon: Icon(Icons.edit_note_rounded, size: 26.sp, color: Colors.white),
+                icon: Icon(Icons.edit_note_rounded, size: 26.sp, color: _fg),
               ),
               Padding(
                 padding: EdgeInsets.only(right: 12.w),
@@ -55,7 +60,7 @@ class VocabularyTopicView extends GetView<VocabularyTopicController> {
               collapseMode: CollapseMode.parallax,
               stretchModes: const [StretchMode.zoomBackground],
               background: Container(
-                color: AppColors.ink,
+                color: _bg,
                 padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 22.h),
                 alignment: Alignment.bottomLeft,
                 child: Row(
@@ -69,7 +74,7 @@ class VocabularyTopicView extends GetView<VocabularyTopicController> {
                           width: 84.w,
                           height: 84.w,
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.1),
+                            color: AppColors.isDark ? Colors.white.withValues(alpha: 0.1) : AppColors.surfaceMuted,
                             borderRadius: BorderRadius.circular(22.r),
                           ),
                           alignment: Alignment.center,
@@ -84,10 +89,10 @@ class VocabularyTopicView extends GetView<VocabularyTopicController> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(controller.topicName,
-                              style: TextStyle(fontSize: 28.sp, fontWeight: FontWeight.w800, color: Colors.white, height: 1.1, letterSpacing: -0.6)),
+                              style: TextStyle(fontSize: 28.sp, fontWeight: FontWeight.w800, color: _fg, height: 1.1, letterSpacing: -0.6)),
                           SizedBox(height: 6.h),
                           Obx(() => Text('${controller.totalWords} từ vựng',
-                              style: TextStyle(fontSize: 14.sp, color: Colors.white.withValues(alpha: 0.72)))),
+                              style: TextStyle(fontSize: 14.sp, color: AppColors.isDark ? Colors.white.withValues(alpha: 0.72) : AppColors.textSecondary))),
                         ],
                       ),
                     ),

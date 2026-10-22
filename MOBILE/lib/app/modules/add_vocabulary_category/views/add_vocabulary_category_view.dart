@@ -41,7 +41,7 @@ class AddVocabularyCategoryView
                       style: TextStyle(
                         fontSize: 28.sp,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.ink,
+                        color: AppColors.textPrimary,
                       ),
                     ),
                     SizedBox(height: 24.h),
@@ -236,7 +236,7 @@ class _RequiredLabel extends StatelessWidget {
         text: '',
         style: TextStyle(
           fontSize: 14.sp,
-          color: AppColors.ink,
+          color: AppColors.textPrimary,
           fontWeight: FontWeight.w600,
         ),
         children: [

@@ -146,7 +146,7 @@ class CommunityDetailView extends GetView<CommunityDetailController> {
                     style: TextStyle(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.w800,
-                      color: AppColors.ink,
+                      color: AppColors.textPrimary,
                     ),
                   ),
                   SizedBox(height: 14.h),

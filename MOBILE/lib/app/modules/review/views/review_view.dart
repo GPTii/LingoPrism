@@ -649,7 +649,7 @@ class ReviewView extends GetView<ReviewController> {
                             style: AppTextStyles.bodyMedium.copyWith(
                               fontWeight: FontWeight.w800,
                               fontSize: 18.sp,
-                              color: AppColors.ink,
+                              color: AppColors.textPrimary,
                             ),
                           ),
                           Text(
@@ -677,7 +677,7 @@ class ReviewView extends GetView<ReviewController> {
                         item.translation,
                         style: AppTextStyles.bodyMedium.copyWith(
                           fontWeight: FontWeight.w600,
-                          color: AppColors.ink,
+                          color: AppColors.textPrimary,
                         ),
                       ),
                     ],

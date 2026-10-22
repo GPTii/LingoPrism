@@ -2004,7 +2004,7 @@ class _RoundThreePrompt extends StatelessWidget {
           style: TextStyle(
             fontSize: 28.sp,
             fontWeight: FontWeight.w700,
-            color: AppColors.ink,
+            color: AppColors.textPrimary,
           ),
         ),
         SizedBox(height: 32.h),

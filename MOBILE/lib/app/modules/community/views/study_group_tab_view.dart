@@ -95,7 +95,7 @@ class StudyGroupTabView extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 18.sp,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.ink,
+                        color: AppColors.textPrimary,
                       ),
                     ),
                     SizedBox(height: 16.h),
@@ -1156,7 +1156,7 @@ class LeaderboardTile extends StatelessWidget {
       case 1:
         return _LeaderboardColors(
           background: [AppColors.primarySoft, AppColors.primaryTint],
-          primary: AppColors.ink,
+          primary: AppColors.textPrimary,
           secondary: AppColors.textSecondary,
           shadow: AppColors.primaryLight,
           border: AppColors.primaryTint,
