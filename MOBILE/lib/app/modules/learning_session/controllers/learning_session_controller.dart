@@ -6,6 +6,7 @@ import '../../../data/models/api/vocab.dart';
 import '../../../data/repositories/repositories.dart';
 import '../../../data/services/game_service.dart';
 import '../../../data/services/tts_service.dart';
+import 'package:lingoprism/app/core/navigation/back.dart';
 
 /// A word in the session, built from the server's session item.
 class LearningWord {
@@ -187,7 +188,7 @@ class LearningSessionController extends GetxController {
       }
     } catch (e) {
       error.value = ApiClient.toApiException(e).message;
-      Get.back();
+      goBack();
       Get.snackbar('Không thể bắt đầu', error.value, snackPosition: SnackPosition.BOTTOM);
     } finally {
       _isLoading.value = false;

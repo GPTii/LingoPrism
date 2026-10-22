@@ -14,6 +14,7 @@ import '../../add_vocabulary_category/bindings/add_vocabulary_category_binding.d
 import '../../add_vocabulary_category/views/add_vocabulary_category_view.dart';
 import '../../learning_session/controllers/learning_session_controller.dart';
 import '../../vocabulary_topic/controllers/vocabulary_topic_controller.dart';
+import 'package:lingoprism/app/core/navigation/back.dart';
 
 /// A topic in the learner's library (system topic with saved words, or a personal topic).
 class VocabularyCategory {
@@ -181,8 +182,8 @@ class ReviewController extends GetxController {
       title: const Text('Xoá chủ đề'),
       content: Text('Xoá chủ đề "${category.name}"? Các từ vẫn còn trong thư viện của bạn.'),
       actions: [
-        TextButton(onPressed: () => Get.back<bool>(result: false), child: const Text('Huỷ')),
-        TextButton(onPressed: () => Get.back<bool>(result: true), child: const Text('Xoá')),
+        TextButton(onPressed: () => goBack<bool>(result: false), child: const Text('Huỷ')),
+        TextButton(onPressed: () => goBack<bool>(result: true), child: const Text('Xoá')),
       ],
     ));
     if (confirmed != true) return;

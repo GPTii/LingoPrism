@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../../../core/network/api_client.dart';
 import '../../../data/services/auth_service.dart';
 import '../../../data/services/game_service.dart';
+import 'package:lingoprism/app/core/navigation/back.dart';
 
 class ProfileGoalController extends GetxController {
   late final TextEditingController learnController;
@@ -37,7 +38,7 @@ class ProfileGoalController extends GetxController {
     try {
       await AuthService.to.updateGoal(dailyNew: learn, dailyReview: review);
       GameService.to.refreshAll();
-      Get.back(result: true);
+      goBack(result: true);
       Get.snackbar('Đã cập nhật', 'Mục tiêu học tập đã được lưu.', snackPosition: SnackPosition.BOTTOM);
     } catch (e) {
       errorMessage.value = ApiClient.toApiException(e).message;

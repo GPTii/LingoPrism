@@ -10,6 +10,7 @@ import '../../data/services/tts_service.dart';
 import '../../routes/app_pages.dart';
 import '../learning_session/controllers/learning_session_controller.dart';
 import 'package:lingoprism/app/core/theme/app_colors.dart';
+import 'package:lingoprism/app/core/navigation/back.dart';
 
 /// Lộ trình 4 cấp độ (BE /levels/): progress per level, choosing the level, skip test.
 
@@ -287,7 +288,7 @@ class LevelTestView extends GetView<LevelTestController> {
             SizedBox(height: 20.h),
             FilledButton(
               onPressed: () {
-                Get.back();
+                goBack();
                 if (r.passed) Get.toNamed(Routes.learningSession, arguments: const LearningSessionArguments(kind: 'learn'));
               },
               child: Text(r.passed ? 'Học từ mới' : 'Quay lại'),

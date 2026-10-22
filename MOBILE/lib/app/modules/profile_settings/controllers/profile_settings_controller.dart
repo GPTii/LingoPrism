@@ -11,6 +11,7 @@ import '../../../routes/app_pages.dart';
 import '../../profile/controllers/profile_controller.dart';
 import '../../../routes/app_pages.dart' as routes;
 import 'package:lingoprism/app/core/theme/app_colors.dart';
+import 'package:lingoprism/app/core/navigation/back.dart';
 
 class ProfileSettingsController extends GetxController {
   ProfileSettingsController({AuthService? authService})
@@ -56,7 +57,7 @@ class ProfileSettingsController extends GetxController {
             const SizedBox(height: 8),
             SizedBox(
               width: double.infinity,
-              child: ElevatedButton(onPressed: () => Get.back(result: true), child: const Text('Lưu')),
+              child: ElevatedButton(onPressed: () => goBack(result: true), child: const Text('Lưu')),
             ),
           ]),
         );
@@ -117,11 +118,11 @@ class ProfileSettingsController extends GetxController {
         content: const Text('Bạn có chắc muốn đăng xuất khỏi LingoPrism?'),
         actions: [
           TextButton(
-            onPressed: () => Get.back(result: false),
+            onPressed: () => goBack(result: false),
             child: const Text('Hủy'),
           ),
           ElevatedButton(
-            onPressed: () => Get.back(result: true),
+            onPressed: () => goBack(result: true),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.error,
             ),

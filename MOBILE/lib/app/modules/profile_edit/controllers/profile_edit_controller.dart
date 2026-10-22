@@ -8,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../../core/network/api_client.dart';
 import '../../../data/services/auth_service.dart';
 import '../../profile/controllers/profile_controller.dart';
+import 'package:lingoprism/app/core/navigation/back.dart';
 
 class ProfileEditController extends GetxController {
   final TextEditingController nameController = TextEditingController();
@@ -57,7 +58,7 @@ class ProfileEditController extends GetxController {
         await AuthService.to.updateProfile({'display_name': name});
       }
       if (Get.isRegistered<ProfileController>()) await Get.find<ProfileController>().loadProfile();
-      Get.back(result: true);
+      goBack(result: true);
       Get.snackbar('Đã cập nhật', 'Thông tin hồ sơ đã được cập nhật.', snackPosition: SnackPosition.BOTTOM);
     } catch (e) {
       errorMessage.value = ApiClient.toApiException(e).message;

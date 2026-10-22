@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import '../../../core/theme/app_colors.dart';
+import 'package:lingoprism/app/core/navigation/back.dart';
 
 class CustomCameraView extends StatefulWidget {
   static const String galleryResultTag = '__gallery__';
@@ -38,7 +39,7 @@ class _CustomCameraViewState extends State<CustomCameraView> {
       _cameras = await availableCameras();
       if (_cameras == null || _cameras!.isEmpty) {
         Get.snackbar('Lỗi', 'Không tìm thấy camera');
-        Get.back();
+        goBack();
         return;
       }
 
@@ -50,7 +51,7 @@ class _CustomCameraViewState extends State<CustomCameraView> {
       await _startCamera(_currentCameraIndex);
     } catch (e) {
       Get.snackbar('Lỗi', 'Không thể khởi tạo camera: $e');
-      Get.back();
+      goBack();
     }
   }
 
@@ -97,7 +98,7 @@ class _CustomCameraViewState extends State<CustomCameraView> {
         Get.snackbar('Lỗi', 'Không thể đổi camera: $e');
       } else {
         Get.snackbar('Lỗi', 'Không thể bật camera: $e');
-        Get.back();
+        goBack();
       }
       return;
     }
@@ -133,7 +134,7 @@ class _CustomCameraViewState extends State<CustomCameraView> {
       // Phát âm thanh khi bấm nút chụp
       _playShutterSound();
       final XFile picture = await _controller!.takePicture();
-      Get.back(result: picture.path);
+      goBack(result: picture.path);
     } catch (e) {
       Get.snackbar('Lỗi', 'Không thể chụp ảnh: $e');
     } finally {
@@ -200,7 +201,7 @@ class _CustomCameraViewState extends State<CustomCameraView> {
   }
 
   void _openGallery() {
-    Get.back(result: CustomCameraView.galleryResultTag);
+    goBack(result: CustomCameraView.galleryResultTag);
   }
 
   IconData get _flashIcon {
@@ -235,7 +236,7 @@ class _CustomCameraViewState extends State<CustomCameraView> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Get.back(),
+          onPressed: () => goBack(),
         ),
         title: Text(
           'Chụp ảnh',

@@ -31,6 +31,7 @@ import 'package:get/get.dart';
 import '../controllers/community_chat_controller.dart';
 import '../models/community_chat_models.dart';
 import 'package:lingoprism/app/core/theme/app_colors.dart';
+import 'package:lingoprism/app/core/navigation/back.dart';
 
 /// Main chat view widget for community group conversations
 ///
@@ -217,10 +218,10 @@ class _ChatHeader extends StatelessWidget {
     try {
       // Use Navigator instead of Get.canPop() for better compatibility
       if (Navigator.canPop(Get.context!)) {
-        Get.back();
+        goBack();
       } else {
         // Fallback: try to go back anyway
-        Get.back();
+        goBack();
       }
     } catch (e) {
       debugPrint('Navigation error: $e');

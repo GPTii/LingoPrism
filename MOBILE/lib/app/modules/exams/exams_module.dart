@@ -12,6 +12,7 @@ import '../../data/repositories/repositories.dart';
 import '../../data/services/auth_service.dart';
 import '../../data/services/game_service.dart';
 import '../../routes/app_pages.dart';
+import 'package:lingoprism/app/core/navigation/back.dart';
 
 // ====================================================================== list
 
@@ -123,7 +124,7 @@ class ExamTakeController extends GetxController {
         });
       }
     } catch (e) {
-      Get.back();
+      goBack();
       Get.snackbar('Lỗi', ApiClient.toApiException(e).message, snackPosition: SnackPosition.BOTTOM);
     }
   }
@@ -138,8 +139,8 @@ class ExamTakeController extends GetxController {
           title: const Text('Nộp bài?'),
           content: Text('Còn $unanswered câu chưa trả lời.'),
           actions: [
-            TextButton(onPressed: () => Get.back(result: false), child: const Text('Làm tiếp')),
-            TextButton(onPressed: () => Get.back(result: true), child: const Text('Nộp bài')),
+            TextButton(onPressed: () => goBack(result: false), child: const Text('Làm tiếp')),
+            TextButton(onPressed: () => goBack(result: true), child: const Text('Nộp bài')),
           ],
         ));
         if (ok != true) return;

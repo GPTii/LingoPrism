@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import '../../../core/theme/app_colors.dart';
 import '../controllers/forgot_password_controller.dart';
+import 'package:lingoprism/app/core/navigation/back.dart';
 
 class ForgotPasswordView extends GetView<ForgotPasswordController> {
   const ForgotPasswordView({super.key});
@@ -21,7 +22,7 @@ class ForgotPasswordView extends GetView<ForgotPasswordController> {
                 child: Row(
                   children: [
                     IconButton(
-                      onPressed: () => Get.back(),
+                      onPressed: () => goBack(),
                       icon: Icon(
                         Icons.arrow_back_ios,
                         color: Colors.white,
@@ -188,7 +189,7 @@ class ForgotPasswordView extends GetView<ForgotPasswordController> {
 
                         // Back to login
                         TextButton(
-                          onPressed: () => Get.back(),
+                          onPressed: () => goBack(),
                           child: Text(
                             'Quay lại đăng nhập',
                             style: TextStyle(

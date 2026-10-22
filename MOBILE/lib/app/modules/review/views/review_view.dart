@@ -9,6 +9,7 @@ import '../controllers/review_controller.dart';
 // import '../../vocabulary_topic/controllers/vocabulary_topic_controller.dart'; // not used here
 import 'package:flutter_slidable/flutter_slidable.dart';
 import '../../../data/models/api/vocab.dart';
+import 'package:lingoprism/app/core/navigation/back.dart';
 
 class ReviewView extends GetView<ReviewController> {
   const ReviewView({super.key});
@@ -321,9 +322,9 @@ class ReviewView extends GetView<ReviewController> {
                             ),
                           ),
                         ),
-                        IconButton(
-                          onPressed: Get.back,
-                          icon: const Icon(Icons.close),
+                        const IconButton(
+                          onPressed: goBack,
+                          icon: Icon(Icons.close),
                         ),
                       ],
                     ),

@@ -5,6 +5,7 @@ import '../controllers/streak_controller.dart';
 import '../../../core/theme/app_widgets.dart';
 import '../../../core/utils/streak_asset_resolver.dart';
 import 'package:lingoprism/app/core/theme/app_colors.dart';
+import 'package:lingoprism/app/core/navigation/back.dart';
 
 class StreakView extends GetView<StreakController> {
   const StreakView({super.key});
@@ -19,7 +20,7 @@ class StreakView extends GetView<StreakController> {
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios_new_rounded,
               color: AppColors.textPrimary),
-          onPressed: () => Get.back(),
+          onPressed: () => goBack(),
         ),
         title: Text(
           'Streak',

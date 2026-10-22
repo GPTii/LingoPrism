@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../data/repositories/repositories.dart';
+import 'package:lingoprism/app/core/navigation/back.dart';
 
 const _reasons = {
   'harassment': 'Quấy rối, đe doạ, xúc phạm',
@@ -56,7 +57,7 @@ class _ReportUserSheetState extends State<_ReportUserSheet> {
       final block = _block && !widget.blocked;
       await CommunityRepository.reportUser(widget.userId,
           reason: _reason, details: _details.text.trim(), block: block, thread: widget.threadId);
-      Get.back(result: true);
+      goBack(result: true);
       Get.snackbar('Đã gửi báo cáo',
           block ? 'Đã chặn ${widget.name}. Đội ngũ kiểm duyệt sẽ xem xét sớm nhất.' : 'Đội ngũ kiểm duyệt sẽ xem xét sớm nhất.',
           snackPosition: SnackPosition.BOTTOM);

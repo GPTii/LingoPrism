@@ -7,6 +7,7 @@ import '../../../data/services/auth_service.dart';
 import '../../../routes/app_pages.dart';
 import '../../profile/controllers/profile_controller.dart';
 import '../../community/views/report_user_sheet.dart';
+import 'package:lingoprism/app/core/navigation/back.dart';
 
 class CommunityMemberProfileArguments {
   const CommunityMemberProfileArguments({
@@ -103,8 +104,8 @@ class CommunityMemberProfileController extends GetxController {
         content: const Text('Hai bạn sẽ bỏ theo dõi nhau, không nhắn tin cho nhau được và không thấy bài đăng của nhau. '
             'Người kia không nhận được thông báo.'),
         actions: [
-          TextButton(onPressed: () => Get.back(result: false), child: const Text('Huỷ')),
-          TextButton(onPressed: () => Get.back(result: true), child: const Text('Chặn', style: TextStyle(color: Colors.red))),
+          TextButton(onPressed: () => goBack(result: false), child: const Text('Huỷ')),
+          TextButton(onPressed: () => goBack(result: true), child: const Text('Chặn', style: TextStyle(color: Colors.red))),
         ],
       ));
       if (ok != true) return;

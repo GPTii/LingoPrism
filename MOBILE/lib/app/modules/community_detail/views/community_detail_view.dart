@@ -8,6 +8,7 @@ import 'package:get/get.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../community/controllers/community_controller.dart';
 import '../controllers/community_detail_controller.dart';
+import 'package:lingoprism/app/core/navigation/back.dart';
 
 const int _minReportDescriptionLength = 10;
 
@@ -22,9 +23,9 @@ class CommunityDetailView extends GetView<CommunityDetailController> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new),
-          onPressed: Get.back,
+        leading: const IconButton(
+          icon: Icon(Icons.arrow_back_ios_new),
+          onPressed: goBack,
         ),
         title: Text(
           post.authorName,
@@ -74,11 +75,11 @@ class CommunityDetailView extends GetView<CommunityDetailController> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Get.back(result: false),
+            onPressed: () => goBack(result: false),
             child: const Text('Huỷ'),
           ),
           TextButton(
-            onPressed: () => Get.back(result: true),
+            onPressed: () => goBack(result: true),
             child: const Text(
               'Xoá',
               style: TextStyle(color: Colors.red),
@@ -92,9 +93,9 @@ class CommunityDetailView extends GetView<CommunityDetailController> {
     if (confirmed == true) {
       await controller.deletePost(post);
       if (Get.isBottomSheetOpen ?? false) {
-        Get.back<void>();
+        goBack<void>();
       }
-      Get.back<void>();
+      goBack<void>();
     }
   }
 

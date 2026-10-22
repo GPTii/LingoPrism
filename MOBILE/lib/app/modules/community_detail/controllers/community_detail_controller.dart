@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:get/get.dart';
 import '../../community/controllers/community_controller.dart';
+import 'package:lingoprism/app/core/navigation/back.dart';
 
 class CommunityDetailArguments {
   const CommunityDetailArguments({required this.post});
@@ -25,7 +26,7 @@ class CommunityDetailController extends GetxController {
       // Tránh gọi snackbar/back trong build: đợi sau frame đầu
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Get.snackbar('Lỗi', 'Không tìm thấy bài viết.');
-        Get.back();
+        goBack();
       });
       // Giữ một post rỗng để tránh crash render
       post = CommunityPost(

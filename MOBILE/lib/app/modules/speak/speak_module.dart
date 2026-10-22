@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get/get.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/prismo.dart';
@@ -9,6 +8,7 @@ import '../../core/widgets/target_word.dart';
 import '../../core/widgets/word_picture.dart';
 import '../../data/models/api/vocab.dart';
 import '../../data/repositories/repositories.dart';
+import 'package:lingoprism/app/core/navigation/back.dart';
 
 /// Luyện phát âm (same as the web's /speak): ten words from my library, one at a time –
 /// listen to the model voice, say it, see the score; an average at the end.
@@ -48,7 +48,7 @@ class _SpeakPracticeViewState extends State<SpeakPracticeView> {
           if (snap.connectionState != ConnectionState.done) return const Center(child: CircularProgressIndicator());
           final deck = snap.data ?? const <WordCard>[];
           if (deck.isEmpty) {
-            return _Message(
+            return const _Message(
               mood: PrismoMood.wow,
               title: 'Thư viện của bạn chưa có từ nào',
               body: 'Lưu vài từ từ một chủ đề hoặc chụp ảnh một đồ vật, rồi quay lại luyện phát âm.',
@@ -132,7 +132,7 @@ class _Message extends StatelessWidget {
             Text(body, textAlign: TextAlign.center, style: TextStyle(color: AppColors.textSecondary)),
             if (action != null) ...[SizedBox(height: 18.h), action!],
             SizedBox(height: 8.h),
-            TextButton(onPressed: Get.back, child: const Text('Quay lại')),
+            const TextButton(onPressed: goBack, child: Text('Quay lại')),
           ]),
         ),
       );

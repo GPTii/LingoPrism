@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 
 import '../controllers/profile_edit_controller.dart';
 import 'package:lingoprism/app/core/theme/app_colors.dart';
+import 'package:lingoprism/app/core/navigation/back.dart';
 
 class ProfileEditView extends GetView<ProfileEditController> {
   const ProfileEditView({super.key});
@@ -17,7 +18,7 @@ class ProfileEditView extends GetView<ProfileEditController> {
         backgroundColor: AppColors.primarySoft,
         elevation: 0,
         leading: IconButton(
-          onPressed: Get.back,
+          onPressed: goBack,
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
           color: AppColors.textPrimary,
         ),
@@ -187,7 +188,7 @@ class ProfileEditView extends GetView<ProfileEditController> {
                 child: OutlinedButton.icon(
                   onPressed: () async {
                     await controller.pickAvatarFromDevice();
-                    if (context.mounted) Get.back();
+                    if (context.mounted) goBack();
                   },
                   icon: Icon(Icons.photo_library_rounded, color: AppColors.primary),
                   label: Text(
@@ -215,7 +216,7 @@ class ProfileEditView extends GetView<ProfileEditController> {
                   return GestureDetector(
                     onTap: () {
                       controller.chooseAvatar(path);
-                      Get.back();
+                      goBack();
                     },
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(18.r),

@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../controllers/shop_controller.dart';
 import '../../../core/theme/app_widgets.dart';
 import 'package:lingoprism/app/core/theme/app_colors.dart';
+import 'package:lingoprism/app/core/navigation/back.dart';
 
 class ShopView extends GetView<ShopController> {
   const ShopView({super.key});
@@ -17,7 +18,7 @@ class ShopView extends GetView<ShopController> {
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: AppColors.textPrimary),
-          onPressed: () => Get.back(),
+          onPressed: () => goBack(),
         ),
         title: Text(
           'Cửa hàng',

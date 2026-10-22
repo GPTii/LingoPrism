@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../../../core/network/api_client.dart';
 import '../../../data/repositories/repositories.dart';
 import 'package:lingoprism/app/data/services/auth_service.dart';
+import 'package:lingoprism/app/core/navigation/back.dart';
 
 
 enum StudyGroupApprovalMode { auto, require }
@@ -73,7 +74,7 @@ class CommunityCreateGroupController extends GetxController {
     isSubmitting.value = true;
     try {
       final group = await CommunityRepository.createGroup(name, description, requireApproval, icon: iconPath);
-      Get.back(result: group);
+      goBack(result: group);
     } catch (e) {
       Get.snackbar(
         'Có lỗi xảy ra',

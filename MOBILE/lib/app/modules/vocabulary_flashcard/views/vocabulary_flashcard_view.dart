@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../vocabulary_topic/controllers/vocabulary_topic_controller.dart';
 import '../controllers/vocabulary_flashcard_controller.dart';
+import 'package:lingoprism/app/core/navigation/back.dart';
 
 class VocabularyFlashcardView extends GetView<VocabularyFlashcardController> {
   const VocabularyFlashcardView({super.key});
@@ -17,7 +18,7 @@ class VocabularyFlashcardView extends GetView<VocabularyFlashcardController> {
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: AppColors.textPrimary),
-          onPressed: Get.back,
+          onPressed: goBack,
         ),
         title: Obx(
           () => Text(
@@ -33,7 +34,7 @@ class VocabularyFlashcardView extends GetView<VocabularyFlashcardController> {
       ),
       body: SafeArea(
         child: controller.total == 0
-            ? _EmptyState(onBack: Get.back)
+            ? const _EmptyState(onBack: goBack)
             : Column(
                 children: [
                   Expanded(

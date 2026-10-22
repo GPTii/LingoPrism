@@ -20,6 +20,7 @@ import '../../../core/theme/theme_service.dart';
 import '../../../data/repositories/repositories.dart';
 import '../../../data/models/api/vocab.dart';
 import '../../../core/widgets/target_word.dart';
+import 'package:lingoprism/app/core/navigation/back.dart';
 
 const _monthNames = [
   'Một', 'Hai', 'Ba', 'Tư', 'Năm', 'Sáu', 'Bảy', 'Tám', 'Chín', 'Mười', 'Mười Một', 'Mười Hai',
@@ -377,7 +378,7 @@ class LearningTabView extends GetView<HomeStatsController> {
                 children: [
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: () => Get.back(result: 'review'),
+                      onPressed: () => goBack(result: 'review'),
                       style: OutlinedButton.styleFrom(
                         padding: EdgeInsets.symmetric(vertical: 12.h),
                         shape: RoundedRectangleBorder(
@@ -396,7 +397,7 @@ class LearningTabView extends GetView<HomeStatsController> {
                   SizedBox(width: 12.w),
                   Expanded(
                     child: FilledButton(
-                      onPressed: () => Get.back(result: 'learn_more'),
+                      onPressed: () => goBack(result: 'learn_more'),
                       style: FilledButton.styleFrom(
                         padding: EdgeInsets.symmetric(vertical: 12.h),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),

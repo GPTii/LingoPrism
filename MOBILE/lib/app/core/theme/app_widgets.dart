@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'app_colors.dart';
+import 'package:lingoprism/app/core/navigation/back.dart';
 
 /// Reusable widgets for the app
 class AppWidgets {
@@ -159,7 +160,7 @@ class AppWidgets {
         actions: [
           TextButton(
             onPressed: () {
-              Get.back();
+              goBack();
               onConfirm?.call();
             },
             style: TextButton.styleFrom(
@@ -225,7 +226,7 @@ class AppWidgets {
         actions: [
           TextButton(
             onPressed: () {
-              Get.back();
+              goBack();
               onConfirm?.call();
             },
             style: TextButton.styleFrom(
@@ -297,7 +298,7 @@ class AppWidgets {
             children: [
               Expanded(
                 child: OutlinedButton(
-                  onPressed: () => Get.back(result: false),
+                  onPressed: () => goBack(result: false),
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     shape: RoundedRectangleBorder(
@@ -317,7 +318,7 @@ class AppWidgets {
               const SizedBox(width: 12),
               Expanded(
                 child: ElevatedButton(
-                  onPressed: () => Get.back(result: true),
+                  onPressed: () => goBack(result: true),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: confirmColor ?? AppColors.buttonActive,
                     padding: const EdgeInsets.symmetric(vertical: 12),
@@ -388,7 +389,7 @@ class AppWidgets {
         actions: [
           TextButton(
             onPressed: () {
-              Get.back();
+              goBack();
               onConfirm?.call();
             },
             style: TextButton.styleFrom(
@@ -411,13 +412,13 @@ class AppWidgets {
 
   /// Show a branded loading overlay with mascot image and message.
   ///
-  /// Call `Get.back()` to close when loading completes.
+  /// Call `goBack()` to close when loading completes.
   static Future<void> showLoadingOverlay({
     String message = 'Đang tải dữ liệu, vui lòng đợi...',
   }) async {
     // Avoid stacking multiple loading dialogs.
     if (Get.isDialogOpen == true) {
-      Get.back<void>();
+      goBack<void>();
     }
 
     await Get.dialog(

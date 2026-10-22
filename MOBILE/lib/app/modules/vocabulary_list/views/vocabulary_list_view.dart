@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../controllers/vocabulary_list_controller.dart';
+import 'package:lingoprism/app/core/navigation/back.dart';
 
 class VocabularyListView extends GetView<VocabularyListController> {
   const VocabularyListView({super.key});
@@ -64,7 +65,7 @@ class VocabularyListView extends GetView<VocabularyListController> {
         children: [
           // Back button
           IconButton(
-            onPressed: () => Get.back(),
+            onPressed: () => goBack(),
             icon: Icon(Icons.arrow_back, size: 24.sp),
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),

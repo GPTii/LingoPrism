@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lingoprism/app/core/theme/app_colors.dart';
+import 'package:lingoprism/app/core/navigation/back.dart';
 
 class IconCategory {
   final String label;
@@ -276,7 +277,7 @@ class AddVocabularyCategoryController extends GetxController {
                                     selectedIcon.value = icon;
                                     iconError.value = null;
                                     _updateCanSave();
-                                    Get.back();
+                                    goBack();
                                   },
                                   child: AnimatedContainer(
                                     duration: const Duration(milliseconds: 200),
@@ -340,7 +341,7 @@ class AddVocabularyCategoryController extends GetxController {
       return;
     }
 
-    Get.back(result: {
+    goBack(result: {
       'name': trimmedName,
       'icon': selectedIcon.value!,
     });

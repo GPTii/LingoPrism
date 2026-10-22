@@ -11,6 +11,7 @@ import '../../learning_session/controllers/learning_session_controller.dart';
 import '../../vocabulary_flashcard/bindings/vocabulary_flashcard_binding.dart';
 import '../../vocabulary_flashcard/views/vocabulary_flashcard_view.dart';
 import 'package:lingoprism/app/core/theme/app_colors.dart';
+import 'package:lingoprism/app/core/navigation/back.dart';
 
 enum VocabularyLearningStatus { notStarted, learning, learned }
 
@@ -159,7 +160,7 @@ class VocabularyTopicController extends GetxController {
                           onTap: () async {
                             try {
                               await VocabRepository.addWord(c.id, topic: topic.id);
-                              Get.back();
+                              goBack();
                               await load();
                             } catch (e) {
                               Get.snackbar('Lỗi', ApiClient.toApiException(e).message);
@@ -196,7 +197,7 @@ class VocabularyTopicController extends GetxController {
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: TextField(controller: details, decoration: const InputDecoration(hintText: 'Mô tả (không bắt buộc)')),
         ),
-        for (final e in reasons.entries) SimpleDialogOption(onPressed: () => Get.back(result: e.key), child: Text(e.value)),
+        for (final e in reasons.entries) SimpleDialogOption(onPressed: () => goBack(result: e.key), child: Text(e.value)),
       ],
     ));
     if (reason == null) return;

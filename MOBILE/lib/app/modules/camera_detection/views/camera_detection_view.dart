@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../controllers/camera_detection_controller.dart';
 import 'package:lingoprism/app/core/theme/app_colors.dart';
 import '../../../routes/app_pages.dart';
+import 'package:lingoprism/app/core/navigation/back.dart';
 
 
 class CameraDetectionView extends GetView<CameraDetectionController> {
@@ -71,7 +72,7 @@ class CameraDetectionView extends GetView<CameraDetectionController> {
       child: Row(
         children: [
           IconButton(
-            onPressed: () => Get.back(),
+            onPressed: () => goBack(),
             icon: Icon(
               Icons.arrow_back,
               size: 24.sp,

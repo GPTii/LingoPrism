@@ -5,6 +5,7 @@ import '../../vocabulary_flashcard/bindings/vocabulary_flashcard_binding.dart';
 import '../../vocabulary_flashcard/views/vocabulary_flashcard_view.dart';
 import '../../vocabulary_topic/controllers/vocabulary_topic_controller.dart';
 import 'package:lingoprism/app/core/theme/app_colors.dart';
+import 'package:lingoprism/app/core/navigation/back.dart';
 
 /// Simple data model for previewing vocabulary content without backend data.
 class VocabularyItem {
@@ -138,11 +139,11 @@ class VocabularyListController extends GetxController {
         content: const Text('Bạn có chắc muốn xóa từ này?'),
         actions: [
           TextButton(
-            onPressed: () => Get.back(result: false),
+            onPressed: () => goBack(result: false),
             child: const Text('Hủy'),
           ),
           TextButton(
-            onPressed: () => Get.back(result: true),
+            onPressed: () => goBack(result: true),
             child: const Text('Xóa', style: TextStyle(color: Colors.red)),
           ),
         ],
@@ -201,7 +202,7 @@ class VocabularyListController extends GetxController {
                     : 'Thêm vào yêu thích',
               ),
               onTap: () {
-                Get.back();
+                goBack();
                 toggleFavorite(vocab.id);
               },
             ),
@@ -209,7 +210,7 @@ class VocabularyListController extends GetxController {
               leading: const Icon(Icons.delete, color: Colors.red),
               title: const Text('Xóa', style: TextStyle(color: Colors.red)),
               onTap: () {
-                Get.back();
+                goBack();
                 deleteWord(vocab.id);
               },
             ),

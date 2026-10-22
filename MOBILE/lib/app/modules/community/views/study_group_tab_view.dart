@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import '../controllers/community_controller.dart';
 import 'package:lingoprism/app/data/services/auth_service.dart';
 import 'package:lingoprism/app/core/theme/app_colors.dart';
+import 'package:lingoprism/app/core/navigation/back.dart';
 
 class StudyGroupTabView extends StatelessWidget {
   const StudyGroupTabView({
@@ -149,7 +150,7 @@ class StudyGroupTabView extends StatelessWidget {
                           ),
                         ),
                         onPressed: () {
-                          Get.back();
+                          goBack();
                           controller.submitJoinRequest(
                             group: group,
                             message: messageController.text,

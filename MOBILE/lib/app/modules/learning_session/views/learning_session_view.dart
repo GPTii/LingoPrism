@@ -13,6 +13,7 @@ import '../../home/controllers/learning_tab_controller.dart';
 import '../../../core/widgets/word_picture.dart';
 import '../../../core/widgets/prismo.dart';
 import '../../../core/widgets/prism_effects.dart';
+import 'package:lingoprism/app/core/navigation/back.dart';
 
 // --- Start of Round 3 Models ---
 // Note: These model classes should ideally be in their own file (e.g., in app/data/models).
@@ -83,7 +84,7 @@ class LearningSessionView extends GetView<LearningSessionController> {
         backgroundColor: AppColors.primarySoft,
         elevation: 0,
         leading: IconButton(
-          onPressed: Get.back,
+          onPressed: goBack,
           icon: Icon(Icons.arrow_back_ios_new_rounded,
               color: AppColors.textPrimary),
         ),
@@ -637,7 +638,7 @@ class _RoundThreeContentState extends State<_RoundThreeContent> {
 
   void _showCompletionDialog({required int percent}) {
     // legacy dialog (unused after fullscreen change)
-    Get.back<void>();
+    goBack<void>();
   }
 
   void _showCompletionPage({required RoundThreeSummary summary}) {
@@ -1852,7 +1853,7 @@ class _LessonCompletedScreenState extends State<_LessonCompletedScreen> {
                         await Get.find<LearningTabController>().refreshProgress();
                       } catch (_) {}
                     }
-                    Get.back<void>();
+                    goBack<void>();
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,

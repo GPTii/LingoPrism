@@ -14,6 +14,7 @@ import '../../community_chat/models/community_chat_models.dart' as chat_models;
 import '../../community_member_profile/controllers/community_member_profile_controller.dart';
 import '../../profile/controllers/profile_controller.dart' show ProfileController, rankForTier;
 import '../../review/controllers/review_controller.dart';
+import 'package:lingoprism/app/core/navigation/back.dart';
 
 int _boundIndex(int length, int index) {
   if (length <= 0 || index < 0) return 0;
@@ -551,15 +552,15 @@ class CommunityController extends GetxController {
       title: const Text('Xoá bài viết'),
       content: const Text('Bạn có chắc muốn xoá bài viết này?'),
       actions: [
-        TextButton(onPressed: () => Get.back(result: false), child: const Text('Huỷ')),
-        TextButton(onPressed: () => Get.back(result: true), child: const Text('Xoá')),
+        TextButton(onPressed: () => goBack(result: false), child: const Text('Huỷ')),
+        TextButton(onPressed: () => goBack(result: true), child: const Text('Xoá')),
       ],
     ));
     if (ok != true) return;
     try {
       await CommunityRepository.deletePost(int.parse(post.id));
       posts.removeWhere((p) => p.id == post.id);
-      if (Get.currentRoute == Routes.communityDetail) Get.back();
+      if (Get.currentRoute == Routes.communityDetail) goBack();
       Get.snackbar('Đã xoá', 'Bài viết đã được xoá vĩnh viễn.', snackPosition: SnackPosition.BOTTOM);
     } catch (e) {
       Get.snackbar('Lỗi', ApiClient.toApiException(e).message, snackPosition: SnackPosition.BOTTOM);
@@ -809,7 +810,7 @@ class CommunityController extends GetxController {
     }
     try {
       final status = await CommunityRepository.join(int.parse(group.groupId), message: message.trim());
-      if (Get.isBottomSheetOpen == true || Get.isDialogOpen == true) Get.back();
+      if (Get.isBottomSheetOpen == true || Get.isDialogOpen == true) goBack();
       Get.snackbar(status == 'pending' ? 'Đã gửi yêu cầu' : 'Đã tham gia',
           status == 'pending' ? 'Cần trưởng nhóm duyệt.' : 'Chào mừng bạn đến với ${group.name}!', snackPosition: SnackPosition.BOTTOM);
       await loadGroups();

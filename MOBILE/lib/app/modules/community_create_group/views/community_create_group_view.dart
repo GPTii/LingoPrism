@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 
 import '../controllers/community_create_group_controller.dart';
 import 'package:lingoprism/app/core/theme/app_colors.dart';
+import 'package:lingoprism/app/core/navigation/back.dart';
 
 class CommunityCreateGroupView extends GetView<CommunityCreateGroupController> {
   const CommunityCreateGroupView({super.key});
@@ -18,7 +19,7 @@ class CommunityCreateGroupView extends GetView<CommunityCreateGroupController> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
           color: AppColors.textPrimary,
-          onPressed: Get.back,
+          onPressed: goBack,
         ),
         title: Text(
           'Tạo nhóm học',

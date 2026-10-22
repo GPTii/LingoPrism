@@ -15,6 +15,7 @@ import '../../../routes/app_pages.dart';
 import 'follow_suggestions.dart';
 import 'study_group_tab_view.dart';
 import 'community_leaderboard_view.dart';
+import 'package:lingoprism/app/core/navigation/back.dart';
 
 // Constants for validation and configuration
 const int _maxTopicLength = 50;
@@ -1784,7 +1785,7 @@ class _FeedCard extends StatelessWidget {
       textConfirm: 'Xoá',
       confirmTextColor: Colors.white,
       onConfirm: () {
-        Get.back<void>();
+        goBack<void>();
         controller.deletePost(post);
       },
     );

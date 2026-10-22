@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../../../data/services/tts_service.dart';
 import '../../vocabulary_topic/controllers/vocabulary_topic_controller.dart';
+import 'package:lingoprism/app/core/navigation/back.dart';
 
 /// Free browsing of a topic's flashcards (not graded – graded practice uses a study session).
 class VocabularyFlashcardController extends GetxController {
@@ -28,7 +29,7 @@ class VocabularyFlashcardController extends GetxController {
     final incoming = args?['items'];
     items = incoming is List<VocabularyTopicItem> ? incoming : <VocabularyTopicItem>[];
     topicName = args?['topicName'] as String? ?? 'Flashcard';
-    if (items.isEmpty) Future.microtask(Get.back);
+    if (items.isEmpty) Future.microtask(goBack);
   }
 
   @override
@@ -54,7 +55,7 @@ class VocabularyFlashcardController extends GetxController {
   }
 
   void completeSession() {
-    Get.back();
+    goBack();
     Get.snackbar('Flashcard', 'Bạn đã xem hết thẻ của "$topicName". Hãy luyện tập để ghi nhớ lâu hơn!',
         snackPosition: SnackPosition.BOTTOM);
   }

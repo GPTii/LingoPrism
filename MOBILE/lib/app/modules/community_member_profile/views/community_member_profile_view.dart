@@ -7,6 +7,7 @@ import '../../profile/views/profile_view.dart';
 import '../controllers/community_member_profile_controller.dart';
 import '../../messages/messages_module.dart';
 import 'package:lingoprism/app/core/theme/app_colors.dart';
+import 'package:lingoprism/app/core/navigation/back.dart';
 
 class CommunityMemberProfileView
     extends GetView<CommunityMemberProfileController> {
@@ -20,7 +21,7 @@ class CommunityMemberProfileView
         backgroundColor: AppColors.primarySoft,
         elevation: 0,
         leading: IconButton(
-          onPressed: Get.back,
+          onPressed: goBack,
           icon: Icon(Icons.arrow_back_ios_new_rounded,
               color: AppColors.textPrimary),
         ),

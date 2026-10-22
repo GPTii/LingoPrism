@@ -7,6 +7,7 @@ import '../../../data/models/api/game.dart' as api;
 import '../../../data/repositories/repositories.dart';
 import '../../../data/services/auth_service.dart';
 import '../../../data/services/game_service.dart';
+import 'package:lingoprism/app/core/navigation/back.dart';
 
 class ShopController extends GetxController {
   final coins = 0.obs;
@@ -144,7 +145,7 @@ class ShopController extends GetxController {
                 children: [
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: () => Get.back(result: false),
+                      onPressed: () => goBack(result: false),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         shape: RoundedRectangleBorder(
@@ -164,7 +165,7 @@ class ShopController extends GetxController {
                   const SizedBox(width: 12),
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: () => Get.back(result: true),
+                      onPressed: () => goBack(result: true),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.buttonActive,
                         padding: const EdgeInsets.symmetric(vertical: 12),

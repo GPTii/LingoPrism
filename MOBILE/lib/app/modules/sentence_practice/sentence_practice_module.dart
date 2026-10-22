@@ -11,6 +11,7 @@ import '../../data/repositories/repositories.dart';
 import '../../data/services/auth_service.dart';
 import '../../data/services/game_service.dart';
 import '../../data/services/tts_service.dart';
+import 'package:lingoprism/app/core/navigation/back.dart';
 
 /// Sentence practice (arrange / listen / fill / meaning) built from verified Tatoeba sentences.
 /// Arguments: `{'topic': int?, 'title': String?}`.
@@ -253,7 +254,7 @@ class SentencePracticeView extends GetView<SentencePracticeController> {
             Text(text, textAlign: TextAlign.center, style: TextStyle(fontSize: 15.sp)),
             SizedBox(height: 16.h),
             if (retry) ElevatedButton(onPressed: controller.load, child: const Text('Thử lại'))
-            else ElevatedButton(onPressed: Get.back, child: const Text('Quay lại')),
+            else const ElevatedButton(onPressed: goBack, child: Text('Quay lại')),
           ]),
         ),
       );
@@ -270,7 +271,7 @@ class SentencePracticeView extends GetView<SentencePracticeController> {
                 style: TextStyle(fontSize: 15.sp, color: AppColors.textSecondary)),
             SizedBox(height: 24.h),
             Row(mainAxisSize: MainAxisSize.min, children: [
-              OutlinedButton(onPressed: Get.back, child: const Text('Về trước')),
+              const OutlinedButton(onPressed: goBack, child: Text('Về trước')),
               SizedBox(width: 12.w),
               ElevatedButton(onPressed: controller.load, child: const Text('Luyện tiếp')),
             ]),

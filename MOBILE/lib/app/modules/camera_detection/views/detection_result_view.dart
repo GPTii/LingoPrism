@@ -15,6 +15,7 @@ import '../../../data/services/game_service.dart';
 import '../../../data/services/offline_detections.dart';
 import '../../../routes/app_pages.dart';
 import '../../photo_dialogue/photo_dialogue_module.dart';
+import 'package:lingoprism/app/core/navigation/back.dart';
 
 /// Detected objects → vocabulary in the language being learned. The learner picks the words to save,
 /// marks wrong detections (feedback feeds the VIP algorithm) and can share the photo to the community.
@@ -145,7 +146,7 @@ class _DetectionResultViewState extends State<DetectionResultView> {
     }
     if (offline) {
       await OfflineDetections.queue(result, offlineItems!, topic: topic?.id);
-      Get.back();
+      goBack();
       Get.snackbar('Đã lưu tạm', 'Đang offline: ${chosen.length} từ sẽ được lưu vào thư viện khi có mạng.',
           snackPosition: SnackPosition.BOTTOM, backgroundColor: AppColors.buttonSuccess, colorText: Colors.white);
       return;
@@ -161,7 +162,7 @@ class _DetectionResultViewState extends State<DetectionResultView> {
       GameService.to.refreshAll();
       final talk = saved > 0 && await PhotoDialogueView.available();
       final locale = chosen.map((i) => i.shownCard?.target?.ttsLocale).firstWhere((l) => l != null && l.isNotEmpty, orElse: () => '');
-      Get.back();
+      goBack();
       Get.snackbar(
           'Thành công',
           '${share ? 'Đã lưu $saved từ và chia sẻ lên cộng đồng' : 'Đã lưu $saved từ vào thư viện'}'

@@ -6,6 +6,7 @@ import '../controllers/notification_controller.dart';
 import '../../../core/theme/app_widgets.dart';
 import '../../../data/models/notification_item.dart';
 import 'package:lingoprism/app/core/theme/app_colors.dart';
+import 'package:lingoprism/app/core/navigation/back.dart';
 
 class NotificationView extends GetView<NotificationController> {
   const NotificationView({super.key});
@@ -18,7 +19,7 @@ class NotificationView extends GetView<NotificationController> {
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: AppColors.textPrimary),
-          onPressed: () => Get.back(),
+          onPressed: () => goBack(),
         ),
         title: Text(
           'Thông báo',

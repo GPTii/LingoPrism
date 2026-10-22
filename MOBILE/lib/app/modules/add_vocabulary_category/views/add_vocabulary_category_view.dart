@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../controllers/add_vocabulary_category_controller.dart';
+import 'package:lingoprism/app/core/navigation/back.dart';
 
 class AddVocabularyCategoryView
     extends GetView<AddVocabularyCategoryController> {
@@ -19,7 +20,7 @@ class AddVocabularyCategoryView
         backgroundColor: AppColors.background,
         elevation: 0,
         leading: IconButton(
-          onPressed: () => Get.back(),
+          onPressed: () => goBack(),
           icon: Icon(
             Icons.arrow_back,
             color: AppColors.textPrimary,

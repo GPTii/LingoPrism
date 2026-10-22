@@ -6,6 +6,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_widgets.dart';
 import '../controllers/survey_controller.dart';
+import 'package:lingoprism/app/core/navigation/back.dart';
 
 class SurveyView extends GetView<SurveyController> {
   const SurveyView({super.key});
@@ -763,7 +764,7 @@ class SurveyView extends GetView<SurveyController> {
                 // Cancel button
                 Expanded(
                   child: OutlinedButton(
-                    onPressed: () => Get.back(),
+                    onPressed: () => goBack(),
                     style: OutlinedButton.styleFrom(
                       backgroundColor: AppColors.buttonDisabled,
                       side: BorderSide(color: AppColors.textWhite.withOpacity(0.3)),
@@ -790,7 +791,7 @@ class SurveyView extends GetView<SurveyController> {
                       controller.setBirthDay(selectedDay.toString().padLeft(2, '0'));
                       controller.setBirthMonth(selectedMonth.toString().padLeft(2, '0'));
                       controller.setBirthYear(selectedYear.toString());
-                      Get.back();
+                      goBack();
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.buttonActive,

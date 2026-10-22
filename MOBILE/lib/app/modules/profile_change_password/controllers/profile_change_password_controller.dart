@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../data/services/auth_service.dart';
+import 'package:lingoprism/app/core/navigation/back.dart';
 
 class ProfileChangePasswordController extends GetxController {
   ProfileChangePasswordController({AuthService? authService})
@@ -43,7 +44,7 @@ class ProfileChangePasswordController extends GetxController {
       );
 
       if (result['success'] == true) {
-        Get.back(result: true);
+        goBack(result: true);
         Get.snackbar(
           'Đã cập nhật',
           'Mật khẩu của bạn đã được thay đổi.',

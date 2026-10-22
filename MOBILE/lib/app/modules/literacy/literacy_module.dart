@@ -12,6 +12,7 @@ import '../../data/services/game_service.dart';
 import '../../data/services/tts_service.dart';
 import '../../routes/app_pages.dart';
 import '../../core/widgets/word_picture.dart';
+import 'package:lingoprism/app/core/navigation/back.dart';
 
 const _vi = 'vi-VN';
 void _say(String text) => TtsService.to.speak(text, _vi);
@@ -542,7 +543,7 @@ class LiteracyLessonView extends GetView<LiteracyLessonController> {
             Text('Đúng ngay lần đầu ${f.correct}/${f.total} câu', style: TextStyle(fontSize: 15.sp, color: AppColors.textSecondary)),
             SizedBox(height: 20.h),
             Row(mainAxisSize: MainAxisSize.min, children: [
-              OutlinedButton(onPressed: Get.back, child: const Text('Về lộ trình')),
+              const OutlinedButton(onPressed: goBack, child: Text('Về lộ trình')),
               SizedBox(width: 12.w),
               f.nextUnlocked
                   ? ElevatedButton(

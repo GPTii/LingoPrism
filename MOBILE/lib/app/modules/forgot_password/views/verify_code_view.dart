@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../controllers/forgot_password_controller.dart';
+import 'package:lingoprism/app/core/navigation/back.dart';
 
 class VerifyCodeView extends GetView<ForgotPasswordController> {
   const VerifyCodeView({super.key});
@@ -28,7 +29,7 @@ class VerifyCodeView extends GetView<ForgotPasswordController> {
                 child: Row(
                   children: [
                     IconButton(
-                      onPressed: () => Get.back(),
+                      onPressed: () => goBack(),
                       icon: Icon(
                         Icons.arrow_back_ios,
                         color: AppColors.textWhite,

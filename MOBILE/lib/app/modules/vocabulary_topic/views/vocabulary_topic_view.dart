@@ -8,6 +8,7 @@ import '../../../core/theme/app_widgets.dart';
 import '../controllers/vocabulary_topic_controller.dart';
 import '../../levels/levels_module.dart' show levelColors;
 import '../../../core/widgets/word_picture.dart';
+import 'package:lingoprism/app/core/navigation/back.dart';
 
 class VocabularyTopicView extends GetView<VocabularyTopicController> {
   const VocabularyTopicView({super.key});
@@ -27,7 +28,7 @@ class VocabularyTopicView extends GetView<VocabularyTopicController> {
             expandedHeight: 210.h,
             backgroundColor: AppColors.ink,
             foregroundColor: Colors.white,
-            leading: IconButton(onPressed: Get.back, icon: Icon(Icons.arrow_back, size: 24.sp)),
+            leading: IconButton(onPressed: goBack, icon: Icon(Icons.arrow_back, size: 24.sp)),
             title: Obx(() => Text('${controller.topicName} · ${controller.totalWords} từ',
                 style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w700, color: Colors.white))),
             actions: [

@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 
 import '../controllers/profile_goal_controller.dart';
 import 'package:lingoprism/app/core/theme/app_colors.dart';
+import 'package:lingoprism/app/core/navigation/back.dart';
 
 class ProfileGoalView extends GetView<ProfileGoalController> {
   const ProfileGoalView({super.key});
@@ -16,7 +17,7 @@ class ProfileGoalView extends GetView<ProfileGoalController> {
         backgroundColor: AppColors.primarySoft,
         elevation: 0,
         leading: IconButton(
-          onPressed: Get.back,
+          onPressed: goBack,
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
           color: AppColors.textPrimary,
         ),
