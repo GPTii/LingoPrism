@@ -1,7 +1,10 @@
 import { useQuery } from '@tanstack/react-query'
-import { Input, Segmented, Skeleton } from 'antd'
+import { App, Button, Input, Modal, Segmented, Skeleton } from 'antd'
+import { PlusOutlined } from '@ant-design/icons'
+import { useQueryClient } from '@tanstack/react-query'
+import { errorMessage } from '../../api/client'
 import { useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { vocabApi, topicTargetName } from '../../api/vocab'
 import { useAuth } from '../../auth/store'
 import WordCardView from '../../components/WordCardView'
@@ -11,6 +14,66 @@ import { Prismo } from '../../components/brand/Brand'
 
 /** every topic its own colour (stable: by id) */
 export const TOPIC_TINTS = ['#1899f0', '#7c5cff', '#10c79a', '#ff8a3d', '#ec4899', '#ffb020', '#8b5cf6', '#14b8a6', '#ff6b81', '#0ea5e9']
+
+const TOPIC_ICONS = ['📘', '⭐', '🍜', '✈️', '💼', '🏠', '🐾', '🎵', '⚽', '🛒', '🌿', '💬']
+
+/** "Chủ đề của tôi": the learner's own topics, and making a new one (name + icon). */
+function MyTopics() {
+  const { message } = App.useApp()
+  const navigate = useNavigate()
+  const queryClient = useQueryClient()
+  const user = useAuth((s) => s.user)
+  const topics = useQuery({ queryKey: ['topics', user?.active_language, user?.zh_script, 'mine'], queryFn: () => vocabApi.topics({ mine: 1 }) })
+  const [open, setOpen] = useState(false)
+  const [name, setName] = useState('')
+  const [icon, setIcon] = useState(TOPIC_ICONS[0])
+  const [busy, setBusy] = useState(false)
+  const create = async () => {
+    if (!name.trim()) return message.warning('Đặt tên cho chủ đề')
+    setBusy(true)
+    try {
+      const t = await vocabApi.createTopic(name.trim(), icon)
+      queryClient.invalidateQueries({ queryKey: ['topics'] })
+      setOpen(false)
+      navigate(`/vocab/topics/${t.id}`)
+    } catch (e) {
+      message.error(errorMessage(e))
+    } finally {
+      setBusy(false)
+    }
+  }
+  return (
+    <section className="flex flex-col gap-3">
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="m-0 text-lg font-bold text-slate-800">Chủ đề của tôi</h2>
+        <Button icon={<PlusOutlined />} onClick={() => { setName(''); setIcon(TOPIC_ICONS[0]); setOpen(true) }}>Tạo chủ đề</Button>
+      </div>
+      {topics.data?.results.length ? (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {topics.data.results.map((t) => (
+            <Link key={t.id} to={`/vocab/topics/${t.id}`} className="lift lp-card p-4 flex items-center gap-3">
+              <span className="text-4xl">{t.icon || '📘'}</span>
+              <span className="min-w-0">
+                <span className="block font-bold text-slate-800 truncate">{t.name_vi}</span>
+                <span className="num block text-sm text-slate-500">{t.word_count} từ</span>
+              </span>
+            </Link>
+          ))}
+        </div>
+      ) : !topics.isLoading && <p className="m-0 text-slate-500">Gom những từ bạn hay dùng thành chủ đề riêng để ôn bằng flashcard.</p>}
+      <Modal open={open} title="Tạo chủ đề của bạn" okText="Tạo chủ đề" cancelText="Huỷ" confirmLoading={busy} onOk={create} onCancel={() => setOpen(false)}>
+        <Input size="large" value={name} onChange={(e) => setName(e.target.value)} maxLength={80} placeholder="VD: Từ vựng công việc" aria-label="Tên chủ đề" onPressEnter={create} />
+        <div className="mt-4 mb-2 text-sm font-semibold text-slate-600">Biểu tượng</div>
+        <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Biểu tượng">
+          {TOPIC_ICONS.map((i) => (
+            <button key={i} type="button" role="radio" aria-checked={icon === i} onClick={() => setIcon(i)}
+              className={`h-11 w-11 rounded-xl text-2xl cursor-pointer border-2 ${icon === i ? 'border-brand-500 bg-brand-50' : 'border-transparent bg-slate-100'}`}>{i}</button>
+          ))}
+        </div>
+      </Modal>
+    </section>
+  )
+}
 
 export default function VocabPage() {
   const user = useAuth((s) => s.user)
@@ -46,7 +109,7 @@ export default function VocabPage() {
           {tab === 'topics' && (
             topics.isLoading ? <Skeleton active /> : (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {topics.data?.results.filter((t) => t.word_count > 0).map((t) => {
+                {topics.data?.results.filter((t) => t.is_system && t.word_count > 0).map((t) => {
                   const tint = TOPIC_TINTS[t.id % TOPIC_TINTS.length]
                   const pct = Math.round((t.learned_count / Math.max(t.word_count, 1)) * 100)
                   return (
@@ -71,6 +134,8 @@ export default function VocabPage() {
               </div>
             )
           )}
+          {tab === 'library' && <MyTopics />}
+          {tab === 'library' && <h2 className="m-0 -mb-2 text-lg font-bold text-slate-800">Tất cả từ đã lưu</h2>}
           {tab === 'library' && (
             library.isLoading ? <Skeleton active /> : library.data?.results.length ? (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">

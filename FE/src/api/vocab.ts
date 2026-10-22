@@ -110,6 +110,9 @@ export const vocabApi = {
   saveTopic: (id: number) => api.post<{ added: number; total: number }>(`/topics/${id}/save/`).then((r) => r.data),
   createTopic: (name_vi: string, icon: string) => api.post<Topic>('/topics/', { name_vi, icon, visibility: 'private' }).then((r) => r.data),
   deleteTopic: (id: number) => api.delete(`/topics/${id}/`),
+  /** my own topic: put a word in it (also saved to my library) / take it out (stays in my library) */
+  addToTopic: (topicId: number, wordId: number) => api.post<{ added: boolean }>(`/topics/${topicId}/words/${wordId}/`).then((r) => r.data),
+  removeFromTopic: (topicId: number, wordId: number) => api.delete(`/topics/${topicId}/words/${wordId}/`),
   searchWords: (search: string) => api.get<Paginated<WordCard>>('/words/', { params: { search, page_size: 30 } }).then((r) => r.data),
   /** one page of verified words that have a translation in `lang` (the server only lists checked data) */
   wordPage: (lang: string, script: string, page: number, pageSize = 1) =>

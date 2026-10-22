@@ -283,3 +283,25 @@ def test_candidate_queue_needs_review_and_checks(db, tmp_path, monkeypatch):
     assert set(word.translations.values_list("language_id", "status")) == {
         ("vi", "verified"), ("en", "verified"), ("zh-Hans", "verified"), ("zh-Hant", "verified")}
     assert word.levels["zh"] == 2 and "半夜" in (tmp_path / "approved.csv").read_text(encoding="utf-8")
+
+
+def test_own_topic_add_and_remove_words_even_if_already_saved(vocab, learner):
+    user, client = learner
+    cat = Word.objects.get(slug="cat")
+    client.post("/api/v1/my-words/", {"word": cat.id, "source": "manual"}, format="json")  # already in my library
+    mine = client.post("/api/v1/topics/", {"name_vi": "Thú cưng", "icon": "🐱", "visibility": "private"}, format="json").data
+    assert client.post(f"/api/v1/topics/{mine["id"]}/words/{cat.id}/").data == {"added": True}
+    assert [c["slug"] for c in client.get(f"/api/v1/topics/{mine["id"]}/words/").data["results"]] == ["cat"]
+    assert [c["slug"] for c in client.get("/api/v1/my-words/", {"topic": mine["id"]}).data["results"]] == ["cat"]
+    assert next(t for t in client.get("/api/v1/topics/").data["results"] if t["id"] == mine["id"])["word_count"] == 1
+    # someone else cannot change my topic; a word without a checked translation is refused
+    other = User.objects.create_user("o@example.com", "Strong!Pass123")
+    co = APIClient()
+    co.force_authenticate(other)
+    assert co.post(f"/api/v1/topics/{mine["id"]}/words/{cat.id}/").status_code in (403, 404)
+    dog = Word.objects.get(slug="dog")  # its zh-Hant is flagged
+    assert client.post(f"/api/v1/topics/{mine["id"]}/words/{dog.id}/").status_code == 400
+    assert client.delete(f"/api/v1/topics/{mine["id"]}/words/{cat.id}/").status_code == 204
+    assert client.get(f"/api/v1/topics/{mine["id"]}/words/").data["results"] == []
+    assert client.get("/api/v1/my-words/").data["count"] == 1  # still in my library
+

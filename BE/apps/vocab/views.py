@@ -1,5 +1,6 @@
 from django.db import transaction
 from django.db.models import Count, Q
+from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.text import slugify
 from drf_spectacular.utils import OpenApiParameter, extend_schema
@@ -13,7 +14,7 @@ from apps.core.throttles import ActionThrottleMixin
 
 from . import serializers as s
 from .lang import checks
-from .models import ErrorReport, ExampleSentence, Language, ReviewStatus, Topic, Word, WordTranslation
+from .models import ErrorReport, ExampleSentence, Language, ReviewStatus, Topic, TopicWord, Word, WordTranslation
 from .services import card, personal_map, resolve_target, words_for_target
 
 LANG_PARAMS = [
@@ -118,6 +119,28 @@ class TopicViewSet(viewsets.ModelViewSet):
                 )
                 created += was_created
         return Response({"added": created, "total": len(words)})
+
+    @action(detail=True, methods=["post", "delete"], url_path=r"words/(?P<word_id>\d+)")
+    def word(self, request, pk=None, word_id=None):
+        """My own topic: put a checked word in it (POST, also saved to my library) or take it out (DELETE, it stays
+        in my library). The word joins the topic itself, so it shows up even if it was already in my library."""
+        from apps.learning.models import PersonalWord
+
+        topic = self.get_object()
+        self._check_owner(topic)
+        word = get_object_or_404(Word, pk=word_id)
+        if request.method == "DELETE":
+            TopicWord.objects.filter(topic=topic, word=word).delete()
+            PersonalWord.objects.filter(user=request.user, word=word, topic=topic).update(topic=None)
+            return Response(status=204)
+        target = resolve_target(request)
+        if not words_for_target(Word.objects.filter(id=word.id), request.user, target).exists():
+            return Response({"detail": "Từ này chưa có bản dịch đã kiểm tra cho ngôn ngữ đang học", "errors": {}}, status=400)
+        last = TopicWord.objects.filter(topic=topic).order_by("-order").values_list("order", flat=True).first() or 0
+        _, added = TopicWord.objects.get_or_create(topic=topic, word=word, defaults={"order": last + 1})
+        PersonalWord.objects.get_or_create(user=request.user, word=word, language=target.learn,
+                                           defaults={"source": PersonalWord.Source.MANUAL, "topic": topic})
+        return Response({"added": added}, status=201 if added else 200)
 
 
 @extend_schema(tags=["vocab"], parameters=LANG_PARAMS)
