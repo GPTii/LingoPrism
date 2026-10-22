@@ -26,7 +26,14 @@ class VocabularyCategory {
   String get name => topic.nameVi;
   String get icon => topic.icon.isEmpty ? '📘' : topic.icon;
   bool get isSystem => topic.isSystem;
-  int get wordCount => topic.isSystem ? topic.savedCount : topic.savedCount;
+  /// All the words of the topic – the same number its page lists.
+  int get wordCount => topic.wordCount > 0 ? topic.wordCount : topic.savedCount;
+
+  /// The words the learner has saved from it (a system topic is only partly in the library).
+  int get savedCount => topic.savedCount;
+
+  /// "154 từ · đã lưu 7" when only some are saved, else "154 từ vựng".
+  String get countLabel => isSystem && savedCount < wordCount ? '$wordCount từ · đã lưu $savedCount' : '$wordCount từ vựng';
   double get progress => topic.savedCount == 0 ? 0 : (topic.learnedCount / topic.savedCount).clamp(0, 1).toDouble();
 }
 

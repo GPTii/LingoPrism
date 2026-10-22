@@ -580,7 +580,7 @@ class ReviewView extends GetView<ReviewController> {
                     ),
                     SizedBox(height: 4.h),
                     Text(
-                      '${category.wordCount} từ vựng',
+                      category.countLabel,
                       style: AppTextStyles.captionMedium,
                     ),
                   ],

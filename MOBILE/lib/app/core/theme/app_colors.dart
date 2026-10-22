@@ -154,11 +154,11 @@ class AppColors {
   static Color get progressCurrent => primary;
   static Color get progressLocked => lineStrong;
 
-  /// Was the violet → sky → mint sweep; now the ink surface, flat.
+  /// The sign-in screens' backdrop, flat: the brand blue in light mode (like the opening screen), the ink in dark.
   static LinearGradient get primaryGradient => LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
-        colors: [ink, ink],
+        colors: isDark ? [ink, ink] : [primary, primary],
       );
 
   static LinearGradient get cardGradient => LinearGradient(

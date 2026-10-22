@@ -71,7 +71,14 @@ class VocabularyTopicController extends GetxController {
   final RxList<VocabularyTopicItem> items = <VocabularyTopicItem>[].obs;
   final RxBool isLoading = false.obs;
 
-  int get totalWords => items.length;
+  /// The topic's words (the server's count, the same as on the library card; the list once it is in).
+  int get totalWords => items.isNotEmpty ? items.length : topic.wordCount;
+
+  /// "154 từ vựng · đã lưu 7" for a system topic only partly saved, so it matches the library card.
+  String get countLabel {
+    final saved = topic.savedCount;
+    return topic.isSystem && saved > 0 && saved < totalWords ? '$totalWords từ vựng · đã lưu $saved' : '$totalWords từ vựng';
+  }
 
   @override
   void onInit() {

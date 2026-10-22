@@ -91,7 +91,7 @@ class VocabularyTopicView extends GetView<VocabularyTopicController> {
                           Text(controller.topicName,
                               style: TextStyle(fontSize: 28.sp, fontWeight: FontWeight.w800, color: _fg, height: 1.1, letterSpacing: -0.6)),
                           SizedBox(height: 6.h),
-                          Obx(() => Text('${controller.totalWords} từ vựng',
+                          Obx(() => Text(controller.countLabel,
                               style: TextStyle(fontSize: 14.sp, color: AppColors.isDark ? Colors.white.withValues(alpha: 0.72) : AppColors.textSecondary))),
                         ],
                       ),

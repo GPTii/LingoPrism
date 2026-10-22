@@ -13,7 +13,7 @@ class CameraDetectionView extends GetView<CameraDetectionController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.textPrimary,
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: Obx(() {
           if (controller.isLoading) {
@@ -47,7 +47,7 @@ class CameraDetectionView extends GetView<CameraDetectionController> {
             'Đang nhận diện...',
             style: TextStyle(
               fontSize: 18.sp,
-              color: Colors.white,
+              color: AppColors.textPrimary,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -60,7 +60,7 @@ class CameraDetectionView extends GetView<CameraDetectionController> {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
       decoration: BoxDecoration(
-        color: AppColors.textPrimary,
+        color: AppColors.surface,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.1),
@@ -76,7 +76,7 @@ class CameraDetectionView extends GetView<CameraDetectionController> {
             icon: Icon(
               Icons.arrow_back,
               size: 24.sp,
-              color: Colors.white,
+              color: AppColors.textPrimary,
             ),
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
@@ -88,14 +88,14 @@ class CameraDetectionView extends GetView<CameraDetectionController> {
               style: TextStyle(
                 fontSize: 24.sp,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: AppColors.textPrimary,
               ),
             ),
           ),
           IconButton(
             tooltip: 'Lịch sử ảnh',
             onPressed: () => Get.toNamed(Routes.photoHistory),
-            icon: Icon(Icons.photo_library_outlined, size: 24.sp, color: Colors.white),
+            icon: Icon(Icons.photo_library_outlined, size: 24.sp, color: AppColors.textPrimary),
           ),
         ],
       ),
