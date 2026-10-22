@@ -9,7 +9,38 @@ import '../../community/controllers/community_controller.dart';
 import '../../community_detail/controllers/community_detail_controller.dart';
 import '../../../routes/app_pages.dart';
 import '../../../core/utils/streak_asset_resolver.dart';
+import '../../../core/widgets/app_icon.dart';
+import '../../../data/services/auth_service.dart';
+import '../../social/social_module.dart';
 import 'package:lingoprism/app/core/theme/app_colors.dart';
+
+/// A big tappable tile with a colour icon: Bạn bè, Bài đã lưu.
+class _ProfileShortcut extends StatelessWidget {
+  const _ProfileShortcut({required this.icon, required this.label, required this.onTap});
+
+  final String icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => Material(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(16.r),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16.r),
+          onTap: onTap,
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(16.r), border: Border.all(color: AppColors.line)),
+            child: Row(children: [
+              AppIcon(icon, size: 30.w),
+              SizedBox(width: 10.w),
+              Expanded(child: Text(label, style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w700, color: AppColors.textPrimary))),
+            ]),
+          ),
+        ),
+      );
+}
 
 class ProfileView extends GetView<ProfileController> {
   const ProfileView({super.key});
@@ -66,6 +97,16 @@ class ProfileView extends GetView<ProfileController> {
                   onFollowToggle: null,
                   isFollowing: false,
                 ),
+                if (AuthService.to.currentUser?.isKid != true) ...[
+                  SizedBox(height: 16.h),
+                  const MyIdCard(),
+                  SizedBox(height: 10.h),
+                  Row(children: [
+                    Expanded(child: _ProfileShortcut(icon: 'community', label: 'Bạn bè', onTap: () => Get.toNamed(Routes.friends))),
+                    SizedBox(width: 10.w),
+                    Expanded(child: _ProfileShortcut(icon: 'bookmark', label: 'Bài đã lưu', onTap: () => Get.toNamed(Routes.savedPosts))),
+                  ]),
+                ],
                 SizedBox(height: 24.h),
                 ProfileOverviewSection(summary: profileSummary),
                 SizedBox(height: 12.h),

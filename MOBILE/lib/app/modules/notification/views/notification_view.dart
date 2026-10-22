@@ -147,9 +147,48 @@ class NotificationView extends GetView<NotificationController> {
       child: AnimatedOpacity(
         duration: const Duration(milliseconds: 200),
         opacity: opacity,
-        child: card,
+        child: controller.actionOf(notification.id) == null
+            ? card
+            : Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [card, _buildAnswer(notification)]),
       ),
     );
+  }
+
+  /// The answer row under a friend / group request: buttons while pending, the outcome afterwards.
+  Widget _buildAnswer(NotificationItem n) {
+    return Obx(() {
+      final state = controller.actionStates[n.id];
+      final friend = controller.actionOf(n.id) == 'friend_request';
+      if (state == null) return const SizedBox.shrink();
+      if (state != 'pending') {
+        return Padding(
+          padding: EdgeInsets.only(top: 6.h, left: 4.w),
+          child: Text(
+            state == 'accepted' ? (friend ? 'Đã là bạn bè' : 'Đã duyệt vào nhóm') : (friend ? 'Lời mời không còn' : 'Yêu cầu đã được xử lý'),
+            style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w600, color: state == 'accepted' ? AppColors.success : AppColors.textSecondary),
+          ),
+        );
+      }
+      final busy = controller.answering.contains(n.id);
+      return Padding(
+        padding: EdgeInsets.only(top: 8.h),
+        child: Row(children: [
+          Expanded(
+            child: FilledButton(
+              onPressed: busy ? null : () => controller.answer(n, true),
+              child: Text(friend ? 'Đồng ý' : 'Duyệt'),
+            ),
+          ),
+          SizedBox(width: 10.w),
+          Expanded(
+            child: OutlinedButton(
+              onPressed: busy ? null : () => controller.answer(n, false),
+              child: const Text('Từ chối'),
+            ),
+          ),
+        ]),
+      );
+    });
   }
 
   Widget _buildFollowCard(NotificationItem notification) {

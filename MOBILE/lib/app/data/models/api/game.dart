@@ -260,7 +260,7 @@ class ShopItem {
 
 class AppNotification {
   AppNotification({required this.id, required this.kind, required this.title, this.body = '', this.image = '',
-      this.data = const {}, this.read = false, required this.createdAt});
+      this.data = const {}, this.read = false, this.actionState, required this.createdAt});
 
   final int id;
   final String kind;
@@ -269,12 +269,18 @@ class AppNotification {
   final String image;
   final Map<String, dynamic> data;
   final bool read;
+
+  /// a friend / group request answered right from the notification: pending · accepted · gone (declined, cancelled)
+  final String? actionState;
   final DateTime createdAt;
 
   String? get route => data['route'] as String?;
 
-  AppNotification copyWith({bool? read}) =>
-      AppNotification(id: id, kind: kind, title: title, body: body, image: image, data: data, read: read ?? this.read, createdAt: createdAt);
+  /// friend_request | group_request | null
+  String? get action => data['action'] as String?;
+
+  AppNotification copyWith({bool? read, String? actionState}) => AppNotification(id: id, kind: kind, title: title, body: body,
+      image: image, data: data, read: read ?? this.read, actionState: actionState ?? this.actionState, createdAt: createdAt);
 
   factory AppNotification.fromJson(Map<String, dynamic> j) => AppNotification(
         id: asInt(j['id']),
@@ -284,6 +290,7 @@ class AppNotification {
         image: brandAsset(asString(j['image'])),
         data: asMap(j['data']),
         read: j['read'] == true,
+        actionState: j['action_state'] as String?,
         createdAt: parseDate(j['created_at']) ?? DateTime.now(),
       );
 }

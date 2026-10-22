@@ -52,6 +52,8 @@ abstract class Routes {
   static const messages = _Paths.messages;
   static const directChat = _Paths.directChat;
   static const poiMap = _Paths.poiMap;
+  static const friends = _Paths.friends;
+  static const savedPosts = _Paths.savedPosts;
 }
 
 abstract class _Paths {
@@ -106,4 +108,6 @@ abstract class _Paths {
   static const messages = '/messages';
   static const directChat = '/messages/chat';
   static const poiMap = '/map';
+  static const friends = '/friends';
+  static const savedPosts = '/saved-posts';
 }

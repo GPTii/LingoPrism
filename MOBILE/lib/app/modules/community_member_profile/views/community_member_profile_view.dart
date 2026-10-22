@@ -6,6 +6,8 @@ import '../../profile/controllers/profile_controller.dart';
 import '../../profile/views/profile_view.dart';
 import '../controllers/community_member_profile_controller.dart';
 import '../../messages/messages_module.dart';
+import '../../social/social_module.dart';
+import '../../../data/models/api/social.dart';
 import 'package:lingoprism/app/core/theme/app_colors.dart';
 import 'package:lingoprism/app/core/navigation/back.dart';
 
@@ -73,6 +75,52 @@ class CommunityMemberProfileView
                 showSettingsButton: false,
                 isFollowLoading: isFollowLoading,
               ),
+              SizedBox(height: 12.h),
+              Row(children: [
+                Expanded(
+                  child: Text(
+                    [if (controller.publicId.value.isNotEmpty) 'ID ${controller.publicId.value}', '${controller.friends.value} bạn bè'].join('  ·  '),
+                    style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
+                  ),
+                ),
+                if (showFollowButton && controller.friendStatus.value != FriendStatus.incoming)
+                  FriendButton(
+                    userId: controller.userId,
+                    name: summary.displayName,
+                    status: controller.friendStatus.value,
+                    requestId: controller.friendRequestId.value,
+                    onChanged: (_) => controller.load(),
+                  ),
+              ]),
+              if (showFollowButton && controller.friendStatus.value == FriendStatus.incoming) ...[
+                SizedBox(height: 12.h),
+                Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.all(14.w),
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(16.r),
+                    border: Border.all(color: AppColors.primaryTint),
+                  ),
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text('${summary.displayName} muốn kết bạn với bạn',
+                        style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+                    if (controller.friendMessage.value.isNotEmpty)
+                      Padding(
+                        padding: EdgeInsets.only(top: 4.h),
+                        child: Text('“${controller.friendMessage.value}”', style: TextStyle(fontSize: 13.sp, color: AppColors.textPrimary)),
+                      ),
+                    SizedBox(height: 10.h),
+                    FriendButton(
+                      userId: controller.userId,
+                      name: summary.displayName,
+                      status: FriendStatus.incoming,
+                      requestId: controller.friendRequestId.value,
+                      onChanged: (_) => controller.load(),
+                    ),
+                  ]),
+                ),
+              ],
               if (controller.canMessage.value) ...[
                 SizedBox(height: 12.h),
                 SizedBox(

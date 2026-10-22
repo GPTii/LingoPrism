@@ -10,6 +10,7 @@ import '../modules/literacy/literacy_module.dart';
 import '../modules/sentence_practice/sentence_practice_module.dart';
 import '../modules/poi_map/poi_map_module.dart';
 import '../modules/messages/messages_module.dart';
+import '../modules/social/social_module.dart';
 import '../modules/support_chat/support_chat_module.dart';
 import '../modules/splash/bindings/splash_binding.dart';
 import '../modules/splash/views/splash_view.dart';
@@ -259,5 +260,7 @@ class AppPages {
     GetPage(name: _Paths.messages, page: () => const MessagesView(), binding: BindingsBuilder(() => Get.lazyPut(() => MessagesController()))),
     GetPage(name: _Paths.directChat, page: () => const DirectChatView(), binding: BindingsBuilder(() => Get.lazyPut(() => DirectChatController()))),
     GetPage(name: _Paths.poiMap, page: () => const PoiMapView(), binding: BindingsBuilder(() => Get.lazyPut(() => PoiMapController()))),
+    GetPage(name: _Paths.friends, page: () => const FriendsView(), binding: BindingsBuilder(() => Get.lazyPut(() => FriendsController()))),
+    GetPage(name: _Paths.savedPosts, page: () => const SavedPostsView(), binding: BindingsBuilder(() => Get.lazyPut(() => SavedPostsController()))),
   ];
 }

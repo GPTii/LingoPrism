@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/network/api_client.dart';
+import '../../../data/models/api/social.dart';
 import '../../../data/repositories/repositories.dart';
 import '../../../data/services/auth_service.dart';
 import '../../../routes/app_pages.dart';
@@ -47,6 +48,11 @@ class CommunityMemberProfileController extends GetxController {
   final RxBool isFollowLoading = false.obs;
   final RxBool showFollowButton = true.obs;
   final RxBool isLoading = false.obs;
+  final RxString publicId = ''.obs;
+  final Rx<FriendStatus> friendStatus = FriendStatus.none.obs;
+  final RxnInt friendRequestId = RxnInt();
+  final RxString friendMessage = ''.obs;
+  final RxInt friends = 0.obs;
 
   @override
   void onInit() {
@@ -86,6 +92,11 @@ class CommunityMemberProfileController extends GetxController {
       recentPosts.assignAll(p.recentPosts.map((r) => '${r['image']}'));
       isFollowing.value = p.isFollowing;
       canMessage.value = p.canMessage;
+      publicId.value = p.author.publicId;
+      friendStatus.value = p.friendStatus;
+      friendRequestId.value = p.friendRequestId;
+      friendMessage.value = p.friendMessage;
+      friends.value = p.friends;
       blocked.value = p.blocked;
       showFollowButton.value = userId != AuthService.to.userId && !p.blocked;
     } catch (e) {

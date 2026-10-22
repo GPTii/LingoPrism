@@ -652,10 +652,18 @@ class _ActionRow extends StatelessWidget {
           ),
           Obx(
             () => _StatButton(
-              icon: post.isVocabularyExpanded.value ? Icons.bookmark : Icons.bookmark_border,
-              color: post.isVocabularyExpanded.value ? const Color(0xFFFFA800) : AppColors.textSecondary,
-              label: '${post.bookmarks.value}',
+              icon: Icons.translate_rounded,
+              color: post.isVocabularyExpanded.value ? AppColors.primary : AppColors.textSecondary,
+              label: 'Từ vựng',
               onTap: () => controller.showVocabulary(post),
+            ),
+          ),
+          Obx(
+            () => _StatButton(
+              icon: post.isSaved.value ? Icons.bookmark : Icons.bookmark_border,
+              color: post.isSaved.value ? const Color(0xFFFFA800) : AppColors.textSecondary,
+              label: post.isSaved.value ? 'Đã lưu' : 'Lưu',
+              onTap: () => controller.toggleSave(post),
             ),
           ),
         ],
@@ -711,7 +719,7 @@ class _CommentsSection extends StatelessWidget {
             itemBuilder: (context, index) {
               final comment = commentMessages[index];
               return RepaintBoundary(
-                child: _CommentItem(comment: comment),
+                child: _CommentItem(post: post, comment: comment),
               );
             },
           );
@@ -1246,8 +1254,9 @@ void _showTopicPicker(
 }
 
 class _CommentItem extends StatelessWidget {
-  const _CommentItem({required this.comment});
+  const _CommentItem({required this.post, required this.comment});
 
+  final CommunityPost post;
   final CommunityPostComment comment;
 
   @override
@@ -1310,11 +1319,14 @@ class _CommentItem extends StatelessWidget {
                   height: 18.w,
                   child: const CircularProgressIndicator(strokeWidth: 2.0),
                 )
-              : Icon(
-                  Icons.favorite_border,
-                  color: AppColors.textSecondary,
-                  size: 20.sp,
-                ),
+              : comment.canDelete
+                  ? IconButton(
+                      tooltip: 'Xoá bình luận',
+                      visualDensity: VisualDensity.compact,
+                      onPressed: () => Get.find<CommunityController>().deleteComment(post, comment),
+                      icon: Icon(Icons.delete_outline_rounded, color: AppColors.textSecondary, size: 20.sp),
+                    )
+                  : const SizedBox.shrink(),
         ],
       ),
     );

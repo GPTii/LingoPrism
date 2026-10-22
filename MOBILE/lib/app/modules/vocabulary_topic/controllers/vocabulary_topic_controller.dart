@@ -166,7 +166,7 @@ class VocabularyTopicController extends GetxController {
                           trailing: const Icon(Icons.add_circle_outline),
                           onTap: () async {
                             try {
-                              await VocabRepository.addWord(c.id, topic: topic.id);
+                              await VocabRepository.addToTopic(topic.id, c.id);
                               goBack();
                               await load();
                             } catch (e) {

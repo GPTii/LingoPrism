@@ -21,6 +21,8 @@ class DeepLink {
         final post = await CommunityRepository.post(id(r'/community/posts/(\d+)')!);
         final community = Get.isRegistered<CommunityController>() ? CommunityController.to : Get.put(CommunityController());
         Get.toNamed(Routes.communityDetail, arguments: CommunityDetailArguments(post: community.toPost(post)));
+      } else if (route.startsWith('/friends')) {
+        Get.toNamed(Routes.friends, arguments: route.contains('tab=incoming') ? 1 : 0);
       } else if (route.startsWith('/community/users/')) {
         CommunityMemberProfileArguments.open(id(r'/community/users/(\d+)')!);
       } else if (route.startsWith('/community')) {

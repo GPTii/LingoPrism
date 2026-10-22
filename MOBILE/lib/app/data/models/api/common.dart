@@ -22,18 +22,22 @@ List<Map<String, dynamic>> asMapList(dynamic v) =>
     v is List ? v.map((e) => Map<String, dynamic>.from(e as Map)).toList() : <Map<String, dynamic>>[];
 
 class Author {
-  Author({required this.id, required this.displayName, this.avatar});
+  Author({required this.id, required this.displayName, this.avatar, this.publicId = ''});
 
   final int id;
   final String displayName;
   final String? avatar;
+
+  /// the 8-digit ID people find each other by
+  final String publicId;
 
   static const String defaultAvatar = 'assets/brand/avatar/avatar_1.png';
 
   String get avatarOrDefault => (avatar == null || avatar!.isEmpty) ? defaultAvatar : avatar!;
 
   factory Author.fromJson(Map<String, dynamic> j) =>
-      Author(id: asInt(j['id']), displayName: asString(j['display_name'], 'Người học LingoPrism'), avatar: _brandOrNull(j['avatar'] as String?));
+      Author(id: asInt(j['id']), displayName: asString(j['display_name'], 'Người học LingoPrism'), avatar: _brandOrNull(j['avatar'] as String?),
+          publicId: asString(j['public_id']));
 }
 
 String? _brandOrNull(String? path) => path == null ? null : brandAsset(path);

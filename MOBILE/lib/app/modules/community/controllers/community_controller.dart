@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/network/api_client.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../../data/models/api/social.dart';
 import '../../../data/models/api/vocab.dart';
 import '../../../data/repositories/repositories.dart';
@@ -301,6 +302,7 @@ class CommunityPost {
     required int comments,
     required int bookmarks,
     bool isLiked = false,
+    bool isSaved = false,
     int initialVocabularyIndex = 0,
     bool initiallySelected = false,
     List<CommunityPostComment>? initialComments,
@@ -327,6 +329,7 @@ class CommunityPost {
         comments = (initialComments?.length ?? comments).obs,
         bookmarks = bookmarks.obs,
         isLiked = isLiked.obs,
+        isSaved = isSaved.obs,
         // real comments only: never invent placeholder ones
         commentMessages = List<CommunityPostComment>.from(initialComments ?? const <CommunityPostComment>[]).obs,
         isCommentsExpanded = false.obs,
@@ -354,6 +357,9 @@ class CommunityPost {
   final RxInt comments;
   final RxInt bookmarks;
   final RxBool isLiked;
+
+  /// in my "Bài đã lưu"
+  final RxBool isSaved;
   final RxList<CommunityPostComment> commentMessages;
   final RxBool isCommentsExpanded;
   final RxBool isVocabularyExpanded;
@@ -391,6 +397,7 @@ class CommunityPostComment {
     required this.content,
     required this.createdAt,
     this.isPending = false,
+    this.canDelete = false,
   });
 
   final String id;
@@ -400,6 +407,9 @@ class CommunityPostComment {
   final String content;
   final DateTime createdAt;
   final bool isPending;
+
+  /// I wrote it, or it is on my post
+  final bool canDelete;
 
   CommunityPostComment copyWith({
     String? id,
@@ -418,6 +428,7 @@ class CommunityPostComment {
       content: content ?? this.content,
       createdAt: createdAt ?? this.createdAt,
       isPending: isPending ?? this.isPending,
+      canDelete: canDelete,
     );
   }
 }
@@ -504,6 +515,7 @@ class CommunityController extends GetxController {
       comments: p.commentCount,
       bookmarks: p.saveCount,
       isLiked: p.liked,
+      isSaved: p.saved,
       initialComments: const [],
       canFollowAuthor: p.author.id != myId,
     )..comments.value = p.commentCount;
@@ -625,6 +637,37 @@ class CommunityController extends GetxController {
 
   void showVocabulary(CommunityPost post) => post.isVocabularyExpanded.toggle();
 
+  /// Keep the post in "Bài đã lưu" (or take it out).
+  Future<void> toggleSave(CommunityPost post) async {
+    final next = !post.isSaved.value;
+    post.isSaved.value = next;
+    try {
+      await CommunityRepository.bookmark(int.parse(post.id), next);
+      Get.snackbar(next ? 'Đã lưu bài viết' : 'Đã bỏ lưu', next ? 'Xem lại trong Hồ sơ › Bài đã lưu.' : 'Bài viết không còn trong Bài đã lưu.',
+          snackPosition: SnackPosition.BOTTOM);
+    } catch (e) {
+      post.isSaved.value = !next;
+      Get.snackbar('Lỗi', ApiClient.toApiException(e).message, snackPosition: SnackPosition.BOTTOM);
+    }
+  }
+
+  Future<void> deleteComment(CommunityPost post, CommunityPostComment comment) async {
+    final ok = await Get.dialog<bool>(AlertDialog(
+      title: const Text('Xoá bình luận này?'),
+      actions: [
+        TextButton(onPressed: () => goBack(result: false), child: const Text('Huỷ')),
+        TextButton(onPressed: () => goBack(result: true), child: Text('Xoá', style: TextStyle(color: AppColors.error))),
+      ],
+    ));
+    if (ok != true) return;
+    try {
+      await CommunityRepository.deleteComment(int.parse(post.id), int.parse(comment.id));
+      await refreshCommentsForPost(post);
+    } catch (e) {
+      Get.snackbar('Lỗi', ApiClient.toApiException(e).message, snackPosition: SnackPosition.BOTTOM);
+    }
+  }
+
   Future<void> refreshCommentsForPost(CommunityPost post) async {
     try {
       final list = await CommunityRepository.comments(int.parse(post.id));
@@ -635,6 +678,7 @@ class CommunityController extends GetxController {
             avatarUrl: c.author.avatarOrDefault,
             content: c.kind == 'sticker' ? (stickerAssets[c.sticker] ?? c.sticker) : c.content,
             createdAt: c.createdAt,
+            canDelete: c.canDelete,
           )));
       post.comments.value = list.length;
     } catch (_) {}
@@ -679,7 +723,12 @@ class CommunityController extends GetxController {
     if (wordId == null) return;
     try {
       final topic = _topicsByName[vocabulary.topic.value ?? ''];
-      await VocabRepository.addWord(wordId, source: 'community', topic: topic?.isSystem == false ? topic!.id : null, sourceRef: post.id);
+      if (topic != null && !topic.isSystem) {
+        // my own topic: the word joins the topic even if it was already in my library
+        await VocabRepository.addToTopic(topic.id, wordId);
+      } else {
+        await VocabRepository.addWord(wordId, source: 'community', sourceRef: post.id);
+      }
       post.bookmarks.value++;
       GameService.to.refreshLibrary();
       if (Get.isRegistered<ReviewController>()) Get.find<ReviewController>().loadCategories();

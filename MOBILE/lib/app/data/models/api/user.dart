@@ -22,6 +22,7 @@ class UserGoal {
 class AppUser {
   AppUser({
     required this.id,
+    this.publicId = '',
     required this.email,
     required this.displayName,
     this.avatar,
@@ -44,6 +45,9 @@ class AppUser {
   });
 
   final int id;
+
+  /// 8 digits, "ID của tôi" – friends find each other by it
+  final String publicId;
   final String email;
   final String displayName;
   final String? avatar;
@@ -89,6 +93,7 @@ class AppUser {
 
   factory AppUser.fromJson(Map<String, dynamic> j) => AppUser(
         id: asInt(j['id']),
+        publicId: asString(j['public_id']),
         email: asString(j['email']),
         displayName: asString(j['display_name']),
         avatar: _brandOrNull(j['avatar'] as String?),
@@ -111,6 +116,7 @@ class AppUser {
       );
 
   Map<String, dynamic> toJson() => {
+        'public_id': publicId,
         'id': id,
         'email': email,
         'display_name': displayName,

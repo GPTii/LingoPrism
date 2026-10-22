@@ -68,6 +68,10 @@ class VocabRepository {
 
   static Future<void> deleteTopic(int id) => _api.delete('/topics/$id/');
 
+  /// my own topic: put a word in it (also saved to my library) / take it out (it stays in my library)
+  static Future<void> addToTopic(int topicId, int wordId) => _api.post('/topics/$topicId/words/$wordId/');
+  static Future<void> removeFromTopic(int topicId, int wordId) => _api.delete('/topics/$topicId/words/$wordId/');
+
   static Future<List<WordCard>> search(String term) async =>
       ApiClient.results(await _api.get('/words/', query: {'search': term, 'page_size': 50})).map(WordCard.fromJson).toList();
 
@@ -197,10 +201,39 @@ class NotificationRepository {
 }
 
 class CommunityRepository {
-  static Future<List<Post>> feed({int? userId, bool following = false, int page = 1}) async => ApiClient.results(
-          await _api.get('/posts/', query: {'user': userId, 'following': following ? 1 : null, 'page': page}))
+  static Future<List<Post>> feed({int? userId, bool following = false, bool saved = false, int page = 1}) async => ApiClient.results(
+          await _api.get('/posts/', query: {'user': userId, 'following': following ? 1 : null, 'saved': saved ? 1 : null, 'page': page}))
       .map(Post.fromJson)
       .toList();
+
+  /// keep a post in "Bài đã lưu" / take it out
+  static Future<void> bookmark(int id, bool save) => save ? _api.post('/posts/$id/bookmark/') : _api.delete('/posts/$id/bookmark/');
+
+  /// the comment's writer or the post's author
+  static Future<void> deleteComment(int postId, int commentId) => _api.delete('/posts/$postId/comments/$commentId/');
+
+  // ---- friends
+
+  /// by the 8-digit ID (exact) or by name (2+ letters)
+  static Future<List<Person>> search(String q) async =>
+      asMapList(await _api.get('/community/users/search/', query: {'q': q})).map(Person.fromJson).toList();
+  static Future<List<Person>> friends() async =>
+      asMapList(await _api.get('/community/users/friends/')).map(Person.fromJson).toList();
+
+  /// incoming: waiting for my answer · outgoing: the ones I sent
+  static Future<List<FriendRequestItem>> friendRequests({bool incoming = true}) async => asMapList(
+          await _api.get('/community/users/friend-requests/', query: {'box': incoming ? 'incoming' : 'outgoing'}))
+      .map(FriendRequestItem.fromJson)
+      .toList();
+
+  /// send a request with a hello – or accept theirs if they already asked
+  static Future<FriendStatus> addFriend(int userId, {String message = ''}) async =>
+      friendStatusFrom(asMap(await _api.post('/community/users/$userId/friend/', data: {'message': message}))['friend_status']);
+
+  /// cancel my request, decline theirs, or unfriend
+  static Future<void> removeFriend(int userId) => _api.delete('/community/users/$userId/friend/');
+  static Future<FriendStatus> answerFriend(int requestId, bool accept) async => friendStatusFrom(
+      asMap(await _api.post('/community/users/friend-requests/$requestId/${accept ? 'accept' : 'decline'}/'))['friend_status']);
 
   static Future<Post> post(int id) async => Post.fromJson(asMap(await _api.get('/posts/$id/')));
 

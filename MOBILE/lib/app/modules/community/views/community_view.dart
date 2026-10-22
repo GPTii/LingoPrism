@@ -1,3 +1,4 @@
+import 'package:lingoprism/app/core/widgets/app_icon.dart';
 import 'dart:convert';
 import 'dart:io';
 
@@ -61,6 +62,12 @@ class CommunityView extends GetView<CommunityController> {
                 SizedBox(height: 12.h),
                 Row(children: [
                   Expanded(child: _buildTabBar()),
+                  if (AuthService.to.currentUser?.isKid != true)
+                    IconButton(
+                      tooltip: 'Bạn bè',
+                      onPressed: () => Get.toNamed(Routes.friends),
+                      icon: AppIcon('community', size: 28.w),
+                    ),
                   if (AuthService.to.currentUser?.isKid != true)
                     IconButton(
                       tooltip: 'Tin nhắn',
@@ -1205,14 +1212,24 @@ class _FeedCard extends StatelessWidget {
         }),
         Obx(() {
           final isVocabulary = post.isVocabularyExpanded.value;
-          final iconColor =
-              isVocabulary ? const Color(0xFFFFBE3B) : AppColors.textSecondary;
+          final iconColor = isVocabulary ? AppColors.primary : AppColors.textSecondary;
           return _ActionItem(
-            icon: isVocabulary ? Icons.bookmark : Icons.bookmark_border,
-            label: post.bookmarks.value.toString(),
+            icon: Icons.translate_rounded,
+            label: 'Từ vựng',
             color: iconColor,
             labelColor: iconColor,
             onTap: () => communityController.showVocabulary(post),
+          );
+        }),
+        Obx(() {
+          final saved = post.isSaved.value;
+          final iconColor = saved ? const Color(0xFFFFA800) : AppColors.textSecondary;
+          return _ActionItem(
+            icon: saved ? Icons.bookmark : Icons.bookmark_border,
+            label: saved ? 'Đã lưu' : 'Lưu',
+            color: iconColor,
+            labelColor: iconColor,
+            onTap: () => communityController.toggleSave(post),
           );
         }),
       ],

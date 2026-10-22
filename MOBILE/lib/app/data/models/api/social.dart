@@ -12,6 +12,7 @@ class Post {
     this.likeCount = 0,
     this.commentCount = 0,
     this.liked = false,
+    this.saved = false,
     this.saveCount = 0,
     this.words = const [],
     required this.createdAt,
@@ -25,11 +26,14 @@ class Post {
   final int likeCount;
   final int commentCount;
   final bool liked;
+
+  /// in my "Bài đã lưu"
+  final bool saved;
   final int saveCount;
   final List<WordCard> words;
   final DateTime createdAt;
 
-  Post copyWith({bool? liked, int? likeCount, int? commentCount, int? saveCount}) => Post(
+  Post copyWith({bool? liked, bool? saved, int? likeCount, int? commentCount, int? saveCount}) => Post(
         id: id,
         author: author,
         image: image,
@@ -38,6 +42,7 @@ class Post {
         likeCount: likeCount ?? this.likeCount,
         commentCount: commentCount ?? this.commentCount,
         liked: liked ?? this.liked,
+        saved: saved ?? this.saved,
         saveCount: saveCount ?? this.saveCount,
         words: words,
         createdAt: createdAt,
@@ -52,6 +57,7 @@ class Post {
         likeCount: asInt(j['like_count']),
         commentCount: asInt(j['comment_count']),
         liked: j['liked'] == true,
+        saved: j['saved'] == true,
         saveCount: asInt(j['save_count']),
         words: asMapList(j['words']).map(WordCard.fromJson).toList(),
         createdAt: parseDate(j['created_at']) ?? DateTime.now(),
@@ -59,13 +65,16 @@ class Post {
 }
 
 class PostComment {
-  PostComment({required this.id, required this.author, this.kind = 'text', this.content = '', this.sticker = '', required this.createdAt});
+  PostComment({required this.id, required this.author, this.kind = 'text', this.content = '', this.sticker = '', this.canDelete = false, required this.createdAt});
 
   final int id;
   final Author author;
   final String kind; // text | sticker
   final String content;
   final String sticker;
+
+  /// I wrote it, or it is on my post
+  final bool canDelete;
   final DateTime createdAt;
 
   factory PostComment.fromJson(Map<String, dynamic> j) => PostComment(
@@ -74,6 +83,55 @@ class PostComment {
         kind: asString(j['kind'], 'text'),
         content: asString(j['content']),
         sticker: asString(j['sticker']),
+        canDelete: j['can_delete'] == true,
+        createdAt: parseDate(j['created_at']) ?? DateTime.now(),
+      );
+}
+
+/// Where I stand with someone: none · friends · outgoing (I asked) · incoming (they asked).
+enum FriendStatus { none, friends, outgoing, incoming }
+
+FriendStatus friendStatusFrom(dynamic v) =>
+    FriendStatus.values.firstWhere((s) => s.name == v, orElse: () => FriendStatus.none);
+
+/// A learner in a list (search results, friends, requests) and where I stand with them.
+class Person {
+  Person({required this.author, this.bio = '', this.activeLanguage = 'en', this.friendStatus = FriendStatus.none,
+      this.friendRequestId, this.isFollowing = false, this.since});
+
+  final Author author;
+  final String bio;
+  final String activeLanguage;
+  final FriendStatus friendStatus;
+  final int? friendRequestId;
+  final bool isFollowing;
+  final DateTime? since;
+
+  int get id => author.id;
+
+  factory Person.fromJson(Map<String, dynamic> j) => Person(
+        author: Author.fromJson(j),
+        bio: asString(j['bio']),
+        activeLanguage: asString(j['active_language'], 'en'),
+        friendStatus: friendStatusFrom(j['friend_status']),
+        friendRequestId: j['friend_request_id'] == null ? null : asInt(j['friend_request_id']),
+        isFollowing: j['is_following'] == true,
+        since: parseDate(j['since']),
+      );
+}
+
+class FriendRequestItem {
+  FriendRequestItem({required this.id, required this.person, this.message = '', required this.createdAt});
+
+  final int id;
+  final Person person;
+  final String message;
+  final DateTime createdAt;
+
+  factory FriendRequestItem.fromJson(Map<String, dynamic> j) => FriendRequestItem(
+        id: asInt(j['id']),
+        person: Person.fromJson(asMap(j['user'])),
+        message: asString(j['message']),
         createdAt: parseDate(j['created_at']) ?? DateTime.now(),
       );
 }
@@ -168,11 +226,18 @@ class ChatMessage {
 }
 
 class CommunityProfile {
-  CommunityProfile({required this.author, this.bio = '', this.followers = 0, this.following = 0, this.posts = 0,
+  CommunityProfile({required this.author, this.bio = '', this.friendStatus = FriendStatus.none, this.friendRequestId,
+      this.friendMessage = '', this.friends = 0, this.followers = 0, this.following = 0, this.posts = 0,
       this.isFollowing = false, this.canMessage = false, this.blocked = false, this.lifetimeXp = 0, this.streak = 0, this.recentPosts = const [], this.groups = const []});
 
   final Author author;
   final String bio;
+  final FriendStatus friendStatus;
+  final int? friendRequestId;
+
+  /// their hello, when they sent me a request
+  final String friendMessage;
+  final int friends;
   final int followers;
   final int following;
   final int posts;
@@ -189,6 +254,10 @@ class CommunityProfile {
   factory CommunityProfile.fromJson(Map<String, dynamic> j) => CommunityProfile(
         author: Author.fromJson(j),
         bio: asString(j['bio']),
+        friendStatus: friendStatusFrom(j['friend_status']),
+        friendRequestId: j['friend_request_id'] == null ? null : asInt(j['friend_request_id']),
+        friendMessage: asString(j['friend_message']),
+        friends: asInt(j['friends']),
         followers: asInt(j['followers']),
         following: asInt(j['following']),
         posts: asInt(j['posts']),
