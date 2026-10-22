@@ -6,6 +6,7 @@ import '../../../data/repositories/repositories.dart';
 import '../../../data/services/auth_service.dart';
 import '../../../routes/app_pages.dart';
 import '../../profile/controllers/profile_controller.dart';
+import '../../community/views/report_user_sheet.dart';
 
 class CommunityMemberProfileArguments {
   const CommunityMemberProfileArguments({
@@ -115,6 +116,11 @@ class CommunityMemberProfileController extends GetxController {
     } catch (e) {
       Get.snackbar('Lỗi', ApiClient.toApiException(e).message, snackPosition: SnackPosition.BOTTOM);
     }
+  }
+
+  Future<void> report() async {
+    if (userId == 0) return;
+    if (await showReportUserSheet(userId: userId, name: summary.value.displayName, blocked: blocked.value)) await load();
   }
 
   Future<void> toggleFollow() async {

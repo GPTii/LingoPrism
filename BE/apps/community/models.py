@@ -110,6 +110,36 @@ class UserBlock(models.Model):
         unique_together = [("blocker", "blocked")]
 
 
+class UserReport(TimeStampedModel):
+    """A learner reported another learner (harassment in private messages, a fake profile…). When it comes from a
+    conversation, the last messages are copied as evidence at that moment, so deleting the chat later changes nothing.
+    Staff either lock the reported account or dismiss the report."""
+
+    class Reason(models.TextChoices):
+        HARASSMENT = "harassment", "Quấy rối"
+        SPAM = "spam", "Spam / lừa đảo"
+        INAPPROPRIATE = "inappropriate", "Nội dung không phù hợp"
+        IMPERSONATION = "impersonation", "Giả mạo người khác"
+        OTHER = "other", "Khác"
+
+    class Status(models.TextChoices):
+        PENDING = "pending", "Chờ xử lý"
+        RESOLVED = "resolved", "Đã khoá tài khoản"
+        DISMISSED = "dismissed", "Bỏ qua"
+
+    reporter = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="+")
+    reported = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="reports_against")
+    reason = models.CharField(max_length=14, choices=Reason.choices)
+    details = models.CharField(max_length=500, blank=True)
+    thread = models.ForeignKey("chat.DirectThread", null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
+    evidence = models.JSONField(default=list, blank=True)  # [{sender, content, created_at}] at report time
+    status = models.CharField(max_length=9, choices=Status.choices, default=Status.PENDING, db_index=True)
+    handled_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
+
+    class Meta:
+        ordering = ["-created_at"]
+
+
 def blocked_between(a_id: int, b_id: int) -> bool:
     return UserBlock.objects.filter(models.Q(blocker_id=a_id, blocked_id=b_id) | models.Q(blocker_id=b_id, blocked_id=a_id)).exists()
 

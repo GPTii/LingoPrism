@@ -232,6 +232,12 @@ class CommunityRepository {
   static Future<void> block(int userId, bool block) =>
       block ? _api.post('/community/users/$userId/block/') : _api.delete('/community/users/$userId/block/');
 
+  /// Report a learner to the moderators; [thread] attaches that conversation's last messages as evidence.
+  static Future<void> reportUser(int userId,
+          {required String reason, String details = '', bool block = false, int? thread}) =>
+      _api.post('/community/users/$userId/report/',
+          data: {'reason': reason, 'details': details, 'block': block, if (thread != null) 'thread': thread});
+
   static Future<List<StudyGroup>> groups({bool mine = false, String? search}) async => ApiClient.results(
           await _api.get('/groups/', query: {'mine': mine ? 1 : null, 'search': search, 'page_size': 100}))
       .map(StudyGroup.fromJson)

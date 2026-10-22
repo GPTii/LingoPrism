@@ -38,6 +38,7 @@ export default function DashboardPage() {
     { label: 'bài tự luận chờ chấm', value: data.exams.waiting_for_grading, to: '/admin/exams' },
     { label: 'báo lỗi từ vựng', value: data.content.open_error_reports, to: '/admin/language-review' },
     { label: 'bài đăng bị báo cáo', value: data.content.pending_post_reports, to: '/admin/moderation' },
+    { label: 'người dùng bị báo cáo', value: data.content.pending_user_reports, to: '/admin/moderation?tab=users' },
     { label: 'hội thoại hỗ trợ đang mở', value: data.support.open_conversations, to: '/admin/support' },
   ]
   const open = todo.filter((t) => t.value > 0)

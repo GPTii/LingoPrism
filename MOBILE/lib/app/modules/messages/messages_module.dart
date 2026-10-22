@@ -11,6 +11,7 @@ import '../../data/models/api/common.dart';
 import '../../data/services/auth_service.dart';
 import '../../data/services/realtime_service.dart';
 import '../../routes/app_pages.dart';
+import '../community/views/report_user_sheet.dart';
 
 /// Private messages between two learners who follow each other (server: apps.chat, /messages/threads/).
 /// Children's accounts never see this. New messages arrive on the user's /ws/events/ socket (RealtimeService).
@@ -225,6 +226,8 @@ class DirectChatController extends GetxController {
     }
   }
 
+  Future<void> reload() async => thread.value = await MessagesRepository.thread(threadId);
+
   Future<void> older() async {
     if (messages.isEmpty) return;
     final (list, more) = await MessagesRepository.messages(threadId, before: messages.first.id);
@@ -298,6 +301,21 @@ class DirectChatView extends GetView<DirectChatController> {
             Expanded(child: Text(t.other.displayName, overflow: TextOverflow.ellipsis)),
           ]);
         }),
+        actions: [
+          Obx(() {
+            final t = controller.thread.value;
+            if (t == null) return const SizedBox();
+            return IconButton(
+              tooltip: 'Báo cáo',
+              icon: const Icon(Icons.flag_outlined),
+              onPressed: () async {
+                if (await showReportUserSheet(userId: t.other.id, name: t.other.displayName, threadId: t.id)) {
+                  controller.reload();
+                }
+              },
+            );
+          }),
+        ],
       ),
       body: Column(children: [
         Expanded(

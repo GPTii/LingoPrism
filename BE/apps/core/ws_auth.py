@@ -7,13 +7,15 @@ from django.contrib.auth.models import AnonymousUser
 
 @database_sync_to_async
 def _user_from_token(raw_token):
-    from rest_framework_simplejwt.authentication import JWTAuthentication
-    from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
+    from rest_framework.exceptions import AuthenticationFailed
+    from rest_framework_simplejwt.exceptions import TokenError
 
-    auth = JWTAuthentication()
+    from apps.core.authentication import LockAwareJWTAuthentication
+
+    auth = LockAwareJWTAuthentication()
     try:
         return auth.get_user(auth.get_validated_token(raw_token))
-    except (InvalidToken, TokenError):
+    except (AuthenticationFailed, TokenError):
         return AnonymousUser()
 
 

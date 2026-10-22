@@ -7,6 +7,7 @@ import { useAuth } from '../../auth/store'
 import { StreakIcon, XpIcon } from '../../components/brand/Brand'
 import { Facts, PageHeader, Section, UserAvatar } from '../../components/ui'
 import { MessageButton } from './MessagesPage'
+import { ReportUserButton } from './ReportUser'
 
 export default function MemberProfilePage() {
   const { id } = useParams()
@@ -58,6 +59,7 @@ export default function MemberProfilePage() {
             {p.can_message && <MessageButton userId={p.id} />}
             {!p.blocked && <Button size="large" type={p.is_following ? 'default' : 'primary'} onClick={toggle}>{p.is_following ? 'Đang theo dõi' : 'Theo dõi'}</Button>}
             <Button size="large" type="text" danger={!p.blocked} onClick={toggleBlock}>{p.blocked ? 'Bỏ chặn' : 'Chặn'}</Button>
+            <ReportUserButton userId={p.id} name={p.display_name} blocked={p.blocked} onDone={() => profile.refetch()} />
           </span>
         )} />
       <Section>

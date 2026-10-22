@@ -97,3 +97,64 @@ def test_blocking_ends_messages_follows_and_hides_posts(people):
     assert cb.delete(f"/api/v1/community/users/{a.id}/block/").data == {"blocked": False}
     assert len(ca.get("/api/v1/posts/").data["results"]) == 1  # …until unblocked
     assert ca.post(f"/api/v1/community/users/{b.id}/follow/").status_code == 200
+
+
+def test_report_a_learner_with_the_conversation_as_evidence(people):
+    from rest_framework_simplejwt.tokens import RefreshToken
+
+    from apps.community.models import UserBlock, UserReport
+
+    a, b, kid = people
+    follow_both(a, b)
+    ca, cb = client_for(a), client_for(b)
+    thread = ca.post("/api/v1/messages/threads/", {"user": b.id}, format="json").data
+    cb.post(f"/api/v1/messages/threads/{thread['id']}/messages/", {"content": "Gửi mình số tài khoản đi"}, format="json")
+
+    # a thread that is not theirs cannot be attached
+    assert ca.post(f"/api/v1/community/users/{b.id}/report/", {"reason": "spam", "thread": 999999}, format="json").status_code == 404
+    assert ca.post(f"/api/v1/community/users/{b.id}/report/", {"reason": "other", "details": "?"}, format="json").status_code == 400
+
+    r = ca.post(f"/api/v1/community/users/{b.id}/report/", {"reason": "spam", "thread": thread["id"], "block": True}, format="json")
+    assert r.status_code == 201 and r.data["blocked"] is True
+    assert UserBlock.objects.filter(blocker=a, blocked=b).exists()
+    report = UserReport.objects.get()
+    assert [m["content"] for m in report.evidence] == ["Gửi mình số tài khoản đi"]
+    # the evidence stays even if the conversation goes away
+    from apps.chat.models import DirectThread
+    DirectThread.objects.all().delete()
+    report.refresh_from_db()
+    assert report.evidence and report.thread is None
+    assert ca.post(f"/api/v1/community/users/{b.id}/report/", {"reason": "spam"}, format="json").status_code == 400  # once while pending
+
+    # learners cannot see the moderation queue
+    assert ca.get("/api/v1/admin/user-reports/").status_code == 403
+    staff = User.objects.create_user("mod@example.com", "Strong!Pass123", role="staff")
+    cs = client_for(staff)
+    row = cs.get("/api/v1/admin/user-reports/?status=pending").data["results"][0]
+    assert row["reported"] == b.id and row["reports_against"] == 1 and row["evidence"][0]["sender_id"] == b.id
+
+    refresh = str(RefreshToken.for_user(b))
+    real_b = APIClient()
+    real_b.credentials(HTTP_AUTHORIZATION=f"Bearer {RefreshToken.for_user(b).access_token}")
+    assert real_b.get("/api/v1/me/").status_code == 200
+    assert cs.post(f"/api/v1/admin/user-reports/{row['id']}/resolve/", {"lock": True}, format="json").status_code == 200
+    b.refresh_from_db()
+    assert b.status == "locked"
+    assert UserReport.objects.get().status == "resolved"
+    assert a.notifications.filter(title="Báo cáo của bạn đã được xem xét").exists()
+    # a locked account is cut off at once: its access token and refresh token stop working
+    assert real_b.get("/api/v1/me/").status_code == 401
+    assert APIClient().post("/api/v1/auth/refresh/", {"refresh": refresh}, format="json").status_code == 401
+
+
+def test_staff_cannot_be_locked_from_a_report(people):
+    from apps.community.models import UserReport
+
+    a, b, kid = people
+    staff = User.objects.create_user("mod@example.com", "Strong!Pass123", role="staff")
+    report = UserReport.objects.create(reporter=a, reported=staff, reason="other", details="giả làm admin")
+    r = client_for(staff).post(f"/api/v1/admin/user-reports/{report.id}/resolve/", {"lock": True}, format="json")
+    assert r.status_code == 400
+    assert client_for(staff).post(f"/api/v1/admin/user-reports/{report.id}/resolve/", {}, format="json").status_code == 200
+    report.refresh_from_db()
+    assert report.status == "dismissed"

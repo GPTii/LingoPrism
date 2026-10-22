@@ -21,8 +21,8 @@ from apps.chat.services import can_message
 from apps.core.throttles import ActionThrottleMixin
 
 from .models import (
-    Group, GroupMember, Post, PostComment, PostLike, PostReport, PostWord, UserBlock, UserFollow, blocked_between,
-    hidden_user_ids,
+    Group, GroupMember, Post, PostComment, PostLike, PostReport, PostWord, UserBlock, UserFollow, UserReport,
+    blocked_between, hidden_user_ids,
 )
 
 User = get_user_model()
@@ -208,8 +208,29 @@ class PostViewSet(ActionThrottleMixin, mixins.ListModelMixin, mixins.RetrieveMod
 
 # ------------------------------------------------------------------ users / follows
 
+class UserReportSerializer(serializers.ModelSerializer):
+    block = serializers.BooleanField(default=False, write_only=True)
+    thread = serializers.IntegerField(required=False, allow_null=True, write_only=True)
+
+    class Meta:
+        model = UserReport
+        fields = ["id", "reason", "details", "block", "thread", "status", "created_at"]
+        read_only_fields = ["id", "status", "created_at"]
+
+    def validate(self, attrs):
+        if attrs["reason"] == "other" and len(attrs.get("details", "").strip()) < 10:
+            raise serializers.ValidationError('Hãy mô tả chi tiết khi chọn lý do "Khác".')
+        return attrs
+
+
+def block_user(me, target):
+    UserBlock.objects.get_or_create(blocker=me, blocked=target)
+    UserFollow.objects.filter(Q(follower=me, following=target) | Q(follower=target, following=me)).delete()
+
+
 @extend_schema(tags=["community"])
-class CommunityUserViewSet(viewsets.GenericViewSet):
+class CommunityUserViewSet(ActionThrottleMixin, viewsets.GenericViewSet):
+    throttle_scopes = {"report": "report"}
     queryset = User.objects.filter(is_active=True)
     serializer_class = serializers.Serializer
     permission_classes = [permissions.IsAuthenticated, NotKid]
@@ -276,9 +297,36 @@ class CommunityUserViewSet(viewsets.GenericViewSet):
         if request.method == "DELETE":
             UserBlock.objects.filter(blocker=request.user, blocked=target).delete()
             return Response({"blocked": False})
-        UserBlock.objects.get_or_create(blocker=request.user, blocked=target)
-        UserFollow.objects.filter(Q(follower=request.user, following=target) | Q(follower=target, following=request.user)).delete()
+        block_user(request.user, target)
         return Response({"blocked": True})
+
+    @action(detail=True, methods=["post"], serializer_class=UserReportSerializer)
+    def report(self, request, pk=None):
+        """Report a learner to the moderators. With `thread`, the last 30 messages of that conversation are kept as
+        evidence (only a conversation between these two people). `block` also blocks them right away."""
+        from apps.chat.models import DirectThread
+
+        target = self.get_object()
+        if target.id == request.user.id:
+            return Response({"detail": "Bạn không thể báo cáo chính mình.", "errors": {}}, status=400)
+        ser = UserReportSerializer(data=request.data)
+        ser.is_valid(raise_exception=True)
+        data = ser.validated_data
+        if UserReport.objects.filter(reporter=request.user, reported=target, status=UserReport.Status.PENDING).exists():
+            return Response({"detail": "Bạn đã báo cáo người này, đội ngũ kiểm duyệt đang xem xét.", "errors": {}}, status=400)
+        thread, evidence = None, []
+        if data.get("thread"):
+            a, b = sorted([request.user.id, target.id])
+            thread = get_object_or_404(DirectThread, pk=data["thread"], user_a_id=a, user_b_id=b)
+            last = list(thread.messages.select_related("sender").order_by("-created_at", "-id")[:30])
+            evidence = [{"sender": m.sender.display_name, "sender_id": m.sender_id, "content": m.content,
+                         "created_at": m.created_at.isoformat()} for m in reversed(last)]
+        UserReport.objects.create(reporter=request.user, reported=target, reason=data["reason"],
+                                  details=data.get("details", ""), thread=thread, evidence=evidence)
+        if data.get("block"):
+            block_user(request.user, target)
+        return Response({"detail": "Đã gửi báo cáo. Đội ngũ kiểm duyệt sẽ xem xét sớm nhất.",
+                         "blocked": bool(data.get("block"))}, status=201)
 
 
 # ------------------------------------------------------------------ groups
@@ -444,6 +492,55 @@ class AdminPostReportViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
         else:
             report.status, report.handled_by = PostReport.Status.DISMISSED, request.user
             report.save(update_fields=["status", "handled_by"])
+        return Response({"ok": True})
+
+
+class AdminUserReportSerializer(serializers.ModelSerializer):
+    reporter_name = serializers.CharField(source="reporter.display_name", read_only=True)
+    reporter_email = serializers.CharField(source="reporter.email", read_only=True)
+    reported_name = serializers.CharField(source="reported.display_name", read_only=True)
+    reported_email = serializers.CharField(source="reported.email", read_only=True)
+    reported_status = serializers.CharField(source="reported.status", read_only=True)
+    reports_against = serializers.SerializerMethodField()
+
+    class Meta:
+        model = UserReport
+        fields = ["id", "reporter", "reporter_name", "reporter_email", "reported", "reported_name", "reported_email",
+                  "reported_status", "reports_against", "reason", "details", "evidence", "status", "created_at"]
+        read_only_fields = fields
+
+    def get_reports_against(self, obj):
+        """How many different people reported this learner: one report can be a quarrel, several is a pattern."""
+        return UserReport.objects.filter(reported_id=obj.reported_id).values("reporter").distinct().count()
+
+
+@extend_schema(tags=["admin-community"])
+class AdminUserReportViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+    serializer_class = AdminUserReportSerializer
+    permission_classes = [IsStaffRole]
+    filterset_fields = ["status", "reason"]
+    queryset = UserReport.objects.select_related("reporter", "reported")
+
+    @action(detail=True, methods=["post"])
+    def resolve(self, request, pk=None):
+        """`lock: true` locks the reported account (it can no longer sign in) and closes every pending report about
+        them; otherwise only this report is dismissed. The reporter is told it was handled, never how."""
+        report = self.get_object()
+        if request.data.get("lock"):
+            target = report.reported
+            if target.role != User.Role.LEARNER:
+                return Response({"detail": "Chỉ khoá được tài khoản học viên từ đây.", "errors": {}}, status=400)
+            target.status = User.Status.LOCKED
+            target.save(update_fields=["status"])
+            handled = list(UserReport.objects.filter(reported=target, status="pending").select_related("reporter"))
+            UserReport.objects.filter(id__in=[r.id for r in handled]).update(status="resolved", handled_by=request.user)
+        else:
+            report.status, report.handled_by = UserReport.Status.DISMISSED, request.user
+            report.save(update_fields=["status", "handled_by"])
+            handled = [report]
+        for r in {r.reporter_id: r for r in handled}.values():
+            notify(r.reporter, Notification.Kind.SYSTEM, "Báo cáo của bạn đã được xem xét",
+                   "Cảm ơn bạn đã giúp cộng đồng LingoPrism an toàn hơn.")
         return Response({"ok": True})
 
 

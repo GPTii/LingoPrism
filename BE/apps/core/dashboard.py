@@ -17,7 +17,7 @@ class DashboardView(APIView):
     @extend_schema(tags=["admin-dashboard"], responses={200: dict})
     def get(self, request):
         from apps.chat.models import SupportConversation
-        from apps.community.models import Post, PostReport
+        from apps.community.models import Post, PostReport, UserReport
         from apps.detection.models import Detection, DetectionItem
         from apps.learning.models import ReviewLog, StudySession
         from apps.quizzes.models import Submission
@@ -55,6 +55,7 @@ class DashboardView(APIView):
                 "translations": list(WordTranslation.objects.values("language_id", "status").annotate(n=Count("id"))),
                 "open_error_reports": ErrorReport.objects.filter(status="open").count(),
                 "pending_post_reports": PostReport.objects.filter(status="pending").count(),
+                "pending_user_reports": UserReport.objects.filter(status="pending").count(),
                 "posts_7d": Post.objects.filter(created_at__gte=now - timedelta(days=7)).count(),
             },
             "exams": {"waiting_for_grading": Submission.objects.filter(status="submitted").count()},

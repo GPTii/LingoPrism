@@ -30,9 +30,10 @@ class CommunityMemberProfileView
               ? const SizedBox()
               : PopupMenuButton<String>(
                   icon: Icon(Icons.more_vert_rounded, color: AppColors.textPrimary),
-                  onSelected: (_) => controller.toggleBlock(),
+                  onSelected: (v) => v == 'report' ? controller.report() : controller.toggleBlock(),
                   itemBuilder: (_) => [
                     PopupMenuItem(value: 'block', child: Text(controller.blocked.value ? 'Bỏ chặn' : 'Chặn người này')),
+                    const PopupMenuItem(value: 'report', child: Text('Báo cáo')),
                   ],
                 )),
         ],

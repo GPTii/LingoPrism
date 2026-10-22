@@ -6,7 +6,7 @@ export interface DashboardData {
   users: { total: number; learners: number; kids: number; new_7d: number; active_today: number; by_language: { active_language: string; zh_script: string; n: number }[] }
   learning: { sessions_per_day: { date: string; count: number }[]; answers_today: number }
   detection: { per_day: { date: string; count: number }[]; top_labels: { label: string; n: number }[] }
-  content: { translations: { language_id: string; status: string; n: number }[]; open_error_reports: number; pending_post_reports: number; posts_7d: number }
+  content: { translations: { language_id: string; status: string; n: number }[]; open_error_reports: number; pending_post_reports: number; pending_user_reports: number; posts_7d: number }
   exams: { waiting_for_grading: number }
   support: { open_conversations: number }
 }
@@ -47,6 +47,25 @@ export interface PostReport {
   reporter_email: string
   reason: string
   details: string
+  status: 'pending' | 'resolved' | 'dismissed'
+  created_at: string
+}
+
+/** A learner reported another learner; `evidence` is the conversation as it was when reported. */
+export interface UserReport {
+  id: number
+  reporter: number
+  reporter_name: string
+  reporter_email: string
+  reported: number
+  reported_name: string
+  reported_email: string
+  reported_status: 'active' | 'locked'
+  /** distinct people who ever reported this learner */
+  reports_against: number
+  reason: string
+  details: string
+  evidence: { sender: string; sender_id: number; content: string; created_at: string }[]
   status: 'pending' | 'resolved' | 'dismissed'
   created_at: string
 }
@@ -130,6 +149,8 @@ export const adminApi = {
   // moderation
   postReports: (status = 'pending') => api.get<Paginated<PostReport>>('/admin/post-reports/', { params: { status } }).then((r) => r.data),
   resolveReport: (id: number, hide: boolean) => api.post(`/admin/post-reports/${id}/resolve/`, { hide_post: hide }),
+  userReports: (status = 'pending') => api.get<Paginated<UserReport>>('/admin/user-reports/', { params: { status } }).then((r) => r.data),
+  resolveUserReport: (id: number, lock: boolean) => api.post(`/admin/user-reports/${id}/resolve/`, { lock }),
   // notifications
   broadcast: (data: { title: string; body: string; role: string; learner_type: string }) => api.post<{ sent: number }>('/admin/broadcast/', data).then((r) => r.data),
   // support

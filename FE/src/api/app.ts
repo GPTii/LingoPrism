@@ -238,6 +238,8 @@ export const communityApi = {
   suggestions: () => api.get<(Author & { active_language: string; follows_me: boolean; lifetime_xp: number })[]>('/community/users/suggestions/').then((r) => r.data),
   block: (userId: number, block: boolean) =>
     block ? api.post(`/community/users/${userId}/block/`) : api.delete(`/community/users/${userId}/block/`),
+  reportUser: (userId: number, data: { reason: string; details: string; block: boolean; thread?: number }) =>
+    api.post<{ detail: string; blocked: boolean }>(`/community/users/${userId}/report/`, data).then((r) => r.data),
   groups: (params?: Record<string, unknown>) => api.get<Paginated<StudyGroup>>('/groups/', { params: { page_size: 100, ...params } }).then((r) => r.data.results),
   createGroup: (data: Partial<StudyGroup>) => api.post<StudyGroup>('/groups/', data).then((r) => r.data),
   join: (id: number, message = '') => api.post<{ status: string }>(`/groups/${id}/join/`, { message }).then((r) => r.data),

@@ -1,14 +1,97 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { App, Badge, Button, Card, Form, Image, Input, List, Select, Space, Table, Tag } from 'antd'
+import { App, Badge, Button, Card, Form, Image, Input, List, Select, Space, Table, Tabs, Tag } from 'antd'
 import { useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import dayjs from 'dayjs'
-import { adminApi, type DetectionLog, type DetectionReport, type PostReport } from '../../api/admin'
+import { adminApi, type DetectionLog, type DetectionReport, type PostReport, type UserReport } from '../../api/admin'
 import { errorMessage } from '../../api/client'
 import { SupportChatBox } from '../learner/SupportPage'
 
-const REASONS: Record<string, string> = { spam: 'Spam', inappropriate: 'Không phù hợp', wrong_vocab: 'Từ vựng sai', harassment: 'Quấy rối', other: 'Khác' }
+const REASONS: Record<string, string> = {
+  spam: 'Spam', inappropriate: 'Không phù hợp', wrong_vocab: 'Từ vựng sai', harassment: 'Quấy rối',
+  impersonation: 'Giả mạo', other: 'Khác',
+}
 
 export function ModerationPage() {
+  const [params, setParams] = useSearchParams()
+  const pendingUsers = useQuery({ queryKey: ['user-reports', 'pending'], queryFn: () => adminApi.userReports('pending') })
+  const pendingPosts = useQuery({ queryKey: ['post-reports', 'pending'], queryFn: () => adminApi.postReports('pending') })
+  return (
+    <Card title="Kiểm duyệt cộng đồng">
+      <Tabs activeKey={params.get('tab') ?? 'posts'} onChange={(tab) => setParams({ tab }, { replace: true })} items={[
+        { key: 'posts', label: <Badge count={pendingPosts.data?.count} offset={[10, 0]} size="small">Bài đăng</Badge>, children: <PostReports /> },
+        { key: 'users', label: <Badge count={pendingUsers.data?.count} offset={[10, 0]} size="small">Người dùng</Badge>, children: <UserReports /> },
+      ]} />
+    </Card>
+  )
+}
+
+/** Reports about a learner, mostly from private messages. The messages shown are the copy taken when the report was
+ * sent; locking the account signs that learner out everywhere and closes all pending reports about them. */
+function UserReports() {
+  const { message, modal } = App.useApp()
+  const queryClient = useQueryClient()
+  const [status, setStatus] = useState('pending')
+  const list = useQuery({ queryKey: ['user-reports', status], queryFn: () => adminApi.userReports(status) })
+  const resolve = (r: UserReport, lock: boolean) => {
+    const run = async () => {
+      try {
+        await adminApi.resolveUserReport(r.id, lock)
+        message.success(lock ? `Đã khoá tài khoản ${r.reported_email}` : 'Đã bỏ qua báo cáo')
+        queryClient.invalidateQueries({ queryKey: ['user-reports'] })
+      } catch (e) {
+        message.error(errorMessage(e))
+      }
+    }
+    if (!lock) return run()
+    modal.confirm({
+      title: `Khoá tài khoản ${r.reported_name}?`,
+      content: 'Người này bị đăng xuất ngay trên mọi thiết bị và không đăng nhập lại được. Có thể mở khoá ở trang Người dùng.',
+      okText: 'Khoá tài khoản', okButtonProps: { danger: true }, cancelText: 'Huỷ', onOk: run,
+    })
+  }
+  return (
+    <div className="flex flex-col gap-3">
+      <Select value={status} onChange={setStatus} style={{ width: 180 }} className="self-end"
+        options={[{ value: 'pending', label: 'Chờ xử lý' }, { value: 'resolved', label: 'Đã khoá tài khoản' }, { value: 'dismissed', label: 'Bỏ qua' }]} />
+      <Table<UserReport> rowKey="id" loading={list.isLoading} dataSource={list.data?.results}
+        expandable={{
+          rowExpandable: (r) => r.evidence.length > 0,
+          expandedRowRender: (r) => (
+            <div className="flex flex-col gap-1.5 max-w-2xl">
+              <div className="text-xs text-slate-500 mb-1">{r.evidence.length} tin nhắn gần nhất lúc báo cáo</div>
+              {r.evidence.map((m, i) => (
+                <div key={i} className={`flex gap-2 ${m.sender_id === r.reported ? '' : 'opacity-70'}`}>
+                  <span className="shrink-0 w-24 text-xs text-slate-500 pt-0.5">{dayjs(m.created_at).format('HH:mm DD/MM')}</span>
+                  <span className={`font-semibold shrink-0 ${m.sender_id === r.reported ? 'text-red-600' : 'text-slate-600'}`}>{m.sender}:</span>
+                  <span className="whitespace-pre-wrap break-words">{m.content}</span>
+                </div>
+              ))}
+            </div>
+          ),
+        }}
+        columns={[
+          { title: 'Bị báo cáo', render: (_, r) => (
+            <div>
+              <div className="font-semibold">{r.reported_name}</div>
+              <div className="text-xs text-slate-500">{r.reported_email}</div>
+              {r.reported_status === 'locked' && <Tag color="red" className="mt-1">Đã khoá</Tag>}
+            </div>
+          ) },
+          { title: 'Lý do', render: (_, r) => <div><Tag color="red">{REASONS[r.reason]}</Tag><div className="text-xs">{r.details}</div></div> },
+          { title: 'Số người báo', dataIndex: 'reports_against', render: (n: number) => (n > 1 ? <Tag color="volcano">{n} người</Tag> : '1') },
+          { title: 'Tin nhắn', render: (_, r) => (r.evidence.length ? `${r.evidence.length} tin` : '—') },
+          { title: 'Người báo', render: (_, r) => <div><div>{r.reporter_name}</div><div className="text-xs text-slate-500">{r.reporter_email}</div></div> },
+          { title: 'Lúc', dataIndex: 'created_at', render: (v) => dayjs(v).format('HH:mm DD/MM') },
+          { title: '', render: (_, r) => r.status === 'pending' && (
+            <Space><Button danger onClick={() => resolve(r, true)}>Khoá tài khoản</Button><Button onClick={() => resolve(r, false)}>Bỏ qua</Button></Space>
+          ) },
+        ]} />
+    </div>
+  )
+}
+
+function PostReports() {
   const queryClient = useQueryClient()
   const [status, setStatus] = useState('pending')
   const list = useQuery({ queryKey: ['post-reports', status], queryFn: () => adminApi.postReports(status) })
@@ -17,8 +100,9 @@ export function ModerationPage() {
     queryClient.invalidateQueries({ queryKey: ['post-reports'] })
   }
   return (
-    <Card title="Kiểm duyệt cộng đồng" extra={<Select value={status} onChange={setStatus} style={{ width: 160 }}
-      options={[{ value: 'pending', label: 'Chờ xử lý' }, { value: 'resolved', label: 'Đã ẩn bài' }, { value: 'dismissed', label: 'Bỏ qua' }]} />}>
+    <div className="flex flex-col gap-3">
+      <Select value={status} onChange={setStatus} style={{ width: 180 }} className="self-end"
+        options={[{ value: 'pending', label: 'Chờ xử lý' }, { value: 'resolved', label: 'Đã ẩn bài' }, { value: 'dismissed', label: 'Bỏ qua' }]} />
       <Table<PostReport> rowKey="id" loading={list.isLoading} dataSource={list.data?.results} columns={[
         { title: 'Ảnh', dataIndex: 'post_image', render: (v) => <Image src={v} width={80} /> },
         { title: 'Bài đăng', render: (_, r) => <div><div>{r.post_caption}</div><div className="text-xs text-slate-400">{r.post_author}</div></div> },
@@ -29,7 +113,7 @@ export function ModerationPage() {
           <Space><Button danger onClick={() => resolve(r.id, true)}>Ẩn bài</Button><Button onClick={() => resolve(r.id, false)}>Bỏ qua</Button></Space>
         ) },
       ]} />
-    </Card>
+    </div>
   )
 }
 

@@ -8,6 +8,7 @@ import { errorMessage } from '../../api/client'
 import { useAuth } from '../../auth/store'
 import { Prismo } from '../../components/brand/Brand'
 import { EmptyState, PageHeader, UserAvatar } from '../../components/ui'
+import { ReportUserButton } from './ReportUser'
 
 const when = (iso: string) => (dayjs(iso).isSame(dayjs(), 'day') ? dayjs(iso).format('HH:mm') : dayjs(iso).format('DD/MM'))
 
@@ -116,6 +117,12 @@ function Conversation({ id }: { id: number }) {
             <span className="truncate font-bold text-slate-800">{t.other.display_name}</span>
           </Link>
         ) : <Skeleton.Input active size="small" />}
+        {t && (
+          <span className="ml-auto">
+            <ReportUserButton compact userId={t.other.id} name={t.other.display_name} threadId={t.id}
+              onDone={() => { queryClient.invalidateQueries({ queryKey: ['dm-threads'] }); thread.refetch() }} />
+          </span>
+        )}
       </div>
       <div className="flex-1 overflow-y-auto flex flex-col gap-2 p-4" aria-live="polite">
         {messages === null && <Skeleton active />}
