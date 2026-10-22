@@ -136,6 +136,10 @@ def can_message(user, other) -> bool:
         return False
     if "kid" in (user.learner_type, other.learner_type):
         return False
+    from apps.community.models import blocked_between
+
+    if blocked_between(user.id, other.id):
+        return False
     return (UserFollow.objects.filter(follower=user, following=other).exists()
             and UserFollow.objects.filter(follower=other, following=user).exists())
 

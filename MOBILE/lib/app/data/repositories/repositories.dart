@@ -228,6 +228,10 @@ class CommunityRepository {
   static Future<void> follow(int userId, bool follow) =>
       follow ? _api.post('/community/users/$userId/follow/') : _api.delete('/community/users/$userId/follow/');
 
+  /// Blocking also ends following both ways; no messages, no posts from each other.
+  static Future<void> block(int userId, bool block) =>
+      block ? _api.post('/community/users/$userId/block/') : _api.delete('/community/users/$userId/block/');
+
   static Future<List<StudyGroup>> groups({bool mine = false, String? search}) async => ApiClient.results(
           await _api.get('/groups/', query: {'mine': mine ? 1 : null, 'search': search, 'page_size': 100}))
       .map(StudyGroup.fromJson)

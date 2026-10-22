@@ -73,3 +73,27 @@ def test_strangers_and_kids_are_kept_out(people):
     outsider = client_for(User.objects.create_user("c@example.com", "Strong!Pass123"))
     assert outsider.get(f"/api/v1/messages/threads/{thread['id']}/messages/").status_code == 404
     assert outsider.post(f"/api/v1/messages/threads/{thread['id']}/messages/", {"content": "hi"}, format="json").status_code == 404
+
+
+def test_blocking_ends_messages_follows_and_hides_posts(people):
+    from apps.community.models import Post
+
+    a, b, kid = people
+    follow_both(a, b)
+    ca, cb = client_for(a), client_for(b)
+    thread = ca.post("/api/v1/messages/threads/", {"user": b.id}, format="json").data
+    Post.objects.create(user=b, image="posts/x.png", caption="Bài của Bình")
+    assert len(ca.get("/api/v1/posts/").data["results"]) == 1
+
+    assert cb.post(f"/api/v1/community/users/{a.id}/block/").data == {"blocked": True}
+    assert not UserFollow.objects.filter(follower=a, following=b).exists()  # both directions gone
+    assert not UserFollow.objects.filter(follower=b, following=a).exists()
+    assert ca.post(f"/api/v1/community/users/{b.id}/follow/").status_code == 400  # cannot follow back
+    url = f"/api/v1/messages/threads/{thread['id']}/messages/"
+    assert ca.post(url, {"content": "Sao vậy?"}, format="json").status_code == 400
+    assert ca.get("/api/v1/posts/").data["results"] == []  # the blocker's posts are gone for the blocked one…
+    assert cb.get(f"/api/v1/community/users/{a.id}/profile/").data["blocked"] is True
+
+    assert cb.delete(f"/api/v1/community/users/{a.id}/block/").data == {"blocked": False}
+    assert len(ca.get("/api/v1/posts/").data["results"]) == 1  # …until unblocked
+    assert ca.post(f"/api/v1/community/users/{b.id}/follow/").status_code == 200

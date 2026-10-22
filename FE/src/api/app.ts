@@ -197,6 +197,8 @@ export interface CommunityProfile extends Author {
   is_following: boolean
   /** both follow each other and neither is a child account */
   can_message: boolean
+  /** I blocked this person */
+  blocked: boolean
   lifetime_xp: number
   streak: number
   recent_posts: { id: number; image: string }[]
@@ -233,6 +235,8 @@ export const communityApi = {
   profile: (userId: number) => api.get<CommunityProfile>(`/community/users/${userId}/profile/`).then((r) => r.data),
   follow: (userId: number, follow: boolean) =>
     follow ? api.post(`/community/users/${userId}/follow/`) : api.delete(`/community/users/${userId}/follow/`),
+  block: (userId: number, block: boolean) =>
+    block ? api.post(`/community/users/${userId}/block/`) : api.delete(`/community/users/${userId}/block/`),
   groups: (params?: Record<string, unknown>) => api.get<Paginated<StudyGroup>>('/groups/', { params: { page_size: 100, ...params } }).then((r) => r.data.results),
   createGroup: (data: Partial<StudyGroup>) => api.post<StudyGroup>('/groups/', data).then((r) => r.data),
   join: (id: number, message = '') => api.post<{ status: string }>(`/groups/${id}/join/`, { message }).then((r) => r.data),

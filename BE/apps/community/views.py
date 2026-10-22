@@ -20,7 +20,10 @@ from apps.vocab.services import card, personal_map, resolve_target, words_for_ta
 from apps.chat.services import can_message
 from apps.core.throttles import ActionThrottleMixin
 
-from .models import Group, GroupMember, Post, PostComment, PostLike, PostReport, PostWord, UserFollow
+from .models import (
+    Group, GroupMember, Post, PostComment, PostLike, PostReport, PostWord, UserBlock, UserFollow, blocked_between,
+    hidden_user_ids,
+)
 
 User = get_user_model()
 
@@ -129,7 +132,7 @@ class PostViewSet(ActionThrottleMixin, mixins.ListModelMixin, mixins.RetrieveMod
             like_count=Count("likes", distinct=True),
             comment_count=Count("comments", filter=Q(comments__hidden=False), distinct=True),
             liked=Exists(PostLike.objects.filter(post=OuterRef("pk"), user=user)),
-        )
+        ).exclude(user_id__in=hidden_user_ids(user.id))
         params = self.request.query_params
         if params.get("user"):
             qs = qs.filter(user_id=params["user"])
@@ -223,6 +226,7 @@ class CommunityUserViewSet(viewsets.GenericViewSet):
             "posts": Post.objects.filter(user=user, status=Post.Status.ACTIVE).count(),
             "is_following": UserFollow.objects.filter(follower=request.user, following=user).exists(),
             "can_message": can_message(request.user, user),
+            "blocked": UserBlock.objects.filter(blocker=request.user, blocked=user).exists(),
             "lifetime_xp": stats.lifetime_xp, "streak": game.current_streak(user),
             "recent_posts": [{"id": p.id, "image": request.build_absolute_uri(p.image.url)} for p in recent],
             "groups": [{"id": m.group_id, "name": m.group.name} for m in
@@ -237,11 +241,27 @@ class CommunityUserViewSet(viewsets.GenericViewSet):
         if request.method == "DELETE":
             UserFollow.objects.filter(follower=request.user, following=target).delete()
             return Response({"following": False})
+        if blocked_between(request.user.id, target.id):
+            return Response({"detail": "Bạn không thể theo dõi người này.", "errors": {}}, status=400)
         _, created = UserFollow.objects.get_or_create(follower=request.user, following=target)
         if created:
             notify(target, Notification.Kind.FOLLOW, f"{request.user.display_name} đã theo dõi bạn",
                    data={"route": f"/community/users/{request.user.id}"})
         return Response({"following": True})
+
+
+    @action(detail=True, methods=["post", "delete"])
+    def block(self, request, pk=None):
+        """Block (POST) or unblock (DELETE) a learner. Blocking also ends following in both directions."""
+        target = self.get_object()
+        if target.id == request.user.id:
+            return Response({"detail": "Bạn không thể chặn chính mình.", "errors": {}}, status=400)
+        if request.method == "DELETE":
+            UserBlock.objects.filter(blocker=request.user, blocked=target).delete()
+            return Response({"blocked": False})
+        UserBlock.objects.get_or_create(blocker=request.user, blocked=target)
+        UserFollow.objects.filter(Q(follower=request.user, following=target) | Q(follower=target, following=request.user)).delete()
+        return Response({"blocked": True})
 
 
 # ------------------------------------------------------------------ groups

@@ -98,6 +98,28 @@ class UserFollow(models.Model):
         unique_together = [("follower", "following")]
 
 
+class UserBlock(models.Model):
+    """`blocker` no longer wants contact with `blocked`: no follow, no private messages, no posts in their feed
+    (both ways)."""
+
+    blocker = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="blocking_set")
+    blocked = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="blocked_by_set")
+    created_at = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        unique_together = [("blocker", "blocked")]
+
+
+def blocked_between(a_id: int, b_id: int) -> bool:
+    return UserBlock.objects.filter(models.Q(blocker_id=a_id, blocked_id=b_id) | models.Q(blocker_id=b_id, blocked_id=a_id)).exists()
+
+
+def hidden_user_ids(user_id: int) -> set[int]:
+    """People whose content `user_id` must not see: the ones they blocked and the ones who blocked them."""
+    rows = UserBlock.objects.filter(models.Q(blocker_id=user_id) | models.Q(blocked_id=user_id)).values_list("blocker_id", "blocked_id")
+    return {b if a == user_id else a for a, b in rows}
+
+
 class Group(TimeStampedModel):
     class Status(models.TextChoices):
         ACTIVE = "active", "Hoạt động"

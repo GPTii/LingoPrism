@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/network/api_client.dart';
@@ -40,6 +41,7 @@ class CommunityMemberProfileController extends GetxController {
   final RxList<String> recentPosts = <String>[].obs;
   final RxBool isFollowing = false.obs;
   final RxBool canMessage = false.obs;
+  final RxBool blocked = false.obs;
   final RxBool isFollowLoading = false.obs;
   final RxBool showFollowButton = true.obs;
   final RxBool isLoading = false.obs;
@@ -82,10 +84,36 @@ class CommunityMemberProfileController extends GetxController {
       recentPosts.assignAll(p.recentPosts.map((r) => '${r['image']}'));
       isFollowing.value = p.isFollowing;
       canMessage.value = p.canMessage;
+      blocked.value = p.blocked;
+      showFollowButton.value = userId != AuthService.to.userId && !p.blocked;
     } catch (e) {
       Get.snackbar('Lỗi', ApiClient.toApiException(e).message, snackPosition: SnackPosition.BOTTOM);
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  Future<void> toggleBlock() async {
+    if (userId == 0) return;
+    final next = !blocked.value;
+    if (next) {
+      final ok = await Get.dialog<bool>(AlertDialog(
+        title: Text('Chặn ${summary.value.displayName}?'),
+        content: const Text('Hai bạn sẽ bỏ theo dõi nhau, không nhắn tin cho nhau được và không thấy bài đăng của nhau. '
+            'Người kia không nhận được thông báo.'),
+        actions: [
+          TextButton(onPressed: () => Get.back(result: false), child: const Text('Huỷ')),
+          TextButton(onPressed: () => Get.back(result: true), child: const Text('Chặn', style: TextStyle(color: Colors.red))),
+        ],
+      ));
+      if (ok != true) return;
+    }
+    try {
+      await CommunityRepository.block(userId, next);
+      Get.snackbar(next ? 'Đã chặn' : 'Đã bỏ chặn', summary.value.displayName, snackPosition: SnackPosition.BOTTOM);
+      await load();
+    } catch (e) {
+      Get.snackbar('Lỗi', ApiClient.toApiException(e).message, snackPosition: SnackPosition.BOTTOM);
     }
   }
 

@@ -11,10 +11,27 @@ import { MessageButton } from './MessagesPage'
 export default function MemberProfilePage() {
   const { id } = useParams()
   const me = useAuth((s) => s.user)
-  const { message } = App.useApp()
+  const { message, modal } = App.useApp()
   const profile = useQuery({ queryKey: ['profile', id], queryFn: () => communityApi.profile(Number(id)) })
   const p = profile.data
   if (!p) return <div className="max-w-3xl mx-auto lp-card p-6"><Skeleton active avatar /></div>
+  const toggleBlock = () => {
+    const run = async () => {
+      try {
+        await communityApi.block(p.id, !p.blocked)
+        message.success(p.blocked ? `Đã bỏ chặn ${p.display_name}` : `Đã chặn ${p.display_name}`)
+        profile.refetch()
+      } catch (e) {
+        message.error(errorMessage(e))
+      }
+    }
+    if (p.blocked) return run()
+    modal.confirm({
+      title: `Chặn ${p.display_name}?`,
+      content: 'Hai bạn sẽ bỏ theo dõi nhau, không nhắn tin cho nhau được và không thấy bài đăng của nhau. Người kia không nhận được thông báo.',
+      okText: 'Chặn', okButtonProps: { danger: true }, cancelText: 'Huỷ', onOk: run,
+    })
+  }
   const toggle = async () => {
     try {
       await communityApi.follow(p.id, !p.is_following)
@@ -39,7 +56,8 @@ export default function MemberProfilePage() {
         actions={p.id !== me?.id && (
           <span className="flex gap-2">
             {p.can_message && <MessageButton userId={p.id} />}
-            <Button size="large" type={p.is_following ? 'default' : 'primary'} onClick={toggle}>{p.is_following ? 'Đang theo dõi' : 'Theo dõi'}</Button>
+            {!p.blocked && <Button size="large" type={p.is_following ? 'default' : 'primary'} onClick={toggle}>{p.is_following ? 'Đang theo dõi' : 'Theo dõi'}</Button>}
+            <Button size="large" type="text" danger={!p.blocked} onClick={toggleBlock}>{p.blocked ? 'Bỏ chặn' : 'Chặn'}</Button>
           </span>
         )} />
       <Section>

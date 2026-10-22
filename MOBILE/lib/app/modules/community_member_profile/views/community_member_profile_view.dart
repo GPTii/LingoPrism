@@ -25,6 +25,17 @@ class CommunityMemberProfileView
               color: AppColors.textPrimary),
         ),
         titleSpacing: 0,
+        actions: [
+          Obx(() => controller.userId == 0 || !controller.showFollowButton.value && !controller.blocked.value
+              ? const SizedBox()
+              : PopupMenuButton<String>(
+                  icon: Icon(Icons.more_vert_rounded, color: AppColors.textPrimary),
+                  onSelected: (_) => controller.toggleBlock(),
+                  itemBuilder: (_) => [
+                    PopupMenuItem(value: 'block', child: Text(controller.blocked.value ? 'Bỏ chặn' : 'Chặn người này')),
+                  ],
+                )),
+        ],
         title: Text(
           'Trang cá nhân',
           style: TextStyle(
