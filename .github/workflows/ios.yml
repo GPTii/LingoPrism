@@ -34,7 +34,7 @@ jobs:
       - name: CocoaPods
         run: cd ios && pod install --repo-update
 
-      - name: Build (no code signing: Sideloadly signs it with your Apple ID)
+      - name: "Build (no code signing: Sideloadly signs it with your Apple ID)"
         run: >
           flutter build ios --release --no-codesign
           --dart-define=API_URL=${{ github.event.inputs.api_url || 'https://lingoprism.id.vn' }}
