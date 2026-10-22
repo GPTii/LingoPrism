@@ -13,13 +13,30 @@ from .services import notify
 
 class NotificationSerializer(serializers.ModelSerializer):
     read = serializers.SerializerMethodField()
+    action_state = serializers.SerializerMethodField()
 
     class Meta:
         model = Notification
-        fields = ["id", "kind", "title", "body", "image", "data", "read", "read_at", "created_at"]
+        fields = ["id", "kind", "title", "body", "image", "data", "read", "read_at", "action_state", "created_at"]
 
     def get_read(self, obj):
         return obj.read_at is not None
+
+    def get_action_state(self, obj):
+        """For a request answered right from the notification (friend / group): pending | accepted | gone, so the
+        buttons show only while there is still something to answer."""
+        action = (obj.data or {}).get("action")
+        if action == "friend_request":
+            from apps.community.models import FriendRequest
+
+            fr = FriendRequest.objects.filter(pk=obj.data.get("request_id")).only("status").first()
+            return fr.status if fr else "gone"
+        if action == "group_request":
+            from apps.community.models import GroupMember
+
+            m = GroupMember.objects.filter(pk=obj.data.get("member_id")).only("status").first()
+            return ("accepted" if m.status == "active" else "pending") if m else "gone"
+        return None
 
 
 class SettingSerializer(serializers.ModelSerializer):

@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.db.models import Count, Exists, F, OuterRef, Q
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from drf_spectacular.utils import extend_schema
 from rest_framework import mixins, permissions, serializers, status, viewsets
 from rest_framework.decorators import action
@@ -21,8 +22,8 @@ from apps.chat.services import can_message
 from apps.core.throttles import ActionThrottleMixin
 
 from .models import (
-    Group, GroupMember, Post, PostComment, PostLike, PostReport, PostWord, UserBlock, UserFollow, UserReport,
-    blocked_between, hidden_user_ids,
+    FriendRequest, Group, GroupMember, Post, PostBookmark, PostComment, PostLike, PostReport, PostWord, UserBlock,
+    UserFollow, UserReport, blocked_between, friend_ids, friendship, hidden_user_ids,
 )
 
 User = get_user_model()
@@ -38,7 +39,41 @@ class NotKid(permissions.BasePermission):
 
 
 def author(request, user):
-    return {"id": user.id, "display_name": user.display_name, "avatar": user.avatar_url(request)}
+    return {"id": user.id, "public_id": user.public_id, "display_name": user.display_name, "avatar": user.avatar_url(request)}
+
+
+def no_kids(request):
+    """Social lists are for adults: NotKid lets reads through, so the read endpoints that show strangers check here."""
+    if getattr(request.user, "learner_type", "adult") == "kid" and not request.user.is_staff_role:
+        raise PermissionDenied(NotKid.message)
+
+
+def friend_status(me, other):
+    """none | friends | outgoing (I asked) | incoming (they asked), and the request behind it."""
+    fr = friendship(me.id, other.id)
+    if not fr:
+        return "none", None
+    if fr.status == FriendRequest.Status.ACCEPTED:
+        return "friends", fr
+    return ("outgoing" if fr.from_user_id == me.id else "incoming"), fr
+
+
+def person(request, user):
+    """A learner in a list (search, friends, requests): who they are and where I stand with them."""
+    me = request.user
+    state, fr = friend_status(me, user)
+    return {**author(request, user), "bio": user.bio, "active_language": user.active_language,
+            "friend_status": state, "friend_request_id": fr.id if fr else None,
+            "is_following": UserFollow.objects.filter(follower=me, following=user).exists()}
+
+
+def accept_friend(request, fr):
+    fr.status, fr.responded_at = FriendRequest.Status.ACCEPTED, timezone.now()
+    fr.save(update_fields=["status", "responded_at"])
+    me = request.user
+    notify(fr.from_user, Notification.Kind.FRIEND_ACCEPT, f"{me.display_name} đã đồng ý kết bạn với bạn",
+           "Giờ hai bạn có thể nhắn tin cho nhau.", data={"route": f"/community/users/{me.id}", "user_id": me.id})
+    return {"friend_status": "friends", "friend_request_id": fr.id}
 
 
 # ------------------------------------------------------------------ posts
@@ -48,13 +83,14 @@ class PostSerializer(serializers.ModelSerializer):
     like_count = serializers.IntegerField(read_only=True, default=0)
     comment_count = serializers.IntegerField(read_only=True, default=0)
     liked = serializers.BooleanField(read_only=True, default=False)
+    saved = serializers.BooleanField(read_only=True, default=False)
     words = serializers.SerializerMethodField()
     word_ids = serializers.ListField(child=serializers.IntegerField(), write_only=True, required=False)
 
     class Meta:
         model = Post
         fields = ["id", "author", "image", "caption", "topic_label", "visibility", "status", "save_count",
-                  "like_count", "comment_count", "liked", "words", "word_ids", "detection", "created_at"]
+                  "like_count", "comment_count", "liked", "saved", "words", "word_ids", "detection", "created_at"]
         read_only_fields = ["id", "author", "status", "save_count", "created_at"]
 
     def get_author(self, obj):
@@ -87,8 +123,14 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PostComment
-        fields = ["id", "author", "kind", "content", "sticker", "created_at"]
+        fields = ["id", "author", "kind", "content", "sticker", "can_delete", "created_at"]
         read_only_fields = ["id", "author", "created_at"]
+
+    can_delete = serializers.SerializerMethodField()
+
+    def get_can_delete(self, obj):
+        me = self.context["request"].user
+        return me.id in (obj.user_id, obj.post.user_id) or me.is_staff_role
 
     def get_author(self, obj):
         return author(self.context["request"], obj.user)
@@ -132,12 +174,15 @@ class PostViewSet(ActionThrottleMixin, mixins.ListModelMixin, mixins.RetrieveMod
             like_count=Count("likes", distinct=True),
             comment_count=Count("comments", filter=Q(comments__hidden=False), distinct=True),
             liked=Exists(PostLike.objects.filter(post=OuterRef("pk"), user=user)),
+            saved=Exists(PostBookmark.objects.filter(post=OuterRef("pk"), user=user)),
         ).exclude(user_id__in=hidden_user_ids(user.id))
         params = self.request.query_params
         if params.get("user"):
             qs = qs.filter(user_id=params["user"])
         if params.get("following") == "1":
             qs = qs.filter(user_id__in=following)
+        if params.get("saved") == "1":  # "Bài đã lưu", newest saved first
+            return qs.filter(bookmarks__user=user).order_by("-bookmarks__created_at")
         return qs.order_by("-created_at")
 
     def perform_create(self, serializer):
@@ -178,6 +223,26 @@ class PostViewSet(ActionThrottleMixin, mixins.ListModelMixin, mixins.RetrieveMod
             notify(post.user, Notification.Kind.COMMENT, f"{request.user.display_name} đã bình luận bài viết của bạn",
                    comment.content[:120], data={"route": f"/community/posts/{post.id}"})
         return Response(CommentSerializer(comment, context={"request": request}).data, status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=["post", "delete"])
+    def bookmark(self, request, pk=None):
+        """Keep the post in "Bài đã lưu" (POST) or take it out (DELETE)."""
+        post = self.get_object()
+        if request.method == "DELETE":
+            PostBookmark.objects.filter(post=post, user=request.user).delete()
+            return Response({"saved": False})
+        PostBookmark.objects.get_or_create(post=post, user=request.user)
+        return Response({"saved": True})
+
+    @action(detail=True, methods=["delete"], url_path=r"comments/(?P<comment_id>\d+)")
+    def delete_comment(self, request, pk=None, comment_id=None):
+        """The comment's writer, the post's author or staff can remove a comment."""
+        post = self.get_object()
+        comment = get_object_or_404(PostComment, pk=comment_id, post=post)
+        if request.user.id not in (comment.user_id, post.user_id) and not request.user.is_staff_role:
+            raise PermissionDenied("Bạn chỉ xoá được bình luận của mình hoặc trên bài của mình.")
+        comment.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=True, methods=["post"], serializer_class=ReportSerializer)
     def report(self, request, pk=None):
@@ -237,11 +302,16 @@ class CommunityUserViewSet(ActionThrottleMixin, viewsets.GenericViewSet):
 
     @action(detail=True, methods=["get"])
     def profile(self, request, pk=None):
+        no_kids(request)
         user = self.get_object()
         stats = game.stats_for(user)
+        state, fr = friend_status(request.user, user)
         recent = Post.objects.filter(user=user, status=Post.Status.ACTIVE).order_by("-created_at")[:12]
         return Response({
             **author(request, user), "bio": user.bio,
+            "friend_status": state, "friend_request_id": fr.id if fr else None,
+            "friend_message": fr.message if fr and state == "incoming" else "",
+            "friends": len(friend_ids(user.id)),
             "followers": UserFollow.objects.filter(following=user).count(),
             "following": UserFollow.objects.filter(follower=user).count(),
             "posts": Post.objects.filter(user=user, status=Post.Status.ACTIVE).count(),
@@ -270,6 +340,79 @@ class CommunityUserViewSet(ActionThrottleMixin, viewsets.GenericViewSet):
                    data={"route": f"/community/users/{request.user.id}"})
         return Response({"following": True})
 
+
+    # ---- finding people, friends
+
+    @action(detail=False, methods=["get"])
+    def search(self, request):
+        """Find a learner by their 8-digit ID (exact) or by name (2+ letters). Adults only, never blocked people."""
+        no_kids(request)
+        q = request.query_params.get("q", "").strip().lstrip("#")
+        if len(q) < 2:
+            return Response([])
+        qs = (User.objects.filter(is_active=True, status=User.Status.ACTIVE, role=User.Role.LEARNER)
+              .exclude(learner_type="kid").exclude(id__in={request.user.id, *hidden_user_ids(request.user.id)}))
+        qs = qs.filter(public_id=q) if q.isdigit() and len(q) == 8 else qs.filter(display_name__icontains=q)
+        return Response([person(request, u) for u in qs.order_by("display_name")[:20]])
+
+    @action(detail=True, methods=["post", "delete"])
+    def friend(self, request, pk=None):
+        """POST: send a friend request with an optional hello (`message`); if they had already asked me, we become
+        friends at once. DELETE: cancel my request, decline theirs, or end the friendship."""
+        me, target = request.user, self.get_object()
+        state, fr = friend_status(me, target)
+        if request.method == "DELETE":
+            if fr:
+                fr.delete()
+            return Response({"friend_status": "none"})
+        if target.id == me.id or target.learner_type == "kid" or target.role != User.Role.LEARNER:
+            return Response({"detail": "Bạn không thể kết bạn với tài khoản này.", "errors": {}}, status=400)
+        if blocked_between(me.id, target.id):
+            return Response({"detail": "Bạn không thể kết bạn với người này.", "errors": {}}, status=400)
+        if state == "incoming":
+            return Response(accept_friend(request, fr))
+        if state == "none":
+            fr = FriendRequest.objects.create(from_user=me, to_user=target, message=str(request.data.get("message", ""))[:200])
+            notify(target, Notification.Kind.FRIEND_REQUEST, f"{me.display_name} muốn kết bạn với bạn", fr.message,
+                   data={"route": "/friends?tab=incoming", "action": "friend_request", "request_id": fr.id, "user_id": me.id})
+            state = "outgoing"
+        return Response({"friend_status": state, "friend_request_id": fr.id})
+
+    @action(detail=False, methods=["get"])
+    def friends(self, request):
+        """My friends, newest first."""
+        no_kids(request)
+        me = request.user
+        rows = (FriendRequest.objects.filter(Q(from_user=me) | Q(to_user=me), status=FriendRequest.Status.ACCEPTED)
+                .select_related("from_user", "to_user").order_by("-responded_at"))
+        hidden = hidden_user_ids(me.id)
+        out = []
+        for fr in rows:
+            other = fr.to_user if fr.from_user_id == me.id else fr.from_user
+            if other.is_active and other.id not in hidden:
+                out.append({**person(request, other), "since": fr.responded_at})
+        return Response(out)
+
+    @action(detail=False, methods=["get"], url_path="friend-requests")
+    def friend_requests(self, request):
+        """`?box=incoming` (default): requests waiting for my answer; `?box=outgoing`: the ones I sent."""
+        no_kids(request)
+        me = request.user
+        incoming = request.query_params.get("box", "incoming") != "outgoing"
+        qs = (FriendRequest.objects.filter(status=FriendRequest.Status.PENDING, **({"to_user": me} if incoming else {"from_user": me}))
+              .select_related("from_user", "to_user"))
+        return Response([{"id": fr.id, "message": fr.message, "created_at": fr.created_at,
+                          "user": person(request, fr.from_user if incoming else fr.to_user)} for fr in qs])
+
+    @action(detail=False, methods=["post"], url_path=r"friend-requests/(?P<req_id>\d+)/(?P<decision>accept|decline)")
+    def answer_friend_request(self, request, req_id=None, decision=None):
+        fr = get_object_or_404(FriendRequest, pk=req_id, to_user=request.user)
+        if fr.status != FriendRequest.Status.PENDING:
+            return Response({"friend_status": "friends", "friend_request_id": fr.id})
+        if decision == "decline":  # the sender is not told; they can ask again later
+            fr.delete()
+            return Response({"friend_status": "none"})
+        return Response(accept_friend(request, fr))
 
     @action(detail=False, methods=["get"])
     def suggestions(self, request):
@@ -420,10 +563,15 @@ class GroupViewSet(ActionThrottleMixin, mixins.ListModelMixin, mixins.RetrieveMo
         m, created = GroupMember.objects.get_or_create(
             group=group, user=request.user,
             defaults={"status": status_value, "request_message": request.data.get("message", "")[:200]})
-        if created and status_value == "pending":
+        if created:
             for leader in group.members.filter(role="leader").select_related("user"):
-                notify(leader.user, Notification.Kind.SYSTEM, f"{request.user.display_name} xin vào nhóm {group.name}",
-                       data={"route": f"/community/groups/{group.id}"})
+                if status_value == "pending":
+                    notify(leader.user, Notification.Kind.GROUP_REQUEST, f"{request.user.display_name} xin vào nhóm {group.name}",
+                           m.request_message, data={"route": f"/community/groups/{group.id}", "action": "group_request",
+                                                    "group_id": group.id, "member_id": m.id, "user_id": request.user.id})
+                else:
+                    notify(leader.user, Notification.Kind.GROUP, f"{request.user.display_name} đã tham gia nhóm {group.name}",
+                           data={"route": f"/community/groups/{group.id}", "user_id": request.user.id})
         return Response({"status": m.status})
 
     @action(detail=True, methods=["post"])
@@ -450,13 +598,19 @@ class GroupViewSet(ActionThrottleMixin, mixins.ListModelMixin, mixins.RetrieveMo
         self._leader(group)
         m = get_object_or_404(GroupMember, pk=member_id, group=group)
         if decision == "approve":
-            m.status = "active"
-            m.save(update_fields=["status"])
-            notify(m.user, Notification.Kind.SYSTEM, f"Bạn đã được duyệt vào nhóm {group.name}",
-                   data={"route": f"/community/groups/{group.id}"})
+            if m.status != "active":
+                m.status = "active"
+                m.save(update_fields=["status"])
+                notify(m.user, Notification.Kind.GROUP, f"Bạn đã được duyệt vào nhóm {group.name}",
+                       data={"route": f"/community/groups/{group.id}"})
         else:
+            if m.role == "leader":
+                return Response({"detail": "Không thể xoá trưởng nhóm.", "errors": {}}, status=400)
+            if decision == "reject" and m.status == "pending":
+                notify(m.user, Notification.Kind.GROUP, f"Yêu cầu vào nhóm {group.name} chưa được duyệt",
+                       "Bạn có thể tìm nhóm khác hoặc xin lại sau.", data={"route": "/community?tab=groups"})
             m.delete()
-        return Response({"ok": True})
+        return Response({"ok": True, "status": "active" if decision == "approve" else "removed"})
 
 
 # ------------------------------------------------------------------ moderation (staff)

@@ -47,6 +47,18 @@ class PostLike(models.Model):
         unique_together = [("post", "user")]
 
 
+class PostBookmark(models.Model):
+    """A post the learner kept to look at again ("Bài đã lưu"); only they see it."""
+
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="bookmarks")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="post_bookmarks")
+    created_at = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        unique_together = [("post", "user")]
+        ordering = ["-created_at"]
+
+
 class PostComment(models.Model):
     class Kind(models.TextChoices):
         TEXT = "text", "Chữ"
@@ -96,6 +108,43 @@ class UserFollow(models.Model):
 
     class Meta:
         unique_together = [("follower", "following")]
+
+
+class FriendRequest(models.Model):
+    """One learner asks another to be friends, with a short hello. Accepted, the two are friends (both ways); a
+    declined or cancelled request is deleted, so it can be sent again later."""
+
+    class Status(models.TextChoices):
+        PENDING = "pending", "Chờ trả lời"
+        ACCEPTED = "accepted", "Đã là bạn bè"
+
+    from_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="friend_requests_sent")
+    to_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="friend_requests_received")
+    message = models.CharField(max_length=200, blank=True)
+    status = models.CharField(max_length=8, choices=Status.choices, default=Status.PENDING, db_index=True)
+    created_at = models.DateTimeField(default=timezone.now)
+    responded_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        unique_together = [("from_user", "to_user")]
+        ordering = ["-created_at"]
+
+
+def friendship(a_id: int, b_id: int):
+    """The request linking two people, whichever of them sent it (or None)."""
+    return FriendRequest.objects.filter(
+        models.Q(from_user_id=a_id, to_user_id=b_id) | models.Q(from_user_id=b_id, to_user_id=a_id)).first()
+
+
+def are_friends(a_id: int, b_id: int) -> bool:
+    fr = friendship(a_id, b_id)
+    return bool(fr and fr.status == FriendRequest.Status.ACCEPTED)
+
+
+def friend_ids(user_id: int) -> set[int]:
+    rows = FriendRequest.objects.filter(models.Q(from_user_id=user_id) | models.Q(to_user_id=user_id),
+                                        status=FriendRequest.Status.ACCEPTED).values_list("from_user_id", "to_user_id")
+    return {b if a == user_id else a for a, b in rows}
 
 
 class UserBlock(models.Model):

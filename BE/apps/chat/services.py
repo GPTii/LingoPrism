@@ -128,7 +128,7 @@ def mark_support_read(user, conv: SupportConversation) -> int:
 # ------------------------------------------------------------------ private messages
 
 def can_message(user, other) -> bool:
-    """Private messages only between two adult learners who follow each other: no stranger can write first, and
+    """Private messages only between two adult learners who are friends or follow each other: no stranger can write first, and
     children's accounts are kept out entirely. Staff use the support chat instead."""
     from apps.community.models import UserFollow
 
@@ -140,8 +140,10 @@ def can_message(user, other) -> bool:
 
     if blocked_between(user.id, other.id):
         return False
-    return (UserFollow.objects.filter(follower=user, following=other).exists()
-            and UserFollow.objects.filter(follower=other, following=user).exists())
+    from apps.community.models import are_friends
+
+    return are_friends(user.id, other.id) or (UserFollow.objects.filter(follower=user, following=other).exists()
+                                               and UserFollow.objects.filter(follower=other, following=user).exists())
 
 
 def thread_with(user, other):

@@ -33,6 +33,17 @@ class UserManager(BaseUserManager):
         return self._create_user(email, password, **extra)
 
 
+def new_public_id() -> str:
+    """An 8-digit number to find someone by ("ID của tôi"), never starting with 0. Not the database id, so
+    accounts cannot be counted or walked through one by one."""
+    import secrets
+
+    while True:
+        code = str(secrets.randbelow(90_000_000) + 10_000_000)
+        if not User.objects.filter(public_id=code).exists():
+            return code
+
+
 class User(AbstractBaseUser, PermissionsMixin, TimeStampedModel):
     class Role(models.TextChoices):
         ADMIN = "admin", "Quản trị viên"
@@ -57,6 +68,7 @@ class User(AbstractBaseUser, PermissionsMixin, TimeStampedModel):
         OTHER = "other", "Khác"
 
     email = models.EmailField(unique=True)
+    public_id = models.CharField(max_length=8, unique=True, editable=False, help_text="ID 8 số để bạn bè tìm nhau")
     display_name = models.CharField(max_length=80, blank=True)
     avatar = models.ImageField(upload_to="avatars/", blank=True, null=True)
     avatar_preset = models.CharField(max_length=120, blank=True, help_text="Ảnh đại diện có sẵn trong app (assets/...)")
@@ -95,6 +107,11 @@ class User(AbstractBaseUser, PermissionsMixin, TimeStampedModel):
 
     def __str__(self):
         return self.email
+
+    def save(self, *args, **kwargs):
+        if not self.public_id:
+            self.public_id = new_public_id()
+        super().save(*args, **kwargs)
 
     def avatar_url(self, request=None) -> str | None:
         if self.avatar:

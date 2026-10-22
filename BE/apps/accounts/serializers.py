@@ -34,12 +34,12 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
-            "id", "email", "display_name", "avatar", "avatar_preset", "bio", "role", "status",
+            "id", "public_id", "email", "display_name", "avatar", "avatar_preset", "bio", "role", "status",
             "learner_type", "learning_languages", "active_language", "zh_script", "show_zhuyin",
             "birth_date", "gender", "purpose", "daily_minutes", "onboarding_completed", "timezone",
             "scales_balance", "gems_balance", "goal", "created_at",
         ]
-        read_only_fields = ["id", "email", "role", "status", "scales_balance", "gems_balance", "created_at"]
+        read_only_fields = ["id", "public_id", "email", "role", "status", "scales_balance", "gems_balance", "created_at"]
 
     def validate_learning_languages(self, value):
         bad = [v for v in value if v not in LANGUAGE_CHOICES]

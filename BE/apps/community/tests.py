@@ -148,3 +148,104 @@ def test_follow_suggestions(users):
     assert ids == [same.id, fan.id]
     assert staff.id not in ids and kid.id not in ids and blocked.id not in ids
     assert client_for(kid).get("/api/v1/community/users/suggestions/").data == []
+
+
+# ---- user IDs, friends, saved posts, answering requests from notifications
+
+def test_every_user_has_a_distinct_8_digit_id(users):
+    a, b, kid = users
+    ids = {a.public_id, b.public_id, kid.public_id}
+    assert len(ids) == 3 and all(len(i) == 8 and i.isdigit() and i[0] != "0" for i in ids)
+    assert client_for(a).get("/api/v1/me/").data["public_id"] == a.public_id
+
+
+def test_find_by_id_or_name_never_finds_children(users):
+    a, b, kid = users
+    ca = client_for(a)
+    found = ca.get("/api/v1/community/users/search/", {"q": b.public_id}).data
+    assert [p["id"] for p in found] == [b.id] and found[0]["friend_status"] == "none"
+    assert [p["id"] for p in ca.get("/api/v1/community/users/search/", {"q": "#" + b.public_id}).data] == [b.id]
+    assert [p["id"] for p in ca.get("/api/v1/community/users/search/", {"q": "Bìn"}).data] == [b.id]
+    assert ca.get("/api/v1/community/users/search/", {"q": kid.public_id}).data == []
+    # a child cannot look for strangers either
+    assert client_for(kid).get("/api/v1/community/users/search/", {"q": "An"}).status_code == 403
+
+
+def test_friend_request_notify_accept_then_message(users):
+    a, b, kid = users
+    ca, cb = client_for(a), client_for(b)
+    res = ca.post(f"/api/v1/community/users/{b.id}/friend/", {"message": "Chào bạn, mình cũng học tiếng Trung"}, format="json")
+    assert res.data["friend_status"] == "outgoing"
+    rid = res.data["friend_request_id"]
+    # b is told, with the hello, and can answer from the notification
+    n = cb.get("/api/v1/notifications/").data["results"][0]
+    assert n["kind"] == "friend_request" and n["body"].startswith("Chào bạn") and n["action_state"] == "pending"
+    assert n["data"]["request_id"] == rid
+    incoming = cb.get("/api/v1/community/users/friend-requests/").data
+    assert [r["id"] for r in incoming] == [rid] and incoming[0]["user"]["id"] == a.id
+    assert [r["id"] for r in ca.get("/api/v1/community/users/friend-requests/", {"box": "outgoing"}).data] == [rid]
+    assert cb.get(f"/api/v1/community/users/{a.id}/profile/").data["friend_status"] == "incoming"
+    # only the person asked can answer
+    assert ca.post(f"/api/v1/community/users/friend-requests/{rid}/accept/").status_code == 404
+    assert cb.post(f"/api/v1/community/users/friend-requests/{rid}/accept/").data["friend_status"] == "friends"
+    assert a.notifications.filter(kind="friend_accept").count() == 1
+    assert cb.get("/api/v1/notifications/").data["results"][0]["action_state"] == "accepted"
+    assert [f["id"] for f in ca.get("/api/v1/community/users/friends/").data] == [b.id]
+    assert ca.get(f"/api/v1/community/users/{b.id}/profile/").data["can_message"] is True  # friends may message
+    # unfriend
+    assert ca.delete(f"/api/v1/community/users/{b.id}/friend/").data["friend_status"] == "none"
+    assert cb.get("/api/v1/community/users/friends/").data == []
+
+
+def test_crossed_requests_make_friends_and_decline_is_silent(users):
+    a, b, kid = users
+    ca, cb = client_for(a), client_for(b)
+    ca.post(f"/api/v1/community/users/{b.id}/friend/")
+    assert cb.post(f"/api/v1/community/users/{a.id}/friend/").data["friend_status"] == "friends"
+    ca.delete(f"/api/v1/community/users/{b.id}/friend/")
+    rid = ca.post(f"/api/v1/community/users/{b.id}/friend/").data["friend_request_id"]
+    assert cb.post(f"/api/v1/community/users/friend-requests/{rid}/decline/").data["friend_status"] == "none"
+    assert not a.notifications.filter(title__contains="từ chối").exists()
+    # never with a child, never after a block
+    assert ca.post(f"/api/v1/community/users/{kid.id}/friend/").status_code == 400
+    cb.post(f"/api/v1/community/users/{a.id}/block/")
+    assert ca.post(f"/api/v1/community/users/{b.id}/friend/").status_code == 400
+
+
+def test_save_posts_and_delete_comments(users):
+    a, b, kid = users
+    ca, cb = client_for(a), client_for(b)
+    pid = ca.post("/api/v1/posts/", {"image": png(), "caption": "Quả táo"}, format="multipart").data["id"]
+    assert cb.post(f"/api/v1/posts/{pid}/bookmark/").data == {"saved": True}
+    saved = cb.get("/api/v1/posts/", {"saved": "1"}).data["results"]
+    assert [p["id"] for p in saved] == [pid] and saved[0]["saved"] is True
+    assert ca.get("/api/v1/posts/", {"saved": "1"}).data["results"] == []  # only mine
+    cb.delete(f"/api/v1/posts/{pid}/bookmark/")
+    assert cb.get("/api/v1/posts/", {"saved": "1"}).data["results"] == []
+    cid = cb.post(f"/api/v1/posts/{pid}/comments/", {"content": "Ngon"}, format="json").data["id"]
+    other = User.objects.create_user("c@example.com", "Strong!Pass123", display_name="Chi")
+    assert client_for(other).delete(f"/api/v1/posts/{pid}/comments/{cid}/").status_code == 403
+    assert cb.get(f"/api/v1/posts/{pid}/comments/").data[0]["can_delete"] is True
+    assert ca.delete(f"/api/v1/posts/{pid}/comments/{cid}/").status_code == 204  # the post's author may
+    assert cb.get(f"/api/v1/posts/{pid}/comments/").data == []
+
+
+def test_group_request_with_intro_answered_from_notification(users):
+    a, b, kid = users
+    ca, cb = client_for(a), client_for(b)
+    gid = ca.post("/api/v1/groups/", {"name": "HSK 3", "require_approval": True}, format="json").data["id"]
+    assert cb.post(f"/api/v1/groups/{gid}/join/", {"message": "Mình học HSK 2 rồi"}, format="json").data["status"] == "pending"
+    n = ca.get("/api/v1/notifications/").data["results"][0]
+    assert n["kind"] == "group_request" and n["body"] == "Mình học HSK 2 rồi" and n["action_state"] == "pending"
+    mid = n["data"]["member_id"]
+    assert cb.post(f"/api/v1/groups/{gid}/members/{mid}/approve/").status_code == 403  # not the leader
+    assert ca.post(f"/api/v1/groups/{gid}/members/{mid}/approve/").data["status"] == "active"
+    assert ca.get("/api/v1/notifications/").data["results"][0]["action_state"] == "accepted"
+    assert b.notifications.filter(kind="group", title__contains="được duyệt").count() == 1
+    # a rejected request is told so, and can be sent again
+    cb.post(f"/api/v1/groups/{gid}/leave/")
+    cb.post(f"/api/v1/groups/{gid}/join/", {"message": "Cho mình vào lại"}, format="json")
+    mid = GroupMember.objects.get(group_id=gid, user=b).id
+    ca.post(f"/api/v1/groups/{gid}/members/{mid}/reject/")
+    assert b.notifications.filter(kind="group", title__contains="chưa được duyệt").count() == 1
+    assert ca.get("/api/v1/notifications/").data["results"][0]["action_state"] == "gone"
