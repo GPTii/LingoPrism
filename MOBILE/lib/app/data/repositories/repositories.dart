@@ -314,8 +314,11 @@ class DetectionRepository {
   /// Same list as JSON, kept on the phone for detection without network (OfflineDetections).
   static Future<List<Map<String, dynamic>>> labelsRaw() async => asMapList(await _api.get('/detections/labels/'));
 
-  static Future<List<DetectionResult>> history() async =>
-      ApiClient.results(await _api.get('/detections/')).map(DetectionResult.fromJson).toList();
+  /// The learner's photos, newest first: (page, has more). [confirmed] true/false keeps only photos with/without saved words.
+  static Future<(List<DetectionResult>, bool)> history({int page = 1, bool? confirmed}) async {
+    final d = await _api.get<dynamic>('/detections/', query: {'page': page, 'confirmed': confirmed == null ? null : (confirmed ? 1 : 0)});
+    return (ApiClient.results(d).map(DetectionResult.fromJson).toList(), d is Map && d['next'] != null);
+  }
 }
 
 class GisRepository {

@@ -4,6 +4,7 @@ import '../modules/stats/stats_module.dart';
 import '../modules/speak/speak_module.dart';
 import '../modules/live_camera/live_camera_module.dart';
 import '../modules/photo_dialogue/photo_dialogue_module.dart';
+import '../modules/photo_history/photo_history_module.dart';
 import '../modules/levels/levels_module.dart';
 import '../modules/literacy/literacy_module.dart';
 import '../modules/sentence_practice/sentence_practice_module.dart';
@@ -244,6 +245,8 @@ class AppPages {
       GetPage(name: _Paths.speakPractice, page: () => const SpeakPracticeView()),
       GetPage(name: _Paths.liveCamera, page: () => const LiveCameraView()),
       GetPage(name: _Paths.photoDialogue, page: () => const PhotoDialogueView()),
+      GetPage(name: _Paths.photoHistory, page: () => const PhotoHistoryView()),
+      GetPage(name: _Paths.photoShot, page: () => const PhotoShotView()),
       GetPage(name: _Paths.examList, page: () => const ExamListView(), binding: BindingsBuilder(() => Get.lazyPut(() => ExamListController()))),
     GetPage(name: _Paths.examTake, page: () => const ExamTakeView(), binding: BindingsBuilder(() => Get.lazyPut(() => ExamTakeController()))),
     GetPage(name: _Paths.examResult, page: () => const ExamResultView(), binding: BindingsBuilder(() => Get.lazyPut(() => ExamResultController()))),

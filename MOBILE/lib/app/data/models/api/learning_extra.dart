@@ -19,7 +19,7 @@ class DetectionAlternative {
 class DetectedItem {
   DetectedItem({required this.id, required this.label, required this.confidence, required this.bbox, this.card,
       this.selected = false, this.feedback = 'unknown', this.uncertain = false, this.alternatives = const [],
-      this.learned = false});
+      this.learned = false, this.correctedLabel = '', this.correctedCard});
 
   final int id;
   final String label;
@@ -31,9 +31,17 @@ class DetectedItem {
   final bool uncertain; // model not sure → ask the learner which object it is
   final List<DetectionAlternative> alternatives;
   final bool learned; // relabelled automatically from an earlier learner's error report
+  final String correctedLabel; // what the learner said it really is (saved error report)
+  final WordCard? correctedCard;
   String? picked; // label the learner chose instead of the model's answer (error report)
   WordCard? pickedCard; // its card when picked from the full list ("Vật khác…")
   bool notObject = false; // error report: there is no such object here
+
+  /// In the photo history: the learner's correction first, then the model's answer.
+  WordCard? get savedCard => correctedCard ?? card;
+
+  /// Boxes the learner marked as "not an object" (no correction) are left out of the history.
+  bool get dismissed => feedback == 'wrong' && correctedLabel.isEmpty;
 
   /// The word shown for this object: the one the learner picked, else the model's answer.
   WordCard? get shownCard {
@@ -56,11 +64,14 @@ class DetectedItem {
         uncertain: j['uncertain'] == true,
         alternatives: asMapList(j['alternatives']).map(DetectionAlternative.fromJson).toList(),
         learned: j['learned'] == true,
+        correctedLabel: asString(j['corrected_label']),
+        correctedCard: j['corrected_card'] is Map ? WordCard.fromJson(asMap(j['corrected_card'])) : null,
       );
 }
 
 class DetectionResult {
-  DetectionResult({required this.id, required this.model, required this.device, this.inferenceMs, this.image, required this.items});
+  DetectionResult({required this.id, required this.model, required this.device, this.inferenceMs, this.image, required this.items,
+      this.createdAt, this.confirmed = false});
 
   final int id;
   final String model;
@@ -68,6 +79,8 @@ class DetectionResult {
   final int? inferenceMs;
   final String? image;
   final List<DetectedItem> items;
+  final DateTime? createdAt;
+  final bool confirmed; // the learner saved words from this photo
 
   factory DetectionResult.fromJson(Map<String, dynamic> j) => DetectionResult(
         id: asInt(j['id']),
@@ -76,6 +89,8 @@ class DetectionResult {
         inferenceMs: j['inference_ms'] == null ? null : asInt(j['inference_ms']),
         image: j['image'] as String?,
         items: asMapList(j['items']).map(DetectedItem.fromJson).toList(),
+        createdAt: DateTime.tryParse(asString(j['created_at']))?.toLocal(),
+        confirmed: j['confirmed'] == true,
       );
 }
 

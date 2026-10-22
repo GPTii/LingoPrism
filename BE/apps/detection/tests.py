@@ -42,6 +42,12 @@ def test_log_on_device_and_confirm(setup):
     ]}, format="json")
     assert res.data["saved"] == 1
     assert PersonalWord.objects.get(user=user, word=cat).source == "camera"
+    # photo history: newest first, filtered by whether words were saved from the photo
+    c.post("/api/v1/detections/log/", {"model_name": "m", "items": [{"label": "cat", "confidence": 0.9, "bbox": [0, 0, 1, 1]}]}, format="json")
+    assert len(c.get("/api/v1/detections/").data["results"]) == 2
+    saved = c.get("/api/v1/detections/?confirmed=1").data["results"]
+    assert [d["confirmed"] for d in saved] == [True] and saved[0]["items"][1]["corrected_label"] == "cat"
+    assert [d["confirmed"] for d in c.get("/api/v1/detections/?confirmed=0").data["results"]] == [False]
     from apps.gamification.models import UserStats
     assert UserStats.objects.get(user=user).detections == 1
 

@@ -11,6 +11,7 @@ import '../../../data/models/api/learning_extra.dart';
 import '../../../data/repositories/repositories.dart';
 import '../../../data/services/offline_detections.dart';
 import '../../../data/services/on_device_detector.dart';
+import '../../../data/services/local_shots.dart';
 
 class CameraDetectionController extends GetxController {
   static CameraDetectionController get to => Get.find();
@@ -147,6 +148,7 @@ class CameraDetectionController extends GetxController {
         final items = boxes.map((b) => b.toJson()).toList();
         try {
           result = await DetectionRepository.logOnDevice(OnDeviceDetector.instance.modelName, ms, items);
+          LocalShots.keep(result.id, file); // the server has no copy of a photo detected on the phone
         } on ApiException catch (e2) {
           if (!e2.isNetwork) rethrow;
           if (!OfflineDetections.hasLabels) {

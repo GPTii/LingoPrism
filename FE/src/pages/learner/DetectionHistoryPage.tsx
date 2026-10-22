@@ -2,6 +2,7 @@ import { useInfiniteQuery } from '@tanstack/react-query'
 import { Button, Skeleton } from 'antd'
 import { CameraOutlined, CheckOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { learnApi, type DetectedItem, type DetectionResult } from '../../api/app'
 import { langTag } from '../../components/TargetWord'
@@ -66,10 +67,17 @@ function Shot({ d }: { d: DetectionResult }) {
 }
 
 /** Lịch sử ảnh đã nhận diện: every photo with the words found in it (web and phone alike). */
+const FILTERS = [
+  { key: 'all', label: 'Tất cả' },
+  { key: '1', label: 'Đã lưu từ' },
+  { key: '0', label: 'Chưa lưu từ' },
+] as const
+
 export default function DetectionHistoryPage() {
+  const [filter, setFilter] = useState<(typeof FILTERS)[number]['key']>('all')
   const q = useInfiniteQuery({
-    queryKey: ['detections'],
-    queryFn: ({ pageParam }) => learnApi.detections(pageParam),
+    queryKey: ['detections', filter],
+    queryFn: ({ pageParam }) => learnApi.detections(pageParam, filter === 'all' ? undefined : filter),
     initialPageParam: 1,
     getNextPageParam: (last, pages) => (last.next ? pages.length + 1 : undefined),
   })
@@ -79,6 +87,15 @@ export default function DetectionHistoryPage() {
       <PageHeader back={{ to: '/camera', label: 'Chụp ảnh' }} title="Lịch sử ảnh"
         description="Những ảnh bạn đã chụp và từ vựng tìm thấy trong đó, gồm cả ảnh chụp trên điện thoại."
         actions={<Link to="/camera"><Button type="primary" size="large" icon={<CameraOutlined />}>Chụp ảnh mới</Button></Link>} />
+      <div role="radiogroup" aria-label="Lọc ảnh" className="flex flex-wrap gap-2 -mt-2">
+        {FILTERS.map((f) => (
+          <button key={f.key} type="button" role="radio" aria-checked={filter === f.key} onClick={() => setFilter(f.key)}
+            className={`cursor-pointer rounded-full px-4 py-1.5 text-sm font-semibold border transition-colors ${
+              filter === f.key ? 'bg-brand-600 text-white border-brand-600' : 'bg-transparent text-slate-600 border-slate-200 hover:border-slate-400'}`}>
+            {f.label}
+          </button>
+        ))}
+      </div>
       {q.isLoading ? <Skeleton active /> : shots.length ? (
         <>
           {/* masonry: every photo at its own shape */}
@@ -91,6 +108,13 @@ export default function DetectionHistoryPage() {
             </div>
           )}
         </>
+      ) : filter !== 'all' ? (
+        <div className="lp-card">
+          <EmptyState art={<Prismo mood="happy" size={88} />}
+            title={filter === '1' ? 'Chưa có ảnh nào đã lưu từ' : 'Ảnh nào cũng đã lưu từ'}
+            description={filter === '1' ? 'Chụp ảnh rồi chọn những từ muốn học để lưu vào thư viện.' : 'Bạn đã lưu từ của mọi ảnh đã chụp.'}
+            action={<Button onClick={() => setFilter('all')}>Xem tất cả ảnh</Button>} />
+        </div>
       ) : (
         <div className="lp-card">
           <EmptyState art={<Prismo mood="wow" size={88} />} title="Bạn chưa chụp ảnh nào"

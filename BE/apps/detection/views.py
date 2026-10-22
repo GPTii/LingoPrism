@@ -156,7 +156,11 @@ class DetectionViewSet(ActionThrottleMixin, mixins.ListModelMixin, mixins.Retrie
         return Detection.objects.filter(user=self.request.user).select_related("photo").prefetch_related("items")
 
     def list(self, request, *args, **kwargs):
-        page = self.paginate_queryset(self.get_queryset())
+        """The learner's photos, newest first. `?confirmed=1` only the ones they saved words from, `0` the others."""
+        qs = self.get_queryset()
+        if request.query_params.get("confirmed") in ("0", "1"):
+            qs = qs.filter(confirmed=request.query_params["confirmed"] == "1")
+        page = self.paginate_queryset(qs)
         return self.get_paginated_response([_items_payload(request, d) for d in page])
 
     def retrieve(self, request, *args, **kwargs):

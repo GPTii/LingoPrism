@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import '../controllers/camera_detection_controller.dart';
 import 'package:lingoprism/app/core/theme/app_colors.dart';
+import '../../../routes/app_pages.dart';
 
 
 class CameraDetectionView extends GetView<CameraDetectionController> {
@@ -80,13 +81,20 @@ class CameraDetectionView extends GetView<CameraDetectionController> {
             constraints: const BoxConstraints(),
           ),
           SizedBox(width: 12.w),
-          Text(
-            'Nhận diện từ ảnh',
-            style: TextStyle(
-              fontSize: 24.sp,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
+          Expanded(
+            child: Text(
+              'Nhận diện từ ảnh',
+              style: TextStyle(
+                fontSize: 24.sp,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
             ),
+          ),
+          IconButton(
+            tooltip: 'Lịch sử ảnh',
+            onPressed: () => Get.toNamed(Routes.photoHistory),
+            icon: Icon(Icons.photo_library_outlined, size: 24.sp, color: Colors.white),
           ),
         ],
       ),

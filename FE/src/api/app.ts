@@ -372,7 +372,8 @@ export interface Submission {
 
 export const learnApi = {
   /** my earlier photos, newest first */
-  detections: (page = 1) => api.get<Paginated<DetectionResult>>('/detections/', { params: { page } }).then((r) => r.data),
+  detections: (page = 1, confirmed?: '0' | '1') =>
+    api.get<Paginated<DetectionResult>>('/detections/', { params: { page, confirmed } }).then((r) => r.data),
   /** which AI features the server has switched on */
   aiStatus: () => api.get<{ dialogue: boolean }>('/ai/status/').then((r) => r.data),
   /** the dialogue already written for a photo, or null */
