@@ -8,6 +8,7 @@ import '../modules/levels/levels_module.dart';
 import '../modules/literacy/literacy_module.dart';
 import '../modules/sentence_practice/sentence_practice_module.dart';
 import '../modules/poi_map/poi_map_module.dart';
+import '../modules/messages/messages_module.dart';
 import '../modules/support_chat/support_chat_module.dart';
 import '../modules/splash/bindings/splash_binding.dart';
 import '../modules/splash/views/splash_view.dart';
@@ -252,6 +253,8 @@ class AppPages {
     GetPage(name: _Paths.levelPath, page: () => const LevelPathView(), binding: BindingsBuilder(() => Get.put(LevelPathController(), permanent: true))),
     GetPage(name: _Paths.levelTest, page: () => const LevelTestView(), binding: BindingsBuilder(() => Get.lazyPut(() => LevelTestController()))),
     GetPage(name: _Paths.supportChat, page: () => const SupportChatView(), binding: BindingsBuilder(() => Get.lazyPut(() => SupportChatController()))),
+    GetPage(name: _Paths.messages, page: () => const MessagesView(), binding: BindingsBuilder(() => Get.lazyPut(() => MessagesController()))),
+    GetPage(name: _Paths.directChat, page: () => const DirectChatView(), binding: BindingsBuilder(() => Get.lazyPut(() => DirectChatController()))),
     GetPage(name: _Paths.poiMap, page: () => const PoiMapView(), binding: BindingsBuilder(() => Get.lazyPut(() => PoiMapController()))),
   ];
 }

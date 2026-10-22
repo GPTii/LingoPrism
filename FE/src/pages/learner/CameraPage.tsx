@@ -1,9 +1,10 @@
-import { App, Button, Checkbox, Select, Spin, Tooltip, Upload } from 'antd'
-import { CameraOutlined, DislikeOutlined, LikeOutlined } from '@ant-design/icons'
+import { App, Button, Checkbox, Input, Select, Spin, Tooltip, Upload } from 'antd'
+import { CameraOutlined, DislikeOutlined, LikeOutlined, ShareAltOutlined } from '@ant-design/icons'
 import { useState, type ReactNode } from 'react'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
-import { learnApi, type DetectedItem, type DetectionResult } from '../../api/app'
+import { communityApi, learnApi, type DetectedItem, type DetectionResult } from '../../api/app'
+import { useAuth } from '../../auth/store'
 import type { WordCard } from '../../api/vocab'
 import { errorMessage } from '../../api/client'
 import TargetWord, { langTag } from '../../components/TargetWord'
@@ -24,9 +25,42 @@ type Item = DetectedItem & { picked?: string; pickedCard?: WordCard; notObject?:
 const shownCard = (i: Item) =>
   i.picked ? i.pickedCard ?? i.alternatives.find((a) => a.label === i.picked)?.card ?? null : i.card
 
+/** After saving: post the photo with its words to the community feed (others can save the words from it). */
+function SharePhoto({ file, detectionId, cards }: { file: File; detectionId: number; cards: WordCard[] }) {
+  const { message } = App.useApp()
+  const queryClient = useQueryClient()
+  const [caption, setCaption] = useState(() => cards.map((c) => c.target?.text ?? '').filter(Boolean).join(' · '))
+  const share = useMutation({
+    mutationFn: () => communityApi.create(file, caption.trim(), cards.map((c) => c.id), detectionId),
+    onSuccess: () => {
+      message.success('Đã chia sẻ lên cộng đồng')
+      queryClient.invalidateQueries({ queryKey: ['feed'] })
+    },
+    onError: (e) => message.error(errorMessage(e)),
+  })
+  if (share.isSuccess)
+    return (
+      <div className="lp-card p-4 flex items-center justify-between gap-3">
+        <span className="font-semibold text-slate-700">Ảnh đã lên bảng tin cộng đồng</span>
+        <Link to="/community"><Button>Xem bảng tin</Button></Link>
+      </div>
+    )
+  return (
+    <div className="lp-card p-4 flex flex-col gap-2">
+      <div className="font-semibold text-slate-800">Chia sẻ ảnh này lên cộng đồng</div>
+      <div className="text-sm text-slate-500">Mọi người thấy ảnh cùng {cards.length} từ bạn vừa lưu và có thể lưu các từ đó.</div>
+      <Input.TextArea value={caption} onChange={(e) => setCaption(e.target.value)} maxLength={500} autoSize={{ minRows: 2, maxRows: 4 }}
+        placeholder="Viết vài dòng về ảnh…" aria-label="Chú thích" />
+      <Button icon={<ShareAltOutlined />} loading={share.isPending} onClick={() => share.mutate()}>Chia sẻ</Button>
+    </div>
+  )
+}
+
 export default function CameraPage() {
   const { message } = App.useApp()
   const queryClient = useQueryClient()
+  const isKid = useAuth((s) => s.user?.learner_type === 'kid') // kids have no community feed
+  const [file, setFile] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
   const [result, setResult] = useState<DetectionResult | null>(null)
   const [loading, setLoading] = useState(false)
@@ -34,6 +68,7 @@ export default function CameraPage() {
   const allLabels = useQuery({ queryKey: ['detect-labels'], queryFn: learnApi.detectLabels, enabled: !!result, staleTime: 3600_000 })
 
   const detect = async (file: File) => {
+    setFile(file)
     setPreview(URL.createObjectURL(file))
     setResult(null)
     setLoading(true)
@@ -196,6 +231,10 @@ export default function CameraPage() {
               <Button type="primary" size="large" loading={saving} disabled={result.confirmed} onClick={save}>
                 {result.confirmed ? 'Đã lưu vào thư viện' : `Lưu ${result.items.filter((x) => x.selected).length} từ đã chọn`}
               </Button>
+            )}
+            {result?.confirmed && file && !isKid && (result.items as Item[]).some((x) => x.selected && shownCard(x)) && (
+              <SharePhoto file={file} detectionId={result.id}
+                cards={(result.items as Item[]).filter((x) => x.selected).map(shownCard).filter((c): c is WordCard => !!c)} />
             )}
             {result?.confirmed && result.items.some((x) => x.selected) && (
               <PhotoDialogue detectionId={result.id}

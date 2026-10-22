@@ -6,6 +6,7 @@ import { errorMessage } from '../../api/client'
 import { useAuth } from '../../auth/store'
 import { StreakIcon, XpIcon } from '../../components/brand/Brand'
 import { Facts, PageHeader, Section, UserAvatar } from '../../components/ui'
+import { MessageButton } from './MessagesPage'
 
 export default function MemberProfilePage() {
   const { id } = useParams()
@@ -36,7 +37,10 @@ export default function MemberProfilePage() {
         }
         description={p.bio || undefined}
         actions={p.id !== me?.id && (
-          <Button size="large" type={p.is_following ? 'default' : 'primary'} onClick={toggle}>{p.is_following ? 'Đang theo dõi' : 'Theo dõi'}</Button>
+          <span className="flex gap-2">
+            {p.can_message && <MessageButton userId={p.id} />}
+            <Button size="large" type={p.is_following ? 'default' : 'primary'} onClick={toggle}>{p.is_following ? 'Đang theo dõi' : 'Theo dõi'}</Button>
+          </span>
         )} />
       <Section>
         <Facts items={[

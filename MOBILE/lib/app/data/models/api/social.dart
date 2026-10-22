@@ -169,7 +169,7 @@ class ChatMessage {
 
 class CommunityProfile {
   CommunityProfile({required this.author, this.bio = '', this.followers = 0, this.following = 0, this.posts = 0,
-      this.isFollowing = false, this.lifetimeXp = 0, this.streak = 0, this.recentPosts = const [], this.groups = const []});
+      this.isFollowing = false, this.canMessage = false, this.lifetimeXp = 0, this.streak = 0, this.recentPosts = const [], this.groups = const []});
 
   final Author author;
   final String bio;
@@ -177,6 +177,8 @@ class CommunityProfile {
   final int following;
   final int posts;
   final bool isFollowing;
+  /// both follow each other and neither is a child account
+  final bool canMessage;
   final int lifetimeXp;
   final int streak;
   final List<Map<String, dynamic>> recentPosts; // {id, image}
@@ -189,6 +191,7 @@ class CommunityProfile {
         following: asInt(j['following']),
         posts: asInt(j['posts']),
         isFollowing: j['is_following'] == true,
+        canMessage: j['can_message'] == true,
         lifetimeXp: asInt(j['lifetime_xp']),
         streak: asInt(j['streak']),
         recentPosts: asMapList(j['recent_posts']),

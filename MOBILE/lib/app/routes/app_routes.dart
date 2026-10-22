@@ -47,6 +47,8 @@ abstract class Routes {
   static const examTake = _Paths.examTake;
   static const examResult = _Paths.examResult;
   static const supportChat = _Paths.supportChat;
+  static const messages = _Paths.messages;
+  static const directChat = _Paths.directChat;
   static const poiMap = _Paths.poiMap;
 }
 
@@ -97,5 +99,7 @@ abstract class _Paths {
   static const examTake = '/exams/take';
   static const examResult = '/exams/result';
   static const supportChat = '/support';
+  static const messages = '/messages';
+  static const directChat = '/messages/chat';
   static const poiMap = '/map';
 }

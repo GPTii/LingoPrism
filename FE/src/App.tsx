@@ -25,6 +25,7 @@ import AchievementsPage from './pages/learner/AchievementsPage'
 import StatsPage from './pages/learner/StatsPage'
 import SpeakPage from './pages/learner/SpeakPage'
 import SupportPage from './pages/learner/SupportPage'
+import MessagesPage from './pages/learner/MessagesPage'
 import NotificationsPage from './pages/learner/NotificationsPage'
 import DashboardPage from './pages/admin/DashboardPage'
 import UsersPage from './pages/admin/UsersPage'
@@ -70,6 +71,8 @@ export default function App() {
           <Route path="stats" element={<StatsPage />} />
           <Route path="speak" element={<SpeakPage />} />
           <Route path="support" element={<SupportPage />} />
+          <Route path="messages" element={<MessagesPage />} />
+          <Route path="messages/:id" element={<MessagesPage />} />
           <Route path="notifications" element={<NotificationsPage />} />
         </Route>
 

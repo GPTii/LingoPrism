@@ -7,11 +7,11 @@ import {
 import { NavLink, useLocation } from 'react-router-dom'
 import { Logo, LogoMark } from './brand/Brand'
 
-export type NavLeaf = { to: string; label: string; only?: string; count?: number }
+export type NavLeaf = { to: string; label: string; only?: string; count?: number; adults?: boolean }
 export type NavGroup = { key: string; label: string; icon: ReactNode; to?: string; children?: NavLeaf[] }
 
 /** The whole app in groups; the counts make the work waiting inside each one visible. */
-export function navGroups(counts: { due?: number; unread?: number; quests?: number }): NavGroup[] {
+export function navGroups(counts: { due?: number; unread?: number; quests?: number; dm?: number }): NavGroup[] {
   return [
     { key: 'home', label: 'Hôm nay', icon: <HomeOutlined />, to: '/' },
     {
@@ -42,6 +42,7 @@ export function navGroups(counts: { due?: number; unread?: number; quests?: numb
         { to: '/community?tab=feed', label: 'Bảng tin' },
         { to: '/community?tab=groups', label: 'Nhóm học' },
         { to: '/community?tab=leaderboard', label: 'Bảng xếp hạng' },
+        { to: '/messages', label: 'Tin nhắn', count: counts.dm, adults: true },
       ],
     },
     {

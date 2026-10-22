@@ -17,6 +17,7 @@ from apps.notifications.models import Notification
 from apps.notifications.services import notify
 from apps.vocab.models import Word
 from apps.vocab.services import card, personal_map, resolve_target, words_for_target
+from apps.chat.services import can_message
 from apps.core.throttles import ActionThrottleMixin
 
 from .models import Group, GroupMember, Post, PostComment, PostLike, PostReport, PostWord, UserFollow
@@ -62,6 +63,12 @@ class PostSerializer(serializers.ModelSerializer):
         words = words_for_target(Word.objects.filter(postword__post=obj), request.user, target)
         personal = personal_map(request.user, [w.id for w in words], target)
         return [card(w, target, personal.get(w.id), request) for w in words]
+
+    def validate_detection(self, detection):
+        # a post can only point at the author's own photo
+        if detection and detection.user_id != self.context["request"].user.id:
+            raise serializers.ValidationError("Ảnh nhận diện không thuộc về bạn.")
+        return detection
 
     def create(self, validated):
         word_ids = validated.pop("word_ids", [])
@@ -215,6 +222,7 @@ class CommunityUserViewSet(viewsets.GenericViewSet):
             "following": UserFollow.objects.filter(follower=user).count(),
             "posts": Post.objects.filter(user=user, status=Post.Status.ACTIVE).count(),
             "is_following": UserFollow.objects.filter(follower=request.user, following=user).exists(),
+            "can_message": can_message(request.user, user),
             "lifetime_xp": stats.lifetime_xp, "streak": game.current_streak(user),
             "recent_posts": [{"id": p.id, "image": request.build_absolute_uri(p.image.url)} for p in recent],
             "groups": [{"id": m.group_id, "name": m.group.name} for m in

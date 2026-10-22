@@ -10,6 +10,8 @@ import '../controllers/community_controller.dart';
 import '../../community_detail/controllers/community_detail_controller.dart';
 import '../../community_detail/views/community_detail_view.dart';
 import '../../community_detail/bindings/community_detail_binding.dart';
+import '../../../data/services/auth_service.dart';
+import '../../../routes/app_pages.dart';
 import 'study_group_tab_view.dart';
 import 'community_leaderboard_view.dart';
 
@@ -55,7 +57,15 @@ class CommunityView extends GetView<CommunityController> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SizedBox(height: 12.h),
-                _buildTabBar(),
+                Row(children: [
+                  Expanded(child: _buildTabBar()),
+                  if (AuthService.to.currentUser?.isKid != true)
+                    IconButton(
+                      tooltip: 'Tin nhắn',
+                      onPressed: () => Get.toNamed(Routes.messages),
+                      icon: Icon(Icons.chat_bubble_outline_rounded, color: AppColors.textPrimary),
+                    ),
+                ]),
                 SizedBox(height: 16.h),
                 Expanded(
                   child: TabBarView(

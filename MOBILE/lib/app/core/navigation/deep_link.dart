@@ -27,6 +27,9 @@ class DeepLink {
         Get.toNamed(Routes.community);
       } else if (route.startsWith('/exams/results/')) {
         Get.toNamed(Routes.examResult, arguments: id(r'/exams/results/(\d+)'));
+      } else if (route.startsWith('/messages')) {
+        final thread = id(r'/messages/(\d+)');
+        thread == null ? Get.toNamed(Routes.messages) : Get.toNamed(Routes.directChat, arguments: thread);
       } else if (route.startsWith('/support')) {
         Get.toNamed(Routes.supportChat);
       } else if (route.startsWith('/profile')) {

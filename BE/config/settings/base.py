@@ -162,6 +162,7 @@ REST_FRAMEWORK = {
         "upload": env("THROTTLE_UPLOAD", default="30/hour"),  # community posts, avatars
         "report": env("THROTTLE_REPORT", default="30/hour"),
         "ai_dialogue": env("THROTTLE_AI_DIALOGUE", default="20/hour"),  # each one is a paid AI call
+        "message": env("THROTTLE_MESSAGE", default="60/min"),  # private messages
     },
     # proxies in front of Django whose X-Forwarded-For is trusted (nginx = 1, Cloudflare + nginx = 2)
     "NUM_PROXIES": env.int("NUM_PROXIES", default=0),

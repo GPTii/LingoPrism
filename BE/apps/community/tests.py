@@ -114,3 +114,16 @@ def test_support_chat(users):
     assert [m["content"] for m in msgs] == ["Em không hiểu từ 貓", "貓 là con mèo nhé"]
     assert SupportConversation.objects.get().staff == staff
     assert client_for(a).get(f"/api/v1/support/conversations/{conv['id']}/").status_code == 404
+
+
+def test_share_a_photo_only_with_your_own_detection(users):
+    from apps.detection.models import Detection
+
+    a, b, kid = users
+    mine = Detection.objects.create(user=a, model_name="test", device="server")
+    theirs = Detection.objects.create(user=b, model_name="test", device="server")
+    ca = client_for(a)
+    res = ca.post("/api/v1/posts/", {"image": png(), "caption": "Cái cốc", "detection": theirs.id}, format="multipart")
+    assert res.status_code == 400 and "detection" in res.data["errors"]
+    res = ca.post("/api/v1/posts/", {"image": png(), "caption": "Cái cốc", "detection": mine.id}, format="multipart")
+    assert res.status_code == 201 and res.data["detection"] == mine.id

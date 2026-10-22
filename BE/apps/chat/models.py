@@ -50,3 +50,31 @@ class SupportMessage(models.Model):
 
     class Meta:
         ordering = ["created_at", "id"]
+
+
+class DirectThread(models.Model):
+    """A private conversation between two learners (stored once per pair: user_a has the smaller id)."""
+
+    user_a = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="+")
+    user_b = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="+")
+    created_at = models.DateTimeField(default=timezone.now)
+    last_message_at = models.DateTimeField(default=timezone.now, db_index=True)
+
+    class Meta:
+        ordering = ["-last_message_at"]
+        constraints = [models.UniqueConstraint(fields=["user_a", "user_b"], name="direct_thread_pair")]
+
+    def other(self, user):
+        return self.user_b if user.id == self.user_a_id else self.user_a
+
+
+class DirectMessage(models.Model):
+    thread = models.ForeignKey(DirectThread, on_delete=models.CASCADE, related_name="messages")
+    sender = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    content = models.CharField(max_length=1000)
+    client_id = models.CharField(max_length=40, blank=True)
+    read_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(default=timezone.now, db_index=True)
+
+    class Meta:
+        ordering = ["created_at", "id"]

@@ -6,8 +6,10 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from apps.core.throttles import ActionThrottleMixin
+
 from . import services
-from .models import GroupMessage, SupportConversation
+from .models import DirectThread, GroupMessage, SupportConversation
 
 
 class SendGroupMessageSerializer(serializers.Serializer):
@@ -116,3 +118,86 @@ class SupportConversationViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixi
         conv.status = SupportConversation.Status.CLOSED
         conv.save(update_fields=["status"])
         return Response({"status": conv.status})
+
+
+# ------------------------------------------------------------------ private messages
+
+def _person(request, user):
+    return {"id": user.id, "display_name": user.display_name, "avatar": user.avatar_url(request)}
+
+
+class SendDirectSerializer(serializers.Serializer):
+    content = serializers.CharField(max_length=1000)
+    client_id = serializers.CharField(required=False, allow_blank=True, max_length=40)
+
+
+class OpenThreadSerializer(serializers.Serializer):
+    user = serializers.IntegerField()
+
+
+@extend_schema(tags=["chat"])
+class DirectThreadViewSet(ActionThrottleMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+    """Private messages between two learners who follow each other (see services.can_message)."""
+
+    serializer_class = serializers.Serializer
+    pagination_class = None
+    throttle_scopes = {"messages": "message"}
+
+    def get_queryset(self):
+        if getattr(self, "swagger_fake_view", False):
+            return DirectThread.objects.none()
+        user = self.request.user
+        return (DirectThread.objects.filter(Q(user_a=user) | Q(user_b=user)).select_related("user_a", "user_b")
+                .annotate(unread=Count("messages", filter=Q(messages__read_at__isnull=True) & ~Q(messages__sender=user)))
+                .order_by("-last_message_at"))
+
+    def _row(self, t):
+        other = t.other(self.request.user)
+        last = t.messages.order_by("-id").first()
+        return {"id": t.id, "other": _person(self.request, other), "unread": getattr(t, "unread", 0),
+                "can_message": services.can_message(self.request.user, other),
+                "last_message": services.direct_message_payload(last) if last else None,
+                "last_message_at": t.last_message_at.isoformat()}
+
+    def list(self, request):
+        return Response([self._row(t) for t in self.get_queryset() if t.messages.exists()])
+
+    def retrieve(self, request, pk=None):
+        return Response(self._row(self.get_object()))
+
+    @extend_schema(request=OpenThreadSerializer, responses={201: dict})
+    def create(self, request):
+        from apps.accounts.models import User
+
+        ser = OpenThreadSerializer(data=request.data)
+        ser.is_valid(raise_exception=True)
+        other = User.objects.filter(pk=ser.validated_data["user"]).first()
+        if not services.can_message(request.user, other):
+            return Response({"detail": "Hai bạn cần theo dõi nhau mới nhắn tin được.", "errors": {}}, status=400)
+        thread = services.thread_with(request.user, other)
+        return Response(self._row(self.get_queryset().get(pk=thread.pk)), status=201)
+
+    @extend_schema(request=SendDirectSerializer, responses={200: dict},
+                   parameters=[OpenApiParameter("before", int, description="older than this message id")])
+    @action(detail=True, methods=["get", "post"])
+    def messages(self, request, pk=None):
+        thread = self.get_object()
+        if request.method == "GET":
+            qs = thread.messages.order_by("-id")
+            if request.query_params.get("before"):
+                qs = qs.filter(id__lt=int(request.query_params["before"]))
+            msgs = list(qs[:50])[::-1]
+            services.mark_direct_read(request.user, thread)
+            return Response({"results": [services.direct_message_payload(m) for m in msgs], "has_more": len(msgs) == 50})
+        ser = SendDirectSerializer(data=request.data)
+        ser.is_valid(raise_exception=True)
+        try:
+            m = services.send_direct_message(request.user, thread, ser.validated_data["content"],
+                                             ser.validated_data.get("client_id", ""))
+        except services.ChatError as e:
+            return Response({"detail": str(e), "errors": {}}, status=400)
+        return Response(services.direct_message_payload(m), status=201)
+
+    @action(detail=True, methods=["post"])
+    def read(self, request, pk=None):
+        return Response({"read": services.mark_direct_read(request.user, self.get_object())})

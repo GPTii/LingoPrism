@@ -123,3 +123,69 @@ def mark_support_read(user, conv: SupportConversation) -> int:
     if ids:
         _broadcast(support_channel(conv.id), "read", {"ids": ids, "reader": user.id, "read_at": now.isoformat()})
     return len(ids)
+
+
+# ------------------------------------------------------------------ private messages
+
+def can_message(user, other) -> bool:
+    """Private messages only between two adult learners who follow each other: no stranger can write first, and
+    children's accounts are kept out entirely. Staff use the support chat instead."""
+    from apps.community.models import UserFollow
+
+    if other is None or user.id == other.id or not other.is_active:
+        return False
+    if "kid" in (user.learner_type, other.learner_type):
+        return False
+    return (UserFollow.objects.filter(follower=user, following=other).exists()
+            and UserFollow.objects.filter(follower=other, following=user).exists())
+
+
+def thread_with(user, other):
+    from .models import DirectThread
+
+    a, b = sorted([user, other], key=lambda u: u.id)
+    return DirectThread.objects.get_or_create(user_a=a, user_b=b)[0]
+
+
+def direct_message_payload(m) -> dict:
+    return {"id": m.id, "thread": m.thread_id, "sender": m.sender_id, "content": m.content, "client_id": m.client_id,
+            "read_at": m.read_at.isoformat() if m.read_at else None, "created_at": m.created_at.isoformat()}
+
+
+def send_direct_message(user, thread, content: str, client_id: str = ""):
+    from apps.notifications.models import Notification
+    from apps.notifications.services import notify, push_event
+
+    from .models import DirectMessage
+
+    other = thread.other(user)
+    if not can_message(user, other):
+        raise ChatError("Hai bạn cần theo dõi nhau mới nhắn tin được")
+    content = content.strip()
+    if not content:
+        raise ChatError("Tin nhắn trống")
+    if client_id:
+        existing = DirectMessage.objects.filter(thread=thread, sender=user, client_id=client_id).first()
+        if existing:
+            return existing
+    # one notification per burst: only when the other person has read everything before this message
+    first_unread = not DirectMessage.objects.filter(thread=thread, sender=user, read_at__isnull=True).exists()
+    m = DirectMessage.objects.create(thread=thread, sender=user, content=content[:1000], client_id=client_id)
+    thread.last_message_at = m.created_at
+    thread.save(update_fields=["last_message_at"])
+    payload = direct_message_payload(m)
+    for uid in (user.id, other.id):  # the sender's other tabs / devices too
+        push_event(uid, "dm", payload)
+    if first_unread:
+        notify(other, Notification.Kind.MESSAGE, f"{user.display_name} nhắn tin cho bạn", content[:120],
+               data={"route": f"/messages/{thread.id}"})
+    return m
+
+
+def mark_direct_read(user, thread) -> int:
+    n = thread.messages.filter(read_at__isnull=True).exclude(sender=user).update(read_at=timezone.now())
+    if n:
+        from apps.notifications.services import push_event
+
+        push_event(thread.other(user).id, "dm_read", {"thread": thread.id})
+    return n

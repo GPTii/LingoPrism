@@ -39,6 +39,7 @@ class CommunityMemberProfileController extends GetxController {
   final Rx<ProfileSummary> summary = ProfileSummary.initial().obs;
   final RxList<String> recentPosts = <String>[].obs;
   final RxBool isFollowing = false.obs;
+  final RxBool canMessage = false.obs;
   final RxBool isFollowLoading = false.obs;
   final RxBool showFollowButton = true.obs;
   final RxBool isLoading = false.obs;
@@ -80,6 +81,7 @@ class CommunityMemberProfileController extends GetxController {
       );
       recentPosts.assignAll(p.recentPosts.map((r) => '${r['image']}'));
       isFollowing.value = p.isFollowing;
+      canMessage.value = p.canMessage;
     } catch (e) {
       Get.snackbar('Lỗi', ApiClient.toApiException(e).message, snackPosition: SnackPosition.BOTTOM);
     } finally {
@@ -94,6 +96,7 @@ class CommunityMemberProfileController extends GetxController {
     try {
       await CommunityRepository.follow(userId, next);
       isFollowing.value = next;
+      load(); // following back may open private messages
       final s = summary.value;
       summary.value = s.copyWith(followers: (s.followers + (next ? 1 : -1)).clamp(0, 1 << 30));
       if (Get.isRegistered<ProfileController>()) {

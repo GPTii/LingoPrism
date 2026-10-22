@@ -195,6 +195,8 @@ export interface CommunityProfile extends Author {
   following: number
   posts: number
   is_following: boolean
+  /** both follow each other and neither is a child account */
+  can_message: boolean
   lifetime_xp: number
   streak: number
   recent_posts: { id: number; image: string }[]
@@ -214,11 +216,12 @@ export interface SupportConversation {
 
 export const communityApi = {
   feed: (params?: Record<string, unknown>) => api.get<Paginated<Post>>('/posts/', { params }).then((r) => r.data),
-  create: (image: File, caption: string, wordIds: number[]) => {
+  create: (image: File, caption: string, wordIds: number[], detectionId?: number) => {
     const form = new FormData()
     form.append('image', image)
     form.append('caption', caption)
     wordIds.forEach((id) => form.append('word_ids', String(id)))
+    if (detectionId) form.append('detection', String(detectionId))
     return api.post<Post>('/posts/', form).then((r) => r.data)
   },
   remove: (id: number) => api.delete(`/posts/${id}/`),
@@ -398,4 +401,36 @@ export function targetCode(user: { active_language: string; zh_script: string } 
   if (!user) return undefined
   if (user.active_language === 'zh') return user.zh_script === 'hant' ? 'zh-Hant' : 'zh-Hans'
   return user.active_language
+}
+
+// ---------------------------------------------------------------- private messages
+
+export interface DirectMessage {
+  id: number
+  thread: number
+  sender: number
+  content: string
+  client_id: string
+  read_at: string | null
+  created_at: string
+}
+
+export interface DirectThread {
+  id: number
+  other: Author
+  unread: number
+  can_message: boolean
+  last_message: DirectMessage | null
+  last_message_at: string
+}
+
+export const messagesApi = {
+  threads: () => api.get<DirectThread[]>('/messages/threads/').then((r) => r.data),
+  thread: (id: number) => api.get<DirectThread>(`/messages/threads/${id}/`).then((r) => r.data),
+  open: (userId: number) => api.post<DirectThread>('/messages/threads/', { user: userId }).then((r) => r.data),
+  list: (id: number, before?: number) =>
+    api.get<{ results: DirectMessage[]; has_more: boolean }>(`/messages/threads/${id}/messages/`, { params: { before } }).then((r) => r.data),
+  send: (id: number, content: string, client_id: string) =>
+    api.post<DirectMessage>(`/messages/threads/${id}/messages/`, { content, client_id }).then((r) => r.data),
+  read: (id: number) => api.post(`/messages/threads/${id}/read/`),
 }

@@ -16,6 +16,9 @@ class RealtimeService extends GetxService {
   final RxInt unreadNotifications = 0.obs;
   final _notifications = StreamController<Map<String, dynamic>>.broadcast();
   Stream<Map<String, dynamic>> get notifications => _notifications.stream;
+  final _directMessages = StreamController<WsEvent>.broadcast();
+  /// "dm" (a new private message) and "dm_read" events, for the messages screens.
+  Stream<WsEvent> get directMessages => _directMessages.stream;
 
   WsClient? _client;
   StreamSubscription? _sub;
@@ -46,13 +49,18 @@ class RealtimeService extends GetxService {
         unreadNotifications.value++;
         _notifications.add(e.payload);
         final title = e.payload['title']?.toString() ?? '';
-        if (title.isNotEmpty) {
+        final inMessages = e.payload['kind'] == 'message' && (Get.currentRoute.startsWith('/messages'));
+        if (title.isNotEmpty && !inMessages) {
           Get.snackbar(title, e.payload['body']?.toString() ?? '',
               snackPosition: SnackPosition.TOP, duration: const Duration(seconds: 3), margin: const EdgeInsets.all(12));
         }
         break;
       case 'xp':
         if (Get.isRegistered<GameService>()) GameService.to.applyRealtimeXp(e.payload);
+        break;
+      case 'dm':
+      case 'dm_read':
+        _directMessages.add(e);
         break;
       case 'quest_completed':
         if (Get.isRegistered<GameService>()) GameService.to.refreshQuests();
@@ -64,6 +72,7 @@ class RealtimeService extends GetxService {
   void onClose() {
     stop();
     _notifications.close();
+    _directMessages.close();
     super.onClose();
   }
 }

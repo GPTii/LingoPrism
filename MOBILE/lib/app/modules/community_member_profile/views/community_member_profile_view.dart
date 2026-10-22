@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import '../../profile/controllers/profile_controller.dart';
 import '../../profile/views/profile_view.dart';
 import '../controllers/community_member_profile_controller.dart';
+import '../../messages/messages_module.dart';
 import 'package:lingoprism/app/core/theme/app_colors.dart';
 
 class CommunityMemberProfileView
@@ -59,6 +60,17 @@ class CommunityMemberProfileView
                 showSettingsButton: false,
                 isFollowLoading: isFollowLoading,
               ),
+              if (controller.canMessage.value) ...[
+                SizedBox(height: 12.h),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () => MessagesRepository.openWith(controller.userId),
+                    icon: const Icon(Icons.chat_bubble_outline_rounded),
+                    label: const Text('Nhắn tin'),
+                  ),
+                ),
+              ],
               SizedBox(height: 24.h),
               ProfileOverviewSection(summary: summary),
               SizedBox(height: 28.h),

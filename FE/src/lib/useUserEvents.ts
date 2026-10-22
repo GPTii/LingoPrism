@@ -27,8 +27,14 @@ export function useUserEvents() {
     const off = socket.on((e) => {
       if (e.event === 'notification') {
         useUnread.getState().set(useUnread.getState().unread + 1)
-        notification.info({ message: String(e.payload.title ?? ''), description: String(e.payload.body ?? ''), placement: 'topRight' })
+        // a new private message while the messages page is open needs no pop-up
+        if (!(e.payload.kind === 'message' && window.location.pathname.startsWith('/messages')))
+          notification.info({ message: String(e.payload.title ?? ''), description: String(e.payload.body ?? ''), placement: 'topRight' })
         queryClient.invalidateQueries({ queryKey: ['notifications'] })
+      } else if (e.event === 'dm' || e.event === 'dm_read') {
+        // the open conversation listens for this; the list of conversations just reloads
+        window.dispatchEvent(new CustomEvent('lingoprism:dm', { detail: { event: e.event, payload: e.payload } }))
+        queryClient.invalidateQueries({ queryKey: ['dm-threads'] })
       } else if (e.event === 'xp' || e.event === 'quest_completed') {
         queryClient.invalidateQueries({ queryKey: ['game-summary'] })
         queryClient.invalidateQueries({ queryKey: ['quests'] })

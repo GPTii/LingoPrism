@@ -1,0 +1,49 @@
+# Run the server's tests on every push / pull request that touches BE: API, algorithms, chat, and the language
+# golden tests (Simplified / Traditional / polyphones against CC-CEDICT, HSK, CMUdict, downloaded once and cached).
+name: Backend tests
+
+on:
+  push:
+    branches: [main]
+    paths: ["BE/**", "AI/classes.yaml", ".github/workflows/backend.yml"]
+  pull_request:
+    paths: ["BE/**", "AI/classes.yaml", ".github/workflows/backend.yml"]
+  workflow_dispatch:
+
+jobs:
+  pytest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    services:
+      db:
+        image: postgres:16   # includes the earthdistance extension used for proximity search
+        env:
+          POSTGRES_DB: lingoprism
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 20
+    env:
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/lingoprism
+      DJANGO_SECRET_KEY: ci-only-not-secret
+    defaults:
+      run:
+        working-directory: BE
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: BE/requirements.txt
+      - run: pip install -r requirements.txt
+      - name: Language sources (cached)
+        uses: actions/cache@v4
+        with:
+          path: BE/seed/sources
+          key: lang-sources-v1
+      - run: python manage.py fetch_sources
+        env:
+          DJANGO_SETTINGS_MODULE: config.settings.test
+      - run: python -m pytest -p no:cacheprovider
