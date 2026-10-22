@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { App, Button, Form, Input, Modal, Select, Segmented, Skeleton, Switch, Upload } from 'antd'
 import { HeartFilled, HeartOutlined, MessageOutlined, SaveOutlined, FlagOutlined, PlusOutlined, CrownFilled } from '@ant-design/icons'
 import { useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import 'dayjs/locale/vi'
@@ -257,6 +257,45 @@ function LeaderboardTab() {
   )
 }
 
+const LANG_NAME: Record<string, string> = { en: 'tiếng Anh', zh: 'tiếng Trung', vi: 'tiếng Việt' }
+
+/** A row of people to follow: same language first. Following someone back opens private messages. */
+function Suggestions() {
+  const { message } = App.useApp()
+  const queryClient = useQueryClient()
+  const people = useQuery({ queryKey: ['follow-suggestions'], queryFn: communityApi.suggestions, staleTime: 300_000 })
+  const [done, setDone] = useState<number[]>([])
+  if (!people.data?.length) return null
+  const follow = async (id: number) => {
+    try {
+      await communityApi.follow(id, true)
+      setDone((d) => [...d, id])
+      queryClient.invalidateQueries({ queryKey: ['feed'] })
+    } catch (e) {
+      message.error(errorMessage(e))
+    }
+  }
+  return (
+    <section className="lp-card p-4" aria-label="Gợi ý bạn học">
+      <h2 className="m-0 mb-3 text-base font-bold text-slate-800">Gợi ý bạn học</h2>
+      <ul className="m-0 flex list-none gap-3 overflow-x-auto p-0 pb-1">
+        {people.data.map((p) => (
+          <li key={p.id} className="flex w-36 shrink-0 flex-col items-center gap-1.5 rounded-xl border border-slate-100 p-3 text-center">
+            <Link to={`/community/users/${p.id}`} className="flex flex-col items-center gap-1.5 min-w-0 w-full">
+              <UserAvatar name={p.display_name} src={p.avatar} size={48} />
+              <span className="w-full truncate font-semibold text-slate-800">{p.display_name}</span>
+            </Link>
+            <span className="text-xs text-slate-500">{p.follows_me ? 'Đang theo dõi bạn' : `Học ${LANG_NAME[p.active_language] ?? p.active_language}`}</span>
+            <Button size="small" type={done.includes(p.id) ? 'default' : 'primary'} disabled={done.includes(p.id)} onClick={() => follow(p.id)}>
+              {done.includes(p.id) ? 'Đã theo dõi' : p.follows_me ? 'Theo dõi lại' : 'Theo dõi'}
+            </Button>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+
 export default function CommunityPage() {
   const user = useAuth((s) => s.user)
   const [params, setParams] = useSearchParams()
@@ -274,6 +313,7 @@ export default function CommunityPage() {
         ...(isKid ? [] : [{ value: 'feed', label: 'Bảng tin' }, { value: 'groups', label: 'Nhóm học' }]),
         { value: 'leaderboard', label: 'Bảng xếp hạng' },
       ]} />
+      {tab === 'feed' && <Suggestions />}
       {tab === 'feed' && (feed.isLoading ? <Skeleton active /> : feed.data?.results.length ? feed.data.results.map((p) => <PostCard key={p.id} post={p} />) : (
         <div className="lp-card"><EmptyState art={<Prismo mood="wow" size={88} />} title="Bảng tin còn trống" description="Chụp một đồ vật rồi đăng ảnh kèm từ vựng để mọi người cùng học." /></div>
       ))}

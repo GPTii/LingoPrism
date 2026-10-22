@@ -235,6 +235,7 @@ export const communityApi = {
   profile: (userId: number) => api.get<CommunityProfile>(`/community/users/${userId}/profile/`).then((r) => r.data),
   follow: (userId: number, follow: boolean) =>
     follow ? api.post(`/community/users/${userId}/follow/`) : api.delete(`/community/users/${userId}/follow/`),
+  suggestions: () => api.get<(Author & { active_language: string; follows_me: boolean; lifetime_xp: number })[]>('/community/users/suggestions/').then((r) => r.data),
   block: (userId: number, block: boolean) =>
     block ? api.post(`/community/users/${userId}/block/`) : api.delete(`/community/users/${userId}/block/`),
   groups: (params?: Record<string, unknown>) => api.get<Paginated<StudyGroup>>('/groups/', { params: { page_size: 100, ...params } }).then((r) => r.data.results),

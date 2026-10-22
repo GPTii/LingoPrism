@@ -1,6 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.db import transaction
-from django.db.models import Count, Exists, OuterRef, Q
+from django.db.models import Count, Exists, F, OuterRef, Q
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema
 from rest_framework import mixins, permissions, serializers, status, viewsets
@@ -249,6 +249,23 @@ class CommunityUserViewSet(viewsets.GenericViewSet):
                    data={"route": f"/community/users/{request.user.id}"})
         return Response({"following": True})
 
+
+    @action(detail=False, methods=["get"])
+    def suggestions(self, request):
+        """Learners to follow: adults learning the same language first, then the most active lately; never someone
+        already followed, blocked either way, a child or staff."""
+        me = request.user
+        if me.learner_type == "kid":  # children are never shown strangers to follow
+            return Response([])
+        skip = {me.id, *UserFollow.objects.filter(follower=me).values_list("following_id", flat=True), *hidden_user_ids(me.id)}
+        qs = (User.objects.filter(is_active=True, role=User.Role.LEARNER).exclude(learner_type="kid").exclude(id__in=skip)
+              .select_related("stats")
+              .annotate(follows_me=Exists(UserFollow.objects.filter(follower=OuterRef("pk"), following=me)))
+              .order_by("-follows_me", F("stats__last_active_date").desc(nulls_last=True), "-stats__lifetime_xp"))
+        same = list(qs.filter(active_language=me.active_language)[:8])
+        people = same + list(qs.exclude(active_language=me.active_language)[:8 - len(same)]) if len(same) < 8 else same
+        return Response([{**author(request, u), "active_language": u.active_language, "follows_me": u.follows_me,
+                          "lifetime_xp": getattr(getattr(u, "stats", None), "lifetime_xp", 0)} for u in people])
 
     @action(detail=True, methods=["post", "delete"])
     def block(self, request, pk=None):

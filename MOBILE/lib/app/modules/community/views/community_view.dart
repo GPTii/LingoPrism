@@ -12,6 +12,7 @@ import '../../community_detail/views/community_detail_view.dart';
 import '../../community_detail/bindings/community_detail_binding.dart';
 import '../../../data/services/auth_service.dart';
 import '../../../routes/app_pages.dart';
+import 'follow_suggestions.dart';
 import 'study_group_tab_view.dart';
 import 'community_leaderboard_view.dart';
 
@@ -144,13 +145,14 @@ class CommunityView extends GetView<CommunityController> {
                 )
               : ListView.builder(
                   padding: EdgeInsets.only(bottom: 24.h),
-                  itemCount: posts.length,
+                  itemCount: posts.length + 1,
                   cacheExtent: _listCacheExtent,
                   physics: const BouncingScrollPhysics(
                     parent: AlwaysScrollableScrollPhysics(),
                   ),
                   itemBuilder: (context, index) {
-                    final post = posts[index];
+                    if (index == 0) return const FollowSuggestions();
+                    final post = posts[index - 1];
                     return RepaintBoundary(
                       child: _FeedCard(post: post),
                     );

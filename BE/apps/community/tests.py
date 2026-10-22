@@ -127,3 +127,24 @@ def test_share_a_photo_only_with_your_own_detection(users):
     assert res.status_code == 400 and "detection" in res.data["errors"]
     res = ca.post("/api/v1/posts/", {"image": png(), "caption": "Cái cốc", "detection": mine.id}, format="multipart")
     assert res.status_code == 201 and res.data["detection"] == mine.id
+
+
+def test_follow_suggestions(users):
+    from apps.community.models import UserBlock, UserFollow
+
+    a, b, kid = users
+    a.active_language = "zh"
+    a.save()
+    fan = User.objects.create_user("fan@example.com", "Strong!Pass123", display_name="Fan", active_language="en")
+    same = User.objects.create_user("same@example.com", "Strong!Pass123", display_name="Cùng tiếng Trung", active_language="zh")
+    blocked = User.objects.create_user("x@example.com", "Strong!Pass123", active_language="zh")
+    staff = User.objects.create_user("t@example.com", "Strong!Pass123", role="staff", active_language="zh")
+    UserFollow.objects.create(follower=a, following=b)  # already followed
+    UserFollow.objects.create(follower=fan, following=a)  # follows me: suggested first
+    UserBlock.objects.create(blocker=blocked, blocked=a)
+
+    ids = [p["id"] for p in client_for(a).get("/api/v1/community/users/suggestions/").data]
+    # same language first, then others; never b (followed), the child, the blocker, staff or me
+    assert ids == [same.id, fan.id]
+    assert staff.id not in ids and kid.id not in ids and blocked.id not in ids
+    assert client_for(kid).get("/api/v1/community/users/suggestions/").data == []
