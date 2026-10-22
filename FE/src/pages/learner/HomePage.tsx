@@ -92,7 +92,7 @@ export default function HomePage() {
 
         <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
           <button type="button" onClick={() => navigate('/learn?kind=learn')}
-            className="cursor-pointer rounded-2xl bg-[#6d4aff] text-white font-bold px-7 h-14 text-lg hover:bg-[#5533e0] active:scale-[0.97] transition">
+            className="cursor-pointer rounded-2xl bg-[#6d4aff] text-white font-bold px-7 h-14 text-lg hover:bg-[#5533e0] btn-lip">
             Học {target} từ mới
           </button>
           {due > 0 ? (

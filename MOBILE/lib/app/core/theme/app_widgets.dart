@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'app_colors.dart';
 import 'package:lingoprism/app/core/navigation/back.dart';
+import '../widgets/motion.dart';
 
 /// Reusable widgets for the app
 class AppWidgets {
@@ -83,34 +84,10 @@ class AppWidgets {
   }) {
     return SizedBox(
       width: width ?? double.infinity,
-      child: ElevatedButton(
-        onPressed: enabled && !isLoading ? onPressed : null,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: enabled ? AppColors.buttonActive : AppColors.buttonDisabled,
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
-          ),
-          disabledBackgroundColor: AppColors.buttonDisabled,
-        ),
-        child: isLoading
-            ? const SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                ),
-              )
-            : Text(
-                text,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                ),
-              ),
+      child: DuoButton(
+        label: text,
+        loading: isLoading,
+        onPressed: enabled ? onPressed : null,
       ),
     );
   }

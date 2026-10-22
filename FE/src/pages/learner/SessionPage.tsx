@@ -1,7 +1,7 @@
 import { App, Button, Input, Result, Spin } from 'antd'
 import { CloseOutlined, SoundOutlined } from '@ant-design/icons'
-import { motion, AnimatePresence } from 'framer-motion'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { motion, AnimatePresence, animate, useReducedMotion } from 'framer-motion'
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 import { normalizeAnswer, vocabApi, type Question, type SessionItem, type StudySession } from '../../api/vocab'
@@ -12,8 +12,35 @@ import { speak } from '../../lib/speech'
 import SpeakCheck from '../../components/SpeakCheck'
 import WordPicture from '../../components/WordPicture'
 import { Prismo, XpIcon } from '../../components/brand/Brand'
+import { sfx } from '../../lib/sfx'
 
 const PRAISE = ['Chính xác!', 'Tuyệt vời!', 'Giỏi quá!', 'Quá đỉnh!', 'Chuẩn luôn!']
+
+/** a number that counts up from 0 after [delay] seconds */
+function CountUp({ value, delay = 0, prefix = '', suffix = '' }: { value: number; delay?: number; prefix?: string; suffix?: string }) {
+  const reduce = useReducedMotion()
+  const [shown, setShown] = useState(reduce ? value : 0)
+  useEffect(() => {
+    if (reduce) return setShown(value)
+    const c = animate(0, value, { duration: 0.9, delay, ease: [0.22, 1, 0.36, 1], onUpdate: (v) => setShown(Math.round(v)) })
+    return () => c.stop()
+  }, [value, delay, reduce])
+  return <>{prefix}{shown}{suffix}</>
+}
+
+/** one result on the finish screen: a coloured band with its name over a number that counts up (as on Duolingo) */
+function ResultCard({ label, color, delay, children }: { label: string; color: string; delay: number; children: ReactNode }) {
+  return (
+    <motion.div className="rounded-2xl p-0.5" style={{ background: color }}
+      initial={{ opacity: 0, scale: 0.6 }} animate={{ opacity: 1, scale: 1 }}
+      transition={{ delay, type: 'spring', stiffness: 380, damping: 16 }}>
+      <div className="text-[11px] font-extrabold tracking-wider text-white py-1">{label}</div>
+      <div className="rounded-[14px] bg-[var(--surface)] py-3 num text-2xl font-extrabold text-slate-800 flex items-center justify-center gap-1.5">
+        {children}
+      </div>
+    </motion.div>
+  )
+}
 
 /** a burst of colourful confetti when the lesson is done */
 function Confetti() {
@@ -72,6 +99,7 @@ export default function SessionPage() {
   const [flipped, setFlipped] = useState(false)
   const [summary, setSummary] = useState<Summary | null>(null)
   const [error, setError] = useState('')
+  const [combo, setCombo] = useState(0)
   const started = useRef(Date.now())
   const startedOnce = useRef(false)
 
@@ -102,6 +130,7 @@ export default function SessionPage() {
     if (!session) return
     try {
       setSummary(await vocabApi.finish(session.id))
+      sfx('complete', 0.7)
       queryClient.invalidateQueries({ queryKey: ['summary'] })
       queryClient.invalidateQueries({ queryKey: ['me'] })
     } catch (e) {
@@ -128,6 +157,8 @@ export default function SessionPage() {
       correct = true
     }
     setFeedback({ correct, answer: 'answer' in q ? q.answer : '', picked: answer, praise: PRAISE[Math.floor(Math.random() * PRAISE.length)] })
+    setCombo((c) => (correct ? c + 1 : 0))
+    sfx(correct ? 'correct' : 'wrong')
     if (!correct) setSteps((s) => [...s, { ...step, graded: false, firstTry: false }])
     vocabApi.answer(session.id, {
       personal_word: step.item.personal_word, question_type: q.type, correct, first_try: step.firstTry,
@@ -156,19 +187,21 @@ export default function SessionPage() {
     return (
       <div className="relative max-w-xl mx-auto flex flex-col items-center text-center gap-5 pt-4">
         <Confetti />
-        <Prismo mood="celebrate" size={170} className="animate-pop" />
-        <h1 className="text-3xl font-extrabold text-slate-800 m-0">
+        <motion.div initial={{ scale: 0.4, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: 'spring', stiffness: 260, damping: 11 }}>
+          <Prismo mood="celebrate" size={170} />
+        </motion.div>
+        <motion.h1 className="text-3xl font-extrabold text-slate-800 m-0"
+          initial={{ y: -16, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2, type: 'spring', stiffness: 300, damping: 18 }}>
           {summary.level_up ? `Bạn đã lên Cấp ${summary.level_up}!` : perfect ? 'Hoàn hảo! Không sai câu nào!' : 'Hoàn thành bài học!'}
-        </h1>
+        </motion.h1>
         <div className="grid grid-cols-2 gap-3 w-full">
-          <div className="lp-card p-4">
-            <div className="num text-3xl font-bold text-slate-800 flex items-center justify-center gap-1.5"><XpIcon size={28} />+{summary.xp_earned}</div>
-            <div className="text-sm text-slate-500 mt-1">kinh nghiệm</div>
-          </div>
-          <div className="lp-card p-4">
-            <div className="num text-3xl font-bold text-slate-800">{summary.correct_first_try}/{summary.completed_count}</div>
-            <div className="text-sm text-slate-500 mt-1">đúng ngay lần đầu</div>
-          </div>
+          <ResultCard label="KINH NGHIỆM" color="#ffb020" delay={0.45}>
+            <XpIcon size={26} /><CountUp value={summary.xp_earned} prefix="+" delay={0.55} />
+          </ResultCard>
+          <ResultCard label="ĐÚNG NGAY LẦN ĐẦU" color="#10c79a" delay={0.6}>
+            <CountUp value={summary.correct_first_try} delay={0.7} />/{summary.completed_count}
+          </ResultCard>
         </div>
         {missed.length > 0 && (
           <div className="lp-card p-4 w-full">
@@ -178,7 +211,7 @@ export default function SessionPage() {
             </div>
           </div>
         )}
-        <div className="flex flex-wrap justify-center gap-3 w-full">
+        <div className="flex flex-wrap justify-center gap-3 w-full animate-rise" style={{ animationDelay: '900ms' }}>
           <Button size="large" onClick={() => navigate('/')}>Về trang chủ</Button>
           <Button size="large" type="primary" onClick={() => window.location.reload()}>Học tiếp</Button>
         </div>
@@ -195,11 +228,21 @@ export default function SessionPage() {
           className="h-10 w-10 rounded-xl grid place-items-center text-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 cursor-pointer transition">
           <CloseOutlined />
         </button>
-        <div className="flex-1 h-3 rounded-full bg-slate-100 overflow-hidden" role="progressbar" aria-valuemin={0} aria-valuemax={steps.length}
+        {/* a thick tube that fills with a little spring and a light stripe on top, as on Duolingo */}
+        <div className="flex-1 h-4 rounded-full bg-slate-200 overflow-hidden" role="progressbar" aria-valuemin={0} aria-valuemax={steps.length}
           aria-valuenow={Math.min(index, steps.length)} aria-label="Tiến độ bài học">
-          <motion.div className="h-full rounded-full prism-bg" initial={false} animate={{ width: `${Math.max(progress, 3)}%` }}
-            transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }} />
+          <motion.div className="h-full rounded-full prism-bg px-2 pt-[3px]" initial={false} animate={{ width: `${Math.max(progress, 4)}%` }}
+            transition={{ type: 'spring', stiffness: 170, damping: 17 }}>
+            <div className="h-[4px] rounded-full bg-white/35" />
+          </motion.div>
         </div>
+        {combo >= 2 && (
+          <motion.span key={combo} initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
+            transition={{ type: 'spring', stiffness: 500, damping: 14 }}
+            className="num text-sm font-extrabold text-amber-500 whitespace-nowrap" title="Số câu đúng liên tiếp">
+            ×{combo}
+          </motion.span>
+        )}
         <span className="num text-sm font-bold text-slate-500 w-14 text-right">{Math.min(index + 1, steps.length)}/{steps.length}</span>
       </div>
       <AnimatePresence mode="wait">
@@ -228,12 +271,13 @@ export default function SessionPage() {
               {q.type === 'choose_meaning' && <TargetWord target={q.prompt} size="lg" showReading={false} />}
               {q.type === 'choose_pinyin' && <div lang={zhTag} className="text-5xl font-semibold">{q.prompt}</div>}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
-                {q.options.map((opt) => {
+                {q.options.map((opt, i) => {
                   const state = !feedback ? '' : opt === q.answer ? 'is-right' : opt === feedback.picked ? 'is-wrong' : 'opacity-60'
                   return (
+                    // the options deal in one after another
                     <button key={opt} type="button" disabled={!!feedback} onClick={() => submit(opt)}
-                      lang={q.type === 'choose_target' ? zhTag : undefined}
-                      className={`btn-3d px-4 py-4 text-lg font-semibold text-slate-700 cursor-pointer disabled:cursor-default ${state}`}>
+                      lang={q.type === 'choose_target' ? zhTag : undefined} style={{ animationDelay: `${i * 60}ms` }}
+                      className={`btn-3d animate-deal px-4 py-4 text-lg font-semibold text-slate-700 cursor-pointer disabled:cursor-default ${state}`}>
                       {opt}
                     </button>
                   )
@@ -246,13 +290,14 @@ export default function SessionPage() {
             <>
               {q.type === 'type_target' ? meaningPrompt : (
                 <button type="button" onClick={() => speak(q.audio.text, q.audio.tts_locale)} aria-label="Nghe lại"
-                  className="h-24 w-24 rounded-3xl prism-bg text-white text-4xl grid place-items-center cursor-pointer hover:bg-brand-700 active:scale-95 transition">
+                  className="h-24 w-24 rounded-3xl prism-bg text-white text-4xl grid place-items-center cursor-pointer hover:bg-brand-700 btn-lip">
                   <SoundOutlined />
                 </button>
               )}
               <div className="text-slate-500 font-semibold">{q.type === 'listen_type' ? 'Nghe phát âm và gõ lại từ đã nghe.' : 'Gõ lại từ bằng ngôn ngữ đang học'}</div>
               <Input size="large" value={typed} lang={zhTag} disabled={!!feedback} autoFocus
-                onChange={(e) => setTyped(e.target.value)} onPressEnter={() => typed && submit(typed)} className="max-w-sm text-center" />
+                onChange={(e) => setTyped(e.target.value)} onPressEnter={() => typed && submit(typed)}
+                className={`max-w-sm text-center ${feedback && !feedback.correct ? 'lp-shake' : ''}`} />
               {!feedback && <Button type="primary" size="large" disabled={!typed} onClick={() => submit(typed)}>Kiểm tra</Button>}
             </>
           )}
@@ -265,19 +310,25 @@ export default function SessionPage() {
         style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}>
         <div className="max-w-2xl mx-auto px-4 pt-3 flex items-center gap-3">
           {feedback ? (
-            <>
-              <Prismo mood={feedback.correct ? 'celebrate' : 'sad'} size={64} className="animate-pop shrink-0" />
+            // the verdict rises into the bar; Prismo hops in on a spring
+            <motion.div key={`verdict-${index}`} className="flex-1 min-w-0 flex items-center gap-3"
+              initial={{ y: 24, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.26, ease: [0.22, 1, 0.36, 1] }}>
+              <motion.div className="shrink-0" initial={{ scale: 0.4 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 420, damping: 12 }}>
+                <Prismo mood={feedback.correct ? 'celebrate' : 'sad'} size={64} />
+              </motion.div>
               <div className="flex-1 min-w-0">
-                <div className={`text-xl font-bold ${feedback.correct ? 'text-emerald-600' : 'text-red-500'}`}>
+                <div className={`text-xl font-extrabold ${feedback.correct ? 'text-emerald-600' : 'text-red-500'}`}>
                   {feedback.correct ? feedback.praise : 'Chưa đúng rồi'}
                 </div>
-                {!feedback.correct && <div className="text-slate-700 font-bold break-words">Đáp án: <span lang={zhTag}>{feedback.answer}</span></div>}
+                {feedback.correct
+                  ? combo >= 3 && <div className="text-emerald-700 font-bold">{combo} câu đúng liên tiếp</div>
+                  : <div className="text-slate-700 font-bold break-words">Đáp án: <span lang={zhTag}>{feedback.answer}</span></div>}
               </div>
-            </>
+            </motion.div>
           ) : <div className="flex-1" />}
           {q.type === 'flashcard'
             ? <Button type="primary" size="large" className="min-w-36" onClick={next}>Tiếp tục</Button>
-            : feedback && <Button type="primary" size="large" danger={!feedback.correct} className="min-w-36" onClick={next}>Tiếp tục</Button>}
+            : feedback && <Button type="primary" size="large" danger={!feedback.correct} className={`min-w-36 ${feedback.correct ? 'lp-ok' : ''}`} onClick={next}>Tiếp tục</Button>}
         </div>
       </div>
     </div>

@@ -93,7 +93,7 @@ export default function LevelTestPage() {
             <div className="text-slate-600 font-semibold">Nghe rồi chọn từ đúng</div>
             {q.prompt.emoji && <div className="text-6xl">{q.prompt.emoji}</div>}
             <button type="button" aria-label="Nghe lại" onClick={() => speak(q.prompt.audio!.text, q.prompt.audio!.tts_locale)}
-              className="h-20 w-20 rounded-3xl prism-bg text-white text-3xl grid place-items-center cursor-pointer hover:bg-brand-700 active:scale-95 transition">
+              className="h-20 w-20 rounded-3xl prism-bg text-white text-3xl grid place-items-center cursor-pointer hover:bg-brand-700 btn-lip">
               <SoundOutlined />
             </button>
           </>

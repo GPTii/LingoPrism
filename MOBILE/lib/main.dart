@@ -37,6 +37,9 @@ class LingoPrismApp extends StatelessWidget {
           initialBinding: ServiceBinding(),
           initialRoute: AppPages.initial,
           getPages: AppPages.routes,
+          // screens slide in from the right, quickly, like Duolingo's
+          defaultTransition: Transition.rightToLeftWithFade,
+          transitionDuration: const Duration(milliseconds: 280),
           debugShowCheckedModeBanner: false,
           builder: (context, child) => _LearningLocale(child: child ?? const SizedBox()),
         );

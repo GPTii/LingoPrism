@@ -138,7 +138,7 @@ export default function SentencePage() {
               {ex.type === 'arrange' && ex.prompt && <div className="text-xl text-slate-800 text-center">{ex.prompt.text}</div>}
               {ex.type === 'listen' && ex.tts && (
                 <button type="button" aria-label="Nghe lại câu" onClick={() => speak(ex.tts!.text, ex.tts!.locale)}
-                  className="h-20 w-20 rounded-3xl prism-bg text-white text-3xl grid place-items-center cursor-pointer hover:bg-brand-700 active:scale-95 transition">
+                  className="h-20 w-20 rounded-3xl prism-bg text-white text-3xl grid place-items-center cursor-pointer hover:bg-brand-700 btn-lip">
                   <SoundOutlined />
                 </button>
               )}

@@ -2,17 +2,19 @@ import 'dart:math' as math;
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../core/widgets/target_word.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_text_styles.dart';
 import '../controllers/learning_session_controller.dart';
 import '../../home/controllers/learning_tab_controller.dart';
 import '../../../core/widgets/word_picture.dart';
 import '../../../core/widgets/prismo.dart';
 import '../../../core/widgets/prism_effects.dart';
+import '../../../core/widgets/motion.dart';
 import 'package:lingoprism/app/core/navigation/back.dart';
 
 // --- Start of Round 3 Models ---
@@ -156,26 +158,16 @@ class LearningSessionView extends GetView<LearningSessionController> {
                         ],
                       ),
                       SizedBox(height: 8.h),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(18.r),
-                        child: Builder(builder: (_) {
-                          final total = controller.displayTotal;
-                          final position = controller.displayPosition;
-                          final clamped = total == 0
-                              ? 0
-                              : (position > total ? total : position);
-                          final value =
-                              total == 0 ? 0.0 : clamped / total.toDouble();
-                          return LinearProgressIndicator(
-                            value: value,
-                            minHeight: 10.h,
-                            backgroundColor: AppColors.surface,
-                            valueColor: AlwaysStoppedAnimation(
-                              AppColors.primary,
-                            ),
-                          );
-                        }),
-                      ),
+                      Builder(builder: (_) {
+                        final total = controller.displayTotal;
+                        final position = controller.displayPosition;
+                        final clamped = total == 0
+                            ? 0
+                            : (position > total ? total : position);
+                        return LessonProgressBar(
+                          value: total == 0 ? 0.0 : clamped / total.toDouble(),
+                        );
+                      }),
                     ],
                   ),
                 ),
@@ -216,31 +208,11 @@ class LearningSessionView extends GetView<LearningSessionController> {
                 ),
                 Padding(
                   padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 24.h),
-                  child: SizedBox(
-                    width: double.infinity,
-                    height: 52.h,
-                    child: ElevatedButton(
-                      onPressed: controller.isOnLastCard
-                          ? controller.startFlashcardRound
-                          : null,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: controller.isOnLastCard
-                            ? AppColors.primary
-                            : AppColors.surfaceMuted,
-                        foregroundColor: controller.isOnLastCard
-                            ? Colors.white
-                            : AppColors.textSecondary,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14.r),
-                        ),
-                        textStyle: TextStyle(
-                          fontSize: 15.sp,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      child: const Text('Kiểm tra lại bằng Flashcard'),
-                    ),
+                  child: DuoButton(
+                    label: 'Kiểm tra lại bằng Flashcard',
+                    onPressed: controller.isOnLastCard
+                        ? controller.startFlashcardRound
+                        : null,
                   ),
                 ),
               ],
@@ -251,46 +223,21 @@ class LearningSessionView extends GetView<LearningSessionController> {
                   child: Row(
                     children: [
                       Expanded(
-                        child: ElevatedButton(
+                        child: DuoButton(
+                          label: 'Chưa nhớ',
+                          tone: DuoTone.neutral,
                           onPressed: controller.hasFlashcards
                               ? controller.markForgotten
                               : null,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primarySoft,
-                            foregroundColor: AppColors.primary,
-                            elevation: 0,
-                            padding: EdgeInsets.symmetric(vertical: 14.h),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14.r),
-                            ),
-                            textStyle: TextStyle(
-                              fontSize: 15.sp,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          child: const Text('Chưa nhớ'),
                         ),
                       ),
                       SizedBox(width: 12.w),
                       Expanded(
-                        child: ElevatedButton(
+                        child: DuoButton(
+                          label: 'Đã nhớ',
                           onPressed: controller.hasFlashcards
                               ? controller.markRemembered
                               : null,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            foregroundColor: Colors.white,
-                            elevation: 0,
-                            padding: EdgeInsets.symmetric(vertical: 14.h),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14.r),
-                            ),
-                            textStyle: TextStyle(
-                              fontSize: 15.sp,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          child: const Text('Đã nhớ'),
                         ),
                       ),
                     ],
@@ -300,25 +247,9 @@ class LearningSessionView extends GetView<LearningSessionController> {
                   controller.isAwaitingRoundThree)
                 Padding(
                   padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 28.h),
-                  child: SizedBox(
-                    width: double.infinity,
-                    height: 56.h,
-                    child: ElevatedButton(
-                      onPressed: controller.proceedToRoundThree,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.surface,
-                        foregroundColor: AppColors.primary,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14.r),
-                        ),
-                        textStyle: TextStyle(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      child: const Text('Tiếp tục'),
-                    ),
+                  child: DuoButton(
+                    label: 'Tiếp tục',
+                    onPressed: controller.proceedToRoundThree,
                   ),
                 ),
             ],
@@ -378,6 +309,12 @@ class _RoundThreeContentState extends State<_RoundThreeContent> {
   // Lưu kết quả lượt đầu theo từng từ: true = đúng, false = sai
   final Map<String, bool> _firstPassResult = <String, bool>{};
   VoidCallback? _primaryAction;
+  // the answer panel that slides up from the bottom (null = not answered yet)
+  bool? _lastCorrect;
+  String _lastAnswer = '';
+  String _praise = '';
+  int _combo = 0;
+  static const _praises = ['Chính xác!', 'Tuyệt vời!', 'Giỏi quá!', 'Quá đỉnh!', 'Chuẩn luôn!'];
 
   @override
   void initState() {
@@ -455,7 +392,20 @@ class _RoundThreeContentState extends State<_RoundThreeContent> {
     _canContinue.value = true;
     _updatePrimaryAction(null);
     _playFeedbackSound(isCorrect);
-    if (mounted) PrismoReaction.show(context, correct: isCorrect);
+    isCorrect ? HapticFeedback.lightImpact() : HapticFeedback.heavyImpact();
+    if (mounted) {
+      setState(() {
+        _lastCorrect = isCorrect;
+        _combo = isCorrect ? _combo + 1 : 0;
+        _praise = _praises[math.Random().nextInt(_praises.length)];
+        _lastAnswer = switch (question) {
+          MultipleChoiceQuestion q => '${q.questionWord} = ${q.correctOption}',
+          ScrambleQuestion q => q.correctWord,
+          ListenAndTypeQuestion q => q.learningWord.word,
+          _ => '',
+        };
+      });
+    }
 
     if (isFirstAttempt) {
       _firstPassResult[wordKey] = isCorrect;
@@ -582,8 +532,9 @@ class _RoundThreeContentState extends State<_RoundThreeContent> {
 
   Future<void> _goNext() async {
     if (!_canContinue.value) return;
+    setState(() => _lastCorrect = null);
     if (_currentIndex < _questions.length - 1) {
-      _pageController.nextPage(duration: const Duration(milliseconds: 240), curve: Curves.easeOut);
+      _pageController.nextPage(duration: const Duration(milliseconds: 320), curve: Curves.easeOutCubic);
       setState(() {
         _currentIndex++;
       });
@@ -620,7 +571,7 @@ class _RoundThreeContentState extends State<_RoundThreeContent> {
       });
       _primaryAction = null;
       _canContinue.value = false;
-      _pageController.nextPage(duration: const Duration(milliseconds: 240), curve: Curves.easeOut);
+      _pageController.nextPage(duration: const Duration(milliseconds: 320), curve: Curves.easeOutCubic);
       return;
     }
     // Nếu đã qua lượt ôn lại và không còn sai -> hoàn thành
@@ -701,44 +652,105 @@ class _RoundThreeContentState extends State<_RoundThreeContent> {
             itemBuilder: (_, i) => buildQuestion(_questions[i]),
           ),
         ),
-        Padding(
-          padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 20.h),
-          child: Obx(() {
-            final canContinue = _canContinue.value;
-            final hasPrimaryAction = _primaryAction != null;
-            final enabled = canContinue || hasPrimaryAction;
-            final label = canContinue ? 'Tiếp tục' : 'Kiểm tra';
-            return SizedBox(
-              width: double.infinity,
-              height: 56.h,
-              child: ElevatedButton(
-                onPressed: enabled
-                    ? () {
-                        if (canContinue) {
-                          _goNext();
-                        } else {
-                          _primaryAction?.call();
+        // the answer panel: after each answer it rises in green or red with the verdict, the right
+        // answer and a matching "Tiếp tục" button (Duolingo's check → continue footer)
+        Obx(() {
+          final canContinue = _canContinue.value;
+          final enabled = canContinue || _primaryAction != null;
+          final verdict = _lastCorrect;
+          return AnimatedContainer(
+            duration: const Duration(milliseconds: 220),
+            curve: Curves.easeOut,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: verdict == null
+                  ? Colors.transparent
+                  : verdict
+                      ? AppColors.successSoft
+                      : AppColors.errorSoft,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+            ),
+            padding: EdgeInsets.fromLTRB(20.w, verdict == null ? 0 : 16.h, 20.w, 20.h + MediaQuery.paddingOf(context).bottom * 0.5),
+            child: AnimatedSize(
+              duration: const Duration(milliseconds: 220),
+              curve: Curves.easeOutCubic,
+              alignment: Alignment.bottomCenter,
+              child: Column(mainAxisSize: MainAxisSize.min, children: [
+                if (verdict != null)
+                  _AnswerVerdict(
+                    key: ValueKey('verdict-$_currentIndex'),
+                    correct: verdict,
+                    title: verdict ? _praise : 'Chưa đúng rồi',
+                    detail: verdict
+                        ? (_combo >= 3 ? '$_combo câu đúng liên tiếp' : '')
+                        : (_lastAnswer.isEmpty ? 'Xem lại các cặp từ ở trên nhé' : 'Đáp án: $_lastAnswer'),
+                  ),
+                DuoButton(
+                  label: canContinue ? 'Tiếp tục' : 'Kiểm tra',
+                  tone: verdict == null
+                      ? DuoTone.primary
+                      : verdict
+                          ? DuoTone.success
+                          : DuoTone.danger,
+                  onPressed: enabled
+                      ? () {
+                          if (canContinue) {
+                            _goNext();
+                          } else {
+                            _primaryAction?.call();
+                          }
                         }
-                      }
-                    : null,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: enabled ? AppColors.primary : AppColors.primaryTint,
-                  foregroundColor: Colors.white,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
-                  textStyle: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w700),
+                      : null,
                 ),
-                child: Text(label),
-              ),
-            );
-          }),
-        ),
+              ]),
+            ),
+          );
+        }),
       ],
     );
   }
 }
 
+class _AnswerVerdict extends StatelessWidget {
+  const _AnswerVerdict({super.key, required this.correct, required this.title, required this.detail});
+
+  final bool correct;
+  final String title;
+  final String detail;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = correct ? AppColors.success : AppColors.error;
+    final row = Padding(
+      padding: EdgeInsets.only(bottom: 14.h),
+      child: Row(children: [
+        Prismo(mood: correct ? PrismoMood.celebrate : PrismoMood.sad, size: 52.w, blink: false)
+            .animate()
+            .scaleXY(begin: 0.4, end: 1, duration: 380.ms, curve: Curves.elasticOut),
+        SizedBox(width: 12.w),
+        Expanded(
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(title, style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w800, color: color)),
+            if (detail.isNotEmpty)
+              Padding(
+                padding: EdgeInsets.only(top: 2.h),
+                child: Text(detail, style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w700, color: color)),
+              ),
+          ]),
+        ),
+      ]),
+    );
+    if (reduceMotion(context)) return row;
+    return row.animate().fadeIn(duration: 160.ms).slideY(begin: 0.5, end: 0, duration: 260.ms, curve: Curves.easeOutCubic);
+  }
+}
+
 // --- Widgets for Round 3 Question Types ---
+
+/// A typed answer that was wrong gives a short shake.
+Widget _shakeIfWrong(BuildContext context, bool? isCorrect, Widget field) => reduceMotion(context)
+    ? field
+    : field.animate(target: isCorrect == false ? 1 : 0).shakeX(duration: 420.ms, hz: 5, amount: 6);
 
 class _MultipleChoiceQuestionWidget extends StatefulWidget {
   final MultipleChoiceQuestion question;
@@ -782,39 +794,66 @@ class _MultipleChoiceQuestionWidgetState extends State<_MultipleChoiceQuestionWi
             style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
           ),
           SizedBox(height: 40.h),
-          ...widget.question.options.map((option) {
-            Color? buttonColor = AppColors.surface;
-            Color? textColor = AppColors.textPrimary;
-            Color borderColor = AppColors.lineStrong;
+          ...widget.question.options.indexed.map((e) {
+            final (i, option) = e;
+            final answered = _selectedOption != null;
+            final right = answered && option == widget.question.correctOption;
+            final wrong = answered && !right && option == _selectedOption;
+            final textColor = right
+                ? AppColors.success
+                : wrong
+                    ? AppColors.error
+                    : AppColors.textPrimary;
+            final borderColor = right
+                ? AppColors.beamMint
+                : wrong
+                    ? AppColors.error
+                    : AppColors.lineStrong;
 
-            if (_selectedOption != null) {
-              if (option == widget.question.correctOption) {
-                buttonColor = AppColors.successSoft;
-                textColor = AppColors.success;
-                borderColor = AppColors.beamMint;
-              } else if (option == _selectedOption) {
-                buttonColor = AppColors.errorSoft;
-                textColor = AppColors.error;
-                borderColor = AppColors.error;
-              }
-            }
+            final tile = Press3D(
+              onTap: answered ? null : () => _handleAnswer(option),
+              color: right
+                  ? AppColors.successSoft
+                  : wrong
+                      ? AppColors.errorSoft
+                      : AppColors.surface,
+              borderColor: borderColor,
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+              child: Row(children: [
+                // the option's number, like the keyboard hints on Duolingo
+                Container(
+                  width: 28.w,
+                  height: 28.w,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8.r),
+                    border: Border.all(color: borderColor, width: 1.5),
+                  ),
+                  child: Text('${i + 1}', style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w700, color: textColor)),
+                ),
+                SizedBox(width: 12.w),
+                Expanded(
+                  child: Text(option, style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w700, color: textColor)),
+                ),
+              ]),
+            );
 
             return Padding(
-              padding: EdgeInsets.symmetric(vertical: 8.h),
-              child: ElevatedButton(
-                onPressed: () => _handleAnswer(option),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: buttonColor,
-                  foregroundColor: textColor,
-                  elevation: 0,
-                  minimumSize: Size(double.infinity, 52.h),
-                  side: BorderSide(color: borderColor, width: 1.5),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
-                  textStyle: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600),
-                ),
-                child: Text(option),
-              ),
-            );
+              padding: EdgeInsets.symmetric(vertical: 6.h),
+              child: reduceMotion(context)
+                  ? tile
+                  : tile
+                      .animate(target: wrong ? 1 : 0)
+                      .shakeX(duration: 420.ms, hz: 5, amount: 6)
+                      .animate(target: right ? 1 : 0)
+                      .scaleXY(end: 1.04, duration: 140.ms, curve: Curves.easeOut)
+                      .then()
+                      .scaleXY(end: 1 / 1.04, duration: 220.ms, curve: Curves.elasticOut),
+            )
+                // the options deal in one after another
+                .animate(delay: (70 * i).ms)
+                .fadeIn(duration: 220.ms)
+                .slideY(begin: 0.25, end: 0, duration: 300.ms, curve: Curves.easeOutCubic);
           }),
         ],
       ),
@@ -967,36 +1006,43 @@ class _MatchingQuestionWidgetState extends State<_MatchingQuestionWidget> {
                 ? AppColors.error
                 : AppColors.textPrimary;
 
-        return Padding(
-          padding: EdgeInsets.symmetric(horizontal: 2.w),
-          child: SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: matched ? null : () => onSelected(word),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: bgColor,
-                foregroundColor: fgColor,
-                disabledBackgroundColor: bgColor,
-                disabledForegroundColor: fgColor,
-                elevation: 0,
-                minimumSize: Size.fromHeight(54.h),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16.r),
-                ),
-              ),
+        final borderColor = matched
+            ? AppColors.beamMint
+            : isWrong
+                ? AppColors.error
+                : isSelected
+                    ? AppColors.primary
+                    : AppColors.lineStrong;
+        final tile = Press3D(
+          onTap: matched ? null : () => onSelected(word),
+          color: bgColor,
+          borderColor: borderColor,
+          // a matched pair sinks flat and stays there
+          depth: matched ? 0 : null,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: 50.h),
+            child: Center(
               child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
+                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.h),
                 child: Text(
                   word,
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: fgColor,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: TextStyle(color: fgColor, fontWeight: FontWeight.w700, fontSize: 15.sp),
                 ),
               ),
             ),
           ),
+        );
+        return Padding(
+          padding: EdgeInsets.symmetric(horizontal: 2.w),
+          child: reduceMotion(context)
+              ? tile
+              : tile
+                  .animate(target: isWrong ? 1 : 0)
+                  .shakeX(duration: 400.ms, hz: 5, amount: 5)
+                  .animate(target: matched ? 1 : 0)
+                  .scaleXY(end: 0.96, duration: 160.ms, curve: Curves.easeOut)
+                  .fade(end: 0.6, duration: 260.ms),
         );
       },
     );
@@ -1093,7 +1139,7 @@ class _ScrambleQuestionWidgetState extends State<_ScrambleQuestionWidget> {
               ),
             ),
             SizedBox(height: 40.h),
-            TextField(
+            _shakeIfWrong(context, _isCorrect, TextField(
               controller: _textController,
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w600),
@@ -1113,7 +1159,7 @@ class _ScrambleQuestionWidgetState extends State<_ScrambleQuestionWidget> {
                         color: _isCorrect! ? AppColors.success : Colors.red,
                       ),
               ),
-            ),
+            )),
             SizedBox(height: 30.h),
             if (_isCorrect == false) ...[
               SizedBox(height: 12.h),
@@ -1242,7 +1288,7 @@ class _ListenAndTypeQuestionWidgetState extends State<_ListenAndTypeQuestionWidg
               ),
             ),
             SizedBox(height: 40.h),
-            TextField(
+            _shakeIfWrong(context, _isCorrect, TextField(
               controller: _textController,
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w600),
@@ -1262,7 +1308,7 @@ class _ListenAndTypeQuestionWidgetState extends State<_ListenAndTypeQuestionWidg
                         color: _isCorrect! ? AppColors.success : Colors.red,
                       ),
               ),
-            ),
+            )),
       if (_isCorrect == false) ...[
               SizedBox(height: 12.h),
               Text(
@@ -1500,21 +1546,14 @@ class _NavigationButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final enabled = onTap != null;
     return Expanded(
-      child: ElevatedButton(
-        onPressed: onTap,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: onTap == null
-              ? AppColors.primaryTint
-              : AppColors.primary,
-          foregroundColor: Colors.white,
-          elevation: 0,
-          padding: EdgeInsets.symmetric(vertical: 12.h),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14.r),
-          ),
-        ),
-        child: Icon(icon, size: 20.sp),
+      child: Press3D(
+        onTap: onTap,
+        color: enabled ? AppColors.surface : AppColors.surfaceMuted,
+        borderColor: AppColors.lineStrong,
+        padding: EdgeInsets.symmetric(vertical: 11.h),
+        child: Icon(icon, size: 20.sp, color: enabled ? AppColors.primary : AppColors.textHint),
       ),
     );
   }
@@ -1703,17 +1742,18 @@ class _LessonCompletedScreenState extends State<_LessonCompletedScreen> {
             children: [
               
               const Spacer(),
+              // the finish, after Duolingo: the title drops in, Prismo hops in a burst of beams,
+              // then the three result cards land one by one and count up
               Text(
-                'Xong bài học!',
+                percent == 100 ? 'Hoàn hảo!' : 'Xong bài học!',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: 26.sp,
+                  fontSize: 28.sp,
                   fontWeight: FontWeight.w800,
                   color: AppColors.textPrimary,
                 ),
-              ),
+              ).animate().fadeIn(duration: 260.ms).slideY(begin: -0.4, end: 0, duration: 420.ms, curve: Curves.easeOutBack),
               SizedBox(height: 16.h),
-              // the lesson's one celebration: Prismo hops inside a burst of the three beams
               Center(
                 child: PrismBurst(
                   child: Prismo(
@@ -1721,68 +1761,36 @@ class _LessonCompletedScreenState extends State<_LessonCompletedScreen> {
                     size: 170.w,
                   ),
                 ),
-              ),
-              SizedBox(height: 12.h),
-              Padding(
-                padding: EdgeInsets.only(bottom: 8.h),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Row(
-                      children: [
-                        Text(
-                          widget.summary.xpEarned > 0 ? '+${widget.summary.xpEarned}' : '0',
-                          style: AppTextStyles.h4.copyWith(
-                            color: widget.summary.xpEarned > 0 ? AppColors.textPrimary : AppColors.textHint,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        SizedBox(width: 4.w),
-                        Image.asset(
-                          'assets/brand/icons/xp.png',
-                          width: 28.w,
-                          height: 28.h,
-                          errorBuilder: (_, __, ___) => Icon(
-                            Icons.star,
-                            size: 28.sp,
-                            color: AppColors.xpGold,
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(width: 16.w),
-                    Row(
-                      children: [
-                        Text(
-                          widget.summary.scalesEarned > 0 ? '+${widget.summary.scalesEarned}' : '0',
-                          style: AppTextStyles.h4.copyWith(
-                            color: widget.summary.scalesEarned > 0 ? AppColors.primary : AppColors.textHint,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        SizedBox(width: 4.w),
-                        Image.asset(
-                          'assets/brand/icons/scale.png',
-                          width: 26.w,
-                          height: 26.h,
-                          errorBuilder: (_, __, ___) => Icon(
-                            Icons.circle,
-                            size: 24.sp,
-                            color: AppColors.primary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+              ).animate(delay: 120.ms).scaleXY(begin: 0.5, end: 1, duration: 650.ms, curve: Curves.elasticOut),
+              SizedBox(height: 20.h),
+              Row(children: [
+                _ResultCard(
+                  label: 'KINH NGHIỆM',
+                  color: AppColors.beamAmber,
+                  value: widget.summary.xpEarned,
+                  prefix: '+',
+                  icon: Icons.bolt_rounded,
+                  delay: 450.ms,
                 ),
-              ),
-
-              SizedBox(height: 12.h),
-              Text(
-                'Bạn đã trả lời đúng $percent%',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
-              ),
+                SizedBox(width: 10.w),
+                _ResultCard(
+                  label: 'CHÍNH XÁC',
+                  color: AppColors.beamMint,
+                  value: percent,
+                  suffix: '%',
+                  icon: Icons.track_changes_rounded,
+                  delay: 600.ms,
+                ),
+                SizedBox(width: 10.w),
+                _ResultCard(
+                  label: 'VẢY',
+                  color: AppColors.primary,
+                  value: widget.summary.scalesEarned,
+                  prefix: '+',
+                  icon: Icons.diamond_rounded,
+                  delay: 750.ms,
+                ),
+              ]),
               SizedBox(height: 16.h),
               if (difficult.isNotEmpty) ...[
                 Text(
@@ -1844,31 +1852,75 @@ class _LessonCompletedScreenState extends State<_LessonCompletedScreen> {
                 ),
               ],
               const Spacer(),
-              SizedBox(
-                height: 56.h,
-                child: ElevatedButton(
-                  onPressed: () async {
-                    if (Get.isRegistered<LearningTabController>()) {
-                      try {
-                        await Get.find<LearningTabController>().refreshProgress();
-                      } catch (_) {}
-                    }
-                    goBack<void>();
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
-                    textStyle: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w700),
-                  ),
-                  child: const Text('Tiếp tục'),
-                ),
-              ),
+              DuoButton(
+                label: 'Tiếp tục',
+                onPressed: () async {
+                  if (Get.isRegistered<LearningTabController>()) {
+                    try {
+                      await Get.find<LearningTabController>().refreshProgress();
+                    } catch (_) {}
+                  }
+                  goBack<void>();
+                },
+              ).animate(delay: 950.ms).fadeIn(duration: 250.ms).slideY(begin: 0.4, end: 0, curve: Curves.easeOutCubic),
             ],
           ),
         ),
       ),
+    );
+  }
+}
+
+/// One result on the finish screen: a coloured header band and a number that counts up.
+class _ResultCard extends StatelessWidget {
+  const _ResultCard({
+    required this.label,
+    required this.color,
+    required this.value,
+    required this.icon,
+    required this.delay,
+    this.prefix = '',
+    this.suffix = '',
+  });
+
+  final String label;
+  final Color color;
+  final int value;
+  final IconData icon;
+  final Duration delay;
+  final String prefix;
+  final String suffix;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Container(
+        decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(16.r)),
+        padding: EdgeInsets.all(2.w),
+        child: Column(children: [
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: 5.h),
+            child: Text(label,
+                style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w800, color: Colors.white, letterSpacing: 0.6)),
+          ),
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.symmetric(vertical: 12.h),
+            decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(14.r)),
+            child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+              Icon(icon, color: color, size: 20.sp),
+              SizedBox(width: 4.w),
+              CountUp(
+                value: value,
+                prefix: prefix,
+                suffix: suffix,
+                delay: delay,
+                style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+              ),
+            ]),
+          ),
+        ]),
+      ).animate(delay: delay).fadeIn(duration: 200.ms).scaleXY(begin: 0.6, end: 1, duration: 500.ms, curve: Curves.elasticOut),
     );
   }
 }

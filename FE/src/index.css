@@ -129,20 +129,43 @@ a { text-underline-offset: 3px; }
 .lift:hover { transform: translateY(-1px); border-color: var(--line-strong); }
 .lift:active { transform: scale(0.985); }
 
-/* buttons: flat, named for their action, pressed by a small scale */
-.learner .ant-btn { font-weight: 700; transition: transform 120ms var(--ease-out), background-color 150ms, border-color 150ms, color 150ms; }
-.learner .ant-btn:not(:disabled):active { transform: scale(0.97); }
+/*
+ * buttons: tactile, after Duolingo – each sits on a solid lip of its own darker shade and is pushed
+ * down onto it when pressed. The lip is a hard 0-blur shadow, so the button never "floats".
+ */
+.learner .ant-btn {
+  --lip: var(--line-strong); --lip-h: 4px;
+  font-weight: 700;
+  transition: transform 80ms var(--ease-out), box-shadow 80ms var(--ease-out), background-color 150ms, border-color 150ms, color 150ms;
+}
+.learner .ant-btn:not(:disabled):not(.ant-btn-variant-text):not(.ant-btn-variant-link) { box-shadow: 0 var(--lip-h) 0 var(--lip); }
+.learner .ant-btn:not(:disabled):not(.ant-btn-variant-text):not(.ant-btn-variant-link):active { transform: translateY(var(--lip-h)); box-shadow: 0 0 0 var(--lip); }
+.learner .ant-btn-sm { --lip-h: 3px; }
+/* a hand-made violet button (home CTA, the big speaker) on the same lip */
+.btn-lip { box-shadow: 0 5px 0 #4a2fc4; transition: transform 80ms var(--ease-out), box-shadow 80ms var(--ease-out), background-color 150ms; }
+.btn-lip:active { transform: translateY(5px); box-shadow: 0 0 0 #4a2fc4; }
+/* a button joined to an input (search) is part of the field: no lip of its own */
+.learner .ant-input-group-addon .ant-btn, .learner .ant-input-search-button { box-shadow: none !important; transform: none !important; }
+.learner .ant-btn-variant-solid { --lip: var(--color-brand-700); }
+.learner .ant-btn-variant-solid.ant-btn-color-dangerous { --lip: #be123c; }
+.learner .ant-btn-variant-solid.lp-ok, .learner .ant-btn-variant-solid.lp-ok:hover { background: #0e9f7b !important; --lip: #0a7a5e; }
 .learner .ant-btn-variant-outlined:not(:disabled), .learner .ant-btn-variant-dashed:not(:disabled) { border-width: 1.5px; }
+.learner .ant-btn-variant-text:not(:disabled):active, .learner .ant-btn-variant-link:not(:disabled):active { transform: scale(0.97); }
 
-/* answer choices: a quiet tile that fills with the beam colour when judged */
+/* answer choices: a tile on a lip that fills with the beam colour when judged –
+   the right one bumps up, a wrong pick shakes */
 .btn-3d {
-  border-radius: 0.875rem; border: 1.5px solid var(--line-strong); background: var(--surface);
-  transition: transform 120ms var(--ease-out), border-color 150ms, background-color 150ms, color 150ms;
+  border-radius: 0.875rem; border: 2px solid var(--line-strong); border-bottom-width: 5px; background: var(--surface);
+  transition: transform 80ms var(--ease-out), border-bottom-width 80ms var(--ease-out), margin-bottom 80ms var(--ease-out),
+    border-color 150ms, background-color 150ms, color 150ms;
 }
 .btn-3d:not(:disabled):hover { border-color: var(--color-brand-400); background: color-mix(in oklab, var(--color-brand-500) 5%, var(--surface)); }
-.btn-3d:not(:disabled):active { transform: scale(0.98); }
-.btn-3d.is-right { border-color: #10c79a; background: color-mix(in oklab, #10c79a 14%, var(--surface)); }
-.btn-3d.is-wrong { border-color: #f43f5e; background: color-mix(in oklab, #f43f5e 11%, var(--surface)); }
+.btn-3d:not(:disabled):active { transform: translateY(3px); border-bottom-width: 2px; margin-bottom: 3px; }
+.btn-3d.is-right { border-color: #10c79a; background: color-mix(in oklab, #10c79a 14%, var(--surface)); animation: lp-bump 420ms var(--ease-out); }
+.btn-3d.is-wrong { border-color: #f43f5e; background: color-mix(in oklab, #f43f5e 11%, var(--surface)); animation: lp-shake 420ms ease-in-out; }
+@keyframes lp-bump { 0% { transform: scale(1) } 35% { transform: scale(1.06) } 65% { transform: scale(0.98) } 100% { transform: scale(1) } }
+@keyframes lp-shake { 0%, 100% { transform: none } 20% { transform: translateX(-7px) } 40% { transform: translateX(6px) } 60% { transform: translateX(-4px) } 80% { transform: translateX(3px) } }
+.lp-shake { animation: lp-shake 420ms ease-in-out; }
 
 .learner .ant-progress-bg { background: var(--color-brand-600) !important; }
 .learner .ant-segmented { padding: 3px; border-radius: 12px; }
@@ -153,6 +176,11 @@ a { text-underline-offset: 3px; }
 @keyframes lp-rise { from { transform: translateY(6px); opacity: 0 } to { transform: none; opacity: 1 } }
 .animate-pop { animation: lp-pop 260ms var(--ease-out) both; }
 .animate-rise { animation: lp-rise 320ms var(--ease-out) both; }
+/* the same rise for pressable things: only before it ends (backwards), so :active can still move them */
+.animate-deal { animation: lp-rise 300ms var(--ease-out) backwards; }
+/* page changes: a quick fade (opacity only, so fixed bars inside the page stay put) */
+@keyframes lp-fade { from { opacity: 0 } to { opacity: 1 } }
+.animate-page { animation: lp-fade 220ms var(--ease-out) both; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
