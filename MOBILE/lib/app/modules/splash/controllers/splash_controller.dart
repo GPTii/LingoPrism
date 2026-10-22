@@ -24,7 +24,7 @@ class SplashController extends GetxController {
     try {
       _isLoading.value = true;
       _errorMessage.value = '';
-      await Future.delayed(const Duration(milliseconds: 1800)); // splash animation
+      await Future.delayed(const Duration(milliseconds: 2300)); // Prismo wakes up (LivingPrismoFace intro)
 
       if (await LocalStorageService.isFirstLaunch()) {
         _go(Routes.onboarding);

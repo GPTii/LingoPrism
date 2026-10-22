@@ -137,5 +137,15 @@ flutter_launcher_icons:
   image_path: "assets/brand/logo.png"
   image_path_ios: "assets/brand/logo_square.png"
   remove_alpha_ios: true
-  adaptive_icon_background: "#1585DC"
+  adaptive_icon_background: "#1899F0"
   adaptive_icon_foreground: "assets/brand/logo_foreground.png"
+
+# opening screen: Prismo's face on the brand blue; the Flutter splash (SplashView) picks up from the
+# same picture at the same size (180 dp) and brings it to life. Regenerate: dart run flutter_native_splash:create
+flutter_native_splash:
+  color: "#1899F0"
+  image: assets/brand/splash_face.png
+  android_12:
+    color: "#1899F0"
+    image: assets/brand/splash_face_android12.png
+  fullscreen: false

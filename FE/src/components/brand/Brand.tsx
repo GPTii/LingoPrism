@@ -9,23 +9,27 @@ import { useId } from 'react'
 /** useId() contains ':' / '«', which breaks url(#id) references in some browsers */
 const useSvgId = () => 'lp' + useId().replace(/[^a-zA-Z0-9]/g, '')
 
+/** The app icon: Prismo's big-eyed face on the brand blue (same drawing as FE/scripts/make-brand-mark.py). */
 export function LogoMark({ size = 36, className = '' }: { size?: number; className?: string }) {
-  const id = useSvgId()
+  const tri = 'M80 22 L138 124 L22 124 Z'
   return (
-    <svg width={size} height={size} viewBox="0 0 64 64" className={className} aria-hidden>
-      <defs>
-        <linearGradient id={`${id}bg`} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#239ff2" />
-          <stop offset="1" stopColor="#0f6fb0" />
-        </linearGradient>
-      </defs>
-      <rect width="64" height="64" rx="16" fill={`url(#${id}bg)`} />
-      <path d="M5 37 L23 33" stroke="#fff" strokeWidth="3.5" strokeLinecap="round" opacity="0.9" />
-      <path d="M32 13 L49 46 L15 46 Z" fill="#fff" stroke="#fff" strokeWidth="5" strokeLinejoin="round" />
-      <path d="M32 16 L32 44 L19 44 Z" fill="#d0ebfd" />
-      <path d="M43 32 L60 25" stroke="#ffb020" strokeWidth="4" strokeLinecap="round" />
-      <path d="M44 36 L61 35" stroke="#10c79a" strokeWidth="4" strokeLinecap="round" />
-      <path d="M43 40 L59 45" stroke="#ff6b81" strokeWidth="4" strokeLinecap="round" />
+    <svg width={size} height={size} viewBox="0 0 160 160" className={className} aria-hidden>
+      <rect width="160" height="160" rx="40" fill="#1899f0" />
+      <g transform="translate(4.8 4.8) scale(0.94)">
+        <g strokeWidth="7" strokeLinecap="round">
+          <path d="M131 95 L152 84" stroke="#ffb020" /><path d="M134 104 L157 104" stroke="#10c79a" /><path d="M131 113 L152 124" stroke="#ff6b81" />
+        </g>
+        <path d={tri} transform="translate(0 7)" fill="#0f78c8" stroke="#0f78c8" strokeWidth="22" strokeLinejoin="round" />
+        <path d={tri} fill="#5cc6ff" stroke="#5cc6ff" strokeWidth="22" strokeLinejoin="round" />
+        {[60, 100].map((x) => (
+          <g key={x}>
+            <ellipse cx={x} cy="89" rx="17.5" ry="21" fill="#fff" />
+            <ellipse cx={x + 3} cy="93" rx="8.5" ry="10.5" fill="#15233b" />
+            <circle cx={x + 6.5} cy="87.5" r="3.4" fill="#fff" />
+          </g>
+        ))}
+        <path d="M73 113 Q80 120 87 113" fill="none" stroke="#15233b" strokeWidth="4" strokeLinecap="round" />
+      </g>
     </svg>
   )
 }
