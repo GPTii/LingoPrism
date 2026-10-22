@@ -1,5 +1,13 @@
 import { api } from './client'
-import type { AuthResponse, User } from './types'
+import type { AuthResponse, User, UserGoal } from './types'
+
+export interface NotificationSettings {
+  push_enabled: boolean
+  social_enabled: boolean
+  contextual_allowed: boolean
+  morning_time: string | null
+  evening_time: string | null
+}
 
 export const authApi = {
   login: (email: string, password: string) =>
@@ -17,4 +25,16 @@ export const authApi = {
     api.post('/auth/password/reset/', { reset_token, new_password }),
   me: () => api.get<User>('/me/').then((r) => r.data),
   updateMe: (data: Partial<User>) => api.patch<User>('/me/', data).then((r) => r.data),
+  uploadAvatar: (file: File) => {
+    const form = new FormData()
+    form.append('avatar', file)
+    return api.patch<User>('/me/', form).then((r) => r.data)
+  },
+  goal: () => api.get<UserGoal>('/me/goal/').then((r) => r.data),
+  updateGoal: (data: Partial<UserGoal>) => api.patch<UserGoal>('/me/goal/', data).then((r) => r.data),
+  /** signs out every device afterwards */
+  changePassword: (old_password: string, new_password: string) => api.post('/auth/password/change/', { old_password, new_password }),
+  notificationSettings: () => api.get<NotificationSettings>('/notification-settings/').then((r) => r.data),
+  updateNotificationSettings: (data: Partial<NotificationSettings>) =>
+    api.patch<NotificationSettings>('/notification-settings/', data).then((r) => r.data),
 }

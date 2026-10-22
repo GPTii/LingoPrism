@@ -9,7 +9,7 @@ export type NavLeaf = { to: string; label: string; icon: AppIconName; only?: str
 export type NavGroup = { key: string; label: string; icon: AppIconName; to?: string; children?: NavLeaf[] }
 
 /** The whole app in groups; the counts make the work waiting inside each one visible. */
-export function navGroups(counts: { due?: number; unread?: number; quests?: number; dm?: number }): NavGroup[] {
+export function navGroups(counts: { due?: number; unread?: number; quests?: number; dm?: number; friends?: number }): NavGroup[] {
   return [
     { key: 'home', label: 'Hôm nay', icon: 'home', to: '/' },
     {
@@ -38,6 +38,8 @@ export function navGroups(counts: { due?: number; unread?: number; quests?: numb
     {
       key: 'community', label: 'Cộng đồng', icon: 'community', children: [
         { to: '/community?tab=feed', label: 'Bảng tin', icon: 'news' },
+        { to: '/friends', label: 'Bạn bè', icon: 'community', count: counts.friends, adults: true },
+        { to: '/community?tab=saved', label: 'Bài đã lưu', icon: 'bookmark', adults: true },
         { to: '/community?tab=groups', label: 'Nhóm học', icon: 'group' },
         { to: '/community?tab=leaderboard', label: 'Bảng xếp hạng', icon: 'podium' },
         { to: '/messages', label: 'Tin nhắn', icon: 'mail', count: counts.dm, adults: true },

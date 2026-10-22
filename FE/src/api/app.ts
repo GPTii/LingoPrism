@@ -112,8 +112,10 @@ export interface AppNotification {
   title: string
   body: string
   image: string
-  data: { route?: string; [k: string]: unknown }
+  data: { route?: string; action?: 'friend_request' | 'group_request'; request_id?: number; group_id?: number; member_id?: number; user_id?: number; [k: string]: unknown }
   read: boolean
+  /** a request answered right from the notification: still pending, already accepted, or gone (declined / cancelled) */
+  action_state: 'pending' | 'accepted' | 'gone' | null
   created_at: string
 }
 
@@ -128,8 +130,29 @@ export const notificationApi = {
 
 export interface Author {
   id: number
+  public_id?: string
   display_name: string
   avatar: string | null
+}
+
+/** where I stand with someone: not friends, friends, I asked (outgoing), they asked (incoming) */
+export type FriendStatus = 'none' | 'friends' | 'outgoing' | 'incoming'
+
+export interface Person extends Author {
+  public_id: string
+  bio: string
+  active_language: string
+  friend_status: FriendStatus
+  friend_request_id: number | null
+  is_following: boolean
+  since?: string
+}
+
+export interface FriendRequestItem {
+  id: number
+  message: string
+  created_at: string
+  user: Person
 }
 
 export interface Post {
@@ -141,6 +164,8 @@ export interface Post {
   like_count: number
   comment_count: number
   liked: boolean
+  /** in my "Bài đã lưu" */
+  saved: boolean
   save_count: number
   words: WordCard[]
   created_at: string
@@ -152,6 +177,8 @@ export interface PostComment {
   kind: 'text' | 'sticker'
   content: string
   sticker: string
+  /** I wrote it, or it is on my post */
+  can_delete: boolean
   created_at: string
 }
 
@@ -190,7 +217,13 @@ export interface ChatMessage {
 }
 
 export interface CommunityProfile extends Author {
+  public_id: string
   bio: string
+  friend_status: FriendStatus
+  friend_request_id: number | null
+  /** their hello, when they sent me a request */
+  friend_message: string
+  friends: number
   followers: number
   following: number
   posts: number
@@ -229,7 +262,22 @@ export const communityApi = {
   remove: (id: number) => api.delete(`/posts/${id}/`),
   like: (id: number, like: boolean) => (like ? api.post(`/posts/${id}/like/`) : api.delete(`/posts/${id}/like/`)),
   comments: (id: number) => api.get<PostComment[]>(`/posts/${id}/comments/`).then((r) => r.data),
+  post: (id: number) => api.get<Post>(`/posts/${id}/`).then((r) => r.data),
   comment: (id: number, content: string) => api.post<PostComment>(`/posts/${id}/comments/`, { kind: 'text', content }).then((r) => r.data),
+  deleteComment: (postId: number, commentId: number) => api.delete(`/posts/${postId}/comments/${commentId}/`),
+  bookmark: (id: number, save: boolean) =>
+    (save ? api.post(`/posts/${id}/bookmark/`) : api.delete(`/posts/${id}/bookmark/`)).then((r) => r.data as { saved: boolean }),
+  search: (q: string) => api.get<Person[]>('/community/users/search/', { params: { q } }).then((r) => r.data),
+  friends: () => api.get<Person[]>('/community/users/friends/').then((r) => r.data),
+  friendRequests: (box: 'incoming' | 'outgoing') =>
+    api.get<FriendRequestItem[]>('/community/users/friend-requests/', { params: { box } }).then((r) => r.data),
+  /** send a request (with a hello) – or accept theirs if they already asked */
+  addFriend: (userId: number, message = '') =>
+    api.post<{ friend_status: FriendStatus; friend_request_id: number }>(`/community/users/${userId}/friend/`, { message }).then((r) => r.data),
+  /** cancel my request, decline theirs, or unfriend */
+  removeFriend: (userId: number) => api.delete(`/community/users/${userId}/friend/`),
+  answerFriend: (requestId: number, decision: 'accept' | 'decline') =>
+    api.post<{ friend_status: FriendStatus }>(`/community/users/friend-requests/${requestId}/${decision}/`).then((r) => r.data),
   report: (id: number, reason: string, details: string) => api.post(`/posts/${id}/report/`, { reason, details }),
   saveWords: (id: number) => api.post<{ added: number }>(`/posts/${id}/save-words/`).then((r) => r.data),
   profile: (userId: number) => api.get<CommunityProfile>(`/community/users/${userId}/profile/`).then((r) => r.data),

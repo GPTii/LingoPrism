@@ -19,6 +19,8 @@ import DetectionHistoryPage from './pages/learner/DetectionHistoryPage'
 import CommunityPage from './pages/learner/CommunityPage'
 import GroupPage from './pages/learner/GroupPage'
 import MemberProfilePage from './pages/learner/MemberProfilePage'
+import FriendsPage from './pages/learner/FriendsPage'
+import PostPage from './pages/learner/PostPage'
 import { ExamListPage, ExamResultPage, ExamTakePage } from './pages/learner/ExamsPages'
 import MapPage from './pages/learner/MapPage'
 import AchievementsPage from './pages/learner/AchievementsPage'
@@ -62,6 +64,8 @@ export default function App() {
           <Route path="community" element={<CommunityPage />} />
           <Route path="community/groups/:id" element={<GroupPage />} />
           <Route path="community/users/:id" element={<MemberProfilePage />} />
+          <Route path="community/posts/:id" element={<PostPage />} />
+          <Route path="friends" element={<FriendsPage />} />
           <Route path="exams" element={<ExamListPage />} />
           <Route path="exams/:id" element={<ExamTakePage />} />
           <Route path="exams/results/:id" element={<ExamResultPage />} />

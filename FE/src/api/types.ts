@@ -11,6 +11,8 @@ export interface UserGoal {
 
 export interface User {
   id: number
+  /** 8 digits, shown as "ID của tôi" – friends find each other by it */
+  public_id: string
   email: string
   display_name: string
   avatar: string | null

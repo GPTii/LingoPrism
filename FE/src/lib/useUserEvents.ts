@@ -31,6 +31,16 @@ export function useUserEvents() {
         if (!(e.payload.kind === 'message' && window.location.pathname.startsWith('/messages')))
           notification.info({ message: String(e.payload.title ?? ''), description: String(e.payload.body ?? ''), placement: 'topRight' })
         queryClient.invalidateQueries({ queryKey: ['notifications'] })
+        // a friend request / answer, or someone asking into my group: the counts and lists change too
+        const kind = String(e.payload.kind ?? '')
+        if (kind.startsWith('friend_')) {
+          queryClient.invalidateQueries({ queryKey: ['friend-requests'] })
+          queryClient.invalidateQueries({ queryKey: ['friends'] })
+          queryClient.invalidateQueries({ queryKey: ['profile'] })
+        } else if (kind.startsWith('group')) {
+          queryClient.invalidateQueries({ queryKey: ['groups'] })
+          queryClient.invalidateQueries({ queryKey: ['members'] })
+        }
       } else if (e.event === 'dm' || e.event === 'dm_read') {
         // the open conversation listens for this; the list of conversations just reloads
         window.dispatchEvent(new CustomEvent('lingoprism:dm', { detail: { event: e.event, payload: e.payload } }))

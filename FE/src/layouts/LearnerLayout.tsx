@@ -2,7 +2,7 @@ import type React from 'react'
 import { App, Avatar, Badge, ConfigProvider, Drawer, Dropdown, Grid, Select, Tooltip } from 'antd'
 import { useEffect, useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { gameApi, messagesApi } from '../api/app'
+import { communityApi, gameApi, messagesApi } from '../api/app'
 import { authApi } from '../api/auth'
 import { CameraFilled, LogoutOutlined, MoonOutlined, SettingOutlined, SunOutlined, UserOutlined } from '@ant-design/icons'
 import { Navigate, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
@@ -96,11 +96,13 @@ export default function LearnerLayout() {
   const quests = useQuery({ queryKey: ['quests'], queryFn: gameApi.quests, enabled: !!user })
   const isKid = user?.learner_type === 'kid'
   const dmThreads = useQuery({ queryKey: ['dm-threads'], queryFn: messagesApi.threads, enabled: !!user && !isKid })
+  const friendRequests = useQuery({ queryKey: ['friend-requests', 'incoming'], queryFn: () => communityApi.friendRequests('incoming'), enabled: !!user && !isKid })
   const groups = navGroups({
     due: library.data?.due,
     unread,
     quests: quests.data?.quests.filter((q) => !q.completed).length,
     dm: dmThreads.data?.reduce((n, t) => n + t.unread, 0),
+    friends: friendRequests.data?.length,
   }).map((g) => ({ ...g, children: g.children?.filter((c) => (!c.only || c.only === user?.active_language) && !(c.adults && isKid)) }))
 
   useEffect(() => {

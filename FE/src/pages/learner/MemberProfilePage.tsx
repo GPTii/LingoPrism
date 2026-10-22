@@ -6,6 +6,7 @@ import { errorMessage } from '../../api/client'
 import { useAuth } from '../../auth/store'
 import { StreakIcon, XpIcon } from '../../components/brand/Brand'
 import { Facts, PageHeader, Section, UserAvatar } from '../../components/ui'
+import { FriendButton } from '../../components/Friends'
 import { MessageButton } from './MessagesPage'
 import { ReportUserButton } from './ReportUser'
 
@@ -49,6 +50,7 @@ export default function MemberProfilePage() {
             <UserAvatar name={p.display_name} src={p.avatar} size={64} />
             <span className="min-w-0">
               {p.display_name}
+              <span className="num block text-sm font-semibold text-slate-500 mt-0.5 tracking-normal">ID {p.public_id}</span>
               {p.groups[0] && <span className="block text-base font-medium text-slate-500 mt-0.5">Nhóm {p.groups[0].name}</span>}
             </span>
           </span>
@@ -56,16 +58,29 @@ export default function MemberProfilePage() {
         description={p.bio || undefined}
         actions={p.id !== me?.id && (
           <span className="flex gap-2">
+            {!p.blocked && p.friend_status !== 'incoming' && (
+              <FriendButton userId={p.id} name={p.display_name} status={p.friend_status} requestId={p.friend_request_id} size="large" />
+            )}
             {p.can_message && <MessageButton userId={p.id} />}
-            {!p.blocked && <Button size="large" type={p.is_following ? 'default' : 'primary'} onClick={toggle}>{p.is_following ? 'Đang theo dõi' : 'Theo dõi'}</Button>}
+            {!p.blocked && <Button size="large" type="default" onClick={toggle}>{p.is_following ? 'Đang theo dõi' : 'Theo dõi'}</Button>}
             <Button size="large" type="text" danger={!p.blocked} onClick={toggleBlock}>{p.blocked ? 'Bỏ chặn' : 'Chặn'}</Button>
             <ReportUserButton userId={p.id} name={p.display_name} blocked={p.blocked} onDone={() => profile.refetch()} />
           </span>
         )} />
+      {p.friend_status === 'incoming' && !p.blocked && (
+        <section className="lp-card p-5 border-brand-200 bg-brand-50 flex flex-col sm:flex-row sm:items-center gap-3">
+          <div className="flex-1 min-w-0">
+            <div className="font-bold text-slate-800">{p.display_name} muốn kết bạn với bạn</div>
+            {p.friend_message && <div className="text-slate-700 mt-1 whitespace-pre-wrap">“{p.friend_message}”</div>}
+          </div>
+          <FriendButton userId={p.id} name={p.display_name} status="incoming" requestId={p.friend_request_id} />
+        </section>
+      )}
       <Section>
         <Facts items={[
           { label: 'tổng XP', value: p.lifetime_xp.toLocaleString('vi-VN'), icon: <XpIcon size={22} /> },
           { label: 'ngày liên tiếp', value: p.streak, icon: <StreakIcon size={22} /> },
+          { label: 'bạn bè', value: p.friends },
           { label: 'bài đăng', value: p.posts },
           { label: 'người theo dõi', value: p.followers },
           { label: 'đang theo dõi', value: p.following },

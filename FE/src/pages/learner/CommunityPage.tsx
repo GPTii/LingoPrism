@@ -1,12 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { App, Button, Form, Input, Modal, Select, Segmented, Skeleton, Switch, Upload } from 'antd'
-import { HeartFilled, HeartOutlined, MessageOutlined, SaveOutlined, FlagOutlined, PlusOutlined, CrownFilled } from '@ant-design/icons'
+import { HeartFilled, HeartOutlined, MessageOutlined, SaveOutlined, FlagOutlined, PlusOutlined, CrownFilled, TeamOutlined } from '@ant-design/icons'
 import { useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import 'dayjs/locale/vi'
-import { communityApi, gameApi, type Post } from '../../api/app'
+import { communityApi, gameApi, type Post, type StudyGroup } from '../../api/app'
 import { errorMessage } from '../../api/client'
 import { vocabApi } from '../../api/vocab'
 import { useAuth } from '../../auth/store'
@@ -17,16 +17,52 @@ import { EmptyState, PageHeader, UserAvatar } from '../../components/ui'
 dayjs.extend(relativeTime)
 dayjs.locale('vi')
 
-function PostCard({ post }: { post: Post }) {
-  const { message } = App.useApp()
+/** A bookmark outline, filled when the post is in "Bài đã lưu". */
+function BookmarkIcon({ filled }: { filled: boolean }) {
+  return (
+    <svg width="1em" height="1em" viewBox="0 0 24 24" aria-hidden className={filled ? 'text-brand-600' : ''}>
+      <path d="M6 3.5h12a1 1 0 0 1 1 1V21l-7-4.5L5 21V4.5a1 1 0 0 1 1-1Z" fill={filled ? 'currentColor' : 'none'}
+        stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+export function PostCard({ post, commentsOpen = false }: { post: Post; commentsOpen?: boolean }) {
+  const { message, modal } = App.useApp()
   const queryClient = useQueryClient()
   const navigate = useNavigate()
   const me = useAuth((s) => s.user)
   const [liked, setLiked] = useState(post.liked)
   const [likes, setLikes] = useState(post.like_count)
-  const [open, setOpen] = useState(false)
+  const [saved, setSaved] = useState(post.saved)
+  const [commentCount, setCommentCount] = useState(post.comment_count)
+  const [open, setOpen] = useState(commentsOpen)
   const [text, setText] = useState('')
   const comments = useQuery({ queryKey: ['comments', post.id], queryFn: () => communityApi.comments(post.id), enabled: open })
+
+  const toggleSave = async () => {
+    setSaved(!saved)
+    try {
+      await communityApi.bookmark(post.id, !saved)
+      message.success(saved ? 'Đã bỏ khỏi Bài đã lưu' : 'Đã lưu bài viết')
+      queryClient.invalidateQueries({ queryKey: ['feed', 'saved'] })
+    } catch (e) {
+      setSaved(saved)
+      message.error(errorMessage(e))
+    }
+  }
+  const removeComment = (id: number) => modal.confirm({
+    title: 'Xoá bình luận này?', okText: 'Xoá', okButtonProps: { danger: true }, cancelText: 'Huỷ',
+    onOk: async () => {
+      try {
+        await communityApi.deleteComment(post.id, id)
+        setCommentCount((n) => Math.max(0, n - 1))
+        comments.refetch()
+      } catch (e) {
+        message.error(errorMessage(e))
+      }
+    },
+  })
 
   const toggleLike = async () => {
     setLiked(!liked)
@@ -44,6 +80,7 @@ function PostCard({ post }: { post: Post }) {
     try {
       await communityApi.comment(post.id, text)
       setText('')
+      setCommentCount((n) => n + 1)
       comments.refetch()
     } catch (e) {
       message.error(errorMessage(e))
@@ -84,7 +121,10 @@ function PostCard({ post }: { post: Post }) {
         </button>
         <div className="flex-1" />
         {post.author.id === me?.id ? (
-          <Button type="text" danger onClick={async () => { await communityApi.remove(post.id); queryClient.invalidateQueries({ queryKey: ['feed'] }) }}>Xoá</Button>
+          <Button type="text" danger onClick={() => modal.confirm({
+            title: 'Xoá bài viết này?', okText: 'Xoá', okButtonProps: { danger: true }, cancelText: 'Huỷ',
+            onOk: async () => { await communityApi.remove(post.id); queryClient.invalidateQueries({ queryKey: ['feed'] }); if (commentsOpen) navigate('/community') },
+          })}>Xoá</Button>
         ) : (
           <Button type="text" icon={<FlagOutlined />} onClick={report} aria-label="Báo cáo bài đăng" />
         )}
@@ -103,7 +143,10 @@ function PostCard({ post }: { post: Post }) {
         )}
         <div className="flex gap-2">
           <Button type="text" aria-pressed={liked} aria-label={liked ? 'Bỏ thích' : 'Thích'} icon={liked ? <HeartFilled className="text-red-500" /> : <HeartOutlined />} onClick={toggleLike}><span className="num">{likes}</span></Button>
-          <Button type="text" aria-expanded={open} aria-label="Bình luận" icon={<MessageOutlined />} onClick={() => setOpen(!open)}><span className="num">{post.comment_count}</span></Button>
+          <Button type="text" aria-expanded={open} aria-label="Bình luận" icon={<MessageOutlined />} onClick={() => setOpen(!open)}><span className="num">{commentCount}</span></Button>
+          <Button type="text" aria-pressed={saved} aria-label={saved ? 'Bỏ lưu bài viết' : 'Lưu bài viết'} icon={<BookmarkIcon filled={saved} />} onClick={toggleSave}>
+            {saved ? 'Đã lưu' : 'Lưu bài'}
+          </Button>
           {post.words.length > 0 && (
             <Button type="text" icon={<SaveOutlined />} onClick={async () => {
               try { const r = await communityApi.saveWords(post.id); message.success(`Đã lưu ${r.added} từ`) } catch (e) { message.error(errorMessage(e)) }
@@ -112,10 +155,19 @@ function PostCard({ post }: { post: Post }) {
         </div>
         {open && (
           <div className="flex flex-col gap-2.5 border-t border-slate-200 pt-3">
+            {comments.isLoading && <Skeleton active paragraph={{ rows: 2 }} title={false} />}
+            {comments.data?.length === 0 && <div className="text-sm text-slate-500">Chưa có bình luận. Hãy là người đầu tiên!</div>}
             {comments.data?.map((c) => (
-              <div key={c.id} className="flex gap-2 text-sm">
-                <UserAvatar name={c.author.display_name} src={c.author.avatar} size={26} />
-                <div><b className="font-semibold text-slate-800">{c.author.display_name}</b> <span className="text-slate-700">{c.content}</span></div>
+              <div key={c.id} className="group flex gap-2 text-sm">
+                <Link to={`/community/users/${c.author.id}`}><UserAvatar name={c.author.display_name} src={c.author.avatar} size={26} /></Link>
+                <div className="flex-1 min-w-0">
+                  <Link to={`/community/users/${c.author.id}`} className="font-semibold !text-slate-800">{c.author.display_name}</Link>{' '}
+                  <span className="text-slate-700 break-words">{c.kind === 'sticker' ? `[sticker ${c.sticker}]` : c.content}</span>
+                  <span className="block text-xs text-slate-500 mt-0.5">
+                    {dayjs(c.created_at).fromNow()}
+                    {c.can_delete && <button type="button" className="ml-3 cursor-pointer font-semibold text-slate-500 hover:text-red-600" onClick={() => removeComment(c.id)}>Xoá</button>}
+                  </span>
+                </div>
               </div>
             ))}
             <Input.Search placeholder="Viết bình luận…" enterButton="Gửi" value={text} onChange={(e) => setText(e.target.value)} onSearch={send} />
@@ -172,11 +224,31 @@ function Groups() {
   const groups = useQuery({ queryKey: ['groups'], queryFn: () => communityApi.groups() })
   const [creating, setCreating] = useState(false)
   const [form] = Form.useForm()
+  const [asking, setAsking] = useState<StudyGroup | null>(null)
+  const [hello, setHello] = useState('')
   const join = useMutation({
-    mutationFn: (id: number) => communityApi.join(id),
-    onSuccess: (r) => { message.success(r.status === 'pending' ? 'Đã gửi yêu cầu, chờ trưởng nhóm duyệt' : 'Đã tham gia nhóm'); queryClient.invalidateQueries({ queryKey: ['groups'] }) },
+    mutationFn: ({ id, message: m }: { id: number; message: string }) => communityApi.join(id, m),
+    onSuccess: (r) => {
+      message.success(r.status === 'pending' ? 'Đã gửi yêu cầu, trưởng nhóm sẽ nhận được thông báo' : 'Đã tham gia nhóm')
+      setAsking(null)
+      queryClient.invalidateQueries({ queryKey: ['groups'] })
+    },
     onError: (e) => message.error(errorMessage(e)),
   })
+  const cancel = async (id: number) => {
+    try {
+      await communityApi.leave(id)
+      message.success('Đã huỷ yêu cầu')
+      queryClient.invalidateQueries({ queryKey: ['groups'] })
+    } catch (e) {
+      message.error(errorMessage(e))
+    }
+  }
+  const ask = (g: StudyGroup) => {
+    if (!g.require_approval) return join.mutate({ id: g.id, message: '' })
+    setHello('')
+    setAsking(g)
+  }
   const create = async () => {
     const v = await form.validateFields()
     try {
@@ -201,8 +273,13 @@ function Groups() {
             </div>
             {g.my_status === 'active' ? (
               <Button type="primary" onClick={() => navigate(`/community/groups/${g.id}`)}>Vào nhóm</Button>
-            ) : g.my_status === 'pending' ? <span className="text-sm font-semibold text-amber-700 whitespace-nowrap">Chờ duyệt</span> : (
-              <Button loading={join.isPending} onClick={() => join.mutate(g.id)}>Tham gia</Button>
+            ) : g.my_status === 'pending' ? (
+              <span className="flex flex-col items-end gap-1 shrink-0">
+                <span className="text-sm font-semibold text-amber-700 whitespace-nowrap">Chờ duyệt</span>
+                <Button size="small" type="text" onClick={() => cancel(g.id)}>Huỷ yêu cầu</Button>
+              </span>
+            ) : (
+              <Button loading={join.isPending && join.variables?.id === g.id} onClick={() => ask(g)}>{g.require_approval ? 'Xin vào nhóm' : 'Tham gia'}</Button>
             )}
           </li>
         ))}
@@ -210,10 +287,22 @@ function Groups() {
       {groups.data?.length === 0 && (
         <div className="lp-card"><EmptyState art={<Prismo mood="wow" size={88} />} title="Chưa có nhóm học nào" description="Tạo nhóm đầu tiên và rủ bạn bè cùng học." /></div>
       )}
+      <Modal title={asking ? `Xin vào nhóm ${asking.name}` : ''} open={!!asking} okText="Gửi yêu cầu" cancelText="Huỷ"
+        confirmLoading={join.isPending} onCancel={() => setAsking(null)}
+        onOk={() => asking && join.mutate({ id: asking.id, message: hello.trim() })}>
+        {asking?.description && (
+          <div className="rounded-xl bg-slate-100 px-3 py-2 text-sm text-slate-700 mb-3">
+            <b className="block text-slate-800">Giới thiệu / yêu cầu của nhóm</b>{asking.description}
+          </div>
+        )}
+        <p className="text-slate-600 mt-0">Giới thiệu ngắn về bạn – trưởng nhóm đọc trong thông báo trước khi duyệt.</p>
+        <Input.TextArea value={hello} onChange={(e) => setHello(e.target.value)} maxLength={200} showCount autoSize={{ minRows: 3, maxRows: 6 }}
+          placeholder="VD: Mình đang ôn HSK 3, mỗi tối học 20 phút, muốn tìm bạn cùng luyện nói." aria-label="Giới thiệu bản thân" />
+      </Modal>
       <Modal title="Tạo nhóm học" open={creating} onOk={create} onCancel={() => setCreating(false)} okText="Tạo nhóm" cancelText="Huỷ">
         <Form form={form} layout="vertical" initialValues={{ require_approval: false }}>
           <Form.Item name="name" label="Tên nhóm" rules={[{ required: true, message: 'Đặt tên cho nhóm' }]}><Input /></Form.Item>
-          <Form.Item name="description" label="Yêu cầu / mô tả"><Input.TextArea /></Form.Item>
+          <Form.Item name="description" label="Giới thiệu / yêu cầu của nhóm"><Input.TextArea maxLength={300} showCount placeholder="Nhóm học gì, mỗi tuần làm gì, cần điều kiện gì để vào" /></Form.Item>
           <Form.Item name="require_approval" label="Cần trưởng nhóm duyệt" valuePropName="checked"><Switch /></Form.Item>
         </Form>
       </Modal>
@@ -300,22 +389,32 @@ export default function CommunityPage() {
   const user = useAuth((s) => s.user)
   const [params, setParams] = useSearchParams()
   const isKidUser = user?.learner_type === 'kid'
-  const asked = params.get('tab') as 'feed' | 'groups' | 'leaderboard' | null
-  const tab = isKidUser ? 'leaderboard' : asked && ['feed', 'groups', 'leaderboard'].includes(asked) ? asked : 'feed'
+  const asked = params.get('tab') as 'feed' | 'saved' | 'groups' | 'leaderboard' | null
+  const tab = isKidUser ? 'leaderboard' : asked && ['feed', 'saved', 'groups', 'leaderboard'].includes(asked) ? asked : 'feed'
   const setTab = (t: typeof tab) => setParams({ tab: t }, { replace: true })
   const feed = useQuery({ queryKey: ['feed'], queryFn: () => communityApi.feed(), enabled: tab === 'feed' })
+  const saved = useQuery({ queryKey: ['feed', 'saved'], queryFn: () => communityApi.feed({ saved: 1 }), enabled: tab === 'saved' })
   const isKid = user?.learner_type === 'kid'
+  const requests = useQuery({ queryKey: ['friend-requests', 'incoming'], queryFn: () => communityApi.friendRequests('incoming'), enabled: !isKid })
   return (
     <div className="max-w-3xl mx-auto flex flex-col gap-5">
       <PageHeader title="Cộng đồng" description="Chia sẻ ảnh kèm từ vựng, học cùng nhóm và đua XP mỗi tuần."
-        actions={tab === 'feed' && !isKid ? <NewPost /> : undefined} />
+        actions={!isKid && (
+          <span className="flex gap-2">
+            <Link to="/friends"><Button icon={<TeamOutlined />}>Bạn bè{requests.data?.length ? <span className="num ml-1 rounded-full bg-brand-600 text-white text-xs px-1.5">{requests.data.length}</span> : null}</Button></Link>
+            {tab === 'feed' && <NewPost />}
+          </span>
+        )} />
       <Segmented value={tab} onChange={(v) => setTab(v as typeof tab)} options={[
-        ...(isKid ? [] : [{ value: 'feed', label: 'Bảng tin' }, { value: 'groups', label: 'Nhóm học' }]),
+        ...(isKid ? [] : [{ value: 'feed', label: 'Bảng tin' }, { value: 'saved', label: 'Đã lưu' }, { value: 'groups', label: 'Nhóm học' }]),
         { value: 'leaderboard', label: 'Bảng xếp hạng' },
       ]} />
       {tab === 'feed' && <Suggestions />}
       {tab === 'feed' && (feed.isLoading ? <Skeleton active /> : feed.data?.results.length ? feed.data.results.map((p) => <PostCard key={p.id} post={p} />) : (
         <div className="lp-card"><EmptyState art={<Prismo mood="wow" size={88} />} title="Bảng tin còn trống" description="Chụp một đồ vật rồi đăng ảnh kèm từ vựng để mọi người cùng học." /></div>
+      ))}
+      {tab === 'saved' && (saved.isLoading ? <Skeleton active /> : saved.data?.results.length ? saved.data.results.map((p) => <PostCard key={p.id} post={p} />) : (
+        <div className="lp-card"><EmptyState art={<Prismo mood="happy" size={88} />} title="Chưa lưu bài nào" description="Bấm “Lưu bài” dưới một bài viết để xem lại ở đây." /></div>
       ))}
       {tab === 'groups' && <Groups />}
       {tab === 'leaderboard' && <LeaderboardTab />}
