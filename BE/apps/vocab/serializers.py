@@ -61,8 +61,11 @@ class AdminTranslationSerializer(serializers.ModelSerializer):
 class AdminExampleSerializer(serializers.ModelSerializer):
     class Meta:
         model = ExampleSentence
-        fields = ["id", "word", "language", "text", "transliteration", "translation_vi", "translation_en",
-                  "source", "source_id", "license", "status"]
+        fields = ["id", "word", "word_slug", "language", "text", "transliteration", "translation_vi", "translation_en",
+                  "source", "source_id", "license", "status", "tokens", "target_tokens", "checks"]
+        read_only_fields = ["checks"]
+
+    word_slug = serializers.CharField(source="word.slug", read_only=True)
 
 
 class AdminWordSerializer(serializers.ModelSerializer):

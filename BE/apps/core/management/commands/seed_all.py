@@ -14,7 +14,9 @@ class Command(BaseCommand):
         if not sources_available():
             call_command("fetch_sources")
         call_command("build_vocab", offline=offline)
+        call_command("import_tatoeba")
         call_command("seed_gamification")
         call_command("generate_exams")
         call_command("seed_pois")
         call_command("seed_demo_users")
+        call_command("seed_demo_activity")

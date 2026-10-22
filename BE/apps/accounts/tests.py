@@ -66,6 +66,33 @@ def test_admin_users_requires_admin(client):
     assert client.get("/api/v1/admin/users/").status_code == 403
 
 
+def test_admin_user_crud(client):
+    from apps.accounts.models import User
+
+    admin = User.objects.create_superuser("root@example.com", "Strong!Pass123")
+    client.force_authenticate(admin)
+
+    res = client.post("/api/v1/admin/users/", {
+        "email": "New@Example.com", "password": "Strong!Pass123", "display_name": "Lan",
+        "role": "staff", "active_language": "zh", "zh_script": "hant",
+    }, format="json")
+    assert res.status_code == 201, res.data
+    uid = res.data["id"]
+    assert res.data["email"] == "new@example.com" and "password" not in res.data
+    assert res.data["learning_languages"] == ["zh"]
+    assert client.post("/api/v1/admin/users/", {"email": "x@example.com"}, format="json").status_code == 400
+
+    res = client.patch(f"/api/v1/admin/users/{uid}/", {"display_name": "Lan 2", "password": "Another!Pass456"}, format="json")
+    assert res.status_code == 200 and res.data["display_name"] == "Lan 2"
+    assert APIClient().post("/api/v1/auth/login/", {"email": "new@example.com", "password": "Another!Pass456"},
+                            format="json").status_code == 200
+
+    assert client.patch(f"/api/v1/admin/users/{admin.id}/", {"role": "learner"}, format="json").status_code == 400
+    assert client.delete(f"/api/v1/admin/users/{admin.id}/").status_code == 400
+    assert client.delete(f"/api/v1/admin/users/{uid}/").status_code == 204
+    assert not User.objects.filter(pk=uid).exists()
+
+
 def test_google_config_is_off_without_client_ids(client, settings):
     settings.GOOGLE_WEB_CLIENT_ID = ""
     assert client.get("/api/v1/auth/google/config/").data == {"client_id": None}

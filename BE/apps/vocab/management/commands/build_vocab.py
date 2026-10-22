@@ -1,6 +1,7 @@
 import csv
 from collections import Counter
 
+from django.core.files import File
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
@@ -37,6 +38,9 @@ class Command(BaseCommand):
         flagged = []
         with open(concepts / "words.csv", encoding="utf-8") as fh:
             rows = list(csv.DictReader(fh))
+        if (concepts / "words_approved.csv").exists():  # words approved by teachers in the admin queue
+            with open(concepts / "words_approved.csv", encoding="utf-8") as fh:
+                rows += list(csv.DictReader(fh))
         for i, row in enumerate(rows):
             if only and row["slug"] not in only:
                 continue
@@ -48,6 +52,9 @@ class Command(BaseCommand):
             if i % 25 == 0:
                 sources.moedict().save()
         sources.moedict().save()
+        self._emoji(concepts / "emoji.csv")
+        self._images(concepts / "images.csv", sources.SEED_DIR / "images")
+        self._levels(concepts / "levels.csv")
 
         self.stdout.write("")
         for code, *_ in LANGUAGES:
@@ -82,6 +89,16 @@ class Command(BaseCommand):
                 )
 
     @transaction.atomic
+    def _emoji(self, path):
+        if not path.exists():
+            return
+        with open(path, encoding="utf-8") as fh:
+            mapping = {r["slug"]: r["emoji"] for r in csv.DictReader(fh)}
+        for word in Word.objects.filter(slug__in=mapping):
+            if word.emoji != mapping[word.slug]:
+                word.emoji = mapping[word.slug]
+                word.save(update_fields=["emoji"])
+
     def _word(self, row, order, offline):
         word, _ = Word.objects.update_or_create(
             slug=row["slug"],
@@ -131,3 +148,52 @@ class Command(BaseCommand):
         tr.mark(ReviewStatus.FLAGGED if data["errors"] else ReviewStatus.VERIFIED, method="auto")
         tr.save()
         return code, tr.status, issues
+
+    @transaction.atomic
+    def _levels(self, path):
+        """Levels 1–4 per learning language (build_levels), a hand override wins."""
+        if not path.exists():
+            return
+        with open(path, encoding="utf-8") as fh:
+            rows = {r["slug"]: r for r in csv.DictReader(fh)}
+        for word in Word.objects.filter(slug__in=rows):
+            r = rows[word.slug]
+            levels = {lang: int(r[f"override_{lang}"] or r[lang]) for lang in ("en", "zh", "vi")}
+            if word.levels != levels:
+                word.levels = levels
+                word.save(update_fields=["levels"])
+
+    @transaction.atomic
+    def _images(self, path, folder):
+        """Real photos from fetch_word_images; only reviewed ones, never over a picture an admin uploaded."""
+        if not path.exists():
+            return
+        with open(path, encoding="utf-8") as fh:
+            rows = {r["slug"]: r for r in csv.DictReader(fh)}
+        attached = 0
+        for word in Word.objects.filter(slug__in=rows):
+            row, src = rows[word.slug], folder / f"{word.slug}.jpg"
+            seeded = not word.image or word.image.name.startswith("words/seed_")
+            if not seeded:
+                continue
+            if row["status"] != "verified" or not src.exists():
+                if word.image:
+                    word.image.delete(save=False)
+                    word.image_credit = word.image_source = ""
+                    word.save(update_fields=["image", "image_credit", "image_source"])
+                continue
+            credit = " · ".join(x for x in (row["author"], row["license"]) if x)
+            name = f"seed_{word.slug}.jpg"
+            fresh = (word.image and word.image.name == f"words/{name}" and word.image.storage.exists(word.image.name)
+                     and word.image.size == src.stat().st_size)
+            if not fresh:
+                if word.image:
+                    word.image.delete(save=False)
+                word.image.storage.delete(f"words/{name}")  # leftover of an interrupted run – keep the name stable
+                with open(src, "rb") as fh:
+                    word.image.save(name, File(fh), save=False)
+            if not fresh or word.image_credit != credit or word.image_source != row["source_url"]:
+                word.image_credit, word.image_source = credit, row["source_url"]
+                word.save(update_fields=["image", "image_credit", "image_source"])
+                attached += 1
+        self.stdout.write(f"Ảnh minh họa: cập nhật {attached} từ")

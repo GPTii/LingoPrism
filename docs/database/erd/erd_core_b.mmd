@@ -1,0 +1,75 @@
+erDiagram
+  accounts_user {
+    bigint id PK
+    varchar email UK
+    varchar display_name
+    varchar role
+    varchar learner_type
+    varchar active_language
+    varchar zh_script
+  }
+  detection_modelversion {
+    bigint id PK
+    varchar name UK
+    jsonb classes
+    float map50
+    bool is_active
+  }
+  detection_photo {
+    bigint id PK
+    bigint user_id FK
+    varchar image
+    varchar source
+  }
+  detection_detection {
+    bigint id PK
+    bigint user_id FK
+    bigint photo_id FK
+    bigint model_version_id FK
+    varchar model_name
+    varchar device
+    int inference_ms
+  }
+  detection_detectionitem {
+    bigint id PK
+    bigint detection_id FK
+    varchar label
+    float confidence
+    jsonb bbox
+    jsonb top_k
+    bigint word_id FK
+    varchar feedback
+    bigint learned_from_id FK
+  }
+  gamification_xptransaction {
+    bigint id PK
+    bigint user_id FK
+    varchar source
+    float multiplier
+    int amount
+  }
+  gamification_badge {
+    bigint id PK
+    varchar code UK
+    varchar name
+    varchar condition
+    int threshold
+  }
+  gamification_userbadge {
+    bigint id PK
+    bigint user_id FK
+    bigint badge_id FK
+    timestamptz awarded_at
+  }
+  vocab_word {
+    bigint id PK
+  }
+  accounts_user ||--o{ detection_photo : "user_id"
+  accounts_user ||--o{ detection_detection : "user_id"
+  detection_photo |o--o{ detection_detection : "photo_id"
+  detection_modelversion |o--o{ detection_detection : "model_version_id"
+  detection_detection ||--o{ detection_detectionitem : "detection_id"
+  vocab_word |o--o{ detection_detectionitem : "word_id"
+  accounts_user ||--o{ gamification_xptransaction : "user_id"
+  accounts_user ||--o{ gamification_userbadge : "user_id"
+  gamification_badge ||--o{ gamification_userbadge : "badge_id"

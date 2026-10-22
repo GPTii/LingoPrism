@@ -1,0 +1,105 @@
+erDiagram
+  learning_learnerlevel {
+    bigint id PK
+    bigint user_id FK
+    varchar language
+    smallint current
+    smallint passed_test
+  }
+  learning_personalword {
+    bigint id PK
+    bigint user_id FK
+    bigint word_id FK
+    varchar language
+    varchar status
+    bigint topic_id FK
+    smallint stage
+    float fsrs_difficulty
+    float fsrs_stability
+    timestamptz due_at
+  }
+  learning_reviewlog {
+    bigint id PK
+    bigint user_id FK
+    bigint personal_word_id FK
+    bigint session_id FK
+    varchar question_type
+    bool correct
+    smallint rating
+    int response_ms
+    float elapsed_days
+  }
+  learning_sentenceattempt {
+    bigint id PK
+    bigint user_id FK
+    bigint sentence_id FK
+    varchar language
+    varchar script
+    varchar exercise
+    bool correct
+    varchar answer
+    int response_ms
+  }
+  learning_sessionitem {
+    bigint id PK
+    bigint session_id FK
+    bigint personal_word_id FK
+    smallint order
+    bool answered
+  }
+  learning_studysession {
+    bigint id PK
+    bigint user_id FK
+    varchar kind
+    bigint topic_id FK
+    varchar scheduler
+    smallint planned_count
+    smallint completed_count
+    int xp_earned
+  }
+  literacy_literacyattempt {
+    bigint id PK
+    bigint user_id FK
+    varchar session
+    smallint lesson
+    varchar unit
+    varchar exercise
+    smallint index
+    bool correct
+  }
+  literacy_literacyprogress {
+    bigint id PK
+    bigint user_id FK
+    smallint lesson
+    smallint best_percent
+    smallint stars
+    int times_completed
+    timestamptz completed_at
+  }
+  accounts_user {
+    bigint id PK
+  }
+  vocab_examplesentence {
+    bigint id PK
+  }
+  vocab_topic {
+    bigint id PK
+  }
+  vocab_word {
+    bigint id PK
+  }
+  accounts_user ||--o{ learning_learnerlevel : "user_id"
+  accounts_user ||--o{ learning_personalword : "user_id"
+  vocab_word ||--o{ learning_personalword : "word_id"
+  vocab_topic |o--o{ learning_personalword : "topic_id"
+  accounts_user ||--o{ learning_reviewlog : "user_id"
+  learning_personalword ||--o{ learning_reviewlog : "personal_word_id"
+  learning_studysession |o--o{ learning_reviewlog : "session_id"
+  accounts_user ||--o{ learning_sentenceattempt : "user_id"
+  vocab_examplesentence ||--o{ learning_sentenceattempt : "sentence_id"
+  learning_studysession ||--o{ learning_sessionitem : "session_id"
+  learning_personalword ||--o{ learning_sessionitem : "personal_word_id"
+  accounts_user ||--o{ learning_studysession : "user_id"
+  vocab_topic |o--o{ learning_studysession : "topic_id"
+  accounts_user ||--o{ literacy_literacyattempt : "user_id"
+  accounts_user ||--o{ literacy_literacyprogress : "user_id"

@@ -222,3 +222,36 @@ def moedict() -> MoeDict:
 
 def sources_available() -> bool:
     return all((SOURCES_DIR / name).exists() for name in DOWNLOADS)
+
+
+@lru_cache(maxsize=1)
+def neutral_tone_words() -> dict[str, tuple[int, ...]]:
+    """Words whose CC-CEDICT reading has a neutral tone (妈妈 ma1 ma5, 谢谢 xie4 xie5), keyed by simplified and
+    traditional form → tones. Only words where every entry agrees (东西 "thing" vs "east and west" is left out),
+    and, for traditional forms, not ones marked with a different Taiwan reading. Small – read once from the
+    file, without loading the whole dictionary. Empty when the file is missing."""
+    from .pinyin import normalize_numbered
+
+    path = SOURCES_DIR / "cedict_ts.u8.gz"
+    if not path.exists():
+        return {}
+    seen: dict[str, set[tuple[int, ...]]] = {}
+    with gzip.open(path, "rt", encoding="utf-8") as fh:
+        for line in fh:
+            m = _LINE_RE.match(line)
+            if not m:
+                continue
+            trad, simp, pin, rest = m.groups()
+            syl = normalize_numbered(pin).split()
+            if len(syl) != len(simp) or len(simp) < 2 or len(simp) > 4 or not all(s[-1:].isdigit() for s in syl):
+                continue
+            tones = tuple(int(s[-1]) for s in syl)
+            seen.setdefault("s:" + simp, set()).add(tones)
+            seen.setdefault("t:" + trad, set()).add((0,) if "Taiwan pr." in rest else tones)
+    out: dict[str, tuple[int, ...]] = {}
+    for key, variants in seen.items():
+        if len(variants) == 1:
+            (tones,) = variants
+            if 5 in tones:
+                out[key] = tones
+    return out

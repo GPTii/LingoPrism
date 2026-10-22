@@ -55,7 +55,7 @@ class NearbyView(APIView):
             p = pois[pid]
             p.distance_m = round(d, 1)
             results.append(PoiSerializer(p).data)
-        return Response({"radius_m": radius, "query_ms": query_ms, "method": "postgres-earthdistance", "results": results})
+        return Response({"radius_m": radius, "query_ms": query_ms, "method": services.method(), "results": results})
 
 
 class GeofenceCheckView(APIView):

@@ -1,0 +1,84 @@
+erDiagram
+  vocab_errorreport {
+    bigint id PK
+    bigint user_id FK
+    bigint word_id FK
+    bigint translation_id FK
+    bigint example_id FK
+    varchar reason
+    varchar details
+    varchar status
+    timestamptz handled_at
+  }
+  vocab_examplesentence {
+    bigint id PK
+    bigint word_id FK
+    varchar language_id FK
+    varchar text
+    varchar transliteration
+    varchar translation_vi
+    varchar source
+    varchar status
+  }
+  vocab_language {
+    varchar code PK
+    varchar name
+    varchar tts_locale
+  }
+  vocab_topic {
+    bigint id PK
+    varchar slug UK
+    varchar name_vi
+    varchar audience
+    bigint owner_id FK
+    varchar visibility
+  }
+  vocab_topicword {
+    bigint id PK
+    bigint topic_id FK
+    bigint word_id FK
+    int order
+  }
+  vocab_word {
+    bigint id PK
+    varchar slug UK
+    jsonb levels
+    varchar yolo_label
+    varchar part_of_speech
+    smallint difficulty
+  }
+  vocab_wordcandidate {
+    bigint id PK
+    varchar zh_hans UK
+    varchar zh_hant
+    varchar pinyin
+    smallint hsk_level
+    jsonb glosses
+    varchar en
+    bigint word_id FK
+  }
+  vocab_wordtranslation {
+    bigint id PK
+    bigint word_id FK
+    varchar language_id FK
+    varchar text
+    varchar ipa
+    varchar pinyin
+    varchar status
+    varchar verified_method
+  }
+  accounts_user {
+    bigint id PK
+  }
+  accounts_user ||--o{ vocab_errorreport : "user_id"
+  vocab_word ||--o{ vocab_errorreport : "word_id"
+  vocab_wordtranslation |o--o{ vocab_errorreport : "translation_id"
+  vocab_examplesentence |o--o{ vocab_errorreport : "example_id"
+  vocab_word ||--o{ vocab_examplesentence : "word_id"
+  vocab_language ||--o{ vocab_examplesentence : "language_id"
+  accounts_user |o--o{ vocab_topic : "owner_id"
+  vocab_topic ||--o{ vocab_topicword : "topic_id"
+  vocab_word ||--o{ vocab_topicword : "word_id"
+  vocab_word |o--o{ vocab_wordcandidate : "word_id"
+  vocab_word ||--o{ vocab_wordtranslation : "word_id"
+  vocab_language ||--o{ vocab_wordtranslation : "language_id"

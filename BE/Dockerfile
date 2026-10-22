@@ -15,7 +15,10 @@ COPY requirements.txt .
 RUN pip install -r requirements.txt
 
 COPY . .
-RUN chmod +x /app/entrypoint.sh
+# run as an unprivileged user: a bug in the app or a library must not hand out root in the container.
+# media/staticfiles exist in the image owned by that user, so fresh volumes inherit the ownership.
+RUN chmod +x /app/entrypoint.sh     && useradd --create-home --uid 1000 app     && mkdir -p /app/media /app/staticfiles     && chown -R app:app /app
+USER app
 
 EXPOSE 8000
 ENTRYPOINT ["/app/entrypoint.sh"]

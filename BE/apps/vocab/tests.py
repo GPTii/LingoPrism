@@ -184,3 +184,102 @@ def test_admin_translation_verify(vocab, db):
     assert res.status_code == 200 and res.data["status"] == "flagged"
     res = c.post(f"/api/v1/admin/translations/{tr.id}/verify/")
     assert res.data["status"] == "verified" and res.data["verified_method"] == "manual"
+
+
+# ---------------------------------------------------------------- example sentences (Tatoeba)
+
+
+
+@needs_sources
+def test_sentence_segmentation_and_pinyin():
+    from apps.vocab.lang import sentences as sl
+
+    s = sl.build_zh("我们试试看！", "hans", "Wo3men5 shi4shi5 kan4!", reviewed=True)
+    assert not s.errors
+    assert [t["t"] for t in s.tokens][0] == "我们"
+    assert s.tokens[0]["p"] == "wǒ men" and s.tokens[-1] == {"t": "！", "x": 1}
+
+    t = sl.build_zh("這隻貓很可愛。", "hant", "Zhe4 zhi1 mao1 hen3 ke3ai4.", reviewed=True)
+    assert not t.errors and any(tok.get("z") == "ㄇㄠ" for tok in t.tokens)
+
+
+@needs_sources
+@pytest.mark.parametrize("text,script", [
+    ("你在圣誕節去教堂嗎？", "hant"),  # 圣 is the simplified form of 聖
+    ("他看着我。", "hant"),            # Taiwan writes 著
+    ("我們去學校。", "hans"),
+])
+def test_sentence_mixed_script_is_flagged(text, script):
+    from apps.vocab.lang import sentences as sl
+
+    pin = " ".join(["a1"] * sl.han_count(text))
+    assert any("thể trong câu" in e for e in sl.build_zh(text, script, pin, reviewed=True).errors)
+
+
+@needs_sources
+def test_sentence_pinyin_mismatch_is_flagged():
+    from apps.vocab.lang import sentences as sl
+
+    assert sl.build_zh("我们试试看！", "hans", "Wo3men5 shi4shi5 kan1!", reviewed=False).errors
+    assert sl.build_zh("我们试试看", "hans", "Wo3men5 shi4", reviewed=True).errors  # syllable count
+
+
+def test_latin_tokens_and_spans():
+    from apps.vocab.lang import sentences as sl
+
+    toks = sl.tokens_latin("We're near the traffic light.", "en")
+    assert [t["t"] for t in toks] == ["We're", "near", "the", "traffic", "light", "."]
+    assert sl.word_spans(toks, "traffic light", "en") == [3, 4]
+    vi = sl.tokens_latin("Ra bãi biển đi lối nào?", "vi")
+    assert sl.word_spans(vi, "bãi biển", "vi") == [1, 2]
+    assert sl.normalize_answer("We're near  the traffic light!") == sl.normalize_answer("we're near the traffic light")
+
+
+def test_word_images_are_reviewed_free_and_present():
+    """Every word photo was looked at by a person, is freely licensed and credited (seed/concepts/images.csv)."""
+    import csv
+
+    from apps.vocab.management.commands.fetch_word_images import FREE
+
+    with open(sources.SEED_DIR / "concepts" / "words.csv", encoding="utf-8") as fh:
+        slugs = {r["slug"] for r in csv.DictReader(fh)}
+    with open(sources.SEED_DIR / "concepts" / "images.csv", encoding="utf-8") as fh:
+        rows = {r["slug"]: r for r in csv.DictReader(fh)}
+    assert set(rows) == slugs
+    for slug, r in rows.items():
+        assert r["status"] in ("verified", "none"), slug
+        photo = sources.SEED_DIR / "images" / f"{slug}.jpg"
+        if r["status"] == "none":
+            assert not photo.exists(), slug
+            continue
+        assert photo.exists(), slug
+        assert FREE.match(r["license"]), (slug, r["license"])
+        assert r["author"], slug
+        assert r["source_url"].startswith("https://commons.wikimedia.org/") or r["license"] == "CC0", slug
+
+
+def test_candidate_queue_needs_review_and_checks(db, tmp_path, monkeypatch):
+    """A suggested word is only added after a teacher fixes it and it passes the same source checks as the seed."""
+    from apps.vocab import candidates
+    from apps.vocab.models import WordCandidate
+
+    monkeypatch.setattr(candidates, "APPROVED_CSV", tmp_path / "approved.csv")
+    for code in ("vi", "en", "zh-Hans", "zh-Hant"):
+        Language.objects.get_or_create(code=code, defaults={"name": code, "native_name": code, "tts_locale": code})
+    Topic.objects.create(slug="time", name_vi="Thời gian")
+    staff = User.objects.create_user("t@example.com", "Strong!Pass123", role="staff")
+    c = WordCandidate.objects.create(zh_hans="半夜", zh_hant="半夜", pinyin="bàn yè", hsk_level=2,
+                                     glosses=["midnight", "in the middle of the night"], en="midnight", vi="")
+    client = APIClient()
+    client.force_authenticate(staff)
+    res = client.post(f"/api/v1/admin/candidates/{c.id}/approve/")
+    assert res.status_code == 400 and "nghĩa tiếng Việt" in res.data["detail"] and "chủ đề" in res.data["detail"]
+    assert not Word.objects.exists()
+
+    client.patch(f"/api/v1/admin/candidates/{c.id}/", {"vi": "nửa đêm", "topics": "time"}, format="json")
+    res = client.post(f"/api/v1/admin/candidates/{c.id}/approve/")
+    assert res.status_code == 200 and res.data["status"] == "approved"
+    word = Word.objects.get(slug="midnight")
+    assert set(word.translations.values_list("language_id", "status")) == {
+        ("vi", "verified"), ("en", "verified"), ("zh-Hans", "verified"), ("zh-Hant", "verified")}
+    assert word.levels["zh"] == 2 and "半夜" in (tmp_path / "approved.csv").read_text(encoding="utf-8")

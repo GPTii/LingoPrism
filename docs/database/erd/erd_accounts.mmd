@@ -1,0 +1,37 @@
+erDiagram
+  accounts_authprovider {
+    bigint id PK
+    bigint user_id FK
+    varchar provider
+    varchar provider_uid
+    timestamptz linked_at
+  }
+  accounts_passwordresetcode {
+    bigint id PK
+    bigint user_id FK
+    varchar code
+    varchar reset_token
+    smallint attempts
+    timestamptz used_at
+  }
+  accounts_user {
+    bigint id PK
+    varchar email UK
+    varchar display_name
+    varchar role
+    varchar learner_type
+    varchar active_language
+    varchar zh_script
+  }
+  accounts_usergoal {
+    bigint id PK
+    bigint user_id FK
+    smallint daily_new_target
+    smallint daily_review_target
+    time remind_morning
+    time remind_evening
+    bool smart_remind
+  }
+  accounts_user ||--o{ accounts_authprovider : "user_id"
+  accounts_user ||--o{ accounts_passwordresetcode : "user_id"
+  accounts_user ||--o| accounts_usergoal : "user_id"

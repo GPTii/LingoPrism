@@ -1,6 +1,7 @@
 """Language resolution and learner-facing word cards."""
 from dataclasses import dataclass
 
+from django.utils import timezone
 from django.db.models import Prefetch, Q
 
 from .models import ExampleSentence, ReviewStatus, Word, WordTranslation
@@ -86,28 +87,48 @@ def card(word: Word, target: Target, personal=None, request=None) -> dict:
     if image and request is not None and image.startswith("/"):
         image = request.build_absolute_uri(image)
     vi = by_lang.get("vi")
-    en = by_lang.get("en")
     return {
         "id": word.id,
         "slug": word.slug,
         "image": image or None,
+        "image_credit": word.image_credit if word.image and word.image.name.startswith("words/seed_") else "",
+        "image_source": word.image_source if word.image and word.image.name.startswith("words/seed_") else "",
+        "emoji": word.emoji,
         "part_of_speech": word.part_of_speech,
         "difficulty": word.difficulty,
+        "level": (word.levels or {}).get(target.learn),
         "audience": word.audience,
         "yolo_label": word.yolo_label,
         "target": translation_payload(by_lang.get(target.code)),
         "meaning_vi": vi.text if vi else "",
-        "english": en.text if en and target.code != "en" else None,
+        # learners are Vietnamese: a Chinese word is explained in Vietnamese, never through English
+        "english": None,
         "examples": [
-            {"id": e.id, "text": e.text, "transliteration": e.transliteration,
-             "translation_vi": e.translation_vi, "translation_en": e.translation_en, "source": e.source}
+            {"id": e.id, "text": e.text, "transliteration": e.transliteration, "tokens": e.tokens,
+             "target_tokens": e.target_tokens, "translation_vi": e.translation_vi,
+             # Vietnamese is taught to Vietnamese children – no English gloss
+             "translation_en": "",
+             "source": e.source, "source_id": e.source_id}
             for e in getattr(word, "visible_examples", [])[:3]
         ],
         "personal": None if personal is None else {
             "id": personal.id, "status": personal.status, "stage": personal.stage,
             "due_at": personal.due_at, "last_reviewed_at": personal.last_reviewed_at,
+            "recall": recall_now(personal),
         },
     }
+
+
+def recall_now(personal) -> float | None:
+    """FSRS retrievability today: the chance (0–1) the learner still remembers this word right now.
+    None until the word has been reviewed at least once."""
+    from apps.algorithms.fsrs import retrievability
+
+    stability = getattr(personal, "fsrs_stability", 0) or 0
+    if not personal.last_reviewed_at or stability <= 0:
+        return None
+    days = (timezone.now() - personal.last_reviewed_at).total_seconds() / 86400
+    return round(retrievability(days, stability), 3)
 
 
 def personal_map(user, word_ids, target: Target) -> dict:

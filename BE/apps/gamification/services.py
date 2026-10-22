@@ -6,6 +6,7 @@ from django.db import transaction
 from django.db.models import F
 from django.utils import timezone
 
+from apps.core import brand
 from apps.notifications.models import Notification
 from apps.notifications.services import notify, push_event
 
@@ -62,7 +63,7 @@ def mark_activity(user, day: date | None = None) -> UserStats:
         stats.freezes_used += 1
         stats.current_streak += 2
         notify(user, Notification.Kind.SYSTEM, "Đá băng đã giữ chuỗi streak của bạn! 🧊",
-               f"Chuỗi hiện tại: {stats.current_streak} ngày.", image="assets/images/streak/streakbang.png")
+               f"Chuỗi hiện tại: {stats.current_streak} ngày.", image=brand.STREAK_FREEZE)
     else:
         stats.current_streak = 1
     stats.longest_streak = max(stats.longest_streak, stats.current_streak)
@@ -114,7 +115,7 @@ def award_xp(user, source: str, base: int, source_id: str = "", note: str = "") 
     for m in XP_MILESTONES:
         if before < m <= stats.lifetime_xp:
             notify(user, Notification.Kind.XP_MILESTONE, f"Bạn đã đạt {m} XP!",
-                   f"Tổng kinh nghiệm hiện tại: {stats.lifetime_xp} XP.", image="assets/images/XP.png",
+                   f"Tổng kinh nghiệm hiện tại: {stats.lifetime_xp} XP.", image=brand.XP,
                    data={"route": "/profile"})
     check_badges(user, stats)
     push_event(user.id, "xp", {"amount": amount, "lifetime_xp": stats.lifetime_xp, "today_xp": progress.xp})
@@ -223,7 +224,7 @@ def _user_tier(user) -> LeagueTier:
     last = LeagueMember.objects.filter(user=user, cycle__status=LeagueCycle.Status.CLOSED).select_related("cycle__tier").order_by("-cycle__start_at").first()
     tiers = list(LeagueTier.objects.order_by("order"))
     if not tiers:
-        tiers = [LeagueTier.objects.create(code="tan-binh", name="Tân binh Igloo", order=0)]
+        tiers = [LeagueTier.objects.create(code=brand.TIERS[0][0], name=brand.TIERS[0][1], order=0, icon=brand.rank(1))]
     if last is None:
         return tiers[0]
     idx = next(i for i, t in enumerate(tiers) if t.id == last.cycle.tier_id)

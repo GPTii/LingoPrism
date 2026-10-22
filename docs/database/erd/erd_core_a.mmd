@@ -1,0 +1,133 @@
+erDiagram
+  vocab_language {
+    varchar code PK
+    varchar name
+    varchar tts_locale
+  }
+  vocab_topic {
+    bigint id PK
+    varchar slug UK
+    varchar name_vi
+    varchar audience
+    bigint owner_id FK
+    varchar visibility
+  }
+  vocab_word {
+    bigint id PK
+    varchar slug UK
+    jsonb levels
+    varchar yolo_label
+    varchar part_of_speech
+    smallint difficulty
+  }
+  vocab_topicword {
+    bigint id PK
+    bigint topic_id FK
+    bigint word_id FK
+    int order
+  }
+  vocab_wordtranslation {
+    bigint id PK
+    bigint word_id FK
+    varchar language_id FK
+    varchar text
+    varchar ipa
+    varchar pinyin
+    varchar status
+    varchar verified_method
+  }
+  vocab_examplesentence {
+    bigint id PK
+    bigint word_id FK
+    varchar language_id FK
+    varchar text
+    varchar transliteration
+    varchar translation_vi
+    varchar source
+    varchar status
+  }
+  learning_personalword {
+    bigint id PK
+    bigint user_id FK
+    bigint word_id FK
+    varchar language
+    varchar status
+    bigint topic_id FK
+    smallint stage
+    float fsrs_difficulty
+    float fsrs_stability
+    timestamptz due_at
+  }
+  learning_studysession {
+    bigint id PK
+    bigint user_id FK
+    varchar kind
+    bigint topic_id FK
+    varchar scheduler
+    smallint planned_count
+    smallint completed_count
+    int xp_earned
+  }
+  learning_reviewlog {
+    bigint id PK
+    bigint user_id FK
+    bigint personal_word_id FK
+    bigint session_id FK
+    varchar question_type
+    bool correct
+    smallint rating
+    int response_ms
+    float elapsed_days
+  }
+  quizzes_question {
+    bigint id PK
+    varchar kind
+    varchar language_id FK
+    bigint topic_id FK
+    bigint word_id FK
+    text prompt
+    jsonb options
+    smallint difficulty
+  }
+  quizzes_exam {
+    bigint id PK
+    varchar title
+    varchar language_id FK
+    bigint topic_id FK
+    smallint pass_percent
+    bool is_published
+  }
+  quizzes_submission {
+    bigint id PK
+    bigint user_id FK
+    bigint exam_id FK
+    varchar status
+    timestamptz submitted_at
+    numeric score
+    numeric max_score
+  }
+  accounts_user {
+    bigint id PK
+  }
+  accounts_user |o--o{ vocab_topic : "owner_id"
+  vocab_topic ||--o{ vocab_topicword : "topic_id"
+  vocab_word ||--o{ vocab_topicword : "word_id"
+  vocab_word ||--o{ vocab_wordtranslation : "word_id"
+  vocab_language ||--o{ vocab_wordtranslation : "language_id"
+  vocab_word ||--o{ vocab_examplesentence : "word_id"
+  vocab_language ||--o{ vocab_examplesentence : "language_id"
+  accounts_user ||--o{ learning_personalword : "user_id"
+  vocab_word ||--o{ learning_personalword : "word_id"
+  vocab_topic |o--o{ learning_personalword : "topic_id"
+  accounts_user ||--o{ learning_studysession : "user_id"
+  vocab_topic |o--o{ learning_studysession : "topic_id"
+  accounts_user ||--o{ learning_reviewlog : "user_id"
+  learning_personalword ||--o{ learning_reviewlog : "personal_word_id"
+  learning_studysession |o--o{ learning_reviewlog : "session_id"
+  vocab_language ||--o{ quizzes_question : "language_id"
+  vocab_topic |o--o{ quizzes_question : "topic_id"
+  vocab_word |o--o{ quizzes_question : "word_id"
+  vocab_language ||--o{ quizzes_exam : "language_id"
+  vocab_topic |o--o{ quizzes_exam : "topic_id"
+  accounts_user ||--o{ quizzes_submission : "user_id"
+  quizzes_exam ||--o{ quizzes_submission : "exam_id"

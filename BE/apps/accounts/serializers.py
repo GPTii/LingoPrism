@@ -142,13 +142,54 @@ class ChangePasswordSerializer(serializers.Serializer):
 
 
 class AdminUserSerializer(serializers.ModelSerializer):
-    """Used by the admin web to manage accounts and roles."""
+    """Used by the admin web to create, edit and delete accounts."""
+
+    password = serializers.CharField(write_only=True, required=False, allow_blank=True, min_length=8,
+                                     help_text="Bắt buộc khi tạo; để trống khi sửa nếu không đổi mật khẩu")
 
     class Meta:
         model = User
         fields = [
-            "id", "email", "display_name", "avatar", "role", "status", "learner_type",
+            "id", "email", "password", "display_name", "avatar", "role", "status", "learner_type",
             "learning_languages", "active_language", "zh_script", "scales_balance", "gems_balance",
             "last_login", "created_at",
         ]
-        read_only_fields = ["id", "email", "last_login", "created_at"]
+        read_only_fields = ["id", "avatar", "last_login", "created_at"]
+
+    validate_learning_languages = UserSerializer.validate_learning_languages
+    validate_active_language = UserSerializer.validate_active_language
+
+    def validate_email(self, value):
+        value = User.objects.normalize_email(value).lower()
+        if User.objects.filter(email__iexact=value).exclude(pk=getattr(self.instance, "pk", None)).exists():
+            raise serializers.ValidationError("Email đã được sử dụng")
+        return value
+
+    def validate_password(self, value):
+        if value:
+            password_validation.validate_password(value)
+        return value
+
+    def validate(self, attrs):
+        if self.instance is None and not attrs.get("password"):
+            raise serializers.ValidationError({"password": "Cần nhập mật khẩu cho tài khoản mới"})
+        active = attrs.get("active_language", getattr(self.instance, "active_language", "en"))
+        langs = attrs.get("learning_languages", getattr(self.instance, "learning_languages", []))
+        if langs and active not in langs:
+            attrs["learning_languages"] = [*langs, active]
+        return attrs
+
+    def create(self, validated):
+        password = validated.pop("password")
+        validated.setdefault("learning_languages", [validated.get("active_language", "en")])
+        user = User.objects.create_user(password=password, onboarding_completed=True, **validated)
+        UserGoal.objects.create(user=user)
+        return user
+
+    def update(self, instance, validated):
+        password = validated.pop("password", "")
+        user = super().update(instance, validated)
+        if password:
+            user.set_password(password)
+            user.save(update_fields=["password"])
+        return user

@@ -1,21 +1,43 @@
+import logging
 import secrets
 
 from django.conf import settings
-from django.core.mail import send_mail
 from django.db import transaction
+from django.db.models import ProtectedError
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema
 from rest_framework import generics, mixins, status, viewsets
+from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.settings import api_settings
+from rest_framework.throttling import UserRateThrottle
 from rest_framework.views import APIView
 from rest_framework_simplejwt.exceptions import TokenError
+from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, OutstandingToken
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from apps.core.permissions import IsAdminRole
+from apps.core.throttles import EmailRateThrottle
 
 from . import serializers as s
 from .models import AuthProvider, PasswordResetCode, User, UserGoal
+from .tasks import send_reset_code
+
+security_log = logging.getLogger("security")
+# default limits + one per target e-mail (a password guess or reset-code flood spread over many IPs)
+EMAIL_THROTTLED = [*api_settings.DEFAULT_THROTTLE_CLASSES, EmailRateThrottle]
+
+
+def _client_ip(request):
+    # same IP the rate limits use (X-Forwarded-For from nginx when NUM_PROXIES is set)
+    return UserRateThrottle().get_ident(request)
+
+
+def logout_everywhere(user):
+    """Revoke every refresh token of the user (password changed/reset: a stolen session must not survive)."""
+    for token in OutstandingToken.objects.filter(user=user).exclude(blacklistedtoken__isnull=False):
+        BlacklistedToken.objects.get_or_create(token=token)
 
 
 def _auth_response(user, status_code=status.HTTP_200_OK):
@@ -26,6 +48,7 @@ def _auth_response(user, status_code=status.HTTP_200_OK):
 class RegisterView(APIView):
     serializer_class = s.RegisterSerializer
     permission_classes = [AllowAny]
+    throttle_scope = "register"
 
     @extend_schema(request=s.RegisterSerializer)
     def post(self, request):
@@ -39,11 +62,15 @@ class RegisterView(APIView):
 class LoginView(APIView):
     serializer_class = s.LoginSerializer
     permission_classes = [AllowAny]
+    throttle_scope = "login"
+    throttle_classes = EMAIL_THROTTLED
 
     @extend_schema(request=s.LoginSerializer)
     def post(self, request):
         ser = s.LoginSerializer(data=request.data)
-        ser.is_valid(raise_exception=True)
+        if not ser.is_valid():
+            security_log.warning("login failed email=%s ip=%s", str(request.data.get("email", ""))[:120], _client_ip(request))
+            raise ValidationError(ser.errors)
         user = ser.validated_data["user"]
         user.last_login = timezone.now()
         user.save(update_fields=["last_login"])
@@ -56,6 +83,7 @@ class GoogleLoginView(APIView):
 
     serializer_class = s.GoogleLoginSerializer
     permission_classes = [AllowAny]
+    throttle_scope = "login"
 
     @extend_schema(request=s.GoogleLoginSerializer)
     def post(self, request):
@@ -120,6 +148,8 @@ class LogoutView(APIView):
 class ForgotPasswordView(APIView):
     serializer_class = s.ForgotPasswordSerializer
     permission_classes = [AllowAny]
+    throttle_scope = "password_reset"
+    throttle_classes = EMAIL_THROTTLED
 
     @extend_schema(request=s.ForgotPasswordSerializer)
     def post(self, request):
@@ -128,12 +158,8 @@ class ForgotPasswordView(APIView):
         user = User.objects.filter(email=ser.validated_data["email"].lower(), is_active=True).first()
         if user:
             reset = PasswordResetCode.issue(user)
-            send_mail(
-                "LingoPrism - Mã đặt lại mật khẩu",
-                f"Mã xác minh của bạn là: {reset.code}\nMã có hiệu lực trong 15 phút.",
-                None,
-                [user.email],
-            )
+            # sent by the Celery worker: a slow mail server must not hold the request (and a server thread)
+            send_reset_code.delay(user.email, reset.code)
         # Always the same answer so emails cannot be enumerated.
         return Response({"detail": "Nếu email tồn tại, mã xác minh đã được gửi."})
 
@@ -142,6 +168,8 @@ class ForgotPasswordView(APIView):
 class VerifyResetCodeView(APIView):
     serializer_class = s.VerifyResetCodeSerializer
     permission_classes = [AllowAny]
+    throttle_scope = "password_reset"
+    throttle_classes = EMAIL_THROTTLED
 
     @extend_schema(request=s.VerifyResetCodeSerializer)
     def post(self, request):
@@ -158,6 +186,7 @@ class VerifyResetCodeView(APIView):
         if reset is None or reset.is_expired or reset.attempts >= PasswordResetCode.MAX_ATTEMPTS:
             return invalid
         if not secrets.compare_digest(reset.code, ser.validated_data["code"]):
+            security_log.warning("reset code wrong email=%s ip=%s", reset.user.email, _client_ip(request))
             reset.attempts += 1
             reset.save(update_fields=["attempts"])
             return invalid
@@ -170,6 +199,7 @@ class VerifyResetCodeView(APIView):
 class ResetPasswordView(APIView):
     serializer_class = s.ResetPasswordSerializer
     permission_classes = [AllowAny]
+    throttle_scope = "password_reset"
 
     @extend_schema(request=s.ResetPasswordSerializer)
     def post(self, request):
@@ -182,6 +212,7 @@ class ResetPasswordView(APIView):
             return Response({"detail": "Phiên đặt lại mật khẩu đã hết hạn", "errors": {}}, status=400)
         reset.user.set_password(ser.validated_data["new_password"])
         reset.user.save(update_fields=["password"])
+        logout_everywhere(reset.user)
         reset.used_at = timezone.now()
         reset.save(update_fields=["used_at"])
         return Response({"detail": "Đặt lại mật khẩu thành công"})
@@ -196,6 +227,7 @@ class ChangePasswordView(APIView):
         ser.is_valid(raise_exception=True)
         request.user.set_password(ser.validated_data["new_password"])
         request.user.save(update_fields=["password"])
+        logout_everywhere(request.user)
         return Response({"detail": "Bạn đã đổi mật khẩu."})
 
 
@@ -224,7 +256,7 @@ class PublicUserView(generics.RetrieveAPIView):
 
 
 @extend_schema(tags=["admin-users"])
-class AdminUserViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.UpdateModelMixin, viewsets.GenericViewSet):
+class AdminUserViewSet(viewsets.ModelViewSet):
     serializer_class = s.AdminUserSerializer
     permission_classes = [IsAdminRole]
     queryset = User.objects.all()
@@ -232,9 +264,35 @@ class AdminUserViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.
     search_fields = ["email", "display_name"]
     ordering_fields = ["created_at", "last_login", "email"]
 
-    def perform_update(self, serializer):
-        user = serializer.save()
+    def _guard_self(self, user, data):
+        if user.pk == self.request.user.pk and (
+            data.get("role", user.role) != user.role or data.get("status", user.status) != user.status
+        ):
+            raise ValidationError("Không thể tự đổi vai trò hoặc khóa tài khoản của chính mình")
+
+    def _sync_flags(self, user):
         user.is_staff = user.role == User.Role.ADMIN
         user.save(update_fields=["is_staff"])
+
+    def perform_create(self, serializer):
+        self._sync_flags(serializer.save())
+
+    def perform_update(self, serializer):
+        self._guard_self(serializer.instance, serializer.validated_data)
+        self._sync_flags(serializer.save())
+
+    def destroy(self, request, *args, **kwargs):
+        user = self.get_object()
+        if user.pk == request.user.pk:
+            raise ValidationError("Không thể xóa tài khoản đang đăng nhập")
+        if user.role == User.Role.ADMIN and not User.objects.filter(role=User.Role.ADMIN).exclude(pk=user.pk).exists():
+            raise ValidationError("Phải còn ít nhất một quản trị viên")
+        try:
+            with transaction.atomic():
+                user.delete()
+        except ProtectedError:
+            return Response({"detail": "Tài khoản đang được dữ liệu khác tham chiếu – hãy khóa thay vì xóa."},
+                            status=status.HTTP_409_CONFLICT)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 

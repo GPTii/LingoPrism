@@ -27,7 +27,7 @@ cd BE
 python -m venv .venv && .venv/Scripts/activate      # Linux/macOS: source .venv/bin/activate
 pip install -r requirements.txt
 python manage.py migrate
-python manage.py seed_all         # nguồn ngôn ngữ → 300 từ × 4 ngôn ngữ đã kiểm tra, đề thi, POI, game hoá, tài khoản demo
+python manage.py seed_all         # (gồm seed_demo_activity: 22 người học với 5 tuần lịch sử học, cộng đồng, giải đấu) nguồn ngôn ngữ → 585 từ × 4 ngôn ngữ đã kiểm tra (300 gốc + 285 từ Firestore SnapLingua cũ), đề thi, POI, game hoá, tài khoản demo
 mkdir -p models && cp <yolov10n.onnx> models/   # model nhận diện phía server (tuỳ chọn)
 python manage.py runserver
 
@@ -62,8 +62,32 @@ cd FE && npm run build
 
 Học viên chỉ thấy dữ liệu **đã kiểm tra** – đối chiếu chéo tự động với CC-CEDICT (CC BY-SA 4.0), danh sách HSK, từ điển Bộ Giáo dục Đài Loan qua moedict (CC BY-ND 3.0 TW), CMUdict, Tatoeba (CC BY 2.0 FR). Chi tiết: PLAN.md §3b.
 
+Ảnh minh họa từ vựng: ảnh thật từ Wikimedia Commons (CC0 / public domain / CC BY / CC BY-SA / GFDL), đã được duyệt từng ảnh; tác giả và giấy phép nằm trong `BE/seed/concepts/images.csv` và hiện kèm ảnh trong app. Tải lại: `python manage.py fetch_word_images`.
+
+Lộ trình 4 cấp độ (Nhập môn → Sơ cấp → Trung cấp → Nâng cao) cho mỗi ngôn ngữ: tiếng Trung theo HSK 3.0 (HSK 1–3; từ ngoài HSK hoặc HSK 4+ xếp theo tần suất), tiếng Anh/tiếng Việt theo tần suất trong câu Tatoeba – dữ liệu ở `BE/seed/concepts/levels.csv` (có cột ghi đè tay), tính lại bằng `python manage.py build_levels`. Học xong 70% số từ của một cấp thì mở cấp tiếp, hoặc qua bài kiểm tra vượt cấp (8/10).
+
 ## Docker (khi deploy)
 
 ```bash
 docker compose up -d --build
 ```
+
+## Thuật toán nghiên cứu (đề cương) – `BE/apps/algorithms`
+
+Tự cài đặt bằng Python/NumPy, không dùng thư viện cho phần lõi; chọn thuật toán đang chạy và xem thực nghiệm ở **Admin → Thuật toán AI**.
+
+| Thuật toán | File | Dùng ở đâu | Baseline so sánh |
+|---|---|---|---|
+| SM-2 | `sm2.py` | lập lịch ôn (mặc định) | Leitner cũ |
+| FSRS-4.5 (D/S/R) | `fsrs.py` | lập lịch ôn (tuỳ chọn) | SM-2 |
+| VIP – ưu tiên ôn theo nhầm lẫn thị giác | `vip.py`, `vision.py` | thứ tự từ trong phiên ôn tập | theo hạn ôn |
+| Smart Distractor (Word2Vec skip-gram tự cài) | `word2vec.py`, `distractor.py` | đáp án nhiễu trắc nghiệm | ngẫu nhiên cùng chủ đề |
+| Proximity Search (grid index + Haversine) | `proximity.py` | tìm POI gần, geofencing | PostgreSQL earthdistance |
+| Genetic Algorithm | `ga.py` | tối ưu 17 tham số FSRS trên lịch sử ôn | tham số FSRS mặc định |
+
+```bash
+python manage.py train_word2vec                  # ~15–20 phút trên CPU, ghi seed/cache/concept_vectors.npz
+python manage.py run_algorithm_experiments       # vision, srs, ga, vip, distractor, proximity → ExperimentRun
+python manage.py run_algorithm_experiments --only vision --confusion <report/confusion_matrix.json>   # khi có model YOLO tự train
+```
+Lịch sử ôn của người học mẫu được sinh theo mô hình trí nhớ (quên hàm mũ, `simulate.py`) và thí nghiệm VIP chạy trên người học mô phỏng – cần chạy lại khi có dữ liệu người dùng thật.

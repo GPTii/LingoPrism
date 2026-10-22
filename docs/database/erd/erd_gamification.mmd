@@ -1,0 +1,125 @@
+erDiagram
+  gamification_activeboost {
+    bigint id PK
+    bigint user_id FK
+    bigint item_id FK
+    float multiplier
+    timestamptz started_at
+    timestamptz expires_at
+  }
+  gamification_badge {
+    bigint id PK
+    varchar code UK
+    varchar name
+    varchar condition
+    int threshold
+  }
+  gamification_dailyprogress {
+    bigint id PK
+    bigint user_id FK
+    date date
+    smallint new_target
+    smallint review_target
+    int new_learned
+    int reviews_done
+    int xp
+  }
+  gamification_dailyquest {
+    bigint id PK
+    bigint user_id FK
+    date date
+    varchar kind
+    smallint target
+    smallint progress
+    timestamptz completed_at
+    bool reward_claimed
+  }
+  gamification_item {
+    bigint id PK
+    varchar code UK
+    varchar name
+    varchar description
+    varchar image
+    varchar effect
+    int cost_scales
+  }
+  gamification_leaguecycle {
+    bigint id PK
+    bigint tier_id FK
+    smallint group_index
+    timestamptz start_at
+    timestamptz end_at
+    varchar status
+  }
+  gamification_leaguemember {
+    bigint id PK
+    bigint cycle_id FK
+    bigint user_id FK
+    int weekly_xp
+    smallint rank
+    varchar result
+  }
+  gamification_leaguetier {
+    bigint id PK
+    varchar code UK
+    varchar name
+    smallint order UK
+    varchar icon
+    smallint promote_top
+    smallint demote_bottom
+  }
+  gamification_monthlyquest {
+    bigint id PK
+    bigint user_id FK
+    varchar month
+    smallint completed_count
+    bool reward_claimed
+    timestamptz reward_claimed_at
+  }
+  gamification_userbadge {
+    bigint id PK
+    bigint user_id FK
+    bigint badge_id FK
+    timestamptz awarded_at
+  }
+  gamification_userinventory {
+    bigint id PK
+    bigint user_id FK
+    bigint item_id FK
+    int quantity
+    timestamptz last_used_at
+  }
+  gamification_userstats {
+    bigint id PK
+    bigint user_id FK
+    int lifetime_xp
+    int current_streak
+    int longest_streak
+    date last_active_date
+    int freezes_used
+    int words_learned
+  }
+  gamification_xptransaction {
+    bigint id PK
+    bigint user_id FK
+    varchar source
+    float multiplier
+    int amount
+  }
+  accounts_user {
+    bigint id PK
+  }
+  accounts_user ||--o{ gamification_activeboost : "user_id"
+  gamification_item ||--o{ gamification_activeboost : "item_id"
+  accounts_user ||--o{ gamification_dailyprogress : "user_id"
+  accounts_user ||--o{ gamification_dailyquest : "user_id"
+  gamification_leaguetier ||--o{ gamification_leaguecycle : "tier_id"
+  gamification_leaguecycle ||--o{ gamification_leaguemember : "cycle_id"
+  accounts_user ||--o{ gamification_leaguemember : "user_id"
+  accounts_user ||--o{ gamification_monthlyquest : "user_id"
+  accounts_user ||--o{ gamification_userbadge : "user_id"
+  gamification_badge ||--o{ gamification_userbadge : "badge_id"
+  accounts_user ||--o{ gamification_userinventory : "user_id"
+  gamification_item ||--o{ gamification_userinventory : "item_id"
+  accounts_user ||--o| gamification_userstats : "user_id"
+  accounts_user ||--o{ gamification_xptransaction : "user_id"

@@ -24,7 +24,7 @@ class Command(BaseCommand):
         mv, _ = ModelVersion.objects.update_or_create(name=info["name"], defaults={
             "file": str(onnx_path.resolve()), "classes": info["classes"], "input_size": info.get("imgsz", 640),
             "precision": m.get("precision"), "recall": m.get("recall"), "map50": m.get("map50"),
-            "map50_95": m.get("map50_95"), "is_active": not no_activate,
+            "map50_95": m.get("map50_95"), "notes": info.get("metrics_note", ""), "is_active": not no_activate,
         })
         if mv.is_active:
             ModelVersion.objects.exclude(pk=mv.pk).update(is_active=False)

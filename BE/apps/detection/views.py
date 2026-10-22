@@ -1,5 +1,7 @@
 from django.db import transaction
 from django.db.models import Avg, Count, Q
+from django.http import HttpResponse
+from django.utils import timezone
 from drf_spectacular.utils import extend_schema
 from PIL import Image
 from rest_framework import mixins, serializers, viewsets
@@ -13,26 +15,51 @@ from apps.gamification import services as game
 from apps.learning.models import PersonalWord
 from apps.vocab.models import Topic, Word
 from apps.vocab.services import card, personal_map, resolve_target, words_for_target
+from apps.core.throttles import ActionThrottleMixin
 
-from .inference import DetectorUnavailable, get_detector
-from .models import Detection, DetectionItem, ModelVersion, Photo
+from . import memory
+from .inference import Box, DetectorUnavailable, get_detector
+from .models import CorrectionMemory, Detection, DetectionItem, ModelVersion, Photo
 
 MAX_UPLOAD_MB = 10
+UNSURE_BELOW = 0.6  # below this the learner is asked "is it: A / B / C?" instead of being told one word
+# a label learners often mark wrong is always asked about, whatever the confidence (per-class threshold from feedback)
+OFTEN_WRONG_MIN_FEEDBACK, OFTEN_WRONG_RATE = 5, 0.3
+
+
+def _often_wrong(labels) -> set[str]:
+    rows = DetectionItem.objects.filter(label__in=labels).exclude(feedback="unknown").values("label").annotate(
+        n=Count("id"), wrong=Count("id", filter=Q(feedback="wrong")))
+    return {r["label"] for r in rows if r["n"] >= OFTEN_WRONG_MIN_FEEDBACK and r["wrong"] / r["n"] >= OFTEN_WRONG_RATE}
 
 
 def _items_payload(request, detection: Detection):
     target = resolve_target(request)
     items = list(detection.items.all())
-    labels = {i.label for i in items}
+    labels = {i.label for i in items} | {t["label"] for i in items for t in (i.top_k or [])}
+    labels |= {i.corrected_label for i in items if i.corrected_label}
     words = {w.yolo_label: w for w in words_for_target(Word.objects.filter(yolo_label__in=labels), request.user, target)}
     personal = personal_map(request.user, [w.id for w in words.values()], target)
+    often_wrong = _often_wrong({i.label for i in items})
     out = []
     for it in items:
         w = words.get(it.label)
+        alternatives = []
+        for t in it.top_k or []:
+            aw = words.get(t["label"])
+            if t["label"] != it.label and aw and t["label"] not in {a["label"] for a in alternatives}:
+                alternatives.append({"label": t["label"], "confidence": t["confidence"],
+                                     "card": card(aw, target, personal.get(aw.id), request)})
+        cw = words.get(it.corrected_label) if it.corrected_label else None
         out.append({
             "id": it.id, "label": it.label, "confidence": round(it.confidence, 4), "bbox": it.bbox, "top_k": it.top_k,
-            "selected": it.selected, "feedback": it.feedback,
+            "selected": it.selected, "feedback": it.feedback, "corrected_label": it.corrected_label,
+            "uncertain": (it.confidence < UNSURE_BELOW and bool(alternatives)) or it.label in often_wrong,
+            "learned": it.learned_from_id is not None,  # relabelled from an earlier learner's error report
+            "not_object": it.feedback == "wrong" and not it.corrected_label and hasattr(it, "report"),
             "card": card(w, target, personal.get(w.id), request) if w else None,
+            "alternatives": alternatives,
+            "corrected_card": card(cw, target, personal.get(cw.id), request) if cw else None,
         })
     return {
         "id": detection.id, "model": detection.model_name, "device": detection.device, "inference_ms": detection.inference_ms,
@@ -59,6 +86,7 @@ class DetectView(APIView):
     """Upload a photo → YOLOv10 on the server → objects + vocabulary cards."""
 
     parser_classes = [MultiPartParser, FormParser]
+    throttle_scope = "detect"
 
     @extend_schema(tags=["detection"], request={"multipart/form-data": DetectUploadSerializer}, responses={200: dict})
     def post(self, request):
@@ -73,6 +101,7 @@ class DetectView(APIView):
             return Response({"detail": str(e), "errors": {}}, status=503)
         img = Image.open(upload)
         boxes, ms = detector.predict(img)
+        boxes = memory.apply(request.user, img, boxes)
         upload.seek(0)
         with transaction.atomic():
             photo = Photo.objects.create(user=request.user, image=upload, width=img.width, height=img.height,
@@ -81,7 +110,8 @@ class DetectView(APIView):
                                            model_version=ModelVersion.objects.filter(is_active=True).first(),
                                            device=Detection.Device.SERVER, inference_ms=ms)
             DetectionItem.objects.bulk_create([
-                DetectionItem(detection=det, label=b.label, confidence=b.confidence, bbox=b.bbox, top_k=b.top_k)
+                DetectionItem(detection=det, label=b.label, confidence=b.confidence, bbox=b.bbox, top_k=b.top_k,
+                              learned_from_id=b.memory_id)
                 for b in boxes
             ])
             _link_words(det)
@@ -106,6 +136,7 @@ class ConfirmItemSerializer(serializers.Serializer):
     selected = serializers.BooleanField(default=False)
     feedback = serializers.ChoiceField(choices=DetectionItem.Feedback.choices, default="unknown")
     corrected_label = serializers.CharField(required=False, allow_blank=True, max_length=60)
+    not_object = serializers.BooleanField(default=False, help_text="Báo lỗi: chỗ này không phải đồ vật nào")
 
 
 class ConfirmSerializer(serializers.Serializer):
@@ -114,7 +145,8 @@ class ConfirmSerializer(serializers.Serializer):
 
 
 @extend_schema(tags=["detection"])
-class DetectionViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+class DetectionViewSet(ActionThrottleMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+    throttle_scopes = {"log": "detect"}
     serializer_class = LogDetectionSerializer
     parser_classes = [JSONParser, MultiPartParser, FormParser]
 
@@ -130,6 +162,14 @@ class DetectionViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewset
     def retrieve(self, request, *args, **kwargs):
         return Response(_items_payload(request, self.get_object()))
 
+    @action(detail=False, methods=["get"])
+    def labels(self, request):
+        """Every object the detector knows, with its word card – the list for "it is something else"."""
+        target = resolve_target(request)
+        words = words_for_target(Word.objects.exclude(yolo_label="").exclude(yolo_label__isnull=True), request.user, target)
+        return Response(sorted(({"label": w.yolo_label, "card": card(w, target, None, request)} for w in words),
+                               key=lambda r: r["card"].get("meaning_vi") or r["label"]))
+
     @extend_schema(request=LogDetectionSerializer)
     @action(detail=False, methods=["post"])
     def log(self, request):
@@ -139,16 +179,19 @@ class DetectionViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewset
         d = ser.validated_data
         with transaction.atomic():
             photo = None
+            boxes = [Box(i["label"], i["confidence"], i["bbox"],
+                         i.get("top_k") or [{"label": i["label"], "confidence": i["confidence"]}]) for i in d["items"]]
             if request.FILES.get("image"):
                 img = Image.open(request.FILES["image"])
+                boxes = memory.apply(request.user, img, boxes)
                 request.FILES["image"].seek(0)
                 photo = Photo.objects.create(user=request.user, image=request.FILES["image"], width=img.width, height=img.height)
             det = Detection.objects.create(user=request.user, photo=photo, model_name=d["model_name"],
                                            device=Detection.Device.ON_DEVICE, inference_ms=d.get("inference_ms"))
             DetectionItem.objects.bulk_create([
-                DetectionItem(detection=det, label=i["label"], confidence=i["confidence"], bbox=i["bbox"],
-                              top_k=i.get("top_k") or [{"label": i["label"], "confidence": i["confidence"]}])
-                for i in d["items"]
+                DetectionItem(detection=det, label=b.label, confidence=b.confidence, bbox=b.bbox, top_k=b.top_k,
+                              learned_from_id=b.memory_id)
+                for b in boxes
             ])
             _link_words(det)
         return Response(_items_payload(request, det), status=201)
@@ -161,19 +204,34 @@ class DetectionViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewset
         ser = ConfirmSerializer(data=request.data)
         ser.is_valid(raise_exception=True)
         target = resolve_target(request)
-        saved = 0
-        items = {i.id: i for i in det.items.all()}
+        saved = reported = 0
+        items = {i.id: i for i in det.items.all()}  # the prefetched instances: the response reads them back
+        corrected = {c.get("corrected_label") for c in ser.validated_data["items"]} - {None, ""}
+        word_by_label = dict(Word.objects.filter(yolo_label__in=corrected).values_list("yolo_label", "id"))
         with transaction.atomic():
             for c in ser.validated_data["items"]:
                 it = items.get(c["id"])
                 if it is None:
                     continue
+                was_wrong = it.feedback == DetectionItem.Feedback.WRONG
                 it.selected, it.feedback = c["selected"], c["feedback"]
                 it.corrected_label = c.get("corrected_label", "")
+                if c["not_object"]:  # error report: there is no such object here
+                    it.corrected_label, it.feedback, it.selected = "", DetectionItem.Feedback.WRONG, False
+                elif it.corrected_label == it.label:  # learner confirmed the model's own answer
+                    it.corrected_label, it.feedback = "", DetectionItem.Feedback.CORRECT
+                elif it.corrected_label:  # learner picked another object: the model was wrong, save that word
+                    it.feedback = DetectionItem.Feedback.WRONG
                 it.save(update_fields=["selected", "feedback", "corrected_label"])
-                if it.selected and it.word_id and it.feedback != "wrong":
+                if it.feedback == DetectionItem.Feedback.WRONG and (it.corrected_label or c["not_object"]):
+                    reported += memory.remember(it, request.user)
+                    if it.learned_from_id and not was_wrong:
+                        memory.dispute(it.learned_from)
+                word_id = word_by_label.get(it.corrected_label) if it.corrected_label else (
+                    it.word_id if it.feedback != "wrong" else None)
+                if it.selected and word_id:
                     _, created = PersonalWord.objects.get_or_create(
-                        user=request.user, word_id=it.word_id, language=target.learn,
+                        user=request.user, word_id=word_id, language=target.learn,
                         defaults={"source": PersonalWord.Source.CAMERA, "source_ref": str(det.id),
                                   "topic": ser.validated_data.get("topic")})
                     saved += created
@@ -184,7 +242,7 @@ class DetectionViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewset
             game.bump_stat(request.user, "detections")
             game.mark_activity(request.user)
             game.award_xp(request.user, "camera", 5 + 2 * saved, source_id=str(det.id), note="Nhận diện ảnh")
-        return Response({"saved": saved, **_items_payload(request, det)})
+        return Response({"saved": saved, "reported": reported, **_items_payload(request, det)})
 
 
 # ------------------------------------------------------------------ admin
@@ -239,3 +297,73 @@ class AdminDetectionViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
             "label", "corrected_label").annotate(count=Count("id")).order_by("-count")[:50]
         by_device = Detection.objects.values("device").annotate(count=Count("id"), avg_ms=Avg("inference_ms"))
         return Response({"per_label": list(per_label), "confusion": list(confusion), "by_device": list(by_device)})
+
+
+# ------------------------------------------------------------------ admin: error reports
+
+def _report_row(request, m: CorrectionMemory, same: dict):
+    return {
+        "id": m.id, "user": m.user.email, "wrong_label": m.wrong_label, "correct_label": m.correct_label,
+        "status": m.status, "disputes": m.disputes, "applied": m.applied.count(),
+        "same_reports": same.get((m.wrong_label, m.correct_label), 1),
+        "crop": request.build_absolute_uri(m.crop.url) if m.crop else None,
+        "photo": request.build_absolute_uri(m.item.detection.photo.image.url)
+        if m.item.detection.photo and m.item.detection.photo.image else None,
+        "reviewed_by": m.reviewed_by.email if m.reviewed_by else None, "exported_at": m.exported_at,
+        "created_at": m.created_at,
+    }
+
+
+@extend_schema(tags=["admin-detection"])
+class AdminCorrectionViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+    """Learners' detection error reports (correction memory): review, then export as training data."""
+
+    serializer_class = ModelVersionSerializer
+    permission_classes = [IsStaffRole]
+    queryset = CorrectionMemory.objects.select_related("user", "reviewed_by", "item__detection__photo").order_by(
+        "-created_at")
+    filterset_fields = ["status", "wrong_label", "correct_label"]
+
+    def list(self, request, *args, **kwargs):
+        page = self.paginate_queryset(self.filter_queryset(self.get_queryset()))
+        same = {(r["wrong_label"], r["correct_label"]): r["n"] for r in CorrectionMemory.objects.exclude(
+            status="rejected").values("wrong_label", "correct_label").annotate(n=Count("user", distinct=True))}
+        return self.get_paginated_response([_report_row(request, m, same) for m in page])
+
+    def _review(self, request, status):
+        m = self.get_object()
+        m.status, m.reviewed_by, m.reviewed_at = status, request.user, timezone.now()
+        m.save(update_fields=["status", "reviewed_by", "reviewed_at"])
+        return Response({"id": m.id, "status": m.status})
+
+    @action(detail=True, methods=["post"])
+    def approve(self, request, pk=None):
+        return self._review(request, CorrectionMemory.Status.APPROVED)
+
+    @action(detail=True, methods=["post"])
+    def reject(self, request, pk=None):
+        return self._review(request, CorrectionMemory.Status.REJECTED)
+
+    @action(detail=False, methods=["get"])
+    def summary(self, request):
+        qs = CorrectionMemory.objects
+        return Response({
+            "pending": qs.filter(status="pending").count(), "approved": qs.filter(status="approved").count(),
+            "rejected": qs.filter(status="rejected").count(),
+            "approved_not_exported": qs.filter(status="approved", exported_at__isnull=True).count(),
+            "applied": DetectionItem.objects.filter(learned_from__isnull=False).count(),
+            "memory_enabled": memory.available(), "consensus_users": memory.CONSENSUS_USERS,
+        })
+
+    @action(detail=False, methods=["get"])
+    def export(self, request):
+        """Approved reports → zip in YOLO format (merge into the next training run: AI/scripts/merge_feedback.py)."""
+        from .training_export import build_feedback_zip
+
+        data, n_photos = build_feedback_zip()
+        if not n_photos:
+            return Response({"detail": "Chưa có báo lỗi nào được duyệt", "errors": {}}, status=400)
+        CorrectionMemory.objects.filter(status="approved", exported_at__isnull=True).update(exported_at=timezone.now())
+        resp = HttpResponse(data, content_type="application/zip")
+        resp["Content-Disposition"] = f'attachment; filename="lingoprism_feedback_{timezone.now():%Y%m%d}.zip"'
+        return resp

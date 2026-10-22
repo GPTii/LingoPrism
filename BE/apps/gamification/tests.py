@@ -96,7 +96,7 @@ def test_league_join_and_close(user):
     client = APIClient()
     client.force_authenticate(user)
     board = client.get("/api/v1/leaderboard/").data
-    assert board["tier"]["name"] == "Tân binh Igloo"
+    assert board["tier"]["name"] == "Tia Sáng"
     assert [m["xp"] for m in board["members"]] == [50, 20] and board["members"][0]["is_me"]
     cycle = LeagueCycle.objects.get()
     services.close_cycle(cycle)

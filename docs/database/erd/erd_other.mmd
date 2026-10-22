@@ -1,0 +1,77 @@
+erDiagram
+  algorithms_algorithmconfig {
+    bigint id PK
+    varchar scheduler
+    varchar review_priority
+    varchar distractor
+    varchar proximity
+    jsonb fsrs_weights
+    jsonb vip_weights
+  }
+  algorithms_experimentrun {
+    bigint id PK
+    varchar kind
+    jsonb results
+    float duration_s
+  }
+  gis_geofenceevent {
+    bigint id PK
+    bigint user_id FK
+    bigint poi_id FK
+    float lat
+    float lng
+    float distance_m
+  }
+  gis_poi {
+    bigint id PK
+    varchar name
+    varchar category
+    float lat
+    float lng
+    int radius_m
+    varchar address
+  }
+  gis_poi_topics {
+    bigint id PK
+    bigint poi_id FK
+    bigint topic_id FK
+  }
+  notifications_devicetoken {
+    bigint id PK
+    bigint user_id FK
+    varchar token UK
+    varchar platform
+    timestamptz last_active_at
+  }
+  notifications_notification {
+    bigint id PK
+    bigint user_id FK
+    varchar kind
+    varchar title
+    varchar body
+    varchar image
+    jsonb data
+    timestamptz read_at
+  }
+  notifications_notificationsetting {
+    bigint id PK
+    bigint user_id FK
+    bool push_enabled
+    time morning_time
+    time evening_time
+    bool contextual_allowed
+    bool social_enabled
+  }
+  accounts_user {
+    bigint id PK
+  }
+  vocab_topic {
+    bigint id PK
+  }
+  accounts_user ||--o{ gis_geofenceevent : "user_id"
+  gis_poi ||--o{ gis_geofenceevent : "poi_id"
+  gis_poi ||--o{ gis_poi_topics : "poi_id"
+  vocab_topic ||--o{ gis_poi_topics : "topic_id"
+  accounts_user ||--o{ notifications_devicetoken : "user_id"
+  accounts_user ||--o{ notifications_notification : "user_id"
+  accounts_user ||--o| notifications_notificationsetting : "user_id"

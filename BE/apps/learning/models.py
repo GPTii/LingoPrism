@@ -3,7 +3,7 @@ from django.db import models
 from django.utils import timezone
 
 from apps.core.models import TimeStampedModel
-from apps.vocab.models import Topic, Word
+from apps.vocab.models import ExampleSentence, Topic, Word
 
 from .scheduling import CardState
 
@@ -44,6 +44,8 @@ class PersonalWord(TimeStampedModel):
     repetitions = models.PositiveIntegerField(default=0)
     lapses = models.PositiveIntegerField(default=0)
     wrong_streak = models.PositiveIntegerField(default=0)
+    fsrs_difficulty = models.FloatField(default=0, help_text="FSRS D (1–10)")
+    fsrs_stability = models.FloatField(default=0, help_text="FSRS S (ngày)")
     due_at = models.DateTimeField(null=True, blank=True, db_index=True)
     first_learned_at = models.DateTimeField(null=True, blank=True)
     last_reviewed_at = models.DateTimeField(null=True, blank=True)
@@ -58,11 +60,13 @@ class PersonalWord(TimeStampedModel):
 
     @property
     def state(self) -> CardState:
-        return CardState(self.stage, self.ease, self.interval_days, self.repetitions, self.lapses, self.wrong_streak)
+        return CardState(self.stage, self.ease, self.interval_days, self.repetitions, self.lapses, self.wrong_streak,
+                         self.fsrs_difficulty, self.fsrs_stability)
 
     def apply_state(self, state: CardState, due_at):
         self.stage, self.ease, self.interval_days = state.stage, state.ease, state.interval_days
         self.repetitions, self.lapses, self.wrong_streak = state.repetitions, state.lapses, state.wrong_streak
+        self.fsrs_difficulty, self.fsrs_stability = state.difficulty, state.stability
         self.due_at = due_at
         now = timezone.now()
         self.last_reviewed_at = now
@@ -127,3 +131,35 @@ class ReviewLog(models.Model):
     class Meta:
         ordering = ["-created_at"]
         indexes = [models.Index(fields=["user", "created_at"])]
+
+
+class SentenceAttempt(models.Model):
+    """One answer to a sentence exercise (arrange / listen / fill / meaning) – data for later analysis."""
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="sentence_attempts")
+    sentence = models.ForeignKey(ExampleSentence, on_delete=models.CASCADE, related_name="attempts")
+    language = models.CharField(max_length=2, choices=LearningLanguage.choices)
+    script = models.CharField(max_length=4, blank=True)
+    exercise = models.CharField(max_length=10)
+    correct = models.BooleanField()
+    answer = models.CharField(max_length=300, blank=True)
+    response_ms = models.PositiveIntegerField(null=True, blank=True)
+    created_at = models.DateTimeField(default=timezone.now, db_index=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+
+class LearnerLevel(TimeStampedModel):
+    """Where a learner is on the 4-level path of one language (levels of the words: Word.levels)."""
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="levels")
+    language = models.CharField(max_length=5, choices=LearningLanguage.choices)
+    current = models.PositiveSmallIntegerField(default=1, help_text="Cấp đang học (người học tự chọn trong các cấp đã mở)")
+    passed_test = models.PositiveSmallIntegerField(default=1, help_text="Cấp cao nhất đã mở nhờ bài kiểm tra vượt cấp")
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["user", "language"], name="uniq_learner_level")]
+
+    def __str__(self):
+        return f"{self.user_id} {self.language} cấp {self.current}"

@@ -90,3 +90,164 @@ classes:
   - {label: window, slug: window, oi: Window}
   - {label: lamp, slug: lamp, oi: Lamp}
   - {label: pillow, slug: pillow, oi: Pillow}
+
+# Served by the pretrained models only (Open Images V7 folded + COCO), not in the training dataset: objects the
+# vocabulary already has a word for. Without them a bouquet came out as broccoli/orange: the folded model had no
+# "flower" to answer with and COCO picked the closest class it knows. oi = all Open Images classes for that word.
+extra:
+  # COCO classes (both models know them)
+  - {label: fire hydrant, slug: fire-hydrant, coco: fire hydrant, oi: [Fire hydrant]}
+  - {label: tie, slug: tie, coco: tie, oi: [Tie]}
+  - {label: frisbee, slug: frisbee, coco: frisbee, oi: [Flying disc]}
+  - {label: sports ball, slug: ball, coco: sports ball, oi: [Ball, Rugby ball, Golf ball, Cricket ball]}
+  - {label: kite, slug: kite, coco: kite, oi: [Kite]}
+  - {label: baseball bat, slug: baseball-bat, coco: baseball bat, oi: [Baseball bat]}
+  - {label: skateboard, slug: skateboard, coco: skateboard, oi: [Skateboard]}
+  - {label: surfboard, slug: surfboard, coco: surfboard, oi: [Surfboard]}
+  - {label: tennis racket, slug: tennis-racket, coco: tennis racket, oi: [Tennis racket, Racket, Table tennis racket]}
+  - {label: wine glass, slug: wine-glass, coco: wine glass, oi: [Wine glass]}
+  - {label: sandwich, slug: sandwich, coco: sandwich, oi: [Sandwich, Submarine sandwich]}
+  - {label: hot dog, slug: hot-dog, coco: hot dog, oi: [Hot dog]}
+  - {label: donut, slug: donut, coco: donut, oi: [Doughnut]}
+  - {label: toilet, slug: toilet, coco: toilet, oi: [Toilet]}
+  - {label: remote, slug: remote-control, coco: remote, oi: [Remote control]}
+  - {label: microwave, slug: microwave, coco: microwave, oi: [Microwave oven]}
+  - {label: oven, slug: oven, coco: oven, oi: [Oven]}
+  - {label: toaster, slug: toaster, coco: toaster, oi: [Toaster]}
+  - {label: sink, slug: sink, coco: sink, oi: [Sink]}
+  - {label: vase, slug: vase, coco: vase, oi: [Vase]}
+  - {label: hair drier, slug: hair-dryer, coco: hair drier, oi: [Hair dryer]}
+  # Open Images only
+  - {label: flower, slug: flower, oi: [Flower, Rose, Common sunflower, Lily, Lavender (Plant)]}
+  - {label: tree, slug: tree, oi: [Tree, Palm tree, Christmas tree, Maple, Willow]}
+  - {label: mushroom, slug: mushroom, oi: [Mushroom]}
+  - {label: pumpkin, slug: pumpkin, oi: [Pumpkin]}
+  - {label: grape, slug: grape, oi: [Grape]}
+  - {label: mango, slug: mango, oi: [Mango]}
+  - {label: lemon, slug: lemon, oi: [Lemon]}
+  - {label: pear, slug: pear, oi: [Pear]}
+  - {label: peach, slug: peach, oi: [Peach]}
+  - {label: potato, slug: potato, oi: [Potato]}
+  - {label: cucumber, slug: cucumber, oi: [Cucumber]}
+  - {label: coconut, slug: coconut, oi: [Coconut]}
+  - {label: milk, slug: milk, oi: [Milk]}
+  - {label: coffee, slug: coffee, oi: [Coffee]}
+  - {label: tea, slug: tea, oi: [Tea]}
+  - {label: juice, slug: juice, oi: [Juice]}
+  - {label: beer, slug: beer, oi: [Beer]}
+  - {label: cheese, slug: cheese, oi: [Cheese]}
+  - {label: ice cream, slug: ice-cream, oi: [Ice cream]}
+  - {label: candy, slug: candy, oi: [Candy]}
+  - {label: cookie, slug: cookie, oi: [Cookie]}
+  - {label: hamburger, slug: hamburger, oi: [Hamburger]}
+  - {label: french fries, slug: french-fries, oi: [French fries]}
+  - {label: salad, slug: salad, oi: [Salad]}
+  - {label: shrimp, slug: shrimp, oi: [Shrimp]}
+  - {label: crab, slug: crab, oi: [Crab]}
+  - {label: fish, slug: fish, oi: [Fish, Goldfish]}
+  - {label: bee, slug: bee, oi: [Bee]}
+  - {label: ant, slug: ant, oi: [Ant]}
+  - {label: ladybug, slug: ladybug, oi: [Ladybug]}
+  - {label: snail, slug: snail, oi: [Snail]}
+  - {label: spider, slug: spider, oi: [Spider]}
+  - {label: snake, slug: snake, oi: [Snake]}
+  - {label: lizard, slug: lizard, oi: [Lizard]}
+  - {label: frog, slug: frog, oi: [Frog]}
+  - {label: turtle, slug: turtle, oi: [Turtle, Sea turtle, Tortoise]}
+  - {label: crocodile, slug: crocodile, oi: [Crocodile]}
+  - {label: dinosaur, slug: dinosaur, oi: [Dinosaur]}
+  - {label: penguin, slug: penguin, oi: [Penguin]}
+  - {label: owl, slug: owl, oi: [Owl]}
+  - {label: parrot, slug: parrot, oi: [Parrot]}
+  - {label: eagle, slug: eagle, oi: [Eagle]}
+  - {label: swan, slug: swan, oi: [Swan]}
+  - {label: goose, slug: goose, oi: [Goose]}
+  - {label: kangaroo, slug: kangaroo, oi: [Kangaroo]}
+  - {label: deer, slug: deer, oi: [Deer]}
+  - {label: fox, slug: fox, oi: [Fox]}
+  - {label: goat, slug: goat, oi: [Goat]}
+  - {label: camel, slug: camel, oi: [Camel]}
+  - {label: panda, slug: panda, oi: [Panda]}
+  - {label: squirrel, slug: squirrel, oi: [Squirrel]}
+  - {label: hedgehog, slug: hedgehog, oi: [Hedgehog]}
+  - {label: mouse animal, slug: mouse-animal, oi: [Mouse]}
+  - {label: leopard, slug: leopard, oi: [Leopard]}
+  - {label: rhinoceros, slug: rhinoceros, oi: [Rhinoceros]}
+  - {label: hippopotamus, slug: hippo, oi: [Hippopotamus]}
+  - {label: dolphin, slug: dolphin, oi: [Dolphin]}
+  - {label: whale, slug: whale, oi: [Whale]}
+  - {label: shark, slug: shark, oi: [Shark]}
+  - {label: jellyfish, slug: jellyfish, oi: [Jellyfish]}
+  - {label: starfish, slug: starfish, oi: [Starfish]}
+  - {label: taxi, slug: taxi, oi: [Taxi]}
+  - {label: ambulance, slug: ambulance, oi: [Ambulance]}
+  - {label: helicopter, slug: helicopter, oi: [Helicopter]}
+  - {label: rocket, slug: rocket, oi: [Rocket]}
+  - {label: house, slug: house, oi: [House]}
+  - {label: stairs, slug: stairs, oi: [Stairs]}
+  - {label: tent, slug: tent, oi: [Tent]}
+  - {label: swimming pool, slug: swimming-pool, oi: [Swimming pool]}
+  - {label: flag, slug: flag, oi: [Flag]}
+  - {label: shirt, slug: shirt, oi: [Shirt]}
+  - {label: pants, slug: pants, oi: [Trousers]}
+  - {label: jeans, slug: jeans, oi: [Jeans]}
+  - {label: shorts, slug: shorts, oi: [Shorts]}
+  - {label: skirt, slug: skirt, oi: [Skirt, Miniskirt]}
+  - {label: dress, slug: dress, oi: [Dress]}
+  - {label: suit, slug: suit, oi: [Suit]}
+  - {label: coat, slug: coat, oi: [Coat]}
+  - {label: jacket, slug: jacket, oi: [Jacket]}
+  - {label: shoes, slug: shoes, oi: [Footwear]}
+  - {label: boots, slug: boots, oi: [Boot]}
+  - {label: high heels, slug: high-heels, oi: [High heels]}
+  - {label: sandals, slug: sandals, oi: [Sandal]}
+  - {label: socks, slug: socks, oi: [Sock]}
+  - {label: scarf, slug: scarf, oi: [Scarf]}
+  - {label: belt, slug: belt, oi: [Belt]}
+  - {label: gloves, slug: gloves, oi: [Glove]}
+  - {label: face, slug: face, oi: [Human face]}
+  - {label: hair, slug: hair, oi: [Human hair]}
+  - {label: eye, slug: eye, oi: [Human eye]}
+  - {label: ear, slug: ear, oi: [Human ear]}
+  - {label: nose, slug: nose, oi: [Human nose]}
+  - {label: mouth, slug: mouth, oi: [Human mouth]}
+  - {label: hand, slug: hand, oi: [Human hand]}
+  - {label: arm, slug: arm, oi: [Human arm]}
+  - {label: leg, slug: leg, oi: [Human leg]}
+  - {label: foot, slug: foot, oi: [Human foot]}
+  - {label: desk, slug: desk, oi: [Desk]}
+  - {label: bookshelf, slug: bookshelf, oi: [Bookcase]}
+  - {label: wardrobe, slug: wardrobe, oi: [Wardrobe]}
+  - {label: drawer, slug: drawer, oi: [Drawer]}
+  - {label: curtain, slug: curtain, oi: [Curtain]}
+  - {label: mirror, slug: mirror, oi: [Mirror]}
+  - {label: towel, slug: towel, oi: [Towel]}
+  - {label: plate, slug: plate, oi: [Plate]}
+  - {label: kettle, slug: kettle, oi: [Kettle]}
+  - {label: candle, slug: candle, oi: [Candle]}
+  - {label: light bulb, slug: light-bulb, oi: [Light bulb]}
+  - {label: fan, slug: fan, oi: [Mechanical fan, Ceiling fan]}
+  - {label: washing machine, slug: washing-machine, oi: [Washing machine]}
+  - {label: box, slug: box, oi: [Box]}
+  - {label: envelope, slug: envelope, oi: [Envelope]}
+  - {label: coin, slug: coin, oi: [Coin]}
+  - {label: balloon, slug: balloon, oi: [Balloon]}
+  - {label: doll, slug: doll, oi: [Doll]}
+  - {label: hammer, slug: hammer, oi: [Hammer]}
+  - {label: ladder, slug: ladder, oi: [Ladder]}
+  - {label: flashlight, slug: flashlight, oi: [Flashlight]}
+  - {label: seat belt, slug: seat-belt, oi: [Seat belt]}
+  - {label: eraser, slug: eraser, oi: [Eraser]}
+  - {label: ruler, slug: ruler, oi: [Ruler]}
+  - {label: calculator, slug: calculator, oi: [Calculator]}
+  - {label: tablet, slug: tablet, oi: [Tablet computer]}
+  - {label: camera, slug: camera, oi: [Camera]}
+  - {label: headphones, slug: headphones, oi: [Headphones]}
+  - {label: printer, slug: printer, oi: [Printer]}
+  - {label: football, slug: football, oi: [Football]}
+  - {label: volleyball, slug: volleyball, oi: [Volleyball (Ball)]}
+  - {label: guitar, slug: guitar, oi: [Guitar]}
+  - {label: piano, slug: piano, oi: [Piano]}
+  - {label: violin, slug: violin, oi: [Violin]}
+  - {label: drum, slug: drum, oi: [Drum]}
+  - {label: flute, slug: flute, oi: [Flute]}

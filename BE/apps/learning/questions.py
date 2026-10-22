@@ -45,6 +45,14 @@ class RandomSameTopicDistractors(DistractorProvider):
 
 
 def get_distractor_provider() -> DistractorProvider:
+    """Random baseline or Smart Distractor Generation (apps.algorithms), as chosen on the admin page."""
+    from apps.algorithms.models import AlgorithmConfig
+
+    if AlgorithmConfig.get().distractor == "smart":
+        from apps.algorithms.distractor import VECTORS, SmartDistractors
+
+        if VECTORS.exists():
+            return SmartDistractors()
     return RandomSameTopicDistractors()
 
 
@@ -53,12 +61,28 @@ def _texts(words, code):
     return {t.word_id: t for t in trs}
 
 
+def _questions_vi(word: Word, tr, provider: DistractorProvider) -> list[dict]:
+    accepted = [tr.text] + [v for v in tr.accepted_variants if v]
+    payload = translation_payload(tr)
+    questions = [{"type": "flashcard", "front": payload, "back": word.emoji}]
+    others = [t.text for t in _texts(provider.pick(word, Target("vi", "vi", ""), 3), "vi").values() if t.text != tr.text][:3]
+    if (word.emoji or word.image) and len(others) >= 2:
+        opts = others + [tr.text]
+        random.shuffle(opts)
+        questions.append({"type": "choose_target", "prompt": word.emoji, "options": opts, "answer": tr.text})
+    questions.append({"type": "listen_type", "audio": payload, "accepted": accepted, "answer": tr.text})
+    return questions
+
+
 def build_questions(word: Word, target: Target, by_lang: dict, provider: DistractorProvider) -> list[dict]:
     tr = by_lang.get(target.code)
     vi = by_lang.get("vi")
     if tr is None:
         return []
-    meaning = vi.text if vi and target.code != "vi" else (by_lang.get("en").text if by_lang.get("en") else "")
+    if target.code == "vi":
+        # Vietnamese is taught to Vietnamese children: picture + sound, never an English gloss
+        return _questions_vi(word, tr, provider)
+    meaning = vi.text if vi else ""
     distractors = provider.pick(word, target, 3)
     d_target = _texts(distractors, target.code)
     d_meaning = _texts(distractors, "vi" if target.code != "vi" else "en")

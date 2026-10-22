@@ -72,6 +72,11 @@ class Word(TimeStampedModel):
     slug = models.SlugField(max_length=80, unique=True)
     image = models.ImageField(upload_to="words/", blank=True, null=True)
     image_url = models.URLField(blank=True)
+    image_credit = models.CharField(max_length=300, blank=True, help_text="Tác giả · giấy phép của ảnh (seed/concepts/images.csv)")
+    levels = models.JSONField(default=dict, blank=True,
+                              help_text='Cấp độ 1–4 theo ngôn ngữ học, VD {"en": 1, "zh": 2, "vi": 1} – seed/concepts/levels.csv')
+    image_source = models.URLField(max_length=500, blank=True, help_text="Trang gốc của ảnh trên Wikimedia Commons")
+    emoji = models.CharField(max_length=16, blank=True, help_text="Hình minh họa (emoji Unicode) cho trẻ em – seed/concepts/emoji.csv")
     yolo_label = models.CharField(max_length=60, blank=True, db_index=True, help_text="Tên lớp YOLOv10 tương ứng")
     part_of_speech = models.CharField(max_length=6, choices=PartOfSpeech.choices, default=PartOfSpeech.NOUN)
     difficulty = models.PositiveSmallIntegerField(default=1, help_text="1 (dễ) – 5 (khó)")
@@ -84,6 +89,13 @@ class Word(TimeStampedModel):
 
     def __str__(self):
         return self.slug
+
+    def save(self, *args, **kwargs):
+        # every word sits on the 4-level path; a word added by hand starts at the level of its difficulty
+        self.levels = {lang: (self.levels or {}).get(lang) or min(max(self.difficulty, 1), 4) for lang in ("en", "zh", "vi")}
+        if kwargs.get("update_fields") is not None and "levels" not in kwargs["update_fields"]:
+            kwargs["update_fields"] = [*kwargs["update_fields"], "levels"]
+        super().save(*args, **kwargs)
 
 
 class TopicWord(models.Model):
@@ -153,9 +165,15 @@ class ExampleSentence(TimeStampedModel):
     source_id = models.CharField(max_length=40, blank=True)
     license = models.CharField(max_length=40, blank=True)
     status = models.CharField(max_length=8, choices=ReviewStatus.choices, default=ReviewStatus.DRAFT, db_index=True)
+    tokens = models.JSONField(default=list, blank=True,
+                              help_text='Từ đã tách: [{"t": "我们", "p": "wǒ men", "z": "ㄨㄛˇ ˙ㄇㄣ"}, {"t": "。", "x": 1}]')
+    target_tokens = models.JSONField(default=list, blank=True, help_text="Vị trí các token là từ vựng `word`")
+    checks = models.JSONField(default=dict, blank=True, help_text="errors / warnings của bộ kiểm tra tự động")
 
     class Meta:
         ordering = ["id"]
+        constraints = [models.UniqueConstraint(fields=["word", "language", "source", "source_id"],
+                                               condition=~models.Q(source_id=""), name="uniq_example_source")]
 
     def __str__(self):
         return self.text
@@ -189,3 +207,40 @@ class ErrorReport(TimeStampedModel):
 
     class Meta:
         ordering = ["-created_at"]
+
+
+class WordCandidate(TimeStampedModel):
+    """A new word proposed from the HSK list (CC-CEDICT + Vietnamese Wiktionary), waiting for a teacher.
+
+    Machine suggestions are often the wrong sense (打 → "dozen"), so nothing reaches learners before a person
+    approves it – and approval still runs the same source checks as seed/concepts/words.csv."""
+
+    class Status(models.TextChoices):
+        PENDING = "pending", "Chờ duyệt"
+        APPROVED = "approved", "Đã duyệt"
+        REJECTED = "rejected", "Bỏ qua"
+
+    zh_hans = models.CharField(max_length=40, unique=True)
+    zh_hant = models.CharField(max_length=40)
+    pinyin = models.CharField(max_length=120, blank=True)
+    hsk_level = models.PositiveSmallIntegerField(db_index=True)
+    glosses = models.JSONField(default=list, help_text="Nghĩa tiếng Anh trong CC-CEDICT")
+    en = models.CharField(max_length=80, blank=True)
+    vi = models.CharField(max_length=80, blank=True)
+    vi_options = models.JSONField(default=list, help_text="Gợi ý nghĩa Việt (Wiktionary tiếng Việt)")
+    part_of_speech = models.CharField(max_length=6, default="noun")
+    topics = models.CharField(max_length=120, blank=True, help_text="slug chủ đề, phân cách bằng |")
+    audience = models.CharField(max_length=5, default="all")
+    confidence = models.CharField(max_length=6, default="low", help_text="high = nghĩa chính khớp cả 3 chiều")
+    status = models.CharField(max_length=8, choices=Status.choices, default=Status.PENDING, db_index=True)
+    checks = models.JSONField(default=dict, blank=True, help_text="Kết quả kiểm tra nguồn lần gần nhất")
+    note = models.CharField(max_length=300, blank=True)
+    word = models.ForeignKey(Word, null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
+    reviewed_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["hsk_level", "-confidence", "id"]
+
+    def __str__(self):
+        return f"{self.zh_hans} ({self.status})"

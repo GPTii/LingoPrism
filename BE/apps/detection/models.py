@@ -74,3 +74,39 @@ class DetectionItem(models.Model):
 
     class Meta:
         ordering = ["-confidence"]
+    learned_from = models.ForeignKey("CorrectionMemory", null=True, blank=True, on_delete=models.SET_NULL,
+                                     related_name="applied", help_text="Nhãn đã được sửa tự động theo báo lỗi trước đó")
+
+
+class CorrectionMemory(models.Model):
+    """A detection error reported by a learner, remembered by what the object looks like (image embedding).
+
+    The next time the detector makes the same mistake on a similar-looking object, the server answers with the
+    corrected word instead – no retraining. A report applies to its reporter at once and to everyone once approved
+    (CONSENSUS_USERS learners reported the same mistake, or staff approved it). Approved reports are exported as
+    training data for the next YOLO run (AI/scripts/merge_feedback.py)."""
+
+    class Status(models.TextChoices):
+        PENDING = "pending", "Chờ duyệt (chỉ áp dụng cho người báo)"
+        APPROVED = "approved", "Đã duyệt (áp dụng cho mọi người)"
+        REJECTED = "rejected", "Bị từ chối"
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="correction_reports")
+    item = models.OneToOneField(DetectionItem, on_delete=models.CASCADE, related_name="report")
+    wrong_label = models.CharField(max_length=60, db_index=True, help_text="Nhãn model đã đoán")
+    correct_label = models.CharField(max_length=60, blank=True, help_text="Nhãn đúng; rỗng = không phải đồ vật nào")
+    embedding = models.BinaryField(help_text="float32 vector của vùng ảnh (BE/models/embedder.onnx)")
+    crop = models.ImageField(upload_to="corrections/%Y/%m/", null=True, blank=True)
+    status = models.CharField(max_length=8, choices=Status.choices, default=Status.PENDING, db_index=True)
+    disputes = models.PositiveIntegerField(default=0, help_text="Số lần người khác báo lần sửa tự động này là sai")
+    reviewed_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL,
+                                    related_name="+")
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+    exported_at = models.DateTimeField(null=True, blank=True, help_text="Đã xuất làm dữ liệu train")
+    created_at = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.wrong_label} → {self.correct_label or '(không phải đồ vật)'}"

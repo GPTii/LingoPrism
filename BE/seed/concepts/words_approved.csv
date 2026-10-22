@@ -1,0 +1,282 @@
+slug,topics,yolo_label,pos,audience,difficulty,vi,en,en_aliases,zh_hans,zh_hant
+midnight,time,,noun,all,2,nửa đêm,midnight,,半夜,半夜
+daytime,time,,noun,all,1,ban ngày,daytime,during the day;day,白天,白天
+half-a-year,time,,noun,all,1,nửa năm,half a year,,半年,半年
+north,directions,,noun,all,1,phía bắc,north,be defeated,北,北
+south,directions,,noun,all,1,phía nam,south,,南,南
+east,directions,,noun,all,1,phía đông,east,host;landlord,东,東
+west,directions,,noun,all,1,phía tây,west,spanish,西,西
+southeast,directions,,noun,all,2,đông nam,southeast,,东南,東南
+southwest,directions,,noun,all,2,tây nam,southwest,,西南,西南
+front,directions,,noun,all,1,phía trước,front,front side;in front of,前边,前邊
+outside,directions,,noun,all,1,bên ngoài,outside,outer surface;abroad,外边,外邊
+inside,directions,,noun,all,1,bên trong,inside,,里边,裡邊
+above,directions,,noun,all,1,phía trên,above,top;overhead;upwards,上边,上邊
+below,directions,,noun,all,1,phía dưới,below,under;underside,下边,下邊
+right-side,directions,,noun,all,1,bên phải,right side,,右边,右邊
+left-side,directions,,noun,all,1,bên trái,left side,left;the left of,左边,左邊
+opposite,directions,,noun,all,2,đối diện,opposite,face to face,对面,對面
+here,directions,,other,all,1,ở đây,here,,这里,這裡
+over-there,directions,,other,all,1,đằng kia,over there,yonder,那边,那邊
+where,greetings|directions,,other,all,1,ở đâu,where,somewhere;anywhere;wherever,哪里,哪裡
+patient-2,people|health,,noun,all,1,bệnh nhân,patient,sick person;invalid,病人,病人
+dish,food,,noun,all,1,món ăn,dish,type,菜,菜
+vehicle,transport,,noun,all,1,xe cộ,vehicle,car;machine,车,車
+have-a-meal,actions,,phrase,all,1,ăn cơm,have a meal,eat;make a living,吃饭,吃飯
+come-out,actions,,verb,all,1,đi ra,come out,appear;arise,出来,出來
+go-out,actions,,verb,all,1,ra ngoài,go out,,出去,出去
+take-a-taxi,transport|actions,,phrase,all,1,bắt taxi,take a taxi,hitch a lift,打车,打車
+location,places,,noun,all,1,địa điểm,location,place;site;venue,地点,地點
+telephone,technology,,noun,all,1,điện thoại,telephone,phone call,电话,電話
+worker,jobs,,noun,all,1,công nhân,worker,,工人,工人
+foreign-country,places,,noun,all,1,nước ngoài,foreign country,,外国,外國
+pleasant-to-hear,qualities,,adj,all,1,êm tai,pleasant to hear,,好听,好聽
+day-after-tomorrow,time,,noun,all,1,ngày kia,day after tomorrow,life after birth;acquired;posteriori,后天,後天
+day-before-yesterday,time,,noun,all,1,hôm kia,day before yesterday,,前天,前天
+family-member,family,,noun,all,1,người nhà,family member,servant,家人,家人
+this-year,time,,noun,all,1,năm nay,this year,,今年,今年
+next-year,time,,noun,all,1,năm sau,next year,,明年,明年
+last-year,time,,noun,all,1,năm ngoái,last year,,去年,去年
+year-before-last,time,,noun,all,2,năm kia,year before last,,前年,前年
+go-in,actions,,verb,all,1,đi vào,go in,go forward;advance;enter,进,進
+feel,actions|emotions,,verb,all,1,cảm thấy,feel,,觉得,覺得
+see-a-doctor,health,,phrase,all,1,đi khám bệnh,see a doctor,visit a doctor;see a patient,看病,看病
+text,education,,noun,all,1,bài khóa,text,,课文,課文
+elderly,people,,noun,all,1,người già,elderly,,老人,老人
+building,places,,noun,all,1,tòa nhà,building,storied building;floor,楼,樓
+upstairs,home|directions,,noun,all,1,tầng trên,upstairs,,楼上,樓上
+downstairs,home|directions,,noun,all,1,tầng dưới,downstairs,,楼下,樓下
+intersection,transport,,noun,all,1,ngã tư,intersection,crossing,路口,路口
+on-the-way,transport,,other,all,1,trên đường,on the way,on the road,路上,路上
+at-once,time,,other,all,1,ngay lập tức,at once,right away;immediately;on horseback,马上,馬上
+name,people,,noun,all,1,tên,name,,名字,名字
+boyfriend,people,,noun,all,1,bạn trai,boyfriend,,男朋友,男朋友
+girlfriend,people,,noun,all,1,bạn gái,girlfriend,,女朋友,女朋友
+schoolboy,education|people,,noun,all,1,nam sinh,schoolboy,male student;boy;guy,男生,男生
+schoolgirl,education|people,,noun,all,1,nữ sinh,schoolgirl,female student;girl,女生,女生
+you,people,,other,all,1,bạn,you,,你,你
+she,people,,other,all,1,cô ấy,she,,她,她
+we,people,,other,all,2,chúng ta,we,i or me;you;also pr,咱们,咱們
+it,people,,other,all,2,nó,it,,它,它
+be-familiar-with,actions,,verb,all,1,quen biết,be familiar with,know;recognize,认识,認識
+serious,personality,,adj,all,1,nghiêm túc,serious,conscientious;earnest;take seriously,认真,認真
+date,time,,noun,all,1,ngày tháng,date,,日期,日期
+go-to-work,actions|jobs,,phrase,all,1,đi làm,go to work,be on duty;start work,上班,上班
+get-off-work,actions|jobs,,phrase,all,1,tan làm,get off work,next service,下班,下班
+go-to-class,education,,phrase,all,1,vào học,go to class,attend class,上课,上課
+finish-class,education,,phrase,all,1,tan học,finish class,be dismissed;be fired,下课,下課
+body,body,,noun,all,1,cơ thể,body,one's health,身体,身體
+what,greetings,,other,all,1,cái gì,what,,什么,什麼
+fall-ill,health,,verb,all,1,bị ốm,fall ill,,生病,生病
+who,greetings,,other,all,1,ai,who,also pr,谁,誰
+hear,actions,,verb,all,1,nghe thấy,hear,,听见,聽見
+dictation,education,,noun,all,1,nghe viết,dictation,transcribe by ear,听写,聽寫
+foreign-language,education,,noun,all,1,ngoại ngữ,foreign language,,外语,外語
+online-friend,technology|people,,noun,all,1,bạn trên mạng,online friend,,网友,網友
+online,technology,,other,all,1,trên mạng,online,,网上,網上
+primary-school-student,education,,noun,all,1,học sinh tiểu học,primary school student,schoolchild;beginner,小学生,小學生
+college,education,,noun,all,1,học viện,college,educational institute;school;faculty,学院,學院
+half,numbers,,noun,all,1,một nửa,half,,一半,一半
+together,actions,,other,all,1,cùng nhau,together,same place,一起,一起
+same,qualities,,adj,all,1,giống nhau,same,like;equal to;same as,一样,一樣
+useful,qualities,,adj,all,1,có ích,useful,,有用,有用
+how,greetings,,other,all,1,như thế nào,how,what;why,怎么,怎麼
+knowledge,education,,noun,all,1,kiến thức,knowledge,intellectual,知识,知識
+china,places,,noun,all,1,Trung Quốc,china,,中国,中國
+middle-school,education|places,,noun,all,1,trường trung học,middle school,,中学,中學
+middle-school-student,education,,noun,all,1,học sinh trung học,middle school student,middle-school student;high school student,中学生,中學生
+best,qualities,,adj,all,1,tốt nhất,best,,最好,最好
+sometimes,time,,other,all,1,thỉnh thoảng,sometimes,,有时候,有時候
+class,education,,noun,all,1,lớp học,class,squad;work shift,班,班
+often,time,,other,all,1,thường xuyên,often,always;ever;frequently,常,常
+electricity,technology,,noun,all,1,điện,electricity,lightning;electric,电,電
+how-many,greetings|numbers,,other,all,1,bao nhiêu,how many,somewhat,多少,多少
+dry,qualities,,adj,all,1,khô,dry,dried food,干,乾
+call,actions,,verb,all,1,gọi,call,shout;order;ask,叫,叫
+next-time,time,,other,all,1,lần sau,next time,,下次,下次
+last-time,time,,other,all,1,lần trước,last time,,上次,上次
+first,time,,other,all,1,trước tiên,first,my late,先,先
+also,greetings,,other,all,1,cũng,also,even,也,也
+some,numbers,,other,all,1,một số,some,,有些,有些
+again,time,,other,all,1,lại,again,more;then,再,再
+really,qualities,,other,all,1,thật,really,truly;indeed;real,真,真
+character,education,,noun,all,1,chữ,character,letter;symbol;word,字,字
+can,actions,,verb,all,1,có thể,can,be able to;might possibly;ability,能,能
+be,actions,,verb,all,1,là,be,very well,是,是
+too,qualities,,other,all,1,quá,too,highest;greatest;very,太,太
+that,directions,,other,all,1,đó,that,then,那,那
+washroom,places|home,,noun,all,1,nhà vệ sinh,washroom,toilet;lavatory,洗手间,洗手間
+not-bad,qualities,,adj,all,2,không tồi,not bad,correct;right;pretty good,不错,不錯
+different,qualities,,adj,all,2,khác nhau,different,distinct;not the same;not alike,不同,不同
+menu,food|places,,noun,all,2,thực đơn,menu,,菜单,菜單
+lawn,nature,,noun,all,2,bãi cỏ,lawn,meadow;sod;turf,草地,草地
+almost,qualities,,other,all,2,gần như,almost,nearly;more or less;about the same,差不多,差不多
+achievement,education,,noun,all,2,thành tích,achievement,performance records;grades,成绩,成績
+set-off,actions|transport,,verb,all,2,khởi hành,set off,proceed from,出发,出發
+exit,places,,noun,all,2,lối ra,exit,speak;export,出口,出口
+entrance,places,,noun,all,2,lối vào,entrance,import,入口,入口
+go-out-2,actions,,verb,all,2,ra khỏi nhà,go out,leave home;away from home,出门,出門
+be-born,actions|family,,verb,all,2,sinh ra,be born,,出生,出生
+leave-hospital,health,,verb,all,2,xuất viện,leave hospital,,出院,出院
+rent,places,,verb,all,2,cho thuê,rent,,出租,出租
+blow,actions,,verb,all,2,thổi,blow,blast;puff,吹,吹
+spring-festival,time,,noun,all,2,Tết Nguyên đán,spring festival,,春节,春節
+word,education,,noun,all,2,từ,word,,词,詞
+plan,actions,,verb,all,2,dự định,plan,intend;calculate,打算,打算
+print,technology,,verb,all,2,in,print,affix a seal;stamp;print out,打印,列印
+everyone,people,,other,all,2,mọi người,everyone,influential family;great expert,大家,大家
+adult,people,,noun,all,2,người lớn,adult,grownup,大人,大人
+size,qualities,,noun,all,2,kích thước,size,large and small;adults and children;consideration of seniority,大小,大小
+everywhere,directions,,other,all,2,khắp nơi,everywhere,,到处,到處
+lamp-2,home,,noun,all,2,cái đèn,lamp,light;lantern,灯,燈
+low,qualities,,adj,all,2,thấp,low,beneath;lower;let droop,低,低
+animal,animals,,noun,all,2,động vật,animal,,动物,動物
+pronunciation,education,,noun,all,2,cách đọc,pronunciation,,读音,讀音
+text-message,technology,,noun,all,2,tin nhắn,text message,sms,短信,簡訊
+team,sports,,noun,all,2,đội,team,squadron;group,队,隊
+captain,sports|people,,noun,all,2,đội trưởng,captain,team leader,队长,隊長
+dialogue,education,,noun,all,2,hội thoại,dialogue,talk,对话,對話
+how-long,greetings|time,,other,all,2,bao lâu,how long,long time,多久,多久
+discover,actions,,verb,all,2,phát hiện,discover,discovery,发现,發現
+convenient,qualities,,adj,all,2,thuận tiện,convenient,relieve oneself,方便,方便
+instant-noodles,food,,noun,all,2,mì ăn liền,instant noodles,,方便面,泡麵
+feel-relieved,emotions,,verb,all,2,yên tâm,feel relieved,feel reassured;be at ease,放心,放心
+score,education,,noun,all,2,điểm số,score,grade;mark;fraction,分数,分數
+review,education|actions,,verb,all,2,ôn tập,review,revision,复习,復習
+change,actions,,verb,all,2,thay đổi,change,alter;transform,改变,改變
+moved,emotions,,adj,all,2,cảm động,moved,move;touch;moving,感动,感動
+just-now,time,,other,all,2,vừa nãy,just now,moment ago,刚才,剛才
+advanced,qualities,,adj,all,2,cao cấp,advanced,high level;high grade;high-ranking,高级,高級
+high-school,education|places,,noun,all,2,trường trung học phổ thông,high school,senior high school,高中,高中
+kilogram,numbers,,noun,all,2,ki-lô-gam,kilogram,,公斤,公斤
+kilometer,numbers,,noun,all,2,ki-lô-mét,kilometer,,公里,公里
+fair,qualities,,adj,all,2,công bằng,fair,impartial,公平,公平
+enough,qualities,,adj,all,2,đủ,enough,really,够,夠
+advertisement,technology,,noun,all,2,quảng cáo,advertisement,advertise;commercial,广告,廣告
+shout,actions,,verb,all,2,hét,shout,yell;call out for,喊,喊
+seem,qualities,,verb,all,2,hình như,seem,as if;seem like,好像,好像
+painter,jobs,,noun,all,2,họa sĩ,painter,,画家,畫家
+bad-person,people,,noun,all,2,người xấu,bad person,villain,坏人,壞人
+exchange,actions,,verb,all,2,đổi,exchange,change;substitute;switch,换,換
+or,greetings,,other,all,2,hoặc,or,,或者,或者
+opportunity,jobs,,noun,all,2,cơ hội,opportunity,chance;occasion,机会,機會
+urgent,qualities,,adj,all,2,gấp,urgent,pressing;rapid;hurried,急,急
+fake,qualities,,adj,all,2,giả,fake,false;artificial;borrow,假,假
+examine,actions|health,,verb,all,2,kiểm tra,examine,inspection;inspect,检查,檢查
+make-friends,actions|people,,phrase,all,2,kết bạn,make friends,,交朋友,交朋友
+traffic,transport,,noun,all,2,giao thông,traffic,be connected;transportation;communications,交通,交通
+education,education,,noun,all,2,giáo dục,education,educate;teach,教育,教育
+program,technology|hobbies,,noun,all,2,chương trình,program,planned activity,节目,節目
+borrow,actions,,verb,all,2,mượn,borrow,lend,借,借
+liquor,food,,noun,all,2,rượu,liquor,wine;spirits;alcoholic beverage,酒,酒
+raise-a-hand,actions|education,,phrase,all,2,giơ tay,raise a hand,,举手,舉手
+boot-up,technology,,verb,all,2,bật máy,boot up,start an engine;press ctrl-alt-delete,开机,開機
+turn-off,technology,,verb,all,2,tắt máy,turn off,,关机,關機
+start-school,education,,verb,all,2,khai giảng,start school,begin;found a school,开学,開學
+cute,qualities,,adj,all,2,đáng yêu,cute,adorable;lovely,可爱,可愛
+dreadful,qualities,,adj,all,2,đáng sợ,dreadful,awful;fearful;formidable,可怕,可怕
+but,greetings,,other,all,2,nhưng,but,indeed,可是,可是
+air,nature,,noun,all,2,không khí,air,atmosphere,空气,空氣
+fast-food,food,,noun,all,2,đồ ăn nhanh,fast food,snack;quick meal,快餐,快餐
+pull,actions,,verb,all,2,kéo,pull,play;drag;draw,拉,拉
+push,actions,,verb,all,2,đẩy,push,cut;refuse;reject,推,推
+come-from,actions|places,,verb,all,2,đến từ,come from,,来自,來自
+old-friend,people,,noun,all,2,bạn cũ,old friend,period;menstruation,老朋友,老朋友
+example,education,,noun,all,2,ví dụ,example,case;instance,例子,例子
+practice,education|actions,,verb,all,2,luyện tập,practice,exercise;drill,练习,練習
+pleasantly-cool,weather,,adj,all,2,mát mẻ,pleasantly cool,,凉快,涼快
+bright,qualities,,adj,all,2,sáng,bright,loud and clear,亮,亮
+below-zero,weather,,other,all,2,dưới không độ,below zero,,零下,零下
+fluent,qualities,,adj,all,2,trôi chảy,fluent,,流利,流利
+list-of-names,objects,,noun,all,2,danh sách,list of names,,名单,名單
+ugly,qualities,,adj,all,2,xấu xí,ugly,unsightly,难看,難看
+feel-unwell,health|emotions,,adj,all,2,khó chịu,feel unwell,suffer pain,难受,難受
+unpleasant-to-hear,qualities,,adj,all,2,khó nghe,unpleasant to hear,coarse;vulgar;offensive,难听,難聽
+line-up,actions,,verb,all,2,xếp hàng,line up,,排队,排隊
+come-across,actions,,verb,all,2,tình cờ gặp,come across,run into;meet;hit,碰到,碰到
+ordinarily,time,,other,all,2,thường ngày,ordinarily,in normal times;in peacetime,平时,平時
+ordinary,qualities,,adj,all,2,bình thường,ordinary,common;general;average,普通,普通
+other,qualities,,adj,all,2,khác,other,else;rest,其他,其他
+ride-a-bike,transport|actions,,phrase,all,2,đạp xe,ride a bike,,骑车,騎車
+youth,people,,noun,all,2,thanh niên,youth,youthful years;young person;young,青年,青年
+teenager,people,,noun,all,2,thiếu niên,teenager,adolescent;youth,青少年,青少年
+clear,qualities,,adj,all,2,rõ ràng,clear,distinct;understand thoroughly;be clear about,清楚,清楚
+stadium,sports|places,,noun,all,2,sân bóng,stadium,sports ground;court;pitch,球场,球場
+sports-team,sports,,noun,all,2,đội bóng,sports team,,球队,球隊
+whole-body,body,,noun,all,2,toàn thân,whole body,em,全身,全身
+enthusiastic,personality,,adj,all,2,nhiệt tình,enthusiastic,cordial;passion;passionate,热情,熱情
+population,places,,noun,all,2,dân số,population,people,人口,人口
+discuss,actions,,verb,all,2,bàn bạc,discuss,consult;talk over,商量,商量
+last-week,time,,noun,all,2,tuần trước,last week,,上周,上周
+next-week,time,,noun,all,2,tuần sau,next week,,下周,下週
+new-word,education,,noun,all,2,từ mới,new word,,生词,生詞
+life,people,,noun,all,2,cuộc sống,life,live;livelihood,生活,生活
+very,qualities,,other,all,2,rất,very,completely;utterly;extremely,十分,十分
+internship,jobs,,noun,all,2,thực tập,internship,practice;field work;intern,实习,實習
+food,food,,noun,all,2,thức ăn,food,,食物,食物
+mayor,jobs,,noun,all,2,thị trưởng,mayor,,市长,市長
+receive,actions,,verb,all,2,nhận được,receive,,收到,收到
+income,jobs,,noun,all,2,thu nhập,income,take in;revenue,收入,收入
+comfortable,qualities,,adj,all,2,thoải mái,comfortable,feeling well,舒服,舒服
+digit,numbers,,noun,all,2,chữ số,digit,numeral;number;figure,数字,數字
+explain,actions|education,,verb,all,2,giải thích,explain,illustrate;indicate;show,说明,說明
+therefore,greetings,,other,all,2,vì vậy,therefore,as a result;so;reason why,所以,所以
+all,numbers,,other,all,2,tất cả,all,,所有,所有
+attitude,personality,,noun,all,2,thái độ,attitude,manner;bearing;approach,态度,態度
+special,qualities,,adj,all,2,đặc biệt,special,in particular,特别,特別
+hurt,health,,verb,all,2,đau,hurt,love dearly,疼,疼
+improve,actions,,verb,all,2,nâng cao,improve,raise;increase,提高,提高
+physical-education,education|sports,,noun,all,2,thể dục,physical education,sports,体育,體育
+stadium-2,sports|places,,noun,all,2,sân vận động,stadium,,体育场,體育場
+gymnasium,sports|places,,noun,all,2,nhà thi đấu,gymnasium,gym;stadium,体育馆,體育館
+hear-that,actions,,verb,all,2,nghe nói,hear that,hear;one hears;hearsay;listening and speaking,听说,聽說
+stop,actions,,verb,all,2,dừng lại,stop,halt;park,停,停
+park-2,transport,,verb,all,2,đỗ xe,park,pull up;stop working;stall,停车,停車
+notify,technology,,verb,all,2,thông báo,notify,inform;notice;notification,通知,通知
+ten-thousand,numbers,,other,all,2,mười nghìn,ten thousand,great number,万,萬
+net,objects,,noun,all,2,cái lưới,net,network,网,網
+why,greetings,,other,all,2,tại sao,why,for what reason,为什么,為什麼
+ask-the-way,actions|transport,,phrase,all,2,hỏi đường,ask the way,ask for directions,问路,問路
+habit,personality,,noun,all,2,thói quen,habit,custom;usual practice;be used to,习惯,習慣
+western-medicine,health,,noun,all,2,Tây y,western medicine,,西医,西醫
+recall,actions,,verb,all,2,nhớ ra,recall,think of;call to mind,想起,想起
+resemble,qualities,,verb,all,2,giống,resemble,be like;look as if;such as,像,像
+childhood,time,,noun,all,2,thời thơ ấu,childhood,in one's childhood,小时候,小時候
+novel,hobbies,,noun,all,2,tiểu thuyết,novel,fiction,小说,小說
+group,people,,noun,all,2,nhóm,group,,小组,小組
+campus,education|places,,noun,all,2,khuôn viên trường,campus,,校园,校園
+news,technology,,noun,all,2,tin tức,news,,新闻,新聞
+signal,technology,,noun,all,2,tín hiệu,signal,,信号,訊號
+pedestrian,transport|people,,noun,all,2,người đi bộ,pedestrian,traveler on foot;passer-by,行人,行人
+choose,actions,,verb,all,2,chọn,choose,pick;select;elect,选,選
+semester,education,,noun,all,2,học kỳ,semester,term,学期,學期
+raise-2,animals|actions,,verb,all,2,nuôi,raise,bring up;keep;support,养,養
+pill,health,,noun,all,2,viên thuốc,pill,pill or tablet,药片,藥片
+liquid-medicine,health,,noun,all,2,thuốc nước,liquid medicine,bottled medicine;lotion,药水,藥水
+night,time,,noun,all,2,ban đêm,night,,夜,夜
+a-little-bit,numbers,,other,all,2,một chút,a little bit,little bit,一点点,一點點
+have-a-pleasant-journey,greetings,,phrase,all,2,thượng lộ bình an,have a pleasant journey,bon voyage,一路平安,一路平安
+already,time,,other,all,2,đã,already,,已经,已經
+later,time,,other,all,2,sau này,later,after;afterwards;following,以后,以後
+before,time,,other,all,2,trước đây,before,formerly;previous;ago,以前,以前
+opinion,people,,noun,all,2,ý kiến,opinion,idea;suggestion;objection,意见,意見
+meaning,education,,noun,all,2,ý nghĩa,meaning,idea;opinion;wish,意思,意思
+syllable,education,,noun,all,2,âm tiết,syllable,,音节,音節
+bank-card,objects,,noun,all,2,thẻ ngân hàng,bank card,,银行卡,銀行卡
+forever,time,,other,all,2,mãi mãi,forever,eternal,永远,永遠
+tourist,people|places,,noun,all,2,khách du lịch,tourist,guest player,游客,遊客
+reason,people,,noun,all,2,nguyên nhân,reason,cause;origin;root cause,原因,原因
+yard,home,,noun,all,2,cái sân,yard,courtyard;garden;patio,院子,院子
+be-willing,emotions,,verb,all,2,sẵn lòng,be willing,wish;want;ready;willing,愿意,願意
+more-and-more,qualities,,other,all,2,càng ngày càng,more and more,,越来越,越來越
+grow-up,actions|family,,verb,all,2,lớn lên,grow up,,长大,長大
+take-care-of,actions|family,,verb,all,2,chăm sóc,take care of,show consideration;attend to;look after,照顾,照顧
+take-a-photo,actions|hobbies,,phrase,all,2,chụp ảnh,take a photo,take a photograph,照相,照相
+middle-age,people,,noun,all,2,trung niên,middle age,,中年,中年
+repeat,actions|education,,verb,all,2,lặp lại,repeat,duplicate,重复,重複
+anniversary,time,,noun,all,2,ngày kỷ niệm,anniversary,annual,周年,週年
+host,people,,noun,all,2,chủ nhà,host,owner;master,主人,主人
+rent-2,places,,verb,all,2,thuê,rent,hire;charter;rent out,租,租
+recently,time,,other,all,2,gần đây,recently,soon;nearest,最近,最近
+composition,education,,noun,all,2,bài văn,composition,write an essay,作文,作文
+seat,transport|objects,,noun,all,2,chỗ ngồi,seat,,座位,座位

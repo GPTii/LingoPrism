@@ -9,6 +9,7 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 
 from apps.core.permissions import IsStaffRole
+from apps.core.throttles import ActionThrottleMixin
 
 from . import serializers as s
 from .lang import checks
@@ -160,7 +161,8 @@ class WordViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.Gen
 
 
 @extend_schema(tags=["vocab"])
-class ErrorReportViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, viewsets.GenericViewSet):
+class ErrorReportViewSet(ActionThrottleMixin, mixins.CreateModelMixin, mixins.ListModelMixin, viewsets.GenericViewSet):
+    throttle_scopes = {"create": "report"}
     serializer_class = s.ErrorReportSerializer
 
     def get_queryset(self):
@@ -289,8 +291,17 @@ class AdminExampleViewSet(viewsets.ModelViewSet):
     serializer_class = s.AdminExampleSerializer
     permission_classes = [IsStaffRole]
     filterset_fields = ["language", "status", "word", "source"]
-    search_fields = ["text", "translation_vi"]
-    queryset = ExampleSentence.objects.all()
+    search_fields = ["text", "translation_vi", "translation_en"]
+    queryset = ExampleSentence.objects.select_related("word")
+
+    def perform_update(self, serializer):
+        before = serializer.instance.status
+        ex = serializer.save()
+        if ex.status != before:
+            # keep who overrode the automatic checks, for the audit trail
+            ex.checks = {**ex.checks, "manual": {"by": self.request.user.email, "status": ex.status,
+                                                 "at": timezone.now().isoformat()}}
+            ex.save(update_fields=["checks"])
 
 
 @extend_schema(tags=["admin-vocab"])

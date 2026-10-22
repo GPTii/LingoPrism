@@ -17,6 +17,7 @@ from apps.notifications.models import Notification
 from apps.notifications.services import notify
 from apps.vocab.models import Word
 from apps.vocab.services import card, personal_map, resolve_target, words_for_target
+from apps.core.throttles import ActionThrottleMixin
 
 from .models import Group, GroupMember, Post, PostComment, PostLike, PostReport, PostWord, UserFollow
 
@@ -103,8 +104,9 @@ class ReportSerializer(serializers.ModelSerializer):
 
 
 @extend_schema(tags=["community"])
-class PostViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.CreateModelMixin,
+class PostViewSet(ActionThrottleMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.CreateModelMixin,
                   mixins.DestroyModelMixin, viewsets.GenericViewSet):
+    throttle_scopes = {"create": "upload", "report": "report"}
     serializer_class = PostSerializer
     permission_classes = [permissions.IsAuthenticated, NotKid]
     parser_classes = [MultiPartParser, FormParser, JSONParser]
@@ -285,8 +287,9 @@ class MemberSerializer(serializers.ModelSerializer):
 
 
 @extend_schema(tags=["groups"])
-class GroupViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.CreateModelMixin,
+class GroupViewSet(ActionThrottleMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.CreateModelMixin,
                    mixins.UpdateModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet):
+    throttle_scopes = {"create": "upload"}
     serializer_class = GroupSerializer
     permission_classes = [permissions.IsAuthenticated, NotKid]
     search_fields = ["name", "description"]

@@ -12,6 +12,8 @@ environ.Env.read_env(BASE_DIR.parent / ".env", overwrite=False)
 SECRET_KEY = env("DJANGO_SECRET_KEY", default="dev-insecure-change-me")
 DEBUG = env.bool("DJANGO_DEBUG", default=False)
 ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=["localhost", "127.0.0.1"])
+# Django admin path: a non-default one keeps password-guessing bots off it (nginx proxies /django-admin/ by default)
+ADMIN_URL = env("DJANGO_ADMIN_URL", default="django-admin/")
 
 INSTALLED_APPS = [
     "daphne",
@@ -34,6 +36,7 @@ INSTALLED_APPS = [
     "apps.accounts",
     "apps.vocab",
     "apps.learning",
+    "apps.literacy",
     "apps.notifications",
     "apps.gamification",
     "apps.quizzes",
@@ -41,8 +44,10 @@ INSTALLED_APPS = [
     "apps.chat",
     "apps.detection",
     "apps.gis",
+    "apps.algorithms",
     "apps.audit",
     "apps.push",
+    "apps.aitalk",
 ]
 
 MIDDLEWARE = [
@@ -82,6 +87,10 @@ DATABASES = {
         default="postgres://postgres:postgres@localhost:5432/lingoprism",
     )
 }
+# reuse connections instead of one per request; a query running away is killed instead of holding the DB
+DATABASES["default"]["CONN_MAX_AGE"] = env.int("DB_CONN_MAX_AGE", default=60)
+DATABASES["default"]["CONN_HEALTH_CHECKS"] = True
+DATABASES["default"].setdefault("OPTIONS", {})["options"] = f"-c statement_timeout={env.int('DB_STATEMENT_TIMEOUT_MS', default=15000)}"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 AUTH_USER_MODEL = "accounts.User"
@@ -136,6 +145,26 @@ REST_FRAMEWORK = {
     "PAGE_SIZE": 20,
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "EXCEPTION_HANDLER": "apps.core.exceptions.api_exception_handler",
+    # rate limits (apps/core/throttles.py); ScopedRateThrottle only acts on views that set throttle_scope
+    "DEFAULT_THROTTLE_CLASSES": [
+        "rest_framework.throttling.AnonRateThrottle",
+        "rest_framework.throttling.UserRateThrottle",
+        "rest_framework.throttling.ScopedRateThrottle",
+    ],
+    "DEFAULT_THROTTLE_RATES": {
+        "anon": env("THROTTLE_ANON", default="300/min"),  # per IP, shared by a classroom
+        "user": env("THROTTLE_USER", default="300/min"),
+        "login": env("THROTTLE_LOGIN", default="40/min"),  # per IP (a classroom shares one IP); per account: auth_email
+        "auth_email": env("THROTTLE_AUTH_EMAIL", default="10/hour"),  # per target e-mail, any IP
+        "register": env("THROTTLE_REGISTER", default="60/hour"),  # per IP: a teacher may sign up a whole class
+        "password_reset": env("THROTTLE_PASSWORD_RESET", default="10/hour"),
+        "detect": env("THROTTLE_DETECT", default="30/min"),  # YOLO on the CPU: the most expensive endpoint
+        "upload": env("THROTTLE_UPLOAD", default="30/hour"),  # community posts, avatars
+        "report": env("THROTTLE_REPORT", default="30/hour"),
+        "ai_dialogue": env("THROTTLE_AI_DIALOGUE", default="20/hour"),  # each one is a paid AI call
+    },
+    # proxies in front of Django whose X-Forwarded-For is trusted (nginx = 1, Cloudflare + nginx = 2)
+    "NUM_PROXIES": env.int("NUM_PROXIES", default=0),
 }
 
 SIMPLE_JWT = {
@@ -160,6 +189,12 @@ CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=["http://localho
 GOOGLE_CLIENT_IDS = env.list("GOOGLE_CLIENT_IDS", default=[])
 # Firebase Cloud Messaging: path to the service-account JSON (secret, on the server only); empty = push off
 FIREBASE_CREDENTIALS_FILE = env("FIREBASE_CREDENTIALS_FILE", default="")
+# AI dialogue from a photo (Anthropic API key, secret); empty = the feature is off
+ANTHROPIC_API_KEY = env("ANTHROPIC_API_KEY", default="")
+AI_TALK_MODEL = env("AI_TALK_MODEL", default="claude-opus-5-5")
+# Gemini (Google AI Studio, free tier) is used first when its key is set
+GEMINI_API_KEY = env("GEMINI_API_KEY", default="")
+GEMINI_MODEL = env("GEMINI_MODEL", default="gemini-flash-latest")
 # the "Web application" client the web page signs in with (public; defaults to the first accepted ID)
 GOOGLE_WEB_CLIENT_ID = env("GOOGLE_WEB_CLIENT_ID", default="") or (GOOGLE_CLIENT_IDS[0] if GOOGLE_CLIENT_IDS else "")
 
@@ -172,6 +207,12 @@ EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=True)
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="LingoPrism <no-reply@lingoprism.local>")
 
 YOLO_MODEL_PATH = env("YOLO_MODEL_PATH", default=str(BASE_DIR / "models" / "yolov10n.onnx"))
+# pretrained COCO model used alongside the trained one for the COCO classes (see detection.inference.EnsembleDetector)
+YOLO_BASE_MODEL_PATH = env("YOLO_BASE_MODEL_PATH", default=str(BASE_DIR / "models" / "yolov10m-int8.onnx"))
+# CLIP re-check of look-alike labels (AI/scripts/export_clip.py, detection.inference.LabelVerifier); missing = off
+DETECTION_CLIP_PATH = env("DETECTION_CLIP_PATH", default=str(BASE_DIR / "models" / "clip-mobileclip2-s2.onnx"))
+# image embedder of the detection correction memory (AI/scripts/export_embedder.py); missing = memory off
+DETECTION_EMBEDDER_PATH = env("DETECTION_EMBEDDER_PATH", default=str(BASE_DIR / "models" / "embedder.onnx"))
 DATA_UPLOAD_MAX_MEMORY_SIZE = 12 * 1024 * 1024
 FILE_UPLOAD_MAX_MEMORY_SIZE = 12 * 1024 * 1024
 

@@ -11,9 +11,20 @@ MAX_RADIUS_M = 20000
 GEOFENCE_COOLDOWN = timedelta(hours=6)
 
 
-def nearby(lat: float, lng: float, radius_m: int, limit: int = 50) -> list[tuple[int, float]]:
-    """[(poi_id, distance_m)] ordered by distance."""
+def method() -> str:
+    from apps.algorithms.models import AlgorithmConfig
+
+    return AlgorithmConfig.get().proximity
+
+
+def nearby(lat: float, lng: float, radius_m: int, limit: int = 50, using: str | None = None) -> list[tuple[int, float]]:
+    """[(poi_id, distance_m)] ordered by distance – self-implemented grid index (apps.algorithms.proximity)
+    or the PostgreSQL earthdistance baseline, as chosen on the admin page."""
     radius_m = min(max(int(radius_m), 1), MAX_RADIUS_M)
+    if (using or method()) == "grid":
+        from apps.algorithms.proximity import poi_index
+
+        return poi_index().query(lat, lng, radius_m, limit)
     sql = """
         SELECT id, earth_distance(ll_to_earth(%s, %s), ll_to_earth(lat, lng)) AS d
         FROM gis_poi

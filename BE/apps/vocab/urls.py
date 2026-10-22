@@ -1,6 +1,7 @@
 from rest_framework.routers import DefaultRouter
 
 from . import views
+from .candidates import AdminCandidateViewSet
 
 router = DefaultRouter()
 router.register("languages", views.LanguageViewSet, basename="languages")
@@ -13,5 +14,6 @@ router.register("admin/translations", views.AdminTranslationViewSet, basename="a
 router.register("admin/examples", views.AdminExampleViewSet, basename="admin-examples")
 router.register("admin/reports", views.AdminErrorReportViewSet, basename="admin-reports")
 router.register("admin/vocab-stats", views.AdminVocabStatsView, basename="admin-vocab-stats")
+router.register("admin/candidates", AdminCandidateViewSet, basename="admin-candidates")
 
 urlpatterns = router.urls

@@ -41,16 +41,19 @@ def _relevant(entries, terms):
     return [e for e in entries if gloss_matches(e.glosses, terms)]
 
 
-_WEAK = ("(literary)", "(old)", "(archaic)", "variant of", "used in", "old variant", "(dialect)", "surname")
+_WEAK = ("(literary)", "(old)", "(archaic)", "variant of", "used in", "old variant", "(dialect)", "surname",
+         "(bound form)")
 
 
 def _entry_score(entry, terms) -> tuple:
-    """Lower is better: first matching gloss position, penalising literary/variant senses."""
+    """Lower is better: first matching gloss position, penalising literary/variant senses;
+    a gloss that *is* the term beats one that merely contains it (妻子 "wife" vs "wife and children")."""
+    wanted = {t.lower().strip() for t in terms}
     for i, g in enumerate(entry.glosses):
         if gloss_matches([g], terms):
             weak = any(w in g.lower() for w in _WEAK)
-            return (1 if weak else 0, i)
-    return (9, 99)
+            return (1 if weak else 0, i, 0 if g.lower().strip() in wanted else 1)
+    return (9, 99, 1)
 
 
 def _best_reading(matching, terms):

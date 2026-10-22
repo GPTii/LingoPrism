@@ -1,0 +1,60 @@
+erDiagram
+  detection_correctionmemory {
+    bigint id PK
+    bigint user_id FK
+    bigint item_id FK
+    varchar wrong_label
+    varchar correct_label
+    bytea embedding
+    varchar crop
+    varchar status
+    int disputes
+  }
+  detection_detection {
+    bigint id PK
+    bigint user_id FK
+    bigint photo_id FK
+    bigint model_version_id FK
+    varchar model_name
+    varchar device
+    int inference_ms
+  }
+  detection_detectionitem {
+    bigint id PK
+    bigint detection_id FK
+    varchar label
+    float confidence
+    jsonb bbox
+    jsonb top_k
+    bigint word_id FK
+    varchar feedback
+    bigint learned_from_id FK
+  }
+  detection_modelversion {
+    bigint id PK
+    varchar name UK
+    jsonb classes
+    float map50
+    bool is_active
+  }
+  detection_photo {
+    bigint id PK
+    bigint user_id FK
+    varchar image
+    varchar source
+  }
+  accounts_user {
+    bigint id PK
+  }
+  vocab_word {
+    bigint id PK
+  }
+  accounts_user ||--o{ detection_correctionmemory : "user_id"
+  detection_detectionitem ||--o| detection_correctionmemory : "item_id"
+  accounts_user ||--o{ detection_detection : "user_id"
+  detection_photo |o--o{ detection_detection : "photo_id"
+  detection_modelversion |o--o{ detection_detection : "model_version_id"
+  detection_detection ||--o{ detection_detectionitem : "detection_id"
+  vocab_word |o--o{ detection_detectionitem : "word_id"
+  detection_correctionmemory |o--o{ detection_detectionitem : "learned_from_id"
+  accounts_user ||--o{ detection_photo : "user_id"

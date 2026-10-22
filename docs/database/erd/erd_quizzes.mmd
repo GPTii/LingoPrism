@@ -1,0 +1,68 @@
+erDiagram
+  quizzes_answer {
+    bigint id PK
+    bigint submission_id FK
+    bigint exam_question_id FK
+    smallint selected_option
+    text text
+    bool is_correct
+    numeric score
+    text feedback
+  }
+  quizzes_exam {
+    bigint id PK
+    varchar title
+    varchar language_id FK
+    bigint topic_id FK
+    smallint pass_percent
+    bool is_published
+  }
+  quizzes_examquestion {
+    bigint id PK
+    bigint exam_id FK
+    bigint question_id FK
+    smallint order
+    numeric points
+  }
+  quizzes_question {
+    bigint id PK
+    varchar kind
+    varchar language_id FK
+    bigint topic_id FK
+    bigint word_id FK
+    text prompt
+    jsonb options
+    smallint difficulty
+  }
+  quizzes_submission {
+    bigint id PK
+    bigint user_id FK
+    bigint exam_id FK
+    varchar status
+    timestamptz submitted_at
+    numeric score
+    numeric max_score
+  }
+  accounts_user {
+    bigint id PK
+  }
+  vocab_language {
+    varchar code PK
+  }
+  vocab_topic {
+    bigint id PK
+  }
+  vocab_word {
+    bigint id PK
+  }
+  quizzes_submission ||--o{ quizzes_answer : "submission_id"
+  quizzes_examquestion ||--o{ quizzes_answer : "exam_question_id"
+  vocab_language ||--o{ quizzes_exam : "language_id"
+  vocab_topic |o--o{ quizzes_exam : "topic_id"
+  quizzes_exam ||--o{ quizzes_examquestion : "exam_id"
+  quizzes_question ||--o{ quizzes_examquestion : "question_id"
+  vocab_language ||--o{ quizzes_question : "language_id"
+  vocab_topic |o--o{ quizzes_question : "topic_id"
+  vocab_word |o--o{ quizzes_question : "word_id"
+  accounts_user ||--o{ quizzes_submission : "user_id"
+  quizzes_exam ||--o{ quizzes_submission : "exam_id"

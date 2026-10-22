@@ -1,0 +1,122 @@
+erDiagram
+  chat_groupmessage {
+    bigint id PK
+    bigint group_id FK
+    bigint user_id FK
+    varchar kind
+    varchar content
+    varchar sticker
+    bigint badge_id FK
+    varchar client_id
+  }
+  chat_supportconversation {
+    bigint id PK
+    bigint learner_id FK
+    bigint staff_id FK
+    varchar subject
+    varchar status
+    timestamptz last_message_at
+  }
+  chat_supportmessage {
+    bigint id PK
+    bigint conversation_id FK
+    bigint sender_id FK
+    varchar content
+    varchar client_id
+    timestamptz delivered_at
+    timestamptz read_at
+  }
+  community_group {
+    bigint id PK
+    varchar name
+    varchar description
+    varchar icon
+    bool require_approval
+    varchar status
+  }
+  community_groupmember {
+    bigint id PK
+    bigint group_id FK
+    bigint user_id FK
+    varchar role
+    varchar status
+    varchar request_message
+    timestamptz joined_at
+  }
+  community_post {
+    bigint id PK
+    bigint user_id FK
+    varchar image
+    varchar caption
+    varchar topic_label
+    varchar visibility
+    varchar status
+    int save_count
+    bigint detection_id FK
+  }
+  community_postcomment {
+    bigint id PK
+    bigint post_id FK
+    bigint user_id FK
+    varchar kind
+    varchar content
+    varchar sticker
+    bool hidden
+  }
+  community_postlike {
+    bigint id PK
+    bigint post_id FK
+    bigint user_id FK
+  }
+  community_postreport {
+    bigint id PK
+    bigint post_id FK
+    bigint reporter_id FK
+    varchar reason
+    varchar details
+    varchar status
+  }
+  community_postword {
+    bigint id PK
+    bigint post_id FK
+    bigint word_id FK
+    smallint order
+  }
+  community_userfollow {
+    bigint id PK
+    bigint follower_id FK
+    bigint following_id FK
+  }
+  accounts_user {
+    bigint id PK
+  }
+  detection_detection {
+    bigint id PK
+  }
+  gamification_badge {
+    bigint id PK
+  }
+  vocab_word {
+    bigint id PK
+  }
+  community_group ||--o{ chat_groupmessage : "group_id"
+  accounts_user |o--o{ chat_groupmessage : "user_id"
+  gamification_badge |o--o{ chat_groupmessage : "badge_id"
+  accounts_user ||--o{ chat_supportconversation : "learner_id"
+  accounts_user |o--o{ chat_supportconversation : "staff_id"
+  chat_supportconversation ||--o{ chat_supportmessage : "conversation_id"
+  accounts_user ||--o{ chat_supportmessage : "sender_id"
+  community_group ||--o{ community_groupmember : "group_id"
+  accounts_user ||--o{ community_groupmember : "user_id"
+  accounts_user ||--o{ community_post : "user_id"
+  detection_detection |o--o{ community_post : "detection_id"
+  community_post ||--o{ community_postcomment : "post_id"
+  accounts_user ||--o{ community_postcomment : "user_id"
+  community_post ||--o{ community_postlike : "post_id"
+  accounts_user ||--o{ community_postlike : "user_id"
+  community_post ||--o{ community_postreport : "post_id"
+  accounts_user ||--o{ community_postreport : "reporter_id"
+  community_post ||--o{ community_postword : "post_id"
+  vocab_word ||--o{ community_postword : "word_id"
+  accounts_user ||--o{ community_userfollow : "follower_id"
+  accounts_user ||--o{ community_userfollow : "following_id"

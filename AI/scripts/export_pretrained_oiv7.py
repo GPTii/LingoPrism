@@ -45,13 +45,15 @@ def main():
     import torch
     from ultralytics import YOLO
 
-    classes = yaml.safe_load((ROOT / "classes.yaml").read_text(encoding="utf-8"))["classes"]
+    data = yaml.safe_load((ROOT / "classes.yaml").read_text(encoding="utf-8"))
+    classes = data["classes"] + data.get("extra", [])  # extra: objects with a word but no training images
     yolo = YOLO(args.weights)
     oi_index = {name: i for i, name in yolo.names.items()}
 
     labels, groups = [], []
     for c in classes:
-        names = ([c["oi"]] if c.get("oi") else []) + EXTRA.get(c["label"], [])
+        oi = c.get("oi") or []
+        names = (oi if isinstance(oi, list) else [oi]) + EXTRA.get(c["label"], [])
         idx = [oi_index[n] for n in names if n in oi_index]
         missing = [n for n in names if n not in oi_index]
         if missing:

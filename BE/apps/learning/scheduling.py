@@ -12,6 +12,8 @@ class CardState:
     repetitions: int = 0
     lapses: int = 0
     wrong_streak: int = 0
+    difficulty: float = 0.0  # FSRS D (1–10); 0 = not used by this scheduler
+    stability: float = 0.0  # FSRS S in days
 
     def as_dict(self):
         return asdict(self)
@@ -20,7 +22,8 @@ class CardState:
 class Scheduler:
     name = "base"
 
-    def review(self, state: CardState, correct: bool, rating: int, now: datetime) -> tuple[CardState, datetime]:
+    def review(self, state: CardState, correct: bool, rating: int, now: datetime,
+               elapsed_days: float | None = None) -> tuple[CardState, datetime]:
         raise NotImplementedError
 
 
@@ -30,7 +33,7 @@ class LeitnerScheduler(Scheduler):
     name = "leitner"
     INTERVALS = [1, 3, 7, 14, 30, 60, 120]
 
-    def review(self, state, correct, rating, now):
+    def review(self, state, correct, rating, now, elapsed_days=None):
         s = CardState(**state.as_dict())
         s.repetitions += 1
         if correct:
@@ -44,9 +47,17 @@ class LeitnerScheduler(Scheduler):
         return s, now + timedelta(days=s.interval_days)
 
 
-SCHEDULERS = {cls.name: cls for cls in (LeitnerScheduler,)}
-DEFAULT_SCHEDULER = "leitner"
-
-
 def get_scheduler(name: str | None = None) -> Scheduler:
-    return SCHEDULERS.get(name or DEFAULT_SCHEDULER, LeitnerScheduler)()
+    """The scheduler a session uses: the one stored on the session, else the one chosen on the admin page
+    (apps.algorithms: SM-2 / FSRS, self-implemented), with the GA-fitted FSRS weights when there are some."""
+    from apps.algorithms.fsrs import FSRSScheduler
+    from apps.algorithms.models import AlgorithmConfig
+    from apps.algorithms.sm2 import SM2Scheduler
+
+    cfg = AlgorithmConfig.get()
+    name = name or cfg.scheduler
+    if name == "fsrs":
+        return FSRSScheduler(cfg.fsrs_weights, cfg.desired_retention)
+    if name == "sm2":
+        return SM2Scheduler()
+    return LeitnerScheduler()

@@ -16,6 +16,7 @@ x-backend: &backend
     - media:/app/media
     - static:/app/staticfiles
     - ./BE/models:/app/models:ro
+    - ./secrets:/app/secrets:ro   # Firebase service-account key (deploy/push.sh copies it; never in git)
   depends_on:
     db: { condition: service_healthy }
     redis: { condition: service_started }
@@ -58,17 +59,18 @@ services:
       RUN_MIGRATIONS: "0"
       DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
       REDIS_URL: redis://redis:6379/0
-    command: celery -A config worker -l info
+    command: celery -A config worker -l info --concurrency=1   # e-mails only: 1 process saves RAM on a 4 GB VPS
 
   web:
     build: ./FE
     image: lingoprism-web
-    ports: ["80:80"]
+    ports: ["80:80", "443:443"]
     volumes:
       - media:/app/media:ro
       - static:/app/staticfiles:ro
       - ./deploy/nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
       - ./deploy/nginx/proxy_params.conf:/etc/nginx/proxy_params.conf:ro
+      - ./deploy/certs:/etc/nginx/certs:ro
     depends_on: [backend]
     restart: unless-stopped
 

@@ -1,0 +1,766 @@
+{
+ "scheduler": "fsrs",
+ "review_priority": "vip",
+ "distractor": "smart",
+ "proximity": "grid",
+ "fsrs_weights": [
+  0.8171,
+  3.4344,
+  0.579,
+  26.8639,
+  6.324,
+  0.139,
+  0.3071,
+  0.1009,
+  0.9948,
+  0.0696,
+  1.0895,
+  2.847,
+  0.0907,
+  0.1491,
+  0.0115,
+  0.3359,
+  2.8915
+ ],
+ "vip_weights": {
+  "forget": 0.4,
+  "due_days": 1,
+  "confusion": 0.2,
+  "confidence": 0.15,
+  "difficulty": 0.25
+ },
+ "desired_retention": 0.9,
+ "vision": {
+  "source": "confusion_matrix",
+  "classes": {
+   "tv": {
+    "score": 0.15294117647058825,
+    "samples": 85,
+    "confusion": {
+     "laptop": 0.011764705882352941,
+     "background": 0.1411764705882353
+    },
+    "mean_conf": 0.8026
+   },
+   "bed": {
+    "score": 0.28378378378378377,
+    "samples": 74,
+    "confusion": {
+     "cat": 0.02702702702702703,
+     "background": 0.22972972972972974,
+     "dining table": 0.02702702702702703
+    },
+    "mean_conf": 0.8
+   },
+   "bus": {
+    "score": 0.17567567567567569,
+    "samples": 74,
+    "confusion": {
+     "train": 0.013513513513513514,
+     "background": 0.16216216216216217
+    },
+    "mean_conf": 0.8408
+   },
+   "car": {
+    "score": 0.2988826815642458,
+    "samples": 358,
+    "confusion": {
+     "truck": 0.019553072625698324,
+     "background": 0.2737430167597765,
+     "motorcycle": 0.002793296089385475,
+     "traffic light": 0.002793296089385475
+    },
+    "mean_conf": 0.6274
+   },
+   "cat": {
+    "score": 0.10989010989010989,
+    "samples": 91,
+    "confusion": {
+     "dog": 0.03296703296703297,
+     "bird": 0.01098901098901099,
+     "background": 0.06593406593406594
+    },
+    "mean_conf": 0.8594
+   },
+   "cow": {
+    "score": 0.38842975206611574,
+    "samples": 121,
+    "confusion": {
+     "horse": 0.024793388429752067,
+     "sheep": 0.12396694214876033,
+     "zebra": 0.024793388429752067,
+     "background": 0.21487603305785125
+    },
+    "mean_conf": 0.739
+   },
+   "cup": {
+    "score": 0.38490566037735846,
+    "samples": 265,
+    "confusion": {
+     "bowl": 0.007547169811320755,
+     "bottle": 0.007547169811320755,
+     "background": 0.36981132075471695
+    },
+    "mean_conf": 0.6542
+   },
+   "dog": {
+    "score": 0.08139534883720931,
+    "samples": 86,
+    "confusion": {
+     "sheep": 0.011627906976744186,
+     "background": 0.06976744186046512
+    },
+    "mean_conf": 0.8675
+   },
+   "egg": {
+    "score": 0.6825396825396826,
+    "samples": 63,
+    "confusion": {
+     "background": 0.6825396825396826
+    },
+    "mean_conf": 0.5239
+   },
+   "hat": {
+    "score": 0.627906976744186,
+    "samples": 172,
+    "confusion": {
+     "helmet": 0.011627906976744186,
+     "background": 0.6162790697674418
+    },
+    "mean_conf": 0.4048
+   },
+   "pen": {
+    "score": 0.3214285714285714,
+    "samples": 28,
+    "confusion": {
+     "bottle": 0.03571428571428571,
+     "background": 0.2857142857142857
+    },
+    "mean_conf": 0.6079
+   },
+   "pig": {
+    "score": 0.34285714285714286,
+    "samples": 35,
+    "confusion": {
+     "sheep": 0.02857142857142857,
+     "background": 0.3142857142857143
+    },
+    "mean_conf": 0.5804
+   },
+   "bear": {
+    "score": 0.09523809523809523,
+    "samples": 63,
+    "confusion": {
+     "dog": 0.015873015873015872,
+     "elephant": 0.015873015873015872,
+     "background": 0.06349206349206349
+    },
+    "mean_conf": 0.8569
+   },
+   "bird": {
+    "score": 0.39814814814814814,
+    "samples": 108,
+    "confusion": {
+     "chicken": 0.009259259259259259,
+     "background": 0.3888888888888889
+    },
+    "mean_conf": 0.7281
+   },
+   "boat": {
+    "score": 0.450381679389313,
+    "samples": 131,
+    "confusion": {
+     "cow": 0.007633587786259542,
+     "background": 0.44274809160305345
+    },
+    "mean_conf": 0.533
+   },
+   "book": {
+    "score": 0.6805555555555556,
+    "samples": 216,
+    "confusion": {
+     "person": 0.004629629629629629,
+     "background": 0.6759259259259259
+    },
+    "mean_conf": 0.2816
+   },
+   "bowl": {
+    "score": 0.33333333333333337,
+    "samples": 186,
+    "confusion": {
+     "cup": 0.005376344086021506,
+     "apple": 0.005376344086021506,
+     "banana": 0.005376344086021506,
+     "broccoli": 0.016129032258064516,
+     "background": 0.3010752688172043
+    },
+    "mean_conf": 0.6605
+   },
+   "cake": {
+    "score": 0.41836734693877553,
+    "samples": 98,
+    "confusion": {
+     "background": 0.40816326530612246,
+     "dining table": 0.01020408163265306
+    },
+    "mean_conf": 0.6542
+   },
+   "door": {
+    "score": 0.7837837837837838,
+    "samples": 37,
+    "confusion": {
+     "background": 0.7837837837837838
+    },
+    "mean_conf": 0.2346
+   },
+   "duck": {
+    "score": 0.5272727272727272,
+    "samples": 55,
+    "confusion": {
+     "background": 0.5272727272727272
+    },
+    "mean_conf": 0.6093
+   },
+   "fork": {
+    "score": 0.40816326530612246,
+    "samples": 98,
+    "confusion": {
+     "bird": 0.01020408163265306,
+     "knife": 0.030612244897959183,
+     "spoon": 0.061224489795918366,
+     "background": 0.30612244897959184
+    },
+    "mean_conf": 0.6977
+   },
+   "lamp": {
+    "score": 0.6285714285714286,
+    "samples": 35,
+    "confusion": {
+     "helmet": 0.02857142857142857,
+     "background": 0.6
+    },
+    "mean_conf": 0.475
+   },
+   "lion": {
+    "score": 0.1875,
+    "samples": 32,
+    "confusion": {
+     "cat": 0.0625,
+     "background": 0.125
+    },
+    "mean_conf": 0.8692
+   },
+   "apple": {
+    "score": 0.4661016949152542,
+    "samples": 118,
+    "confusion": {
+     "orange": 0.025423728813559324,
+     "background": 0.4406779661016949
+    },
+    "mean_conf": 0.5417
+   },
+   "bench": {
+    "score": 0.631578947368421,
+    "samples": 57,
+    "confusion": {
+     "chair": 0.05263157894736842,
+     "person": 0.017543859649122806,
+     "background": 0.5614035087719298
+    },
+    "mean_conf": 0.4974
+   },
+   "bread": {
+    "score": 0.6938775510204082,
+    "samples": 49,
+    "confusion": {
+     "cake": 0.02040816326530612,
+     "background": 0.673469387755102
+    },
+    "mean_conf": 0.3357
+   },
+   "chair": {
+    "score": 0.42010309278350516,
+    "samples": 388,
+    "confusion": {
+     "cat": 0.002577319587628866,
+     "bench": 0.015463917525773196,
+     "couch": 0.015463917525773196,
+     "person": 0.010309278350515464,
+     "background": 0.3711340206185567,
+     "dining table": 0.005154639175257732
+    },
+    "mean_conf": 0.5452
+   },
+   "clock": {
+    "score": 0.34375,
+    "samples": 64,
+    "confusion": {
+     "tv": 0.015625,
+     "background": 0.328125
+    },
+    "mean_conf": 0.65
+   },
+   "couch": {
+    "score": 0.506578947368421,
+    "samples": 152,
+    "confusion": {
+     "bed": 0.013157894736842105,
+     "chair": 0.05921052631578947,
+     "person": 0.006578947368421052,
+     "background": 0.4276315789473684
+    },
+    "mean_conf": 0.7073
+   },
+   "horse": {
+    "score": 0.17142857142857143,
+    "samples": 105,
+    "confusion": {
+     "cow": 0.047619047619047616,
+     "bird": 0.009523809523809525,
+     "background": 0.11428571428571428
+    },
+    "mean_conf": 0.7637
+   },
+   "knife": {
+    "score": 0.6,
+    "samples": 175,
+    "confusion": {
+     "fork": 0.011428571428571429,
+     "background": 0.5828571428571429,
+     "cell phone": 0.005714285714285714
+    },
+    "mean_conf": 0.625
+   },
+   "mouse": {
+    "score": 0.13559322033898305,
+    "samples": 59,
+    "confusion": {
+     "background": 0.13559322033898305
+    },
+    "mean_conf": 0.8135
+   },
+   "pizza": {
+    "score": 0.20481927710843373,
+    "samples": 83,
+    "confusion": {
+     "background": 0.20481927710843373
+    },
+    "mean_conf": 0.7569
+   },
+   "sheep": {
+    "score": 0.24528301886792453,
+    "samples": 159,
+    "confusion": {
+     "dog": 0.012578616352201259,
+     "background": 0.23270440251572327
+    },
+    "mean_conf": 0.69
+   },
+   "spoon": {
+    "score": 0.47115384615384615,
+    "samples": 104,
+    "confusion": {
+     "fork": 0.04807692307692308,
+     "knife": 0.019230769230769232,
+     "background": 0.3942307692307692,
+     "toothbrush": 0.009615384615384616
+    },
+    "mean_conf": 0.6069
+   },
+   "tiger": {
+    "score": 0.47368421052631576,
+    "samples": 19,
+    "confusion": {
+     "cat": 0.05263157894736842,
+     "background": 0.42105263157894735
+    },
+    "mean_conf": 0.83
+   },
+   "train": {
+    "score": 0.13513513513513514,
+    "samples": 74,
+    "confusion": {
+     "bus": 0.013513513513513514,
+     "background": 0.12162162162162163
+    },
+    "mean_conf": 0.7951
+   },
+   "truck": {
+    "score": 0.43478260869565216,
+    "samples": 92,
+    "confusion": {
+     "bus": 0.03260869565217391,
+     "car": 0.13043478260869565,
+     "cow": 0.010869565217391304,
+     "suitcase": 0.010869565217391304,
+     "background": 0.2391304347826087,
+     "traffic light": 0.010869565217391304
+    },
+    "mean_conf": 0.6515
+   },
+   "watch": {
+    "score": 0.6071428571428571,
+    "samples": 28,
+    "confusion": {
+     "clock": 0.03571428571428571,
+     "background": 0.5714285714285714
+    },
+    "mean_conf": 0.5786
+   },
+   "zebra": {
+    "score": 0.09701492537313433,
+    "samples": 134,
+    "confusion": {
+     "background": 0.09701492537313433
+    },
+    "mean_conf": 0.8008
+   },
+   "banana": {
+    "score": 0.7169811320754716,
+    "samples": 106,
+    "confusion": {
+     "bowl": 0.018867924528301886,
+     "background": 0.6981132075471698
+    },
+    "mean_conf": 0.3336
+   },
+   "bottle": {
+    "score": 0.3865979381443299,
+    "samples": 194,
+    "confusion": {
+     "cup": 0.010309278350515464,
+     "bird": 0.005154639175257732,
+     "background": 0.3711340206185567
+    },
+    "mean_conf": 0.5688
+   },
+   "carrot": {
+    "score": 0.5789473684210527,
+    "samples": 133,
+    "confusion": {
+     "orange": 0.007518796992481203,
+     "background": 0.5714285714285714
+    },
+    "mean_conf": 0.3764
+   },
+   "helmet": {
+    "score": 0.2830188679245283,
+    "samples": 106,
+    "confusion": {
+     "background": 0.2830188679245283
+    },
+    "mean_conf": 0.4728
+   },
+   "laptop": {
+    "score": 0.2558139534883721,
+    "samples": 86,
+    "confusion": {
+     "tv": 0.023255813953488372,
+     "keyboard": 0.046511627906976744,
+     "background": 0.18604651162790697
+    },
+    "mean_conf": 0.7725
+   },
+   "monkey": {
+    "score": 0.16216216216216217,
+    "samples": 37,
+    "confusion": {
+     "background": 0.16216216216216217
+    },
+    "mean_conf": 0.67
+   },
+   "orange": {
+    "score": 0.6,
+    "samples": 135,
+    "confusion": {
+     "apple": 0.014814814814814815,
+     "background": 0.5851851851851851
+    },
+    "mean_conf": 0.539
+   },
+   "person": {
+    "score": 0.27945472249269715,
+    "samples": 2054,
+    "confusion": {
+     "cat": 0.0004868549172346641,
+     "egg": 0.0004868549172346641,
+     "hat": 0.0024342745861733205,
+     "bird": 0.0004868549172346641,
+     "chair": 0.0004868549172346641,
+     "horse": 0.0024342745861733205,
+     "train": 0.0004868549172346641,
+     "banana": 0.0004868549172346641,
+     "helmet": 0.0024342745861733205,
+     "laptop": 0.0004868549172346641,
+     "handbag": 0.0004868549172346641,
+     "scissors": 0.0004868549172346641,
+     "umbrella": 0.0004868549172346641,
+     "background": 0.2643622200584226,
+     "cell phone": 0.0009737098344693282,
+     "motorcycle": 0.0014605647517039922,
+     "dining table": 0.0004868549172346641
+    },
+    "mean_conf": 0.6783
+   },
+   "pillow": {
+    "score": 0.6829268292682927,
+    "samples": 41,
+    "confusion": {
+     "bed": 0.04878048780487805,
+     "background": 0.6341463414634146
+    },
+    "mean_conf": 0.2981
+   },
+   "rabbit": {
+    "score": 0.21875,
+    "samples": 32,
+    "confusion": {
+     "background": 0.21875
+    },
+    "mean_conf": 0.778
+   },
+   "tomato": {
+    "score": 0.75,
+    "samples": 96,
+    "confusion": {
+     "background": 0.7291666666666666,
+     "watermelon": 0.020833333333333332
+    },
+    "mean_conf": 0.3457
+   },
+   "window": {
+    "score": 0.8919667590027701,
+    "samples": 361,
+    "confusion": {
+     "background": 0.8919667590027701
+    },
+    "mean_conf": 0.1488
+   },
+   "bicycle": {
+    "score": 0.33858267716535434,
+    "samples": 127,
+    "confusion": {
+     "background": 0.33858267716535434
+    },
+    "mean_conf": 0.6463
+   },
+   "chicken": {
+    "score": 0.21621621621621623,
+    "samples": 37,
+    "confusion": {
+     "background": 0.21621621621621623
+    },
+    "mean_conf": 0.8
+   },
+   "giraffe": {
+    "score": 0.13725490196078433,
+    "samples": 102,
+    "confusion": {
+     "background": 0.13725490196078433
+    },
+    "mean_conf": 0.8174
+   },
+   "glasses": {
+    "score": 0.631578947368421,
+    "samples": 95,
+    "confusion": {
+     "background": 0.631578947368421
+    },
+    "mean_conf": 0.3563
+   },
+   "handbag": {
+    "score": 0.6785714285714286,
+    "samples": 112,
+    "confusion": {
+     "background": 0.6785714285714286
+    },
+    "mean_conf": 0.4054
+   },
+   "airplane": {
+    "score": 0.14864864864864866,
+    "samples": 74,
+    "confusion": {
+     "background": 0.14864864864864866
+    },
+    "mean_conf": 0.7778
+   },
+   "backpack": {
+    "score": 0.6075949367088608,
+    "samples": 79,
+    "confusion": {
+     "dog": 0.012658227848101266,
+     "person": 0.02531645569620253,
+     "handbag": 0.0379746835443038,
+     "suitcase": 0.06329113924050633,
+     "background": 0.46835443037974683
+    },
+    "mean_conf": 0.4696
+   },
+   "broccoli": {
+    "score": 0.503030303030303,
+    "samples": 165,
+    "confusion": {
+     "background": 0.503030303030303
+    },
+    "mean_conf": 0.3788
+   },
+   "elephant": {
+    "score": 0.061224489795918366,
+    "samples": 98,
+    "confusion": {
+     "background": 0.061224489795918366
+    },
+    "mean_conf": 0.8457
+   },
+   "keyboard": {
+    "score": 0.2077922077922078,
+    "samples": 77,
+    "confusion": {
+     "book": 0.012987012987012988,
+     "background": 0.19480519480519481
+    },
+    "mean_conf": 0.6811
+   },
+   "scissors": {
+    "score": 0.5142857142857142,
+    "samples": 35,
+    "confusion": {
+     "background": 0.5142857142857142
+    },
+    "mean_conf": 0.7132
+   },
+   "suitcase": {
+    "score": 0.3492063492063492,
+    "samples": 126,
+    "confusion": {
+     "backpack": 0.007936507936507936,
+     "background": 0.3412698412698413
+    },
+    "mean_conf": 0.5673
+   },
+   "umbrella": {
+    "score": 0.3880597014925373,
+    "samples": 67,
+    "confusion": {
+     "background": 0.3880597014925373
+    },
+    "mean_conf": 0.5783
+   },
+   "butterfly": {
+    "score": 0,
+    "samples": 30,
+    "confusion": {},
+    "mean_conf": 0.79
+   },
+   "pineapple": {
+    "score": 0.5294117647058824,
+    "samples": 17,
+    "confusion": {
+     "background": 0.5294117647058824
+    },
+    "mean_conf": 0.49
+   },
+   "cell phone": {
+    "score": 0.30985915492957744,
+    "samples": 71,
+    "confusion": {
+     "laptop": 0.014084507042253521,
+     "background": 0.29577464788732394
+    },
+    "mean_conf": 0.7573
+   },
+   "chopsticks": {
+    "score": 0.9375,
+    "samples": 16,
+    "confusion": {
+     "background": 0.9375
+    },
+    "mean_conf": 0.11
+   },
+   "motorcycle": {
+    "score": 0.18181818181818182,
+    "samples": 88,
+    "confusion": {
+     "person": 0.03409090909090909,
+     "background": 0.14772727272727273
+    },
+    "mean_conf": 0.722
+   },
+   "strawberry": {
+    "score": 0.45864661654135336,
+    "samples": 133,
+    "confusion": {
+     "background": 0.45864661654135336
+    },
+    "mean_conf": 0.4102
+   },
+   "teddy bear": {
+    "score": 0.1728395061728395,
+    "samples": 81,
+    "confusion": {
+     "person": 0.012345679012345678,
+     "background": 0.16049382716049382
+    },
+    "mean_conf": 0.7026
+   },
+   "toothbrush": {
+    "score": 0.4852941176470588,
+    "samples": 68,
+    "confusion": {
+     "background": 0.4852941176470588
+    },
+    "mean_conf": 0.63
+   },
+   "watermelon": {
+    "score": 0.3333333333333333,
+    "samples": 24,
+    "confusion": {
+     "background": 0.3333333333333333
+    },
+    "mean_conf": 0.4437
+   },
+   "dining table": {
+    "score": 0.583941605839416,
+    "samples": 274,
+    "confusion": {
+     "tv": 0.0036496350364963502,
+     "dog": 0.0036496350364963502,
+     "bowl": 0.0072992700729927005,
+     "cake": 0.010948905109489052,
+     "bench": 0.0072992700729927005,
+     "chair": 0.01824817518248175,
+     "pizza": 0.014598540145985401,
+     "banana": 0.0036496350364963502,
+     "broccoli": 0.0072992700729927005,
+     "background": 0.5072992700729927
+    },
+    "mean_conf": 0.3709
+   },
+   "potted plant": {
+    "score": 0.632183908045977,
+    "samples": 87,
+    "confusion": {
+     "orange": 0.011494252873563218,
+     "background": 0.6206896551724138
+    },
+    "mean_conf": 0.3983
+   },
+   "refrigerator": {
+    "score": 0.3018867924528302,
+    "samples": 53,
+    "confusion": {
+     "background": 0.3018867924528302
+    },
+    "mean_conf": 0.7136
+   },
+   "traffic light": {
+    "score": 0.421875,
+    "samples": 128,
+    "confusion": {
+     "background": 0.421875
+    },
+    "mean_conf": 0.5286
+   }
+  }
+ }
+}

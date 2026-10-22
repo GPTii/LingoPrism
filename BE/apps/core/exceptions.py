@@ -1,3 +1,4 @@
+from rest_framework.exceptions import Throttled
 from rest_framework.views import exception_handler
 
 
@@ -7,6 +8,10 @@ def api_exception_handler(exc, context):
     if response is None:
         return None
     data = response.data
+    if isinstance(exc, Throttled):  # 429: rate limit (apps/core/throttles.py)
+        wait = f" Hãy thử lại sau {int(exc.wait)} giây." if exc.wait else ""
+        response.data = {"detail": f"Bạn thao tác quá nhanh.{wait}", "errors": {}}
+        return response
     if isinstance(data, dict) and "detail" in data and len(data) == 1:
         response.data = {"detail": str(data["detail"]), "errors": {}}
     elif isinstance(data, dict):

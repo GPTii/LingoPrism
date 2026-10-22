@@ -11,6 +11,7 @@ from apps.vocab.models import Topic, Word
 from apps.vocab.services import LEARN_LANGUAGES, card, resolve_target, words_for_target
 from apps.vocab.views import LANG_PARAMS
 
+from .levels import advance_if_done, current_level as level_current
 from .models import PersonalWord, ReviewLog, SessionItem, StudySession
 from .questions import build_questions, get_distractor_provider
 from .scheduling import get_scheduler
@@ -122,7 +123,15 @@ class StudySessionViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, view
         user = self.request.user
         mine = PersonalWord.objects.filter(user=user, language=target.learn)
         if kind == StudySession.Kind.REVIEW:
-            return list(mine.filter(due_at__lte=timezone.now()).order_by("due_at")[:size])
+            due = mine.filter(due_at__lte=timezone.now()).select_related("word")
+            from apps.algorithms.models import AlgorithmConfig
+
+            cfg = AlgorithmConfig.get()
+            if cfg.review_priority == AlgorithmConfig.Priority.VIP:
+                from apps.algorithms.vip import rank
+
+                return [pw for pw, _, _ in rank(list(due), cfg.vip_weights or None)[:size]]
+            return list(due.order_by("due_at")[:size])
         if kind == StudySession.Kind.PRACTICE:
             if topic is None:
                 return list(mine.exclude(status=PersonalWord.Status.NEW).order_by("?")[:size])
@@ -138,8 +147,17 @@ class StudySessionViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, view
             base = Word.objects.filter(topics=topic) if topic else Word.objects.all()
             if user.learner_type == "kid":
                 base = base.filter(audience__in=["all", "kid"])
-            base = base.exclude(learners__user=user, learners__language=target.learn).order_by("difficulty", "?")
-            for w in words_for_target(base, user, target)[: size - len(picked)]:
+            base = base.exclude(learners__user=user, learners__language=target.learn)
+            # the learner's level first, then what is left of the easier levels; never above the current level
+            cur = level_current(user, target)
+            fresh = []
+            for n in [cur] + list(range(cur - 1, 0, -1)):
+                need = size - len(picked) - len(fresh)
+                if need <= 0:
+                    break
+                fresh += list(words_for_target(base.filter(**{f"levels__{target.learn}": n}), user, target)
+                              .order_by("difficulty", "?")[:need])
+            for w in fresh:
                 picked.append(PersonalWord.objects.create(
                     user=user, word=w, language=target.learn, source=PersonalWord.Source.TOPIC, topic=topic))
         return picked
@@ -226,7 +244,7 @@ class StudySessionViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, view
         with transaction.atomic():
             if d["graded"] and not item.answered:
                 scheduler = get_scheduler(session.scheduler)
-                after, due = scheduler.review(before, d["correct"] and d["first_try"], rating, now)
+                after, due = scheduler.review(before, d["correct"] and d["first_try"], rating, now, elapsed_days=elapsed)
                 pw.apply_state(after, due)
                 pw.save()
                 item.answered = True
@@ -256,10 +274,11 @@ class StudySessionViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, view
             from apps.learning.signals import session_finished
 
             session_finished.send(sender=StudySession, session=session)
+        level_up = advance_if_done(request.user, resolve_target(request)) if session.kind == "learn" else None
         wrong = SessionItem.objects.filter(session=session, personal_word__logs__session=session,
                                            personal_word__logs__correct=False).values_list("personal_word_id", flat=True)
         return Response({
             "id": session.id, "planned_count": session.planned_count, "completed_count": session.completed_count,
             "correct_first_try": session.correct_first_try, "xp_earned": session.xp_earned,
-            "needs_more_practice": sorted(set(wrong)),
+            "needs_more_practice": sorted(set(wrong)), "level_up": level_up,
         })
