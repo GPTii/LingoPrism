@@ -907,6 +907,31 @@ class CommunityController extends GetxController {
 
   // ---------------------------------------------------------------- leaderboard
 
+  /// 'league' (this week's league) or 'friends' (you and the people you follow, XP this week)
+  final RxString boardScope = 'league'.obs;
+  final RxList<CommunityLeaderboardParticipant> friendsBoard = <CommunityLeaderboardParticipant>[].obs;
+
+  Future<void> setBoardScope(String scope) async {
+    boardScope.value = scope;
+    if (scope != 'friends') return;
+    try {
+      final board = await GameRepository.leaderboard(scope: 'friends');
+      friendsBoard.assignAll(board.members.map((m) => CommunityLeaderboardParticipant(
+            rank: m.rank,
+            userId: '${m.userId}',
+            name: m.isMe ? '${m.displayName} (bạn)' : m.displayName,
+            totalPoints: m.xp,
+            weeklyPoints: m.xp,
+            avatarUrl: m.avatar ?? 'assets/brand/avatar/avatar_1.png',
+            status: CommunityLeaderboardStatus.safe,
+            xpBreakdown: const {},
+            rawPoints: m.xp,
+          )));
+    } catch (e) {
+      Get.log('friends leaderboard: $e');
+    }
+  }
+
   List<CommunityLeaderboardParticipant> get promotionLeaders =>
       currentLeague.value.participants.where((p) => p.status == CommunityLeaderboardStatus.promotion).toList();
 

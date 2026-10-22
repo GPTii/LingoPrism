@@ -1,4 +1,4 @@
-from datetime import date, timedelta
+from datetime import date, datetime, time, timedelta
 
 from django.contrib.auth import get_user_model
 from django.db.models import Sum
@@ -146,12 +146,27 @@ class BadgeViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
 
 
 class LeaderboardView(APIView):
-    @extend_schema(tags=["gamification"], parameters=[OpenApiParameter("scope", str, description="league | global")],
+    @extend_schema(tags=["gamification"], parameters=[OpenApiParameter("scope", str, description="league | global | friends")],
                    responses={200: dict})
     def get(self, request):
         scope = request.query_params.get("scope", "league")
         User = get_user_model()
         tiers = [{"code": t.code, "name": t.name, "order": t.order, "icon": t.icon} for t in LeagueTier.objects.all()]
+        if scope == "friends":
+            # you and the people you follow, by XP earned this week (Monday 00:00, local time)
+            from apps.community.models import UserFollow
+
+            ids = [request.user.id, *UserFollow.objects.filter(follower=request.user).values_list("following_id", flat=True)]
+            today = timezone.localdate()
+            week_start = timezone.make_aware(datetime.combine(today - timedelta(days=today.weekday()), time.min))
+            xp = dict(XpTransaction.objects.filter(user_id__in=ids, created_at__gte=week_start)
+                      .values("user_id").annotate(s=Sum("amount")).values_list("user_id", "s"))
+            people = sorted(User.objects.filter(id__in=ids, is_active=True), key=lambda u: (-(xp.get(u.id) or 0), u.id))
+            return Response({"scope": "friends", "tiers": tiers, "members": [
+                {"rank": i + 1, "user_id": u.id, "display_name": u.display_name, "avatar": _avatar(request, u),
+                 "xp": xp.get(u.id) or 0, "is_me": u.id == request.user.id}
+                for i, u in enumerate(people)
+            ]})
         if scope == "global":
             top = User.objects.filter(is_active=True, stats__lifetime_xp__gt=0).select_related("stats").order_by("-stats__lifetime_xp")[:50]
             return Response({"scope": "global", "tiers": tiers, "members": [

@@ -63,7 +63,7 @@ export interface LeaderboardEntry {
 }
 
 export interface Leaderboard {
-  scope: 'league' | 'global'
+  scope: 'league' | 'friends' | 'global'
   tier?: { code: string; name: string }
   ends_at?: string
   tiers: { code: string; name: string; order: number; icon: string }[]
@@ -98,7 +98,7 @@ export const gameApi = {
   claim: (id: number) => api.post<{ scales: number }>(`/quests/${id}/claim/`).then((r) => r.data),
   claimMonthly: () => api.post<{ gems: number }>('/quests/monthly/claim/').then((r) => r.data),
   badges: () => api.get<Badge[]>('/badges/').then((r) => r.data),
-  leaderboard: (scope: 'league' | 'global' = 'league') => api.get<Leaderboard>('/leaderboard/', { params: { scope } }).then((r) => r.data),
+  leaderboard: (scope: 'league' | 'friends' | 'global' = 'league') => api.get<Leaderboard>('/leaderboard/', { params: { scope } }).then((r) => r.data),
   shop: () => api.get<ShopItem[]>('/shop/items/').then((r) => r.data),
   buy: (id: number) => api.post<{ scales: number; gems: number }>(`/shop/items/${id}/buy/`).then((r) => r.data),
   use: (id: number) => api.post<{ multiplier: number; expires_at: string }>(`/shop/items/${id}/use/`).then((r) => r.data),

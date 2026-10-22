@@ -222,18 +222,27 @@ function Groups() {
 }
 
 function LeaderboardTab() {
-  const [scope, setScope] = useState<'league' | 'global'>('league')
+  const isKid = useAuth((s) => s.user?.learner_type === 'kid') // children follow nobody
+  const [scope, setScope] = useState<'league' | 'friends' | 'global'>('league')
   const board = useQuery({ queryKey: ['leaderboard', scope], queryFn: () => gameApi.leaderboard(scope) })
   const zoneColor = { promotion: 'bg-emerald-50', safe: '', demotion: 'bg-red-50' } as const
   const medal = ['#ffb020', '#a8a3c4', '#e08a4f']
   return (
     <div className="flex flex-col gap-4">
-      <Segmented value={scope} onChange={(v) => setScope(v as typeof scope)} options={[{ value: 'league', label: 'Giải đấu tuần' }, { value: 'global', label: 'Toàn hệ thống' }]} />
+      <Segmented value={scope} onChange={(v) => setScope(v as typeof scope)} options={[
+        { value: 'league', label: 'Giải đấu tuần' },
+        ...(isKid ? [] : [{ value: 'friends', label: 'Bạn bè' }]),
+        { value: 'global', label: 'Toàn hệ thống' },
+      ]} />
+      {scope === 'friends' && <div className="text-slate-600">XP tuần này của bạn và những người bạn đang theo dõi.</div>}
       {board.data?.tier && (
         <div className="text-slate-600"><b className="text-slate-800">{board.data.tier.name}</b> · kết thúc {dayjs(board.data.ends_at).fromNow()} ·
           <span className="text-emerald-700"> xanh: lên hạng</span> · <span className="text-red-600">đỏ: xuống hạng</span></div>
       )}
       <ol className="lp-card m-0 p-2 list-none">
+        {scope === 'friends' && board.data?.members.length === 1 && (
+          <li className="px-3 py-2 text-sm text-slate-500">Theo dõi bạn học trong Bảng tin để cùng thi đua mỗi tuần.</li>
+        )}
         {board.data?.members.length === 0 && <li><EmptyState art={<Prismo mood="sleepy" size={80} />} title="Bảng xếp hạng tuần này còn trống" description="Học một bài để có tên đầu tiên." /></li>}
         {board.data?.members.map((m) => (
           <li key={m.user_id} className={`flex items-center gap-3 py-2 px-3 rounded-xl ${m.is_me ? 'bg-brand-50' : m.zone ? zoneColor[m.zone] : ''}`}>

@@ -28,6 +28,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
+import '../../../data/services/auth_service.dart';
 import '../controllers/community_controller.dart';
 import 'package:lingoprism/app/core/theme/app_colors.dart';
 
@@ -57,6 +58,46 @@ class CommunityLeaderboardView extends StatelessWidget {
           //   TournamentNoticeBanner(notice: notice),
           //   SizedBox(height: 16.h),
           // ],
+          if (AuthService.to.currentUser?.isKid != true) ...[
+            SizedBox(
+              width: double.infinity,
+              child: SegmentedButton<String>(
+                segments: const [
+                  ButtonSegment(value: 'league', label: Text('Giải đấu tuần')),
+                  ButtonSegment(value: 'friends', label: Text('Bạn bè')),
+                ],
+                selected: {controller.boardScope.value},
+                showSelectedIcon: false,
+                onSelectionChanged: (s) => controller.setBoardScope(s.first),
+              ),
+            ),
+            SizedBox(height: 14.h),
+          ],
+          if (controller.boardScope.value == 'friends')
+            Expanded(
+              child: ListView(
+                padding: EdgeInsets.only(bottom: 24.h),
+                physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+                children: [
+                  Text('XP tuần này của bạn và những người bạn đang theo dõi.',
+                      style: TextStyle(color: AppColors.textSecondary, fontSize: 13.sp)),
+                  SizedBox(height: 10.h),
+                  _LeagueSection(
+                    title: 'Bạn bè',
+                    color: AppColors.tint(const Color(0xFFE4DCFF)),
+                    participants: controller.friendsBoard.toList(),
+                    onParticipantTap: controller.openLeaderboardProfile,
+                  ),
+                  if (controller.friendsBoard.length <= 1)
+                    Padding(
+                      padding: EdgeInsets.only(top: 12.h),
+                      child: Text('Theo dõi bạn học trong Bảng tin để cùng thi đua mỗi tuần.',
+                          textAlign: TextAlign.center, style: TextStyle(color: AppColors.textSecondary, fontSize: 14.sp)),
+                    ),
+                ],
+              ),
+            )
+          else ...[
           _LeagueHeader(league: league),
           SizedBox(height: 18.h),
           Expanded(
@@ -91,6 +132,7 @@ class CommunityLeaderboardView extends StatelessWidget {
               ],
             ),
           ),
+          ],
         ],
       );
     });

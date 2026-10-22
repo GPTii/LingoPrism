@@ -140,3 +140,23 @@ def test_websocket_rejects_anonymous():
         assert not connected
 
     async_to_sync(run)()
+
+
+def test_friends_leaderboard_is_this_weeks_xp_of_people_you_follow(user):
+    from apps.community.models import UserFollow
+    from apps.gamification.models import XpTransaction
+
+    friend = User.objects.create_user("f@example.com", "Strong!Pass123", display_name="Bạn")
+    stranger = User.objects.create_user("s@example.com", "Strong!Pass123")
+    UserFollow.objects.create(follower=user, following=friend)
+    services.award_xp(user, "learn", 20)
+    services.award_xp(friend, "learn", 50)
+    services.award_xp(stranger, "learn", 90)
+    old = services.award_xp(friend, "learn", 5) and XpTransaction.objects.filter(user=friend).latest("id")
+    old.created_at -= timedelta(days=8)  # last week's XP does not count
+    old.save(update_fields=["created_at"])
+
+    c = APIClient()
+    c.force_authenticate(user)
+    rows = c.get("/api/v1/leaderboard/", {"scope": "friends"}).data["members"]
+    assert [(r["display_name"], r["xp"], r["is_me"]) for r in rows] == [("Bạn", 50, False), (user.display_name, 20, True)]
