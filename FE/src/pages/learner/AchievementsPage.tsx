@@ -8,6 +8,7 @@ import { gameApi } from '../../api/app'
 import { errorMessage } from '../../api/client'
 import { BadgeMedal, FreezeIcon, GemIcon, Prismo, ScaleIcon, StreakIcon, XpIcon } from '../../components/brand/Brand'
 import { Facts, PageHeader, Section } from '../../components/ui'
+import { QuestGo } from '../../components/QuestGo'
 
 /** the item drawn from the brand set: ice block, Prismo sticker, or the XP star */
 const itemIcon = (i: { code: string; effect: string }) =>
@@ -93,7 +94,8 @@ export default function AchievementsPage() {
                         onClick={() => act.mutate({ fn: () => gameApi.claim(q.id), done: `Đã nhận ${q.reward_scales} vảy` })}>
                         Nhận {q.reward_scales} <ScaleIcon size={14} />
                       </Button>
-                    ) : q.reward_claimed ? <span className="text-sm font-semibold text-emerald-600"><CheckOutlined /> Đã nhận</span> : null}
+                    ) : q.reward_claimed ? <span className="text-sm font-semibold text-emerald-600"><CheckOutlined /> Đã nhận</span>
+                      : !q.completed ? <QuestGo kind={q.kind} title={q.title} /> : null}
                   </div>
                   <Progress percent={Math.round((q.progress / Math.max(q.target, 1)) * 100)} format={() => `${q.progress}/${q.target}`}
                     strokeColor={q.completed ? '#10c79a' : undefined} />

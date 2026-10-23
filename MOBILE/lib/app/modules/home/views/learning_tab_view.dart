@@ -14,6 +14,7 @@ import '../../../data/services/auth_service.dart';
 import '../../../data/models/api/game.dart';
 import '../../../data/models/api/user.dart';
 import '../controllers/learning_tab_controller.dart';
+import '../controllers/home_controller.dart';
 import '../../levels/levels_module.dart';
 import '../../../core/widgets/prismo.dart';
 import '../../../core/widgets/app_icon.dart';
@@ -544,6 +545,7 @@ class LearningTabView extends GetView<HomeStatsController> {
     bool completed = false,
     String? actionLabel,
     VoidCallback? onTap,
+    VoidCallback? onGo,
   }) {
     final safeTotal = total <= 0 ? 1 : total;
     final safeCurrent = current.clamp(0, safeTotal);
@@ -588,7 +590,7 @@ class LearningTabView extends GetView<HomeStatsController> {
             ),
             child: Text(actionLabel),
           )
-        else
+        else ...[
           Text(
             '$safeCurrent/$safeTotal',
             style: TextStyle(
@@ -598,6 +600,16 @@ class LearningTabView extends GetView<HomeStatsController> {
               fontFeatures: const [FontFeature.tabularFigures()],
             ),
           ),
+          if (onGo != null) ...[
+            SizedBox(width: 8.w),
+            IconButton.filledTonal(
+              onPressed: onGo,
+              tooltip: 'Làm ngay',
+              visualDensity: VisualDensity.compact,
+              icon: Icon(Icons.arrow_forward_rounded, size: 18.sp),
+            ),
+          ],
+        ],
       ],
     );
     return content;
@@ -673,12 +685,34 @@ class LearningTabView extends GetView<HomeStatsController> {
                   completed: quest.completed,
                   actionLabel: canClaim ? 'Nhận ${quest.rewardScales} vảy' : null,
                   onTap: canClaim ? () => Get.find<LearningTabController>().claim(quest) : null,
+                  onGo: quest.completed ? null : _questAction(quest.kind),
                 ),
               );
             }),
         ],
       ),
     );
+  }
+
+  /// Where each daily quest kind (DailyQuest.Kind on the server) is done; null hides the arrow.
+  VoidCallback? _questAction(String kind) {
+    switch (kind) {
+      case 'save_words':
+        return () {
+          if (!Get.isRegistered<CameraDetectionController>()) {
+            Get.lazyPut(() => CameraDetectionController());
+          }
+          CameraDetectionController.to.takePhoto();
+        };
+      case 'reach_learn_goal':
+        return _handleNewLearningTap;
+      case 'reach_review_goal':
+        return () => HomeController.to.changeTab(1);
+      case 'post_community_image':
+      case 'engage_community':
+        return () => HomeController.to.changeTab(2);
+    }
+    return null;
   }
 
   Widget _buildOptimizedAsset({

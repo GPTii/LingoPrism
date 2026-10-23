@@ -7,6 +7,7 @@ import { gameApi } from '../../api/app'
 import { useAuth } from '../../auth/store'
 import LevelPath from '../../components/LevelPath'
 import TodayWord from '../../components/TodayWord'
+import { QuestGo } from '../../components/QuestGo'
 import { LangGlyph, Prismo, ScaleIcon, StreakIcon, XpIcon, type Mood } from '../../components/brand/Brand'
 import { AppIcon } from '../../components/brand/AppIcon'
 
@@ -150,6 +151,7 @@ export default function HomePage() {
                   <span className="num inline-flex items-center gap-1 text-sm font-bold text-slate-600 shrink-0">
                     <ScaleIcon size={16} />{q.reward_scales}
                   </span>
+                  {!q.completed && <QuestGo kind={q.kind} title={q.title} />}
                 </li>
               ))}
               {!quests.data?.quests.length && <li className="text-slate-500 text-sm">Hôm nay chưa có nhiệm vụ. Học một bài để mở nhiệm vụ mới.</li>}
