@@ -78,10 +78,19 @@ class CommunityMemberProfileView
               SizedBox(height: 12.h),
               Row(children: [
                 Expanded(
-                  child: Text(
-                    [if (controller.publicId.value.isNotEmpty) 'ID ${controller.publicId.value}', '${controller.friends.value} bạn bè'].join('  ·  '),
-                    style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
-                  ),
+                  child: Row(children: [
+                    if (controller.publicId.value.isNotEmpty) ...[
+                      Text('ID ${controller.publicId.value}',
+                          style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+                      CopyIdButton(id: controller.publicId.value),
+                      Text('·  ', style: TextStyle(fontSize: 13.sp, color: AppColors.textSecondary)),
+                    ],
+                    Flexible(
+                      child: Text('${controller.friends.value} bạn bè',
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+                    ),
+                  ]),
                 ),
                 if (showFollowButton && controller.friendStatus.value != FriendStatus.incoming)
                   FriendButton(

@@ -163,8 +163,15 @@ class MyIdCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final id = AuthService.to.currentUser?.publicId ?? '';
-    if (id.isEmpty) return const SizedBox.shrink();
+    // Reactive: the cached user can predate public_id until /me/ comes back on app start.
+    return Obx(() {
+      final id = AuthService.to.user.value?.publicId ?? '';
+      if (id.isEmpty) return const SizedBox.shrink();
+      return _card(id);
+    });
+  }
+
+  Widget _card(String id) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
       decoration: BoxDecoration(
@@ -182,16 +189,36 @@ class MyIdCard extends StatelessWidget {
           ]),
         ),
         OutlinedButton.icon(
-          onPressed: () async {
-            await Clipboard.setData(ClipboardData(text: id));
-            Get.snackbar('Đã sao chép', 'Gửi ID $id cho bạn bè để họ tìm bạn.', snackPosition: SnackPosition.BOTTOM);
-          },
+          onPressed: () => copyPublicId(id, mine: true),
           icon: const Icon(Icons.copy_rounded, size: 18),
           label: const Text('Sao chép'),
         ),
       ]),
     );
   }
+}
+
+Future<void> copyPublicId(String id, {bool mine = false}) async {
+  await Clipboard.setData(ClipboardData(text: id));
+  Get.snackbar('Đã sao chép', mine ? 'Gửi ID $id cho bạn bè để họ tìm bạn.' : 'Đã sao chép ID $id.',
+      snackPosition: SnackPosition.BOTTOM);
+}
+
+/// A small copy icon to sit next to someone's "ID 12345678".
+class CopyIdButton extends StatelessWidget {
+  const CopyIdButton({super.key, required this.id});
+
+  final String id;
+
+  @override
+  Widget build(BuildContext context) => IconButton(
+        onPressed: () => copyPublicId(id),
+        icon: Icon(Icons.copy_rounded, size: 16.sp, color: AppColors.textSecondary),
+        tooltip: 'Sao chép ID',
+        visualDensity: VisualDensity.compact,
+        padding: EdgeInsets.zero,
+        constraints: BoxConstraints(minWidth: 32.w, minHeight: 32.w),
+      );
 }
 
 /// One learner in a list, with the friend button on the right.

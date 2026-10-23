@@ -6,7 +6,7 @@ import { errorMessage } from '../../api/client'
 import { useAuth } from '../../auth/store'
 import { StreakIcon, XpIcon } from '../../components/brand/Brand'
 import { Facts, PageHeader, Section, UserAvatar } from '../../components/ui'
-import { FriendButton } from '../../components/Friends'
+import { CopyIdButton, FriendButton } from '../../components/Friends'
 import { MessageButton } from './MessagesPage'
 import { ReportUserButton } from './ReportUser'
 
@@ -50,7 +50,9 @@ export default function MemberProfilePage() {
             <UserAvatar name={p.display_name} src={p.avatar} size={64} />
             <span className="min-w-0">
               {p.display_name}
-              <span className="num block text-sm font-semibold text-slate-500 mt-0.5 tracking-normal">ID {p.public_id}</span>
+              <span className="num flex items-center gap-1 text-sm font-semibold text-slate-500 mt-0.5 tracking-normal">
+                ID {p.public_id} <CopyIdButton id={p.public_id} size="small" />
+              </span>
               {p.groups[0] && <span className="block text-base font-medium text-slate-500 mt-0.5">Nhóm {p.groups[0].name}</span>}
             </span>
           </span>

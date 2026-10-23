@@ -107,26 +107,36 @@ export function FriendButton({ userId, name, status, requestId, onChange, size =
   )
 }
 
-/** "ID của tôi": the 8 digits friends search for, with a copy button. */
-export function MyIdCard({ className = '' }: { className?: string }) {
+/** Copies an 8-digit ID; falls back to showing it when the browser blocks the clipboard. */
+export function CopyIdButton({ id, label, size = 'middle' }: { id: string; label?: string; size?: 'small' | 'middle' | 'large' }) {
   const { message } = App.useApp()
-  const id = useAuth((s) => s.user?.public_id)
-  if (!id) return null
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(id)
       message.success('Đã sao chép ID')
     } catch {
-      message.info(`ID của bạn: ${id}`)
+      message.info(`ID: ${id}`)
     }
   }
+  return (
+    <Button size={size} type={label ? 'default' : 'text'} icon={<CopyOutlined />} onClick={copy}
+      aria-label="Sao chép ID" title="Sao chép ID">
+      {label}
+    </Button>
+  )
+}
+
+/** "ID của tôi": the 8 digits friends search for, with a copy button. */
+export function MyIdCard({ className = '' }: { className?: string }) {
+  const id = useAuth((s) => s.user?.public_id)
+  if (!id) return null
   return (
     <div className={`lp-card px-4 py-3 flex items-center gap-3 ${className}`}>
       <div className="min-w-0">
         <div className="text-xs font-semibold text-slate-500">ID của tôi</div>
         <div className="num text-2xl font-extrabold tracking-[0.12em] text-slate-900">{id}</div>
       </div>
-      <Button className="ml-auto" icon={<CopyOutlined />} onClick={copy}>Sao chép</Button>
+      <span className="ml-auto"><CopyIdButton id={id} label="Sao chép" /></span>
     </div>
   )
 }
