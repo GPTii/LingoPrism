@@ -5,6 +5,8 @@
  *   * the game icons: streak flame, scales (vảy), gems (ngọc), XP.
  */
 import { useId } from 'react'
+import type { MascotLook } from '../../api/types'
+import { useAuth } from '../../auth/store'
 
 /** useId() contains ':' / '«', which breaks url(#id) references in some browsers */
 const useSvgId = () => 'lp' + useId().replace(/[^a-zA-Z0-9]/g, '')
@@ -51,8 +53,67 @@ export type Mood = 'happy' | 'celebrate' | 'sleepy' | 'think' | 'sad' | 'wow'
 
 const INK = '#15233b'
 
-/** Prismo – the LingoPrism mascot. */
-export function Prismo({ mood = 'happy', size = 120, className = '' }: { mood?: Mood; size?: number; className?: string }) {
+/** Each learner's Prismo is dressed from layers drawn on this frame: Prismo's grid with room for hats and held things. */
+const FRAME = '-10 -24 180 180'
+/** layers in front of Prismo, back to front (the background goes behind) */
+const FRONT = ['neck', 'hand', 'glasses', 'hat'] as const
+export const outfitUrl = (code: string) => `/outfits/${code}.svg`
+
+/**
+ * Prismo – the LingoPrism mascot. By default it wears what the signed-in learner dressed it in
+ * (`look="mine"`); pass another learner's look, or null for the plain mascot.
+ */
+export function Prismo({ mood = 'happy', size = 120, className = '', look = 'mine' }: {
+  mood?: Mood
+  size?: number
+  className?: string
+  look?: MascotLook | null | 'mine'
+}) {
+  const mine = useAuth((s) => s.user?.mascot)
+  const wear = look === 'mine' ? mine : look
+  const front = wear ? FRONT.filter((slot) => wear[slot]) : []
+  if (!front.length) {
+    return (
+      <svg width={size} height={size * 0.94} viewBox="0 0 160 150" className={className} role="img" aria-label="Prismo">
+        <PrismoBody mood={mood} />
+      </svg>
+    )
+  }
+  // dressed: drawn on the larger frame, with negative margins so it takes the same room as plain Prismo
+  // and the hat (or what it holds) reaches outside that room
+  const k = size / 160
+  return (
+    <svg width={180 * k} height={180 * k} viewBox={FRAME} className={className} role="img" aria-label="Prismo"
+      style={{ margin: `${-24 * k}px ${-10 * k}px ${-6 * k}px ${-10 * k}px`, overflow: 'visible' }}>
+      <PrismoBody mood={mood} />
+      {front.map((slot) => <image key={slot} href={outfitUrl(wear![slot])} x="-10" y="-24" width="180" height="180" />)}
+    </svg>
+  )
+}
+
+/** Someone's Prismo as their picture: the whole frame, background included, in a circle (or a rounded square). */
+export function PrismoAvatar({ look, size = 36, mood = 'happy', square = false, className = '' }: {
+  look?: MascotLook | null
+  size?: number
+  mood?: Mood
+  square?: boolean
+  className?: string
+}) {
+  return (
+    <svg width={size} height={size} viewBox={FRAME} className={`shrink-0 ${square ? 'rounded-[22%]' : 'rounded-full'} ${className}`}
+      role="img" aria-label={look?.name || 'Prismo'} style={{ width: size, height: size, overflow: 'hidden' }}>
+      <rect x="-10" y="-24" width="180" height="180" fill="#dff1ff" />
+      {look?.background && <image href={outfitUrl(look.background)} x="-10" y="-24" width="180" height="180" />}
+      <PrismoBody mood={mood} />
+      {look && FRONT.filter((slot) => look[slot]).map((slot) => (
+        <image key={slot} href={outfitUrl(look[slot])} x="-10" y="-24" width="180" height="180" />
+      ))}
+    </svg>
+  )
+}
+
+/** Prismo's body and face on its 160 × 150 grid. */
+function PrismoBody({ mood }: { mood: Mood }) {
   const id = useSvgId()
   const eye = (x: number) => {
     switch (mood) {
@@ -88,7 +149,7 @@ export function Prismo({ mood = 'happy', size = 120, className = '' }: { mood?: 
   }[mood]
 
   return (
-    <svg width={size} height={size * 0.94} viewBox="0 0 160 150" className={className} role="img" aria-label="Prismo">
+    <>
       <defs>
         <linearGradient id={`${id}b`} x1="0.2" y1="0" x2="0.8" y2="1">
           <stop offset="0" stopColor="#62c6ff" />
@@ -122,7 +183,7 @@ export function Prismo({ mood = 'happy', size = 120, className = '' }: { mood?: 
           <path d="M132 34 l2 5 5 2 -5 2 -2 5 -2 -5 -5 -2 5 -2 Z" fill="#10c79a" />
         </g>
       )}
-    </svg>
+    </>
   )
 }
 

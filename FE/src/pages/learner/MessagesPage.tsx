@@ -25,7 +25,7 @@ function ThreadList({ threads, active }: { threads: DirectThread[]; active?: num
         <li key={t.id}>
           <Link to={`/messages/${t.id}`}
             className={`flex items-center gap-3 rounded-xl px-3 py-2.5 ${t.id === active ? 'bg-brand-50' : 'hover:bg-slate-50'}`}>
-            <UserAvatar name={t.other.display_name} src={t.other.avatar} size={40} />
+            <UserAvatar name={t.other.display_name} src={t.other.avatar} mascot={t.other.mascot} size={40} />
             <span className="min-w-0 flex-1">
               <span className="flex items-baseline justify-between gap-2">
                 <span className={`truncate text-slate-800 ${t.unread ? 'font-bold' : 'font-semibold'}`}>{t.other.display_name}</span>
@@ -115,7 +115,7 @@ function Conversation({ id }: { id: number }) {
       <div className="flex items-center gap-3 border-b border-slate-100 px-4 py-3">
         {t ? (
           <Link to={`/community/users/${t.other.id}`} className="flex items-center gap-3 min-w-0">
-            <UserAvatar name={t.other.display_name} src={t.other.avatar} size={36} />
+            <UserAvatar name={t.other.display_name} src={t.other.avatar} mascot={t.other.mascot} size={36} />
             <span className="truncate font-bold text-slate-800">{t.other.display_name}</span>
           </Link>
         ) : <Skeleton.Input active size="small" />}

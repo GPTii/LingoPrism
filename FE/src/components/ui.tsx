@@ -1,6 +1,8 @@
 import { useState, type ReactNode } from 'react'
 import { ArrowLeftOutlined, DownOutlined, UpOutlined } from '@ant-design/icons'
 import { Link } from 'react-router-dom'
+import type { MascotLook } from '../api/types'
+import { PrismoAvatar } from './brand/Brand'
 
 /**
  * The few building blocks every learner page is made of, so all pages share one rhythm:
@@ -90,19 +92,20 @@ export function EmptyState({ title, description, action, art }: {
 }
 
 /**
- * A person: their photo, or the first letter of their name on a blue tint (never a blank silhouette).
- * Preset avatars ("assets/…") are mobile app artwork, so the web shows the letter for them.
+ * A person: their photo, or their own Prismo dressed as they left it (also when they chose Prismo over the photo).
+ * Preset avatars ("assets/…") are mobile app artwork, so the web shows their Prismo for them.
  */
-export function UserAvatar({ name, src, size = 36 }: { name?: string | null; src?: string | null; size?: number }) {
-  const photo = src && !src.startsWith('assets/') ? src : null
-  const letter = (name ?? '?').trim().charAt(0).toUpperCase() || '?'
+export function UserAvatar({ src, size = 36, mascot }: {
+  name?: string | null
+  src?: string | null
+  size?: number
+  mascot?: MascotLook | null
+}) {
+  const photo = src && !src.startsWith('assets/') && !mascot?.as_avatar ? src : null
   return photo ? (
     <img src={photo} alt="" width={size} height={size} className="rounded-full object-cover shrink-0 bg-slate-100" style={{ width: size, height: size }} />
   ) : (
-    <span aria-hidden className="rounded-full shrink-0 grid place-items-center font-bold bg-brand-100 text-brand-700"
-      style={{ width: size, height: size, fontSize: size * 0.42 }}>
-      {letter}
-    </span>
+    <PrismoAvatar look={mascot} size={size} />
   )
 }
 

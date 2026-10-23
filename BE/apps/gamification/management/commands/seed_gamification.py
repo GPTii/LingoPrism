@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.db.models import F
 
-from apps.gamification.models import Badge, Item, LeagueTier, UserInventory
+from apps.gamification.models import Badge, Item, LeagueTier, Outfit, UserInventory
 from apps.gamification.sync import sync_catalog
 
 from apps.core import brand
@@ -21,5 +21,5 @@ class Command(BaseCommand):
         for order, (code, name) in enumerate(TIERS):
             LeagueTier.objects.update_or_create(code=code, defaults={
                 "name": name, "order": order, "icon": brand.rank(order + 1)})
-        items, badges = sync_catalog(Item, Badge, UserInventory)
+        items, badges = sync_catalog(Item, Badge, UserInventory, Outfit)
         self.stdout.write(self.style.SUCCESS(f"{len(TIERS)} hạng, {items} vật phẩm, {badges} huy hiệu"))

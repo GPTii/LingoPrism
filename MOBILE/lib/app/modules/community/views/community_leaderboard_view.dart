@@ -31,6 +31,7 @@ import 'package:get/get.dart';
 import '../../../data/services/auth_service.dart';
 import '../controllers/community_controller.dart';
 import 'package:lingoprism/app/core/theme/app_colors.dart';
+import '../../../core/widgets/prismo_avatar.dart';
 import '../../../core/widgets/show_more.dart';
 
 /// Main leaderboard view widget displaying community league rankings
@@ -437,10 +438,12 @@ class _LeagueParticipantTile extends StatelessWidget {
             ),
           ),
           SizedBox(width: 12.w),
-          CircleAvatar(
-            radius: 22.r,
-            backgroundImage: _getCachedAvatarProvider(participant.avatarUrl),
-          ),
+          participant.avatarUrl.isEmpty || participant.mascot?.asAvatar == true
+              ? PrismoAvatar(look: participant.mascot, size: 44.r)
+              : CircleAvatar(
+                  radius: 22.r,
+                  backgroundImage: _getCachedAvatarProvider(participant.avatarUrl),
+                ),
           SizedBox(width: 12.w),
           Expanded(
             child: Column(

@@ -8,8 +8,8 @@ from rest_framework.test import APIClient
 from rest_framework_simplejwt.tokens import AccessToken
 
 from apps.accounts.models import User, UserGoal
-from apps.gamification import services
-from apps.gamification.models import DailyQuest, Item, LeagueCycle, UserInventory
+from apps.gamification import mascot, services
+from apps.gamification.models import DailyQuest, Item, LeagueCycle, Outfit, UserInventory
 from apps.notifications.models import Notification
 
 pytestmark = pytest.mark.django_db
@@ -216,7 +216,7 @@ def test_gem_exchange_and_streak_repair(user):
     assert res.status_code == 200 and res.data["gems"] == 1 and res.data["scales"] == 100
 
     repair = Item.objects.get(code="streak_repair")
-    User.objects.filter(pk=user.pk).update(gems_balance=10)
+    User.objects.filter(pk=user.pk).update(gems_balance=10, scales_balance=1000)
     assert client.post(f"/api/v1/shop/items/{repair.id}/buy/").data["detail"] == "Chuỗi của bạn vẫn còn, không cần hồi"
     day = services.today()
     for i in range(10, 4, -1):  # a 6-day streak that ended 5 days ago…
@@ -226,8 +226,8 @@ def test_gem_exchange_and_streak_repair(user):
     assert stats.current_streak == 1 and stats.lost_streak == 6
     assert client.get("/api/v1/gamification/summary/").data["repairable_streak"] == 6
     res = client.post(f"/api/v1/shop/items/{repair.id}/buy/")
-    # 10 + 1 ("Khởi động", 3 days) − 5 for the repair; then the 7-day streak earns "Một tuần kiên trì" (+2)
-    assert res.status_code == 200 and res.data["gems"] == 8
+    # paid in vảy; gems: 10 + 1 ("Khởi động", 3 days), then the 7-day streak earns "Một tuần kiên trì" (+2)
+    assert res.status_code == 200 and res.data["scales"] == 200 and res.data["gems"] == 13
     assert services.stats_for(user).current_streak == 7
     assert client.get("/api/v1/gamification/summary/").data["repairable_streak"] == 0
 
@@ -237,7 +237,7 @@ def test_streak_repair_before_learning_again(user):
     for i in range(6, 2, -1):  # 4 days, then 2 days missed
         services.mark_activity(user, day - timedelta(days=i))
     assert services.repairable_streak(user) == 4
-    User.objects.filter(pk=user.pk).update(gems_balance=5)
+    User.objects.filter(pk=user.pk).update(scales_balance=800)
     services.purchase(user, Item.objects.get(code="streak_repair"))
     services.mark_activity(user, day)
     assert services.stats_for(user).current_streak == 5
@@ -251,8 +251,9 @@ def test_promotion_gives_gems_and_league_badge(user):
     user.refresh_from_db()
     stats = services.stats_for(user)
     assert stats.best_league == 2
-    # 5 gems for 1st place + 1 for the "Lên hạng Ánh Đồng" badge (the 50 XP give no badge yet)
-    assert user.gems_balance == 6
+    # 5 gems for 1st place + 1 for "Lên hạng Ánh Đồng" + 3 for "Quán quân tuần" (the 50 XP give no badge yet)
+    assert user.gems_balance == 9
+    assert stats.league_wins == 1 and mascot.owned_codes(user) == {"hat_crown"}
 
 
 def test_kids_do_not_see_community_badges(user):
@@ -263,3 +264,52 @@ def test_kids_do_not_see_community_badges(user):
     user.save()
     kid = {b["condition"] for b in client.get("/api/v1/badges/").data}
     assert "friends" in adult and "friends" not in kid and "streak" in kid
+
+
+def test_prices_scales_for_help_gems_for_looks(user):
+    for item in Item.objects.filter(active=True):
+        if item.effect == "sticker":
+            assert item.cost_gems and not item.cost_scales, item.code
+        else:
+            assert item.cost_scales and not item.cost_gems, item.code
+    assert all(o.cost_gems or o.badge_code for o in Outfit.objects.all())
+
+
+def test_wardrobe_buy_and_dress(user):
+    client = APIClient()
+    client.force_authenticate(user)
+    data = client.get("/api/v1/mascot/").data
+    assert data["name"] == "Prismo" and data["wearing"]["hat"] == "" and len(data["outfits"]) >= 40
+    assert client.post("/api/v1/mascot/buy/", {"code": "hat_cap"}).data["detail"] == "Không đủ Ngọc"
+    User.objects.filter(pk=user.pk).update(gems_balance=5)
+    res = client.post("/api/v1/mascot/buy/", {"code": "hat_cap"})
+    assert res.status_code == 200 and res.data["gems"] == 3 and res.data["wearing"]["hat"] == "hat_cap"  # worn at once
+    assert client.post("/api/v1/mascot/buy/", {"code": "hat_cap"}).data["detail"] == "Prismo đã có món này rồi"
+    assert client.post("/api/v1/mascot/buy/", {"code": "hat_crown"}).status_code == 400  # earned, never sold
+    assert client.patch("/api/v1/mascot/", {"wearing": {"glasses": "glasses_sun"}}, format="json").status_code == 400
+    assert client.patch("/api/v1/mascot/", {"wearing": {"glasses": "hat_cap"}}, format="json").status_code == 400
+    res = client.patch("/api/v1/mascot/", {"name": "Bé Lam", "as_avatar": True, "wearing": {"hat": ""}}, format="json")
+    assert res.data["name"] == "Bé Lam" and res.data["wearing"]["hat"] == "" and res.data["as_avatar"]
+    client.force_authenticate(User.objects.get(pk=user.pk))  # a fresh user, as each real request has
+    assert client.get("/api/v1/me/").data["mascot"]["name"] == "Bé Lam"
+    lb = client.get("/api/v1/leaderboard/?scope=league").data["members"]
+    assert lb[0]["mascot"]["as_avatar"] is True
+
+
+def test_badge_unlocks_its_outfit(user):
+    services.bump_stat(user, "night_owl")
+    assert "hat_nightcap" in mascot.owned_codes(user)
+    note = Notification.objects.filter(user=user, kind="achievement").latest("id")
+    assert "Mũ ngủ" in note.body
+
+
+def test_festival_pieces_only_in_their_window():
+    from datetime import date
+
+    witch = Outfit.objects.get(code="hat_witch")
+    assert mascot.for_sale(witch, date(2026, 10, 31))
+    assert not mascot.for_sale(witch, date(2026, 11, 10))
+    assert mascot.how_to_get(witch, date(2026, 11, 10)) == "Chỉ bán dịp Halloween, từ 20/10"
+    assert mascot.how_to_get(witch, date(2026, 10, 25)) == "Chỉ bán dịp Halloween, đến hết 03/11"
+    tet = Outfit.objects.get(code="hand_lixi")
+    assert mascot.for_sale(tet, date(2027, 2, 6)) and not mascot.for_sale(tet, date(2027, 3, 1))

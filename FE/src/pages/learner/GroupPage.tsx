@@ -115,7 +115,7 @@ export default function GroupPage() {
               {shown.map((m, i) => (
                 <li key={m.id} className="flex items-center gap-2.5">
                   <span className="num w-5 text-sm font-bold text-slate-500">{i + 1}</span>
-                  <UserAvatar name={m.user.display_name} src={m.user.avatar} size={30} />
+                  <UserAvatar name={m.user.display_name} src={m.user.avatar} mascot={m.user.mascot} size={30} />
                   <span className="flex-1 min-w-0 truncate text-slate-800">
                     {m.user.display_name}{m.role === 'leader' && <CrownFilled className="text-amber-500 ml-1" aria-label="trưởng nhóm" />}
                   </span>

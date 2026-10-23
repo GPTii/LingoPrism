@@ -119,7 +119,7 @@ export function PostCard({ post, commentsOpen = false }: { post: Post; commentsO
   return (
     <article className="lp-card overflow-hidden">
       <div className="flex items-center gap-3 p-4">
-        <UserAvatar name={post.author.display_name} src={post.author.avatar} size={40} />
+        <UserAvatar name={post.author.display_name} src={post.author.avatar} mascot={post.author.mascot} size={40} />
         <button type="button" className="text-left cursor-pointer" onClick={() => navigate(`/community/users/${post.author.id}`)}>
           <div className="font-semibold text-slate-800">{post.author.display_name}</div>
           <div className="text-xs text-slate-500">{dayjs(post.created_at).fromNow()}</div>
@@ -170,7 +170,7 @@ export function PostCard({ post, commentsOpen = false }: { post: Post; commentsO
             )}
             {(allComments ? comments.data : comments.data?.slice(-3))?.map((c) => (
               <div key={c.id} className="group flex gap-2 text-sm">
-                <Link to={`/community/users/${c.author.id}`}><UserAvatar name={c.author.display_name} src={c.author.avatar} size={26} /></Link>
+                <Link to={`/community/users/${c.author.id}`}><UserAvatar name={c.author.display_name} src={c.author.avatar} mascot={c.author.mascot} size={26} /></Link>
                 <div className="flex-1 min-w-0">
                   <Link to={`/community/users/${c.author.id}`} className="font-semibold !text-slate-800">{c.author.display_name}</Link>{' '}
                   {c.kind === 'sticker' ? <StickerImage code={c.sticker} size={88} /> : <span className="text-slate-700 break-words">{c.content}</span>}
@@ -355,7 +355,7 @@ function LeaderboardTab() {
         {[...rows.shown, ...(meBelow ? [meBelow] : [])].map((m) => (
           <li key={m.user_id} className={`flex items-center gap-3 py-2 px-3 rounded-xl ${m.is_me ? 'bg-brand-50' : m.zone ? zoneColor[m.zone] : ''}`}>
             <span className="num w-8 text-center font-bold" style={m.rank <= 3 ? { color: medal[m.rank - 1] } : undefined}>{m.rank}</span>
-            <UserAvatar name={m.display_name} src={m.avatar} />
+            <UserAvatar name={m.display_name} src={m.avatar} mascot={m.mascot} />
             <span className={`flex-1 min-w-0 truncate ${m.is_me ? 'font-bold text-brand-700' : 'text-slate-800'}`}>{m.display_name}{m.is_me && ' (bạn)'}</span>
             <span className="num font-semibold text-slate-700">{m.xp} XP</span>
           </li>
@@ -391,7 +391,7 @@ function Suggestions() {
         {people.data.map((p) => (
           <li key={p.id} className="flex w-36 shrink-0 flex-col items-center gap-1.5 rounded-xl border border-slate-100 p-3 text-center">
             <Link to={`/community/users/${p.id}`} className="flex flex-col items-center gap-1.5 min-w-0 w-full">
-              <UserAvatar name={p.display_name} src={p.avatar} size={48} />
+              <UserAvatar name={p.display_name} src={p.avatar} mascot={p.mascot} size={48} />
               <span className="w-full truncate font-semibold text-slate-800">{p.display_name}</span>
             </Link>
             <span className="text-xs text-slate-500">{p.follows_me ? 'Đang theo dõi bạn' : `Học ${LANG_NAME[p.active_language] ?? p.active_language}`}</span>

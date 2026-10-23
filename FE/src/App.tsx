@@ -24,6 +24,7 @@ import PostPage from './pages/learner/PostPage'
 import { ExamListPage, ExamResultPage, ExamTakePage } from './pages/learner/ExamsPages'
 import MapPage from './pages/learner/MapPage'
 import AchievementsPage from './pages/learner/AchievementsPage'
+import WardrobePage from './pages/learner/WardrobePage'
 import StatsPage from './pages/learner/StatsPage'
 import SpeakPage from './pages/learner/SpeakPage'
 import SupportPage from './pages/learner/SupportPage'
@@ -72,6 +73,7 @@ export default function App() {
           <Route path="map" element={<MapPage />} />
           <Route path="shop" element={<AchievementsPage />} />
           <Route path="achievements" element={<AchievementsPage />} />
+          <Route path="prismo" element={<WardrobePage />} />
           <Route path="stats" element={<StatsPage />} />
           <Route path="speak" element={<SpeakPage />} />
           <Route path="support" element={<SupportPage />} />

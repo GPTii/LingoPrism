@@ -10,7 +10,7 @@ from apps.core import brand
 from apps.notifications.models import Notification
 from apps.notifications.services import notify, push_event
 
-from . import catalog
+from . import catalog, mascot
 from .models import (
     ActiveBoost, Badge, DailyProgress, DailyQuest, Item, LeagueCycle, LeagueMember, LeagueTier, MonthlyQuest,
     UserBadge, UserInventory, UserStats, XpTransaction,
@@ -177,6 +177,7 @@ def badge_values(stats: UserStats) -> dict:
         Badge.Condition.EARLY_BIRD: stats.early_bird,
         Badge.Condition.NIGHT_OWL: stats.night_owl,
         Badge.Condition.LEAGUE: stats.best_league,
+        Badge.Condition.LEAGUE_WINS: stats.league_wins,
     }
 
 
@@ -194,6 +195,9 @@ def check_badges(user, stats: UserStats | None = None):
         if badge.reward_gems:
             type(user).objects.filter(pk=user.pk).update(gems_balance=F("gems_balance") + badge.reward_gems)
         gems = f" Thưởng {badge.reward_gems} ngọc!" if badge.reward_gems else ""
+        outfits = mascot.grant_for_badge(user, badge.code)
+        if outfits:
+            gems += f" Mở khoá cho Prismo: {', '.join(outfits)}."
         notify(user, Notification.Kind.ACHIEVEMENT, f"Huy hiệu mới: {badge.name}",
                f"{badge.description}.{gems}", image=badge.icon,
                data={"route": "/achievements", "badge": badge.code, "gems": badge.reward_gems})
@@ -334,6 +338,10 @@ def close_cycle(cycle: LeagueCycle):
         else:
             m.result = "stayed"
         m.save(update_fields=["rank", "result"])
+        if rank == 1 and m.weekly_xp > 0:
+            UserStats.objects.get_or_create(user_id=m.user_id)
+            UserStats.objects.filter(user_id=m.user_id).update(league_wins=F("league_wins") + 1)
+            check_badges(m.user)  # "Quán quân tuần" and the crown it unlocks
         if m.result == "promoted":
             gems = LEAGUE_PROMOTION_GEMS.get(rank, 1)
             type(m.user).objects.filter(pk=m.user_id).update(gems_balance=F("gems_balance") + gems)

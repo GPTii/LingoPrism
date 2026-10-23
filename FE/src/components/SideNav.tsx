@@ -51,6 +51,7 @@ export function navGroups(counts: { due?: number; unread?: number; quests?: numb
         { to: '/achievements#quests', label: 'Nhiệm vụ', icon: 'target', count: counts.quests },
         { to: '/achievements#calendar', label: 'Lịch học', icon: 'calendar' },
         { to: '/achievements#badges', label: 'Huy hiệu', icon: 'medal' },
+        { to: '/prismo', label: 'Tủ đồ Prismo', icon: 'sparkle' },
         { to: '/achievements#shop', label: 'Cửa hàng', icon: 'bag' },
       ],
     },

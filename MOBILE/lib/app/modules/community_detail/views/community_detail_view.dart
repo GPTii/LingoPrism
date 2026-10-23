@@ -1,3 +1,4 @@
+import '../../../core/widgets/prismo_avatar.dart';
 import 'dart:convert';
 import 'dart:io';
 
@@ -483,35 +484,6 @@ class _PostImage extends StatelessWidget {
   }
 }
 
-class _AvatarImageProvider {
-  static ImageProvider from(String avatar) {
-    if (avatar.startsWith('data:image')) {
-      final commaIndex = avatar.indexOf(',');
-      if (commaIndex != -1 && commaIndex < avatar.length - 1) {
-        final encoded = avatar.substring(commaIndex + 1);
-        try {
-          final bytes = base64Decode(encoded);
-          return MemoryImage(bytes);
-        } catch (_) {
-          // Ignore decoding error and fall through to next strategy.
-        }
-      }
-    }
-    if (avatar.startsWith('http')) {
-      return NetworkImage(avatar);
-    }
-    if (avatar.startsWith('assets/')) {
-      return AssetImage(avatar);
-    }
-    if (avatar.isNotEmpty) {
-      final file = File(avatar);
-      if (file.existsSync()) {
-        return FileImage(file);
-      }
-    }
-    return const AssetImage('assets/brand/avatar/avatar_1.png');
-  }
-}
 
 class _FeedCard extends StatelessWidget {
   const _FeedCard({required this.post});
@@ -587,10 +559,7 @@ class _Header extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        CircleAvatar(
-          radius: 24.r,
-          backgroundImage: _AvatarImageProvider.from(post.authorAvatar),
-        ),
+        PersonAvatar(avatar: post.authorAvatar, look: post.authorMascot, size: 48.r),
         SizedBox(width: 12.w),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1272,23 +1241,7 @@ class _CommentItem extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CircleAvatar(
-            radius: 22.r,
-            backgroundColor: AppColors.primarySoft,
-            backgroundImage: comment.avatarUrl.isNotEmpty
-                ? _AvatarImageProvider.from(comment.avatarUrl)
-                : null,
-            child: comment.avatarUrl.isEmpty
-                ? Text(
-                    _initialsFrom(comment.userName),
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.primary,
-                    ),
-                  )
-                : null,
-          ),
+          PersonAvatar(avatar: comment.avatarUrl, look: comment.mascot, size: 44.r),
           SizedBox(width: 12.w),
           Expanded(
             child: Column(
@@ -1336,16 +1289,6 @@ class _CommentItem extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  String _initialsFrom(String name) {
-    final words = name.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
-    if (words.isEmpty) return '??';
-    final first = words.first;
-    final last = words.length > 1 ? words.last : '';
-    final firstInitial = first.isNotEmpty ? first[0] : '';
-    final lastInitial = last.isNotEmpty ? last[0] : '';
-    return (firstInitial + lastInitial).toUpperCase();
   }
 }
 

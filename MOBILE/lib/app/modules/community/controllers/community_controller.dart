@@ -1,3 +1,4 @@
+import '../../../data/models/api/common.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -150,6 +151,7 @@ class CommunityGroupMemberScore {
     required this.weeklyPoints,
     required this.avatarUrl,
     this.isHighlighted = false,
+    this.mascot,
   });
 
   final int rank;
@@ -159,6 +161,7 @@ class CommunityGroupMemberScore {
   final int weeklyPoints;
   final String avatarUrl;
   final bool isHighlighted;
+  final MascotLook? mascot;
 }
 
 class CommunityGroupDetails {
@@ -209,6 +212,7 @@ class CommunityLeaderboardParticipant {
     required this.xpBreakdown,
     required this.rawPoints,
     this.isVirtual = false,
+    this.mascot,
   });
 
   final int rank;
@@ -217,6 +221,7 @@ class CommunityLeaderboardParticipant {
   final int totalPoints;
   final int weeklyPoints;
   final String avatarUrl;
+  final MascotLook? mascot;
   final CommunityLeaderboardStatus status;
   final Map<String, int> xpBreakdown;
   final int rawPoints;
@@ -243,6 +248,7 @@ class CommunityLeaderboardParticipant {
       avatarUrl: avatarUrl ?? this.avatarUrl,
       status: status ?? this.status,
       xpBreakdown: xpBreakdown ?? this.xpBreakdown,
+      mascot: mascot,
       rawPoints: rawPoints ?? this.rawPoints,
       isVirtual: isVirtual ?? this.isVirtual,
     );
@@ -294,6 +300,7 @@ class CommunityPost {
     required this.authorId,
     required this.authorName,
     required this.authorAvatar,
+    this.authorMascot,
     required this.postedAt,
     required this.imageUrl,
     this.photoId,
@@ -348,6 +355,7 @@ class CommunityPost {
   final String authorId;
   final String authorName;
   final String authorAvatar;
+  final MascotLook? authorMascot;
   final String postedAt;
   final String imageUrl;
   final String? photoId;
@@ -398,12 +406,14 @@ class CommunityPostComment {
     required this.createdAt,
     this.isPending = false,
     this.canDelete = false,
+    this.mascot,
   });
 
   final String id;
   final String userId;
   final String userName;
   final String avatarUrl;
+  final MascotLook? mascot;
   final String content;
   final DateTime createdAt;
   final bool isPending;
@@ -429,6 +439,7 @@ class CommunityPostComment {
       createdAt: createdAt ?? this.createdAt,
       isPending: isPending ?? this.isPending,
       canDelete: canDelete,
+      mascot: mascot,
     );
   }
 }
@@ -493,7 +504,8 @@ class CommunityController extends GetxController {
       id: '${p.id}',
       authorId: '${p.author.id}',
       authorName: p.author.displayName,
-      authorAvatar: p.author.avatarOrDefault,
+      authorAvatar: p.author.avatar ?? '',
+      authorMascot: p.author.mascot,
       postedAt: _relativeTime(p.createdAt),
       imageUrl: p.image,
       vocabularyItems: p.words
@@ -675,7 +687,8 @@ class CommunityController extends GetxController {
             id: '${c.id}',
             userId: '${c.author.id}',
             userName: c.author.displayName,
-            avatarUrl: c.author.avatarOrDefault,
+            avatarUrl: c.author.avatar ?? '',
+            mascot: c.author.mascot,
             content: c.kind == 'sticker' ? stickerAsset(c.sticker) : c.content,
             createdAt: c.createdAt,
             canDelete: c.canDelete,
@@ -830,7 +843,8 @@ class CommunityController extends GetxController {
             displayName: active[i].user.displayName,
             totalPoints: active[i].weeklyXp,
             weeklyPoints: active[i].weeklyXp,
-            avatarUrl: active[i].user.avatarOrDefault,
+            avatarUrl: active[i].user.avatar ?? '',
+            mascot: active[i].user.mascot,
             isHighlighted: active[i].user.id == AuthService.to.userId,
           ),
       ],
@@ -985,7 +999,8 @@ class CommunityController extends GetxController {
             name: m.isMe ? '${m.displayName} (bạn)' : m.displayName,
             totalPoints: m.xp,
             weeklyPoints: m.xp,
-            avatarUrl: m.avatar ?? 'assets/brand/avatar/avatar_1.png',
+            avatarUrl: m.avatar ?? '',
+            mascot: m.mascot,
             status: CommunityLeaderboardStatus.safe,
             xpBreakdown: const {},
             rawPoints: m.xp,
@@ -1015,7 +1030,8 @@ class CommunityController extends GetxController {
                 name: m.isMe ? '${m.displayName} (bạn)' : m.displayName,
                 totalPoints: m.xp,
                 weeklyPoints: m.xp,
-                avatarUrl: m.avatar ?? 'assets/brand/avatar/avatar_1.png',
+                avatarUrl: m.avatar ?? '',
+                mascot: m.mascot,
                 status: switch (m.zone) {
                   'promotion' => CommunityLeaderboardStatus.promotion,
                   'demotion' => CommunityLeaderboardStatus.demotion,

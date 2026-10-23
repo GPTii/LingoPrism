@@ -195,6 +195,16 @@ class GameRepository {
       asMapList(await _api.get('/shop/items/stickers/')).map(StickerInfo.fromJson).toList();
 
   static Future<Map<String, dynamic>> userStats(int userId) async => asMap(await _api.get('/users/$userId/stats/'));
+
+  /// my Prismo and its whole wardrobe
+  static Future<Wardrobe> wardrobe() async => Wardrobe.fromJson(asMap(await _api.get('/mascot/')));
+  static Future<Wardrobe> dress({String? name, bool? asAvatar, Map<String, String>? wearing}) async =>
+      Wardrobe.fromJson(asMap(await _api.patch('/mascot/', data: {
+        if (name != null) 'name': name,
+        if (asAvatar != null) 'as_avatar': asAvatar,
+        if (wearing != null) 'wearing': wearing,
+      })));
+  static Future<Wardrobe> buyOutfit(String code) async => Wardrobe.fromJson(asMap(await _api.post('/mascot/buy/', data: {'code': code})));
 }
 
 class NotificationRepository {

@@ -42,6 +42,7 @@ class AppUser {
     this.scales = 0,
     this.gems = 0,
     this.goal,
+    this.mascot,
   });
 
   final int id;
@@ -67,6 +68,9 @@ class AppUser {
   final int scales;
   final int gems;
   final UserGoal? goal;
+
+  /// my Prismo as I dressed it (null until the wardrobe is opened)
+  final MascotLook? mascot;
 
   static const String defaultAvatar = 'assets/brand/avatar/avatar_1.png';
 
@@ -113,6 +117,7 @@ class AppUser {
         scales: asInt(j['scales_balance']),
         gems: asInt(j['gems_balance']),
         goal: j['goal'] is Map ? UserGoal.fromJson(asMap(j['goal'])) : null,
+        mascot: MascotLook.fromJson(j['mascot']),
       );
 
   Map<String, dynamic> toJson() => {
@@ -136,6 +141,7 @@ class AppUser {
         'onboarding_completed': onboardingCompleted,
         'scales_balance': scales,
         'gems_balance': gems,
+        if (mascot != null) 'mascot': mascot!.toJson(),
         if (goal != null)
           'goal': {
             'daily_new_target': goal!.dailyNewTarget,

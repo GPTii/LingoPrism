@@ -1,3 +1,4 @@
+import '../../wardrobe/wardrobe_module.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
@@ -109,6 +110,8 @@ class ProfileView extends GetView<ProfileController> {
                     Expanded(child: _ProfileShortcut(icon: 'bookmark', label: 'Bài đã lưu', onTap: () => Get.toNamed(Routes.savedPosts))),
                   ]),
                 ],
+                SizedBox(height: 12.h),
+                const MyPrismoCard(),
                 SizedBox(height: 12.h),
                 BadgesSection(badges: controller.badges.toList()),
                 SizedBox(height: 24.h),

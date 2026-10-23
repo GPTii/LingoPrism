@@ -27,7 +27,9 @@ function Spectrum({ learned, target, mood }: { learned: number; target: number; 
   const bands = ['#ffb020', '#10c79a', '#ff6b81']
   return (
     <div className="flex items-center gap-1 sm:gap-2">
-      <Prismo mood={mood} size={104} className="shrink-0 -mr-3 relative z-[1] -mt-6" />
+      <Link to="/prismo" title="Tủ đồ Prismo" className="shrink-0 -mr-3 relative z-[1] -mt-6">
+        <Prismo mood={mood} size={104} />
+      </Link>
       <div className="flex-1 min-w-0" role="progressbar" aria-valuemin={0} aria-valuemax={target} aria-valuenow={learned} aria-label="Mục tiêu từ mới hôm nay">
         <div className="flex flex-col gap-[3px]">
           {bands.map((c, i) => (
@@ -62,11 +64,17 @@ export default function HomePage() {
   const learned = g?.today.new_learned ?? 0
   const goalPct = Math.min(100, Math.round((learned / target) * 100))
   const due = s?.due ?? 0
-  const mood: Mood = goalPct >= 100 ? 'celebrate' : g?.studied_today ? 'happy' : due > 0 ? 'think' : 'wow'
+  // Prismo feels the day: sad right after a lost streak, sleepy while a kept streak waits for today's lesson
+  const lost = !g?.studied_today && (g?.repairable_streak ?? 0) > 0
+  const waiting = !g?.studied_today && (g?.streak ?? 0) > 0
+  const pet = user?.mascot?.name || 'Prismo'
+  const mood: Mood = goalPct >= 100 ? 'celebrate' : lost ? 'sad' : g?.studied_today ? 'happy' : waiting ? 'sleepy' : due > 0 ? 'think' : 'wow'
   const line = goalPct >= 100 ? 'Bạn đã đạt mục tiêu hôm nay. Ôn thêm vài từ để nhớ lâu hơn.'
-    : g?.studied_today ? `Còn ${target - learned} từ nữa là đạt mục tiêu hôm nay.`
-      : due > 0 ? `${due} từ đến lịch ôn. Ôn trước, học từ mới sau.`
-        : 'Năm phút là đủ cho một lượt học hôm nay.'
+    : lost ? `${pet} buồn vì mất chuỗi ${g?.repairable_streak} ngày. Hồi chuỗi trong Cửa hàng để nối lại.`
+      : g?.studied_today ? `Còn ${target - learned} từ nữa là đạt mục tiêu hôm nay.`
+        : waiting ? `${pet} đang ngủ gật. Học một bài để giữ chuỗi ${g?.streak} ngày.`
+          : due > 0 ? `${due} từ đến lịch ôn. Ôn trước, học từ mới sau.`
+            : 'Năm phút là đủ cho một lượt học hôm nay.'
 
   const facts = [
     { icon: <StreakIcon size={30} active={!!g?.studied_today} />, value: g?.streak ?? 0, label: 'ngày liên tiếp' },

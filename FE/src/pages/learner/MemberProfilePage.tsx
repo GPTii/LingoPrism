@@ -4,7 +4,7 @@ import { useParams } from 'react-router-dom'
 import { communityApi } from '../../api/app'
 import { errorMessage } from '../../api/client'
 import { useAuth } from '../../auth/store'
-import { StreakIcon, XpIcon } from '../../components/brand/Brand'
+import { PrismoAvatar, StreakIcon, XpIcon } from '../../components/brand/Brand'
 import { Facts, PageHeader, Section, ShowMore, UserAvatar } from '../../components/ui'
 import { CopyIdButton, FriendButton } from '../../components/Friends'
 import { MessageButton } from './MessagesPage'
@@ -47,7 +47,7 @@ export default function MemberProfilePage() {
       <PageHeader back={{ to: '/community', label: 'Cộng đồng' }}
         title={
           <span className="flex items-center gap-4">
-            <UserAvatar name={p.display_name} src={p.avatar} size={64} />
+            <UserAvatar name={p.display_name} src={p.avatar} mascot={p.mascot} size={64} />
             <span className="min-w-0">
               {p.display_name}
               <span className="num flex items-center gap-1 text-sm font-semibold text-slate-500 mt-0.5 tracking-normal">
@@ -88,6 +88,14 @@ export default function MemberProfilePage() {
           { label: 'đang theo dõi', value: p.following },
         ]} />
       </Section>
+      {p.mascot && (
+        <Section title={`Prismo của ${p.display_name}`}>
+          <div className="flex items-center gap-5">
+            <PrismoAvatar look={p.mascot} size={150} square />
+            <div className="text-xl font-bold text-slate-800">{p.mascot.name}</div>
+          </div>
+        </Section>
+      )}
       {p.recent_posts.length > 0 && (
         <Section title="Ảnh gần đây">
           <ShowMore items={p.recent_posts} limit={6} label="Xem thêm ảnh">{(shown) => (

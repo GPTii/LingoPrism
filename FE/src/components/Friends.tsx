@@ -146,7 +146,7 @@ export function PersonRow({ person, extra, onChange }: { person: Person; extra?:
   return (
     <li className="flex items-center gap-3 py-3">
       <Link to={`/community/users/${person.id}`} className="flex items-center gap-3 min-w-0 flex-1">
-        <UserAvatar name={person.display_name} src={person.avatar} size={44} />
+        <UserAvatar name={person.display_name} src={person.avatar} mascot={person.mascot} size={44} />
         <span className="min-w-0">
           <span className="block font-semibold text-slate-800 truncate">{person.display_name}</span>
           <span className="num block text-xs text-slate-500">ID {person.public_id}</span>

@@ -12,6 +12,7 @@ abstract class Routes {
   static const verifyResetCode = _Paths.verifyResetCode;
   static const newPassword = _Paths.newPassword;
   static const shop = _Paths.shop;
+  static const wardrobe = _Paths.wardrobe;
   static const streak = _Paths.streak;
   static const notification = _Paths.notification;
   static const profile = _Paths.profile;
@@ -68,6 +69,7 @@ abstract class _Paths {
   static const verifyResetCode = '/verify-reset-code';
   static const newPassword = '/new-password';
   static const shop = '/shop';
+  static const wardrobe = '/prismo';
   static const streak = '/streak';
   static const notification = '/notification';
   static const profile = '/profile';

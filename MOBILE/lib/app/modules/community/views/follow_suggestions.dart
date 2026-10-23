@@ -1,3 +1,4 @@
+import '../../../core/widgets/prismo_avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -7,7 +8,6 @@ import '../../../core/theme/app_colors.dart';
 import '../../../data/models/api/common.dart';
 import '../../../data/repositories/repositories.dart';
 import '../../community_member_profile/controllers/community_member_profile_controller.dart';
-import '../../messages/messages_module.dart' show avatarImage;
 
 const _langName = {'en': 'tiếng Anh', 'zh': 'tiếng Trung', 'vi': 'tiếng Việt'};
 
@@ -74,7 +74,7 @@ class _FollowSuggestionsState extends State<FollowSuggestions> {
                     onTap: () => CommunityMemberProfileArguments.open(author.id,
                         displayName: author.displayName, avatar: author.avatarOrDefault),
                     child: Column(children: [
-                      CircleAvatar(radius: 22.r, backgroundImage: avatarImage(author.avatarOrDefault)),
+                      PersonAvatar(avatar: author.avatar, look: author.mascot, size: 44.r),
                       SizedBox(height: 6.h),
                       Text(author.displayName, maxLines: 1, overflow: TextOverflow.ellipsis,
                           style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.textPrimary)),

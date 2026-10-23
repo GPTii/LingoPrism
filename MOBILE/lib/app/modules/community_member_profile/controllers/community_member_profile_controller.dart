@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/network/api_client.dart';
+import '../../../data/models/api/common.dart';
 import '../../../data/models/api/social.dart';
 import '../../../data/repositories/repositories.dart';
 import '../../../data/services/auth_service.dart';
@@ -42,6 +43,7 @@ class CommunityMemberProfileController extends GetxController {
   late final int userId;
   final Rx<ProfileSummary> summary = ProfileSummary.initial().obs;
   final RxList<String> recentPosts = <String>[].obs;
+  final mascot = Rxn<MascotLook>();
   final RxBool isFollowing = false.obs;
   final RxBool canMessage = false.obs;
   final RxBool blocked = false.obs;
@@ -90,6 +92,7 @@ class CommunityMemberProfileController extends GetxController {
         following: p.following,
       );
       recentPosts.assignAll(p.recentPosts.map((r) => '${r['image']}'));
+      mascot.value = p.author.mascot;
       isFollowing.value = p.isFollowing;
       canMessage.value = p.canMessage;
       publicId.value = p.author.publicId;

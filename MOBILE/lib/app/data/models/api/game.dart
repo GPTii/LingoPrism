@@ -194,7 +194,8 @@ class StickerInfo {
 String stickerAsset(String code) => 'assets/rewards/stickers/$code.png';
 
 class LeaderboardEntry {
-  LeaderboardEntry({required this.rank, required this.userId, required this.displayName, this.avatar, this.xp = 0, this.zone = 'safe', this.isMe = false});
+  LeaderboardEntry({required this.rank, required this.userId, required this.displayName, this.avatar, this.xp = 0, this.zone = 'safe', this.isMe = false,
+      this.mascot});
 
   final int rank;
   final int userId;
@@ -203,6 +204,7 @@ class LeaderboardEntry {
   final int xp;
   final String zone; // promotion | safe | demotion
   final bool isMe;
+  final MascotLook? mascot;
 
   factory LeaderboardEntry.fromJson(Map<String, dynamic> j) => LeaderboardEntry(
         rank: asInt(j['rank']),
@@ -212,6 +214,7 @@ class LeaderboardEntry {
         xp: asInt(j['xp']),
         zone: asString(j['zone'], 'safe'),
         isMe: j['is_me'] == true,
+        mascot: MascotLook.fromJson(j['mascot']),
       );
 }
 
@@ -327,3 +330,56 @@ class AppNotification {
 }
 
 String? _brandOrNull(String? path) => path == null ? null : brandAsset(path);
+
+/// One piece of Prismo's wardrobe (/mascot/).
+class OutfitInfo {
+  OutfitInfo({required this.code, required this.name, required this.slot, this.costGems, this.owned = false, this.forSale = false,
+      this.how = '', this.badge = '', this.event = ''});
+
+  final String code;
+  final String name;
+  final String slot;
+  final int? costGems;
+  final bool owned;
+
+  /// can be bought right now (not earned-only, festival open)
+  final bool forSale;
+
+  /// how it is had when it is not simply bought: the badge, or the festival and its dates
+  final String how;
+  final String badge;
+  final String event;
+
+  String get asset => outfitAsset(code);
+
+  factory OutfitInfo.fromJson(Map<String, dynamic> j) => OutfitInfo(
+        code: asString(j['code']),
+        name: asString(j['name']),
+        slot: asString(j['slot']),
+        costGems: j['cost_gems'] == null ? null : asInt(j['cost_gems']),
+        owned: j['owned'] == true,
+        forSale: j['for_sale'] == true,
+        how: asString(j['how']),
+        badge: asString(j['badge']),
+        event: asString(j['event']),
+      );
+}
+
+class Wardrobe {
+  Wardrobe({required this.look, this.gems = 0, this.slots = const [], this.outfits = const []});
+
+  final MascotLook look;
+  final int gems;
+  final List<(String, String)> slots; // (code, label)
+  final List<OutfitInfo> outfits;
+
+  factory Wardrobe.fromJson(Map<String, dynamic> j) {
+    final wearing = asMap(j['wearing']);
+    return Wardrobe(
+      look: MascotLook.fromJson({...wearing, 'name': j['name'], 'as_avatar': j['as_avatar']})!,
+      gems: asInt(j['gems']),
+      slots: [for (final s in asMapList(j['slots'])) (asString(s['code']), asString(s['label']))],
+      outfits: asMapList(j['outfits']).map(OutfitInfo.fromJson).toList(),
+    );
+  }
+}

@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.core.throttles import ActionThrottleMixin
+from apps.gamification.mascot import look
 
 from . import services
 from .models import DirectThread, GroupMessage, SupportConversation
@@ -123,7 +124,7 @@ class SupportConversationViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixi
 # ------------------------------------------------------------------ private messages
 
 def _person(request, user):
-    return {"id": user.id, "display_name": user.display_name, "avatar": user.avatar_url(request)}
+    return {"id": user.id, "display_name": user.display_name, "avatar": user.avatar_url(request), "mascot": look(user)}
 
 
 class SendDirectSerializer(serializers.Serializer):

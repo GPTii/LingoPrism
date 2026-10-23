@@ -1,3 +1,4 @@
+import '../../core/widgets/prismo_avatar.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -172,7 +173,7 @@ class MessagesView extends GetView<MessagesController> {
                   await Get.toNamed(Routes.directChat, arguments: t.id);
                   controller.load();
                 },
-                leading: CircleAvatar(backgroundImage: avatarImage(t.other.avatarOrDefault)),
+                leading: PersonAvatar(avatar: t.other.avatar, look: t.other.mascot, size: 40.r),
                 title: Row(children: [
                   Expanded(child: Text(t.other.displayName, overflow: TextOverflow.ellipsis,
                       style: TextStyle(fontWeight: bold ? FontWeight.w800 : FontWeight.w600, color: AppColors.textPrimary))),
@@ -307,7 +308,7 @@ class DirectChatView extends GetView<DirectChatController> {
           final t = controller.thread.value;
           if (t == null) return const Text('Tin nhắn');
           return Row(children: [
-            CircleAvatar(radius: 16.r, backgroundImage: avatarImage(t.other.avatarOrDefault)),
+            PersonAvatar(avatar: t.other.avatar, look: t.other.mascot, size: 32.r),
             SizedBox(width: 10.w),
             Expanded(child: Text(t.other.displayName, overflow: TextOverflow.ellipsis)),
           ]);

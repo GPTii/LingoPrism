@@ -15,6 +15,8 @@ urlpatterns = [
     path("gamification/summary/", views.SummaryView.as_view(), name="gamification-summary"),
     path("gamification/progress/", views.ProgressView.as_view(), name="gamification-progress"),
     path("gamification/xp-history/", views.XpHistoryView.as_view(), name="gamification-xp-history"),
+    path("mascot/", views.MascotView.as_view(), name="mascot"),
+    path("mascot/buy/", views.MascotBuyView.as_view(), name="mascot-buy"),
     path("leaderboard/", views.LeaderboardView.as_view(), name="leaderboard"),
     path("users/<int:user_id>/stats/", views.PublicProfileStatsView.as_view(), name="user-stats"),
 ] + router.urls

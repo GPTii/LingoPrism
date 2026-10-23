@@ -1,6 +1,11 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get/get.dart';
+
+import '../../data/models/api/common.dart';
+import '../../data/services/auth_service.dart';
 
 /// Prismo's moods – the same set as the web mascot (FE/src/components/brand/Brand.tsx).
 enum PrismoMood { happy, celebrate, sad, think, wow, sleepy }
@@ -8,12 +13,17 @@ enum PrismoMood { happy, celebrate, sad, think, wow, sleepy }
 /// Prismo drawn in code (not a picture) so it can be alive: it blinks now and then,
 /// jumps when the mood turns to [PrismoMood.celebrate] and sinks a little on [PrismoMood.sad].
 /// With "reduce motion" on, it stays still.
+///
+/// It wears what the signed-in learner dressed it in ([mine]), or [look] when given: one SVG layer per piece, drawn on
+/// the wardrobe frame (Prismo's grid widened to x −10…170, y −24…156), so a hat reaches above Prismo's box.
 class Prismo extends StatefulWidget {
-  const Prismo({super.key, this.mood = PrismoMood.happy, this.size = 120, this.blink = true});
+  const Prismo({super.key, this.mood = PrismoMood.happy, this.size = 120, this.blink = true, this.look, this.mine = true});
 
   final PrismoMood mood;
   final double size;
   final bool blink;
+  final MascotLook? look;
+  final bool mine;
 
   @override
   State<Prismo> createState() => _PrismoState();
@@ -65,8 +75,34 @@ class _PrismoState extends State<Prismo> with TickerProviderStateMixin {
     super.dispose();
   }
 
+  MascotLook? get _look {
+    if (widget.look != null || !widget.mine) return widget.look;
+    return Get.isRegistered<AuthService>() ? AuthService.to.user.value?.mascot : null;
+  }
+
+  Widget _dressed(Widget body) {
+    final front = _look?.front ?? const <String>[];
+    if (front.isEmpty) return body;
+    final k = widget.size / 160;
+    return Stack(clipBehavior: Clip.none, children: [
+      body,
+      for (final code in front)
+        Positioned(left: -10 * k, top: -24 * k, width: 180 * k, height: 180 * k, child: SvgPicture.asset(outfitAsset(code))),
+    ]);
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (widget.look == null && widget.mine && Get.isRegistered<AuthService>()) {
+      return Obx(() {
+        AuthService.to.user.value; // dressed again as soon as my look changes
+        return _build(context);
+      });
+    }
+    return _build(context);
+  }
+
+  Widget _build(BuildContext context) {
     return Semantics(
       label: 'Prismo',
       image: true,
@@ -93,10 +129,10 @@ class _PrismoState extends State<Prismo> with TickerProviderStateMixin {
                 scaleY: squash,
                 scaleX: 2 - squash,
                 alignment: Alignment.bottomCenter,
-                child: CustomPaint(
+                child: _dressed(CustomPaint(
                   size: Size(widget.size, widget.size * 150 / 160),
                   painter: _PrismoPainter(widget.mood, 1 - _blink.value),
-                ),
+                )),
               ),
             ),
           );

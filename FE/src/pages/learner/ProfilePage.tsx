@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { App, Button, Checkbox, Form, Input, InputNumber, Radio, Switch, TimePicker, Upload } from 'antd'
-import { CameraOutlined } from '@ant-design/icons'
+import { ArrowRightOutlined, CameraOutlined } from '@ant-design/icons'
 import dayjs, { type Dayjs } from 'dayjs'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
@@ -10,7 +10,7 @@ import type { User, UserGoal } from '../../api/types'
 import { useAuth } from '../../auth/store'
 import { useLogout } from '../../auth/useLogout'
 import { AppIcon, type AppIconName } from '../../components/brand/AppIcon'
-import { LangGlyph } from '../../components/brand/Brand'
+import { LangGlyph, PrismoAvatar } from '../../components/brand/Brand'
 import { MyIdCard } from '../../components/Friends'
 import { PageHeader, Section, UserAvatar } from '../../components/ui'
 
@@ -49,7 +49,7 @@ function AvatarPicker({ user }: { user: User }) {
       return false
     }}>
       <button type="button" aria-label="Đổi ảnh đại diện" className="relative cursor-pointer rounded-full">
-        <UserAvatar name={user.display_name} src={user.avatar} size={72} />
+        <UserAvatar name={user.display_name} src={user.avatar} mascot={user.mascot} size={72} />
         <span className={`absolute -bottom-1 -right-1 h-8 w-8 rounded-full grid place-items-center bg-brand-600 text-white ring-4 ring-[var(--page-bg)] ${busy ? 'animate-pulse' : ''}`}>
           <CameraOutlined />
         </span>
@@ -206,6 +206,14 @@ export default function ProfilePage() {
             </span>
           </span>
         } />
+      <Link to="/prismo" className="lift lp-card p-4 flex items-center gap-4 group">
+        <PrismoAvatar look={user.mascot} size={76} square />
+        <span className="flex-1 min-w-0">
+          <span className="block font-bold text-slate-800 text-lg">{user.mascot?.name || 'Prismo'} của bạn</span>
+          <span className="block text-sm text-slate-500">Mở tủ đồ: mũ, kính, đồ cầm tay và nền cho linh vật của bạn</span>
+        </span>
+        <ArrowRightOutlined className="text-slate-400 transition-transform duration-150 group-hover:translate-x-0.5" />
+      </Link>
       {!isKid && (
         <>
           <MyIdCard />

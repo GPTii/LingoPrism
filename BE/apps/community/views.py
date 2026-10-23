@@ -12,6 +12,7 @@ from rest_framework.response import Response
 
 from apps.core.permissions import IsStaffRole
 from apps.gamification import services as game
+from apps.gamification.mascot import look
 from apps.gamification.models import DailyQuest
 from apps.learning.models import PersonalWord
 from apps.notifications.models import Notification
@@ -39,7 +40,8 @@ class NotKid(permissions.BasePermission):
 
 
 def author(request, user):
-    return {"id": user.id, "public_id": user.public_id, "display_name": user.display_name, "avatar": user.avatar_url(request)}
+    return {"id": user.id, "public_id": user.public_id, "display_name": user.display_name, "avatar": user.avatar_url(request),
+            "mascot": look(user)}
 
 
 def no_kids(request):
@@ -180,7 +182,7 @@ class PostViewSet(ActionThrottleMixin, mixins.ListModelMixin, mixins.RetrieveMod
         following = UserFollow.objects.filter(follower=user).values("following_id")
         qs = Post.objects.filter(status=Post.Status.ACTIVE).filter(
             Q(visibility=Post.Visibility.PUBLIC) | Q(user=user) | Q(user_id__in=following)
-        ).select_related("user").annotate(
+        ).select_related("user__mascot").annotate(
             like_count=Count("likes", distinct=True),
             comment_count=Count("comments", filter=Q(comments__hidden=False), distinct=True),
             liked=Exists(PostLike.objects.filter(post=OuterRef("pk"), user=user)),
@@ -224,7 +226,7 @@ class PostViewSet(ActionThrottleMixin, mixins.ListModelMixin, mixins.RetrieveMod
     def comments(self, request, pk=None):
         post = self.get_object()
         if request.method == "GET":
-            qs = post.comments.filter(hidden=False).select_related("user")
+            qs = post.comments.filter(hidden=False).select_related("user__mascot")
             return Response(CommentSerializer(qs, many=True, context={"request": request}).data)
         ser = CommentSerializer(data=request.data, context={"request": request})
         ser.is_valid(raise_exception=True)
@@ -600,7 +602,7 @@ class GroupViewSet(ActionThrottleMixin, mixins.ListModelMixin, mixins.RetrieveMo
     @action(detail=True, methods=["get"])
     def members(self, request, pk=None):
         group = self.get_object()
-        qs = group.members.select_related("user").order_by("role", "joined_at")
+        qs = group.members.select_related("user__mascot").order_by("role", "joined_at")
         if not GroupMember.objects.filter(group=group, user=request.user, role="leader").exists():
             qs = qs.filter(status="active")
         return Response(MemberSerializer(qs, many=True, context={"request": request}).data)

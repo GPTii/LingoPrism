@@ -30,6 +30,12 @@ class UserGoalSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     goal = UserGoalSerializer(read_only=True)
+    mascot = serializers.SerializerMethodField()
+
+    def get_mascot(self, obj):
+        from apps.gamification.mascot import look
+
+        return look(obj)
 
     class Meta:
         model = User
@@ -37,7 +43,7 @@ class UserSerializer(serializers.ModelSerializer):
             "id", "public_id", "email", "display_name", "avatar", "avatar_preset", "bio", "role", "status",
             "learner_type", "learning_languages", "active_language", "zh_script", "show_zhuyin",
             "birth_date", "gender", "purpose", "daily_minutes", "onboarding_completed", "timezone",
-            "scales_balance", "gems_balance", "goal", "created_at",
+            "scales_balance", "gems_balance", "goal", "mascot", "created_at",
         ]
         read_only_fields = ["id", "public_id", "email", "role", "status", "scales_balance", "gems_balance", "created_at"]
 
@@ -55,10 +61,16 @@ class UserSerializer(serializers.ModelSerializer):
 
 class PublicUserSerializer(serializers.ModelSerializer):
     avatar = serializers.SerializerMethodField()
+    mascot = serializers.SerializerMethodField()
+
+    def get_mascot(self, obj):
+        from apps.gamification.mascot import look
+
+        return look(obj)
 
     class Meta:
         model = User
-        fields = ["id", "display_name", "avatar", "bio", "learner_type", "created_at"]
+        fields = ["id", "display_name", "avatar", "mascot", "bio", "learner_type", "created_at"]
 
     def get_avatar(self, obj):
         return obj.avatar_url(self.context.get("request"))

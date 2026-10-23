@@ -11,6 +11,7 @@ import '../controllers/home_stats_controller.dart';
 import '../../../core/utils/streak_asset_resolver.dart';
 import '../../learning_session/controllers/learning_session_controller.dart';
 import '../../../data/services/auth_service.dart';
+import '../../../data/services/game_service.dart';
 import '../../../data/models/api/game.dart';
 import '../../../data/models/api/user.dart';
 import '../controllers/learning_tab_controller.dart';
@@ -135,13 +136,33 @@ class LearningTabView extends GetView<HomeStatsController> {
   }) {
     final safeTarget = target <= 0 ? 10 : target;
     final done = learned >= safeTarget;
+    // Prismo feels the day: sad right after a lost streak, sleepy while a kept streak waits for today's lesson
+    final g = GameService.to.summary.value;
+    final pet = user?.mascot?.name ?? 'Prismo';
+    final lost = !g.studiedToday && g.repairableStreak > 0;
+    final waiting = !g.studiedToday && g.streak > 0;
+    final mood = done
+        ? PrismoMood.celebrate
+        : lost
+            ? PrismoMood.sad
+            : learned > 0 || g.studiedToday
+                ? PrismoMood.happy
+                : waiting
+                    ? PrismoMood.sleepy
+                    : due > 0
+                        ? PrismoMood.think
+                        : PrismoMood.wow;
     final line = done
         ? 'Bạn đã đạt mục tiêu hôm nay. Ôn thêm vài từ để nhớ lâu hơn.'
-        : learned > 0
-            ? 'Còn ${safeTarget - learned} từ nữa là đạt mục tiêu hôm nay.'
-            : due > 0
-                ? '$due từ đến lịch ôn. Ôn trước, học từ mới sau.'
-                : 'Năm phút là đủ cho một lượt học hôm nay.';
+        : lost
+            ? '$pet buồn vì mất chuỗi ${g.repairableStreak} ngày. Hồi chuỗi trong Cửa hàng để nối lại.'
+            : learned > 0
+                ? 'Còn ${safeTarget - learned} từ nữa là đạt mục tiêu hôm nay.'
+                : waiting
+                    ? '$pet đang ngủ gật. Học một bài để giữ chuỗi ${g.streak} ngày.'
+                    : due > 0
+                        ? '$due từ đến lịch ôn. Ôn trước, học từ mới sau.'
+                        : 'Năm phút là đủ cho một lượt học hôm nay.';
     final name = user?.displayName ?? '';
 
     return Container(
@@ -175,9 +196,9 @@ class LearningTabView extends GetView<HomeStatsController> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Prismo(
-                mood: done ? PrismoMood.celebrate : learned > 0 ? PrismoMood.happy : due > 0 ? PrismoMood.think : PrismoMood.wow,
-                size: 78.w,
+              GestureDetector(
+                onTap: () => Get.toNamed(Routes.wardrobe),
+                child: Prismo(mood: mood, size: 78.w),
               ),
               Expanded(child: _GoalBeam(learned: learned, target: safeTarget)),
             ],

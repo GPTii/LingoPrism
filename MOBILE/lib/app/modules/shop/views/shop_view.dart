@@ -1,3 +1,4 @@
+import '../../wardrobe/wardrobe_module.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -57,6 +58,12 @@ class ShopView extends GetView<ShopController> {
                 ),
                 SizedBox(height: 20.h),
               ],
+              const MyPrismoCard(),
+              Padding(
+                padding: EdgeInsets.only(top: 6.h, bottom: 16.h),
+                child: Text('Vảy mua vật phẩm giữ chuỗi, tăng XP · ngọc mua đồ cho Prismo và sticker.',
+                    style: TextStyle(fontSize: 12.5.sp, color: AppColors.textSecondary)),
+              ),
               _title('Cách kiếm ngọc'),
               SizedBox(
                 height: 104.h,

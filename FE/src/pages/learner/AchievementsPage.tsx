@@ -3,7 +3,7 @@ import { App, Button, Calendar, Progress, Skeleton } from 'antd'
 import { CheckOutlined, ThunderboltFilled } from '@ant-design/icons'
 import dayjs, { type Dayjs } from 'dayjs'
 import { useEffect, useState } from 'react'
-import { useLocation } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { gameApi, type ShopItem } from '../../api/app'
 import { errorMessage } from '../../api/client'
 import { BadgeMedal, FreezeIcon, GemIcon, ScaleIcon, StreakIcon, XpIcon } from '../../components/brand/Brand'
@@ -152,7 +152,8 @@ export default function AchievementsPage() {
         </Section>
       </div>
 
-      <Section id="gems" title="Cách kiếm ngọc">
+      <Section id="gems" title="Cách kiếm ngọc"
+        extra={<Link to="/prismo" className="text-sm font-semibold">Tiêu ngọc ở Tủ đồ Prismo →</Link>}>
         <ul className="m-0 p-0 list-none grid sm:grid-cols-2 lg:grid-cols-5 gap-3">
           {GEM_WAYS.map((w) => (
             <li key={w.title} className="rounded-xl bg-slate-50 p-3.5 flex flex-col gap-1">
@@ -183,7 +184,7 @@ export default function AchievementsPage() {
         {badgeList.toggle}
       </Section>
 
-      <Section id="shop" title="Cửa hàng" extra={<span className="text-sm text-slate-500">Đổi vảy và ngọc lấy vật phẩm hỗ trợ</span>}>
+      <Section id="shop" title="Cửa hàng" extra={<span className="text-sm text-slate-500">Vảy mua vật phẩm giữ chuỗi, tăng XP · ngọc mua đồ cho Prismo và sticker</span>}>
         <ul className="m-0 p-0 list-none grid md:grid-cols-3 gap-3">
           {items.map((i) => {
             const repair = i.effect === 'streak_repair'

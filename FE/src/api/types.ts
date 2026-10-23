@@ -9,6 +9,17 @@ export interface UserGoal {
   smart_remind: boolean
 }
 
+/** What someone's Prismo wears (one outfit code per slot, "" for nothing) and whether it stands in for their photo. */
+export interface MascotLook {
+  name: string
+  as_avatar: boolean
+  background: string
+  hat: string
+  glasses: string
+  neck: string
+  hand: string
+}
+
 export interface User {
   id: number
   /** 8 digits, shown as "ID của tôi" – friends find each other by it */
@@ -33,6 +44,8 @@ export interface User {
   scales_balance: number
   gems_balance: number
   goal: UserGoal | null
+  /** null until they open their wardrobe: a plain Prismo */
+  mascot?: MascotLook | null
   created_at: string
 }
 

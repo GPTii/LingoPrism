@@ -22,7 +22,7 @@ def item_path(code: str) -> str:
 # Sticker packs: bought once, every sticker in the pack can then be sent in comments, group chats and messages.
 # Chinese captions use only characters written the same in Simplified and Traditional (你好, 加油).
 STICKER_PACKS = [
-    {"code": "pack_hello", "name": "Prismo chào hỏi", "colour": "#1899f0", "cost_scales": 300, "cost_gems": None,
+    {"code": "pack_hello", "name": "Prismo chào hỏi", "colour": "#1899f0", "cost_scales": None, "cost_gems": 1,
      "stickers": [("hello", "Xin chào!"), ("thanks", "Cảm ơn nha!"), ("sticker_ok", "OK luôn!"),
                   ("great", "Tuyệt vời!"), ("good_night", "Ngủ ngon"), ("bye", "Tạm biệt!")]},
     {"code": "pack_feelings", "name": "Prismo cảm xúc", "colour": "#ff4b6e", "cost_scales": None, "cost_gems": 2,
@@ -41,11 +41,12 @@ STICKER_CAPTION = {code: text for p in STICKER_PACKS for code, text in p["sticke
 LEGACY_STICKERS = {"sticker_ok": "pack_hello", "sticker_love": "pack_feelings", "sticker_sad": "pack_feelings"}
 
 # Shop items other than sticker packs: (code, name, description, image, effect, cost_scales, cost_gems)
+# Vảy buys what helps you keep learning (streak, XP); ngọc buys looks (stickers, Prismo's outfits).
 ITEMS = [
     ("streak_freeze", "Đá băng", "Giữ chuỗi streak khi nghỉ 1 ngày", "assets/brand/icons/streak_freeze.png", "streak_freeze", 200, None),
     ("xp_boost", "Vảy tăng tốc", "Nhận đôi XP trong 15 phút", "assets/brand/icons/xp_x2.png", "xp_double_15m", 150, None),
-    ("super_boost", "Bình ánh sáng", "Tăng 25% XP toàn app trong 24 giờ", "assets/brand/icons/xp_potion.png", "xp_plus25_24h", None, 2),
-    ("streak_repair", "Hồi chuỗi", "Lỡ mất streak? Nối lại chuỗi cũ trong vòng 3 ngày", item_path("streak_repair"), "streak_repair", None, 5),
+    ("super_boost", "Bình ánh sáng", "Tăng 25% XP toàn app trong 24 giờ", "assets/brand/icons/xp_potion.png", "xp_plus25_24h", 400, None),
+    ("streak_repair", "Hồi chuỗi", "Lỡ mất streak? Nối lại chuỗi cũ trong vòng 3 ngày", item_path("streak_repair"), "streak_repair", 800, None),
     ("gem_exchange", "Đổi vảy lấy ngọc", "Đổi 500 vảy lấy 1 ngọc, nhận ngay", item_path("gem_exchange"), "gem_exchange", 500, None),
 ]
 
@@ -55,7 +56,7 @@ CONDITION_ART = {
     "xp": ("star", "#f5b400"), "detections": ("camera", "#ce82ff"), "posts": ("image", "#ff86c8"),
     "cheers": ("heart", "#ff4b4b"), "friends": ("friends", "#14c9a8"), "quests": ("flag", "#e8566f"),
     "sessions": ("bolt", "#1899f0"), "perfect": ("target", "#00b38a"), "early_bird": ("sun", "#ffa31a"),
-    "night_owl": ("moon", "#5b5fc7"), "league": ("trophy", "#a56eff"),
+    "night_owl": ("moon", "#5b5fc7"), "league": ("trophy", "#a56eff"), "league_wins": ("trophy", "#f5b400"),
 }
 SOCIAL_CONDITIONS = {"posts", "cheers", "friends"}  # not offered to children
 
@@ -120,6 +121,8 @@ BADGES = [
     _b("league-6", "Lên hạng Ngọc Lục", "Thăng lên hạng Ngọc Lục", "league", 6, 3, no_label=True),
     _b("league-8", "Lên hạng Tử Ngọc", "Thăng lên hạng Tử Ngọc", "league", 8, 5, no_label=True),
     _b("league-10", "Lăng Kính Huyền Thoại", "Lên hạng cao nhất", "league", 10, 10, no_label=True, tier=6),
+    _b("league-win-1", "Quán quân tuần", "Về nhất giải đấu tuần", "league_wins", 1, 3),
+    _b("league-win-5", "Nhà vô địch", "Về nhất giải đấu 5 tuần", "league_wins", 5, 8),
     # cộng đồng (không có với tài khoản trẻ em)
     _b("sharer-1", "Bài đăng đầu tiên", "Đăng bài đầu tiên lên cộng đồng", "posts", 1, 1),
     _b("sharer-5", "Người chia sẻ", "Đăng 5 bài lên cộng đồng", "posts", 5, 2),
@@ -130,4 +133,83 @@ BADGES = [
     _b("friends-1", "Người bạn đầu tiên", "Kết bạn với 1 người", "friends", 1, 1),
     _b("friends-5", "Hội bạn học", "Có 5 người bạn", "friends", 5, 2),
     _b("friends-15", "Kết nối khắp nơi", "Có 15 người bạn", "friends", 15, 3),
+]
+
+
+# ---------------------------------------------------------------- Prismo's wardrobe
+# Every learner has their own Prismo and dresses it: one piece per slot. Pieces are bought with ngọc, or earned
+# (a badge unlocks them; they cannot be bought), or sold only during a festival. Each piece is one SVG layer drawn on
+# Prismo's own grid (FE/scripts/make-outfits.py): public/outfits/<code>.svg on the web, assets/outfits/<code>.svg in the app.
+
+def outfit_path(code: str) -> str:
+    return f"assets/outfits/{code}.svg"
+
+
+SLOTS = [("background", "Nền"), ("hat", "Mũ"), ("glasses", "Kính"), ("neck", "Đồ đeo"), ("hand", "Cầm tay")]
+
+# Festivals: a piece tagged with one is sold only inside its window (dates are inclusive, local time).
+# Halloween and Giáng sinh fall on the same days every year; Tết follows the lunar calendar (mùng 1: 6/2/2027, 26/1/2028).
+EVENTS = {
+    "halloween": {"name": "Halloween", "yearly": ("10-20", "11-03")},
+    "noel": {"name": "Giáng sinh", "yearly": ("12-10", "12-31")},
+    "tet": {"name": "Tết Nguyên đán", "dates": [("2027-01-27", "2027-02-16"), ("2028-01-16", "2028-02-05")]},
+}
+
+
+def _o(code, name, slot, gems=None, badge="", event=""):
+    return {"code": code, "name": name, "slot": slot, "gems": gems, "badge": badge, "event": event}
+
+
+OUTFITS = [
+    # mũ
+    _o("hat_cap", "Mũ lưỡi trai", "hat", 2),
+    _o("hat_beanie", "Mũ len", "hat", 2),
+    _o("hat_party", "Mũ sinh nhật", "hat", 2),
+    _o("hat_non_la", "Nón lá", "hat", 3),
+    _o("hat_flowers", "Vòng hoa", "hat", 3),
+    _o("hat_beret", "Mũ nồi họa sĩ", "hat", 3),
+    _o("hat_grad", "Mũ tốt nghiệp", "hat", badge="word-master-100"),
+    _o("hat_nightcap", "Mũ ngủ", "hat", badge="night-owl"),
+    _o("hat_flame", "Vương miện lửa", "hat", badge="streak-30"),
+    _o("hat_crown", "Vương miện", "hat", badge="league-win-1"),
+    _o("hat_witch", "Mũ phù thủy", "hat", 4, event="halloween"),
+    _o("hat_santa", "Mũ Noel", "hat", 3, event="noel"),
+    # kính
+    _o("glasses_round", "Kính tròn", "glasses", 1),
+    _o("glasses_sun", "Kính râm", "glasses", 2),
+    _o("glasses_heart", "Kính trái tim", "glasses", 3),
+    _o("glasses_star", "Kính ngôi sao", "glasses", 3),
+    _o("glasses_pixel", "Kính pixel", "glasses", 4),
+    _o("glasses_monocle", "Kính một mắt", "glasses", badge="words-500"),
+    # đồ đeo
+    _o("neck_bow", "Nơ đỏ", "neck", 1),
+    _o("neck_tie", "Cà vạt", "neck", 2),
+    _o("neck_pearls", "Chuỗi ngọc", "neck", 3),
+    _o("neck_medal", "Huy chương vàng", "neck", badge="perfect-10"),
+    _o("neck_bell", "Chuông Noel", "neck", 2, event="noel"),
+    # cầm tay
+    _o("hand_book", "Quyển sách", "hand", 1),
+    _o("hand_pencil", "Bút chì", "hand", 1),
+    _o("hand_balloon", "Bóng bay", "hand", 2),
+    _o("hand_icecream", "Kem ốc quế", "hand", 2),
+    _o("hand_flag", "Cờ LingoPrism", "hand", 3),
+    _o("hand_camera", "Máy ảnh", "hand", badge="snapper-50"),
+    _o("hand_trophy", "Cúp vô địch", "hand", badge="league-win-5"),
+    _o("hand_pumpkin", "Đèn bí ngô", "hand", 3, event="halloween"),
+    _o("hand_lixi", "Bao lì xì", "hand", 3, event="tet"),
+    _o("hand_mai", "Cành mai", "hand", 3, event="tet"),
+    # nền
+    _o("bg_sky", "Bầu trời", "background", 2),
+    _o("bg_classroom", "Lớp học", "background", 3),
+    _o("bg_library", "Thư viện", "background", 3),
+    _o("bg_beach", "Bãi biển", "background", 3),
+    _o("bg_mountain", "Núi xanh", "background", 3),
+    _o("bg_sakura", "Hoa anh đào", "background", 4),
+    _o("bg_space", "Vũ trụ", "background", 5),
+    _o("bg_sunrise", "Bình minh", "background", badge="early-bird"),
+    _o("bg_flame", "Lửa rực", "background", badge="streak-100"),
+    _o("bg_prism", "Lăng kính huyền thoại", "background", badge="league-10"),
+    _o("bg_halloween", "Đêm Halloween", "background", 4, event="halloween"),
+    _o("bg_snow", "Tuyết rơi", "background", 4, event="noel"),
+    _o("bg_tet", "Phố Tết", "background", 4, event="tet"),
 ]

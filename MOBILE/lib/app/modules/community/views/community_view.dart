@@ -1,3 +1,4 @@
+import '../../../core/widgets/prismo_avatar.dart';
 import 'package:lingoprism/app/core/widgets/app_icon.dart';
 import 'dart:convert';
 import 'dart:io';
@@ -828,10 +829,12 @@ class _FeedCard extends StatelessWidget {
   Widget _buildHeader(BuildContext context) {
     return Row(
       children: [
-        CircleAvatar(
-          radius: 22.r,
-          backgroundImage: _avatarProvider(),
-        ),
+        post.authorAvatar.isEmpty || post.authorMascot?.asAvatar == true
+            ? PrismoAvatar(look: post.authorMascot, size: 44.r)
+            : CircleAvatar(
+                radius: 22.r,
+                backgroundImage: _avatarProvider(),
+              ),
         SizedBox(width: 12.w),
         Expanded(
           child: Column(

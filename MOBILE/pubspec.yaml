@@ -111,6 +111,7 @@ flutter:
     - assets/rewards/stickers/
     - assets/rewards/badges/
     - assets/rewards/items/
+    - assets/outfits/
     - assets/icons/
     - assets/icons/ui/
     - assets/ml_models/

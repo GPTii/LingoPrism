@@ -26,6 +26,7 @@ class UserStats(models.Model):
     early_bird = models.PositiveIntegerField(default=0, help_text="Buổi học xong trước 7 giờ sáng")
     night_owl = models.PositiveIntegerField(default=0, help_text="Buổi học xong sau 10 giờ tối")
     best_league = models.PositiveSmallIntegerField(default=1, help_text="Hạng giải đấu cao nhất (1..10)")
+    league_wins = models.PositiveIntegerField(default=0, help_text="Số tuần về nhất giải đấu")
     lost_streak = models.PositiveIntegerField(default=0, help_text="Chuỗi vừa bị mất, để Hồi chuỗi nối lại")
     lost_streak_on = models.DateField(null=True, blank=True)
 
@@ -90,6 +91,7 @@ class Badge(models.Model):
         EARLY_BIRD = "early_bird", "Học trước 7 giờ sáng"
         NIGHT_OWL = "night_owl", "Học sau 10 giờ tối"
         LEAGUE = "league", "Hạng giải đấu cao nhất"
+        LEAGUE_WINS = "league_wins", "Số tuần về nhất giải đấu"
 
     code = models.SlugField(unique=True)
     name = models.CharField(max_length=80)
@@ -243,3 +245,53 @@ class ActiveBoost(models.Model):
     multiplier = models.FloatField()
     started_at = models.DateTimeField(default=timezone.now)
     expires_at = models.DateTimeField(db_index=True)
+
+
+class Outfit(models.Model):
+    """A piece for Prismo (catalog.OUTFITS): bought with ngọc, earned with a badge, or sold only during a festival."""
+
+    class Slot(models.TextChoices):
+        BACKGROUND = "background", "Nền"
+        HAT = "hat", "Mũ"
+        GLASSES = "glasses", "Kính"
+        NECK = "neck", "Đồ đeo"
+        HAND = "hand", "Cầm tay"
+
+    code = models.SlugField(unique=True)
+    name = models.CharField(max_length=60)
+    slot = models.CharField(max_length=10, choices=Slot.choices)
+    image = models.CharField(max_length=200)
+    cost_gems = models.PositiveIntegerField(null=True, blank=True, help_text="Trống: không bán, chỉ mở khoá bằng huy hiệu")
+    badge_code = models.SlugField(blank=True, help_text="Huy hiệu mở khoá món này")
+    event = models.SlugField(blank=True, help_text="Dịp lễ duy nhất được bán (catalog.EVENTS)")
+    order = models.PositiveSmallIntegerField(default=0)
+    active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ["order"]
+
+    def __str__(self):
+        return self.name
+
+
+class UserOutfit(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="outfits")
+    outfit = models.ForeignKey(Outfit, on_delete=models.CASCADE)
+    acquired_at = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        unique_together = [("user", "outfit")]
+
+
+class Mascot(models.Model):
+    """Each learner's own Prismo: its name and what it wears, one outfit code per slot (blank: nothing)."""
+
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="mascot")
+    name = models.CharField(max_length=20, default="Prismo")
+    background = models.CharField(max_length=40, blank=True)
+    hat = models.CharField(max_length=40, blank=True)
+    glasses = models.CharField(max_length=40, blank=True)
+    neck = models.CharField(max_length=40, blank=True)
+    hand = models.CharField(max_length=40, blank=True)
+    as_avatar = models.BooleanField(default=False, help_text="Dùng Prismo làm ảnh đại diện thay cho ảnh")
+    updated_at = models.DateTimeField(auto_now=True)

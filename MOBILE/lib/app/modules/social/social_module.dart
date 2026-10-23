@@ -1,3 +1,4 @@
+import '../../core/widgets/prismo_avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -20,8 +21,6 @@ import '../../core/widgets/show_more.dart';
 
 /// Friends (same server API as the web's /friends): every learner has an 8-digit ID to be found by; a friend
 /// request carries a short hello and is answered by the other person (also from the notification). Adults only.
-
-ImageProvider _avatar(String path) => path.startsWith('http') ? NetworkImage(path) : AssetImage(path) as ImageProvider;
 
 /// The friend button in its four states: "Kết bạn" (asks for a hello first), "Đã gửi lời mời" (can be cancelled),
 /// "Đồng ý" / "Từ chối" when they asked me, and "Bạn bè" (can be ended).
@@ -238,7 +237,7 @@ class PersonTile extends StatelessWidget {
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
         child: Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
-          CircleAvatar(radius: 22.r, backgroundColor: AppColors.primarySoft, backgroundImage: _avatar(a.avatarOrDefault)),
+          PersonAvatar(avatar: a.avatar, look: a.mascot, size: 44.r),
           SizedBox(width: 12.w),
           Expanded(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [

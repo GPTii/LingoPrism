@@ -1,5 +1,5 @@
 import { api } from './client'
-import type { Paginated } from './types'
+import type { Paginated, MascotLook } from './types'
 import type { WordCard } from './vocab'
 
 // ---------------------------------------------------------------- gamification
@@ -68,6 +68,7 @@ export interface LeaderboardEntry {
   user_id: number
   display_name: string
   avatar: string | null
+  mascot?: MascotLook | null
   xp: number
   zone?: 'promotion' | 'safe' | 'demotion'
   is_me: boolean
@@ -104,6 +105,32 @@ export interface DayProgress {
   freeze_used: boolean
 }
 
+export type OutfitSlot = 'background' | 'hat' | 'glasses' | 'neck' | 'hand'
+
+export interface Outfit {
+  code: string
+  name: string
+  slot: OutfitSlot
+  image: string
+  cost_gems: number | null
+  owned: boolean
+  /** can be bought right now (not earned-only, festival open) */
+  for_sale: boolean
+  /** how it is had when it is not simply bought: the badge, or the festival and its dates */
+  how: string
+  badge: string
+  event: string
+}
+
+export interface Wardrobe {
+  name: string
+  as_avatar: boolean
+  gems: number
+  wearing: Record<OutfitSlot, string>
+  slots: { code: OutfitSlot; label: string }[]
+  outfits: Outfit[]
+}
+
 export const gameApi = {
   summary: () => api.get<GameSummary>('/gamification/summary/').then((r) => r.data),
   progress: (start?: string, end?: string) => api.get<DayProgress[]>('/gamification/progress/', { params: { start, end } }).then((r) => r.data),
@@ -117,6 +144,11 @@ export const gameApi = {
   use: (id: number) => api.post<{ multiplier: number; expires_at: string }>(`/shop/items/${id}/use/`).then((r) => r.data),
   /** the stickers I can send (from the packs I own) */
   stickers: () => api.get<Sticker[]>('/shop/items/stickers/').then((r) => r.data),
+  /** my Prismo and every piece of its wardrobe */
+  wardrobe: () => api.get<Wardrobe>('/mascot/').then((r) => r.data),
+  dress: (data: { name?: string; as_avatar?: boolean; wearing?: Partial<Record<OutfitSlot, string>> }) =>
+    api.patch<Wardrobe>('/mascot/', data).then((r) => r.data),
+  buyOutfit: (code: string) => api.post<Wardrobe>('/mascot/buy/', { code }).then((r) => r.data),
 }
 
 // ---------------------------------------------------------------- notifications
@@ -148,6 +180,7 @@ export interface Author {
   public_id?: string
   display_name: string
   avatar: string | null
+  mascot?: MascotLook | null
 }
 
 /** where I stand with someone: not friends, friends, I asked (outgoing), they asked (incoming) */

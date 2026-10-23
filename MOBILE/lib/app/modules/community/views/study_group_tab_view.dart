@@ -1,3 +1,4 @@
+import '../../../core/widgets/prismo_avatar.dart';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -950,12 +951,8 @@ class LeaderboardTile extends StatelessWidget {
       final avatarUrl = member.avatarUrl.trim();
 
       Widget avatarContent;
-      if (avatarUrl.isEmpty) {
-        avatarContent = Icon(
-          Icons.person_rounded,
-          size: 22.sp,
-          color: colors.secondary,
-        );
+      if (avatarUrl.isEmpty || member.mascot?.asAvatar == true) {
+        avatarContent = PrismoAvatar(look: member.mascot, size: 44.w);
       } else if (avatarUrl.startsWith('http')) {
         avatarContent = ClipOval(
           child: Image.network(

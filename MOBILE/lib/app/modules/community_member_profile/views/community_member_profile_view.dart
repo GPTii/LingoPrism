@@ -1,3 +1,4 @@
+import '../../../core/widgets/prismo_avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -143,6 +144,20 @@ class CommunityMemberProfileView
               ],
               SizedBox(height: 24.h),
               ProfileOverviewSection(summary: summary),
+              if (controller.mascot.value != null) ...[
+                SizedBox(height: 20.h),
+                Row(children: [
+                  PrismoAvatar(look: controller.mascot.value, size: 96.w, square: true),
+                  SizedBox(width: 14.w),
+                  Expanded(
+                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      Text('Prismo của ${summary.displayName}', style: TextStyle(fontSize: 13.sp, color: AppColors.textSecondary)),
+                      Text(controller.mascot.value!.name,
+                          style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                    ]),
+                  ),
+                ]),
+              ],
               SizedBox(height: 28.h),
               Text(
                 'Các bài đăng gần đây',
