@@ -9,6 +9,7 @@ import { useAuth } from '../../auth/store'
 import { Prismo } from '../../components/brand/Brand'
 import { EmptyState, PageHeader, UserAvatar } from '../../components/ui'
 import { ReportUserButton } from './ReportUser'
+import { StickerImage, StickerPicker } from '../../components/Stickers'
 
 const when = (iso: string) => (dayjs(iso).isSame(dayjs(), 'day') ? dayjs(iso).format('HH:mm') : dayjs(iso).format('DD/MM'))
 
@@ -31,7 +32,7 @@ function ThreadList({ threads, active }: { threads: DirectThread[]; active?: num
                 {t.last_message && <span className="num text-xs text-slate-500 shrink-0">{when(t.last_message.created_at)}</span>}
               </span>
               <span className="flex items-center justify-between gap-2">
-                <span className={`truncate text-sm ${t.unread ? 'text-slate-800' : 'text-slate-500'}`}>{t.last_message?.content}</span>
+                <span className={`truncate text-sm ${t.unread ? 'text-slate-800' : 'text-slate-500'}`}>{t.last_message?.sticker ? 'Sticker' : t.last_message?.content}</span>
                 {t.unread > 0 && <span className="num shrink-0 rounded-full bg-brand-600 px-1.5 text-xs font-bold text-white">{t.unread}</span>}
               </span>
             </span>
@@ -91,18 +92,19 @@ function Conversation({ id }: { id: number }) {
     setHasMore(r.has_more)
   }
 
-  const send = async () => {
-    const content = text.trim()
-    if (!content || !me) return
-    setText('')
+  /** a text message, or a sticker when one is given */
+  const send = async (sticker = '') => {
+    const content = sticker ? '' : text.trim()
+    if ((!content && !sticker) || !me) return
+    if (!sticker) setText('')
     const client_id = `${me.id}-${Date.now()}`
-    setMessages((l) => [...(l ?? []), { id: -Date.now(), thread: id, sender: me.id, content, client_id, read_at: null, created_at: new Date().toISOString() }])
+    setMessages((l) => [...(l ?? []), { id: -Date.now(), thread: id, sender: me.id, content, sticker, client_id, read_at: null, created_at: new Date().toISOString() }])
     try {
-      const m = await messagesApi.send(id, content, client_id)
+      const m = sticker ? await messagesApi.sendSticker(id, sticker, client_id) : await messagesApi.send(id, content, client_id)
       setMessages((l) => l?.map((x) => (x.client_id === client_id ? m : x)) ?? l)
     } catch (e) {
       setMessages((l) => l?.filter((x) => x.client_id !== client_id) ?? l)
-      setText(content)
+      if (!sticker) setText(content)
       message.error(errorMessage(e))
     }
   }
@@ -135,10 +137,14 @@ function Conversation({ id }: { id: number }) {
           const lastMine = mine && !messages.slice(i + 1).some((x) => x.sender === me?.id)
           return (
             <div key={m.id} className={`flex flex-col ${mine ? 'items-end' : 'items-start'}`}>
-              <div title={dayjs(m.created_at).format('HH:mm DD/MM/YYYY')}
-                className={`max-w-[75%] whitespace-pre-wrap break-words rounded-2xl px-3 py-2 ${mine ? 'bg-brand-600 text-white rounded-br-md' : 'bg-slate-100 text-slate-800 rounded-bl-md'}`}>
-                {m.content}
-              </div>
+              {m.sticker ? (
+                <div title={dayjs(m.created_at).format('HH:mm DD/MM/YYYY')}><StickerImage code={m.sticker} size={120} /></div>
+              ) : (
+                <div title={dayjs(m.created_at).format('HH:mm DD/MM/YYYY')}
+                  className={`max-w-[75%] whitespace-pre-wrap break-words rounded-2xl px-3 py-2 ${mine ? 'bg-brand-600 text-white rounded-br-md' : 'bg-slate-100 text-slate-800 rounded-bl-md'}`}>
+                  {m.content}
+                </div>
+              )}
               {lastMine && <span className="text-[11px] text-slate-500 mt-0.5">{m.id < 0 ? 'Đang gửi…' : m.read_at ? 'Đã xem' : 'Đã gửi'}</span>}
             </div>
           )
@@ -149,8 +155,11 @@ function Conversation({ id }: { id: number }) {
         {t && !t.can_message ? (
           <div className="text-center text-sm text-slate-500">Hai bạn không còn theo dõi nhau nên không gửi thêm tin được.</div>
         ) : (
-          <Input.Search placeholder="Nhập tin nhắn…" enterButton="Gửi" aria-label="Tin nhắn" maxLength={1000}
-            value={text} onChange={(e) => setText(e.target.value)} onSearch={send} />
+          <div className="flex gap-2">
+            <Input.Search placeholder="Nhập tin nhắn…" enterButton="Gửi" aria-label="Tin nhắn" maxLength={1000}
+              value={text} onChange={(e) => setText(e.target.value)} onSearch={() => send()} />
+            <StickerPicker onPick={send} />
+          </div>
         )}
       </div>
     </div>

@@ -8,6 +8,7 @@ import { errorMessage } from '../../api/client'
 import { useUnread } from '../../lib/useUserEvents'
 import { Prismo } from '../../components/brand/Brand'
 import { AppIcon, type AppIconName } from '../../components/brand/AppIcon'
+import { rewardUrl } from '../../components/Stickers'
 import { EmptyState, PageHeader } from '../../components/ui'
 
 /** Maps server routes (shared with the mobile app) to web pages. */
@@ -97,7 +98,8 @@ export default function NotificationsPage() {
               <li key={n.id} className={`flex flex-col sm:flex-row gap-2 sm:gap-3 rounded-xl p-3 transition-colors hover:bg-slate-50 ${n.read ? '' : 'bg-brand-50/70'}`}>
                 <button type="button" onClick={() => open(n)} className="flex gap-3 flex-1 min-w-0 text-left cursor-pointer">
                   <span className="mt-0.5 h-10 w-10 shrink-0 rounded-full grid place-items-center bg-slate-100">
-                    <AppIcon name={KIND_ICON[n.kind] ?? 'bell'} size={26} />
+                    {rewardUrl(n.image) ? <img src={rewardUrl(n.image)!} alt="" width={34} height={34} />
+                      : <AppIcon name={KIND_ICON[n.kind] ?? 'bell'} size={26} />}
                   </span>
                   <span className="flex-1 min-w-0">
                     <span className={`block ${n.read ? 'font-medium text-slate-700' : 'font-bold text-slate-800'}`}>{n.title}</span>

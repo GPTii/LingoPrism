@@ -62,8 +62,8 @@ def test_quests_claim_and_monthly(user):
     services.progress_quest(user, DailyQuest.Kind.SAVE_WORDS, 5)
     q = DailyQuest.objects.get(user=user, kind=DailyQuest.Kind.SAVE_WORDS)
     assert q.completed
-    assert services.claim_quest(user, q) == 15
-    assert services.claim_quest(user, q) == 0
+    assert services.claim_quest(user, q) == (15, 0)
+    assert services.claim_quest(user, q) == (0, 0)
     user.refresh_from_db()
     assert user.scales_balance == 15
     assert services.monthly_for(user).completed_count == 1
@@ -160,3 +160,106 @@ def test_friends_leaderboard_is_this_weeks_xp_of_people_you_follow(user):
     c.force_authenticate(user)
     rows = c.get("/api/v1/leaderboard/", {"scope": "friends"}).data["members"]
     assert [(r["display_name"], r["xp"], r["is_me"]) for r in rows] == [("Bạn", 50, False), (user.display_name, 20, True)]
+
+
+def test_badge_gives_gems_once(user):
+    services.award_xp(user, "learn", 120)  # "Tia sáng đầu": 100 XP → 1 gem
+    user.refresh_from_db()
+    assert user.gems_balance == 1
+    assert Notification.objects.filter(user=user, kind="achievement", title__contains="Tia sáng đầu").count() == 1
+    services.check_badges(user)
+    user.refresh_from_db()
+    assert user.gems_balance == 1
+
+
+def test_last_quest_of_the_day_gives_a_gem(user):
+    for q in services.ensure_quests(user):
+        services.progress_quest(user, q.kind, absolute=q.target)
+    quests = list(DailyQuest.objects.filter(user=user))
+    gems = [services.claim_quest(user, q)[1] for q in quests]
+    assert gems == [0] * (len(quests) - 1) + [1]
+    assert services.stats_for(user).quests_done == len(quests)
+
+
+def test_sticker_pack_unlocks_its_stickers(user):
+    client = APIClient()
+    client.force_authenticate(user)
+    assert client.get("/api/v1/shop/items/stickers/").data == []
+    pack = Item.objects.get(code="pack_feelings")
+    shop = {i["code"]: i for i in client.get("/api/v1/shop/items/").data}
+    assert [s["code"] for s in shop["pack_feelings"]["stickers"]][:2] == ["sticker_love", "sticker_sad"]
+    assert "sticker_ok" not in shop  # the single stickers sold before are no longer on sale
+    User.objects.filter(pk=user.pk).update(gems_balance=2)
+    assert client.post(f"/api/v1/shop/items/{pack.id}/buy/").status_code == 200
+    mine = [s["code"] for s in client.get("/api/v1/shop/items/stickers/").data]
+    assert len(mine) == 6 and services.owns_sticker(user, "haha") and not services.owns_sticker(user, "hello")
+    User.objects.filter(pk=user.pk).update(gems_balance=5)
+    assert client.post(f"/api/v1/shop/items/{pack.id}/buy/").data["detail"] == "Bạn đã có gói sticker này"
+
+
+def test_legacy_sticker_owner_gets_the_pack(user):
+    from apps.gamification.models import Badge
+    from apps.gamification.sync import sync_catalog
+
+    legacy = Item.objects.create(code="sticker_ok", name="Sticker OK", description="", image="", effect="sticker", cost_gems=2)
+    UserInventory.objects.create(user=user, item=legacy, quantity=1)
+    sync_catalog(Item, Badge, UserInventory)
+    assert services.owns_sticker(user, "great") and not Item.objects.get(code="sticker_ok").active
+
+
+def test_gem_exchange_and_streak_repair(user):
+    client = APIClient()
+    client.force_authenticate(user)
+    exchange = Item.objects.get(code="gem_exchange")
+    User.objects.filter(pk=user.pk).update(scales_balance=600)
+    res = client.post(f"/api/v1/shop/items/{exchange.id}/buy/")
+    assert res.status_code == 200 and res.data["gems"] == 1 and res.data["scales"] == 100
+
+    repair = Item.objects.get(code="streak_repair")
+    User.objects.filter(pk=user.pk).update(gems_balance=10)
+    assert client.post(f"/api/v1/shop/items/{repair.id}/buy/").data["detail"] == "Chuỗi của bạn vẫn còn, không cần hồi"
+    day = services.today()
+    for i in range(10, 4, -1):  # a 6-day streak that ended 5 days ago…
+        services.mark_activity(user, day - timedelta(days=i))
+    services.mark_activity(user, day - timedelta(days=1))  # …and a new one started yesterday
+    stats = services.stats_for(user)
+    assert stats.current_streak == 1 and stats.lost_streak == 6
+    assert client.get("/api/v1/gamification/summary/").data["repairable_streak"] == 6
+    res = client.post(f"/api/v1/shop/items/{repair.id}/buy/")
+    # 10 + 1 ("Khởi động", 3 days) − 5 for the repair; then the 7-day streak earns "Một tuần kiên trì" (+2)
+    assert res.status_code == 200 and res.data["gems"] == 8
+    assert services.stats_for(user).current_streak == 7
+    assert client.get("/api/v1/gamification/summary/").data["repairable_streak"] == 0
+
+
+def test_streak_repair_before_learning_again(user):
+    day = services.today()
+    for i in range(6, 2, -1):  # 4 days, then 2 days missed
+        services.mark_activity(user, day - timedelta(days=i))
+    assert services.repairable_streak(user) == 4
+    User.objects.filter(pk=user.pk).update(gems_balance=5)
+    services.purchase(user, Item.objects.get(code="streak_repair"))
+    services.mark_activity(user, day)
+    assert services.stats_for(user).current_streak == 5
+
+
+def test_promotion_gives_gems_and_league_badge(user):
+    other = User.objects.create_user("o2@example.com", "Strong!Pass123")
+    services.award_xp(user, "learn", 50)
+    services.award_xp(other, "learn", 20)
+    services.close_cycle(LeagueCycle.objects.get())
+    user.refresh_from_db()
+    stats = services.stats_for(user)
+    assert stats.best_league == 2
+    # 5 gems for 1st place + 1 for the "Lên hạng Ánh Đồng" badge (the 50 XP give no badge yet)
+    assert user.gems_balance == 6
+
+
+def test_kids_do_not_see_community_badges(user):
+    client = APIClient()
+    client.force_authenticate(user)
+    adult = {b["condition"] for b in client.get("/api/v1/badges/").data}
+    user.learner_type = "kid"
+    user.save()
+    kid = {b["condition"] for b in client.get("/api/v1/badges/").data}
+    assert "friends" in adult and "friends" not in kid and "streak" in kid

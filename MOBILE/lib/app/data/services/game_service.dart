@@ -50,7 +50,7 @@ class GameService extends GetxService {
     } catch (_) {}
   }
 
-  Future<int> claimQuest(DailyQuest quest) async {
+  Future<(int, int)> claimQuest(DailyQuest quest) async {
     final gained = await GameRepository.claimQuest(quest.id);
     await Future.wait([refreshQuests(), refreshSummary()]);
     return gained;

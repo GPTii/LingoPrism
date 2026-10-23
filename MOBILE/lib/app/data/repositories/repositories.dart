@@ -173,7 +173,11 @@ class GameRepository {
     return (asMapList(d['quests']).map(DailyQuest.fromJson).toList(), MonthlyQuest.fromJson(asMap(d['monthly'])));
   }
 
-  static Future<int> claimQuest(int id) async => asInt(asMap(await _api.post('/quests/$id/claim/'))['scales']);
+  /// (scales, gems): a gem comes with the last of the day's quests.
+  static Future<(int, int)> claimQuest(int id) async {
+    final r = asMap(await _api.post('/quests/$id/claim/'));
+    return (asInt(r['scales']), asInt(r['gems']));
+  }
   static Future<int> claimMonthly() async => asInt(asMap(await _api.post('/quests/monthly/claim/'))['gems']);
 
   static Future<List<BadgeInfo>> badges({int? userId}) async =>
@@ -185,6 +189,10 @@ class GameRepository {
   static Future<List<ShopItem>> shop() async => asMapList(await _api.get('/shop/items/')).map(ShopItem.fromJson).toList();
   static Future<Map<String, dynamic>> buy(int itemId) async => asMap(await _api.post('/shop/items/$itemId/buy/'));
   static Future<Map<String, dynamic>> use(int itemId) async => asMap(await _api.post('/shop/items/$itemId/use/'));
+
+  /// The stickers I can send (from the packs I own).
+  static Future<List<StickerInfo>> stickers() async =>
+      asMapList(await _api.get('/shop/items/stickers/')).map(StickerInfo.fromJson).toList();
 
   static Future<Map<String, dynamic>> userStats(int userId) async => asMap(await _api.get('/users/$userId/stats/'));
 }

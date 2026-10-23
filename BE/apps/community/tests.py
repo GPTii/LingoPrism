@@ -189,7 +189,8 @@ def test_friend_request_notify_accept_then_message(users):
     assert ca.post(f"/api/v1/community/users/friend-requests/{rid}/accept/").status_code == 404
     assert cb.post(f"/api/v1/community/users/friend-requests/{rid}/accept/").data["friend_status"] == "friends"
     assert a.notifications.filter(kind="friend_accept").count() == 1
-    assert cb.get("/api/v1/notifications/").data["results"][0]["action_state"] == "accepted"
+    asked = [n for n in cb.get("/api/v1/notifications/").data["results"] if n["kind"] == "friend_request"]
+    assert asked[0]["action_state"] == "accepted"
     assert [f["id"] for f in ca.get("/api/v1/community/users/friends/").data] == [b.id]
     assert ca.get(f"/api/v1/community/users/{b.id}/profile/").data["can_message"] is True  # friends may message
     # unfriend

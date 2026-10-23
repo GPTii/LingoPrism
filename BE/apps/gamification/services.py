@@ -10,12 +10,14 @@ from apps.core import brand
 from apps.notifications.models import Notification
 from apps.notifications.services import notify, push_event
 
+from . import catalog
 from .models import (
     ActiveBoost, Badge, DailyProgress, DailyQuest, Item, LeagueCycle, LeagueMember, LeagueTier, MonthlyQuest,
     UserBadge, UserInventory, UserStats, XpTransaction,
 )
 
 DAILY_XP_CAP = 500
+LEAGUE_PROMOTION_GEMS = {1: 5, 2: 3, 3: 2}  # anyone else promoted: 1
 XP_MILESTONES = [100, 500, 1000, 2500, 5000, 10000, 25000, 50000]
 LEAGUE_GROUP_SIZE = 30
 
@@ -65,12 +67,47 @@ def mark_activity(user, day: date | None = None) -> UserStats:
         notify(user, Notification.Kind.SYSTEM, "Đá băng đã giữ chuỗi streak của bạn! 🧊",
                f"Chuỗi hiện tại: {stats.current_streak} ngày.", image=brand.STREAK_FREEZE)
     else:
+        if last is not None and stats.current_streak > 1:  # kept for a few days: "Hồi chuỗi" can join it back
+            stats.lost_streak, stats.lost_streak_on = stats.current_streak, day
         stats.current_streak = 1
     stats.longest_streak = max(stats.longest_streak, stats.current_streak)
     stats.last_active_date = day
     stats.save()
     check_badges(user, stats)
     return stats
+
+
+REPAIR_DAYS = 3  # a lost streak can be repaired for this many days
+
+
+def repairable_streak(user, stats: UserStats | None = None) -> int:
+    """Days of streak that "Hồi chuỗi" would give back now (0 = nothing to repair)."""
+    stats = stats or stats_for(user)
+    t = today()
+    if stats.last_active_date and stats.current_streak > 0:
+        gap = (t - stats.last_active_date).days
+        frozen = gap == 2 and has_item(user, Item.Effect.STREAK_FREEZE)
+        if 2 <= gap <= REPAIR_DAYS + 1 and not frozen:  # broken, not started again yet
+            return stats.current_streak
+    if stats.lost_streak and stats.lost_streak_on and (t - stats.lost_streak_on).days < REPAIR_DAYS:
+        return stats.lost_streak  # broken, and a new streak already started
+    return 0
+
+
+def _repair_streak(user) -> int:
+    stats = UserStats.objects.select_for_update().get_or_create(user=user)[0]
+    days = repairable_streak(user, stats)
+    if not days:
+        raise ShopError("Chuỗi của bạn vẫn còn, không cần hồi")
+    t = today()
+    if stats.last_active_date and (t - stats.last_active_date).days >= 2:
+        stats.last_active_date = t - timedelta(days=1)  # learning today carries the old streak on
+    else:
+        stats.current_streak += stats.lost_streak
+    stats.lost_streak, stats.lost_streak_on = 0, None
+    stats.longest_streak = max(stats.longest_streak, stats.current_streak)
+    stats.save()
+    return days
 
 
 def current_streak(user) -> int:
@@ -124,22 +161,43 @@ def award_xp(user, source: str, base: int, source_id: str = "", note: str = "") 
 
 # ------------------------------------------------------------------ badges
 
-def check_badges(user, stats: UserStats | None = None):
-    stats = stats or stats_for(user)
-    values = {
+def badge_values(stats: UserStats) -> dict:
+    return {
         Badge.Condition.XP: stats.lifetime_xp,
         Badge.Condition.STREAK: stats.current_streak,
         Badge.Condition.WORDS_LEARNED: stats.words_learned,
         Badge.Condition.WORDS_MASTERED: stats.words_mastered,
         Badge.Condition.DETECTIONS: stats.detections,
         Badge.Condition.POSTS: stats.posts,
+        Badge.Condition.CHEERS: stats.cheers,
+        Badge.Condition.FRIENDS: stats.friends,
+        Badge.Condition.QUESTS: stats.quests_done,
+        Badge.Condition.SESSIONS: stats.sessions,
+        Badge.Condition.PERFECT: stats.perfect_sessions,
+        Badge.Condition.EARLY_BIRD: stats.early_bird,
+        Badge.Condition.NIGHT_OWL: stats.night_owl,
+        Badge.Condition.LEAGUE: stats.best_league,
     }
+
+
+def check_badges(user, stats: UserStats | None = None):
+    """Award every badge now reached, with its gems."""
+    stats = stats or stats_for(user)
+    values = badge_values(stats)
     owned = set(UserBadge.objects.filter(user=user).values_list("badge_id", flat=True))
     for badge in Badge.objects.exclude(id__in=owned):
-        if values.get(badge.condition, 0) >= badge.threshold:
-            UserBadge.objects.get_or_create(user=user, badge=badge)
-            notify(user, Notification.Kind.ACHIEVEMENT, "Bạn vừa nhận được thành tựu mới",
-                   f"{badge.name}: {badge.description}", image=badge.icon, data={"route": "/profile", "badge": badge.code})
+        if values.get(badge.condition, 0) < badge.threshold:
+            continue
+        _, created = UserBadge.objects.get_or_create(user=user, badge=badge)
+        if not created:
+            continue
+        if badge.reward_gems:
+            type(user).objects.filter(pk=user.pk).update(gems_balance=F("gems_balance") + badge.reward_gems)
+        gems = f" Thưởng {badge.reward_gems} ngọc!" if badge.reward_gems else ""
+        notify(user, Notification.Kind.ACHIEVEMENT, f"Huy hiệu mới: {badge.name}",
+               f"{badge.description}.{gems}", image=badge.icon,
+               data={"route": "/achievements", "badge": badge.code, "gems": badge.reward_gems})
+        push_event(user.id, "badge", {"code": badge.code, "name": badge.name, "gems": badge.reward_gems, "icon": badge.icon})
 
 
 def bump_stat(user, field: str, by: int = 1):
@@ -186,17 +244,24 @@ def progress_quest(user, kind: str, amount: int = 1, absolute: int | None = None
         MonthlyQuest.objects.filter(pk=monthly.pk).update(completed_count=F("completed_count") + 1)
         push_event(user.id, "quest_completed", {"kind": kind})
     quest.save()
+    if quest.completed:
+        bump_stat(user, "quests_done")
 
 
 @transaction.atomic
-def claim_quest(user, quest: DailyQuest) -> int:
+def claim_quest(user, quest: DailyQuest) -> tuple[int, int]:
+    """(scales, gems): the quest's scales, plus a gem when it was the last of the day's quests to be claimed."""
     quest = DailyQuest.objects.select_for_update().get(pk=quest.pk)
     if not quest.completed or quest.reward_claimed:
-        return 0
+        return 0, 0
     quest.reward_claimed = True
     quest.save(update_fields=["reward_claimed"])
-    type(user).objects.filter(pk=user.pk).update(scales_balance=F("scales_balance") + DailyQuest.REWARD_SCALES)
-    return DailyQuest.REWARD_SCALES
+    gems = 0
+    if not DailyQuest.objects.filter(user=user, date=quest.date, reward_claimed=False).exists():
+        gems = DailyQuest.ALL_DONE_GEMS
+    type(user).objects.filter(pk=user.pk).update(scales_balance=F("scales_balance") + DailyQuest.REWARD_SCALES,
+                                                 gems_balance=F("gems_balance") + gems)
+    return DailyQuest.REWARD_SCALES, gems
 
 
 @transaction.atomic
@@ -259,6 +324,7 @@ def close_cycle(cycle: LeagueCycle):
     is_bottom = cycle.tier_id == tiers[0].id
     members = list(cycle.members.select_related("user").order_by("-weekly_xp", "id"))
     n = len(members)
+    next_place = min(next(i for i, t in enumerate(tiers) if t.id == cycle.tier_id) + 2, len(tiers))  # 1-based
     for rank, m in enumerate(members, start=1):
         m.rank = rank
         if rank <= cycle.tier.promote_top and m.weekly_xp > 0 and not is_top:
@@ -269,7 +335,15 @@ def close_cycle(cycle: LeagueCycle):
             m.result = "stayed"
         m.save(update_fields=["rank", "result"])
         if m.result == "promoted":
-            notify(m.user, Notification.Kind.LEAGUE, "Bạn vừa thăng hạng mới!", f"Hạng {rank} tuần qua tại {cycle.tier.name}.",
+            gems = LEAGUE_PROMOTION_GEMS.get(rank, 1)
+            type(m.user).objects.filter(pk=m.user_id).update(gems_balance=F("gems_balance") + gems)
+            stats = stats_for(m.user)
+            if next_place > stats.best_league:
+                stats.best_league = next_place
+                stats.save(update_fields=["best_league"])
+                check_badges(m.user, stats)
+            notify(m.user, Notification.Kind.LEAGUE, "Bạn vừa thăng hạng mới!",
+                   f"Hạng {rank} tuần qua tại {cycle.tier.name}. Thưởng {gems} ngọc!",
                    data={"route": "/community/leaderboard"})
     cycle.status = LeagueCycle.Status.CLOSED
     cycle.save(update_fields=["status"])
@@ -311,12 +385,23 @@ def purchase(user, item: Item) -> UserInventory:
     else:
         raise ShopError("Vật phẩm không bán")
     if item.effect == Item.Effect.STICKER and UserInventory.objects.filter(user=u, item=item, quantity__gt=0).exists():
-        raise ShopError("Bạn đã có sticker này")
+        raise ShopError("Bạn đã có gói sticker này")
+    if item.effect == Item.Effect.STREAK_REPAIR:
+        _repair_streak(u)  # raises before anything is paid when there is nothing to repair
+    if item.effect == Item.Effect.GEM_EXCHANGE:
+        u.gems_balance += 1
     u.save(update_fields=["scales_balance", "gems_balance"])
     inv, _ = UserInventory.objects.get_or_create(user=u, item=item)
     inv.quantity += 1
-    inv.save(update_fields=["quantity", "updated_at"])
+    if item.effect in INSTANT:
+        inv.last_used_at = timezone.now()
+    inv.save(update_fields=["quantity", "last_used_at", "updated_at"])
+    if item.effect == Item.Effect.STREAK_REPAIR:
+        check_badges(u)  # the streak badges the repaired streak reaches
     return inv
+
+
+INSTANT = {Item.Effect.STREAK_REPAIR, Item.Effect.GEM_EXCHANGE}  # used up the moment they are bought
 
 
 BOOSTS = {
@@ -336,5 +421,13 @@ def use_item(user, item: Item) -> ActiveBoost:
     return ActiveBoost.objects.create(user=user, item=item, multiplier=multiplier, started_at=now, expires_at=now + duration)
 
 
+def owned_stickers(user) -> list[str]:
+    """Sticker codes the user can send: every sticker of the packs they own (and the single stickers sold before)."""
+    owned = set(UserInventory.objects.filter(user=user, item__effect=Item.Effect.STICKER, quantity__gt=0)
+                .values_list("item__code", flat=True))
+    codes = [code for p in catalog.STICKER_PACKS if p["code"] in owned for code, _ in p["stickers"]]
+    return codes + [c for c in catalog.LEGACY_STICKERS if c in owned and c not in codes]
+
+
 def owns_sticker(user, code: str) -> bool:
-    return UserInventory.objects.filter(user=user, item__code=code, item__effect=Item.Effect.STICKER, quantity__gt=0).exists()
+    return code in owned_stickers(user)

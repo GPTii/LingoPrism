@@ -71,7 +71,8 @@ class DirectThread(models.Model):
 class DirectMessage(models.Model):
     thread = models.ForeignKey(DirectThread, on_delete=models.CASCADE, related_name="messages")
     sender = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    content = models.CharField(max_length=1000)
+    content = models.CharField(max_length=1000, blank=True)
+    sticker = models.CharField(max_length=40, blank=True, help_text="Mã sticker (thay cho nội dung chữ)")
     client_id = models.CharField(max_length=40, blank=True)
     read_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(default=timezone.now, db_index=True)

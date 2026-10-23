@@ -13,6 +13,7 @@ import { useAuth } from '../../auth/store'
 import { langTag } from '../../components/TargetWord'
 import { Prismo } from '../../components/brand/Brand'
 import { EmptyState, PageHeader, UserAvatar } from '../../components/ui'
+import { StickerImage, StickerPicker } from '../../components/Stickers'
 
 dayjs.extend(relativeTime)
 dayjs.locale('vi')
@@ -75,11 +76,14 @@ export function PostCard({ post, commentsOpen = false }: { post: Post; commentsO
       message.error(errorMessage(e))
     }
   }
-  const send = async () => {
-    if (!text.trim()) return
+  const send = async (sticker?: string) => {
+    if (!sticker && !text.trim()) return
     try {
-      await communityApi.comment(post.id, text)
-      setText('')
+      if (sticker) await communityApi.commentSticker(post.id, sticker)
+      else {
+        await communityApi.comment(post.id, text)
+        setText('')
+      }
       setCommentCount((n) => n + 1)
       comments.refetch()
     } catch (e) {
@@ -162,7 +166,7 @@ export function PostCard({ post, commentsOpen = false }: { post: Post; commentsO
                 <Link to={`/community/users/${c.author.id}`}><UserAvatar name={c.author.display_name} src={c.author.avatar} size={26} /></Link>
                 <div className="flex-1 min-w-0">
                   <Link to={`/community/users/${c.author.id}`} className="font-semibold !text-slate-800">{c.author.display_name}</Link>{' '}
-                  <span className="text-slate-700 break-words">{c.kind === 'sticker' ? `[sticker ${c.sticker}]` : c.content}</span>
+                  {c.kind === 'sticker' ? <StickerImage code={c.sticker} size={88} /> : <span className="text-slate-700 break-words">{c.content}</span>}
                   <span className="block text-xs text-slate-500 mt-0.5">
                     {dayjs(c.created_at).fromNow()}
                     {c.can_delete && <button type="button" className="ml-3 cursor-pointer font-semibold text-slate-500 hover:text-red-600" onClick={() => removeComment(c.id)}>Xoá</button>}
@@ -170,7 +174,10 @@ export function PostCard({ post, commentsOpen = false }: { post: Post; commentsO
                 </div>
               </div>
             ))}
-            <Input.Search placeholder="Viết bình luận…" enterButton="Gửi" value={text} onChange={(e) => setText(e.target.value)} onSearch={send} />
+            <div className="flex gap-2">
+              <Input.Search placeholder="Viết bình luận…" enterButton="Gửi" value={text} onChange={(e) => setText(e.target.value)} onSearch={() => send()} />
+              <StickerPicker onPick={(code) => send(code)} />
+            </div>
           </div>
         )}
       </div>

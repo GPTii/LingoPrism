@@ -127,7 +127,8 @@ def _person(request, user):
 
 
 class SendDirectSerializer(serializers.Serializer):
-    content = serializers.CharField(max_length=1000)
+    content = serializers.CharField(required=False, allow_blank=True, max_length=1000)
+    sticker = serializers.CharField(required=False, allow_blank=True, max_length=40)
     client_id = serializers.CharField(required=False, allow_blank=True, max_length=40)
 
 
@@ -192,8 +193,9 @@ class DirectThreadViewSet(ActionThrottleMixin, mixins.ListModelMixin, mixins.Ret
         ser = SendDirectSerializer(data=request.data)
         ser.is_valid(raise_exception=True)
         try:
-            m = services.send_direct_message(request.user, thread, ser.validated_data["content"],
-                                             ser.validated_data.get("client_id", ""))
+            d = ser.validated_data
+            m = services.send_direct_message(request.user, thread, d.get("content", ""), d.get("client_id", ""),
+                                             d.get("sticker", ""))
         except services.ChatError as e:
             return Response({"detail": str(e), "errors": {}}, status=400)
         return Response(services.direct_message_payload(m), status=201)

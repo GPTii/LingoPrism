@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import '../../core/network/api_client.dart';
 import '../../core/network/ws_client.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/widgets/sticker_picker.dart';
 import '../../data/models/api/common.dart';
 import '../../data/services/auth_service.dart';
 import '../../data/services/realtime_service.dart';
@@ -17,12 +18,15 @@ import '../community/views/report_user_sheet.dart';
 /// Children's accounts never see this. New messages arrive on the user's /ws/events/ socket (RealtimeService).
 
 class DirectMessage {
-  DirectMessage({required this.id, required this.sender, required this.content, this.clientId = '', this.readAt,
-      required this.createdAt, this.pending = false});
+  DirectMessage({required this.id, required this.sender, required this.content, this.sticker = '', this.clientId = '',
+      this.readAt, required this.createdAt, this.pending = false});
 
   final int id;
   final int sender;
   final String content;
+
+  /// a sticker code instead of text
+  final String sticker;
   final String clientId;
   final DateTime? readAt;
   final DateTime createdAt;
@@ -32,13 +36,17 @@ class DirectMessage {
         id: asInt(j['id']),
         sender: asInt(j['sender']),
         content: asString(j['content']),
+        sticker: asString(j['sticker']),
         clientId: asString(j['client_id']),
         readAt: DateTime.tryParse(asString(j['read_at'])),
         createdAt: DateTime.tryParse(asString(j['created_at']))?.toLocal() ?? DateTime.now(),
       );
 
-  DirectMessage seen() => DirectMessage(id: id, sender: sender, content: content, clientId: clientId,
+  DirectMessage seen() => DirectMessage(id: id, sender: sender, content: content, sticker: sticker, clientId: clientId,
       readAt: readAt ?? DateTime.now(), createdAt: createdAt);
+
+  /// one line for the list of conversations
+  String get preview => sticker.isNotEmpty ? 'Sticker' : content;
 }
 
 class DirectThread {
@@ -72,8 +80,9 @@ class MessagesRepository {
     return (asMapList(d['results']).map(DirectMessage.fromJson).toList(), d['has_more'] == true);
   }
 
-  static Future<DirectMessage> send(int id, String content, String clientId) async => DirectMessage.fromJson(
-      asMap(await _api.post('/messages/threads/$id/messages/', data: {'content': content, 'client_id': clientId})));
+  static Future<DirectMessage> send(int id, String content, String clientId, {String sticker = ''}) async =>
+      DirectMessage.fromJson(asMap(await _api.post('/messages/threads/$id/messages/',
+          data: {'content': content, 'sticker': sticker, 'client_id': clientId})));
   static Future<void> read(int id) => _api.post('/messages/threads/$id/read/');
 
   /// "Nhắn tin" on a profile: open (or create) the conversation and go there.
@@ -171,7 +180,7 @@ class MessagesView extends GetView<MessagesController> {
                     Text(_when(t.last!.createdAt), style: TextStyle(fontSize: 12.sp, color: AppColors.textSecondary)),
                 ]),
                 subtitle: Row(children: [
-                  Expanded(child: Text(t.last?.content ?? '', maxLines: 1, overflow: TextOverflow.ellipsis,
+                  Expanded(child: Text(t.last?.preview ?? '', maxLines: 1, overflow: TextOverflow.ellipsis,
                       style: TextStyle(color: bold ? AppColors.textPrimary : AppColors.textSecondary))),
                   if (bold)
                     Container(
@@ -252,20 +261,22 @@ class DirectChatController extends GetxController {
     if (m.sender != me) MessagesRepository.read(threadId).catchError((_) {});
   }
 
-  Future<void> send() async {
-    final text = input.text.trim();
-    if (text.isEmpty) return;
-    input.clear();
+  /// The typed text, or a sticker when one is given.
+  Future<void> send({String sticker = ''}) async {
+    final text = sticker.isEmpty ? input.text.trim() : '';
+    if (text.isEmpty && sticker.isEmpty) return;
+    if (sticker.isEmpty) input.clear();
     final clientId = '$me-${DateTime.now().millisecondsSinceEpoch}';
-    messages.add(DirectMessage(id: 0, sender: me, content: text, clientId: clientId, createdAt: DateTime.now(), pending: true));
+    messages.add(DirectMessage(id: 0, sender: me, content: text, sticker: sticker, clientId: clientId,
+        createdAt: DateTime.now(), pending: true));
     _toBottom();
     try {
-      final m = await MessagesRepository.send(threadId, text, clientId);
+      final m = await MessagesRepository.send(threadId, text, clientId, sticker: sticker);
       final i = messages.indexWhere((x) => x.clientId == clientId);
       if (i >= 0) messages[i] = m;
     } catch (e) {
       messages.removeWhere((x) => x.clientId == clientId && x.pending);
-      input.text = text;
+      if (sticker.isEmpty) input.text = text;
       Get.snackbar('Không gửi được', ApiClient.toApiException(e).message, snackPosition: SnackPosition.BOTTOM);
     }
   }
@@ -346,16 +357,19 @@ class DirectChatView extends GetView<DirectChatController> {
                 return Column(
                   crossAxisAlignment: mine ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      margin: EdgeInsets.only(top: 6.h),
-                      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-                      constraints: BoxConstraints(maxWidth: 0.75.sw),
-                      decoration: BoxDecoration(
-                        color: mine ? AppColors.buttonActive : AppColors.surface,
-                        borderRadius: BorderRadius.circular(16.r),
+                    if (m.sticker.isNotEmpty)
+                      Padding(padding: EdgeInsets.only(top: 6.h), child: StickerImage(code: m.sticker, size: 120))
+                    else
+                      Container(
+                        margin: EdgeInsets.only(top: 6.h),
+                        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                        constraints: BoxConstraints(maxWidth: 0.75.sw),
+                        decoration: BoxDecoration(
+                          color: mine ? AppColors.buttonActive : AppColors.surface,
+                          borderRadius: BorderRadius.circular(16.r),
+                        ),
+                        child: Text(m.content, style: TextStyle(color: mine ? Colors.white : AppColors.textPrimary, fontSize: 15.sp)),
                       ),
-                      child: Text(m.content, style: TextStyle(color: mine ? Colors.white : AppColors.textPrimary, fontSize: 15.sp)),
-                    ),
                     if (i == lastMine)
                       Padding(
                         padding: EdgeInsets.only(top: 2.h),
@@ -383,6 +397,7 @@ class DirectChatView extends GetView<DirectChatController> {
             child: Padding(
               padding: EdgeInsets.fromLTRB(12.w, 4.h, 12.w, 8.h),
               child: Row(children: [
+                StickerButton(onPick: (code) => controller.send(sticker: code)),
                 Expanded(
                   child: TextField(
                     controller: controller.input,
@@ -401,7 +416,7 @@ class DirectChatView extends GetView<DirectChatController> {
                   ),
                 ),
                 IconButton(
-                    tooltip: 'Gửi', icon: Icon(Icons.send_rounded, color: AppColors.buttonActive), onPressed: controller.send),
+                    tooltip: 'Gửi', icon: Icon(Icons.send_rounded, color: AppColors.buttonActive), onPressed: () => controller.send()),
               ]),
             ),
           );

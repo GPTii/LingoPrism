@@ -108,6 +108,9 @@ flutter:
     - assets/brand/icons/
     - assets/brand/rank/
     - assets/brand/group/
+    - assets/rewards/stickers/
+    - assets/rewards/badges/
+    - assets/rewards/items/
     - assets/icons/
     - assets/icons/ui/
     - assets/ml_models/

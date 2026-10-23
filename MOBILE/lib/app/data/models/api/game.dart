@@ -9,6 +9,7 @@ class GameSummary {
     this.dailyXpCap = 500,
     this.streak = 0,
     this.longestStreak = 0,
+    this.repairableStreak = 0,
     this.studiedToday = false,
     this.scales = 0,
     this.gems = 0,
@@ -31,6 +32,9 @@ class GameSummary {
   final int dailyXpCap;
   final int streak;
   final int longestStreak;
+
+  /// days "Hồi chuỗi" would give back now (0 = nothing to repair)
+  final int repairableStreak;
   final bool studiedToday;
   final int scales;
   final int gems;
@@ -56,6 +60,7 @@ class GameSummary {
       dailyXpCap: asInt(j['daily_xp_cap'], 500),
       streak: asInt(j['streak']),
       longestStreak: asInt(j['longest_streak']),
+      repairableStreak: asInt(j['repairable_streak']),
       studiedToday: j['studied_today'] == true,
       scales: asInt(j['scales']),
       gems: asInt(j['gems']),
@@ -130,7 +135,7 @@ class DailyQuest {
 }
 
 class MonthlyQuest {
-  MonthlyQuest({required this.month, this.completedCount = 0, this.target = 20, this.rewardGems = 2, this.rewardClaimed = false});
+  MonthlyQuest({required this.month, this.completedCount = 0, this.target = 20, this.rewardGems = 5, this.rewardClaimed = false});
 
   final String month;
   final int completedCount;
@@ -144,18 +149,22 @@ class MonthlyQuest {
         month: asString(j['month']),
         completedCount: asInt(j['completed_count']),
         target: asInt(j['target'], 20),
-        rewardGems: asInt(j['reward_gems'], 2),
+        rewardGems: asInt(j['reward_gems'], 5),
         rewardClaimed: j['reward_claimed'] == true,
       );
 }
 
 class BadgeInfo {
-  BadgeInfo({required this.code, required this.name, this.description = '', this.icon = '', this.owned = false, this.awardedAt});
+  BadgeInfo({required this.code, required this.name, this.description = '', this.icon = '', this.rewardGems = 0,
+      this.owned = false, this.awardedAt});
 
   final String code;
   final String name;
   final String description;
   final String icon;
+
+  /// gems given when the badge is earned
+  final int rewardGems;
   final bool owned;
   final DateTime? awardedAt;
 
@@ -164,10 +173,25 @@ class BadgeInfo {
         name: asString(j['name']),
         description: asString(j['description']),
         icon: brandAsset(asString(j['icon'])),
+        rewardGems: asInt(j['reward_gems']),
         owned: j['owned'] == true,
         awardedAt: parseDate(j['awarded_at']),
       );
 }
+
+/// A sticker from a sticker pack: drawn in assets/rewards/stickers/<code>.png
+class StickerInfo {
+  const StickerInfo({required this.code, this.caption = ''});
+
+  final String code;
+  final String caption;
+
+  String get asset => stickerAsset(code);
+
+  factory StickerInfo.fromJson(Map<String, dynamic> j) => StickerInfo(code: asString(j['code']), caption: asString(j['caption']));
+}
+
+String stickerAsset(String code) => 'assets/rewards/stickers/$code.png';
 
 class LeaderboardEntry {
   LeaderboardEntry({required this.rank, required this.userId, required this.displayName, this.avatar, this.xp = 0, this.zone = 'safe', this.isMe = false});
@@ -228,7 +252,7 @@ class Leaderboard {
 
 class ShopItem {
   ShopItem({required this.id, required this.code, required this.name, required this.description, required this.image,
-      required this.effect, this.costScales, this.costGems, this.owned = 0});
+      required this.effect, this.costScales, this.costGems, this.owned = 0, this.stickers = const []});
 
   final int id;
   final String code;
@@ -240,10 +264,16 @@ class ShopItem {
   final int? costGems;
   final int owned;
 
+  /// the stickers of a sticker pack (empty for other items)
+  final List<StickerInfo> stickers;
+
   bool get paidWithScales => costScales != null && costScales! > 0;
   int get price => paidWithScales ? costScales! : (costGems ?? 0);
   bool get isBoost => effect == 'xp_double_15m' || effect == 'xp_plus25_24h';
   bool get isSticker => effect == 'sticker';
+
+  /// used up the moment it is bought (Hồi chuỗi, Đổi vảy lấy ngọc)
+  bool get isInstant => effect == 'streak_repair' || effect == 'gem_exchange';
 
   factory ShopItem.fromJson(Map<String, dynamic> j) => ShopItem(
         id: asInt(j['id']),
@@ -255,6 +285,7 @@ class ShopItem {
         costScales: j['cost_scales'] == null ? null : asInt(j['cost_scales']),
         costGems: j['cost_gems'] == null ? null : asInt(j['cost_gems']),
         owned: asInt(j['owned']),
+        stickers: asMapList(j['stickers']).map(StickerInfo.fromJson).toList(),
       );
 }
 

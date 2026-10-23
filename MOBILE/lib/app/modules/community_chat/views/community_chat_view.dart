@@ -32,6 +32,7 @@ import '../controllers/community_chat_controller.dart';
 import '../models/community_chat_models.dart';
 import 'package:lingoprism/app/core/theme/app_colors.dart';
 import 'package:lingoprism/app/core/navigation/back.dart';
+import 'package:lingoprism/app/core/widgets/sticker_picker.dart';
 
 /// Main chat view widget for community group conversations
 ///
@@ -68,7 +69,7 @@ class CommunityChatView extends GetView<CommunityChatController> {
                 () => _buildMessagesList(),
               ),
             ),
-            _ChatInput(onSend: controller.sendMessage),
+            _ChatInput(onSend: controller.sendMessage, onSticker: controller.sendSticker),
           ],
         ),
       ),
@@ -389,9 +390,10 @@ class _ChatBubble extends StatelessWidget {
 /// - Debounced send operations to prevent duplicate messages
 /// - Professional styling with adaptive UI states
 class _ChatInput extends StatefulWidget {
-  const _ChatInput({required this.onSend});
+  const _ChatInput({required this.onSend, required this.onSticker});
 
   final Future<void> Function(String) onSend;
+  final ValueChanged<String> onSticker;
 
   @override
   State<_ChatInput> createState() => _ChatInputState();
@@ -451,8 +453,8 @@ class _StickerImage extends StatelessWidget {
             )
           : Image.asset(
               validPath,
-              width: 64.w,
-              height: 64.w,
+              width: 110.w,
+              height: 115.w,
               fit: BoxFit.contain,
               errorBuilder: (context, error, stackTrace) {
                 debugPrint('Asset sticker load error: $error');
@@ -602,6 +604,7 @@ class _ChatInputState extends State<_ChatInput> {
         color: AppColors.primarySoft,
         child: Row(
           children: [
+            StickerButton(onPick: widget.onSticker),
             Expanded(
               child: Container(
                 decoration: BoxDecoration(

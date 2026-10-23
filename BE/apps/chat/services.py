@@ -154,11 +154,12 @@ def thread_with(user, other):
 
 
 def direct_message_payload(m) -> dict:
-    return {"id": m.id, "thread": m.thread_id, "sender": m.sender_id, "content": m.content, "client_id": m.client_id,
+    return {"id": m.id, "thread": m.thread_id, "sender": m.sender_id, "content": m.content, "sticker": m.sticker,
+            "client_id": m.client_id,
             "read_at": m.read_at.isoformat() if m.read_at else None, "created_at": m.created_at.isoformat()}
 
 
-def send_direct_message(user, thread, content: str, client_id: str = ""):
+def send_direct_message(user, thread, content: str, client_id: str = "", sticker: str = ""):
     from apps.notifications.models import Notification
     from apps.notifications.services import notify, push_event
 
@@ -167,8 +168,10 @@ def send_direct_message(user, thread, content: str, client_id: str = ""):
     other = thread.other(user)
     if not can_message(user, other):
         raise ChatError("Hai bạn cần theo dõi nhau mới nhắn tin được")
-    content = content.strip()
-    if not content:
+    content = "" if sticker else content.strip()
+    if sticker and not owns_sticker(user, sticker):
+        raise ChatError("Bạn chưa sở hữu sticker này")
+    if not content and not sticker:
         raise ChatError("Tin nhắn trống")
     if client_id:
         existing = DirectMessage.objects.filter(thread=thread, sender=user, client_id=client_id).first()
@@ -176,14 +179,14 @@ def send_direct_message(user, thread, content: str, client_id: str = ""):
             return existing
     # one notification per burst: only when the other person has read everything before this message
     first_unread = not DirectMessage.objects.filter(thread=thread, sender=user, read_at__isnull=True).exists()
-    m = DirectMessage.objects.create(thread=thread, sender=user, content=content[:1000], client_id=client_id)
+    m = DirectMessage.objects.create(thread=thread, sender=user, content=content[:1000], sticker=sticker, client_id=client_id)
     thread.last_message_at = m.created_at
     thread.save(update_fields=["last_message_at"])
     payload = direct_message_payload(m)
     for uid in (user.id, other.id):  # the sender's other tabs / devices too
         push_event(uid, "dm", payload)
     if first_unread:
-        notify(other, Notification.Kind.MESSAGE, f"{user.display_name} nhắn tin cho bạn", content[:120],
+        notify(other, Notification.Kind.MESSAGE, f"{user.display_name} nhắn tin cho bạn", content[:120] or "[Sticker]",
                data={"route": f"/messages/{thread.id}"})
     return m
 

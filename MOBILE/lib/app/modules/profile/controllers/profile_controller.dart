@@ -63,7 +63,7 @@ class ProfileController extends GetxController {
         } catch (_) {}
       }
       try {
-        badges.assignAll((await GameRepository.badges()).where((b) => b.owned));
+        badges.assignAll(await GameRepository.badges());
       } catch (_) {}
       summary.value = ProfileSummary(
         displayName: me.displayName.isEmpty ? me.email.split('@').first : me.displayName,

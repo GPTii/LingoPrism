@@ -8,6 +8,7 @@ import { errorMessage } from '../../api/client'
 import { useAuth } from '../../auth/store'
 import { LiveSocket } from '../../lib/ws'
 import { PageHeader, Section, UserAvatar } from '../../components/ui'
+import { StickerImage, StickerPicker } from '../../components/Stickers'
 
 /** Study group: realtime chat (WebSocket) + members ranked by this week's XP. */
 export default function GroupPage() {
@@ -59,6 +60,15 @@ export default function GroupPage() {
     }
   }
 
+  const sendSticker = async (sticker: string) => {
+    const client_id = `${me?.id}-${Date.now()}`
+    setMessages((l) => [...l, { id: -Date.now(), kind: 'sticker', sticker, content: '', client_id, created_at: new Date().toISOString(),
+      user: { id: me!.id, display_name: me!.display_name } }])
+    if (!socket.current?.send({ action: 'send', kind: 'sticker', sticker, client_id })) {
+      try { await communityApi.sendSticker(groupId, sticker, client_id) } catch (e) { message.error(errorMessage(e)) }
+    }
+  }
+
   const leave = async () => {
     await communityApi.leave(groupId)
     queryClient.invalidateQueries({ queryKey: ['groups'] })
@@ -83,16 +93,20 @@ export default function GroupPage() {
               const mine = m.user?.id === me?.id
               return (
                 <div key={m.id} className={`flex ${mine ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`max-w-[75%] rounded-2xl px-3 py-2 ${mine ? 'bg-brand-600 text-white rounded-br-md' : 'bg-slate-100 text-slate-800 rounded-bl-md'}`}>
+                  <div className={m.kind === 'sticker' ? 'max-w-[75%]'
+                    : `max-w-[75%] rounded-2xl px-3 py-2 ${mine ? 'bg-brand-600 text-white rounded-br-md' : 'bg-slate-100 text-slate-800 rounded-bl-md'}`}>
                     {!mine && <div className="text-xs font-semibold text-slate-500">{m.user?.display_name}{m.user && leaderIds.has(m.user.id) && <CrownFilled className="text-amber-500 ml-1" aria-label="trưởng nhóm" />}</div>}
-                    <div>{m.kind === 'sticker' ? `[sticker ${m.sticker}]` : m.content}</div>
+                    {m.kind === 'sticker' && m.sticker ? <StickerImage code={m.sticker} size={112} /> : <div>{m.content}</div>}
                   </div>
                 </div>
               )
             })}
             <div ref={bottom} />
           </div>
-          <Input.Search className="mt-3" placeholder="Nhập tin nhắn…" enterButton="Gửi" aria-label="Tin nhắn" value={text} onChange={(e) => setText(e.target.value)} onSearch={send} />
+          <div className="mt-3 flex gap-2">
+            <Input.Search placeholder="Nhập tin nhắn…" enterButton="Gửi" aria-label="Tin nhắn" value={text} onChange={(e) => setText(e.target.value)} onSearch={send} />
+            <StickerPicker onPick={sendSticker} />
+          </div>
         </Section>
         <div className="flex flex-col gap-4">
           <Section title="XP tuần này" extra={<span className="num text-sm text-slate-500">{active.length} thành viên</span>}>

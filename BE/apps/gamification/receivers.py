@@ -1,6 +1,7 @@
 from django.db.models import F
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils import timezone
 
 from apps.learning.models import PersonalWord
 from apps.learning.signals import session_finished
@@ -31,7 +32,21 @@ def on_session_finished(sender, session, **kwargs):
     mastered = PersonalWord.objects.filter(user=user, status="mastered").count()
     stats = services.stats_for(user)
     stats.words_learned, stats.words_mastered = learned, mastered
-    stats.save(update_fields=["words_learned", "words_mastered"])
+    fields = ["words_learned", "words_mastered"]
+    if session.completed_count:
+        stats.sessions += 1
+        fields.append("sessions")
+        if session.completed_count >= 3 and session.correct_first_try == session.completed_count:
+            stats.perfect_sessions += 1
+            fields.append("perfect_sessions")
+        hour = timezone.localtime(session.ended_at or timezone.now()).hour
+        if hour < 7:
+            stats.early_bird += 1
+            fields.append("early_bird")
+        elif hour >= 22:
+            stats.night_owl += 1
+            fields.append("night_owl")
+    stats.save(update_fields=fields)
     services.check_badges(user, stats)
 
 

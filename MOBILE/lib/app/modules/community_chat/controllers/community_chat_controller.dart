@@ -5,17 +5,11 @@ import 'package:get/get.dart';
 
 import '../../../core/network/api_client.dart';
 import '../../../core/network/ws_client.dart';
+import '../../../data/models/api/game.dart' show stickerAsset;
 import '../../../data/models/api/social.dart';
 import '../../../data/repositories/repositories.dart';
 import '../../../data/services/auth_service.dart';
 import '../models/community_chat_models.dart';
-
-/// Sticker codes (shop items) → artwork shown in the chat.
-const stickerAssets = {
-  'sticker_ok': 'assets/brand/mascot/prismo_ok.png',
-  'sticker_love': 'assets/brand/mascot/prismo_love.png',
-  'sticker_sad': 'assets/brand/mascot/prismo_sad.png',
-};
 
 /// Realtime group chat over WebSocket (`/ws/groups/<id>/`), REST for history and as a fallback.
 class CommunityChatController extends GetxController {
@@ -67,7 +61,7 @@ class CommunityChatController extends GetxController {
   CommunityChatMessage _map(ChatMessage m) {
     final isSticker = m.kind == 'sticker';
     final content = switch (m.kind) {
-      'sticker' => stickerAssets[m.sticker] ?? m.sticker,
+      'sticker' => stickerAsset(m.sticker),
       'badge' => '🏅 ${m.badgeName ?? 'Huy hiệu'}',
       _ => m.content,
     };
@@ -102,7 +96,7 @@ class CommunityChatController extends GetxController {
     final clientId = '${AuthService.to.userId}-${DateTime.now().millisecondsSinceEpoch}-${_clientSeq++}';
     messages.add(CommunityChatMessage(
       senderName: AuthService.to.currentUser?.displayName ?? '',
-      content: kind == 'sticker' ? (stickerAssets[sticker] ?? sticker) : content,
+      content: kind == 'sticker' ? stickerAsset(sticker) : content,
       isCurrentUser: true,
       isLeader: _leaderIds.contains(AuthService.to.userId),
       isSticker: kind == 'sticker',
@@ -120,6 +114,8 @@ class CommunityChatController extends GetxController {
       }
     }
   }
+
+  Future<void> sendSticker(String code) => sendMessage('', kind: 'sticker', sticker: code);
 
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {

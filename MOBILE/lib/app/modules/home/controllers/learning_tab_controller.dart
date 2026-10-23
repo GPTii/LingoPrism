@@ -62,8 +62,10 @@ class LearningTabController extends GetxController {
   }
 
   Future<void> claim(DailyQuest quest) async {
-    final gained = await GameService.to.claimQuest(quest);
-    Get.snackbar('Nhận thưởng', '+$gained vảy đã được cộng vào tài khoản của bạn.',
+    final (scales, gems) = await GameService.to.claimQuest(quest);
+    Get.snackbar('Nhận thưởng', gems > 0
+        ? '+$scales vảy và +$gems ngọc vì đã xong hết nhiệm vụ hôm nay!'
+        : '+$scales vảy đã được cộng vào tài khoản của bạn.',
         snackPosition: SnackPosition.BOTTOM, duration: const Duration(seconds: 2));
   }
 

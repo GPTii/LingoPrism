@@ -12,6 +12,7 @@ import '../../../core/utils/streak_asset_resolver.dart';
 import '../../../core/widgets/app_icon.dart';
 import '../../../data/services/auth_service.dart';
 import '../../social/social_module.dart';
+import 'badges_section.dart';
 import 'package:lingoprism/app/core/theme/app_colors.dart';
 
 /// A big tappable tile with a colour icon: Bạn bè, Bài đã lưu.
@@ -107,6 +108,8 @@ class ProfileView extends GetView<ProfileController> {
                     Expanded(child: _ProfileShortcut(icon: 'bookmark', label: 'Bài đã lưu', onTap: () => Get.toNamed(Routes.savedPosts))),
                   ]),
                 ],
+                SizedBox(height: 12.h),
+                BadgesSection(badges: controller.badges.toList()),
                 SizedBox(height: 24.h),
                 ProfileOverviewSection(summary: profileSummary),
                 SizedBox(height: 12.h),

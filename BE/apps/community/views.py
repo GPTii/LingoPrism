@@ -71,9 +71,19 @@ def accept_friend(request, fr):
     fr.status, fr.responded_at = FriendRequest.Status.ACCEPTED, timezone.now()
     fr.save(update_fields=["status", "responded_at"])
     me = request.user
+    count_friends(fr.from_user, fr.to_user)
     notify(fr.from_user, Notification.Kind.FRIEND_ACCEPT, f"{me.display_name} đã đồng ý kết bạn với bạn",
            "Giờ hai bạn có thể nhắn tin cho nhau.", data={"route": f"/community/users/{me.id}", "user_id": me.id})
     return {"friend_status": "friends", "friend_request_id": fr.id}
+
+
+def count_friends(*users):
+    """Keep the friend counter (for the friends badges) in step after a friendship starts or ends."""
+    from apps.gamification.models import UserStats
+
+    for u in users:
+        UserStats.objects.update_or_create(user=u, defaults={"friends": len(friend_ids(u.id))})
+        game.check_badges(u)
 
 
 # ------------------------------------------------------------------ posts
@@ -204,6 +214,7 @@ class PostViewSet(ActionThrottleMixin, mixins.ListModelMixin, mixins.RetrieveMod
         _, created = PostLike.objects.get_or_create(post=post, user=request.user)
         if created:
             game.progress_quest(request.user, DailyQuest.Kind.ENGAGE_COMMUNITY)
+            game.bump_stat(request.user, "cheers")
             if post.user_id != request.user.id:
                 notify(post.user, Notification.Kind.LIKE, f"{request.user.display_name} đã thả tim bài viết của bạn",
                        data={"route": f"/community/posts/{post.id}"})
@@ -219,6 +230,7 @@ class PostViewSet(ActionThrottleMixin, mixins.ListModelMixin, mixins.RetrieveMod
         ser.is_valid(raise_exception=True)
         comment = ser.save(post=post, user=request.user)
         game.progress_quest(request.user, DailyQuest.Kind.ENGAGE_COMMUNITY)
+        game.bump_stat(request.user, "cheers")
         if post.user_id != request.user.id:
             notify(post.user, Notification.Kind.COMMENT, f"{request.user.display_name} đã bình luận bài viết của bạn",
                    comment.content[:120], data={"route": f"/community/posts/{post.id}"})
@@ -364,6 +376,7 @@ class CommunityUserViewSet(ActionThrottleMixin, viewsets.GenericViewSet):
         if request.method == "DELETE":
             if fr:
                 fr.delete()
+                count_friends(me, target)
             return Response({"friend_status": "none"})
         if target.id == me.id or target.learner_type == "kid" or target.role != User.Role.LEARNER:
             return Response({"detail": "Bạn không thể kết bạn với tài khoản này.", "errors": {}}, status=400)

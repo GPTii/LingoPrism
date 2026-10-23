@@ -12,7 +12,7 @@ from rest_framework.views import APIView
 
 from apps.core.permissions import IsStaffRole
 
-from . import services
+from . import catalog, services
 from .models import (
     ActiveBoost, Badge, DailyProgress, DailyQuest, Item, LeagueCycle, LeagueMember, LeagueTier, UserBadge,
     UserInventory, XpTransaction,
@@ -36,6 +36,7 @@ class SummaryView(APIView):
             "lifetime_xp": stats.lifetime_xp, "level": stats.level, "today_xp": progress.xp,
             "daily_xp_cap": services.DAILY_XP_CAP,
             "streak": services.current_streak(user), "longest_streak": stats.longest_streak,
+            "repairable_streak": services.repairable_streak(user, stats),
             "studied_today": progress.active,
             "scales": user.scales_balance, "gems": user.gems_balance,
             "streak_freezes": UserInventory.objects.filter(user=user, item__effect=Item.Effect.STREAK_FREEZE).aggregate(n=Sum("quantity"))["n"] or 0,
@@ -98,10 +99,10 @@ class QuestViewSet(viewsets.GenericViewSet):
     @action(detail=True, methods=["post"])
     def claim(self, request, pk=None):
         quest = get_object_or_404(self.get_queryset(), pk=pk)
-        gained = services.claim_quest(request.user, quest)
+        gained, gems = services.claim_quest(request.user, quest)
         if not gained:
             return Response({"detail": "Nhiệm vụ chưa hoàn thành hoặc đã nhận thưởng", "errors": {}}, status=400)
-        return Response({"scales": gained})
+        return Response({"scales": gained, "gems": gems})
 
     @action(detail=False, methods=["post"], url_path="monthly/claim")
     def claim_monthly(self, request):
@@ -117,7 +118,8 @@ class BadgeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Badge
-        fields = ["id", "code", "name", "description", "icon", "sticker", "condition", "threshold", "owned", "awarded_at"]
+        fields = ["id", "code", "name", "description", "icon", "sticker", "condition", "threshold", "reward_gems", "owned",
+                  "awarded_at"]
 
     def _owned(self):
         if not hasattr(self, "_cache"):
@@ -135,8 +137,16 @@ class BadgeSerializer(serializers.ModelSerializer):
 @extend_schema(tags=["gamification"])
 class BadgeViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     serializer_class = BadgeSerializer
-    queryset = Badge.objects.all()
     pagination_class = None
+
+    def get_queryset(self):
+        qs = Badge.objects.all()
+        uid = self.request.query_params.get("user")
+        User = get_user_model()
+        owner = User.objects.filter(pk=uid).first() if uid and uid.isdigit() else self.request.user
+        if getattr(owner, "learner_type", "") == "kid":  # no community badges for children
+            qs = qs.exclude(condition__in=catalog.SOCIAL_CONDITIONS)
+        return qs
 
     def get_serializer_context(self):
         ctx = super().get_serializer_context()
@@ -188,16 +198,28 @@ class LeaderboardView(APIView):
                          "ends_at": cycle.end_at, "members": out})
 
 
+PACKS = {p["code"]: p for p in catalog.STICKER_PACKS}
+
+
+def sticker_rows(pack_code: str) -> list[dict]:
+    pack = PACKS.get(pack_code)
+    return [{"code": c, "caption": t, "image": catalog.sticker_path(c)} for c, t in pack["stickers"]] if pack else []
+
+
 class ItemSerializer(serializers.ModelSerializer):
     owned = serializers.SerializerMethodField()
+    stickers = serializers.SerializerMethodField()
 
     class Meta:
         model = Item
-        fields = ["id", "code", "name", "description", "image", "effect", "cost_scales", "cost_gems", "owned"]
+        fields = ["id", "code", "name", "description", "image", "effect", "cost_scales", "cost_gems", "owned", "stickers"]
 
     def get_owned(self, obj):
         inv = {i.item_id: i.quantity for i in self.context.get("inventory", [])}
         return inv.get(obj.id, 0)
+
+    def get_stickers(self, obj):
+        return sticker_rows(obj.code) if obj.effect == Item.Effect.STICKER else []
 
 
 @extend_schema(tags=["gamification"])
@@ -222,6 +244,13 @@ class ShopViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
         request.user.refresh_from_db(fields=["scales_balance", "gems_balance"])
         return Response({"item": item.code, "quantity": inv.quantity,
                          "scales": request.user.scales_balance, "gems": request.user.gems_balance})
+
+    @extend_schema(responses={200: dict})
+    @action(detail=False, methods=["get"])
+    def stickers(self, request):
+        """The stickers I can send, for the sticker picker (empty until a pack is bought in the shop)."""
+        codes = services.owned_stickers(request.user)
+        return Response([{"code": c, "caption": catalog.STICKER_CAPTION.get(c, ""), "image": catalog.sticker_path(c)} for c in codes])
 
     @action(detail=True, methods=["post"])
     def use(self, request, pk=None):

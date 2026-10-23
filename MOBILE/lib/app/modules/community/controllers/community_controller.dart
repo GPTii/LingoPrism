@@ -10,7 +10,7 @@ import '../../../data/services/auth_service.dart';
 import '../../../data/services/game_service.dart';
 import '../../../data/services/tts_service.dart';
 import '../../../routes/app_pages.dart';
-import '../../community_chat/controllers/community_chat_controller.dart' show stickerAssets;
+import '../../../data/models/api/game.dart' show stickerAsset;
 import '../../community_chat/models/community_chat_models.dart' as chat_models;
 import '../../community_member_profile/controllers/community_member_profile_controller.dart';
 import '../../profile/controllers/profile_controller.dart' show ProfileController, rankForTier;
@@ -676,7 +676,7 @@ class CommunityController extends GetxController {
             userId: '${c.author.id}',
             userName: c.author.displayName,
             avatarUrl: c.author.avatarOrDefault,
-            content: c.kind == 'sticker' ? (stickerAssets[c.sticker] ?? c.sticker) : c.content,
+            content: c.kind == 'sticker' ? stickerAsset(c.sticker) : c.content,
             createdAt: c.createdAt,
             canDelete: c.canDelete,
           )));
@@ -697,6 +697,19 @@ class CommunityController extends GetxController {
       GameService.to.refreshQuests();
     } catch (e) {
       Get.snackbar('Không thể bình luận', ApiClient.toApiException(e).message, snackPosition: SnackPosition.BOTTOM);
+    } finally {
+      post.isSendingComment.value = false;
+    }
+  }
+
+  Future<void> addStickerComment(CommunityPost post, String sticker) async {
+    post.isSendingComment.value = true;
+    try {
+      await CommunityRepository.comment(int.parse(post.id), sticker: sticker);
+      await refreshCommentsForPost(post);
+      GameService.to.refreshQuests();
+    } catch (e) {
+      Get.snackbar('Không thể gửi sticker', ApiClient.toApiException(e).message, snackPosition: SnackPosition.BOTTOM);
     } finally {
       post.isSendingComment.value = false;
     }

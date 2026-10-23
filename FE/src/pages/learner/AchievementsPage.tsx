@@ -4,20 +4,36 @@ import { CheckOutlined, ThunderboltFilled } from '@ant-design/icons'
 import dayjs, { type Dayjs } from 'dayjs'
 import { useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
-import { gameApi } from '../../api/app'
+import { gameApi, type ShopItem } from '../../api/app'
 import { errorMessage } from '../../api/client'
-import { BadgeMedal, FreezeIcon, GemIcon, Prismo, ScaleIcon, StreakIcon, XpIcon } from '../../components/brand/Brand'
+import { BadgeMedal, FreezeIcon, GemIcon, ScaleIcon, StreakIcon, XpIcon } from '../../components/brand/Brand'
+import { rewardUrl, stickerUrl } from '../../components/Stickers'
 import { Facts, PageHeader, Section } from '../../components/ui'
 import { QuestGo } from '../../components/QuestGo'
 
-/** the item drawn from the brand set: ice block, Prismo sticker, or the XP star */
-const itemIcon = (i: { code: string; effect: string }) =>
-  i.effect === 'streak_freeze' ? <FreezeIcon size={26} />
-    : i.effect === 'sticker' ? <Prismo size={30} mood={i.code.includes('sad') ? 'sad' : i.code.includes('love') ? 'celebrate' : 'happy'} />
-      : <XpIcon size={26} />
+/** the item's own picture when it has one (rewards artwork), else the brand icon: ice block or the XP star */
+const itemIcon = (i: ShopItem) => {
+  const url = rewardUrl(i.image)
+  if (url) return <img src={url} alt="" width={30} height={30} />
+  return i.effect === 'streak_freeze' ? <FreezeIcon size={26} /> : <XpIcon size={26} />
+}
 
 const price = (i: { cost_scales: number | null; cost_gems: number | null }) =>
   i.cost_scales ? <>{i.cost_scales} <ScaleIcon size={16} /></> : <>{i.cost_gems} <GemIcon size={16} /></>
+
+/** items used up the moment they are bought */
+const INSTANT = new Set(['streak_repair', 'gem_exchange'])
+
+const boughtText = (i: ShopItem) =>
+  i.effect === 'streak_repair' ? 'Đã nối lại chuỗi ngày học!' : i.effect === 'gem_exchange' ? 'Đã đổi được 1 ngọc' : `Đã mua ${i.name}`
+
+const GEM_WAYS = [
+  { gems: '1–20', title: 'Mở huy hiệu', hint: 'Mỗi huy hiệu mới tặng ngọc, huy hiệu càng khó càng nhiều.' },
+  { gems: '+1', title: 'Xong hết nhiệm vụ ngày', hint: 'Nhận thưởng nhiệm vụ cuối cùng trong ngày.' },
+  { gems: '+5', title: 'Nhiệm vụ tháng', hint: 'Hoàn thành 20 nhiệm vụ ngày trong tháng.' },
+  { gems: '1–5', title: 'Thăng hạng giải đấu', hint: 'Hạng 1 tuần: 5 ngọc, hạng 2: 3, hạng 3: 2.' },
+  { gems: '+1', title: 'Đổi 500 vảy', hint: 'Đổi ngay trong cửa hàng bên dưới.' },
+]
 
 /** Thành tích: streak calendar, quests, badges and the shop (Vảy / Ngọc). */
 export default function AchievementsPage() {
@@ -35,8 +51,8 @@ export default function AchievementsPage() {
   const days = new Map(progress.data?.map((d) => [d.date, d]))
   const refresh = () => ['game-summary', 'quests', 'shop', 'badges'].forEach((k) => queryClient.invalidateQueries({ queryKey: [k] }))
   const act = useMutation({
-    mutationFn: ({ fn }: { fn: () => Promise<unknown>; done: string }) => fn(),
-    onSuccess: (_, v) => { message.success(v.done); refresh() },
+    mutationFn: ({ fn }: { fn: () => Promise<unknown>; done: string | ((result: unknown) => string) }) => fn(),
+    onSuccess: (r, v) => { message.success(typeof v.done === 'function' ? v.done(r) : v.done); refresh() },
     onError: (e) => message.error(errorMessage(e)),
   })
   // menu links like /achievements#shop land on their section (and highlight it briefly)
@@ -51,6 +67,8 @@ export default function AchievementsPage() {
   }, [hash, badges.isSuccess, shop.isSuccess])
   const s = summary.data
   const owned = badges.data?.filter((b) => b.owned).length ?? 0
+  const items = shop.data?.filter((i) => i.effect !== 'sticker') ?? []
+  const packs = shop.data?.filter((i) => i.effect === 'sticker') ?? []
 
   const cell = (d: Dayjs) => {
     const p = days.get(d.format('YYYY-MM-DD'))
@@ -91,7 +109,8 @@ export default function AchievementsPage() {
                     <span className={`font-medium ${q.reward_claimed ? 'text-slate-400' : 'text-slate-700'}`}>{q.title}</span>
                     {q.completed && !q.reward_claimed ? (
                       <Button size="small" type="primary" loading={act.isPending}
-                        onClick={() => act.mutate({ fn: () => gameApi.claim(q.id), done: `Đã nhận ${q.reward_scales} vảy` })}>
+                        onClick={() => act.mutate({ fn: () => gameApi.claim(q.id), done: (r) => r && (r as { gems: number }).gems
+                          ? `Đã nhận ${q.reward_scales} vảy và 1 ngọc thưởng vì xong hết nhiệm vụ hôm nay!` : `Đã nhận ${q.reward_scales} vảy` })}>
                         Nhận {q.reward_scales} <ScaleIcon size={14} />
                       </Button>
                     ) : q.reward_claimed ? <span className="text-sm font-semibold text-emerald-600"><CheckOutlined /> Đã nhận</span>
@@ -130,14 +149,31 @@ export default function AchievementsPage() {
         </Section>
       </div>
 
+      <Section id="gems" title="Cách kiếm ngọc">
+        <ul className="m-0 p-0 list-none grid sm:grid-cols-2 lg:grid-cols-5 gap-3">
+          {GEM_WAYS.map((w) => (
+            <li key={w.title} className="rounded-xl bg-slate-50 p-3.5 flex flex-col gap-1">
+              <span className="num inline-flex items-center gap-1 text-lg font-extrabold text-brand-600">{w.gems} <GemIcon size={18} /></span>
+              <span className="font-semibold text-slate-800 leading-snug">{w.title}</span>
+              <span className="text-xs text-slate-500">{w.hint}</span>
+            </li>
+          ))}
+        </ul>
+      </Section>
+
       <Section id="badges" title="Huy hiệu" extra={badges.data && <span className="num text-sm text-slate-500">{owned}/{badges.data.length} đã có</span>}>
-        <ul className="m-0 p-0 list-none grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-x-4 gap-y-6">
+        <ul className="m-0 p-0 list-none grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-x-4 gap-y-6">
           {badges.data?.map((b, i) => (
-            <li key={b.code} className={`flex flex-col items-center text-center gap-1 ${b.owned ? '' : 'opacity-60'}`}>
-              <BadgeMedal owned={b.owned} seed={i} size={52} />
+            <li key={b.code} className="flex flex-col items-center text-center gap-1">
+              {rewardUrl(b.icon)
+                ? <img src={rewardUrl(b.icon)!} alt="" width={72} height={72} loading="lazy"
+                    className={b.owned ? '' : 'grayscale opacity-40'} />
+                : <BadgeMedal owned={b.owned} seed={i} size={60} />}
               <div className={`font-semibold leading-snug ${b.owned ? 'text-slate-800' : 'text-slate-500'}`}>{b.name}</div>
               <div className="text-xs text-slate-500 max-w-[22ch]">{b.description}</div>
-              {b.owned && b.awarded_at && <div className="text-xs text-emerald-600 font-medium">{dayjs(b.awarded_at).format('DD/MM/YYYY')}</div>}
+              {b.owned && b.awarded_at
+                ? <div className="text-xs text-emerald-600 font-medium">{dayjs(b.awarded_at).format('DD/MM/YYYY')}</div>
+                : b.reward_gems > 0 && <div className="num inline-flex items-center gap-1 text-xs font-semibold text-brand-600">+{b.reward_gems} <GemIcon size={12} /></div>}
             </li>
           ))}
         </ul>
@@ -145,21 +181,53 @@ export default function AchievementsPage() {
 
       <Section id="shop" title="Cửa hàng" extra={<span className="text-sm text-slate-500">Đổi vảy và ngọc lấy vật phẩm hỗ trợ</span>}>
         <ul className="m-0 p-0 list-none grid md:grid-cols-3 gap-3">
-          {shop.data?.map((i) => (
-            <li key={i.id} className="rounded-xl bg-slate-50 p-4 flex flex-col gap-2">
-              <div className="flex items-center gap-2 font-semibold text-slate-800">
-                {itemIcon(i)}
-                <span className="flex-1">{i.name}</span>
-                {i.owned > 0 && <span className="num text-sm font-medium text-slate-500">đang có {i.owned}</span>}
+          {items.map((i) => {
+            const repair = i.effect === 'streak_repair'
+            const cannotRepair = repair && !s?.repairable_streak
+            return (
+              <li key={i.id} className="rounded-xl bg-slate-50 p-4 flex flex-col gap-2">
+                <div className="flex items-center gap-2 font-semibold text-slate-800">
+                  {itemIcon(i)}
+                  <span className="flex-1">{i.name}</span>
+                  {i.owned > 0 && !INSTANT.has(i.effect) && <span className="num text-sm font-medium text-slate-500">đang có {i.owned}</span>}
+                </div>
+                <div className="text-sm text-slate-500 flex-1">
+                  {repair && s?.repairable_streak ? <b className="text-amber-600">Nối lại chuỗi {s.repairable_streak} ngày vừa mất. </b> : null}
+                  {i.description}
+                </div>
+                <div className="flex gap-2 pt-1">
+                  <Button type="primary" disabled={cannotRepair} title={cannotRepair ? 'Chỉ dùng được khi vừa mất chuỗi' : undefined}
+                    onClick={() => act.mutate({ fn: () => gameApi.buy(i.id), done: boughtText(i) })}>
+                    {repair ? 'Hồi chuỗi' : i.effect === 'gem_exchange' ? 'Đổi' : 'Mua'} · {price(i)}
+                  </Button>
+                  {i.owned > 0 && (i.effect === 'xp_double_15m' || i.effect === 'xp_plus25_24h') && (
+                    <Button onClick={() => act.mutate({ fn: () => gameApi.use(i.id), done: `Đã dùng ${i.name}` })}>Dùng ngay</Button>
+                  )}
+                </div>
+              </li>
+            )
+          })}
+        </ul>
+      </Section>
+
+      <Section id="stickers" title="Gói sticker Prismo"
+        extra={<span className="text-sm text-slate-500">Mua một lần, gửi mãi trong bình luận, chat nhóm và tin nhắn</span>}>
+        <ul className="m-0 p-0 list-none grid md:grid-cols-2 gap-4">
+          {packs.map((p) => (
+            <li key={p.id} className="rounded-2xl bg-slate-50 p-4 flex flex-col gap-3">
+              <div className="flex items-center gap-2">
+                <span className="flex-1 font-bold text-slate-800">{p.name}</span>
+                {p.owned > 0
+                  ? <span className="inline-flex items-center gap-1 text-sm font-semibold text-emerald-600"><CheckOutlined /> Đã có</span>
+                  : <Button type="primary" onClick={() => act.mutate({ fn: () => gameApi.buy(p.id), done: `Đã mở khoá ${p.name}` })}>
+                      Mua · {price(p)}
+                    </Button>}
               </div>
-              <div className="text-sm text-slate-500 flex-1">{i.description}</div>
-              <div className="flex gap-2 pt-1">
-                <Button type="primary" onClick={() => act.mutate({ fn: () => gameApi.buy(i.id), done: `Đã mua ${i.name}` })}>
-                  Mua · {price(i)}
-                </Button>
-                {i.owned > 0 && (i.effect === 'xp_double_15m' || i.effect === 'xp_plus25_24h') && (
-                  <Button onClick={() => act.mutate({ fn: () => gameApi.use(i.id), done: `Đã dùng ${i.name}` })}>Dùng ngay</Button>
-                )}
+              <div className="grid grid-cols-3 sm:grid-cols-6 gap-1">
+                {p.stickers.map((st) => (
+                  <img key={st.code} src={stickerUrl(st.code)} alt={st.caption} title={st.caption} loading="lazy"
+                    className={`w-full h-auto ${p.owned ? '' : 'opacity-90'}`} />
+                ))}
               </div>
             </li>
           ))}

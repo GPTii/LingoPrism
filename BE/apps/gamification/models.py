@@ -18,6 +18,16 @@ class UserStats(models.Model):
     words_mastered = models.PositiveIntegerField(default=0)
     detections = models.PositiveIntegerField(default=0)
     posts = models.PositiveIntegerField(default=0)
+    cheers = models.PositiveIntegerField(default=0, help_text="Lượt thả tim + bình luận đã gửi")
+    friends = models.PositiveIntegerField(default=0)
+    quests_done = models.PositiveIntegerField(default=0)
+    sessions = models.PositiveIntegerField(default=0, help_text="Buổi học đã hoàn thành")
+    perfect_sessions = models.PositiveIntegerField(default=0, help_text="Buổi học đúng hết")
+    early_bird = models.PositiveIntegerField(default=0, help_text="Buổi học xong trước 7 giờ sáng")
+    night_owl = models.PositiveIntegerField(default=0, help_text="Buổi học xong sau 10 giờ tối")
+    best_league = models.PositiveSmallIntegerField(default=1, help_text="Hạng giải đấu cao nhất (1..10)")
+    lost_streak = models.PositiveIntegerField(default=0, help_text="Chuỗi vừa bị mất, để Hồi chuỗi nối lại")
+    lost_streak_on = models.DateField(null=True, blank=True)
 
     @property
     def level(self) -> int:
@@ -72,6 +82,14 @@ class Badge(models.Model):
         WORDS_MASTERED = "words_mastered", "Số từ đã thuộc"
         DETECTIONS = "detections", "Số lần nhận diện ảnh"
         POSTS = "posts", "Số bài đăng"
+        CHEERS = "cheers", "Lượt thả tim và bình luận"
+        FRIENDS = "friends", "Số bạn bè"
+        QUESTS = "quests", "Nhiệm vụ ngày đã hoàn thành"
+        SESSIONS = "sessions", "Buổi học đã hoàn thành"
+        PERFECT = "perfect", "Buổi học đúng hết"
+        EARLY_BIRD = "early_bird", "Học trước 7 giờ sáng"
+        NIGHT_OWL = "night_owl", "Học sau 10 giờ tối"
+        LEAGUE = "league", "Hạng giải đấu cao nhất"
 
     code = models.SlugField(unique=True)
     name = models.CharField(max_length=80)
@@ -80,10 +98,11 @@ class Badge(models.Model):
     sticker = models.CharField(max_length=200, blank=True)
     condition = models.CharField(max_length=16, choices=Condition.choices)
     threshold = models.PositiveIntegerField()
+    reward_gems = models.PositiveSmallIntegerField(default=0, help_text="Ngọc nhận được khi đạt huy hiệu")
     order = models.PositiveSmallIntegerField(default=0)
 
     class Meta:
-        ordering = ["condition", "threshold"]
+        ordering = ["order", "condition", "threshold"]
 
     def __str__(self):
         return self.name
@@ -107,6 +126,7 @@ class DailyQuest(models.Model):
         ENGAGE_COMMUNITY = "engage_community", "Bình luận hoặc thả tim 5 bài viết"
 
     REWARD_SCALES = 15
+    ALL_DONE_GEMS = 1  # claiming the last of the day's quests
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="daily_quests")
     date = models.DateField()
@@ -127,7 +147,7 @@ class DailyQuest(models.Model):
 
 class MonthlyQuest(models.Model):
     TARGET = 20
-    REWARD_GEMS = 2
+    REWARD_GEMS = 5
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="monthly_quests")
     month = models.CharField(max_length=7, help_text="YYYY-MM")
@@ -186,7 +206,9 @@ class Item(models.Model):
         STREAK_FREEZE = "streak_freeze", "Giữ streak khi nghỉ 1 ngày"
         XP_DOUBLE_15M = "xp_double_15m", "x2 XP trong 15 phút"
         XP_PLUS25_24H = "xp_plus25_24h", "+25% XP trong 24 giờ"
-        STICKER = "sticker", "Sticker chat & bình luận"
+        STICKER = "sticker", "Gói sticker chat & bình luận"
+        STREAK_REPAIR = "streak_repair", "Nối lại chuỗi vừa mất"
+        GEM_EXCHANGE = "gem_exchange", "Đổi vảy lấy 1 ngọc"
 
     code = models.SlugField(unique=True)
     name = models.CharField(max_length=60)

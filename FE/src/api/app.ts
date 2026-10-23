@@ -11,6 +11,8 @@ export interface GameSummary {
   daily_xp_cap: number
   streak: number
   longest_streak: number
+  /** days "Hồi chuỗi" would give back now (0 = nothing to repair) */
+  repairable_streak: number
   studied_today: boolean
   scales: number
   gems: number
@@ -48,8 +50,17 @@ export interface Badge {
   name: string
   description: string
   icon: string
+  condition: string
+  threshold: number
+  reward_gems: number
   owned: boolean
   awarded_at: string | null
+}
+
+export interface Sticker {
+  code: string
+  caption: string
+  image: string
 }
 
 export interface LeaderboardEntry {
@@ -80,6 +91,8 @@ export interface ShopItem {
   cost_scales: number | null
   cost_gems: number | null
   owned: number
+  /** the stickers of a sticker pack (empty for other items) */
+  stickers: Sticker[]
 }
 
 export interface DayProgress {
@@ -95,13 +108,15 @@ export const gameApi = {
   summary: () => api.get<GameSummary>('/gamification/summary/').then((r) => r.data),
   progress: (start?: string, end?: string) => api.get<DayProgress[]>('/gamification/progress/', { params: { start, end } }).then((r) => r.data),
   quests: () => api.get<{ quests: DailyQuest[]; monthly: MonthlyQuest }>('/quests/today/').then((r) => r.data),
-  claim: (id: number) => api.post<{ scales: number }>(`/quests/${id}/claim/`).then((r) => r.data),
+  claim: (id: number) => api.post<{ scales: number; gems: number }>(`/quests/${id}/claim/`).then((r) => r.data),
   claimMonthly: () => api.post<{ gems: number }>('/quests/monthly/claim/').then((r) => r.data),
   badges: () => api.get<Badge[]>('/badges/').then((r) => r.data),
   leaderboard: (scope: 'league' | 'friends' | 'global' = 'league') => api.get<Leaderboard>('/leaderboard/', { params: { scope } }).then((r) => r.data),
   shop: () => api.get<ShopItem[]>('/shop/items/').then((r) => r.data),
   buy: (id: number) => api.post<{ scales: number; gems: number }>(`/shop/items/${id}/buy/`).then((r) => r.data),
   use: (id: number) => api.post<{ multiplier: number; expires_at: string }>(`/shop/items/${id}/use/`).then((r) => r.data),
+  /** the stickers I can send (from the packs I own) */
+  stickers: () => api.get<Sticker[]>('/shop/items/stickers/').then((r) => r.data),
 }
 
 // ---------------------------------------------------------------- notifications
@@ -264,6 +279,8 @@ export const communityApi = {
   comments: (id: number) => api.get<PostComment[]>(`/posts/${id}/comments/`).then((r) => r.data),
   post: (id: number) => api.get<Post>(`/posts/${id}/`).then((r) => r.data),
   comment: (id: number, content: string) => api.post<PostComment>(`/posts/${id}/comments/`, { kind: 'text', content }).then((r) => r.data),
+  commentSticker: (id: number, sticker: string) =>
+    api.post<PostComment>(`/posts/${id}/comments/`, { kind: 'sticker', sticker }).then((r) => r.data),
   deleteComment: (postId: number, commentId: number) => api.delete(`/posts/${postId}/comments/${commentId}/`),
   bookmark: (id: number, save: boolean) =>
     (save ? api.post(`/posts/${id}/bookmark/`) : api.delete(`/posts/${id}/bookmark/`)).then((r) => r.data as { saved: boolean }),
@@ -298,6 +315,8 @@ export const communityApi = {
   messages: (groupId: number) => api.get<{ results: ChatMessage[]; has_more: boolean }>(`/groups/${groupId}/messages/`).then((r) => r.data),
   send: (groupId: number, content: string, client_id: string) =>
     api.post<ChatMessage>(`/groups/${groupId}/messages/`, { kind: 'text', content, client_id }).then((r) => r.data),
+  sendSticker: (groupId: number, sticker: string, client_id: string) =>
+    api.post<ChatMessage>(`/groups/${groupId}/messages/`, { kind: 'sticker', sticker, client_id }).then((r) => r.data),
   openSupport: () => api.post<SupportConversation>('/support/conversations/', {}).then((r) => r.data),
   conversations: (params?: Record<string, unknown>) =>
     api.get<Paginated<SupportConversation>>('/support/conversations/', { params }).then((r) => r.data.results),
@@ -466,6 +485,8 @@ export interface DirectMessage {
   thread: number
   sender: number
   content: string
+  /** a sticker code instead of text */
+  sticker: string
   client_id: string
   read_at: string | null
   created_at: string
@@ -488,5 +509,7 @@ export const messagesApi = {
     api.get<{ results: DirectMessage[]; has_more: boolean }>(`/messages/threads/${id}/messages/`, { params: { before } }).then((r) => r.data),
   send: (id: number, content: string, client_id: string) =>
     api.post<DirectMessage>(`/messages/threads/${id}/messages/`, { content, client_id }).then((r) => r.data),
+  sendSticker: (id: number, sticker: string, client_id: string) =>
+    api.post<DirectMessage>(`/messages/threads/${id}/messages/`, { sticker, client_id }).then((r) => r.data),
   read: (id: number) => api.post(`/messages/threads/${id}/read/`),
 }

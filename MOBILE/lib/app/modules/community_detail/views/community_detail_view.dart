@@ -9,6 +9,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../community/controllers/community_controller.dart';
 import '../controllers/community_detail_controller.dart';
 import 'package:lingoprism/app/core/navigation/back.dart';
+import 'package:lingoprism/app/core/widgets/sticker_picker.dart';
 
 const int _minReportDescriptionLength = 10;
 
@@ -789,6 +790,7 @@ class _CommentComposerState extends State<_CommentComposer> {
       ),
       child: Row(
         children: [
+          StickerButton(onPick: (code) => _communityController.addStickerComment(widget.post, code)),
           Expanded(
             child: TextField(
               controller: _textController,
@@ -1301,14 +1303,18 @@ class _CommentItem extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: 4.h),
-                Text(
-                  comment.content,
-                  style: TextStyle(
-                    fontSize: 13.5.sp,
-                    height: 1.38,
-                    color: AppColors.textSecondary,
+                if (comment.content.startsWith('assets/rewards/stickers/'))
+                  Image.asset(comment.content, width: 96.w, height: 100.w, fit: BoxFit.contain,
+                      errorBuilder: (_, __, ___) => const Icon(Icons.emoji_emotions_outlined))
+                else
+                  Text(
+                    comment.content,
+                    style: TextStyle(
+                      fontSize: 13.5.sp,
+                      height: 1.38,
+                      color: AppColors.textSecondary,
+                    ),
                   ),
-                ),
               ],
             ),
           ),
