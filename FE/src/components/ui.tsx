@@ -1,5 +1,5 @@
-import type { ReactNode } from 'react'
-import { ArrowLeftOutlined } from '@ant-design/icons'
+import { useState, type ReactNode } from 'react'
+import { ArrowLeftOutlined, DownOutlined, UpOutlined } from '@ant-design/icons'
 import { Link } from 'react-router-dom'
 
 /**
@@ -104,4 +104,45 @@ export function UserAvatar({ name, src, size = 36 }: { name?: string | null; src
       {letter}
     </span>
   )
+}
+
+/**
+ * A long list shows its first `limit` entries and a "Xem tất cả (N)" toggle below, never everything at once.
+ * `shown` goes into the list; `toggle` goes under it (null when nothing is hidden).
+ */
+export function useShowMore<T>(items: readonly T[] | undefined, limit: number, label = 'Xem tất cả') {
+  const [open, setOpen] = useState(false)
+  const list = items ?? []
+  const hidden = list.length > limit
+  return {
+    shown: open || !hidden ? list : list.slice(0, limit),
+    open,
+    toggle: hidden ? <MoreToggle open={open} count={list.length} label={label} onClick={() => setOpen((o) => !o)} /> : null,
+  }
+}
+
+export function MoreToggle({ open, count, label = 'Xem tất cả', onClick, className = '' }: {
+  open: boolean
+  count?: number
+  label?: string
+  onClick: () => void
+  className?: string
+}) {
+  return (
+    <button type="button" onClick={onClick} aria-expanded={open}
+      className={`mt-3 mx-auto flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-semibold text-brand-600 hover:bg-brand-50 bg-transparent border-0 cursor-pointer ${className}`}>
+      {open ? <>Thu gọn <UpOutlined className="text-xs" /></> : <>{label}{count != null && ` (${count})`} <DownOutlined className="text-xs" /></>}
+    </button>
+  )
+}
+
+/** The same, for lists rendered inside conditionals: `<ShowMore items={x} limit={6}>{(shown) => <ul>…</ul>}</ShowMore>`. */
+export function ShowMore<T>({ items, limit, label, children }: {
+  items: readonly T[] | undefined
+  limit: number
+  label?: string
+  children: (shown: readonly T[]) => ReactNode
+}) {
+  const { shown, toggle } = useShowMore(items, limit, label)
+  return <>{children(shown)}{toggle}</>
 }

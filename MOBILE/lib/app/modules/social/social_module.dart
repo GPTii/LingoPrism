@@ -16,6 +16,7 @@ import '../../routes/app_pages.dart';
 import '../community/controllers/community_controller.dart';
 import '../community_detail/controllers/community_detail_controller.dart';
 import '../community_member_profile/controllers/community_member_profile_controller.dart';
+import '../../core/widgets/show_more.dart';
 
 /// Friends (same server API as the web's /friends): every learner has an 8-digit ID to be found by; a friend
 /// request carries a short hello and is answered by the other person (also from the notification). Adults only.
@@ -340,11 +341,9 @@ class FriendsView extends GetView<FriendsController> {
 
   Widget _list(List<Widget> rows) => RefreshIndicator(
         onRefresh: controller.load,
-        child: ListView.separated(
-          itemCount: rows.length,
-          separatorBuilder: (_, __) => Divider(height: 1, color: AppColors.line),
-          itemBuilder: (_, i) => rows[i],
-        ),
+        child: ListView(children: [
+          ShowMoreColumn(limit: 10, divider: Divider(height: 1, color: AppColors.line), children: rows),
+        ]),
       );
 
   @override

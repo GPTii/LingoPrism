@@ -9,7 +9,7 @@ import { useAuth } from '../../auth/store'
 import { useIsDark } from '../../theme/store'
 import TargetWord from '../../components/TargetWord'
 import { Prismo } from '../../components/brand/Brand'
-import { EmptyState, Facts, PageHeader, Section } from '../../components/ui'
+import { EmptyState, Facts, PageHeader, Section, ShowMore } from '../../components/ui'
 
 const pct = (v: number | null) => (v == null ? '–' : `${Math.round(v * 100)}%`)
 
@@ -95,8 +95,9 @@ export default function StatsPage() {
 
             <Section title="Theo chủ đề">
               {s.by_topic.length ? (
+                <ShowMore items={s.by_topic} limit={6} label="Xem tất cả chủ đề">{(shown) => (
                 <ul className="m-0 p-0 list-none flex flex-col gap-3">
-                  {s.by_topic.map((t) => (
+                  {shown.map((t) => (
                     <li key={t.id}>
                       <Link to={`/vocab/topics/${t.id}`} className="flex justify-between text-sm mb-1 !text-slate-700">
                         <span className="font-medium">{t.icon} {t.name}</span>
@@ -106,14 +107,16 @@ export default function StatsPage() {
                     </li>
                   ))}
                 </ul>
+                )}</ShowMore>
               ) : <p className="m-0 text-slate-500">Lưu từ theo chủ đề để xem tiến độ từng chủ đề.</p>}
             </Section>
           </div>
 
           <Section title="Từ hay sai" extra={s.hardest.length > 0 && <Link to="/learn?kind=review"><Button type="primary">Ôn các từ này</Button></Link>}>
             {s.hardest.length ? (
+              <ShowMore items={s.hardest} limit={8} label="Xem tất cả từ hay sai">{(shown) => (
               <ul className="m-0 p-0 list-none grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                {s.hardest.map((h) => h.card.target && (
+                {shown.map((h) => h.card.target && (
                   <li key={h.card.id} className="rounded-xl bg-slate-50 p-4 flex flex-col items-center text-center gap-1">
                     <TargetWord target={h.card.target} size="md" showReading={false} />
                     <div className="text-slate-600">{h.card.meaning_vi}</div>
@@ -121,6 +124,7 @@ export default function StatsPage() {
                   </li>
                 ))}
               </ul>
+              )}</ShowMore>
             ) : <p className="m-0 text-slate-500">Chưa có từ nào bạn hay sai. Giỏi lắm!</p>}
           </Section>
         </>

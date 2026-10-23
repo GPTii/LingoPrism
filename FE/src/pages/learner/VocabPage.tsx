@@ -9,7 +9,7 @@ import { vocabApi, topicTargetName } from '../../api/vocab'
 import { useAuth } from '../../auth/store'
 import WordCardView from '../../components/WordCardView'
 import { langTag } from '../../components/TargetWord'
-import { EmptyState, PageHeader } from '../../components/ui'
+import { EmptyState, PageHeader, ShowMore } from '../../components/ui'
 import { Prismo } from '../../components/brand/Brand'
 
 /** every topic its own colour (stable: by id) */
@@ -49,8 +49,9 @@ function MyTopics() {
         <Button icon={<PlusOutlined />} onClick={() => { setName(''); setIcon(TOPIC_ICONS[0]); setOpen(true) }}>Tạo chủ đề</Button>
       </div>
       {topics.data?.results.length ? (
+        <ShowMore items={topics.data.results} limit={8} label="Xem tất cả chủ đề của tôi">{(shown) => (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {topics.data.results.map((t) => (
+          {shown.map((t) => (
             <Link key={t.id} to={`/vocab/topics/${t.id}`} className="lift lp-card p-4 flex items-center gap-3">
               <span className="text-4xl">{t.icon || '📘'}</span>
               <span className="min-w-0">
@@ -60,6 +61,7 @@ function MyTopics() {
             </Link>
           ))}
         </div>
+        )}</ShowMore>
       ) : !topics.isLoading && <p className="m-0 text-slate-500">Gom những từ bạn hay dùng thành chủ đề riêng để ôn bằng flashcard.</p>}
       <Modal open={open} title="Tạo chủ đề của bạn" okText="Tạo chủ đề" cancelText="Huỷ" confirmLoading={busy} onOk={create} onCancel={() => setOpen(false)}>
         <Input size="large" value={name} onChange={(e) => setName(e.target.value)} maxLength={80} placeholder="VD: Từ vựng công việc" aria-label="Tên chủ đề" onPressEnter={create} />
@@ -98,9 +100,11 @@ export default function VocabPage() {
         <section>
           <h2 className="text-lg font-bold text-slate-800 mb-3">Kết quả cho “{search}”</h2>
           {found.isLoading ? <Skeleton active /> : found.data?.results.length ? (
+            <ShowMore items={found.data.results} limit={24} label="Xem tất cả kết quả">{(shown) => (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {found.data.results.map((c) => <WordCardView key={c.id} card={c} />)}
+              {shown.map((c) => <WordCardView key={c.id} card={c} />)}
             </div>
+            )}</ShowMore>
           ) : <div className="lp-card"><EmptyState art={<Prismo mood="think" size={80} />} title={`Không có từ nào khớp “${search}”`} description="Thử từ khác, hoặc gõ nghĩa tiếng Việt." /></div>}
         </section>
       ) : (
@@ -108,8 +112,9 @@ export default function VocabPage() {
           <Segmented size="large" value={tab} onChange={(v) => setTab(v as typeof tab)} options={[{ value: 'topics', label: 'Chủ đề' }, { value: 'library', label: 'Từ của tôi' }]} />
           {tab === 'topics' && (
             topics.isLoading ? <Skeleton active /> : (
+              <ShowMore items={topics.data?.results.filter((t) => t.is_system && t.word_count > 0)} limit={12} label="Xem tất cả chủ đề">{(shown) => (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {topics.data?.results.filter((t) => t.is_system && t.word_count > 0).map((t) => {
+                {shown.map((t) => {
                   const tint = TOPIC_TINTS[t.id % TOPIC_TINTS.length]
                   const pct = Math.round((t.learned_count / Math.max(t.word_count, 1)) * 100)
                   return (
@@ -132,15 +137,18 @@ export default function VocabPage() {
                   )
                 })}
               </div>
+              )}</ShowMore>
             )
           )}
           {tab === 'library' && <MyTopics />}
           {tab === 'library' && <h2 className="m-0 -mb-2 text-lg font-bold text-slate-800">Tất cả từ đã lưu</h2>}
           {tab === 'library' && (
             library.isLoading ? <Skeleton active /> : library.data?.results.length ? (
+              <ShowMore items={library.data.results} limit={24} label="Xem tất cả từ đã lưu">{(shown) => (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {library.data.results.map((c) => <WordCardView key={c.id} card={c} />)}
+                {shown.map((c) => <WordCardView key={c.id} card={c} />)}
               </div>
+              )}</ShowMore>
             ) : <div className="lp-card"><EmptyState art={<Prismo mood="wow" size={80} />} title="Thư viện của bạn còn trống" description="Mở một chủ đề rồi bấm “Lưu từ”, hoặc chụp ảnh một đồ vật để lưu từ mới." /></div>
           )}
         </>

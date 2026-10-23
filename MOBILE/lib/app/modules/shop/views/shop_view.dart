@@ -5,6 +5,7 @@ import '../../../data/models/api/game.dart';
 import '../controllers/shop_controller.dart';
 import 'package:lingoprism/app/core/theme/app_colors.dart';
 import 'package:lingoprism/app/core/navigation/back.dart';
+import '../../../core/widgets/show_more.dart';
 
 /// Ways to earn gems, as the server gives them (apps/gamification: badges, quests, leagues, the exchange).
 const _gemWays = [
@@ -78,10 +79,10 @@ class ShopView extends GetView<ShopController> {
               Text('Mua một lần, gửi mãi trong bình luận, chat nhóm và tin nhắn.',
                   style: TextStyle(fontSize: 13.sp, color: AppColors.textSecondary)),
               SizedBox(height: 10.h),
-              for (final pack in controller.packs) ...[
-                _PackCard(pack: pack, busy: controller.busy.value == pack.code, onBuy: () => controller.confirmPurchase(pack)),
-                SizedBox(height: 12.h),
-              ],
+              ShowMoreColumn(limit: 2, label: 'Xem tất cả gói sticker', spacing: 12.h, children: [
+                for (final pack in controller.packs)
+                  _PackCard(pack: pack, busy: controller.busy.value == pack.code, onBuy: () => controller.confirmPurchase(pack)),
+              ]),
             ],
           );
         }),

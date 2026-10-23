@@ -8,6 +8,7 @@ import '../../core/widgets/prismo.dart';
 import '../../data/models/api/common.dart';
 import '../../data/models/api/vocab.dart';
 import '../../routes/app_pages.dart';
+import '../../core/widgets/show_more.dart';
 
 /// Thống kê học tập (same numbers as the web's /stats): answers by day, by question type,
 /// by topic and the words answered wrong most often – for the language being learned.
@@ -124,7 +125,7 @@ class _StatsViewState extends State<StatsView> {
                   SizedBox(height: 12.h),
                   _Card(
                     title: 'Theo chủ đề',
-                    child: Column(children: [
+                    child: ShowMoreColumn(limit: 6, label: 'Xem tất cả chủ đề', children: [
                       for (final t in asMapList(s['by_topic']))
                         _MeterRow(
                           label: '${asString(t['icon'])} ${asString(t['name'])}',
@@ -140,6 +141,7 @@ class _StatsViewState extends State<StatsView> {
                     _Card(
                       title: 'Từ hay sai',
                       child: Column(children: [
+                        ShowMoreColumn(limit: 8, label: 'Xem tất cả từ hay sai', children: [
                         for (final h in hardest)
                           Builder(builder: (context) {
                             final c = WordCard.fromJson(asMap(h['card']));
@@ -151,6 +153,7 @@ class _StatsViewState extends State<StatsView> {
                                   style: TextStyle(color: AppColors.error, fontWeight: FontWeight.w700)),
                             );
                           }),
+                        ]),
                         SizedBox(height: 8.h),
                         SizedBox(
                           width: double.infinity,

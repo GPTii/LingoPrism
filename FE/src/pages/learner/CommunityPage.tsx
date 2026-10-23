@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { App, Button, Form, Input, Modal, Select, Segmented, Skeleton, Switch, Upload } from 'antd'
-import { HeartFilled, HeartOutlined, MessageOutlined, SaveOutlined, FlagOutlined, PlusOutlined, CrownFilled, TeamOutlined } from '@ant-design/icons'
+import { DownOutlined, HeartFilled, HeartOutlined, MessageOutlined, SaveOutlined, FlagOutlined, PlusOutlined, CrownFilled, TeamOutlined } from '@ant-design/icons'
 import { useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import dayjs from 'dayjs'
@@ -12,7 +12,7 @@ import { vocabApi } from '../../api/vocab'
 import { useAuth } from '../../auth/store'
 import { langTag } from '../../components/TargetWord'
 import { Prismo } from '../../components/brand/Brand'
-import { EmptyState, PageHeader, UserAvatar } from '../../components/ui'
+import { EmptyState, PageHeader, ShowMore, UserAvatar, useShowMore } from '../../components/ui'
 import { StickerImage, StickerPicker } from '../../components/Stickers'
 
 dayjs.extend(relativeTime)
@@ -39,6 +39,7 @@ export function PostCard({ post, commentsOpen = false }: { post: Post; commentsO
   const [commentCount, setCommentCount] = useState(post.comment_count)
   const [open, setOpen] = useState(commentsOpen)
   const [text, setText] = useState('')
+  const [allComments, setAllComments] = useState(commentsOpen) // the feed shows the last 3 comments
   const comments = useQuery({ queryKey: ['comments', post.id], queryFn: () => communityApi.comments(post.id), enabled: open })
 
   const toggleSave = async () => {
@@ -161,7 +162,13 @@ export function PostCard({ post, commentsOpen = false }: { post: Post; commentsO
           <div className="flex flex-col gap-2.5 border-t border-slate-200 pt-3">
             {comments.isLoading && <Skeleton active paragraph={{ rows: 2 }} title={false} />}
             {comments.data?.length === 0 && <div className="text-sm text-slate-500">Chưa có bình luận. Hãy là người đầu tiên!</div>}
-            {comments.data?.map((c) => (
+            {!allComments && (comments.data?.length ?? 0) > 3 && (
+              <button type="button" onClick={() => setAllComments(true)}
+                className="self-start inline-flex items-center gap-1.5 bg-transparent border-0 p-0 cursor-pointer text-sm font-semibold text-slate-500 hover:text-slate-800">
+                Xem {comments.data!.length - 3} bình luận trước <DownOutlined className="text-xs" />
+              </button>
+            )}
+            {(allComments ? comments.data : comments.data?.slice(-3))?.map((c) => (
               <div key={c.id} className="group flex gap-2 text-sm">
                 <Link to={`/community/users/${c.author.id}`}><UserAvatar name={c.author.display_name} src={c.author.avatar} size={26} /></Link>
                 <div className="flex-1 min-w-0">
@@ -270,8 +277,9 @@ function Groups() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex justify-end"><Button icon={<PlusOutlined />} onClick={() => setCreating(true)}>Tạo nhóm</Button></div>
+      <ShowMore items={groups.data} limit={6} label="Xem tất cả nhóm">{(shown) => (
       <ul className="m-0 p-0 list-none grid md:grid-cols-2 gap-3">
-        {groups.data?.map((g) => (
+        {shown.map((g) => (
           <li key={g.id} className="lp-card p-5 flex items-start justify-between gap-3">
             <div className="min-w-0">
               <div className="font-bold text-lg text-slate-800">{g.name} {g.my_role === 'leader' && <CrownFilled className="text-amber-500" aria-label="Bạn là trưởng nhóm" />}</div>
@@ -291,6 +299,7 @@ function Groups() {
           </li>
         ))}
       </ul>
+      )}</ShowMore>
       {groups.data?.length === 0 && (
         <div className="lp-card"><EmptyState art={<Prismo mood="wow" size={88} />} title="Chưa có nhóm học nào" description="Tạo nhóm đầu tiên và rủ bạn bè cùng học." /></div>
       )}
@@ -323,6 +332,9 @@ function LeaderboardTab() {
   const board = useQuery({ queryKey: ['leaderboard', scope], queryFn: () => gameApi.leaderboard(scope) })
   const zoneColor = { promotion: 'bg-emerald-50', safe: '', demotion: 'bg-red-50' } as const
   const medal = ['#ffb020', '#9aa8bb', '#e08a4f']
+  const rows = useShowMore(board.data?.members, 10, 'Xem cả bảng xếp hạng')
+  // my own row stays in sight even when I am below the top 10
+  const meBelow = rows.open ? undefined : board.data?.members.find((m) => m.is_me && !rows.shown.includes(m))
   return (
     <div className="flex flex-col gap-4">
       <Segmented value={scope} onChange={(v) => setScope(v as typeof scope)} options={[
@@ -340,7 +352,7 @@ function LeaderboardTab() {
           <li className="px-3 py-2 text-sm text-slate-500">Theo dõi bạn học trong Bảng tin để cùng thi đua mỗi tuần.</li>
         )}
         {board.data?.members.length === 0 && <li><EmptyState art={<Prismo mood="sleepy" size={80} />} title="Bảng xếp hạng tuần này còn trống" description="Học một bài để có tên đầu tiên." /></li>}
-        {board.data?.members.map((m) => (
+        {[...rows.shown, ...(meBelow ? [meBelow] : [])].map((m) => (
           <li key={m.user_id} className={`flex items-center gap-3 py-2 px-3 rounded-xl ${m.is_me ? 'bg-brand-50' : m.zone ? zoneColor[m.zone] : ''}`}>
             <span className="num w-8 text-center font-bold" style={m.rank <= 3 ? { color: medal[m.rank - 1] } : undefined}>{m.rank}</span>
             <UserAvatar name={m.display_name} src={m.avatar} />
@@ -349,6 +361,7 @@ function LeaderboardTab() {
           </li>
         ))}
       </ol>
+      {rows.toggle && <div className="-mt-3">{rows.toggle}</div>}
     </div>
   )
 }

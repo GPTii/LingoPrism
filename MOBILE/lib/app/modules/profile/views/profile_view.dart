@@ -14,6 +14,7 @@ import '../../../data/services/auth_service.dart';
 import '../../social/social_module.dart';
 import 'badges_section.dart';
 import 'package:lingoprism/app/core/theme/app_colors.dart';
+import '../../../core/widgets/show_more.dart';
 
 /// A big tappable tile with a colour icon: Bạn bè, Bài đã lưu.
 class _ProfileShortcut extends StatelessWidget {
@@ -412,7 +413,11 @@ class RecentPostsGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GridView.builder(
+    return ShowMore(
+      count: images.length,
+      limit: 6,
+      label: 'Xem thêm ảnh',
+      builder: (_, shown) => GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -421,7 +426,7 @@ class RecentPostsGrid extends StatelessWidget {
         mainAxisSpacing: 12.h,
         childAspectRatio: 1,
       ),
-      itemCount: images.length,
+      itemCount: shown,
       itemBuilder: (_, index) {
         final imagePath = images[index];
         return GestureDetector(
@@ -432,6 +437,7 @@ class RecentPostsGrid extends StatelessWidget {
           ),
         );
       },
+    ),
     );
   }
 

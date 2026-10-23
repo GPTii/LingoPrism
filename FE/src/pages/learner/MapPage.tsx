@@ -10,7 +10,7 @@ import { Circle, MapContainer, Marker, Popup, TileLayer, useMap } from 'react-le
 import L from 'leaflet'
 import { learnApi, type Poi } from '../../api/app'
 import { errorMessage } from '../../api/client'
-import { PageHeader } from '../../components/ui'
+import { PageHeader, ShowMore } from '../../components/ui'
 
 const HCMC: [number, number] = [10.7769, 106.7009]
 const ICONS: Record<string, ReactNode> = {
@@ -96,7 +96,7 @@ export default function MapPage() {
         </div>
         <div className="flex flex-col gap-2 lg:max-h-[560px] overflow-y-auto">
           {queryMs != null && <div className="num text-sm text-slate-500 px-1">{pois.length} địa điểm trong {radius / 1000} km</div>}
-          {pois.map((p) => (
+          <ShowMore items={pois} limit={8} label="Xem tất cả địa điểm">{(shown) => shown.map((p) => (
             <div key={p.id} role="button" tabIndex={0}
               onClick={() => { setCenter([p.lat, p.lng]); setSelected(p.id) }}
               onKeyDown={(e) => { if (e.key === 'Enter') { setCenter([p.lat, p.lng]); setSelected(p.id) } }}
@@ -114,7 +114,7 @@ export default function MapPage() {
                 ))}
               </div>
             </div>
-          ))}
+          ))}</ShowMore>
           {!pois.length && queryMs != null && (
             <p className="text-slate-500 text-sm px-1">Không có địa điểm nào trong {radius / 1000} km. Thử tăng bán kính.</p>
           )}

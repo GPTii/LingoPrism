@@ -8,7 +8,7 @@ import { errorMessage } from '../../api/client'
 import { useAuth } from '../../auth/store'
 import { langTag } from '../../components/TargetWord'
 import { Prismo } from '../../components/brand/Brand'
-import { EmptyState, PageHeader, Section } from '../../components/ui'
+import { EmptyState, PageHeader, Section, ShowMore } from '../../components/ui'
 
 export function ExamListPage() {
   const user = useAuth((s) => s.user)
@@ -172,8 +172,9 @@ export function ExamResultPage() {
         </div>
       </section>
       {r.feedback && <Section title="Nhận xét của giáo viên"><p className="m-0 text-slate-700">{r.feedback}</p></Section>}
+      <ShowMore items={r.answers} limit={10} label="Xem tất cả câu">{(shown) => (
       <ol className="m-0 p-0 list-none flex flex-col gap-3">
-        {r.answers.map((a, i) => {
+        {shown.map((a, i) => {
           const yours = a.question.kind === 'mcq' ? (a.selected_option != null ? a.question.options[a.selected_option] : '(bỏ trống)') : a.text || '(bỏ trống)'
           const state = a.is_correct == null
             ? { icon: <HourglassOutlined className="text-amber-600" />, label: 'Chờ chấm' }
@@ -195,6 +196,7 @@ export function ExamResultPage() {
           )
         })}
       </ol>
+      )}</ShowMore>
       <div className="flex flex-wrap gap-3">
         <Link to="/exams"><Button size="large">Về danh sách đề</Button></Link>
       </div>

@@ -8,7 +8,7 @@ import { useSearchParams } from 'react-router-dom'
 import { communityApi } from '../../api/app'
 import { Prismo } from '../../components/brand/Brand'
 import { MyIdCard, PersonRow } from '../../components/Friends'
-import { EmptyState, PageHeader } from '../../components/ui'
+import { EmptyState, PageHeader, ShowMore } from '../../components/ui'
 
 dayjs.extend(relativeTime)
 dayjs.locale('vi')
@@ -62,11 +62,13 @@ export default function FriendsPage() {
       {tab === 'friends' && (
         <div className="lp-card px-4">
           {friends.isLoading ? loading : friends.data?.length ? (
+            <ShowMore items={friends.data} limit={10} label="Xem tất cả bạn bè">{(shown) => (
             <ul className="m-0 p-0 list-none divide-y divide-slate-100">
-              {friends.data.map((p) => (
+              {shown.map((p) => (
                 <PersonRow key={p.id} person={p} extra={p.since && <span className="block text-xs text-slate-500">Bạn bè từ {dayjs(p.since).format('DD/MM/YYYY')}</span>} />
               ))}
             </ul>
+            )}</ShowMore>
           ) : <EmptyState art={<Prismo mood="wow" size={80} />} title="Chưa có bạn bè" description="Vào Tìm bạn, nhập ID hoặc tên để gửi lời mời kết bạn." />}
         </div>
       )}
@@ -74,8 +76,9 @@ export default function FriendsPage() {
       {tab === 'incoming' && (
         <div className="lp-card px-4">
           {incoming.isLoading ? loading : incoming.data?.length ? (
+            <ShowMore items={incoming.data} limit={5} label="Xem tất cả lời mời">{(shown) => (
             <ul className="m-0 p-0 list-none divide-y divide-slate-100">
-              {incoming.data.map((r) => (
+              {shown.map((r) => (
                 <PersonRow key={r.id} person={r.user} extra={
                   <>
                     {r.message && <span className="block text-sm text-slate-700 mt-1 whitespace-pre-wrap">“{r.message}”</span>}
@@ -84,6 +87,7 @@ export default function FriendsPage() {
                 } />
               ))}
             </ul>
+            )}</ShowMore>
           ) : <EmptyState art={<Prismo mood="sleepy" size={80} />} title="Không có lời mời nào" description="Khi ai đó muốn kết bạn, lời mời sẽ hiện ở đây và trong Thông báo." />}
         </div>
       )}
@@ -91,11 +95,13 @@ export default function FriendsPage() {
       {tab === 'outgoing' && (
         <div className="lp-card px-4">
           {outgoing.isLoading ? loading : outgoing.data?.length ? (
+            <ShowMore items={outgoing.data} limit={5} label="Xem tất cả">{(shown) => (
             <ul className="m-0 p-0 list-none divide-y divide-slate-100">
-              {outgoing.data.map((r) => (
+              {shown.map((r) => (
                 <PersonRow key={r.id} person={r.user} extra={<span className="block text-xs text-slate-500">Gửi {dayjs(r.created_at).fromNow()}</span>} />
               ))}
             </ul>
+            )}</ShowMore>
           ) : <EmptyState art={<Prismo mood="happy" size={80} />} title="Bạn chưa gửi lời mời nào" description="Lời mời đang chờ trả lời sẽ hiện ở đây, bạn có thể huỷ nếu muốn." />}
         </div>
       )}

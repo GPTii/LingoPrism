@@ -8,6 +8,7 @@ import '../controllers/community_controller.dart';
 import 'package:lingoprism/app/data/services/auth_service.dart';
 import 'package:lingoprism/app/core/theme/app_colors.dart';
 import 'package:lingoprism/app/core/navigation/back.dart';
+import '../../../core/widgets/show_more.dart';
 
 class StudyGroupTabView extends StatelessWidget {
   const StudyGroupTabView({
@@ -898,10 +899,14 @@ class LeaderboardList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.separated(
+    return ShowMore(
+      count: members.length,
+      limit: 10,
+      label: 'Xem tất cả thành viên',
+      builder: (_, shown) => ListView.separated(
       physics: const NeverScrollableScrollPhysics(),
       shrinkWrap: true,
-      itemCount: members.length,
+      itemCount: shown,
       padding: EdgeInsets.only(bottom: 24.h),
       separatorBuilder: (_, __) => SizedBox(height: 12.h),
       itemBuilder: (context, index) {
@@ -912,6 +917,7 @@ class LeaderboardList extends StatelessWidget {
           onTap: () => onMemberTap(member),
         );
       },
+    ),
     );
   }
 }

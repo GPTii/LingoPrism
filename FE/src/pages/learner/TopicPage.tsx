@@ -9,7 +9,7 @@ import { useAuth } from '../../auth/store'
 import WordCardView from '../../components/WordCardView'
 import { langTag } from '../../components/TargetWord'
 import { TOPIC_TINTS } from './VocabPage'
-import { EmptyState, PageHeader } from '../../components/ui'
+import { EmptyState, PageHeader, ShowMore } from '../../components/ui'
 import Flashcards from '../../components/Flashcards'
 import { Prismo } from '../../components/brand/Brand'
 import { AppIcon } from '../../components/brand/AppIcon'
@@ -122,9 +122,9 @@ export default function TopicPage() {
           {mine && !words.data?.results.length && (
             <div className="lp-card"><EmptyState art={<Prismo mood="wow" size={80} />} title="Chủ đề còn trống" description="Bấm “Thêm từ” để tìm và đưa từ vào chủ đề của bạn." /></div>
           )}
+          <ShowMore key={level} items={words.data?.results.filter((c) => level === 'all' || c.level === level)} limit={24} label="Xem tất cả từ">{(shown) => (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {words.data?.results.filter((c) => level === 'all' || c.level === level)
-              .map((c) => (
+            {shown.map((c) => (
                 <div key={c.id} className="relative">
                   <WordCardView card={c} topicId={topicId} />
                   {mine && (
@@ -134,6 +134,7 @@ export default function TopicPage() {
                 </div>
               ))}
           </div>
+          )}</ShowMore>
         </>
       )}
       <Flashcards open={cardsOpen} onClose={() => setCardsOpen(false)} cards={words.data?.results ?? []} title={topic.data?.name_vi ?? ''} />

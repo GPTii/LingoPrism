@@ -7,7 +7,7 @@ import { communityApi, type ChatMessage } from '../../api/app'
 import { errorMessage } from '../../api/client'
 import { useAuth } from '../../auth/store'
 import { LiveSocket } from '../../lib/ws'
-import { PageHeader, Section, UserAvatar } from '../../components/ui'
+import { PageHeader, Section, ShowMore, UserAvatar } from '../../components/ui'
 import { StickerImage, StickerPicker } from '../../components/Stickers'
 
 /** Study group: realtime chat (WebSocket) + members ranked by this week's XP. */
@@ -110,8 +110,9 @@ export default function GroupPage() {
         </Section>
         <div className="flex flex-col gap-4">
           <Section title="XP tuần này" extra={<span className="num text-sm text-slate-500">{active.length} thành viên</span>}>
+            <ShowMore items={active} limit={10} label="Xem tất cả thành viên">{(shown) => (
             <ol className="m-0 p-0 list-none flex flex-col gap-2.5">
-              {active.map((m, i) => (
+              {shown.map((m, i) => (
                 <li key={m.id} className="flex items-center gap-2.5">
                   <span className="num w-5 text-sm font-bold text-slate-500">{i + 1}</span>
                   <UserAvatar name={m.user.display_name} src={m.user.avatar} size={30} />
@@ -122,10 +123,11 @@ export default function GroupPage() {
                 </li>
               ))}
             </ol>
+            )}</ShowMore>
           </Section>
           {pending.length > 0 && (
             <Section title="Yêu cầu tham gia">
-              {pending.map((m) => (
+              <ShowMore items={pending} limit={5}>{(shown) => shown.map((m) => (
                 <div key={m.id} className="flex items-center justify-between py-1">
                   <div><div className="font-medium">{m.user.display_name}</div><div className="text-xs text-slate-500">{m.request_message}</div></div>
                   <div className="flex gap-1">
@@ -133,7 +135,7 @@ export default function GroupPage() {
                     <Button size="small" onClick={async () => { await communityApi.moderate(groupId, m.id, 'reject'); members.refetch() }}>Từ chối</Button>
                   </div>
                 </div>
-              ))}
+              ))}</ShowMore>
             </Section>
           )}
         </div>

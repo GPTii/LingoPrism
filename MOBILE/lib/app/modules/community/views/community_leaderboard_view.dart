@@ -31,6 +31,7 @@ import 'package:get/get.dart';
 import '../../../data/services/auth_service.dart';
 import '../controllers/community_controller.dart';
 import 'package:lingoprism/app/core/theme/app_colors.dart';
+import '../../../core/widgets/show_more.dart';
 
 /// Main leaderboard view widget displaying community league rankings
 ///
@@ -350,19 +351,16 @@ class _LeagueSection extends StatelessWidget {
             ),
           ),
           SizedBox(height: 16.h),
-          for (var i = 0; i < participants.length; i++)
-            Padding(
-              padding: EdgeInsets.only(
-                bottom: i == participants.length - 1 ? 0 : 12.h,
-              ),
-              child: RepaintBoundary(
-                key: ValueKey('participant_${participants[i].userId}'),
+          ShowMoreColumn(limit: 10, spacing: 12.h, children: [
+            for (final p in participants)
+              RepaintBoundary(
+                key: ValueKey('participant_${p.userId}'),
                 child: _LeagueParticipantTile(
-                  participant: participants[i],
+                  participant: p,
                   onTap: onParticipantTap,
                 ),
               ),
-            ),
+          ]),
         ],
       ),
     );

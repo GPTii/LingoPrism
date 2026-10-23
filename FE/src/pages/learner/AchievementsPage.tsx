@@ -8,7 +8,7 @@ import { gameApi, type ShopItem } from '../../api/app'
 import { errorMessage } from '../../api/client'
 import { BadgeMedal, FreezeIcon, GemIcon, ScaleIcon, StreakIcon, XpIcon } from '../../components/brand/Brand'
 import { rewardUrl, stickerUrl } from '../../components/Stickers'
-import { Facts, PageHeader, Section } from '../../components/ui'
+import { Facts, PageHeader, Section, useShowMore } from '../../components/ui'
 import { QuestGo } from '../../components/QuestGo'
 
 /** the item's own picture when it has one (rewards artwork), else the brand icon: ice block or the XP star */
@@ -69,6 +69,9 @@ export default function AchievementsPage() {
   const owned = badges.data?.filter((b) => b.owned).length ?? 0
   const items = shop.data?.filter((i) => i.effect !== 'sticker') ?? []
   const packs = shop.data?.filter((i) => i.effect === 'sticker') ?? []
+  // earned badges first, then the ones still to get; long lists open with "Xem tất cả"
+  const badgeList = useShowMore([...(badges.data ?? [])].sort((a, b) => Number(b.owned) - Number(a.owned)), 12, 'Xem tất cả huy hiệu')
+  const packList = useShowMore(packs, 2, 'Xem tất cả gói sticker')
 
   const cell = (d: Dayjs) => {
     const p = days.get(d.format('YYYY-MM-DD'))
@@ -163,7 +166,7 @@ export default function AchievementsPage() {
 
       <Section id="badges" title="Huy hiệu" extra={badges.data && <span className="num text-sm text-slate-500">{owned}/{badges.data.length} đã có</span>}>
         <ul className="m-0 p-0 list-none grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-x-4 gap-y-6">
-          {badges.data?.map((b, i) => (
+          {badgeList.shown.map((b, i) => (
             <li key={b.code} className="flex flex-col items-center text-center gap-1">
               {rewardUrl(b.icon)
                 ? <img src={rewardUrl(b.icon)!} alt="" width={72} height={72} loading="lazy"
@@ -177,6 +180,7 @@ export default function AchievementsPage() {
             </li>
           ))}
         </ul>
+        {badgeList.toggle}
       </Section>
 
       <Section id="shop" title="Cửa hàng" extra={<span className="text-sm text-slate-500">Đổi vảy và ngọc lấy vật phẩm hỗ trợ</span>}>
@@ -213,7 +217,7 @@ export default function AchievementsPage() {
       <Section id="stickers" title="Gói sticker Prismo"
         extra={<span className="text-sm text-slate-500">Mua một lần, gửi mãi trong bình luận, chat nhóm và tin nhắn</span>}>
         <ul className="m-0 p-0 list-none grid md:grid-cols-2 gap-4">
-          {packs.map((p) => (
+          {packList.shown.map((p) => (
             <li key={p.id} className="rounded-2xl bg-slate-50 p-4 flex flex-col gap-3">
               <div className="flex items-center gap-2">
                 <span className="flex-1 font-bold text-slate-800">{p.name}</span>
@@ -232,6 +236,7 @@ export default function AchievementsPage() {
             </li>
           ))}
         </ul>
+        {packList.toggle}
       </Section>
     </div>
   )

@@ -9,7 +9,7 @@ import { useUnread } from '../../lib/useUserEvents'
 import { Prismo } from '../../components/brand/Brand'
 import { AppIcon, type AppIconName } from '../../components/brand/AppIcon'
 import { rewardUrl } from '../../components/Stickers'
-import { EmptyState, PageHeader } from '../../components/ui'
+import { EmptyState, PageHeader, ShowMore } from '../../components/ui'
 
 /** Maps server routes (shared with the mobile app) to web pages. */
 export function webRoute(route?: string): string | null {
@@ -93,8 +93,9 @@ export default function NotificationsPage() {
         {list.isLoading ? <div className="p-4"><Skeleton active /></div> : list.data?.length === 0 ? (
           <EmptyState art={<Prismo mood="sleepy" size={88} />} title="Chưa có thông báo" description="Lời mời kết bạn, yêu cầu vào nhóm, lời nhắc học và tin nhóm sẽ hiện ở đây." />
         ) : (
+          <ShowMore items={list.data} limit={20} label="Xem thông báo cũ hơn">{(shown) => (
           <ul className="m-0 p-0 list-none flex flex-col">
-            {list.data?.map((n) => (
+            {shown.map((n) => (
               <li key={n.id} className={`flex flex-col sm:flex-row gap-2 sm:gap-3 rounded-xl p-3 transition-colors hover:bg-slate-50 ${n.read ? '' : 'bg-brand-50/70'}`}>
                 <button type="button" onClick={() => open(n)} className="flex gap-3 flex-1 min-w-0 text-left cursor-pointer">
                   <span className="mt-0.5 h-10 w-10 shrink-0 rounded-full grid place-items-center bg-slate-100">
@@ -114,6 +115,7 @@ export default function NotificationsPage() {
               </li>
             ))}
           </ul>
+          )}</ShowMore>
         )}
       </div>
     </div>

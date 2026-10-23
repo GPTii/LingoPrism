@@ -5,7 +5,7 @@ import { communityApi } from '../../api/app'
 import { errorMessage } from '../../api/client'
 import { useAuth } from '../../auth/store'
 import { StreakIcon, XpIcon } from '../../components/brand/Brand'
-import { Facts, PageHeader, Section, UserAvatar } from '../../components/ui'
+import { Facts, PageHeader, Section, ShowMore, UserAvatar } from '../../components/ui'
 import { CopyIdButton, FriendButton } from '../../components/Friends'
 import { MessageButton } from './MessagesPage'
 import { ReportUserButton } from './ReportUser'
@@ -90,9 +90,11 @@ export default function MemberProfilePage() {
       </Section>
       {p.recent_posts.length > 0 && (
         <Section title="Ảnh gần đây">
+          <ShowMore items={p.recent_posts} limit={6} label="Xem thêm ảnh">{(shown) => (
           <div className="grid grid-cols-3 gap-2">
-            {p.recent_posts.map((r) => <img key={r.id} src={r.image} alt="" loading="lazy" className="aspect-square w-full object-cover rounded-xl bg-slate-100" />)}
+            {shown.map((r) => <img key={r.id} src={r.image} alt="" loading="lazy" className="aspect-square w-full object-cover rounded-xl bg-slate-100" />)}
           </div>
+          )}</ShowMore>
         </Section>
       )}
     </div>
