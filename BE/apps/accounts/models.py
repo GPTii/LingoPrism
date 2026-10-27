@@ -1,5 +1,5 @@
 import secrets
-from datetime import timedelta
+from datetime import date, timedelta
 
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.models import PermissionsMixin
@@ -97,6 +97,13 @@ class User(AbstractBaseUser, PermissionsMixin, TimeStampedModel):
     is_staff = models.BooleanField(default=False, help_text="Được vào Django Admin")
     is_active = models.BooleanField(default=True)
 
+    # False only for a self sign-up until the 6-digit code mailed to it is entered (accounts made by an admin, the
+    # seed or Google sign-in count as verified)
+    email_verified = models.BooleanField(default=True)
+    # which version of the Terms / Privacy policy (settings.LEGAL_VERSION) the learner accepted, and when
+    terms_version = models.CharField(max_length=20, blank=True)
+    terms_accepted_at = models.DateTimeField(null=True, blank=True)
+
     objects = UserManager()
 
     USERNAME_FIELD = "email"
@@ -125,6 +132,32 @@ class User(AbstractBaseUser, PermissionsMixin, TimeStampedModel):
     @property
     def zh_language_code(self):
         return "zh-Hant" if self.zh_script == self.ZhScript.HANT else "zh-Hans"
+
+    CHILD_AGE = 16  # a "child" in Decree 13/2023: under 16
+
+    @property
+    def is_child(self) -> bool:
+        """Kid mode, or a birth date under CHILD_AGE: a parent or guardian must agree before the account is used."""
+        if self.learner_type == self.LearnerType.KID:
+            return True
+        born = self.birth_date
+        if isinstance(born, str):  # set from a string and not saved/reloaded yet
+            born = date.fromisoformat(born)
+        if born:
+            today = timezone.localdate()
+            age = today.year - born.year - ((today.month, today.day) < (born.month, born.day))
+            return age < self.CHILD_AGE
+        return False
+
+    @property
+    def parent_consent_status(self) -> str:
+        """not_needed | missing | pending (code sent to the parent) | given"""
+        if not self.is_child:
+            return "not_needed"
+        consent = getattr(self, "parent_consent", None)
+        if consent is None:
+            return "missing"
+        return "given" if consent.consented_at else "pending"
 
 
 class UserGoal(models.Model):
@@ -174,3 +207,47 @@ class PasswordResetCode(models.Model):
     @property
     def is_expired(self):
         return timezone.now() > self.created_at + self.TTL
+
+
+class EmailVerificationCode(models.Model):
+    """6-digit code mailed after a self sign-up; entering it proves the address belongs to the learner."""
+
+    TTL = timedelta(hours=24)
+    MAX_ATTEMPTS = 5
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="email_codes")
+    code = models.CharField(max_length=6)
+    attempts = models.PositiveSmallIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    used_at = models.DateTimeField(null=True, blank=True)
+
+    @classmethod
+    def issue(cls, user):
+        cls.objects.filter(user=user, used_at__isnull=True).update(used_at=timezone.now())
+        return cls.objects.create(user=user, code=f"{secrets.randbelow(10**6):06d}")
+
+    @property
+    def is_expired(self):
+        return timezone.now() > self.created_at + self.TTL
+
+
+class ParentalConsent(models.Model):
+    """A parent or guardian agreeing that a child (kid mode, or under 16) uses LingoPrism (Decree 13/2023): a code
+    goes to the parent's e-mail, and entering it is the consent. Kept as proof: who, when, which policy version."""
+
+    TTL = timedelta(hours=24)
+    MAX_ATTEMPTS = 5
+
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="parent_consent")
+    parent_email = models.EmailField()
+    code = models.CharField(max_length=6, blank=True)
+    code_sent_at = models.DateTimeField(null=True, blank=True)
+    attempts = models.PositiveSmallIntegerField(default=0)
+    consented_at = models.DateTimeField(null=True, blank=True)
+    policy_version = models.CharField(max_length=20, blank=True)
+    ip = models.GenericIPAddressField(null=True, blank=True)
+    note = models.CharField(max_length=120, blank=True, help_text="VD: tài khoản có từ trước khi có bước này")
+
+    @property
+    def code_expired(self):
+        return not self.code_sent_at or timezone.now() > self.code_sent_at + self.TTL

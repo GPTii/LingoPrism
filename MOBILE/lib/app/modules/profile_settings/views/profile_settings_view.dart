@@ -6,6 +6,7 @@ import '../../../core/theme/theme_service.dart';
 import '../controllers/profile_settings_controller.dart';
 import 'package:lingoprism/app/core/theme/app_colors.dart';
 import 'package:lingoprism/app/core/navigation/back.dart';
+import '../../account/account_gates.dart';
 
 class ProfileSettingsView extends GetView<ProfileSettingsController> {
   const ProfileSettingsView({super.key});
@@ -67,6 +68,14 @@ class ProfileSettingsView extends GetView<ProfileSettingsController> {
               label: 'Hướng dẫn sử dụng',
               onTap: controller.openGuide,
             ),
+            SizedBox(height: 14.h),
+            _SettingsTile(label: 'Có gì mới', onTap: () => openSite('/releases')),
+            SizedBox(height: 14.h),
+            _SettingsTile(label: 'Chính sách quyền riêng tư', onTap: () => openSite('/privacy')),
+            SizedBox(height: 14.h),
+            _SettingsTile(label: 'Điều khoản sử dụng', onTap: () => openSite('/terms')),
+            SizedBox(height: 14.h),
+            _SettingsTile(label: 'Xoá tài khoản', onTap: confirmDeleteAccount),
             SizedBox(height: 32.h),
             Obx(() {
               final isProcessing = controller.isProcessing.value;

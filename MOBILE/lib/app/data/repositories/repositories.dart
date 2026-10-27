@@ -22,10 +22,31 @@ class AuthRepository {
   }
 
   static Future<(AppUser, String, String)> register(String email, String password, String displayName) async {
+    // the sign-up screen only gets here with the Terms box ticked
     final d = asMap(await _api.post('/auth/register/',
-        data: {'email': email, 'password': password, 'display_name': displayName}, auth: false));
+        data: {'email': email, 'password': password, 'display_name': displayName, 'accept_terms': true}, auth: false));
     return _session(d);
   }
+
+  static Future<AppUser> verifyEmail(String code) async =>
+      AppUser.fromJson(asMap(await _api.post('/auth/email/verify/', data: {'code': code})));
+
+  static Future<String> resendEmailCode() async => asString(asMap(await _api.post('/auth/email/resend/'))['detail']);
+
+  /// A child's account: e-mails the parent a code; returns where it went.
+  static Future<String> askParent(String parentEmail) async => asString(
+      asMap(await _api.post('/me/parent-consent/request/', data: {'parent_email': parentEmail, 'agree': true}))['parent_email'],
+      parentEmail);
+
+  static Future<AppUser> confirmParent(String code) async =>
+      AppUser.fromJson(asMap(await _api.post('/me/parent-consent/confirm/', data: {'code': code})));
+
+  /// For good: learning history, photos, posts, messages.
+  static Future<void> deleteAccount({String? password, String? confirm}) =>
+      _api.post('/me/delete/', data: {if (password != null) 'password': password, if (confirm != null) 'confirm': confirm});
+
+  /// Release notes, newest first (BE/apps/core/releases.json).
+  static Future<List<Map<String, dynamic>>> releases() async => asMapList(asMap(await _api.get('/releases/'))['results']);
 
   static Future<(AppUser, String, String)> google(String idToken) async {
     final d = asMap(await _api.post('/auth/google/', data: {'id_token': idToken}, auth: false));

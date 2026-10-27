@@ -126,6 +126,13 @@ a { text-underline-offset: 3px; }
 
 /* one elevation: a hairline on a white surface, no drifting shadow */
 .lp-card { background: var(--surface); border: 1px solid var(--line); border-radius: 1rem; }
+
+/* long texts (Privacy policy, Terms, release notes): comfortable line length and rhythm */
+.legal-text { line-height: 1.7; color: var(--ink-2, inherit); }
+.legal-text h2 { font-size: 1.25rem; font-weight: 800; margin: 2rem 0 0.75rem; }
+.legal-text p, .legal-text li { max-width: 70ch; }
+.legal-text ul, .legal-text ol { padding-left: 1.25rem; }
+.legal-text li + li { margin-top: 0.4rem; }
 .lift { transition: transform 150ms var(--ease-out), border-color 150ms var(--ease-out), background-color 150ms var(--ease-out); }
 .lift:hover { transform: translateY(-1px); border-color: var(--line-strong); }
 .lift:active { transform: scale(0.985); }

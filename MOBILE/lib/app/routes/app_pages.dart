@@ -74,6 +74,7 @@ import '../modules/learning_session/bindings/learning_session_binding.dart';
 import '../modules/learning_session/views/learning_session_view.dart';
 import '../modules/vocabulary_flashcard/bindings/vocabulary_flashcard_binding.dart';
 import '../modules/vocabulary_flashcard/views/vocabulary_flashcard_view.dart';
+import '../modules/account/account_gates.dart';
 
 part 'app_routes.dart';
 
@@ -113,6 +114,10 @@ class AppPages {
       name: _Paths.survey,
       page: () => const SurveyView(),
       binding: SurveyBinding(),
+    ),
+    GetPage(
+      name: _Paths.parentConsent,
+      page: () => const ParentConsentView(),
     ),
     GetPage(
       name: _Paths.forgotPassword,

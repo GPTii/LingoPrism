@@ -13,6 +13,7 @@ import { AppIcon, type AppIconName } from '../../components/brand/AppIcon'
 import { LangGlyph, PrismoAvatar } from '../../components/brand/Brand'
 import { MyIdCard } from '../../components/Friends'
 import { PageHeader, Section, UserAvatar } from '../../components/ui'
+import { DeleteAccountSection } from '../../components/AccountGates'
 
 const LANGS = [
   { value: 'en', label: <span className="inline-flex items-center gap-2"><LangGlyph lang="en" size={18} />Tiếng Anh</span> },
@@ -261,7 +262,11 @@ export default function ProfilePage() {
       </Form>
       <GoalSection />
       <NotificationSection />
-      <PasswordSection />
+      {user?.has_password !== false && <PasswordSection />}
+      <DeleteAccountSection />
+      <p className="text-center text-sm text-slate-500 m-0">
+        <Link to="/releases">Có gì mới</Link> · <Link to="/privacy">Quyền riêng tư</Link> · <Link to="/terms">Điều khoản</Link>
+      </p>
     </div>
   )
 }

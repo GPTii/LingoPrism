@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { Link } from 'react-router-dom'
 import { LangGlyph, Logo, Prismo } from './brand/Brand'
 
 const LANGS = [
@@ -40,8 +41,23 @@ export default function AuthCard({ title, subtitle, children }: { title: string;
           <h1 className="text-3xl font-extrabold text-slate-800 m-0">{title}</h1>
           {subtitle ? <p className="text-slate-500 mt-2 mb-7">{subtitle}</p> : <div className="mb-6" />}
           {children}
+          <nav className="mt-8 flex justify-center gap-4 text-sm text-slate-500" aria-label="Chính sách">
+            <Link to="/privacy" className="text-slate-500">Quyền riêng tư</Link>
+            <Link to="/terms" className="text-slate-500">Điều khoản</Link>
+            <Link to="/releases" className="text-slate-500">Có gì mới</Link>
+          </nav>
         </div>
       </main>
     </div>
+  )
+}
+
+/** Under the Google button: signing up with Google also accepts the Terms (recorded by the server). */
+export function GoogleTermsNote() {
+  return (
+    <p className="text-xs text-slate-500 text-center mt-2 mb-0">
+      Tiếp tục với Google nghĩa là bạn đồng ý <Link to="/terms" target="_blank">Điều khoản</Link> và{' '}
+      <Link to="/privacy" target="_blank">Chính sách quyền riêng tư</Link>.
+    </p>
   )
 }

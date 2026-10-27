@@ -8,6 +8,7 @@ abstract class Routes {
   static const login = _Paths.login;
   static const register = _Paths.register;
   static const survey = _Paths.survey;
+  static const parentConsent = _Paths.parentConsent;
   static const forgotPassword = _Paths.forgotPassword;
   static const verifyResetCode = _Paths.verifyResetCode;
   static const newPassword = _Paths.newPassword;
@@ -65,6 +66,7 @@ abstract class _Paths {
   static const login = '/login';
   static const register = '/register';
   static const survey = '/survey';
+  static const parentConsent = '/parent-consent';
   static const forgotPassword = '/forgot-password';
   static const verifyResetCode = '/verify-reset-code';
   static const newPassword = '/new-password';

@@ -23,8 +23,8 @@ from apps.core.permissions import IsAdminRole
 from apps.core.throttles import EmailRateThrottle
 
 from . import serializers as s
-from .models import AuthProvider, PasswordResetCode, User, UserGoal
-from .tasks import send_reset_code
+from .models import AuthProvider, EmailVerificationCode, ParentalConsent, PasswordResetCode, User, UserGoal
+from .tasks import send_email_code, send_parent_consent, send_reset_code
 
 security_log = logging.getLogger("security")
 # default limits + one per target e-mail (a password guess or reset-code flood spread over many IPs)
@@ -57,6 +57,7 @@ class RegisterView(APIView):
         ser = s.RegisterSerializer(data=request.data)
         ser.is_valid(raise_exception=True)
         user = ser.save()
+        send_email_code.delay(user.email, EmailVerificationCode.issue(user).code)
         return _auth_response(user, status.HTTP_201_CREATED)
 
 
@@ -112,9 +113,14 @@ class GoogleLoginView(APIView):
             else:
                 user = User.objects.filter(email=info["email"].lower()).first()
                 if user is None:
-                    user = User.objects.create_user(email=info["email"], display_name=info.get("name", ""))
+                    # the Google button sits under "continuing means accepting the Terms and the Privacy policy"
+                    user = User.objects.create_user(email=info["email"], display_name=info.get("name", ""),
+                                                    terms_version=settings.LEGAL_VERSION, terms_accepted_at=timezone.now())
                     UserGoal.objects.create(user=user)
                 AuthProvider.objects.create(user=user, provider=AuthProvider.Provider.GOOGLE, provider_uid=info["sub"])
+            if not user.email_verified:  # Google vouches for the address (email_verified above)
+                user.email_verified = True
+                user.save(update_fields=["email_verified"])
         if user.status == User.Status.LOCKED:
             return Response({"detail": "Tài khoản đã bị khóa", "errors": {}}, status=403)
         return _auth_response(user)
@@ -309,3 +315,137 @@ class AdminUserViewSet(BulkDeleteMixin, viewsets.ModelViewSet):
             raise Conflict("Tài khoản đang được dữ liệu khác tham chiếu – hãy khóa thay vì xóa.")
 
 
+
+
+
+def _check_code(request, record, code: str, max_attempts: int, expired: bool):
+    """Shared by e-mail verification and parent consent: a wrong code counts, the fifth wrong one ends the code."""
+    if record is None or expired or record.attempts >= max_attempts:
+        return False
+    if not secrets.compare_digest(record.code, code):
+        security_log.warning("wrong code user=%s ip=%s", request.user.id, _client_ip(request))
+        record.attempts += 1
+        record.save(update_fields=["attempts"])
+        return False
+    return True
+
+
+@extend_schema(tags=["auth"])
+class VerifyEmailView(APIView):
+    """POST {code}: the 6-digit code mailed after sign-up; the account's e-mail is then verified."""
+
+    throttle_scope = "email_code"
+
+    @extend_schema(request=s.CodeSerializer, responses={200: s.UserSerializer})
+    def post(self, request):
+        user = request.user
+        if not user.email_verified:
+            ser = s.CodeSerializer(data=request.data)
+            ser.is_valid(raise_exception=True)
+            record = EmailVerificationCode.objects.filter(user=user, used_at__isnull=True).order_by("-created_at").first()
+            if not _check_code(request, record, ser.validated_data["code"], EmailVerificationCode.MAX_ATTEMPTS,
+                               record is not None and record.is_expired):
+                return Response({"detail": "Mã không đúng hoặc đã hết hạn. Bấm “Gửi lại mã” để nhận mã mới.", "errors": {}},
+                                status=400)
+            record.used_at = timezone.now()
+            record.save(update_fields=["used_at"])
+            user.email_verified = True
+            user.save(update_fields=["email_verified"])
+        return Response(s.UserSerializer(user, context={"request": request}).data)
+
+
+@extend_schema(tags=["auth"])
+class ResendEmailCodeView(APIView):
+    """POST: a new verification code to the account's e-mail (the old one stops working)."""
+
+    throttle_scope = "email_code"
+
+    @extend_schema(request=None, responses={200: dict})
+    def post(self, request):
+        if request.user.email_verified:
+            return Response({"detail": "Email đã được xác minh"})
+        send_email_code.delay(request.user.email, EmailVerificationCode.issue(request.user).code)
+        return Response({"detail": f"Đã gửi mã mới tới {request.user.email}"})
+
+
+@extend_schema(tags=["auth"])
+class ParentConsentRequestView(APIView):
+    """POST {parent_email, agree}: a child's account (kid mode or under 16) asks a parent or guardian; they get a
+    code by e-mail, with the Privacy policy, and give it to the child if they agree (Decree 13/2023)."""
+
+    throttle_scope = "email_code"
+
+    @extend_schema(request=s.ParentConsentRequestSerializer, responses={200: dict})
+    def post(self, request):
+        user = request.user
+        if not user.is_child:
+            return Response({"status": "not_needed"})
+        ser = s.ParentConsentRequestSerializer(data=request.data)
+        ser.is_valid(raise_exception=True)
+        consent, _ = ParentalConsent.objects.get_or_create(user=user, defaults={"parent_email": ser.validated_data["parent_email"]})
+        if consent.consented_at:
+            return Response({"status": "given"})
+        consent.parent_email = ser.validated_data["parent_email"].lower()
+        consent.code = f"{secrets.randbelow(10**6):06d}"
+        consent.code_sent_at = timezone.now()
+        consent.attempts = 0
+        consent.save()
+        send_parent_consent.delay(consent.parent_email, user.display_name or user.email, user.email, consent.code,
+                                  settings.SITE_URL)
+        return Response({"status": "pending", "parent_email": consent.parent_email})
+
+
+@extend_schema(tags=["auth"])
+class ParentConsentConfirmView(APIView):
+    """POST {code}: the code from the parent's e-mail. Kept as the proof of consent: when, which policy, from where."""
+
+    throttle_scope = "email_code"
+
+    @extend_schema(request=s.CodeSerializer, responses={200: s.UserSerializer})
+    def post(self, request):
+        user = request.user
+        consent = ParentalConsent.objects.filter(user=user).first()
+        if user.is_child and not (consent and consent.consented_at):
+            ser = s.CodeSerializer(data=request.data)
+            ser.is_valid(raise_exception=True)
+            if not _check_code(request, consent, ser.validated_data["code"], ParentalConsent.MAX_ATTEMPTS,
+                               consent is not None and consent.code_expired):
+                return Response({"detail": "Mã không đúng hoặc đã hết hạn. Hãy gửi lại email cho phụ huynh.", "errors": {}},
+                                status=400)
+            consent.consented_at = timezone.now()
+            consent.policy_version = settings.LEGAL_VERSION
+            consent.ip = _client_ip(request)
+            consent.code = ""
+            consent.save()
+            user.refresh_from_db()
+        return Response(s.UserSerializer(user, context={"request": request}).data)
+
+
+@extend_schema(tags=["users"])
+class DeleteAccountView(APIView):
+    """POST {password} – or {confirm: "XOA"} for an account without a password (Google sign-in): deletes the account
+    for good, with its learning history, photos, posts and messages (the photo files too). Every device is signed
+    out first. Required by Google Play and the App Store; /delete-account on the web explains it."""
+
+    throttle_scope = "login"
+
+    @extend_schema(request=s.DeleteAccountSerializer, responses={204: None})
+    def post(self, request):
+        user = request.user
+        ser = s.DeleteAccountSerializer(data=request.data)
+        ser.is_valid(raise_exception=True)
+        if user.has_usable_password():
+            if not user.check_password(ser.validated_data.get("password") or ""):
+                return Response({"detail": "Mật khẩu không đúng", "errors": {}}, status=400)
+        elif (ser.validated_data.get("confirm") or "").strip().upper() not in ("XOA", "XOÁ", "XÓA"):
+            return Response({"detail": "Hãy gõ XOA để xác nhận", "errors": {}}, status=400)
+        if user.role == User.Role.ADMIN and not User.objects.filter(role=User.Role.ADMIN).exclude(pk=user.pk).exists():
+            return Response({"detail": "Phải còn ít nhất một quản trị viên", "errors": {}}, status=400)
+        logout_everywhere(user)
+        security_log.warning("account deleted by its owner id=%s ip=%s", user.id, _client_ip(request))
+        try:
+            with transaction.atomic():
+                user.delete()
+        except ProtectedError:
+            return Response({"detail": "Không xoá được tài khoản lúc này, hãy liên hệ hỗ trợ.", "errors": {}}, status=409)
+        return Response(status=status.HTTP_204_NO_CONTENT)

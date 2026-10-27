@@ -2,7 +2,7 @@ name: lingoprism
 description: LingoPrism – học từ vựng Việt · Anh · Trung bằng thị giác máy tính
 publish_to: 'none'
 
-version: 1.0.0+1
+version: 1.4.0+2004
 
 environment:
   sdk: '>=3.0.0 <4.0.0'

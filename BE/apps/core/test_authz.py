@@ -21,7 +21,7 @@ pytestmark = pytest.mark.django_db
 PUBLIC = {  # reachable signed out, on purpose
     "api/v1/health/", "api/v1/auth/register/", "api/v1/auth/login/", "api/v1/auth/google/",
     "api/v1/auth/google/config/", "api/v1/auth/refresh/", "api/v1/auth/logout/", "api/v1/auth/password/forgot/",
-    "api/v1/auth/password/verify/", "api/v1/auth/password/reset/", "api/v1/languages/",
+    "api/v1/auth/password/verify/", "api/v1/auth/password/reset/", "api/v1/languages/", "api/v1/releases/",
 }
 STAFF_ONLY = re.compile(r"^api/v1/(admin/|pois/stats/)")
 SKIP_FOR_ADMIN = re.compile(r"^api/v1/admin/(algorithms/run/|league-tiers/close-week/|broadcast/)")  # slow / fan-out

@@ -11,6 +11,7 @@ import '../../profile/controllers/profile_controller.dart';
 import '../../profile/views/profile_view.dart';
 import 'package:lingoprism/app/core/theme/app_colors.dart';
 import 'package:lingoprism/app/core/widgets/app_icon.dart';
+import '../../account/account_gates.dart';
 
 class HomeView extends GetView<HomeController> {
   const HomeView({super.key});
@@ -19,7 +20,9 @@ class HomeView extends GetView<HomeController> {
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false, // giữ FAB cố định khi mở bàn phím
-      body: Obx(() {
+      body: Column(children: [
+        const VerifyEmailBanner(),
+        Expanded(child: Obx(() {
         switch (controller.currentIndex) {
           case 0:
             return const LearningTabView();
@@ -38,7 +41,8 @@ class HomeView extends GetView<HomeController> {
           default:
             return const LearningTabView();
         }
-      }),
+      })),
+      ]),
       bottomNavigationBar: Obx(() => DecoratedBox(
             decoration: BoxDecoration(border: Border(top: BorderSide(color: AppColors.line))),
             child: BottomAppBar(

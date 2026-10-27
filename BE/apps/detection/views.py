@@ -149,16 +149,12 @@ class ConfirmSerializer(serializers.Serializer):
 
 def delete_detection(det: Detection) -> None:
     """A photo deleted by its owner or an admin goes for good: the row, its objects and their error reports (cascade),
-    and the files on disk – the photo once no other detection uses it, and the reports' crops. The files go only
-    after the database change is committed, so a failed delete never leaves rows pointing at missing files."""
-    files = [(r.crop.storage, r.crop.name) for r in CorrectionMemory.objects.filter(item__detection=det) if r.crop]
+    and the photo itself once no other detection uses it. Their files leave the disk with the rows (post_delete
+    receivers in apps/core/apps.py)."""
     photo = det.photo
     det.delete()
     if photo and not photo.detections.exists():
-        if photo.image:
-            files.append((photo.image.storage, photo.image.name))
         photo.delete()
-    transaction.on_commit(lambda: [storage.delete(name) for storage, name in files])
 
 
 @extend_schema(tags=["detection"])

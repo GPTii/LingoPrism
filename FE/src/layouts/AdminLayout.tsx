@@ -11,6 +11,7 @@ import { useAuth } from '../auth/store'
 import { useLogout } from '../auth/useLogout'
 import { LogoMark } from '../components/brand/Brand'
 import { useThemeMode } from '../theme/store'
+import { WhatsNew } from '../components/AccountGates'
 
 const ITEMS = [
   { key: '/admin', icon: <DashboardOutlined />, label: 'Tổng quan' },
@@ -94,6 +95,7 @@ export default function AdminLayout() {
         </Layout.Header>
         <Layout.Content className="p-3 md:p-6">
           <div className="mx-auto w-full max-w-[1600px]">
+            <WhatsNew />
             <Suspense fallback={null}><Outlet /></Suspense>
           </div>
         </Layout.Content>

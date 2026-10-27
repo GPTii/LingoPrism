@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import '../../../core/theme/app_colors.dart';
 import '../controllers/register_controller.dart';
+import '../../account/account_gates.dart';
 
 class RegisterView extends GetView<RegisterController> {
   const RegisterView({super.key});
@@ -241,7 +242,9 @@ class RegisterView extends GetView<RegisterController> {
                               ],
                             ),
 
-                            SizedBox(height: 24.h),
+                            SizedBox(height: 12.h),
+                            TermsCheckbox(accepted: controller.acceptedTerms),
+                            SizedBox(height: 12.h),
 
                             // Register button
                             SizedBox(
@@ -319,6 +322,8 @@ class RegisterView extends GetView<RegisterController> {
                                 ),
                               ],
                             ),
+                            SizedBox(height: 10.h),
+                            const GoogleTermsNote(),
 
                             SizedBox(height: 32.h),
 

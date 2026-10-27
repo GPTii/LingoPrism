@@ -15,6 +15,7 @@ import { AppIcon, type AppIconName } from '../components/brand/AppIcon'
 import { useThemeMode, type ThemeMode } from '../theme/store'
 import SideNav, { navGroups } from '../components/SideNav'
 import ErrorBoundary from '../components/ErrorBoundary'
+import { VerifyEmailBanner, WhatsNew } from '../components/AccountGates'
 import { vocabApi } from '../api/vocab'
 
 /** One quiet colour system: the page you are on is marked, the rest stay out of the way. */
@@ -188,6 +189,8 @@ export default function LearnerLayout() {
           </header>
           <main className={`flex-1 px-3 sm:px-4 md:px-8 xl:px-12 pt-2 md:pt-4 md:pb-12 ${focus ? 'pb-4' : 'pb-28'}`}>
             <div className="mx-auto w-full max-w-7xl 2xl:max-w-[1600px]">
+              <VerifyEmailBanner />
+              <WhatsNew />
               <div key={location.pathname} className="animate-page"><ErrorBoundary><Suspense fallback={null}><Outlet /></Suspense></ErrorBoundary></div>
             </div>
           </main>

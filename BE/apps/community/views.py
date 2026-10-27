@@ -10,7 +10,7 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.response import Response
 
-from apps.core.permissions import IsStaffRole
+from apps.core.permissions import IsStaffRole, require_verified_email
 from apps.gamification import services as game
 from apps.gamification.mascot import look
 from apps.gamification.models import DailyQuest
@@ -198,6 +198,7 @@ class PostViewSet(ActionThrottleMixin, mixins.ListModelMixin, mixins.RetrieveMod
         return qs.order_by("-created_at")
 
     def perform_create(self, serializer):
+        require_verified_email(self.request.user)
         serializer.save(user=self.request.user)
         game.bump_stat(self.request.user, "posts")
         game.progress_quest(self.request.user, DailyQuest.Kind.POST_COMMUNITY_IMAGE)
@@ -228,6 +229,7 @@ class PostViewSet(ActionThrottleMixin, mixins.ListModelMixin, mixins.RetrieveMod
         if request.method == "GET":
             qs = post.comments.filter(hidden=False).select_related("user__mascot")
             return Response(CommentSerializer(qs, many=True, context={"request": request}).data)
+        require_verified_email(request.user)
         ser = CommentSerializer(data=request.data, context={"request": request})
         ser.is_valid(raise_exception=True)
         comment = ser.save(post=post, user=request.user)
@@ -380,6 +382,7 @@ class CommunityUserViewSet(ActionThrottleMixin, viewsets.GenericViewSet):
                 fr.delete()
                 count_friends(me, target)
             return Response({"friend_status": "none"})
+        require_verified_email(me)
         if target.id == me.id or target.learner_type == "kid" or target.role != User.Role.LEARNER:
             return Response({"detail": "Bạn không thể kết bạn với tài khoản này.", "errors": {}}, status=400)
         if blocked_between(me.id, target.id):
@@ -565,6 +568,7 @@ class GroupViewSet(ActionThrottleMixin, mixins.ListModelMixin, mixins.RetrieveMo
             raise PermissionDenied("Chỉ trưởng nhóm mới có quyền này.")
 
     def perform_create(self, serializer):
+        require_verified_email(self.request.user)
         group = serializer.save(created_by=self.request.user)
         GroupMember.objects.create(group=group, user=self.request.user, role="leader", status="active")
 

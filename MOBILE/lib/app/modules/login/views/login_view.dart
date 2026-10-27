@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import '../../../core/theme/app_colors.dart';
 import '../controllers/login_controller.dart';
+import '../../account/account_gates.dart';
 
 class LoginView extends GetView<LoginController> {
   const LoginView({super.key});
@@ -279,6 +280,8 @@ class LoginView extends GetView<LoginController> {
                                 ),
                               ],
                             ),
+                            SizedBox(height: 10.h),
+                            const GoogleTermsNote(),
 
                             SizedBox(height: 32.h),
 

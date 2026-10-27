@@ -171,6 +171,7 @@ REST_FRAMEWORK = {
         "auth_email": env("THROTTLE_AUTH_EMAIL", default="10/hour"),  # per target e-mail, any IP
         "register": env("THROTTLE_REGISTER", default="60/hour"),  # per IP: a teacher may sign up a whole class
         "password_reset": env("THROTTLE_PASSWORD_RESET", default="10/hour"),
+        "email_code": env("THROTTLE_EMAIL_CODE", default="10/hour"),  # e-mail verification / parent consent codes
         "detect": env("THROTTLE_DETECT", default="30/min"),  # YOLO on the CPU: the most expensive endpoint
         "upload": env("THROTTLE_UPLOAD", default="30/hour"),  # community posts, avatars
         "report": env("THROTTLE_REPORT", default="30/hour"),
@@ -201,6 +202,11 @@ SPECTACULAR_SETTINGS = {
 CORS_ALLOWED_ORIGINS = env.list("CORS_ALLOWED_ORIGINS", default=["http://localhost:5173"])
 CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=["http://localhost:5173"])
 
+# version (date) of the Terms of use and Privacy policy pages: a sign-up records which one was accepted; bump it
+# together with FE/src/pages/legal when their text changes
+LEGAL_VERSION = "2026-10-28"
+# the public site, for links in e-mails (Privacy policy, deleting an account)
+SITE_URL = env("SITE_URL", default="https://lingoprism.id.vn")
 GOOGLE_CLIENT_IDS = env.list("GOOGLE_CLIENT_IDS", default=[])
 # Firebase Cloud Messaging: path to the service-account JSON (secret, on the server only); empty = push off
 FIREBASE_CREDENTIALS_FILE = env("FIREBASE_CREDENTIALS_FILE", default="")

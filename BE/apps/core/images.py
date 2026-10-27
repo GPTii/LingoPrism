@@ -54,3 +54,19 @@ def sanitize_fields(*fields):
             sanitize(getattr(instance, field), MAX_SIDE.get(field, DEFAULT_MAX_SIDE))
 
     return receiver
+
+
+def delete_files_with(*fields):
+    """post_delete receiver: the instance's files leave MEDIA_ROOT with its row (a deleted photo, post or account must
+    not stay readable on disk), once the deletion is committed so a rolled back delete keeps its files."""
+
+    def receiver(sender, instance, **kwargs):
+        from django.db import transaction
+
+        for field in fields:
+            f = getattr(instance, field, None)
+            if f and f.name:
+                storage, name = f.storage, f.name
+                transaction.on_commit(lambda storage=storage, name=name: storage.delete(name))
+
+    return receiver

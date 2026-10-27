@@ -10,6 +10,10 @@ import HomePage from './pages/learner/HomePage'
 
 // pages load on demand: a first visit downloads only the shell, sign-in and home, not every screen
 const WelcomePage = lazy(() => import('./pages/auth/WelcomePage'))
+const PrivacyPage = lazy(() => import('./pages/legal/LegalPages').then((m) => ({ default: m.PrivacyPage })))
+const TermsPage = lazy(() => import('./pages/legal/LegalPages').then((m) => ({ default: m.TermsPage })))
+const DeleteAccountInfoPage = lazy(() => import('./pages/legal/LegalPages').then((m) => ({ default: m.DeleteAccountInfoPage })))
+const ReleasesPage = lazy(() => import('./pages/legal/LegalPages').then((m) => ({ default: m.ReleasesPage })))
 const ProfilePage = lazy(() => import('./pages/learner/ProfilePage'))
 const VocabPage = lazy(() => import('./pages/learner/VocabPage'))
 const TopicPage = lazy(() => import('./pages/learner/TopicPage'))
@@ -56,6 +60,11 @@ export default function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        {/* public: linked from sign-up, the store listings and the e-mails to parents */}
+        <Route path="/privacy" element={<PrivacyPage />} />
+        <Route path="/terms" element={<TermsPage />} />
+        <Route path="/delete-account" element={<DeleteAccountInfoPage />} />
+        <Route path="/releases" element={<ReleasesPage />} />
 
         <Route element={<RequireAuth />}>
           <Route path="/welcome" element={<WelcomePage />} />

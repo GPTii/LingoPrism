@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../routes/app_pages.dart';
 import '../../../data/services/auth_service.dart';
 
 class SurveyController extends GetxController {
@@ -151,7 +150,7 @@ class SurveyController extends GetxController {
   // Complete survey and navigate to home
   Future<void> completeSurvey() async {
     await _persistSurveyData();
-    Get.offAllNamed(Routes.home);
+    Get.offAllNamed(AuthService.to.nextRoute); // a child's account asks a parent first
   }
 
   Future<void> _persistSurveyData() async {

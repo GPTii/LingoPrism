@@ -36,7 +36,7 @@ class SplashController extends GetxController {
           _go(Routes.login); // session expired while refreshing
           return;
         }
-        _go(AuthService.to.currentUser?.onboardingCompleted == true ? Routes.home : Routes.survey);
+        _go(AuthService.to.nextRoute);
         return;
       }
       _go(Routes.login);

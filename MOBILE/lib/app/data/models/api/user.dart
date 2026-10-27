@@ -43,6 +43,9 @@ class AppUser {
     this.gems = 0,
     this.goal,
     this.mascot,
+    this.emailVerified = true,
+    this.parentConsent = 'not_needed',
+    this.hasPassword = true,
   });
 
   final int id;
@@ -71,6 +74,17 @@ class AppUser {
 
   /// my Prismo as I dressed it (null until the wardrobe is opened)
   final MascotLook? mascot;
+
+  /// false after a self sign-up until the mailed code is entered: posting, friends and messages wait for it
+  final bool emailVerified;
+
+  /// not_needed | missing | pending | given – a child's account (kid mode or under 16) waits for a parent
+  final String parentConsent;
+
+  /// false for a Google-only account: deleting it asks for a typed word instead of the password
+  final bool hasPassword;
+
+  bool get needsParent => parentConsent == 'missing' || parentConsent == 'pending';
 
   static const String defaultAvatar = 'assets/brand/avatar/avatar_1.png';
 
@@ -118,6 +132,9 @@ class AppUser {
         gems: asInt(j['gems_balance']),
         goal: j['goal'] is Map ? UserGoal.fromJson(asMap(j['goal'])) : null,
         mascot: MascotLook.fromJson(j['mascot']),
+        emailVerified: j['email_verified'] != false,
+        parentConsent: asString(j['parent_consent'], 'not_needed'),
+        hasPassword: j['has_password'] != false,
       );
 
   Map<String, dynamic> toJson() => {
@@ -141,6 +158,9 @@ class AppUser {
         'onboarding_completed': onboardingCompleted,
         'scales_balance': scales,
         'gems_balance': gems,
+        'email_verified': emailVerified,
+        'parent_consent': parentConsent,
+        'has_password': hasPassword,
         if (mascot != null) 'mascot': mascot!.toJson(),
         if (goal != null)
           'goal': {

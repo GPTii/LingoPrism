@@ -11,7 +11,7 @@ def client():
 
 
 def register(client, email="a@example.com", password="Strong!Pass123"):
-    return client.post("/api/v1/auth/register/", {"email": email, "password": password}, format="json")
+    return client.post("/api/v1/auth/register/", {"email": email, "password": password, "accept_terms": True}, format="json")
 
 
 def test_register_login_me(client):

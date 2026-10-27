@@ -23,6 +23,9 @@ class RegisterController extends GetxController {
   final _isPasswordVisible = false.obs;
   final _isConfirmPasswordVisible = false.obs;
   final _isLoading = false.obs;
+
+  /// "I accept the Terms and the Privacy policy": required to sign up
+  final acceptedTerms = false.obs;
   final _emailError = ''.obs;
   final _passwordError = ''.obs;
   final _confirmPasswordError = ''.obs;
@@ -75,7 +78,8 @@ class RegisterController extends GetxController {
            confirmPasswordText.isNotEmpty &&
            emailError.isEmpty &&
            passwordError.isEmpty &&
-           confirmPasswordError.isEmpty;
+           confirmPasswordError.isEmpty &&
+           acceptedTerms.value;
   }
 
   void togglePasswordVisibility() {
@@ -187,7 +191,7 @@ class RegisterController extends GetxController {
     final result = await _authService.loginWithGoogle();
     if (result['success'] == true) {
       await AppInitializer.onSessionStarted();
-      Get.offAllNamed(_authService.currentUser?.onboardingCompleted == true ? Routes.home : Routes.survey);
+      Get.offAllNamed(_authService.nextRoute);
     } else if (result['cancelled'] != true) {
       AppWidgets.showErrorDialog(title: 'Thông báo', message: result['message'] as String);
     }

@@ -1,5 +1,7 @@
+from django.conf import settings
 from django.contrib.auth import authenticate, password_validation
 from django.db import IntegrityError, transaction
+from django.utils import timezone
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -45,8 +47,15 @@ class UserSerializer(serializers.ModelSerializer):
             "learner_type", "learning_languages", "active_language", "zh_script", "show_zhuyin",
             "birth_date", "gender", "purpose", "daily_minutes", "onboarding_completed", "timezone",
             "scales_balance", "gems_balance", "goal", "mascot", "created_at",
+            "email_verified", "parent_consent", "has_password",
         ]
-        read_only_fields = ["id", "public_id", "email", "role", "status", "scales_balance", "gems_balance", "created_at"]
+        read_only_fields = ["id", "public_id", "email", "role", "status", "scales_balance", "gems_balance", "created_at",
+                            "email_verified"]
+
+    parent_consent = serializers.CharField(source="parent_consent_status", read_only=True,
+                                           help_text="not_needed | missing | pending | given")
+    has_password = serializers.BooleanField(source="has_usable_password", read_only=True,
+                                            help_text="False for Google-only accounts (deleting asks for a typed word)")
 
     def validate_learning_languages(self, value):
         bad = [v for v in value if v not in LANGUAGE_CHOICES]
@@ -81,6 +90,12 @@ class RegisterSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
     display_name = serializers.CharField(max_length=80, required=False, allow_blank=True)
+    accept_terms = serializers.BooleanField(help_text="Đã đọc và đồng ý Điều khoản sử dụng và Chính sách quyền riêng tư")
+
+    def validate_accept_terms(self, value):
+        if not value:
+            raise serializers.ValidationError("Bạn cần đồng ý Điều khoản sử dụng và Chính sách quyền riêng tư")
+        return value
 
     def validate_email(self, value):
         value = value.lower()
@@ -99,6 +114,9 @@ class RegisterSerializer(serializers.Serializer):
                     email=validated["email"],
                     password=validated["password"],
                     display_name=validated.get("display_name") or validated["email"].split("@")[0],
+                    email_verified=False,
+                    terms_version=settings.LEGAL_VERSION,
+                    terms_accepted_at=timezone.now(),
                 )
                 UserGoal.objects.create(user=user)
         except IntegrityError:  # the same e-mail sent twice at once (double tap): the other request created it
@@ -210,3 +228,23 @@ class AdminUserSerializer(serializers.ModelSerializer):
             user.set_password(password)
             user.save(update_fields=["password"])
         return user
+
+
+
+class CodeSerializer(serializers.Serializer):
+    code = serializers.RegexField(r"^\d{6}$", error_messages={"invalid": "Mã gồm 6 chữ số"})
+
+
+class ParentConsentRequestSerializer(serializers.Serializer):
+    parent_email = serializers.EmailField()
+    agree = serializers.BooleanField(help_text="Phụ huynh đã đọc Chính sách quyền riêng tư")
+
+    def validate_agree(self, value):
+        if not value:
+            raise serializers.ValidationError("Phụ huynh cần đọc và đồng ý Chính sách quyền riêng tư")
+        return value
+
+
+class DeleteAccountSerializer(serializers.Serializer):
+    password = serializers.CharField(required=False, allow_blank=True, write_only=True)
+    confirm = serializers.CharField(required=False, allow_blank=True, help_text='Tài khoản Google: gõ "XOA"')

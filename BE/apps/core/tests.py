@@ -32,7 +32,7 @@ def test_password_guessing_one_account_from_many_ips_is_rate_limited():
 
 def test_password_reset_logs_out_every_session():
     c = APIClient()
-    res = c.post("/api/v1/auth/register/", {"email": "a@example.com", "password": "Strong!Pass123"}, format="json")
+    res = c.post("/api/v1/auth/register/", {"email": "a@example.com", "password": "Strong!Pass123", "accept_terms": True}, format="json")
     refresh = res.data["tokens"]["refresh"]
     c.credentials(HTTP_AUTHORIZATION=f"Bearer {res.data['tokens']['access']}")
     assert c.post("/api/v1/auth/password/change/", {"old_password": "Strong!Pass123",

@@ -4,6 +4,7 @@ from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from django.utils import timezone
 
+from apps.core.permissions import UNVERIFIED_EMAIL
 from apps.gamification.services import owns_sticker
 
 from .models import GroupMessage, SupportConversation, SupportMessage
@@ -54,6 +55,8 @@ def send_group_message(user, group_id: int, kind: str = "text", content: str = "
 
     if user.learner_type == "kid" and not user.is_staff_role:
         raise ChatError("Tài khoản trẻ em không dùng được chat nhóm")
+    if not user.email_verified:
+        raise ChatError(UNVERIFIED_EMAIL)
     if not is_active_member(user, group_id):
         raise ChatError("Bạn chưa tham gia nhóm này")
     if client_id:
@@ -165,6 +168,8 @@ def send_direct_message(user, thread, content: str, client_id: str = "", sticker
 
     from .models import DirectMessage
 
+    if not user.email_verified:
+        raise ChatError(UNVERIFIED_EMAIL)
     other = thread.other(user)
     if not can_message(user, other):
         raise ChatError("Hai bạn cần theo dõi nhau mới nhắn tin được")

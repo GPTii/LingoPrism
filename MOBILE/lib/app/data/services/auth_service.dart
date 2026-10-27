@@ -5,6 +5,7 @@ import '../models/api/user.dart';
 import '../repositories/repositories.dart';
 import 'google_sign_in_service.dart';
 import 'push_service.dart';
+import '../../routes/app_pages.dart';
 
 /// Session state for the whole app (JWT stored locally, user profile from `/me/`).
 ///
@@ -50,6 +51,17 @@ class AuthService extends GetxService {
   Future<void> _setUser(AppUser u) async {
     user.value = u;
     await TokenStorage.save(user: u.toJson());
+  }
+
+  /// A fresh profile from an endpoint that answers with it (e-mail verified, parent agreed…).
+  Future<void> applyUser(AppUser u) => _setUser(u);
+
+  /// Where a signed-in learner goes: the first-visit survey, then – for a child – the parent's consent, then home.
+  String get nextRoute {
+    final u = user.value;
+    if (u == null) return Routes.login;
+    if (!u.onboardingCompleted) return Routes.survey;
+    return u.needsParent ? Routes.parentConsent : Routes.home;
   }
 
   Future<void> _startSession(AppUser u, String access, String refresh) async {

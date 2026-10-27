@@ -97,7 +97,6 @@ class LoginController extends GetxController {
 
   Future<void> _enterApp() async {
     await AppInitializer.onSessionStarted();
-    final onboarded = _authService.currentUser?.onboardingCompleted == true;
-    await Get.offAllNamed(onboarded ? Routes.home : Routes.survey);
+    await Get.offAllNamed(_authService.nextRoute);
   }
 }
