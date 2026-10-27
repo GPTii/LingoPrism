@@ -74,10 +74,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: trivy config
-        uses: aquasecurity/trivy-action@0.28.0
-        with:
-          scan-type: config
-          scan-ref: .
-          severity: HIGH,CRITICAL
-          exit-code: "1"
-          trivyignores: .trivyignore
+        run: |
+          curl -sSL https://github.com/aquasecurity/trivy/releases/download/v0.76.1/trivy_0.76.1_Linux-64bit.tar.gz | tar xz trivy
+          ./trivy config --quiet --severity HIGH,CRITICAL --ignorefile .trivyignore --exit-code 1 .
