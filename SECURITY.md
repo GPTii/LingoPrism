@@ -44,7 +44,7 @@
 1. **Đặt Cloudflare (gói Free) trước server.** DDoS tầng mạng (hàng Gbps) không app nào tự chống được, chỉ CDN chặn được. Bật "Under Attack Mode" khi bị tấn công, (đã làm: `set_real_ip_from` và chặn mọi IP không phải Cloudflare trong `nginx.conf`). Trên Cloudflare giữ **SSL/TLS → Full** (origin dùng chứng chỉ tự ký; muốn "Full (strict)" thì phải thay bằng chứng chỉ Cloudflare Origin CA trước) và bật **Always Use HTTPS**.
 2. **Tường lửa:** chỉ mở 22, 80, 443 (`ufw allow 22,80,443/tcp`). SSH chỉ dùng key, tắt đăng nhập bằng mật khẩu; cài `fail2ban`.
 3. **HTTPS**: Cloudflare + chứng chỉ origin; nginx đã gửi HSTS 1 năm.
-4. **Sao lưu DB hằng ngày** (`deploy/backup.sh`, cron 03:00) và chép ra ngoài server; chạy `sh deploy/restore-drill.sh` định kỳ để chắc bản sao lưu khôi phục được.
+4. **Sao lưu DB hằng ngày** (`deploy/backup.sh`, 03:00 giờ Việt Nam = 20:00 UTC trên VM) và chép ra ngoài server; chạy `sh deploy/restore-drill.sh` định kỳ để chắc bản sao lưu khôi phục được.
 5. **Giám sát:** UptimeRobot (báo khi web sập), xem log `security` (đăng nhập sai hàng loạt), có thể thêm Sentry để bắt lỗi 500.
 6. **Cập nhật:** `apt upgrade` hệ điều hành; chạy `npm audit` / `pip-audit` trước mỗi lần deploy.
 7. Mật khẩu admin dài; tài khoản demo trong README phải đổi mật khẩu hoặc xoá trước khi public.

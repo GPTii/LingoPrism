@@ -1,7 +1,7 @@
 #!/bin/sh
 # Back up the database and uploaded media into ~/backups (keeps the last 14 days).
 #   sh deploy/backup.sh                 # by hand
-#   crontab: 0 3 * * * cd ~/lingoprism && sh deploy/backup.sh >> ~/backups/backup.log 2>&1
+#   crontab (the VM is on UTC: 20:00 = 03:00 in Vietnam): 0 20 * * * cd ~/lingoprism && sh deploy/backup.sh >> ~/backups/backup.log 2>&1
 # Copy the files off the server regularly (scp), a backup on the same disk does not survive losing the VPS.
 set -eu
 cd "$(dirname "$0")/.."

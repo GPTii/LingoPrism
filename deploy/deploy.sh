@@ -84,7 +84,8 @@ if [ -f deploy/algorithm_config.json ] && ! md5sum -c --status "$APPLIED" 2>/dev
 fi
 
 
-CRON="0 3 * * * cd $(pwd) && sh deploy/backup.sh >> \$HOME/backups/backup.log 2>&1"
+# the VM runs on UTC: 20:00 UTC = 03:00 in Vietnam, when nobody is learning
+CRON="0 20 * * * cd $(pwd) && sh deploy/backup.sh >> \$HOME/backups/backup.log 2>&1"
 mkdir -p "$HOME/backups"
 ( crontab -l 2>/dev/null | grep -v 'deploy/backup.sh' || true; echo "$CRON" ) | crontab -
 
