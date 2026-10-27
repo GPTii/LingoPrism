@@ -6,6 +6,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from apps.core.params import int_param
 from apps.core.throttles import ActionThrottleMixin
 from apps.gamification.mascot import look
 
@@ -29,8 +30,8 @@ class GroupMessagesView(APIView):
         if not services.is_active_member(request.user, group_id):
             return Response({"detail": "Bạn chưa tham gia nhóm này", "errors": {}}, status=403)
         qs = GroupMessage.objects.filter(group_id=group_id).select_related("user", "badge").order_by("-id")
-        if request.query_params.get("before"):
-            qs = qs.filter(id__lt=int(request.query_params["before"]))
+        if (before := int_param(request, "before")) is not None:
+            qs = qs.filter(id__lt=before)
         msgs = list(qs[:50])[::-1]
         return Response({"results": [services.group_message_payload(m) for m in msgs], "has_more": len(msgs) == 50})
 
@@ -186,8 +187,8 @@ class DirectThreadViewSet(ActionThrottleMixin, mixins.ListModelMixin, mixins.Ret
         thread = self.get_object()
         if request.method == "GET":
             qs = thread.messages.order_by("-id")
-            if request.query_params.get("before"):
-                qs = qs.filter(id__lt=int(request.query_params["before"]))
+            if (before := int_param(request, "before")) is not None:
+                qs = qs.filter(id__lt=before)
             msgs = list(qs[:50])[::-1]
             services.mark_direct_read(request.user, thread)
             return Response({"results": [services.direct_message_payload(m) for m in msgs], "has_more": len(msgs) == 50})

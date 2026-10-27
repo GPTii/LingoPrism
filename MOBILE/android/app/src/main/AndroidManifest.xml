@@ -15,11 +15,15 @@
 
     <uses-feature android:name="android.hardware.camera" android:required="false" />
 
-    <!-- usesCleartextTraffic: allows the http:// dev backend (10.0.2.2 / LAN). Production uses HTTPS. -->
+    <!-- Release talks HTTPS only (plain http:// is allowed in the debug and profile manifests, for 10.0.2.2 / LAN).
+         No backup: the app's data (sign-in tokens, a child's progress) never leaves the phone in a cloud or adb
+         backup or a transfer to a new phone. -->
     <application
         android:label="LingoPrism"
         android:icon="@mipmap/ic_launcher"
-        android:usesCleartextTraffic="true">
+        android:allowBackup="false"
+        android:fullBackupContent="false"
+        android:dataExtractionRules="@xml/data_extraction_rules">
         <activity
             android:name=".MainActivity"
             android:exported="true"

@@ -46,6 +46,8 @@ export interface User {
   goal: UserGoal | null
   /** null until they open their wardrobe: a plain Prismo */
   mascot?: MascotLook | null
+  /** admin lists only */
+  last_login?: string | null
   created_at: string
 }
 

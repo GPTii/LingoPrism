@@ -1,4 +1,5 @@
 from django.contrib.auth import authenticate, password_validation
+from django.db import IntegrityError, transaction
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -92,12 +93,16 @@ class RegisterSerializer(serializers.Serializer):
         return attrs
 
     def create(self, validated):
-        user = User.objects.create_user(
-            email=validated["email"],
-            password=validated["password"],
-            display_name=validated.get("display_name") or validated["email"].split("@")[0],
-        )
-        UserGoal.objects.create(user=user)
+        try:
+            with transaction.atomic():
+                user = User.objects.create_user(
+                    email=validated["email"],
+                    password=validated["password"],
+                    display_name=validated.get("display_name") or validated["email"].split("@")[0],
+                )
+                UserGoal.objects.create(user=user)
+        except IntegrityError:  # the same e-mail sent twice at once (double tap): the other request created it
+            raise serializers.ValidationError({"email": ["Email đã được sử dụng"]})
         return user
 
 

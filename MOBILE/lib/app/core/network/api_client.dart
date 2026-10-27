@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart' hide Response, FormData, MultipartFile;
 import 'package:get_storage/get_storage.dart';
 
@@ -21,31 +22,62 @@ class ApiException implements Exception {
   String toString() => message;
 }
 
-/// Stores JWT tokens and the cached current user (GetStorage = local key/value storage).
+/// Stores the JWT tokens in the platform keystore (Android Keystore / iOS Keychain), never in a plain file another
+/// app or a backup could read, and caches the current user (not a secret) in GetStorage. [init] loads the tokens
+/// into memory once at start-up so they can be read synchronously.
 class TokenStorage {
   TokenStorage._();
 
   static final GetStorage _box = GetStorage();
+  static const FlutterSecureStorage _secure = FlutterSecureStorage();
   static const _accessKey = 'auth.access';
   static const _refreshKey = 'auth.refresh';
   static const _userKey = 'auth.user';
 
-  static String? get access => _box.read<String>(_accessKey);
-  static String? get refresh => _box.read<String>(_refreshKey);
+  static String? _access;
+  static String? _refresh;
+
+  static Future<void> init() async {
+    try {
+      _access = await _secure.read(key: _accessKey);
+      _refresh = await _secure.read(key: _refreshKey);
+    } catch (_) {
+      // keystore unreadable (e.g. restored on another phone): sign in again
+      await _secure.deleteAll();
+    }
+    // tokens saved in plain storage by an older version move into the keystore
+    final oldAccess = _box.read<String>(_accessKey), oldRefresh = _box.read<String>(_refreshKey);
+    if (oldAccess != null || oldRefresh != null) {
+      await save(access: _access ?? oldAccess, refresh: _refresh ?? oldRefresh);
+      await _box.remove(_accessKey);
+      await _box.remove(_refreshKey);
+    }
+  }
+
+  static String? get access => _access;
+  static String? get refresh => _refresh;
   static Map<String, dynamic>? get user {
     final raw = _box.read(_userKey);
     return raw is Map ? Map<String, dynamic>.from(raw) : null;
   }
 
   static Future<void> save({String? access, String? refresh, Map<String, dynamic>? user}) async {
-    if (access != null) await _box.write(_accessKey, access);
-    if (refresh != null) await _box.write(_refreshKey, refresh);
+    if (access != null) {
+      _access = access;
+      await _secure.write(key: _accessKey, value: access);
+    }
+    if (refresh != null) {
+      _refresh = refresh;
+      await _secure.write(key: _refreshKey, value: refresh);
+    }
     if (user != null) await _box.write(_userKey, user);
   }
 
   static Future<void> clear() async {
-    await _box.remove(_accessKey);
-    await _box.remove(_refreshKey);
+    _access = null;
+    _refresh = null;
+    await _secure.delete(key: _accessKey);
+    await _secure.delete(key: _refreshKey);
     await _box.remove(_userKey);
   }
 }

@@ -1,10 +1,12 @@
 from django.contrib.auth import get_user_model
+from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema
 from rest_framework import generics, mixins, serializers, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+from apps.core.bulk import BulkDeleteMixin
 from apps.core.permissions import IsStaffRole
 
 from .models import DeviceToken, Notification, NotificationSetting
@@ -57,15 +59,32 @@ class BroadcastSerializer(serializers.Serializer):
     learner_type = serializers.ChoiceField(choices=["all", "kid", "adult"], default="all")
 
 
+# ?group= on the list: the kinds a learner thinks of together
+KIND_GROUPS = {
+    "social": ["follow", "friend_request", "friend_accept", "group_request", "group", "comment", "like", "message"],
+    "learning": ["reminder", "achievement", "league", "xp_milestone", "exam", "location"],
+    "system": ["system", "broadcast"],
+}
+
+
 @extend_schema(tags=["notifications"])
-class NotificationViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+class NotificationViewSet(BulkDeleteMixin, mixins.ListModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet):
+    """The learner's notifications: ?kind=, ?group=social|learning|system, ?read=0|1, ?created_from/to; each one
+    or many at once (bulk-delete) can be deleted."""
+
     serializer_class = NotificationSerializer
     filterset_fields = ["kind"]
 
     def get_queryset(self):
         if getattr(self, "swagger_fake_view", False):
             return Notification.objects.none()
-        return Notification.objects.filter(user=self.request.user)
+        qs = Notification.objects.filter(user=self.request.user)
+        params = self.request.query_params
+        if params.get("group") in KIND_GROUPS:
+            qs = qs.filter(kind__in=KIND_GROUPS[params["group"]])
+        if params.get("read") in ("0", "1"):
+            qs = qs.filter(read_at__isnull=params["read"] == "0")
+        return qs
 
     @action(detail=False, methods=["get"], url_path="unread-count")
     def unread_count(self, request):
@@ -73,7 +92,7 @@ class NotificationViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
 
     @action(detail=True, methods=["post"])
     def read(self, request, pk=None):
-        n = self.get_queryset().get(pk=pk)
+        n = get_object_or_404(self.get_queryset(), pk=pk)
         n.read_at = n.read_at or timezone.now()
         n.save(update_fields=["read_at"])
         return Response(NotificationSerializer(n).data)

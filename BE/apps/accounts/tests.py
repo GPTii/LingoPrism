@@ -36,6 +36,17 @@ def test_register_duplicate_email(client):
     assert res.data["detail"] == "Email đã được sử dụng"
 
 
+def test_register_same_email_at_once_is_400_not_500(client, monkeypatch):
+    """A double tap sends two sign-ups together: both pass the "email free?" check, the second hits the unique index."""
+    from apps.accounts import serializers
+
+    register(client)
+    monkeypatch.setattr(serializers.RegisterSerializer, "validate_email", lambda self, value: value.lower())
+    res = register(client)
+    assert res.status_code == 400
+    assert res.data["detail"] == "Email đã được sử dụng"
+
+
 def test_wrong_password(client):
     register(client)
     res = client.post("/api/v1/auth/login/", {"email": "a@example.com", "password": "nope"}, format="json")
@@ -117,3 +128,25 @@ def test_google_login_accepts_only_our_audiences(client, settings, monkeypatch):
     assert res.data["user"]["email"] == "g@example.com"
     # the same Google account signs in to the same user next time
     assert client.post("/api/v1/auth/google/", {"id_token": "x"}, format="json").data["user"]["id"] == res.data["user"]["id"]
+
+
+def test_secure_demo_accounts_replaces_the_public_demo_password():
+    from io import StringIO
+
+    from django.core.management import call_command
+
+    from apps.accounts.management.commands.seed_demo_users import DEMO_PASSWORD
+    from apps.accounts.models import User
+
+    demo = User.objects.create_user(email="kid@lingoprism.local", password=DEMO_PASSWORD)
+    changed = User.objects.create_user(email="adult@lingoprism.local", password="Own!Pass123")
+    learner = User.objects.create_user(email="real@example.com", password=DEMO_PASSWORD)
+    out = StringIO()
+    call_command("secure_demo_accounts", stdout=out)
+
+    demo.refresh_from_db(), changed.refresh_from_db(), learner.refresh_from_db()
+    assert not demo.check_password(DEMO_PASSWORD)
+    email, password = out.getvalue().split()
+    assert email == demo.email and demo.check_password(password)
+    assert changed.check_password("Own!Pass123")  # a demo account whose password was already changed is left alone
+    assert learner.check_password(DEMO_PASSWORD)  # real learners are never touched

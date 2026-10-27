@@ -1,5 +1,5 @@
 import { Avatar, Button, Drawer, Dropdown, Grid, Layout, Menu } from 'antd'
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import {
   AlertOutlined, AuditOutlined, BookOutlined, CameraOutlined, DashboardOutlined, EnvironmentOutlined,
   FileDoneOutlined, LogoutOutlined, MessageOutlined, NotificationOutlined, TrophyOutlined,
@@ -94,7 +94,7 @@ export default function AdminLayout() {
         </Layout.Header>
         <Layout.Content className="p-3 md:p-6">
           <div className="mx-auto w-full max-w-[1600px]">
-            <Outlet />
+            <Suspense fallback={null}><Outlet /></Suspense>
           </div>
         </Layout.Content>
       </Layout>

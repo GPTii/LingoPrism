@@ -1,0 +1,7 @@
+# gitleaks (security.yml): the default rules, minus the CocoaPods checksums in Podfile.lock that only look like keys
+[extend]
+useDefault = true
+
+[allowlist]
+description = "pod checksums"
+paths = ['''Podfile\.lock$''']

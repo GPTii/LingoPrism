@@ -28,6 +28,7 @@ class ServiceBinding extends Bindings {
 class AppInitializer {
   static Future<void> initialize() async {
     await GetStorage.init();
+    await TokenStorage.init();
     ServiceBinding().dependencies();
     if (!Get.isRegistered<NotificationSchedulerService>()) {
       final scheduler = NotificationSchedulerService();

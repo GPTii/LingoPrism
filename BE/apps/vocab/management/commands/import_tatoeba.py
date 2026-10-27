@@ -172,7 +172,7 @@ class Command(BaseCommand):
                 continue
             self.stdout.write(f"↓ {name}")
             req = urllib.request.Request(BASE + path, headers={"User-Agent": USER_AGENT})
-            with urllib.request.urlopen(req, timeout=300) as res:
+            with urllib.request.urlopen(req, timeout=300) as res:  # fixed https source, not user input  # nosec B310
                 (DIR / name).write_bytes(res.read())
 
     def natives(self):

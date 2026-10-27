@@ -7,6 +7,7 @@ from rest_framework import mixins, serializers, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+from apps.core.bulk import BulkDeleteMixin
 from apps.vocab.models import Topic, Word
 from apps.vocab.services import LEARN_LANGUAGES, card, resolve_target, words_for_target
 from apps.vocab.views import LANG_PARAMS
@@ -44,8 +45,8 @@ class AnswerSerializer(serializers.Serializer):
 
 
 @extend_schema(tags=["learning"], parameters=LANG_PARAMS)
-class MyWordViewSet(mixins.ListModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet):
-    """The learner's library (thư viện từ cá nhân)."""
+class MyWordViewSet(BulkDeleteMixin, mixins.ListModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet):
+    """The learner's library (thư viện từ cá nhân): ?status=, ?source=, ?topic=, ?created_from/to (day saved)."""
 
     serializer_class = AddWordSerializer
 
@@ -57,6 +58,8 @@ class MyWordViewSet(mixins.ListModelMixin, mixins.DestroyModelMixin, viewsets.Ge
         params = self.request.query_params
         if params.get("status"):
             qs = qs.filter(status=params["status"])
+        if params.get("source"):
+            qs = qs.filter(source=params["source"])
         if params.get("topic"):
             qs = qs.filter(Q(topic_id=params["topic"]) | Q(word__topics__id=params["topic"])).distinct()
         return qs.order_by("-created_at")
@@ -68,7 +71,7 @@ class MyWordViewSet(mixins.ListModelMixin, mixins.DestroyModelMixin, viewsets.Ge
         return [card(words[p.word_id], target, p, self.request) for p in personal_words if p.word_id in words]
 
     def list(self, request, *args, **kwargs):
-        page = self.paginate_queryset(self.get_queryset())
+        page = self.paginate_queryset(self.filter_queryset(self.get_queryset()))
         return self.get_paginated_response(self._cards(page))
 
     @extend_schema(request=AddWordSerializer)

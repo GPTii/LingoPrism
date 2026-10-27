@@ -9,6 +9,7 @@ from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 
+from apps.core.bulk import BulkDeleteMixin, Conflict
 from apps.core.permissions import IsStaffRole
 from apps.core.throttles import ActionThrottleMixin
 
@@ -40,7 +41,7 @@ def _paginated_cards(view, qs, target):
 
 
 @extend_schema(tags=["vocab"], parameters=LANG_PARAMS)
-class TopicViewSet(viewsets.ModelViewSet):
+class TopicViewSet(BulkDeleteMixin, viewsets.ModelViewSet):
     """System topics + the learner's own topics."""
 
     filterset_fields = ["audience"]
@@ -90,6 +91,9 @@ class TopicViewSet(viewsets.ModelViewSet):
     def perform_update(self, serializer):
         self._check_owner(serializer.instance)
         serializer.save()
+
+    def get_bulk_delete_queryset(self):
+        return Topic.objects.filter(owner=self.request.user)
 
     def perform_destroy(self, instance):
         self._check_owner(instance)
@@ -210,7 +214,7 @@ class ErrorReportViewSet(ActionThrottleMixin, mixins.CreateModelMixin, mixins.Li
 
 
 @extend_schema(tags=["admin-vocab"])
-class AdminTopicViewSet(viewsets.ModelViewSet):
+class AdminTopicViewSet(BulkDeleteMixin, viewsets.ModelViewSet):
     serializer_class = s.TopicSerializer
     permission_classes = [IsStaffRole]
     search_fields = ["name_vi", "name_en", "slug"]
@@ -224,7 +228,7 @@ class AdminTopicViewSet(viewsets.ModelViewSet):
 
 
 @extend_schema(tags=["admin-vocab"])
-class AdminWordViewSet(viewsets.ModelViewSet):
+class AdminWordViewSet(BulkDeleteMixin, viewsets.ModelViewSet):
     serializer_class = s.AdminWordSerializer
     permission_classes = [IsStaffRole]
     search_fields = ["slug", "yolo_label", "translations__text"]
@@ -236,7 +240,17 @@ class AdminWordViewSet(viewsets.ModelViewSet):
         )
         if self.request.query_params.get("flagged") == "1":
             qs = qs.filter(flagged_count__gt=0)
+        if self.request.query_params.get("has_image") in ("0", "1"):
+            no_image = Q(image="") | Q(image__isnull=True)
+            qs = qs.exclude(no_image) if self.request.query_params["has_image"] == "1" else qs.filter(no_image)
         return qs.order_by("slug").distinct()
+
+    def perform_destroy(self, word):
+        # deleting a word would silently empty it from every library that saved it
+        saved = word.learners.count()
+        if saved:
+            raise Conflict(f"{saved} học viên đã lưu từ này vào thư viện – sửa hoặc ẩn khỏi chủ đề thay vì xoá.")
+        word.delete()
 
 
 @extend_schema(tags=["admin-vocab"])
@@ -310,7 +324,7 @@ class AdminTranslationViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, 
 
 
 @extend_schema(tags=["admin-vocab"])
-class AdminExampleViewSet(viewsets.ModelViewSet):
+class AdminExampleViewSet(BulkDeleteMixin, viewsets.ModelViewSet):
     serializer_class = s.AdminExampleSerializer
     permission_classes = [IsStaffRole]
     filterset_fields = ["language", "status", "word", "source"]

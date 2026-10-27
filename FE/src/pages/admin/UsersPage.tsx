@@ -6,6 +6,7 @@ import dayjs from 'dayjs'
 import { api, errorMessage } from '../../api/client'
 import type { Paginated, Role, User } from '../../api/types'
 import { useAuth } from '../../auth/store'
+import { BulkDeleteBar, DateRangeFilter, dateParams, pagination, useBulkDelete, useSelection, type DateRange } from '../../components/DataTools'
 
 const ROLE_OPTIONS = [
   { value: 'admin', label: 'Quản trị viên' },
@@ -19,6 +20,13 @@ const LANG_OPTIONS = [
   { value: 'vi', label: 'Tiếng Việt' },
 ]
 const LANG_LABEL: Record<string, string> = { en: 'Anh', zh: 'Trung', vi: 'Việt' }
+/** "không hoạt động": no sign-in for N days, or never */
+const ACTIVITY_OPTIONS = [
+  { value: '30', label: 'Không đăng nhập 30 ngày' },
+  { value: '90', label: 'Không đăng nhập 90 ngày' },
+  { value: '180', label: 'Không đăng nhập 180 ngày' },
+  { value: 'never', label: 'Chưa đăng nhập lần nào' },
+]
 
 type UserForm = Pick<User, 'email' | 'display_name' | 'role' | 'status' | 'learner_type' | 'active_language' | 'zh_script'> & {
   learning_languages: User['learning_languages']
@@ -30,17 +38,29 @@ export default function UsersPage() {
   const me = useAuth((s) => s.user)
   const queryClient = useQueryClient()
   const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(20)
   const [search, setSearch] = useState('')
   const [role, setRole] = useState<Role | undefined>()
+  const [status, setStatus] = useState<string | undefined>()
+  const [learnerType, setLearnerType] = useState<string | undefined>()
+  const [language, setLanguage] = useState<string | undefined>()
+  const [activity, setActivity] = useState<string | undefined>()
+  const [created, setCreated] = useState<DateRange>(null)
   const [editing, setEditing] = useState<User | 'new' | null>(null)
   const [form] = Form.useForm<UserForm>()
   const activeLanguage = Form.useWatch('active_language', form)
 
+  const filters = {
+    search: search || undefined, role, status, learner_type: learnerType, active_language: language, ...dateParams(created),
+    ...(activity === 'never' ? { never_logged_in: 1 } : activity ? { inactive_since: dayjs().subtract(Number(activity), 'day').format('YYYY-MM-DD') } : {}),
+  }
   const { data, isLoading } = useQuery({
-    queryKey: ['admin-users', page, search, role],
-    queryFn: () =>
-      api.get<Paginated<User>>('/admin/users/', { params: { page, search: search || undefined, role } }).then((r) => r.data),
+    queryKey: ['admin-users', page, pageSize, filters],
+    queryFn: () => api.get<Paginated<User>>('/admin/users/', { params: { page, page_size: pageSize, ...filters } }).then((r) => r.data),
   })
+  const selection = useSelection<User>([filters])
+  /** every filter change starts again from page 1 */
+  const filter = <V,>(set: (v: V) => void) => (v: V) => { set(v); setPage(1) }
 
   const done = (text: string) => {
     message.success(text)
@@ -64,6 +84,10 @@ export default function UsersPage() {
     onSuccess: () => done('Đã xóa tài khoản'),
     onError: (e) => message.error(errorMessage(e)),
   })
+  const bulk = useBulkDelete('/admin/users/bulk-delete/', () => {
+    selection.clear()
+    queryClient.invalidateQueries({ queryKey: ['admin-users'] })
+  })
 
   const openForm = (user: User | 'new') => {
     setEditing(user)
@@ -81,20 +105,29 @@ export default function UsersPage() {
   return (
     <Card
       title="Người dùng"
-      extra={
-        <div className="flex flex-wrap gap-2">
-          <Select allowClear placeholder="Vai trò" options={ROLE_OPTIONS} value={role} onChange={(v) => { setRole(v); setPage(1) }} style={{ width: 170 }} />
-          <Input.Search placeholder="Tìm email, tên" allowClear onSearch={(v) => { setSearch(v); setPage(1) }} style={{ width: 240 }} />
-          {isAdmin && <Button type="primary" icon={<PlusOutlined />} onClick={() => openForm('new')}>Thêm người dùng</Button>}
-        </div>
-      }
+      extra={isAdmin && <Button type="primary" icon={<PlusOutlined />} onClick={() => openForm('new')}>Thêm người dùng</Button>}
     >
+      <div className="flex flex-wrap gap-2 mb-3">
+        <Input.Search placeholder="Tìm email, tên" allowClear onSearch={filter(setSearch)} style={{ width: 220 }} />
+        <Select allowClear placeholder="Vai trò" options={ROLE_OPTIONS} value={role} onChange={filter(setRole)} style={{ width: 160 }} />
+        <Select allowClear placeholder="Trạng thái" value={status} onChange={filter(setStatus)} style={{ width: 130 }}
+          options={[{ value: 'active', label: 'Hoạt động' }, { value: 'locked', label: 'Bị khóa' }]} />
+        <Select allowClear placeholder="Đối tượng" value={learnerType} onChange={filter(setLearnerType)} style={{ width: 130 }}
+          options={[{ value: 'adult', label: 'Người lớn' }, { value: 'kid', label: 'Trẻ em' }]} />
+        <Select allowClear placeholder="Đang học" options={LANG_OPTIONS} value={language} onChange={filter(setLanguage)} style={{ width: 140 }} />
+        <Select allowClear placeholder="Hoạt động" options={ACTIVITY_OPTIONS} value={activity} onChange={filter(setActivity)} style={{ width: 210 }} />
+        <DateRangeFilter value={created} onChange={filter(setCreated)} placeholder={['Tạo từ ngày', 'đến ngày']} />
+      </div>
+      <BulkDeleteBar count={selection.keys.length} noun="tài khoản" busy={bulk.busy} onClear={selection.clear}
+        warning="Toàn bộ dữ liệu học của các tài khoản này bị xoá theo. Tài khoản đang đăng nhập và quản trị viên cuối cùng được giữ lại."
+        onDelete={() => bulk.run(selection.keys, (n) => `${n} tài khoản`)} />
       <Table<User>
         rowKey="id"
         loading={isLoading}
         dataSource={data?.results}
-        scroll={{ x: 900 }}
-        pagination={{ current: page, total: data?.count, pageSize: 20, onChange: setPage, showSizeChanger: false }}
+        scroll={{ x: 1150 }}
+        rowSelection={isAdmin ? { ...selection.rowSelection, getCheckboxProps: (u) => ({ disabled: u.id === me?.id }) } : undefined}
+        pagination={pagination(page, data?.count, pageSize, (p, size) => { setPage(size === pageSize ? p : 1); setPageSize(size) })}
         columns={[
           { title: 'Email', dataIndex: 'email' },
           { title: 'Tên', dataIndex: 'display_name' },
@@ -107,6 +140,7 @@ export default function UsersPage() {
           },
           { title: 'Trạng thái', dataIndex: 'status', render: (v) => (v === 'locked' ? <Tag color="red">Bị khóa</Tag> : <Tag color="green">Hoạt động</Tag>) },
           { title: 'Ngày tạo', dataIndex: 'created_at', render: (v) => dayjs(v).format('DD/MM/YYYY') },
+          { title: 'Đăng nhập gần nhất', dataIndex: 'last_login', render: (v) => (v ? dayjs(v).format('DD/MM/YYYY') : <span className="text-slate-400">Chưa</span>) },
           {
             title: '',
             key: 'actions',

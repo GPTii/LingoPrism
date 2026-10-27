@@ -47,8 +47,11 @@ android {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.getByName("debug")
-            isMinifyEnabled = false
-            isShrinkResources = false
+            // R8 shrinks and renames the Java/Kotlin side, so the APK is smaller and harder to reverse; the Dart side
+            // is obfuscated by `flutter build apk --obfuscate --split-debug-info=build/symbols`
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
 }

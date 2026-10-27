@@ -1,0 +1,3 @@
+# FE/Dockerfile runs the official nginx image, whose master process starts as root to bind 80/443 and serves with
+# unprivileged "nginx" workers; moving to nginx-unprivileged would change the published ports. Accepted.
+DS-0002

@@ -142,24 +142,26 @@ export const adminApi = {
   grade: (id: number, grades: { answer: number; score: string; feedback?: string }[], feedback: string) =>
     api.post<Submission>(`/admin/submissions/${id}/grade/`, { grades, feedback }).then((r) => r.data),
   // pois
-  pois: () => api.get<Poi[]>('/pois/').then((r) => r.data),
+  pois: (params?: Record<string, unknown>) => api.get<Poi[]>('/pois/', { params }).then((r) => r.data),
   savePoi: (poi: Partial<Poi>) => (poi.id ? api.patch<Poi>(`/pois/${poi.id}/`, poi) : api.post<Poi>('/pois/', poi)).then((r) => r.data),
   deletePoi: (id: number) => api.delete(`/pois/${id}/`),
   poiStats: () => api.get<{ id: number; name: string; category: string; visits: number }[]>('/pois/stats/').then((r) => r.data),
   // moderation
-  postReports: (status = 'pending') => api.get<Paginated<PostReport>>('/admin/post-reports/', { params: { status } }).then((r) => r.data),
+  postReports: (status = 'pending', params?: Record<string, unknown>) =>
+    api.get<Paginated<PostReport>>('/admin/post-reports/', { params: { status, ...params } }).then((r) => r.data),
   resolveReport: (id: number, hide: boolean) => api.post(`/admin/post-reports/${id}/resolve/`, { hide_post: hide }),
-  userReports: (status = 'pending') => api.get<Paginated<UserReport>>('/admin/user-reports/', { params: { status } }).then((r) => r.data),
+  userReports: (status = 'pending', params?: Record<string, unknown>) =>
+    api.get<Paginated<UserReport>>('/admin/user-reports/', { params: { status, ...params } }).then((r) => r.data),
   resolveUserReport: (id: number, lock: boolean) => api.post(`/admin/user-reports/${id}/resolve/`, { lock }),
   // notifications
   broadcast: (data: { title: string; body: string; role: string; learner_type: string }) => api.post<{ sent: number }>('/admin/broadcast/', data).then((r) => r.data),
   // support
   conversations: (status?: string) => api.get<Paginated<SupportConversation>>('/support/conversations/', { params: { status } }).then((r) => r.data.results),
   // detections
-  detections: (page = 1) => api.get<Paginated<DetectionLog>>('/admin/detections/', { params: { page } }).then((r) => r.data),
+  detections: (params: Record<string, unknown>) => api.get<Paginated<DetectionLog>>('/admin/detections/', { params }).then((r) => r.data),
   detectionStats: () => api.get<DetectionStats>('/admin/detections/stats/').then((r) => r.data),
-  detectionReports: (status: string | undefined, page = 1) =>
-    api.get<Paginated<DetectionReport>>('/admin/detection-reports/', { params: { status, page } }).then((r) => r.data),
+  detectionReports: (status: string | undefined, page = 1, params?: Record<string, unknown>) =>
+    api.get<Paginated<DetectionReport>>('/admin/detection-reports/', { params: { status, page, ...params } }).then((r) => r.data),
   detectionReportSummary: () => api.get<DetectionReportSummary>('/admin/detection-reports/summary/').then((r) => r.data),
   reviewDetectionReport: (id: number, approve: boolean) => api.post(`/admin/detection-reports/${id}/${approve ? 'approve' : 'reject'}/`),
   exportDetectionReports: () => api.get<Blob>('/admin/detection-reports/export/', { responseType: 'blob' }).then((r) => r.data),

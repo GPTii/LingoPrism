@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { App, Button, Card, Form, Input, InputNumber, Popconfirm, Select, Switch, Table } from 'antd'
+import { App, Button, Card, Form, Input, InputNumber, Popconfirm, Select, Switch, Table, Tag } from 'antd'
 import { useState } from 'react'
 import { Circle, MapContainer, Marker, TileLayer, useMapEvents } from 'react-leaflet'
 import L from 'leaflet'
@@ -7,6 +7,7 @@ import { adminApi } from '../../api/admin'
 import type { Poi } from '../../api/app'
 import { errorMessage } from '../../api/client'
 import { vocabApi } from '../../api/vocab'
+import { BulkDeleteBar, DateRangeFilter, dateParams, useBulkDelete, useSelection, type DateRange } from '../../components/DataTools'
 
 const CATEGORIES = [
   ['market', 'Chợ'], ['supermarket', 'Siêu thị / TTTM'], ['hospital', 'Bệnh viện'], ['school', 'Trường học'], ['park', 'Công viên'],
@@ -28,7 +29,7 @@ export default function PoisAdminPage() {
   const queryClient = useQueryClient()
   const [form] = Form.useForm()
   const [editing, setEditing] = useState<Partial<Poi> | null>(null)
-  const pois = useQuery({ queryKey: ['admin-pois'], queryFn: adminApi.pois })
+  const pois = useQuery({ queryKey: ['admin-pois'], queryFn: () => adminApi.pois() })
   const topics = useQuery({ queryKey: ['topics-all'], queryFn: () => vocabApi.topics() })
   const stats = useQuery({ queryKey: ['poi-stats'], queryFn: adminApi.poiStats })
 
@@ -99,6 +100,46 @@ export default function PoisAdminPage() {
             columns={[{ title: 'Điểm được ghé nhiều nhất', dataIndex: 'name' }, { title: 'Lượt', dataIndex: 'visits' }]} />
         )}
       </Card>
+      <PoiList onEdit={edit} />
     </div>
+  )
+}
+
+/** Every point as a list: find, filter, tick many and delete them at once. */
+function PoiList({ onEdit }: { onEdit: (p: Poi) => void }) {
+  const queryClient = useQueryClient()
+  const [search, setSearch] = useState('')
+  const [category, setCategory] = useState<string | undefined>()
+  const [active, setActive] = useState<string | undefined>()
+  const [created, setCreated] = useState<DateRange>(null)
+  const filters = { search: search || undefined, category, is_active: active, ...dateParams(created) }
+  const list = useQuery({ queryKey: ['admin-pois', 'list', filters], queryFn: () => adminApi.pois(filters) })
+  const selection = useSelection<Poi>([filters])
+  const bulk = useBulkDelete('/pois/bulk-delete/', () => {
+    selection.clear()
+    queryClient.invalidateQueries({ queryKey: ['admin-pois'] })
+  })
+  return (
+    <Card className="lg:col-span-3" title="Tất cả điểm quan tâm">
+      <div className="flex flex-wrap gap-2 mb-3">
+        <Input.Search placeholder="Tên hoặc địa chỉ" allowClear onSearch={setSearch} style={{ width: 220 }} />
+        <Select allowClear placeholder="Loại" options={CATEGORIES} value={category} onChange={setCategory} style={{ width: 180 }} />
+        <Select allowClear placeholder="Hiển thị" value={active} onChange={setActive} style={{ width: 140 }}
+          options={[{ value: 'true', label: 'Đang hiện' }, { value: 'false', label: 'Đang ẩn' }]} />
+        <DateRangeFilter value={created} onChange={setCreated} />
+      </div>
+      <BulkDeleteBar count={selection.keys.length} noun="điểm" busy={bulk.busy} onClear={selection.clear}
+        warning="Lượt ghé của học viên tại các điểm này cũng bị xoá. Muốn giữ lại thì tắt Hiển thị."
+        onDelete={() => bulk.run(selection.keys, (n) => `${n} điểm`)} />
+      <Table<Poi> size="small" rowKey="id" loading={list.isLoading} dataSource={list.data} rowSelection={selection.rowSelection}
+        pagination={{ pageSize: 20, showSizeChanger: true, pageSizeOptions: [20, 50, 100] }}
+        columns={[
+          { title: 'Tên', dataIndex: 'name', render: (v, p) => <Button type="link" className="p-0" onClick={() => onEdit(p)}>{v}</Button> },
+          { title: 'Loại', dataIndex: 'category_label' },
+          { title: 'Địa chỉ', dataIndex: 'address' },
+          { title: 'Bán kính', dataIndex: 'radius_m', render: (v) => <span className="num">{v} m</span> },
+          { title: 'Hiển thị', dataIndex: 'is_active', render: (v) => (v ? <Tag color="green">Đang hiện</Tag> : <Tag>Đang ẩn</Tag>) },
+        ]} />
+    </Card>
   )
 }

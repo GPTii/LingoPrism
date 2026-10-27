@@ -1,6 +1,6 @@
-import { useInfiniteQuery } from '@tanstack/react-query'
+import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
 import { Button, Skeleton } from 'antd'
-import { CameraOutlined, CheckOutlined } from '@ant-design/icons'
+import { CameraOutlined, CheckOutlined, CheckSquareOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
@@ -9,6 +9,7 @@ import { langTag } from '../../components/TargetWord'
 import { Prismo } from '../../components/brand/Brand'
 import PhotoDialogue from '../../components/PhotoDialogue'
 import { EmptyState, PageHeader } from '../../components/ui'
+import { DateRangeFilter, dateParams, Selectable, SelectionBar, useBulkDelete, usePicking, type DateRange } from '../../components/DataTools'
 
 /** The word an object stands for: the learner's correction first, then the model's answer. */
 const wordOf = (i: DetectedItem) => i.corrected_card ?? i.card
@@ -75,19 +76,27 @@ const FILTERS = [
 
 export default function DetectionHistoryPage() {
   const [filter, setFilter] = useState<(typeof FILTERS)[number]['key']>('all')
+  const [taken, setTaken] = useState<DateRange>(null)
+  const queryClient = useQueryClient()
+  const picking = usePicking()
   const q = useInfiniteQuery({
-    queryKey: ['detections', filter],
-    queryFn: ({ pageParam }) => learnApi.detections(pageParam, filter === 'all' ? undefined : filter),
+    queryKey: ['detections', filter, dateParams(taken)],
+    queryFn: ({ pageParam }) => learnApi.detections(pageParam, filter === 'all' ? undefined : filter, dateParams(taken)),
     initialPageParam: 1,
     getNextPageParam: (last, pages) => (last.next ? pages.length + 1 : undefined),
   })
   const shots = q.data?.pages.flatMap((p) => p.results) ?? []
+  const bulk = useBulkDelete('/detections/bulk-delete/', () => {
+    picking.stop()
+    queryClient.invalidateQueries({ queryKey: ['detections'] })
+  })
   return (
     <div className="max-w-6xl mx-auto flex flex-col gap-6">
       <PageHeader back={{ to: '/camera', label: 'Chụp ảnh' }} title="Lịch sử ảnh"
         description="Những ảnh bạn đã chụp và từ vựng tìm thấy trong đó, gồm cả ảnh chụp trên điện thoại."
         actions={<Link to="/camera"><Button type="primary" size="large" icon={<CameraOutlined />}>Chụp ảnh mới</Button></Link>} />
-      <div role="radiogroup" aria-label="Lọc ảnh" className="flex flex-wrap gap-2 -mt-2">
+      <div className="flex flex-wrap items-center gap-2 -mt-2">
+      <div role="radiogroup" aria-label="Lọc ảnh" className="flex flex-wrap gap-2">
         {FILTERS.map((f) => (
           <button key={f.key} type="button" role="radio" aria-checked={filter === f.key} onClick={() => setFilter(f.key)}
             className={`cursor-pointer rounded-full px-4 py-1.5 text-sm font-semibold border transition-colors ${
@@ -96,18 +105,38 @@ export default function DetectionHistoryPage() {
           </button>
         ))}
       </div>
+        <DateRangeFilter value={taken} onChange={setTaken} placeholder={['Chụp từ ngày', 'đến ngày']} />
+        {!picking.active && shots.length > 0 && (
+          <Button className="ml-auto" icon={<CheckSquareOutlined />} onClick={picking.start}>Chọn nhiều</Button>
+        )}
+      </div>
       {q.isLoading ? <Skeleton active /> : shots.length ? (
         <>
           {/* masonry: every photo at its own shape */}
           <div className="columns-1 sm:columns-2 lg:columns-3 gap-4">
-            {shots.map((d) => <Shot key={d.id} d={d} />)}
+            {shots.map((d) => (
+              <Selectable key={d.id} active={picking.active} checked={picking.ids.has(d.id)} onToggle={() => picking.toggle(d.id)}
+                label={`Chọn ảnh chụp lúc ${dayjs(d.created_at).format('HH:mm DD/MM/YYYY')}`}>
+                <Shot d={d} />
+              </Selectable>
+            ))}
           </div>
+          {picking.active && (
+            <SelectionBar count={picking.ids.size} total={shots.length} noun="ảnh" busy={bulk.busy}
+              onSelectAll={() => picking.selectAll(shots.map((d) => d.id))} onClear={picking.clear} onDone={picking.stop}
+              onDelete={() => bulk.run([...picking.ids], (n) => `${n} ảnh`)} />
+          )}
           {q.hasNextPage && (
             <div className="flex justify-center">
               <Button size="large" loading={q.isFetchingNextPage} onClick={() => q.fetchNextPage()}>Xem ảnh cũ hơn</Button>
             </div>
           )}
         </>
+      ) : taken ? (
+        <div className="lp-card">
+          <EmptyState art={<Prismo mood="think" size={88} />} title="Không có ảnh nào trong những ngày này"
+            action={<Button onClick={() => setTaken(null)}>Xem mọi ngày</Button>} />
+        </div>
       ) : filter !== 'all' ? (
         <div className="lp-card">
           <EmptyState art={<Prismo mood="happy" size={88} />}

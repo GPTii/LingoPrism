@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
-import { App, Button, Input, Modal, Segmented, Skeleton } from 'antd'
-import { PlusOutlined } from '@ant-design/icons'
+import { App, Button, Input, Modal, Segmented, Select, Skeleton } from 'antd'
+import { CheckSquareOutlined, PlusOutlined } from '@ant-design/icons'
 import { useQueryClient } from '@tanstack/react-query'
 import { errorMessage } from '../../api/client'
 import { useState } from 'react'
@@ -11,6 +11,7 @@ import WordCardView from '../../components/WordCardView'
 import { langTag } from '../../components/TargetWord'
 import { EmptyState, PageHeader, ShowMore } from '../../components/ui'
 import { Prismo } from '../../components/brand/Brand'
+import { DateRangeFilter, dateParams, Selectable, SelectionBar, useBulkDelete, usePicking, type DateRange } from '../../components/DataTools'
 
 /** every topic its own colour (stable: by id) */
 export const TOPIC_TINTS = ['#1899f0', '#7c5cff', '#10c79a', '#ff8a3d', '#ec4899', '#ffb020', '#8b5cf6', '#14b8a6', '#ff6b81', '#0ea5e9']
@@ -85,9 +86,22 @@ export default function VocabPage() {
   const tab: 'topics' | 'library' = params.get('tab') === 'library' ? 'library' : 'topics'
   const setTab = (t: typeof tab) => setParams(t === 'library' ? { tab: t } : {}, { replace: true })
   const [search, setSearch] = useState('')
+  const [status, setStatus] = useState<string | undefined>()
+  const [source, setSource] = useState<string | undefined>()
+  const [saved, setSaved] = useState<DateRange>(null)
+  const libraryFilters = { status, source, ...dateParams(saved) }
+  const filtering = Object.values(libraryFilters).some(Boolean)
+  const queryClient = useQueryClient()
+  const picking = usePicking()
+  const bulk = useBulkDelete('/my-words/bulk-delete/', () => {
+    picking.stop()
+    queryClient.invalidateQueries({ queryKey: ['my-words'] })
+    queryClient.invalidateQueries({ queryKey: ['topics'] })
+  })
 
   const topics = useQuery({ queryKey: ['topics', lang, script], queryFn: () => vocabApi.topics() })
-  const library = useQuery({ queryKey: ['my-words', lang, script], queryFn: () => vocabApi.myWords(), enabled: tab === 'library' })
+  const library = useQuery({ queryKey: ['my-words', lang, script, libraryFilters], queryFn: () => vocabApi.myWords(libraryFilters), enabled: tab === 'library' })
+  const libraryIds = (library.data?.results ?? []).flatMap((c) => (c.personal ? [c.personal.id] : []))
   const found = useQuery({ queryKey: ['search', lang, script, search], queryFn: () => vocabApi.searchWords(search), enabled: search.length > 0 })
   const zhTag = lang === 'zh' ? langTag(script === 'hant' ? 'zh-Hant' : 'zh-Hans') : undefined
 
@@ -141,14 +155,46 @@ export default function VocabPage() {
             )
           )}
           {tab === 'library' && <MyTopics />}
-          {tab === 'library' && <h2 className="m-0 -mb-2 text-lg font-bold text-slate-800">Tất cả từ đã lưu</h2>}
+          {tab === 'library' && (
+            <div className="flex flex-col gap-3 -mb-2">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <h2 className="m-0 text-lg font-bold text-slate-800">Tất cả từ đã lưu</h2>
+                {!picking.active && libraryIds.length > 0 && (
+                  <Button icon={<CheckSquareOutlined />} onClick={picking.start}>Chọn nhiều</Button>
+                )}
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Select allowClear placeholder="Mức thuộc" value={status} onChange={setStatus} style={{ width: 140 }}
+                  options={[{ value: 'new', label: 'Chưa học' }, { value: 'learning', label: 'Đang học' }, { value: 'mastered', label: 'Đã thuộc' }]} />
+                <Select allowClear placeholder="Lưu từ đâu" value={source} onChange={setSource} style={{ width: 160 }}
+                  options={[{ value: 'topic', label: 'Chủ đề' }, { value: 'camera', label: 'Chụp ảnh' }, { value: 'manual', label: 'Tự thêm' },
+                    { value: 'community', label: 'Cộng đồng' }, { value: 'location', label: 'Gợi ý theo vị trí' }]} />
+                <DateRangeFilter value={saved} onChange={setSaved} placeholder={['Lưu từ ngày', 'đến ngày']} />
+              </div>
+            </div>
+          )}
           {tab === 'library' && (
             library.isLoading ? <Skeleton active /> : library.data?.results.length ? (
-              <ShowMore items={library.data.results} limit={24} label="Xem tất cả từ đã lưu">{(shown) => (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {shown.map((c) => <WordCardView key={c.id} card={c} />)}
-              </div>
-              )}</ShowMore>
+              <>
+                <ShowMore items={library.data.results} limit={picking.active ? 200 : 24} label="Xem tất cả từ đã lưu">{(shown) => (
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {shown.map((c) => (
+                    <Selectable key={c.id} active={picking.active && !!c.personal} checked={!!c.personal && picking.ids.has(c.personal.id)}
+                      onToggle={() => c.personal && picking.toggle(c.personal.id)} label={`Chọn từ ${c.target?.text ?? c.meaning_vi}`}>
+                      <WordCardView card={c} />
+                    </Selectable>
+                  ))}
+                </div>
+                )}</ShowMore>
+                {picking.active && (
+                  <SelectionBar count={picking.ids.size} total={libraryIds.length} noun="từ" busy={bulk.busy}
+                    onSelectAll={() => picking.selectAll(libraryIds)} onClear={picking.clear} onDone={picking.stop}
+                    onDelete={() => bulk.run([...picking.ids], (n) => `${n} từ khỏi thư viện`)} />
+                )}
+              </>
+            ) : filtering ? (
+              <div className="lp-card"><EmptyState art={<Prismo mood="think" size={80} />} title="Không có từ nào khớp bộ lọc"
+                action={<Button onClick={() => { setStatus(undefined); setSource(undefined); setSaved(null) }}>Bỏ lọc</Button>} /></div>
             ) : <div className="lp-card"><EmptyState art={<Prismo mood="wow" size={80} />} title="Thư viện của bạn còn trống" description="Mở một chủ đề rồi bấm “Lưu từ”, hoặc chụp ảnh một đồ vật để lưu từ mới." /></div>
           )}
         </>

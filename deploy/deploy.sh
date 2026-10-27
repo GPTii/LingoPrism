@@ -40,6 +40,9 @@ fi
 $COMPOSE up -d --build
 # the backend container migrates on start (entrypoint.sh): wait for it before touching the database
 until $COMPOSE exec -T backend python manage.py migrate --check >/dev/null 2>&1; do sleep 3; done
+# nginx looks up "backend" once, when it starts: a recreated backend has a new IP (502 for every API call) and an
+# edited deploy/nginx/nginx.conf is mounted, not built in, so compose does not restart web for it. Reload both ways.
+$COMPOSE exec -T web nginx -t && $COMPOSE exec -T web nginx -s reload
 $COMPOSE exec -T backend python manage.py check --deploy --fail-level ERROR >/dev/null 2>&1 \
   || $COMPOSE exec -T backend python manage.py check --deploy --fail-level ERROR   # quiet unless it fails
 
@@ -60,6 +63,10 @@ print('\n'.join(lines))
   chmod 600 ADMIN_PASSWORDS.txt
   echo "admin/staff passwords: $(pwd)/ADMIN_PASSWORDS.txt"
 fi
+# demo learners are seeded with the shared password printed in the public repo: each gets its own, kept with the
+# admin ones (every deploy, so accounts seeded before this existed are fixed too)
+$COMPOSE exec -T backend python manage.py secure_demo_accounts | tr -d '\r' >> ADMIN_PASSWORDS.txt
+chmod 600 ADMIN_PASSWORDS.txt
 
 # detector: Open Images model (232 labels) + COCO yolov10m ensemble, both INT8, + CLIP re-check, see AI/README.md
 # (BE/models is not in git: copy the .onnx files and AI/runs/oiv7-pretrained/model_card.json there first)

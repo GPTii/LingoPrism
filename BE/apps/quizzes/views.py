@@ -10,6 +10,7 @@ from rest_framework import mixins, serializers, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+from apps.core.bulk import BulkDeleteMixin, Conflict
 from apps.core.permissions import IsStaffRole
 from apps.notifications.models import Notification
 from apps.notifications.services import notify
@@ -258,7 +259,7 @@ class AdminExamSerializer(serializers.ModelSerializer):
 
 
 @extend_schema(tags=["admin-exams"])
-class AdminQuestionViewSet(viewsets.ModelViewSet):
+class AdminQuestionViewSet(BulkDeleteMixin, viewsets.ModelViewSet):
     serializer_class = AdminQuestionSerializer
     permission_classes = [IsStaffRole]
     filterset_fields = ["kind", "language", "topic"]
@@ -268,9 +269,15 @@ class AdminQuestionViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
 
+    def perform_destroy(self, question):
+        exams = list(question.exams.values_list("title", flat=True)[:3])
+        if exams:
+            raise Conflict(f"Đang nằm trong đề: {', '.join(exams)} – bỏ khỏi đề trước khi xoá.")
+        question.delete()
+
 
 @extend_schema(tags=["admin-exams"])
-class AdminExamViewSet(viewsets.ModelViewSet):
+class AdminExamViewSet(BulkDeleteMixin, viewsets.ModelViewSet):
     serializer_class = AdminExamSerializer
     permission_classes = [IsStaffRole]
     filterset_fields = ["language", "is_published", "topic"]
@@ -282,12 +289,20 @@ class AdminExamViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
 
+    def perform_destroy(self, exam):
+        # learners' results go with an exam: unpublish it instead
+        done = exam.submissions.exclude(status="in_progress").count()
+        if done:
+            raise Conflict(f"Đã có {done} lượt làm bài – tắt xuất bản thay vì xoá để giữ kết quả của học viên.")
+        exam.delete()
+
 
 @extend_schema(tags=["admin-exams"])
 class AdminSubmissionViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     serializer_class = SubmissionSerializer
     permission_classes = [IsStaffRole]
     filterset_fields = ["status", "exam"]
+    date_filter_field = "submitted_at"  # ?created_from/to = the day it was handed in
     queryset = Submission.objects.exclude(status=Submission.Status.IN_PROGRESS).select_related("exam", "user")
 
     @extend_schema(request=GradeSerializer)

@@ -167,7 +167,8 @@ export interface AppNotification {
 }
 
 export const notificationApi = {
-  list: () => api.get<Paginated<AppNotification>>('/notifications/', { params: { page_size: 100 } }).then((r) => r.data.results),
+  list: (params?: Record<string, unknown>) =>
+    api.get<Paginated<AppNotification>>('/notifications/', { params: { page_size: 100, ...params } }).then((r) => r.data.results),
   unread: () => api.get<{ unread: number }>('/notifications/unread-count/').then((r) => r.data.unread),
   read: (id: number) => api.post(`/notifications/${id}/read/`),
   readAll: () => api.post('/notifications/read-all/'),
@@ -472,8 +473,8 @@ export interface Submission {
 
 export const learnApi = {
   /** my earlier photos, newest first */
-  detections: (page = 1, confirmed?: '0' | '1') =>
-    api.get<Paginated<DetectionResult>>('/detections/', { params: { page, confirmed } }).then((r) => r.data),
+  detections: (page = 1, confirmed?: '0' | '1', params?: Record<string, unknown>) =>
+    api.get<Paginated<DetectionResult>>('/detections/', { params: { page, confirmed, ...params } }).then((r) => r.data),
   /** which AI features the server has switched on */
   aiStatus: () => api.get<{ dialogue: boolean }>('/ai/status/').then((r) => r.data),
   /** the dialogue already written for a photo, or null */

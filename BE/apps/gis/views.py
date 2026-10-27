@@ -7,6 +7,8 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from apps.core.bulk import BulkDeleteMixin
+from apps.core.params import int_param
 from apps.core.permissions import IsStaffRole
 
 from . import services
@@ -45,7 +47,7 @@ class NearbyView(APIView):
     def get(self, request):
         ser = PointSerializer(data=request.query_params)
         ser.is_valid(raise_exception=True)
-        radius = int(request.query_params.get("radius", 1000))
+        radius = int_param(request, "radius", 1000)
         start = time.perf_counter()
         hits = services.nearby(ser.validated_data["lat"], ser.validated_data["lng"], radius)
         query_ms = round((time.perf_counter() - start) * 1000, 2)
@@ -67,7 +69,7 @@ class GeofenceCheckView(APIView):
 
 
 @extend_schema(tags=["gis"])
-class PoiViewSet(viewsets.ModelViewSet):
+class PoiViewSet(BulkDeleteMixin, viewsets.ModelViewSet):
     """Everyone can read POIs (map); only staff can edit them (WebGIS admin)."""
 
     serializer_class = PoiSerializer

@@ -15,6 +15,7 @@ from rest_framework import serializers, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+from apps.core.params import int_param
 from apps.gamification.models import XpTransaction
 from apps.gamification.services import award_xp, mark_activity
 from apps.vocab.lang.sentences import normalize_answer
@@ -156,7 +157,7 @@ class SentencePracticeViewSet(viewsets.ViewSet):
     def lesson(self, request):
         """?topic=<id>&size=10 – không có topic thì lấy câu chứa các từ người học đã học."""
         target = resolve_target(request)
-        size = max(1, min(int(request.query_params.get("size", 10) or 10), MAX_LESSON))
+        size = max(1, min(int_param(request, "size", 10) or 10, MAX_LESSON))
         qs, scope = self._pool(request, target)
         # sentences with a Vietnamese meaning first – they allow every exercise type
         pool = list(qs.exclude(translation_vi="").order_by("?")[:200])

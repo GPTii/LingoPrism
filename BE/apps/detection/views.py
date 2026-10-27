@@ -10,6 +10,7 @@ from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from apps.core.bulk import BulkDeleteMixin
 from apps.core.permissions import IsStaffRole
 from apps.gamification import services as game
 from apps.learning.models import PersonalWord
@@ -144,8 +145,23 @@ class ConfirmSerializer(serializers.Serializer):
     topic = serializers.PrimaryKeyRelatedField(queryset=Topic.objects.all(), required=False, allow_null=True)
 
 
+def delete_detection(det: Detection) -> None:
+    """A photo deleted by its owner or an admin goes for good: the row, its objects and their error reports (cascade),
+    and the files on disk – the photo once no other detection uses it, and the reports' crops. The files go only
+    after the database change is committed, so a failed delete never leaves rows pointing at missing files."""
+    files = [(r.crop.storage, r.crop.name) for r in CorrectionMemory.objects.filter(item__detection=det) if r.crop]
+    photo = det.photo
+    det.delete()
+    if photo and not photo.detections.exists():
+        if photo.image:
+            files.append((photo.image.storage, photo.image.name))
+        photo.delete()
+    transaction.on_commit(lambda: [storage.delete(name) for storage, name in files])
+
+
 @extend_schema(tags=["detection"])
-class DetectionViewSet(ActionThrottleMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+class DetectionViewSet(ActionThrottleMixin, BulkDeleteMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin,
+                       mixins.DestroyModelMixin, viewsets.GenericViewSet):
     throttle_scopes = {"log": "detect"}
     serializer_class = LogDetectionSerializer
     parser_classes = [JSONParser, MultiPartParser, FormParser]
@@ -156,8 +172,9 @@ class DetectionViewSet(ActionThrottleMixin, mixins.ListModelMixin, mixins.Retrie
         return Detection.objects.filter(user=self.request.user).select_related("photo").prefetch_related("items")
 
     def list(self, request, *args, **kwargs):
-        """The learner's photos, newest first. `?confirmed=1` only the ones they saved words from, `0` the others."""
-        qs = self.get_queryset()
+        """The learner's photos, newest first. `?confirmed=1` only the ones they saved words from, `0` the others;
+        ?created_from/to by day."""
+        qs = self.filter_queryset(self.get_queryset())
         if request.query_params.get("confirmed") in ("0", "1"):
             qs = qs.filter(confirmed=request.query_params["confirmed"] == "1")
         page = self.paginate_queryset(qs)
@@ -165,6 +182,9 @@ class DetectionViewSet(ActionThrottleMixin, mixins.ListModelMixin, mixins.Retrie
 
     def retrieve(self, request, *args, **kwargs):
         return Response(_items_payload(request, self.get_object()))
+
+    def perform_destroy(self, instance):
+        delete_detection(instance)
 
     @action(detail=False, methods=["get"])
     def labels(self, request):
@@ -273,11 +293,19 @@ class AdminModelVersionViewSet(viewsets.ModelViewSet):
 
 
 @extend_schema(tags=["admin-detection"])
-class AdminDetectionViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+class AdminDetectionViewSet(BulkDeleteMixin, mixins.ListModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet):
     serializer_class = ModelVersionSerializer
     permission_classes = [IsStaffRole]
     queryset = Detection.objects.select_related("user", "photo").prefetch_related("items").order_by("-created_at")
     filterset_fields = ["device", "model_name", "confirmed"]
+    search_fields = ["user__email", "user__display_name", "items__label"]
+
+    def filter_queryset(self, queryset):
+        # searching by object label joins the items: one row per photo
+        return super().filter_queryset(queryset).distinct()
+
+    def perform_destroy(self, instance):
+        delete_detection(instance)
 
     def list(self, request, *args, **kwargs):
         page = self.paginate_queryset(self.filter_queryset(self.get_queryset()))

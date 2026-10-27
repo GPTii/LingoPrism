@@ -6,6 +6,7 @@ import dayjs from 'dayjs'
 import { adminApi, type DetectionLog, type DetectionReport, type PostReport, type UserReport } from '../../api/admin'
 import { errorMessage } from '../../api/client'
 import { SupportChatBox } from '../learner/SupportPage'
+import { BulkDeleteBar, DateRangeFilter, dateParams, pagination, useBulkDelete, useSelection, type DateRange } from '../../components/DataTools'
 
 const REASONS: Record<string, string> = {
   spam: 'Spam', inappropriate: 'Không phù hợp', wrong_vocab: 'Từ vựng sai', harassment: 'Quấy rối',
@@ -32,7 +33,8 @@ function UserReports() {
   const { message, modal } = App.useApp()
   const queryClient = useQueryClient()
   const [status, setStatus] = useState('pending')
-  const list = useQuery({ queryKey: ['user-reports', status], queryFn: () => adminApi.userReports(status) })
+  const [created, setCreated] = useState<DateRange>(null)
+  const list = useQuery({ queryKey: ['user-reports', status, dateParams(created)], queryFn: () => adminApi.userReports(status, dateParams(created)) })
   const resolve = (r: UserReport, lock: boolean) => {
     const run = async () => {
       try {
@@ -52,8 +54,11 @@ function UserReports() {
   }
   return (
     <div className="flex flex-col gap-3">
-      <Select value={status} onChange={setStatus} style={{ width: 180 }} className="self-end"
-        options={[{ value: 'pending', label: 'Chờ xử lý' }, { value: 'resolved', label: 'Đã khoá tài khoản' }, { value: 'dismissed', label: 'Bỏ qua' }]} />
+      <div className="flex flex-wrap gap-2 justify-end">
+        <DateRangeFilter value={created} onChange={setCreated} placeholder={['Báo từ ngày', 'đến ngày']} />
+        <Select value={status} onChange={setStatus} style={{ width: 180 }}
+          options={[{ value: 'pending', label: 'Chờ xử lý' }, { value: 'resolved', label: 'Đã khoá tài khoản' }, { value: 'dismissed', label: 'Bỏ qua' }]} />
+      </div>
       <Table<UserReport> rowKey="id" loading={list.isLoading} dataSource={list.data?.results}
         expandable={{
           rowExpandable: (r) => r.evidence.length > 0,
@@ -94,15 +99,19 @@ function UserReports() {
 function PostReports() {
   const queryClient = useQueryClient()
   const [status, setStatus] = useState('pending')
-  const list = useQuery({ queryKey: ['post-reports', status], queryFn: () => adminApi.postReports(status) })
+  const [created, setCreated] = useState<DateRange>(null)
+  const list = useQuery({ queryKey: ['post-reports', status, dateParams(created)], queryFn: () => adminApi.postReports(status, dateParams(created)) })
   const resolve = async (id: number, hide: boolean) => {
     await adminApi.resolveReport(id, hide)
     queryClient.invalidateQueries({ queryKey: ['post-reports'] })
   }
   return (
     <div className="flex flex-col gap-3">
-      <Select value={status} onChange={setStatus} style={{ width: 180 }} className="self-end"
-        options={[{ value: 'pending', label: 'Chờ xử lý' }, { value: 'resolved', label: 'Đã ẩn bài' }, { value: 'dismissed', label: 'Bỏ qua' }]} />
+      <div className="flex flex-wrap gap-2 justify-end">
+        <DateRangeFilter value={created} onChange={setCreated} placeholder={['Báo từ ngày', 'đến ngày']} />
+        <Select value={status} onChange={setStatus} style={{ width: 180 }}
+          options={[{ value: 'pending', label: 'Chờ xử lý' }, { value: 'resolved', label: 'Đã ẩn bài' }, { value: 'dismissed', label: 'Bỏ qua' }]} />
+      </div>
       <Table<PostReport> rowKey="id" loading={list.isLoading} dataSource={list.data?.results} columns={[
         { title: 'Ảnh', dataIndex: 'post_image', render: (v) => <Image src={v} width={80} /> },
         { title: 'Bài đăng', render: (_, r) => <div><div>{r.post_caption}</div><div className="text-xs text-slate-400">{r.post_author}</div></div> },
@@ -180,7 +189,11 @@ function DetectionReportsCard() {
   const [status, setStatus] = useState<string | undefined>('pending')
   const [page, setPage] = useState(1)
   const [exporting, setExporting] = useState(false)
-  const reports = useQuery({ queryKey: ['detection-reports', status, page], queryFn: () => adminApi.detectionReports(status, page) })
+  const [created, setCreated] = useState<DateRange>(null)
+  const reports = useQuery({
+    queryKey: ['detection-reports', status, page, dateParams(created)],
+    queryFn: () => adminApi.detectionReports(status, page, dateParams(created)),
+  })
   const summary = useQuery({ queryKey: ['detection-report-summary'], queryFn: adminApi.detectionReportSummary })
   const review = async (r: DetectionReport, approve: boolean) => {
     try {
@@ -231,8 +244,11 @@ function DetectionReportsCard() {
           )}
         </div>
       )}
-      <Select className="mb-3 w-56" value={status ?? 'all'} onChange={(v) => { setStatus(v === 'all' ? undefined : v); setPage(1) }}
-        options={[{ value: 'pending', label: 'Chờ duyệt' }, { value: 'approved', label: 'Đã duyệt' }, { value: 'rejected', label: 'Đã từ chối' }, { value: 'all', label: 'Tất cả' }]} />
+      <div className="flex flex-wrap gap-2 mb-3">
+        <Select className="w-56" value={status ?? 'all'} onChange={(v) => { setStatus(v === 'all' ? undefined : v); setPage(1) }}
+          options={[{ value: 'pending', label: 'Chờ duyệt' }, { value: 'approved', label: 'Đã duyệt' }, { value: 'rejected', label: 'Đã từ chối' }, { value: 'all', label: 'Tất cả' }]} />
+        <DateRangeFilter value={created} onChange={(v) => { setCreated(v); setPage(1) }} placeholder={['Báo từ ngày', 'đến ngày']} />
+      </div>
       <Table<DetectionReport> size="small" rowKey="id" loading={reports.isLoading} dataSource={reports.data?.results}
         pagination={{ current: page, total: reports.data?.count, pageSize: 20, onChange: setPage, showSizeChanger: false }}
         columns={[
@@ -258,8 +274,22 @@ function DetectionReportsCard() {
 }
 
 export function DetectionsAdminPage() {
+  const queryClient = useQueryClient()
   const [page, setPage] = useState(1)
-  const logs = useQuery({ queryKey: ['admin-detections', page], queryFn: () => adminApi.detections(page) })
+  const [pageSize, setPageSize] = useState(20)
+  const [search, setSearch] = useState('')
+  const [device, setDevice] = useState<string | undefined>()
+  const [confirmed, setConfirmed] = useState<string | undefined>()
+  const [created, setCreated] = useState<DateRange>(null)
+  const filters = { search: search || undefined, device, confirmed, ...dateParams(created) }
+  const logs = useQuery({ queryKey: ['admin-detections', page, pageSize, filters], queryFn: () => adminApi.detections({ page, page_size: pageSize, ...filters }) })
+  const selection = useSelection<DetectionLog>([filters])
+  const bulk = useBulkDelete('/admin/detections/bulk-delete/', () => {
+    selection.clear()
+    queryClient.invalidateQueries({ queryKey: ['admin-detections'] })
+    queryClient.invalidateQueries({ queryKey: ['detection-stats'] })
+  })
+  const filter = <V,>(set: (v: V) => void) => (v: V) => { set(v); setPage(1) }
   const stats = useQuery({ queryKey: ['detection-stats'], queryFn: adminApi.detectionStats })
   const models = useQuery({ queryKey: ['model-versions'], queryFn: adminApi.modelVersions })
   return (
@@ -290,8 +320,20 @@ export function DetectionsAdminPage() {
       </div>
       <DetectionReportsCard />
       <Card title="Nhật ký nhận diện">
+        <div className="flex flex-wrap gap-2 mb-3">
+          <Input.Search placeholder="Email, tên hoặc nhãn vật" allowClear onSearch={filter(setSearch)} style={{ width: 230 }} />
+          <Select allowClear placeholder="Thiết bị" value={device} onChange={filter(setDevice)} style={{ width: 130 }}
+            options={[{ value: 'server', label: 'Máy chủ' }, { value: 'on_device', label: 'Điện thoại' }]} />
+          <Select allowClear placeholder="Lưu từ" value={confirmed} onChange={filter(setConfirmed)} style={{ width: 140 }}
+            options={[{ value: 'true', label: 'Đã lưu từ' }, { value: 'false', label: 'Chưa lưu từ' }]} />
+          <DateRangeFilter value={created} onChange={filter(setCreated)} placeholder={['Chụp từ ngày', 'đến ngày']} />
+        </div>
+        <BulkDeleteBar count={selection.keys.length} noun="ảnh" busy={bulk.busy} onClear={selection.clear}
+          warning="Ảnh, các vật nhận ra và báo lỗi kèm theo bị xoá khỏi máy chủ. Từ học viên đã lưu vẫn còn trong thư viện của họ."
+          onDelete={() => bulk.run(selection.keys, (n) => `${n} ảnh`)} />
         <Table<DetectionLog> rowKey="id" loading={logs.isLoading} dataSource={logs.data?.results}
-          pagination={{ current: page, total: logs.data?.count, pageSize: 20, onChange: setPage, showSizeChanger: false }}
+          rowSelection={selection.rowSelection}
+          pagination={pagination(page, logs.data?.count, pageSize, (p, size) => { setPage(size === pageSize ? p : 1); setPageSize(size) })}
           columns={[
             { title: 'Ảnh', dataIndex: 'image', render: (v) => (v ? <Image src={v} width={64} /> : '—') },
             { title: 'Người dùng', dataIndex: 'user' },

@@ -1,8 +1,9 @@
-import { useQuery } from '@tanstack/react-query'
-import { Card, Input, Segmented, Statistic, Table, Tag, Tooltip } from 'antd'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { Card, Input, Segmented, Select, Statistic, Table, Tag, Tooltip } from 'antd'
 import { useState } from 'react'
 import { adminVocabApi, LANG_LABEL, STATUS_TAG, type AdminTranslation, type AdminWord } from '../../api/adminVocab'
 import { langTag } from '../../components/TargetWord'
+import { BulkDeleteBar, DateRangeFilter, dateParams, pagination, useBulkDelete, useSelection, type DateRange } from '../../components/DataTools'
 
 function TranslationCell({ tr }: { tr?: AdminTranslation }) {
   if (!tr) return <span className="text-slate-300">—</span>
@@ -22,14 +23,29 @@ function TranslationCell({ tr }: { tr?: AdminTranslation }) {
 }
 
 export default function VocabAdminPage() {
+  const queryClient = useQueryClient()
   const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(20)
   const [search, setSearch] = useState('')
   const [flagged, setFlagged] = useState<'all' | 'flagged'>('all')
+  const [audience, setAudience] = useState<string | undefined>()
+  const [hasImage, setHasImage] = useState<string | undefined>()
+  const [created, setCreated] = useState<DateRange>(null)
+  const filters = {
+    search: search || undefined, flagged: flagged === 'flagged' ? 1 : undefined, audience, has_image: hasImage, ...dateParams(created),
+  }
   const stats = useQuery({ queryKey: ['admin-vocab-stats'], queryFn: adminVocabApi.stats })
   const words = useQuery({
-    queryKey: ['admin-words', page, search, flagged],
-    queryFn: () => adminVocabApi.words({ page, search: search || undefined, flagged: flagged === 'flagged' ? 1 : undefined }),
+    queryKey: ['admin-words', page, pageSize, filters],
+    queryFn: () => adminVocabApi.words({ page, page_size: pageSize, ...filters }),
   })
+  const selection = useSelection<AdminWord>([filters])
+  const bulk = useBulkDelete('/admin/words/bulk-delete/', () => {
+    selection.clear()
+    queryClient.invalidateQueries({ queryKey: ['admin-words'] })
+    queryClient.invalidateQueries({ queryKey: ['admin-vocab-stats'] })
+  })
+  const filter = <V,>(set: (v: V) => void) => (v: V) => { set(v); setPage(1) }
   const by = (w: AdminWord, code: string) => w.translations.find((t) => t.language === code)
 
   return (
@@ -49,18 +65,25 @@ export default function VocabAdminPage() {
       </div>
       <Card
         title="Từ vựng"
-        extra={
-          <div className="flex gap-2">
-            <Segmented value={flagged} onChange={(v) => { setFlagged(v as typeof flagged); setPage(1) }} options={[{ value: 'all', label: 'Tất cả' }, { value: 'flagged', label: 'Có lỗi' }]} />
-            <Input.Search placeholder="Tìm slug, nhãn YOLO, chữ…" allowClear onSearch={(v) => { setSearch(v); setPage(1) }} style={{ width: 260 }} />
-          </div>
-        }
+        extra={<Segmented value={flagged} onChange={(v) => { setFlagged(v as typeof flagged); setPage(1) }} options={[{ value: 'all', label: 'Tất cả' }, { value: 'flagged', label: 'Có lỗi' }]} />}
       >
+        <div className="flex flex-wrap gap-2 mb-3">
+          <Input.Search placeholder="Tìm slug, nhãn YOLO, chữ…" allowClear onSearch={filter(setSearch)} style={{ width: 240 }} />
+          <Select allowClear placeholder="Đối tượng" value={audience} onChange={filter(setAudience)} style={{ width: 130 }}
+            options={[{ value: 'all', label: 'Tất cả' }, { value: 'kid', label: 'Trẻ em' }, { value: 'adult', label: 'Người lớn' }]} />
+          <Select allowClear placeholder="Ảnh minh hoạ" value={hasImage} onChange={filter(setHasImage)} style={{ width: 150 }}
+            options={[{ value: '1', label: 'Có ảnh' }, { value: '0', label: 'Chưa có ảnh' }]} />
+          <DateRangeFilter value={created} onChange={filter(setCreated)} placeholder={['Thêm từ ngày', 'đến ngày']} />
+        </div>
+        <BulkDeleteBar count={selection.keys.length} noun="từ" busy={bulk.busy} onClear={selection.clear}
+          warning="Bản dịch, câu ví dụ của các từ này bị xoá theo. Từ đã có học viên lưu vào thư viện được giữ lại."
+          onDelete={() => bulk.run(selection.keys, (n) => `${n} từ`)} />
         <Table<AdminWord>
           rowKey="id"
           loading={words.isLoading}
           dataSource={words.data?.results}
-          pagination={{ current: page, total: words.data?.count, pageSize: 20, onChange: setPage, showSizeChanger: false }}
+          rowSelection={selection.rowSelection}
+          pagination={pagination(page, words.data?.count, pageSize, (p, size) => { setPage(size === pageSize ? p : 1); setPageSize(size) })}
           scroll={{ x: 1000 }}
           columns={[
             { title: 'Khái niệm', dataIndex: 'slug', render: (v, w) => <div><div className="font-mono">{v}</div>{w.yolo_label && <Tag color="cyan">YOLO: {w.yolo_label}</Tag>}</div> },

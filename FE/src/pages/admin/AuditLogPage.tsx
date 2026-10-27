@@ -4,6 +4,7 @@ import dayjs from 'dayjs'
 import { useState } from 'react'
 import { api } from '../../api/client'
 import type { Paginated } from '../../api/types'
+import { DateRangeFilter, dateParams, pagination, type DateRange } from '../../components/DataTools'
 
 interface AuditLog {
   id: number
@@ -31,9 +32,13 @@ export default function AuditLogPage() {
   const [page, setPage] = useState(1)
   const [q, setQ] = useState('')
   const [method, setMethod] = useState<string | undefined>()
+  const [created, setCreated] = useState<DateRange>(null)
+  const [pageSize, setPageSize] = useState(20)
   const logs = useQuery({
-    queryKey: ['audit-logs', page, q, method],
-    queryFn: () => api.get<Paginated<AuditLog>>('/admin/audit-logs/', { params: { page, q: q || undefined, method } }).then((r) => r.data),
+    queryKey: ['audit-logs', page, pageSize, q, method, dateParams(created)],
+    queryFn: () => api.get<Paginated<AuditLog>>('/admin/audit-logs/', {
+      params: { page, page_size: pageSize, q: q || undefined, method, ...dateParams(created) },
+    }).then((r) => r.data),
   })
 
   return (
@@ -43,13 +48,14 @@ export default function AuditLogPage() {
           <Input.Search allowClear placeholder="Email hoặc đường dẫn" style={{ width: 240 }} onSearch={(v) => { setQ(v); setPage(1) }} />
           <Select allowClear placeholder="Loại thao tác" style={{ width: 150 }} value={method} onChange={(v) => { setMethod(v); setPage(1) }}
             options={[{ value: 'POST', label: 'Tạo / thực hiện' }, { value: 'PATCH', label: 'Sửa' }, { value: 'DELETE', label: 'Xoá' }]} />
+          <DateRangeFilter value={created} onChange={(v) => { setCreated(v); setPage(1) }} />
         </div>
       }>
       <p className="text-slate-500 mt-0">
         Mọi thay đổi admin và staff thực hiện qua hệ thống đều được ghi lại. Chỉ lưu <b>tên</b> các trường đã gửi, không lưu nội dung, nên mật khẩu hay tin nhắn không bao giờ nằm trong nhật ký.
       </p>
       <Table<AuditLog> rowKey="id" size="middle" loading={logs.isLoading} dataSource={logs.data?.results}
-        pagination={{ current: page, total: logs.data?.count, pageSize: 20, onChange: setPage, showSizeChanger: false }}
+        pagination={pagination(page, logs.data?.count, pageSize, (p, size) => { setPage(size === pageSize ? p : 1); setPageSize(size) })}
         columns={[
           { title: 'Thời gian', dataIndex: 'created_at', width: 150, render: (v: string) => <span className="num">{dayjs(v).format('HH:mm:ss DD/MM/YYYY')}</span> },
           { title: 'Người thực hiện', dataIndex: 'actor_email', render: (v: string, r) => <span>{v} <Tag className="ml-1">{r.actor_role === 'admin' ? 'Admin' : 'Staff'}</Tag></span> },

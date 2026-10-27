@@ -165,7 +165,7 @@ class MoeDict:
         url = self.URL.format(urllib.parse.quote(word))
         req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
         try:
-            with urllib.request.urlopen(req, timeout=20) as res:
+            with urllib.request.urlopen(req, timeout=20) as res:  # fixed https source, not user input  # nosec B310
                 raw = json.loads(res.read().decode("utf-8"))
             data = {
                 "title": raw.get("title"),

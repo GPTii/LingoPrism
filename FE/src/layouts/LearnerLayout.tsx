@@ -1,6 +1,6 @@
 import type React from 'react'
 import { App, Avatar, Badge, ConfigProvider, Drawer, Dropdown, Grid, Select, Tooltip } from 'antd'
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { communityApi, gameApi, messagesApi } from '../api/app'
 import { authApi } from '../api/auth'
@@ -188,7 +188,7 @@ export default function LearnerLayout() {
           </header>
           <main className={`flex-1 px-3 sm:px-4 md:px-8 xl:px-12 pt-2 md:pt-4 md:pb-12 ${focus ? 'pb-4' : 'pb-28'}`}>
             <div className="mx-auto w-full max-w-7xl 2xl:max-w-[1600px]">
-              <div key={location.pathname} className="animate-page"><ErrorBoundary><Outlet /></ErrorBoundary></div>
+              <div key={location.pathname} className="animate-page"><ErrorBoundary><Suspense fallback={null}><Outlet /></Suspense></ErrorBoundary></div>
             </div>
           </main>
 

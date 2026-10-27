@@ -20,6 +20,6 @@ class Command(BaseCommand):
                 continue
             self.stdout.write(f"↓ {name} ← {url}")
             req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
-            with urllib.request.urlopen(req, timeout=120) as res:
+            with urllib.request.urlopen(req, timeout=120) as res:  # fixed https source, not user input  # nosec B310
                 path.write_bytes(res.read())
             self.stdout.write(self.style.SUCCESS(f"✓ {name} ({path.stat().st_size // 1024} KB)"))

@@ -17,6 +17,16 @@ def _resource_and_id(path: str) -> tuple[str, str]:
     return "/".join(names[:2])[:60], (ids[0] if ids else "")
 
 
+def _bulk_ids(request) -> str:
+    """For a bulk delete, which rows: "3 mục: 12,15,40" (ids are not private, unlike the values of other fields)."""
+    try:
+        ids = json.loads(request.body).get("ids") or []
+        text = f"{len(ids)} mục: " + ",".join(str(i) for i in ids)
+        return text if len(text) <= 40 else text[:39] + "…"
+    except Exception:
+        return ""
+
+
 def _field_names(request) -> list[str]:
     """Field names of a JSON body. Multipart uploads are left unread here so the view can parse them."""
     try:
@@ -43,6 +53,8 @@ class AuditLogMiddleware:
         if not (user and user.is_authenticated and getattr(user, "role", "") in ("admin", "staff")):
             return response
         resource, object_id = _resource_and_id(request.path)
+        if request.path.endswith("/bulk-delete/"):
+            object_id = _bulk_ids(request)
         forwarded = request.META.get("HTTP_X_FORWARDED_FOR", "").split(",")[0].strip()
         try:
             AuditLog.objects.create(

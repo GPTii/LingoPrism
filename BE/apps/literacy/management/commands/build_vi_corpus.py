@@ -94,7 +94,7 @@ class Command(BaseCommand):
         if not WORDLIST.exists():
             self.stdout.write(f"↓ {WORDLIST.name}")
             req = urllib.request.Request(WORDLIST_URL, headers={"User-Agent": USER_AGENT})
-            with urllib.request.urlopen(req, timeout=120) as res:
+            with urllib.request.urlopen(req, timeout=120) as res:  # fixed https source, not user input  # nosec B310
                 WORDLIST.write_bytes(res.read())
         # a syllable counts when it is an entry on its own or occurs in at least two entries
         # (a single compound like "kính đên" is not enough evidence)

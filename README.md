@@ -42,6 +42,8 @@ flutter run --dart-define=API_URL=http://<IP-máy-tính>:8000    # điện tho�
 
 ### Tài khoản demo (mật khẩu chung `LingoPrism@2026`)
 
+Chỉ trên máy dev. Trên production, `deploy/deploy.sh` đổi mật khẩu từng tài khoản demo thành mật khẩu ngẫu nhiên (lưu ở `ADMIN_PASSWORDS.txt` trên server), vì mật khẩu chung này công khai trong repo.
+
 | Email | Vai trò |
 |---|---|
 | admin@lingoprism.local | Quản trị viên (web `/admin`, Django Admin `/django-admin/`) |

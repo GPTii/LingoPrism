@@ -384,13 +384,18 @@ class CommunityUserViewSet(ActionThrottleMixin, viewsets.GenericViewSet):
             return Response({"detail": "Bạn không thể kết bạn với tài khoản này.", "errors": {}}, status=400)
         if blocked_between(me.id, target.id):
             return Response({"detail": "Bạn không thể kết bạn với người này.", "errors": {}}, status=400)
-        if state == "incoming":
-            return Response(accept_friend(request, fr))
-        if state == "none":
-            fr = FriendRequest.objects.create(from_user=me, to_user=target, message=str(request.data.get("message", ""))[:200])
-            notify(target, Notification.Kind.FRIEND_REQUEST, f"{me.display_name} muốn kết bạn với bạn", fr.message,
-                   data={"route": "/friends?tab=incoming", "action": "friend_request", "request_id": fr.id, "user_id": me.id})
-            state = "outgoing"
+        with transaction.atomic():
+            # lock both people, lower id first: a double tap, or both pressing "add friend" at the same moment, would
+            # otherwise create the request twice (a 500 on the unique pair, or two crossed pending requests)
+            list(User.objects.select_for_update().filter(pk__in=[me.id, target.id]).order_by("pk"))
+            state, fr = friend_status(me, target)
+            if state == "incoming":
+                return Response(accept_friend(request, fr))
+            if state == "none":
+                fr = FriendRequest.objects.create(from_user=me, to_user=target, message=str(request.data.get("message", ""))[:200])
+                notify(target, Notification.Kind.FRIEND_REQUEST, f"{me.display_name} muốn kết bạn với bạn", fr.message,
+                       data={"route": "/friends?tab=incoming", "action": "friend_request", "request_id": fr.id, "user_id": me.id})
+                state = "outgoing"
         return Response({"friend_status": state, "friend_request_id": fr.id})
 
     @action(detail=False, methods=["get"])

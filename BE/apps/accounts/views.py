@@ -1,9 +1,10 @@
 import logging
 import secrets
+from datetime import date
 
 from django.conf import settings
 from django.db import transaction
-from django.db.models import ProtectedError
+from django.db.models import ProtectedError, Q
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema
 from rest_framework import generics, mixins, status, viewsets
@@ -17,6 +18,7 @@ from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, OutstandingToken
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from apps.core.bulk import BulkDeleteMixin, Conflict
 from apps.core.permissions import IsAdminRole
 from apps.core.throttles import EmailRateThrottle
 
@@ -256,13 +258,26 @@ class PublicUserView(generics.RetrieveAPIView):
 
 
 @extend_schema(tags=["admin-users"])
-class AdminUserViewSet(viewsets.ModelViewSet):
+class AdminUserViewSet(BulkDeleteMixin, viewsets.ModelViewSet):
     serializer_class = s.AdminUserSerializer
     permission_classes = [IsAdminRole]
-    queryset = User.objects.all()
     filterset_fields = ["role", "status", "learner_type", "active_language"]
     search_fields = ["email", "display_name"]
     ordering_fields = ["created_at", "last_login", "email"]
+
+    def get_queryset(self):
+        """Besides the field filters and ?created_from/to: ?inactive_since=YYYY-MM-DD (no sign-in since that day,
+        or never) and ?never_logged_in=1 – the accounts worth cleaning up."""
+        qs = User.objects.all()
+        params = self.request.query_params
+        try:
+            since = date.fromisoformat(params.get("inactive_since", ""))
+            qs = qs.filter(Q(last_login__date__lt=since) | Q(last_login__isnull=True))
+        except ValueError:
+            pass
+        if params.get("never_logged_in") == "1":
+            qs = qs.filter(last_login__isnull=True)
+        return qs.order_by("-created_at")
 
     def _guard_self(self, user, data):
         if user.pk == self.request.user.pk and (
@@ -281,9 +296,9 @@ class AdminUserViewSet(viewsets.ModelViewSet):
         self._guard_self(serializer.instance, serializer.validated_data)
         self._sync_flags(serializer.save())
 
-    def destroy(self, request, *args, **kwargs):
-        user = self.get_object()
-        if user.pk == request.user.pk:
+    def perform_destroy(self, user):
+        """Shared by deleting one account and by bulk delete, so neither can skip these guards."""
+        if user.pk == self.request.user.pk:
             raise ValidationError("Không thể xóa tài khoản đang đăng nhập")
         if user.role == User.Role.ADMIN and not User.objects.filter(role=User.Role.ADMIN).exclude(pk=user.pk).exists():
             raise ValidationError("Phải còn ít nhất một quản trị viên")
@@ -291,8 +306,6 @@ class AdminUserViewSet(viewsets.ModelViewSet):
             with transaction.atomic():
                 user.delete()
         except ProtectedError:
-            return Response({"detail": "Tài khoản đang được dữ liệu khác tham chiếu – hãy khóa thay vì xóa."},
-                            status=status.HTTP_409_CONFLICT)
-        return Response(status=status.HTTP_204_NO_CONTENT)
+            raise Conflict("Tài khoản đang được dữ liệu khác tham chiếu – hãy khóa thay vì xóa.")
 
 
