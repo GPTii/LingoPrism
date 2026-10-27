@@ -8,6 +8,7 @@ import type { Poi } from '../../api/app'
 import { errorMessage } from '../../api/client'
 import { vocabApi } from '../../api/vocab'
 import { BulkDeleteBar, DateRangeFilter, dateParams, useBulkDelete, useSelection, type DateRange } from '../../components/DataTools'
+import SearchBox from '../../components/SearchBox'
 
 const CATEGORIES = [
   ['market', 'Chợ'], ['supermarket', 'Siêu thị / TTTM'], ['hospital', 'Bệnh viện'], ['school', 'Trường học'], ['park', 'Công viên'],
@@ -122,7 +123,7 @@ function PoiList({ onEdit }: { onEdit: (p: Poi) => void }) {
   return (
     <Card className="lg:col-span-3" title="Tất cả điểm quan tâm">
       <div className="flex flex-wrap gap-2 mb-3">
-        <Input.Search placeholder="Tên hoặc địa chỉ" allowClear onSearch={setSearch} style={{ width: 220 }} />
+        <SearchBox placeholder="Tên hoặc địa chỉ" allowClear onSearch={setSearch} style={{ width: 220 }} />
         <Select allowClear placeholder="Loại" options={CATEGORIES} value={category} onChange={setCategory} style={{ width: 180 }} />
         <Select allowClear placeholder="Hiển thị" value={active} onChange={setActive} style={{ width: 140 }}
           options={[{ value: 'true', label: 'Đang hiện' }, { value: 'false', label: 'Đang ẩn' }]} />

@@ -1,9 +1,10 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { Card, Input, Segmented, Select, Statistic, Table, Tag, Tooltip } from 'antd'
+import { Card, Segmented, Select, Statistic, Table, Tag, Tooltip } from 'antd'
 import { useState } from 'react'
 import { adminVocabApi, LANG_LABEL, STATUS_TAG, type AdminTranslation, type AdminWord } from '../../api/adminVocab'
 import { langTag } from '../../components/TargetWord'
 import { BulkDeleteBar, DateRangeFilter, dateParams, pagination, useBulkDelete, useSelection, type DateRange } from '../../components/DataTools'
+import SearchBox from '../../components/SearchBox'
 
 function TranslationCell({ tr }: { tr?: AdminTranslation }) {
   if (!tr) return <span className="text-slate-300">—</span>
@@ -68,7 +69,7 @@ export default function VocabAdminPage() {
         extra={<Segmented value={flagged} onChange={(v) => { setFlagged(v as typeof flagged); setPage(1) }} options={[{ value: 'all', label: 'Tất cả' }, { value: 'flagged', label: 'Có lỗi' }]} />}
       >
         <div className="flex flex-wrap gap-2 mb-3">
-          <Input.Search placeholder="Tìm slug, nhãn YOLO, chữ…" allowClear onSearch={filter(setSearch)} style={{ width: 240 }} />
+          <SearchBox placeholder="Tìm slug, nhãn YOLO, chữ…" allowClear onSearch={filter(setSearch)} style={{ width: 240 }} />
           <Select allowClear placeholder="Đối tượng" value={audience} onChange={filter(setAudience)} style={{ width: 130 }}
             options={[{ value: 'all', label: 'Tất cả' }, { value: 'kid', label: 'Trẻ em' }, { value: 'adult', label: 'Người lớn' }]} />
           <Select allowClear placeholder="Ảnh minh hoạ" value={hasImage} onChange={filter(setHasImage)} style={{ width: 150 }}

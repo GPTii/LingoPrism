@@ -7,6 +7,7 @@ import { adminApi, type DetectionLog, type DetectionReport, type PostReport, typ
 import { errorMessage } from '../../api/client'
 import { SupportChatBox } from '../learner/SupportPage'
 import { BulkDeleteBar, DateRangeFilter, dateParams, pagination, useBulkDelete, useSelection, type DateRange } from '../../components/DataTools'
+import SearchBox from '../../components/SearchBox'
 
 const REASONS: Record<string, string> = {
   spam: 'Spam', inappropriate: 'Không phù hợp', wrong_vocab: 'Từ vựng sai', harassment: 'Quấy rối',
@@ -321,7 +322,7 @@ export function DetectionsAdminPage() {
       <DetectionReportsCard />
       <Card title="Nhật ký nhận diện">
         <div className="flex flex-wrap gap-2 mb-3">
-          <Input.Search placeholder="Email, tên hoặc nhãn vật" allowClear onSearch={filter(setSearch)} style={{ width: 230 }} />
+          <SearchBox placeholder="Email, tên hoặc nhãn vật" allowClear onSearch={filter(setSearch)} style={{ width: 230 }} />
           <Select allowClear placeholder="Thiết bị" value={device} onChange={filter(setDevice)} style={{ width: 130 }}
             options={[{ value: 'server', label: 'Máy chủ' }, { value: 'on_device', label: 'Điện thoại' }]} />
           <Select allowClear placeholder="Lưu từ" value={confirmed} onChange={filter(setConfirmed)} style={{ width: 140 }}

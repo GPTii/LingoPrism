@@ -1,9 +1,10 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { Alert, App, Button, Card, Col, Descriptions, Empty, Image, Input, Row, Select, Space, Table, Tabs, Tag, Tooltip } from 'antd'
+import { Alert, App, Button, Card, Col, Descriptions, Empty, Image, Row, Select, Space, Table, Tabs, Tag, Tooltip } from 'antd'
 import { ExperimentOutlined, ReloadOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import { useState } from 'react'
 import { api, errorMessage } from '../../api/client'
+import SearchBox from '../../components/SearchBox'
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type Exp = { created_at: string; duration_s: number; results: any }
@@ -329,7 +330,7 @@ export default function AlgorithmsPage() {
               </>}
               {!dis?.stats && <div className="flex justify-end"><RunButton kind="distractor" onDone={refresh} /></div>}
               <Space wrap>
-                <Input.Search defaultValue={dq} placeholder="Từ (VD cat, bánh mì, 猫)" onSearch={setDq} style={{ width: 240 }} />
+                <SearchBox defaultValue={dq} placeholder="Từ (VD cat, bánh mì, 猫)" onSearch={setDq} style={{ width: 240 }} />
                 <Select value={dlang} onChange={setDlang} options={[{ value: 'en', label: 'Tiếng Anh' }, { value: 'zh', label: 'Tiếng Trung' }, { value: 'vi', label: 'Tiếng Việt' }]} />
               </Space>
               {dist.data && (

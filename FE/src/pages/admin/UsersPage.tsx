@@ -7,6 +7,7 @@ import { api, errorMessage } from '../../api/client'
 import type { Paginated, Role, User } from '../../api/types'
 import { useAuth } from '../../auth/store'
 import { BulkDeleteBar, DateRangeFilter, dateParams, pagination, useBulkDelete, useSelection, type DateRange } from '../../components/DataTools'
+import SearchBox from '../../components/SearchBox'
 
 const ROLE_OPTIONS = [
   { value: 'admin', label: 'Quản trị viên' },
@@ -108,7 +109,7 @@ export default function UsersPage() {
       extra={isAdmin && <Button type="primary" icon={<PlusOutlined />} onClick={() => openForm('new')}>Thêm người dùng</Button>}
     >
       <div className="flex flex-wrap gap-2 mb-3">
-        <Input.Search placeholder="Tìm email, tên" allowClear onSearch={filter(setSearch)} style={{ width: 220 }} />
+        <SearchBox placeholder="Tìm email, tên" allowClear onSearch={filter(setSearch)} style={{ width: 220 }} />
         <Select allowClear placeholder="Vai trò" options={ROLE_OPTIONS} value={role} onChange={filter(setRole)} style={{ width: 160 }} />
         <Select allowClear placeholder="Trạng thái" value={status} onChange={filter(setStatus)} style={{ width: 130 }}
           options={[{ value: 'active', label: 'Hoạt động' }, { value: 'locked', label: 'Bị khóa' }]} />

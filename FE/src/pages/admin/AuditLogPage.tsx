@@ -1,10 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
-import { Card, Input, Select, Table, Tag } from 'antd'
+import { Card, Select, Table, Tag } from 'antd'
 import dayjs from 'dayjs'
 import { useState } from 'react'
 import { api } from '../../api/client'
 import type { Paginated } from '../../api/types'
 import { DateRangeFilter, dateParams, pagination, type DateRange } from '../../components/DataTools'
+import SearchBox from '../../components/SearchBox'
 
 interface AuditLog {
   id: number
@@ -45,7 +46,7 @@ export default function AuditLogPage() {
     <Card title="Nhật ký thao tác"
       extra={
         <div className="flex flex-wrap gap-2">
-          <Input.Search allowClear placeholder="Email hoặc đường dẫn" style={{ width: 240 }} onSearch={(v) => { setQ(v); setPage(1) }} />
+          <SearchBox allowClear placeholder="Email hoặc đường dẫn" style={{ width: 240 }} onSearch={(v) => { setQ(v); setPage(1) }} />
           <Select allowClear placeholder="Loại thao tác" style={{ width: 150 }} value={method} onChange={(v) => { setMethod(v); setPage(1) }}
             options={[{ value: 'POST', label: 'Tạo / thực hiện' }, { value: 'PATCH', label: 'Sửa' }, { value: 'DELETE', label: 'Xoá' }]} />
           <DateRangeFilter value={created} onChange={(v) => { setCreated(v); setPage(1) }} />

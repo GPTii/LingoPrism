@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { api, errorMessage } from '../../api/client'
 import type { Paginated } from '../../api/types'
 import { vocabApi } from '../../api/vocab'
+import SearchBox from '../../components/SearchBox'
 
 interface Candidate {
   id: number
@@ -78,7 +79,7 @@ export default function CandidateQueue() {
           options={[{ value: 'pending', label: 'Chờ duyệt' }, { value: 'approved', label: 'Đã duyệt' }, { value: 'rejected', label: 'Bỏ qua' }]} />
         <Select allowClear placeholder="Cấp HSK" value={level} onChange={(v) => { setLevel(v); setPage(1) }} style={{ width: 120 }}
           options={[1, 2, 3, 4, 5, 6].map((n) => ({ value: n, label: `HSK ${n}` }))} />
-        <Input.Search allowClear placeholder="Tìm chữ Hán / nghĩa" onSearch={(v) => { setSearch(v); setPage(1) }} style={{ width: 240 }} />
+        <SearchBox allowClear placeholder="Tìm chữ Hán / nghĩa" onSearch={(v) => { setSearch(v); setPage(1) }} style={{ width: 240 }} />
       </Space>
       <Table<Candidate> rowKey="id" size="small" loading={list.isLoading} dataSource={list.data?.results}
         pagination={{ current: page, total: list.data?.count, pageSize: 20, onChange: setPage, showSizeChanger: false }}

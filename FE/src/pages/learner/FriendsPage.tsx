@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { Input, Segmented, Skeleton } from 'antd'
+import { Segmented, Skeleton } from 'antd'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import 'dayjs/locale/vi'
@@ -9,6 +9,7 @@ import { communityApi } from '../../api/app'
 import { Prismo } from '../../components/brand/Brand'
 import { MyIdCard, PersonRow } from '../../components/Friends'
 import { EmptyState, PageHeader, ShowMore } from '../../components/ui'
+import SearchBox from '../../components/SearchBox'
 
 dayjs.extend(relativeTime)
 dayjs.locale('vi')
@@ -46,7 +47,7 @@ export default function FriendsPage() {
 
       {tab === 'find' && (
         <div className="flex flex-col gap-3">
-          <Input.Search size="large" placeholder="Nhập ID 8 số hoặc tên bạn học" enterButton="Tìm" allowClear value={q}
+          <SearchBox size="large" placeholder="Nhập ID 8 số hoặc tên bạn học" enterButton="Tìm" allowClear value={q}
             onChange={(e) => setQ(e.target.value)} onSearch={(v) => setTerm(v.trim().replace(/^#/, ''))} aria-label="Tìm bạn theo ID hoặc tên" />
           <div className="lp-card px-4">
             {term.length < 2 ? <p className="text-slate-500 py-4 m-0">Hỏi ID của bạn mình (trong mục Bạn bè hoặc Hồ sơ) rồi nhập vào đây.</p>

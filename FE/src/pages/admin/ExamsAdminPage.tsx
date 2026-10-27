@@ -7,6 +7,7 @@ import type { Submission } from '../../api/app'
 import { errorMessage } from '../../api/client'
 import { langTag } from '../../components/TargetWord'
 import { BulkDeleteBar, DateRangeFilter, dateParams, pagination, useBulkDelete, useSelection, type DateRange } from '../../components/DataTools'
+import SearchBox from '../../components/SearchBox'
 
 const LANGS = [{ value: 'en', label: 'Tiếng Anh' }, { value: 'zh-Hans', label: 'Giản thể' }, { value: 'zh-Hant', label: 'Phồn thể' }, { value: 'vi', label: 'Tiếng Việt' }]
 
@@ -85,7 +86,7 @@ function Exams() {
   return (
     <>
     <div className="flex flex-wrap gap-2 mb-3">
-      <Input.Search placeholder="Tìm tên đề" allowClear onSearch={filter(setSearch)} style={{ width: 200 }} />
+      <SearchBox placeholder="Tìm tên đề" allowClear onSearch={filter(setSearch)} style={{ width: 200 }} />
       <Select allowClear placeholder="Ngôn ngữ" options={LANGS} value={lang} onChange={filter(setLang)} style={{ width: 140 }} />
       <Select allowClear placeholder="Xuất bản" value={published} onChange={filter(setPublished)} style={{ width: 140 }}
         options={[{ value: 'true', label: 'Đang xuất bản' }, { value: 'false', label: 'Bản nháp' }]} />
@@ -145,7 +146,7 @@ function Questions() {
   return (
     <>
       <div className="flex flex-wrap gap-2 mb-3">
-        <Input.Search placeholder="Tìm nội dung" allowClear onSearch={filter(setSearch)} style={{ width: 200 }} />
+        <SearchBox placeholder="Tìm nội dung" allowClear onSearch={filter(setSearch)} style={{ width: 200 }} />
         <Select allowClear placeholder="Ngôn ngữ" options={LANGS} value={lang} onChange={filter(setLang)} style={{ width: 140 }} />
         <Select allowClear placeholder="Loại câu" value={kindFilter} onChange={filter(setKindFilter)} style={{ width: 140 }}
           options={[{ value: 'mcq', label: 'Trắc nghiệm' }, { value: 'fill', label: 'Điền từ' }, { value: 'essay', label: 'Tự luận' }]} />

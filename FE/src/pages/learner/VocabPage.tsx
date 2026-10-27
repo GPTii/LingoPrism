@@ -12,6 +12,7 @@ import { langTag } from '../../components/TargetWord'
 import { EmptyState, PageHeader, ShowMore } from '../../components/ui'
 import { Prismo } from '../../components/brand/Brand'
 import { DateRangeFilter, dateParams, Selectable, SelectionBar, useBulkDelete, usePicking, type DateRange } from '../../components/DataTools'
+import SearchBox from '../../components/SearchBox'
 
 /** every topic its own colour (stable: by id) */
 export const TOPIC_TINTS = ['#1899f0', '#7c5cff', '#10c79a', '#ff8a3d', '#ec4899', '#ffb020', '#8b5cf6', '#14b8a6', '#ff6b81', '#0ea5e9']
@@ -108,7 +109,7 @@ export default function VocabPage() {
   return (
     <div className="max-w-6xl mx-auto flex flex-col gap-6">
       <PageHeader title="Thư viện từ vựng" description="Chọn một chủ đề – mỗi từ đều có đủ Việt · Anh · Trung, ảnh thật và câu ví dụ."
-        actions={<Input.Search size="large" placeholder="Tìm từ (Việt, Anh, Trung)…" aria-label="Tìm từ vựng" allowClear onSearch={setSearch} style={{ width: 340, maxWidth: '100%' }} />} />
+        actions={<SearchBox size="large" placeholder="Tìm từ (Việt, Anh, Trung)…" aria-label="Tìm từ vựng" allowClear onSearch={setSearch} style={{ width: 340, maxWidth: '100%' }} />} />
 
       {search ? (
         <section>

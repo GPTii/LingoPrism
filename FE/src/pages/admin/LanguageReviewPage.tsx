@@ -8,6 +8,7 @@ import { errorMessage } from '../../api/client'
 import { langTag } from '../../components/TargetWord'
 import { TokenLine } from '../../components/SentenceView'
 import CandidateQueue from './CandidateQueue'
+import SearchBox from '../../components/SearchBox'
 
 function SourcesView({ tr }: { tr: AdminTranslation }) {
   return (
@@ -184,7 +185,7 @@ function ExampleQueue() {
           options={(['flagged', 'verified', 'rejected', 'draft'] as ReviewStatus[]).map((v) => ({ value: v, label: STATUS_TAG[v].label }))} />
         <Select allowClear placeholder="Ngôn ngữ" value={language} onChange={(v) => { setLanguage(v); setPage(1) }} style={{ width: 170 }}
           options={Object.entries(LANG_LABEL).map(([value, label]) => ({ value, label }))} />
-        <Input.Search allowClear placeholder="Tìm trong câu / bản dịch" onSearch={(v) => { setSearch(v); setPage(1) }} style={{ width: 260 }} />
+        <SearchBox allowClear placeholder="Tìm trong câu / bản dịch" onSearch={(v) => { setSearch(v); setPage(1) }} style={{ width: 260 }} />
       </Space>
       <Table<AdminExample>
         rowKey="id"

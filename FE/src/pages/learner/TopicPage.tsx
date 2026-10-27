@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { App, Button, Input, Modal, Segmented, Skeleton } from 'antd'
+import { App, Button, Modal, Segmented, Skeleton } from 'antd'
 import { DeleteOutlined, FormOutlined, PlayCircleOutlined, PlusOutlined, SaveOutlined } from '@ant-design/icons'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useState } from 'react'
@@ -13,6 +13,7 @@ import { EmptyState, PageHeader, ShowMore } from '../../components/ui'
 import Flashcards from '../../components/Flashcards'
 import { Prismo } from '../../components/brand/Brand'
 import { AppIcon } from '../../components/brand/AppIcon'
+import SearchBox from '../../components/SearchBox'
 
 export default function TopicPage() {
   const { id } = useParams()
@@ -139,7 +140,7 @@ export default function TopicPage() {
       )}
       <Flashcards open={cardsOpen} onClose={() => setCardsOpen(false)} cards={words.data?.results ?? []} title={topic.data?.name_vi ?? ''} />
       <Modal open={adding} onCancel={() => setAdding(false)} footer={null} title={`Thêm từ vào “${topic.data?.name_vi ?? ''}”`} width={560}>
-        <Input.Search size="large" placeholder="Tìm từ (Việt, Anh, Trung)…" enterButton="Tìm" allowClear onSearch={(v) => setTerm(v.trim())} autoFocus
+        <SearchBox size="large" placeholder="Tìm từ (Việt, Anh, Trung)…" enterButton="Tìm" allowClear onSearch={(v) => setTerm(v.trim())} autoFocus
           aria-label="Tìm từ để thêm" />
         <ul className="m-0 mt-3 p-0 list-none max-h-[50vh] overflow-y-auto divide-y divide-slate-100">
           {found.isLoading && <li className="p-3"><Skeleton active paragraph={{ rows: 2 }} title={false} /></li>}
