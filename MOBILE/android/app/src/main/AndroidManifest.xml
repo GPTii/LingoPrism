@@ -1,6 +1,9 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- children use this app: no advertising ID, whichever library would ask for it (Google Play Families policy) -->
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID" tools:node="remove" />
     <uses-permission android:name="android.permission.CAMERA" />
     <!-- pronunciation practice: the learner says the word, the phone's speech recogniser listens -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />

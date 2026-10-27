@@ -72,3 +72,20 @@ def test_decompression_bomb_is_refused(settings, tmp_path):
     Image.new("1", (MAX_PIXELS // 1000 + 1000, 1000)).save(buf, "PNG")  # tiny file, huge declared size
     with pytest.raises(ValidationError):
         Photo.objects.create(user=user, image=SimpleUploadedFile("x.png", buf.getvalue(), content_type="image/png"))
+
+
+def test_redis_down_is_a_cache_miss_not_an_error():
+    """The rate-limit counters live in the cache: Redis being down must not take the API down with it."""
+    import time
+
+    from apps.core.cache import ResilientRedisCache
+
+    ResilientRedisCache._down_until = 0.0
+    cache = ResilientRedisCache("redis://127.0.0.1:6390/0", {"OPTIONS": {"socket_connect_timeout": 1, "socket_timeout": 1}})
+    assert cache.get("k", "fallback") == "fallback"
+    start = time.monotonic()
+    assert cache.add("k", 1) is False and cache.get_many(["a", "b"]) == {} and cache.incr("n") == 1
+    assert time.monotonic() - start < 0.5  # no new connection attempts while the breaker is open
+    cache.set("k", 1)
+    cache.delete("k")
+    ResilientRedisCache._down_until = 0.0

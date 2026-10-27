@@ -34,7 +34,7 @@ class WsClient {
   void connect() {
     _closed = false;
     final token = TokenStorage.access;
-    if (token == null) return;
+    if (token == null || ApiConfig.insecure) return; // never a token over plain ws:// in a release build
     final uri = Uri.parse('${ApiConfig.wsBase}$path?token=$token');
     try {
       _channel = WebSocketChannel.connect(uri);

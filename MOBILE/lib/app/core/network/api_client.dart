@@ -102,6 +102,10 @@ class ApiClient extends GetxService {
     ));
     dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) {
+        if (ApiConfig.insecure) {
+          return handler.reject(DioException(requestOptions: options, error: 'insecure',
+              message: 'Bản phát hành chỉ kết nối máy chủ qua HTTPS (API_URL phải là https://).'));
+        }
         final token = TokenStorage.access;
         if (token != null && options.extra['noAuth'] != true) {
           options.headers['Authorization'] = 'Bearer $token';
@@ -152,6 +156,7 @@ class ApiClient extends GetxService {
         return ApiException(data['detail'].toString(),
             statusCode: error.response?.statusCode, errors: Map<String, dynamic>.from(data['errors'] ?? {}));
       }
+      if (error.error == 'insecure') return ApiException(error.message ?? 'Kết nối không an toàn.');
       if (error.response == null) {
         return ApiException('Không kết nối được máy chủ. Kiểm tra mạng và thử lại.');
       }

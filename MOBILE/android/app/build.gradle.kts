@@ -35,11 +35,6 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
-
-        // Facebook provider requires an app id placeholder in the manifest.
-        // You can override this via -PFACEBOOK_APP_ID=123... when building.
-        manifestPlaceholders["facebook_app_id"] =
-            project.findProperty("FACEBOOK_APP_ID") ?: "000000000000000"
     }
 
     buildTypes {
@@ -62,6 +57,4 @@ flutter {
 
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
-    // Ensure Facebook SDK classes are available for MainApplication initialization.
-    implementation("com.facebook.android:facebook-android-sdk:16.3.0")
 }

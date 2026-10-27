@@ -26,20 +26,25 @@
 | Bấm trùng / request song song (race condition) | đăng ký trùng email → 400; kết bạn khoá 2 người theo thứ tự id; mua đồ, nhận quest khoá hàng | `RegisterSerializer`, `CommunityUserViewSet.friend` |
 | Ký tự NUL, tham số sai kiểu | NUL trong query/JSON → 400 (PostgreSQL không lưu được, trước đây là 500); `?before=abc` → bỏ qua | `apps/core/middleware.py`, `apps/core/params.py` |
 | Cạn kết nối DB khi đông người | `CONN_MAX_AGE=0` + pool psycopg tối đa 40 kết nối mỗi process: request vượt quá chờ đến lượt thay vì lỗi (trước đây ~20 người dùng cùng lúc, rồi 200 người dùng cùng lúc, là lỗi 500 "too many clients") | `config/settings/base.py` |
-| **App mobile** (OWASP MASVS) | token trong Android Keystore / iOS Keychain (`flutter_secure_storage`), không backup dữ liệu app, release chỉ HTTPS, R8 + `--obfuscate` | `TokenStorage`, `AndroidManifest.xml` |
+| **App mobile** (OWASP MASVS) | token trong Android Keystore / iOS Keychain (`flutter_secure_storage`), không backup dữ liệu app, release chỉ HTTPS, R8 + `--obfuscate`; không SDK Facebook, không quyền `AD_ID` (chính sách Google Play cho app có trẻ em) | `TokenStorage`, `AndroidManifest.xml` |
+| Redis sập kéo cả web sập | cache (nơi giữ bộ đếm giới hạn tốc độ) coi Redis sập là cache trống, ngắt mạch 10 s; giới hạn của nginx vẫn chạy | `apps/core/cache.py` |
+| DB sập: request treo, luồng bị giữ | kết nối DB timeout 5 s, chờ pool tối đa 10 s; `health/` trả 503 cho công cụ giám sát; DB lên lại thì tự hồi phục sau ~3 s | `config/settings/base.py`, `apps/core/views.py` |
 
 ## Kiểm tra tự động
 
 - `apps/core/test_authz.py` – đi qua **mọi** route API (đọc từ URL conf, endpoint mới tự được kiểm): chưa đăng nhập → 401; người học vào route staff → bị chặn; người B đụng vào ảnh, phiên học, tin nhắn, bài thi, hỗ trợ, nhóm, bài viết của người A → bị chặn và dữ liệu không đổi (OWASP API1 BOLA/IDOR); dữ liệu rác vào mọi route (người học, admin, và chủ dữ liệu) → không bao giờ 500.
 - `.github/workflows/security.yml` – gitleaks (lộ secret trong lịch sử git), bandit + semgrep (code Python/Django/React), pip-audit, npm audit, osv-scanner (thư viện có CVE), trivy (Dockerfile).
-- Kiểm tra tải định kỳ (k6, xem báo cáo trong lịch sử phát triển): spike 0→200 người dùng, soak 20 phút.
+- `apps/chat/test_websockets.py` – 3 kênh WebSocket: token giả / tài khoản khoá → 4401, người ngoài nhóm / đang chờ duyệt / hộp hỗ trợ của người khác → 4403, xả tin bị chặn sau 8 tin, frame > 8 KB hoặc nhị phân → đóng 4413, sự kiện không lọt sang người khác.
+- `apps/core/test_bulk.py` – xoá hàng loạt chỉ trong phạm vi được phép, giữ lại mục không được xoá (kèm lý do), xoá cả file ảnh.
+- Kiểm tra tải (k6, 10/2026 trên production): spike 0→200 người dùng không lỗi 5xx, soak 20 phút 99,99 % thành công, 100 kết nối WebSocket giữ 1 phút (ping p95 150 ms).
+- Diễn tập khôi phục: `sh deploy/restore-drill.sh` khôi phục bản sao lưu mới nhất vào một database tạm cạnh database thật, so số dòng từng bảng, rồi xoá.
 
 ## Phải làm trên server (code không làm thay được)
 
 1. **Đặt Cloudflare (gói Free) trước server.** DDoS tầng mạng (hàng Gbps) không app nào tự chống được, chỉ CDN chặn được. Bật "Under Attack Mode" khi bị tấn công, (đã làm: `set_real_ip_from` và chặn mọi IP không phải Cloudflare trong `nginx.conf`). Trên Cloudflare giữ **SSL/TLS → Full** (origin dùng chứng chỉ tự ký; muốn "Full (strict)" thì phải thay bằng chứng chỉ Cloudflare Origin CA trước) và bật **Always Use HTTPS**.
 2. **Tường lửa:** chỉ mở 22, 80, 443 (`ufw allow 22,80,443/tcp`). SSH chỉ dùng key, tắt đăng nhập bằng mật khẩu; cài `fail2ban`.
 3. **HTTPS**: Cloudflare + chứng chỉ origin; nginx đã gửi HSTS 1 năm.
-4. **Sao lưu DB hằng ngày** (`pg_dump`) ra ngoài server, và thử khôi phục ít nhất một lần.
+4. **Sao lưu DB hằng ngày** (`deploy/backup.sh`, cron 03:00) và chép ra ngoài server; chạy `sh deploy/restore-drill.sh` định kỳ để chắc bản sao lưu khôi phục được.
 5. **Giám sát:** UptimeRobot (báo khi web sập), xem log `security` (đăng nhập sai hàng loạt), có thể thêm Sentry để bắt lỗi 500.
 6. **Cập nhật:** `apt upgrade` hệ điều hành; chạy `npm audit` / `pip-audit` trước mỗi lần deploy.
 7. Mật khẩu admin dài; tài khoản demo trong README phải đổi mật khẩu hoặc xoá trước khi public.
