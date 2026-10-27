@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import '../../core/network/api_client.dart';
 import '../models/api/common.dart';
 import '../models/api/game.dart';
@@ -334,9 +336,14 @@ class DetectionRepository {
   static Future<DetectionResult> detectOnServer(String imagePath, {String source = 'camera'}) async =>
       DetectionResult.fromJson(asMap(await _api.upload('/detect/', filePath: imagePath, fields: {'source': source})));
 
-  static Future<DetectionResult> logOnDevice(String modelName, int inferenceMs, List<Map<String, dynamic>> items) async =>
-      DetectionResult.fromJson(asMap(await _api.post('/detections/log/',
-          data: {'model_name': modelName, 'inference_ms': inferenceMs, 'items': items})));
+  /// A result the phone computed. With [imagePath] the photo goes along (items as JSON in the form): it then shows in
+  /// the history like a server detection and the learners' error reports apply to it.
+  static Future<DetectionResult> logOnDevice(String modelName, int inferenceMs, List<Map<String, dynamic>> items,
+          {String? imagePath}) async =>
+      DetectionResult.fromJson(asMap(imagePath == null
+          ? await _api.post('/detections/log/', data: {'model_name': modelName, 'inference_ms': inferenceMs, 'items': items})
+          : await _api.upload('/detections/log/', filePath: imagePath,
+              fields: {'model_name': modelName, 'inference_ms': inferenceMs, 'items': jsonEncode(items)})));
 
   /// Returns (words saved, error reports remembered by the server).
   static Future<(int, int)> confirm(int detectionId, List<DetectedItem> items, {int? topic}) => confirmRaw(

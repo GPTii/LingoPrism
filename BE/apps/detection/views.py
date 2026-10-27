@@ -1,3 +1,5 @@
+import json
+
 from django.db import transaction
 from django.db.models import Avg, Count, Q
 from django.http import HttpResponse
@@ -197,8 +199,20 @@ class DetectionViewSet(ActionThrottleMixin, BulkDeleteMixin, mixins.ListModelMix
     @extend_schema(request=LogDetectionSerializer)
     @action(detail=False, methods=["post"])
     def log(self, request):
-        """Store a result computed on the phone (TFLite) so it also feeds statistics and VIP."""
-        ser = LogDetectionSerializer(data=request.data)
+        """Store a result computed on the phone (TFLite) so it also feeds statistics and VIP. JSON, or multipart with
+        the photo (`image`, `items` as a JSON string): the photo then shows in the history like a server detection
+        and the learners' error reports (correction memory) apply to it."""
+        data = request.data
+        upload = request.FILES.get("image")
+        if upload is not None:
+            if upload.size > MAX_UPLOAD_MB * 1024 * 1024:
+                return Response({"detail": f"Ảnh tối đa {MAX_UPLOAD_MB} MB", "errors": {}}, status=400)
+            try:
+                data = {"model_name": data.get("model_name"), "items": json.loads(data.get("items") or "[]"),
+                        **({"inference_ms": data["inference_ms"]} if data.get("inference_ms") else {})}
+            except ValueError:
+                return Response({"detail": "items phải là JSON", "errors": {}}, status=400)
+        ser = LogDetectionSerializer(data=data)
         ser.is_valid(raise_exception=True)
         d = ser.validated_data
         with transaction.atomic():

@@ -11,7 +11,6 @@ import '../../../data/models/api/learning_extra.dart';
 import '../../../data/repositories/repositories.dart';
 import '../../../data/services/offline_detections.dart';
 import '../../../data/services/on_device_detector.dart';
-import '../../../data/services/local_shots.dart';
 
 class CameraDetectionController extends GetxController {
   static CameraDetectionController get to => Get.find();
@@ -123,9 +122,11 @@ class CameraDetectionController extends GetxController {
     }
   }
 
-  /// Detect on the server (ONNX ensemble); fall back to the on-device TFLite model when the server has no model or
-  /// the network is down. Online, the phone's result is logged for statistics / VIP; offline, the word cards come
-  /// from the copy kept on the phone and what the learner saves is queued (OfflineDetections).
+  /// Detect on the phone first (TFLite, no server CPU). A clear photo – every object found at least
+  /// [OnDeviceDetector.trustAbove] sure – is used as it is and logged with the photo, so it shows in the history and
+  /// the learners' error reports apply. An unclear one (or one where the phone finds nothing) goes to the server's
+  /// larger, more accurate model ensemble. When the server is unreachable, busy or has no model, the phone's answer
+  /// is used; offline, with the word cards kept on the phone and what the learner saves queued (OfflineDetections).
   Future<void> _uploadAndDetect() async {
     final file = _image.value;
     if (file == null) return;
@@ -133,28 +134,38 @@ class CameraDetectionController extends GetxController {
     try {
       DetectionResult result;
       List<Map<String, dynamic>>? offlineItems;
+      final model = OnDeviceDetector.instance.modelName;
+      final local = await OnDeviceDetector.instance.available ? await OnDeviceDetector.instance.detect(file) : null;
+      final items = local?.$1.map((b) => b.toJson()).toList() ?? <Map<String, dynamic>>[];
+      final clear = local != null && local.$1.isNotEmpty && local.$1.every((b) => b.confidence >= OnDeviceDetector.trustAbove);
       try {
-        result = await DetectionRepository.detectOnServer(file.path);
+        result = clear
+            ? await DetectionRepository.logOnDevice(model, local.$2, items, imagePath: file.path)
+            : await DetectionRepository.detectOnServer(file.path);
         OfflineDetections.refreshLabels();
         _sync();
       } on ApiException catch (e) {
-        if (!(e.isNetwork || e.statusCode == 503)) rethrow;
-        if (!await OnDeviceDetector.instance.available) {
-          throw ApiException(e.isNetwork
-              ? 'Không kết nối được máy chủ và máy chưa có mô hình nhận diện offline.'
-              : e.message);
+        if (!(e.isNetwork || e.statusCode == 503 || e.statusCode == 429)) rethrow;
+        if (local == null) {
+          throw ApiException(e.isNetwork ? 'Không kết nối được máy chủ và máy chưa có mô hình nhận diện offline.' : e.message);
         }
-        final (boxes, ms) = await OnDeviceDetector.instance.detect(file);
-        final items = boxes.map((b) => b.toJson()).toList();
-        try {
-          result = await DetectionRepository.logOnDevice(OnDeviceDetector.instance.modelName, ms, items);
-          LocalShots.keep(result.id, file); // the server has no copy of a photo detected on the phone
-        } on ApiException catch (e2) {
-          if (!e2.isNetwork) rethrow;
+        DetectionResult? logged;
+        if (!clear && !e.isNetwork) {
+          // the server answers but is busy or has no model: log the phone's answer instead
+          try {
+            logged = await DetectionRepository.logOnDevice(model, local.$2, items, imagePath: file.path);
+          } on ApiException catch (e2) {
+            if (!(e2.isNetwork || e2.statusCode == 503 || e2.statusCode == 429)) rethrow;
+          }
+        }
+        if (logged != null) {
+          result = logged;
+        } else {
+          // out of reach: the word cards kept on the phone, and what the learner saves waits in the queue
           if (!OfflineDetections.hasLabels) {
             throw ApiException('Đang offline và máy chưa có bộ từ vựng. Hãy nhận diện một lần khi có mạng để tải về.');
           }
-          result = OfflineDetections.result(OnDeviceDetector.instance.modelName, ms, items);
+          result = OfflineDetections.result(model, local.$2, items);
           offlineItems = items;
         }
       }

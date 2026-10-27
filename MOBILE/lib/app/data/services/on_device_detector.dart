@@ -31,6 +31,9 @@ class OnDeviceDetector {
   static const double confThreshold = 0.30;
   static const double iouThreshold = 0.45;
   static const double sameObjectIou = 0.7; // boxes this close are one object whatever their labels (as on the server)
+  /// A photo whose every object the phone finds at least this sure of is used as it is, without the server's larger
+  /// (more accurate, but CPU-heavy) model; anything less clear still goes to the server.
+  static const double trustAbove = 0.60;
 
   Interpreter? _interpreter;
   List<String> _labels = const [];

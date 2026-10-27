@@ -83,7 +83,8 @@ class _DetectionResultViewState extends State<DetectionResultView> {
   /// "Vật khác…": every object the detector knows, searchable by the word or its Vietnamese meaning.
   Future<void> _pickOther(DetectedItem it) async {
     try {
-      allLabels ??= offline ? OfflineDetections.cachedLabels() : await DetectionRepository.labels();
+      // the copy on the phone (refreshed every 10 minutes) saves downloading the whole list each time
+      allLabels ??= offline || OfflineDetections.hasLabels ? OfflineDetections.cachedLabels() : await DetectionRepository.labels();
     } catch (e) {
       final cached = OfflineDetections.cachedLabels();
       if (cached.isEmpty) {

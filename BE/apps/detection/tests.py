@@ -297,3 +297,35 @@ def test_labels_lists_every_detectable_object(memory_env):
     _, c = memory_env
     labels = {r["label"] for r in c.get("/api/v1/detections/labels/").data}
     assert {"cat", "cow", "pig"} <= labels
+
+
+def test_log_on_device_with_the_photo(setup, tmp_path, settings):
+    """The phone detected it but sends the photo along: it shows in the history and loses its GPS like any upload."""
+    import io
+    import json
+
+    from django.core.files.uploadedfile import SimpleUploadedFile
+
+    from apps.detection.models import Detection
+
+    settings.MEDIA_ROOT = tmp_path
+    user, c, cat = setup
+    buf = io.BytesIO()
+    exif = Image.Exif()
+    exif[0x8825] = {2: (21.0, 1.0, 30.0)}  # a GPS position in the photo
+    Image.new("RGB", (400, 300), "orange").save(buf, "JPEG", exif=exif)
+    photo = SimpleUploadedFile("IMG_0001.jpg", buf.getvalue(), content_type="image/jpeg")
+    items = [{"label": "cat", "confidence": 0.88, "bbox": [0.1, 0.1, 0.6, 0.7]}]
+    res = c.post("/api/v1/detections/log/", {"model_name": "yolov8s-oiv7-tflite", "inference_ms": "120",
+                                             "items": json.dumps(items), "image": photo}, format="multipart")
+    assert res.status_code == 201, res.data
+    assert res.data["image"] and res.data["items"][0]["card"]["target"]["text"] == "cat"
+    det = Detection.objects.get(pk=res.data["id"])
+    assert det.device == "on_device" and det.inference_ms == 120
+    with Image.open(det.photo.image.path) as saved:
+        assert not saved.getexif().get_ifd(0x8825)  # GPS gone
+    assert "IMG_0001" not in det.photo.image.name  # random name
+
+    bad = c.post("/api/v1/detections/log/", {"model_name": "m", "items": "not json", "image": SimpleUploadedFile(
+        "a.jpg", buf.getvalue(), content_type="image/jpeg")}, format="multipart")
+    assert bad.status_code == 400
