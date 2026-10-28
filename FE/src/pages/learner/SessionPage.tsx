@@ -105,11 +105,13 @@ export default function SessionPage() {
 
   const kind = (params.get('kind') ?? 'learn') as StudySession['kind']
   const topic = params.get('topic') ? Number(params.get('topic')) : undefined
+  // "Ôn lại những từ còn sai" from a lost game round: exactly those words
+  const words = params.get('words')?.split(',').map(Number).filter(Boolean)
 
   useEffect(() => {
     if (startedOnce.current) return
     startedOnce.current = true
-    vocabApi.startSession(kind, topic)
+    vocabApi.startSession(kind, topic, undefined, words)
       .then((s) => { setSession(s); setSteps(buildSteps(s, user?.learner_type === 'kid')) })
       .catch((e) => setError(errorMessage(e)))
   }, [kind, topic, user?.learner_type])

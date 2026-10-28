@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     "apps.vocab",
     "apps.learning",
     "apps.literacy",
+    "apps.games",
     "apps.notifications",
     "apps.gamification",
     "apps.quizzes",

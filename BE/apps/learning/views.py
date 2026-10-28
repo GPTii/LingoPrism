@@ -30,7 +30,9 @@ class AddWordSerializer(serializers.Serializer):
 class StartSessionSerializer(serializers.Serializer):
     kind = serializers.ChoiceField(choices=StudySession.Kind.choices)
     topic = serializers.PrimaryKeyRelatedField(queryset=Topic.objects.all(), required=False, allow_null=True)
-    size = serializers.IntegerField(min_value=1, max_value=MAX_SESSION, required=False)
+    size = serializers.IntegerField(min_value=1, max_value=MAX_SESSION, required=False, allow_null=True)
+    word_ids = serializers.ListField(child=serializers.IntegerField(), required=False, max_length=MAX_SESSION,
+                                     help_text="Luyện lại đúng những từ này (VD từ chơi sai trong mục Trò chơi)")
 
 
 class AnswerSerializer(serializers.Serializer):
@@ -122,9 +124,11 @@ class StudySessionViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, view
     def get_serializer_class(self):
         return StartSessionSerializer
 
-    def _pick(self, kind, target, topic, size):
+    def _pick(self, kind, target, topic, size, word_ids=None):
         user = self.request.user
         mine = PersonalWord.objects.filter(user=user, language=target.learn)
+        if word_ids:  # only words already in the learner's library
+            return list(mine.filter(word_id__in=word_ids).select_related("word")[:size])
         if kind == StudySession.Kind.REVIEW:
             due = mine.filter(due_at__lte=timezone.now()).select_related("word")
             from apps.algorithms.models import AlgorithmConfig
@@ -215,7 +219,10 @@ class StudySessionViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, view
         size = min(ser.validated_data.get("size") or default_size, MAX_SESSION)
         topic = ser.validated_data.get("topic")
         with transaction.atomic():
-            picked = self._pick(kind, target, topic, size)
+            word_ids = ser.validated_data.get("word_ids")
+            if word_ids:
+                kind, size = StudySession.Kind.PRACTICE, min(len(word_ids), MAX_SESSION)
+            picked = self._pick(kind, target, topic, size, word_ids)
             if not picked:
                 msg = "Chưa có từ nào đến hạn ôn tập" if kind == "review" else "Không có từ nào để học"
                 return Response({"detail": msg, "errors": {}}, status=400)

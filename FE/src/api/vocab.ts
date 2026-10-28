@@ -126,8 +126,8 @@ export const vocabApi = {
   addWord: (word: number, source = 'manual', topic?: number) => api.post<WordCard>('/my-words/', { word, source, topic }).then((r) => r.data),
   removeWord: (personalId: number) => api.delete(`/my-words/${personalId}/`),
   summary: () => api.get<LibrarySummary>('/my-words/summary/').then((r) => r.data),
-  startSession: (kind: StudySession['kind'], topic?: number, size?: number) =>
-    api.post<StudySession>('/sessions/', { kind, topic, size }).then((r) => r.data),
+  startSession: (kind: StudySession['kind'], topic?: number, size?: number, word_ids?: number[]) =>
+    api.post<StudySession>('/sessions/', { kind, topic, size, word_ids }).then((r) => r.data),
   answer: (sessionId: number, payload: { personal_word: number; question_type: string; correct: boolean; first_try?: boolean; graded?: boolean; response_ms?: number; answer?: string }) =>
     api.post(`/sessions/${sessionId}/answer/`, payload).then((r) => r.data),
   finish: (sessionId: number) =>

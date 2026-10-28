@@ -8,7 +8,7 @@ class AppIcon extends StatelessWidget {
 
   /// home, learn, vocab, camera, community, trophy, chat, bell, sparkle, review, tiles, mic, pencil,
   /// exam, shapes, bookmark, photo, pin, news, group, podium, mail, chart, target, calendar, medal,
-  /// bag, cap, profile, check, book, more
+  /// bag, cap, profile, check, book, more, game, chest
   final String name;
   final double size;
 

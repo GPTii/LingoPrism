@@ -2,6 +2,16 @@
 
 <!-- Sinh từ BE/apps/core/releases.json bằng `python manage.py changelog` – sửa ở file đó, không sửa ở đây. -->
 
+## 1.5.0 – 29/10/2026: Mục Trò chơi
+
+### Mới
+
+- Mục Trò chơi riêng cho tiếng Anh, tiếng Trung và tiếng Việt: bản đồ 4 cấp (Nhập môn, Sơ cấp, Trung cấp, Nâng cao), mỗi cấp có các vòng chơi, rương thưởng và màn trùm.
+- Học trước, chơi sau: mỗi vòng chỉ mở khi đã học xong phần từ hoặc bài học tương ứng ở mục Học, và chỉ dùng những gì đã học.
+- 12 trò chơi: bắt bong bóng, câu cá, thả dấu, chọn hình, chọn nghĩa, chọn cửa, ghép toa tàu, hái quả, lật thẻ, ghép chữ, xếp câu, đuổi hình bắt chữ.
+- Chơi chưa qua màn thì có nút học lại đúng những từ hoặc bài còn sai.
+- Rương thưởng cho ngọc và vảy; thắng màn trùm được thêm ngọc.
+
 ## 1.4.0 – 28/10/2026: Quyền riêng tư và tài khoản
 
 ### Mới

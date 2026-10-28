@@ -135,7 +135,7 @@ function Options({ options, picked, expected, onPick, big = true }: {
 }
 
 /** Text box + on-screen Vietnamese letters and tone marks (children often have no Vietnamese keyboard). */
-function VietInput({ value, onChange, onEnter, disabled }: { value: string; onChange: (v: string) => void; onEnter: () => void; disabled: boolean }) {
+export function VietInput({ value, onChange, onEnter, disabled }: { value: string; onChange: (v: string) => void; onEnter: () => void; disabled: boolean }) {
   const ref = useRef<InputRef>(null)
   const insert = (fn: (text: string, cursor: number) => { text: string; cursor: number }) => {
     const el = ref.current?.input

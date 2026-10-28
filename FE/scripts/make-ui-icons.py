@@ -270,6 +270,26 @@ I["more"] = (  # everything else
 )
 
 
+I["game"] = (  # Trò chơi: a gamepad
+    lip(round_path("M14 14 L34 14 Q43 14 43 25 L43 31 Q43 37 37 36 L31 30 L17 30 L11 36 Q5 37 5 31 L5 25 Q5 14 14 14 Z"), PURPLE)
+    + '<rect x="11.5" y="20" width="9" height="3.4" rx="1.5" fill="#fff"/>'
+    + '<rect x="14.3" y="17.2" width="3.4" height="9" rx="1.5" fill="#fff"/>'
+    + '<circle cx="31" cy="19.5" r="2.4" fill="#ffc800"/>'
+    + '<circle cx="36" cy="23.5" r="2.4" fill="#58cc02"/>'
+    + shine("M13 17 Q15 16 18 16", 2.4, 0.45)
+)
+
+I["chest"] = (  # treasure chest of the game map
+    lip('<rect x="7" y="21" width="34" height="19" rx="3.5" fill="{f}"/>', BROWN)
+    + lip(round_path("M9 21 Q9 9 24 9 Q39 9 39 21 Z"), BROWN)
+    + '<rect x="7" y="19.5" width="34" height="4" fill="#ffc800"/>'
+    + '<rect x="21" y="9.5" width="6" height="30" fill="#ffc800"/>'
+    + '<rect x="19.5" y="18" width="9" height="10" rx="2.5" fill="#e0a800"/>'
+    + '<circle cx="24" cy="22.5" r="1.8" fill="#3c4a5c"/>'
+    + shine("M13 15 Q16 12 20 11.5", 2.4, 0.5)
+)
+
+
 def svg(body):
     return f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">{body}</svg>\n'
 

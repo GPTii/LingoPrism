@@ -1,5 +1,19 @@
 [
   {
+    "version": "1.5.0",
+    "date": "2026-10-29",
+    "title": "Mục Trò chơi",
+    "new": [
+      "Mục Trò chơi riêng cho tiếng Anh, tiếng Trung và tiếng Việt: bản đồ 4 cấp (Nhập môn, Sơ cấp, Trung cấp, Nâng cao), mỗi cấp có các vòng chơi, rương thưởng và màn trùm.",
+      "Học trước, chơi sau: mỗi vòng chỉ mở khi đã học xong phần từ hoặc bài học tương ứng ở mục Học, và chỉ dùng những gì đã học.",
+      "12 trò chơi: bắt bong bóng, câu cá, thả dấu, chọn hình, chọn nghĩa, chọn cửa, ghép toa tàu, hái quả, lật thẻ, ghép chữ, xếp câu, đuổi hình bắt chữ.",
+      "Chơi chưa qua màn thì có nút học lại đúng những từ hoặc bài còn sai.",
+      "Rương thưởng cho ngọc và vảy; thắng màn trùm được thêm ngọc."
+    ],
+    "improved": [],
+    "fixed": []
+  },
+  {
     "version": "1.4.0",
     "date": "2026-10-28",
     "title": "Quyền riêng tư và tài khoản",

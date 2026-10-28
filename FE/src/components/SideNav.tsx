@@ -22,6 +22,7 @@ export function navGroups(counts: { due?: number; unread?: number; quests?: numb
         { to: '/exams', label: 'Đề thi', icon: 'exam' },
       ],
     },
+    { key: 'games', label: 'Trò chơi', icon: 'game', to: '/tro-choi' },
     {
       key: 'vocab', label: 'Từ vựng', icon: 'vocab', children: [
         { to: '/vocab', label: 'Chủ đề', icon: 'shapes' },

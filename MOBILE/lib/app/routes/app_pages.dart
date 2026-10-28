@@ -7,6 +7,7 @@ import '../modules/live_camera/live_camera_module.dart';
 import '../modules/photo_dialogue/photo_dialogue_module.dart';
 import '../modules/photo_history/photo_history_module.dart';
 import '../modules/levels/levels_module.dart';
+import '../modules/games/games_module.dart';
 import '../modules/literacy/literacy_module.dart';
 import '../modules/sentence_practice/sentence_practice_module.dart';
 import '../modules/poi_map/poi_map_module.dart';
@@ -256,6 +257,8 @@ class AppPages {
     GetPage(name: _Paths.sentencePractice, page: () => const SentencePracticeView(), binding: BindingsBuilder(() => Get.lazyPut(() => SentencePracticeController()))),
     GetPage(name: _Paths.literacyMap, page: () => const LiteracyMapView(), binding: BindingsBuilder(() => Get.lazyPut(() => LiteracyMapController()))),
     GetPage(name: _Paths.literacyLesson, page: () => const LiteracyLessonView(), binding: BindingsBuilder(() => Get.lazyPut(() => LiteracyLessonController()))),
+    GetPage(name: _Paths.games, page: () => const GameMapView(), binding: BindingsBuilder(() => Get.lazyPut(() => GameMapController()))),
+    GetPage(name: _Paths.gamePlay, page: () => const GamePlayView(), binding: BindingsBuilder(() => Get.lazyPut(() => GamePlayController()))),
     GetPage(name: _Paths.levelPath, page: () => const LevelPathView(), binding: BindingsBuilder(() => Get.put(LevelPathController(), permanent: true))),
     GetPage(name: _Paths.levelTest, page: () => const LevelTestView(), binding: BindingsBuilder(() => Get.lazyPut(() => LevelTestController()))),
     GetPage(name: _Paths.supportChat, page: () => const SupportChatView(), binding: BindingsBuilder(() => Get.lazyPut(() => SupportChatController()))),

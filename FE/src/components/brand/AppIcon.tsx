@@ -8,6 +8,7 @@ export type AppIconName =
   | 'sparkle' | 'review' | 'tiles' | 'mic' | 'pencil' | 'exam' | 'shapes' | 'bookmark'
   | 'photo' | 'pin' | 'news' | 'group' | 'podium' | 'mail' | 'chart' | 'target'
   | 'calendar' | 'medal' | 'bag' | 'cap' | 'profile' | 'check' | 'book' | 'more'
+  | 'game' | 'chest'
 
 export function AppIcon({ name, size = 24, className = '' }: { name: AppIconName; size?: number; className?: string }) {
   return (

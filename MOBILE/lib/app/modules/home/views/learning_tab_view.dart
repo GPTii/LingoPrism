@@ -80,6 +80,8 @@ class LearningTabView extends GetView<HomeStatsController> {
                               label: const Text('Camera trực tiếp (thử nghiệm)'),
                             ),
                           ),
+                          SizedBox(height: 8.h),
+                          _buildGamesCard(),
                           SizedBox(height: 20.h),
                           const LevelPathCard(),
                           SizedBox(height: 12.h),
@@ -258,6 +260,34 @@ class LearningTabView extends GetView<HomeStatsController> {
               ]),
             ),
             Icon(Icons.chevron_right_rounded, color: AppColors.textHint, size: 24.sp),
+          ]),
+        ),
+      ),
+    );
+  }
+
+  /// Trò chơi: its own section, played with what was learned here (BE apps/games).
+  Widget _buildGamesCard() {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => Get.toNamed(Routes.games),
+        borderRadius: BorderRadius.circular(16.r),
+        child: Ink(
+          decoration: _surface(),
+          padding: EdgeInsets.all(16.w),
+          child: Row(children: [
+            AppIcon('game', size: 52.w),
+            SizedBox(width: 14.w),
+            Expanded(
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text('Trò chơi', style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                SizedBox(height: 2.h),
+                Text('Chơi với những gì đã học, qua màn để mở rương nhận ngọc.',
+                    style: TextStyle(fontSize: 13.sp, color: AppColors.textSecondary, height: 1.35)),
+              ]),
+            ),
+            AppIcon('chest', size: 34.w),
           ]),
         ),
       ),

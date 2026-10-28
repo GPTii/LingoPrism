@@ -43,6 +43,7 @@ class XpTransaction(models.Model):
         EXAM = "exam", "Bài kiểm tra"
         QUEST = "quest", "Nhiệm vụ"
         CAMERA = "camera", "Nhận diện ảnh"
+        GAME = "game", "Trò chơi"
         COMMUNITY = "community", "Cộng đồng"
         ADMIN = "admin", "Điều chỉnh"
 

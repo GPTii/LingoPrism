@@ -63,12 +63,13 @@ class LearningWord {
 
 /// Arguments for the session screen. The server picks the words (learn: new words, review: due words).
 class LearningSessionArguments {
-  const LearningSessionArguments({this.kind = 'learn', this.topic, this.size, this.title});
+  const LearningSessionArguments({this.kind = 'learn', this.topic, this.size, this.title, this.wordIds});
 
   final String kind; // learn | review | practice
   final int? topic;
   final int? size;
   final String? title;
+  final List<int>? wordIds; // "Ôn lại những từ còn sai" after a lost game round: exactly these words
 }
 
 class RoundThreeResult {
@@ -179,7 +180,7 @@ class LearningSessionController extends GetxController {
   Future<void> _start(LearningSessionArguments args) async {
     _isLoading.value = true;
     try {
-      _session = await LearningRepository.start(args.kind, topic: args.topic, size: args.size);
+      _session = await LearningRepository.start(args.kind, topic: args.topic, size: args.size, wordIds: args.wordIds);
       _words.assignAll(_session!.items.map(LearningWord.fromItem).where((w) => w.word.trim().isNotEmpty));
       if (args.kind == 'review') {
         startFlashcardRound();

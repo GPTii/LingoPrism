@@ -132,9 +132,10 @@ class VocabRepository {
 class LearningRepository {
   /// A new session from the server; offline, the one kept on the phone (OfflineLearning) for a
   /// general learn / review lesson.
-  static Future<StudySession> start(String kind, {int? topic, int? size}) async {
+  static Future<StudySession> start(String kind, {int? topic, int? size, List<int>? wordIds}) async {
     try {
-      return StudySession.fromJson(asMap(await _api.post('/sessions/', data: {'kind': kind, 'topic': topic, 'size': size})));
+      return StudySession.fromJson(asMap(await _api.post('/sessions/',
+          data: {'kind': kind, if (topic != null) 'topic': topic, if (size != null) 'size': size, if (wordIds != null) 'word_ids': wordIds})));
     } catch (e) {
       if (topic == null && OfflineLearning.isNetworkError(e)) {
         final kept = OfflineLearning.takeSession(kind);
@@ -435,6 +436,19 @@ class LiteracyRepository {
 
   static Future<LitFinish> finish(int n, String session, int total) async => LitFinish.fromJson(
       asMap(await _api.post('/literacy/lessons/$n/finish/', data: {'session': session, 'total': total})));
+}
+
+/// Trò chơi (BE apps/games): the game map, its rounds and chests. Rounds stay plain JSON: each mini game reads
+/// the fields it needs (see BE apps/games/content.py for their shapes).
+class GamesRepository {
+  static Future<Map<String, dynamic>> map() async => asMap(await _api.get('/games/map/'));
+
+  static Future<Map<String, dynamic>> round(String node) async => asMap(await _api.get('/games/rounds/$node/'));
+
+  static Future<Map<String, dynamic>> finish(String node, String token, List<List<bool>> results) async =>
+      asMap(await _api.post('/games/rounds/$node/finish/', data: {'token': token, 'results': results}));
+
+  static Future<Map<String, dynamic>> openChest(String node) async => asMap(await _api.post('/games/chests/$node/open/'));
 }
 
 class LevelRepository {

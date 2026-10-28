@@ -38,6 +38,8 @@ abstract class Routes {
   static const sentencePractice = _Paths.sentencePractice;
   static const literacyMap = _Paths.literacyMap;
   static const literacyLesson = _Paths.literacyLesson;
+  static const games = _Paths.games;
+  static const gamePlay = _Paths.gamePlay;
   static const levelPath = _Paths.levelPath;
   static const levelTest = _Paths.levelTest;
   static const examList = _Paths.examList;
@@ -95,6 +97,8 @@ abstract class _Paths {
   static const sentencePractice = '/sentences';
   static const literacyMap = '/literacy';
   static const literacyLesson = '/literacy/lesson';
+  static const games = '/games';
+  static const gamePlay = '/games/play';
   static const levelPath = '/levels';
   static const levelTest = '/levels/test';
   static const examList = '/exams';

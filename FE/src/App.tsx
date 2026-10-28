@@ -21,6 +21,8 @@ const SessionPage = lazy(() => import('./pages/learner/SessionPage'))
 const SentencePage = lazy(() => import('./pages/learner/SentencePage'))
 const LiteracyLessonPage = lazy(() => import('./pages/learner/LiteracyPages').then((m) => ({ default: m.LiteracyLessonPage })))
 const LiteracyMapPage = lazy(() => import('./pages/learner/LiteracyPages').then((m) => ({ default: m.LiteracyMapPage })))
+const GameMapPage = lazy(() => import('./pages/learner/GamesPages').then((m) => ({ default: m.GameMapPage })))
+const GamePlayPage = lazy(() => import('./pages/learner/GamesPages').then((m) => ({ default: m.GamePlayPage })))
 const LevelTestPage = lazy(() => import('./pages/learner/LevelTestPage'))
 const CameraPage = lazy(() => import('./pages/learner/CameraPage'))
 const DetectionHistoryPage = lazy(() => import('./pages/learner/DetectionHistoryPage'))
@@ -77,6 +79,8 @@ export default function App() {
             <Route path="sentences" element={<SentencePage />} />
             <Route path="doc-viet" element={<LiteracyMapPage />} />
             <Route path="doc-viet/:n" element={<LiteracyLessonPage />} />
+            <Route path="tro-choi" element={<GameMapPage />} />
+            <Route path="tro-choi/:node" element={<GamePlayPage />} />
             <Route path="levels/:n/test" element={<LevelTestPage />} />
             <Route path="review" element={<Navigate to="/learn?kind=review" replace />} />
             <Route path="camera" element={<CameraPage />} />
