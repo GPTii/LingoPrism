@@ -1,0 +1,45 @@
+# Is lingoprism.id.vn up? Every 10 minutes GitHub opens the home page and the API health check (the database must
+# answer). A failed run makes GitHub e-mail whoever last changed this schedule (Settings > Notifications > Actions
+# on github.com), so the owner learns about an outage without anyone having to report it.
+# A check fails only after 3 tries 40 s apart: one slow answer or a container restart during a deploy is no outage.
+# GitHub runs schedules late when it is busy and turns them off after 60 days without a commit: then re-enable it
+# on the Actions tab. Free on a public repository.
+name: Uptime
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: uptime
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Home page and API health
+        run: |
+          check() {  # url, text the answer must contain
+            for try in 1 2 3; do
+              body=$(curl -sS --max-time 20 -w '\n%{http_code}' "$1" 2>&1) || true
+              code=$(printf '%s' "$body" | tail -n 1)
+              if [ "$code" = 200 ] && printf '%s' "$body" | grep -q "$2"; then
+                echo "ok   $1"
+                return 0
+              fi
+              echo "try $try: $1 -> ${code:-no answer}"
+              [ "$try" = 3 ] || sleep 40
+            done
+            echo "::error::$1 is down (last answer: ${code:-none})"
+            return 1
+          }
+          fail=0
+          check https://lingoprism.id.vn/ '<div id="root">' || fail=1
+          check https://lingoprism.id.vn/api/v1/health/ '"status":"ok"' || fail=1
+          exit $fail

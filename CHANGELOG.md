@@ -15,6 +15,13 @@
 ### Cải thiện
 
 - Ảnh, ảnh bài đăng và ảnh đại diện bị xoá khỏi máy chủ cùng lúc với dữ liệu, không còn nằm lại trên ổ đĩa.
+- Máy chủ xử lý song song gấp đôi số yêu cầu, nên app và web phản hồi nhanh hơn lúc đông người dùng.
+- Nhật ký máy chủ không còn ghi mã đăng nhập hay mã đặt lại mật khẩu.
+
+### Sửa lỗi
+
+- App: nút trong hộp xác nhận đôi khi bấm không có tác dụng sau khi vừa hiện một thông báo.
+- App: trang Hồ sơ hiện tên mặc định và các ô trống sau khi đăng nhập, cho tới khi mở lại app.
 
 ## 1.3.0 – 28/10/2026: Nhanh hơn, chịu tải tốt hơn, quản trị tiện hơn
 

@@ -69,6 +69,7 @@ export function PrivacyPage() {
       <ul>
         <li><b>Microsoft Azure</b> (máy chủ, khu vực Đông Á): lưu toàn bộ dữ liệu ở trên. Dữ liệu vì vậy được lưu ngoài lãnh thổ Việt Nam.</li>
         <li><b>Cloudflare:</b> chuyển tiếp và bảo vệ kết nối tới website (chống tấn công).</li>
+        <li><b>Sentry</b> (theo dõi lỗi máy chủ): khi máy chủ gặp lỗi, chỉ gửi loại lỗi và vị trí lỗi trong mã nguồn để chúng tôi sửa; không gửi tài khoản, nội dung bạn nhập, địa chỉ IP hay email của bạn.</li>
         <li><b>Google:</b> đăng nhập bằng Google, gửi thông báo đẩy (Firebase), gửi email (Gmail).</li>
         <li><b>Google Gemini</b> (khi bạn tạo hội thoại AI từ ảnh): chỉ gửi <b>danh sách từ</b> và trình độ, không gửi ảnh hay thông tin của bạn.</li>
       </ul>

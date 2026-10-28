@@ -47,6 +47,7 @@ services:
       DJANGO_DEBUG: "0"
       USE_REDIS: "1"
       COLLECT_STATIC: "1"
+      WEB_CONCURRENCY: ${WEB_CONCURRENCY:-2}   # API worker processes; set 1 in .env if the 4 GB VM runs short of RAM
       DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
       REDIS_URL: redis://redis:6379/0
       YOLO_MODEL_PATH: /app/models/yolov10n.onnx

@@ -56,6 +56,21 @@ def test_grid_index_equals_brute_force():
     assert proximity.haversine(21.0245, 105.8576, 21.0287, 105.8523) == pytest.approx(707, abs=15)
 
 
+@pytest.mark.django_db
+def test_poi_index_follows_a_change_made_in_another_server_process():
+    from django.core.cache import cache
+
+    from apps.gis.models import Poi
+
+    Poi.objects.create(name="Chợ Bến Thành", category="market", lat=10.7725, lng=106.6980, radius_m=150)
+    assert len(proximity.poi_index().query(10.7725, 106.6980, 500)) == 1
+    # another process adds a POI: its signal ran there, here only the shared version changes
+    Poi.objects.bulk_create([Poi(name="Dinh Độc Lập", category="landmark", lat=10.7770, lng=106.6953, radius_m=200)])
+    assert len(proximity.poi_index().query(10.7725, 106.6980, 1000)) == 1  # still this process's index
+    cache.set(proximity.VERSION_KEY, "set by another process", timeout=None)
+    assert len(proximity.poi_index().query(10.7725, 106.6980, 1000)) == 2
+
+
 def test_evaluation_metrics():
     m = evaluation.metrics([(0.9, True), (0.8, True), (0.2, False), (0.1, False)])
     assert m["auc"] == 1.0 and m["log_loss"] < 0.25

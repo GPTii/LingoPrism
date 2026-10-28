@@ -10,6 +10,7 @@ Geofencing then checks d ≤ the POI's own radius.  The PostgreSQL cube/earthdis
 """
 import math
 import threading
+import time
 from collections import defaultdict
 
 EARTH_R = 6_371_008.8  # mean Earth radius (m), IUGG
@@ -59,22 +60,33 @@ def brute_force(points, lat, lng, radius_m) -> list[tuple[int, float]]:
 
 
 # ------------------------------------------------------------------ index of the active POIs (rebuilt on change)
+# Each server process keeps its own index; a POI saved in one process bumps a version in the shared cache (Redis)
+# so the other processes rebuild theirs on their next query too.
 
 _lock = threading.Lock()
 _index: GridIndex | None = None
+_index_version = None
+VERSION_KEY = "proximity:poi-index-version"
 
 
 def poi_index() -> GridIndex:
-    global _index
+    global _index, _index_version
+    from django.core.cache import cache
+
+    version = cache.get(VERSION_KEY)
     with _lock:
-        if _index is None:
+        if _index is None or version != _index_version:
             from apps.gis.models import Poi
 
             _index = GridIndex(Poi.objects.filter(is_active=True).values_list("id", "lat", "lng"))
+            _index_version = version
         return _index
 
 
 def invalidate(**kwargs):
     global _index
+    from django.core.cache import cache
+
     with _lock:
         _index = None
+    cache.set(VERSION_KEY, time.time_ns(), timeout=None)

@@ -29,3 +29,9 @@ REST_FRAMEWORK["DEFAULT_RENDERER_CLASSES"] = ["rest_framework.renderers.JSONRend
 API_DOCS = env.bool("API_DOCS", default=False)
 
 LOGGING["loggers"] = {"security": {"handlers": ["console"], "level": "WARNING", "propagate": False}}
+
+# server errors (API and the e-mail worker) go to Sentry once SENTRY_DSN is set: apps/core/error_tracking.py
+if env("SENTRY_DSN", default=""):
+    from apps.core import error_tracking
+
+    error_tracking.init(env("SENTRY_DSN"), env("SENTRY_ENVIRONMENT", default="production"))

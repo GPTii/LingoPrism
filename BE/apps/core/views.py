@@ -9,14 +9,15 @@ from rest_framework.response import Response
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def health(request):
-    """200 when the database answers, 503 when it does not (what an uptime monitor watches)."""
+    """200 when the database answers, 503 when it does not (what the uptime check, .github/workflows/uptime.yml,
+    watches). Public: no versions in the answer, they only help someone looking for a known vulnerability."""
     try:
         with connection.cursor() as cursor:
-            cursor.execute("SELECT version(), (SELECT extversion FROM pg_extension WHERE extname = 'earthdistance')")
-            version, earthdistance = cursor.fetchone()
+            cursor.execute("SELECT 1 FROM pg_extension WHERE extname = 'earthdistance'")
+            earthdistance = cursor.fetchone() is not None
     except DatabaseError:
         return Response({"status": "error", "database": "unreachable"}, status=503)
-    return Response({"status": "ok", "database": version.split(",")[0], "earthdistance": earthdistance})
+    return Response({"status": "ok", "database": "ok", "earthdistance": earthdistance})
 
 
 @extend_schema(tags=["system"], responses={200: dict})

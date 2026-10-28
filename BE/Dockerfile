@@ -22,4 +22,9 @@ USER app
 
 EXPOSE 8000
 ENTRYPOINT ["/app/entrypoint.sh"]
-CMD ["daphne", "-b", "0.0.0.0", "-p", "8000", "config.asgi:application"]
+# one worker process per CPU core (Python runs on one core per process): WEB_CONCURRENCY workers, read by uvicorn.
+# Cache, rate limits and the WebSocket channel layer live in Redis, so the workers share them.
+# No access log here: nginx writes it without query strings (WebSocket URLs carry the login token).
+ENV WEB_CONCURRENCY=2
+CMD ["uvicorn", "config.asgi:application", "--host", "0.0.0.0", "--port", "8000", "--lifespan", "off", \
+     "--no-access-log", "--no-server-header", "--timeout-graceful-shutdown", "20"]
