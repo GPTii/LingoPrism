@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import '../../data/models/api/game.dart';
 import '../../data/repositories/repositories.dart';
 import '../../routes/app_pages.dart';
+import '../navigation/back.dart';
 import '../theme/app_colors.dart';
 
 /// A sent sticker (comment, group chat, private message).
@@ -72,7 +73,7 @@ Future<String?> pickSticker() {
                     SizedBox(height: 12.h),
                     FilledButton(
                       onPressed: () {
-                        Get.back();
+                        goBack();
                         Get.toNamed(Routes.shop);
                       },
                       child: const Text('Đến cửa hàng'),
@@ -88,7 +89,7 @@ Future<String?> pickSticker() {
                     for (final s in mine)
                       InkWell(
                         borderRadius: BorderRadius.circular(14.r),
-                        onTap: () => Get.back(result: s.code),
+                        onTap: () => goBack(result: s.code),
                         child: Tooltip(
                           message: s.caption,
                           child: Padding(padding: EdgeInsets.all(2.w), child: Image.asset(s.asset, fit: BoxFit.contain)),

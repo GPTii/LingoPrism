@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 
 import '../../../data/models/api/game.dart';
+import '../../../data/models/api/user.dart';
 import '../../../data/repositories/repositories.dart';
 import '../../../data/services/auth_service.dart';
 import '../../../data/services/game_service.dart';
@@ -29,15 +30,31 @@ class ProfileController extends GetxController {
 
   static ProfileController get to => Get.find<ProfileController>();
 
+  /// the account the summary was last loaded for. This controller lives for the whole app (created at the splash,
+  /// often before anyone is signed in), so it reloads when the account changes: sign-in, a parent's consent
+  /// unlocking a kid account (the first load was refused), or another account after sign-out.
+  int? _loadedFor;
+
   @override
   void onInit() {
     super.onInit();
+    ever<AppUser?>(AuthService.to.user, (u) {
+      if (u == null) {
+        _loadedFor = null;
+        summary.value = ProfileSummary.initial();
+        recentPosts.clear();
+        recentPostIds.clear();
+        badges.clear();
+      } else if (u.id != _loadedFor) {
+        loadProfile();
+      }
+    });
     loadProfile();
   }
 
   Future<void> loadProfile() async {
     final user = AuthService.to.currentUser;
-    if (user == null) return;
+    if (user == null || isLoading.value) return;
     isLoading.value = true;
     errorMessage.value = '';
     try {
@@ -80,6 +97,7 @@ class ProfileController extends GetxController {
       );
       recentPosts.assignAll(images);
       recentPostIds.assignAll(ids);
+      _loadedFor = me.id;
     } catch (e) {
       errorMessage.value = 'Không thể tải dữ liệu hồ sơ. Vui lòng thử lại.';
     } finally {

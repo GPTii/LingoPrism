@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../core/navigation/back.dart';
 import '../../core/network/api_client.dart';
 import '../../core/network/api_config.dart';
 import '../../core/theme/app_colors.dart';
@@ -302,8 +303,8 @@ Future<void> confirmDeleteAccount() async {
       ),
     ]),
     actions: [
-      TextButton(onPressed: () => Get.back(result: false), child: const Text('Huỷ')),
-      TextButton(onPressed: () => Get.back(result: true), style: TextButton.styleFrom(foregroundColor: AppColors.error),
+      TextButton(onPressed: () => goBack(result: false), child: const Text('Huỷ')),
+      TextButton(onPressed: () => goBack(result: true), style: TextButton.styleFrom(foregroundColor: AppColors.error),
           child: const Text('Xoá vĩnh viễn')),
     ],
   ));
