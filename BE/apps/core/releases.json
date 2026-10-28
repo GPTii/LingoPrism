@@ -2,11 +2,10 @@
   {
     "version": "1.4.0",
     "date": "2026-10-28",
-    "title": "Quyền riêng tư và an toàn cho trẻ em",
+    "title": "Quyền riêng tư và tài khoản",
     "new": [
       "Trang Chính sách quyền riêng tư và Điều khoản sử dụng; khi đăng ký cần đồng ý với hai văn bản này.",
       "Xác minh email bằng mã 6 số sau khi đăng ký. Đăng bài, bình luận, kết bạn và nhắn tin cần email đã xác minh.",
-      "Tài khoản trẻ em (hoặc dưới 16 tuổi) cần phụ huynh đồng ý qua mã gửi tới email của phụ huynh.",
       "Tự xoá tài khoản trong Hồ sơ, trên web và trong app: xoá hẳn tiến độ học, ảnh, bài đăng và tin nhắn.",
       "Mục \"Có gì mới\" sau mỗi lần cập nhật."
     ],

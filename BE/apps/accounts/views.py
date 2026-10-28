@@ -23,8 +23,8 @@ from apps.core.permissions import IsAdminRole
 from apps.core.throttles import EmailRateThrottle
 
 from . import serializers as s
-from .models import AuthProvider, EmailVerificationCode, ParentalConsent, PasswordResetCode, User, UserGoal
-from .tasks import send_email_code, send_parent_consent, send_reset_code
+from .models import AuthProvider, EmailVerificationCode, PasswordResetCode, User, UserGoal
+from .tasks import send_email_code, send_reset_code
 
 security_log = logging.getLogger("security")
 # default limits + one per target e-mail (a password guess or reset-code flood spread over many IPs)
@@ -315,11 +315,8 @@ class AdminUserViewSet(BulkDeleteMixin, viewsets.ModelViewSet):
             raise Conflict("Tài khoản đang được dữ liệu khác tham chiếu – hãy khóa thay vì xóa.")
 
 
-
-
-
 def _check_code(request, record, code: str, max_attempts: int, expired: bool):
-    """Shared by e-mail verification and parent consent: a wrong code counts, the fifth wrong one ends the code."""
+    """A wrong code counts, the fifth wrong one ends the code."""
     if record is None or expired or record.attempts >= max_attempts:
         return False
     if not secrets.compare_digest(record.code, code):
@@ -366,59 +363,6 @@ class ResendEmailCodeView(APIView):
             return Response({"detail": "Email đã được xác minh"})
         send_email_code.delay(request.user.email, EmailVerificationCode.issue(request.user).code)
         return Response({"detail": f"Đã gửi mã mới tới {request.user.email}"})
-
-
-@extend_schema(tags=["auth"])
-class ParentConsentRequestView(APIView):
-    """POST {parent_email, agree}: a child's account (kid mode or under 16) asks a parent or guardian; they get a
-    code by e-mail, with the Privacy policy, and give it to the child if they agree (Decree 13/2023)."""
-
-    throttle_scope = "email_code"
-
-    @extend_schema(request=s.ParentConsentRequestSerializer, responses={200: dict})
-    def post(self, request):
-        user = request.user
-        if not user.is_child:
-            return Response({"status": "not_needed"})
-        ser = s.ParentConsentRequestSerializer(data=request.data)
-        ser.is_valid(raise_exception=True)
-        consent, _ = ParentalConsent.objects.get_or_create(user=user, defaults={"parent_email": ser.validated_data["parent_email"]})
-        if consent.consented_at:
-            return Response({"status": "given"})
-        consent.parent_email = ser.validated_data["parent_email"].lower()
-        consent.code = f"{secrets.randbelow(10**6):06d}"
-        consent.code_sent_at = timezone.now()
-        consent.attempts = 0
-        consent.save()
-        send_parent_consent.delay(consent.parent_email, user.display_name or user.email, user.email, consent.code,
-                                  settings.SITE_URL)
-        return Response({"status": "pending", "parent_email": consent.parent_email})
-
-
-@extend_schema(tags=["auth"])
-class ParentConsentConfirmView(APIView):
-    """POST {code}: the code from the parent's e-mail. Kept as the proof of consent: when, which policy, from where."""
-
-    throttle_scope = "email_code"
-
-    @extend_schema(request=s.CodeSerializer, responses={200: s.UserSerializer})
-    def post(self, request):
-        user = request.user
-        consent = ParentalConsent.objects.filter(user=user).first()
-        if user.is_child and not (consent and consent.consented_at):
-            ser = s.CodeSerializer(data=request.data)
-            ser.is_valid(raise_exception=True)
-            if not _check_code(request, consent, ser.validated_data["code"], ParentalConsent.MAX_ATTEMPTS,
-                               consent is not None and consent.code_expired):
-                return Response({"detail": "Mã không đúng hoặc đã hết hạn. Hãy gửi lại email cho phụ huynh.", "errors": {}},
-                                status=400)
-            consent.consented_at = timezone.now()
-            consent.policy_version = settings.LEGAL_VERSION
-            consent.ip = _client_ip(request)
-            consent.code = ""
-            consent.save()
-            user.refresh_from_db()
-        return Response(s.UserSerializer(user, context={"request": request}).data)
 
 
 @extend_schema(tags=["users"])

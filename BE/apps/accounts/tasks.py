@@ -21,20 +21,3 @@ def send_email_code(email: str, code: str):
         None,
         [email],
     )
-
-
-@shared_task(autoretry_for=(OSError,), retry_backoff=30, max_retries=3)
-def send_parent_consent(parent_email: str, child_name: str, child_email: str, code: str, site: str):
-    send_mail(
-        "LingoPrism - Xin phép phụ huynh cho con học",
-        f"Kính chào phụ huynh,\n\n{child_name} ({child_email}) đang tạo tài khoản học ngoại ngữ trên LingoPrism "
-        "và cho biết bạn là cha, mẹ hoặc người giám hộ.\n\n"
-        "Theo quy định về bảo vệ dữ liệu cá nhân của trẻ em, LingoPrism cần sự đồng ý của bạn trước khi con sử dụng. "
-        f"Chính sách quyền riêng tư (dữ liệu nào được thu thập, dùng để làm gì, cách xoá): {site}/privacy\n\n"
-        f"Nếu bạn đồng ý, hãy đưa con mã sau để nhập vào ứng dụng: {code}\n"
-        "Mã có hiệu lực trong 24 giờ.\n\n"
-        "Nếu bạn không đồng ý hoặc không biết việc này, chỉ cần bỏ qua email: tài khoản sẽ không dùng được. "
-        f"Bạn có thể yêu cầu xoá tài khoản bất cứ lúc nào: {site}/delete-account",
-        None,
-        [parent_email],
-    )

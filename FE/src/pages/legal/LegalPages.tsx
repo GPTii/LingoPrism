@@ -75,7 +75,7 @@ export function PrivacyPage() {
       </ul>
 
       <h2>4. Trẻ em</h2>
-      <p>Với tài khoản trẻ em hoặc người dưới 16 tuổi, LingoPrism chỉ cho dùng sau khi <b>cha, mẹ hoặc người giám hộ đồng ý</b>: chúng tôi gửi mã xác nhận tới email của phụ huynh, kèm đường dẫn tới chính sách này. Chế độ trẻ em ẩn bảng tin, kết bạn, nhóm và tin nhắn. Phụ huynh có thể yêu cầu xem hoặc xoá dữ liệu của con bất cứ lúc nào {contact}.</p>
+      <p>Trẻ em dưới 16 tuổi dùng LingoPrism qua tài khoản do <b>cha, mẹ hoặc người giám hộ tạo</b> (bằng email hoặc tài khoản Google của phụ huynh), rồi chọn <b>chế độ trẻ em</b>. Khi tạo tài khoản, phụ huynh đồng ý với chính sách này thay cho con. Chế độ trẻ em ẩn bảng tin, kết bạn, nhóm và tin nhắn. Phụ huynh có thể yêu cầu xem hoặc xoá dữ liệu của con bất cứ lúc nào {contact}.</p>
 
       <h2>5. Thời gian lưu</h2>
       <ul>
@@ -106,7 +106,7 @@ export function TermsPage() {
       <h2>1. Tài khoản</h2>
       <ul>
         <li>Bạn cung cấp email thật và giữ mật khẩu của mình. Mỗi người một tài khoản.</li>
-        <li>Người dưới 16 tuổi chỉ dùng khi có cha, mẹ hoặc người giám hộ đồng ý (xem <Link to="/privacy">Chính sách quyền riêng tư</Link>).</li>
+        <li>Người dưới 16 tuổi dùng qua tài khoản do cha, mẹ hoặc người giám hộ tạo và chọn chế độ trẻ em; người tạo tài khoản chịu trách nhiệm về việc con sử dụng (xem <Link to="/privacy">Chính sách quyền riêng tư</Link>).</li>
       </ul>
       <h2>2. Nội dung bạn đăng</h2>
       <ul>

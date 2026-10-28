@@ -52,7 +52,6 @@ export interface User {
   /** false after a self sign-up until the mailed code is entered: posting, friends and messages wait for it */
   email_verified?: boolean
   /** a child's account (kid mode or under 16) is used only once a parent agreed */
-  parent_consent?: 'not_needed' | 'missing' | 'pending' | 'given'
   /** false for a Google-only account: deleting it asks for a typed word instead */
   has_password?: boolean
 }

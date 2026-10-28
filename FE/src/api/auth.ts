@@ -25,10 +25,6 @@ export const authApi = {
     api.post<AuthResponse>('/auth/register/', { email, password, display_name, accept_terms }).then((r) => r.data),
   verifyEmail: (code: string) => api.post<User>('/auth/email/verify/', { code }).then((r) => r.data),
   resendEmailCode: () => api.post<{ detail: string }>('/auth/email/resend/').then((r) => r.data),
-  /** a child's account: e-mails the parent a code */
-  askParent: (parent_email: string) =>
-    api.post<{ status: string; parent_email?: string }>('/me/parent-consent/request/', { parent_email, agree: true }).then((r) => r.data),
-  confirmParent: (code: string) => api.post<User>('/me/parent-consent/confirm/', { code }).then((r) => r.data),
   /** for good: learning history, photos, posts, messages */
   deleteAccount: (body: { password?: string; confirm?: string }) => api.post('/me/delete/', body),
   releases: () => api.get<{ latest: string; legal_version: string; results: Release[] }>('/releases/').then((r) => r.data),

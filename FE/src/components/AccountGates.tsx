@@ -1,13 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
-import { App, Button, Checkbox, Input, Modal, Tag } from 'antd'
+import { App, Button, Input, Modal, Tag } from 'antd'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { authApi } from '../api/auth'
 import { errorMessage } from '../api/client'
 import { useAuth } from '../auth/store'
-import { useLogout } from '../auth/useLogout'
 import { ReleaseLists } from '../pages/legal/LegalPages'
-import { Logo, Prismo } from './brand/Brand'
 
 /** Above every learner page until the e-mail is verified: type the mailed code, or get a new one. */
 export function VerifyEmailBanner() {
@@ -48,78 +46,6 @@ export function VerifyEmailBanner() {
           inputMode="numeric" placeholder="Mã 6 số" aria-label="Mã xác minh email" style={{ width: 130 }} />
         <Button type="primary" disabled={code.length !== 6} loading={busy === 'verify'} onClick={verify}>Xác minh</Button>
         <Button type="text" loading={busy === 'resend'} onClick={resend}>Gửi lại mã</Button>
-      </div>
-    </div>
-  )
-}
-
-/** In place of the app for a child's account (kid mode or under 16) until a parent or guardian agreed: their
- * e-mail gets a code with the Privacy policy; typing the code is the consent (Decree 13/2023). */
-export function ParentConsentGate() {
-  const { message } = App.useApp()
-  const user = useAuth((s) => s.user)
-  const logout = useLogout()
-  const [parentEmail, setParentEmail] = useState('')
-  const [agree, setAgree] = useState(false)
-  const [sentTo, setSentTo] = useState<string | null>(user?.parent_consent === 'pending' ? '' : null)
-  const [code, setCode] = useState('')
-  const [busy, setBusy] = useState(false)
-  const ask = async () => {
-    setBusy(true)
-    try {
-      const r = await authApi.askParent(parentEmail.trim())
-      setSentTo(r.parent_email ?? parentEmail)
-      message.success('Đã gửi email cho phụ huynh')
-    } catch (e) {
-      message.error(errorMessage(e))
-    } finally {
-      setBusy(false)
-    }
-  }
-  const confirm = async () => {
-    setBusy(true)
-    try {
-      useAuth.getState().setUser(await authApi.confirmParent(code.trim()))
-      message.success('Cảm ơn phụ huynh! Chúc bé học vui.')
-    } catch (e) {
-      message.error(errorMessage(e))
-    } finally {
-      setBusy(false)
-    }
-  }
-  return (
-    <div className="learner min-h-screen grid place-items-center p-4">
-      <div className="lp-card w-full max-w-lg p-6 sm:p-8 flex flex-col gap-4">
-        <div className="flex items-center justify-between"><Logo /><Prismo mood="happy" size={64} /></div>
-        <h1 className="text-2xl font-extrabold text-slate-800 m-0">Xin phép bố mẹ một chút nhé</h1>
-        <p className="m-0 text-slate-600">
-          Tài khoản của trẻ em cần <b>bố, mẹ hoặc người giám hộ</b> đồng ý trước khi dùng. Hãy nhờ phụ huynh nhập email của họ:
-          LingoPrism sẽ gửi một mã cùng <Link to="/privacy" target="_blank">Chính sách quyền riêng tư</Link> để phụ huynh đọc.
-        </p>
-        {sentTo === null ? (
-          <>
-            <Input size="large" type="email" value={parentEmail} onChange={(e) => setParentEmail(e.target.value)}
-              placeholder="Email của phụ huynh" aria-label="Email của phụ huynh" />
-            <Checkbox checked={agree} onChange={(e) => setAgree(e.target.checked)}>
-              Tôi là phụ huynh / người giám hộ và đã đọc Chính sách quyền riêng tư
-            </Checkbox>
-            <Button type="primary" size="large" disabled={!agree || !/\S+@\S+\.\S+/.test(parentEmail)} loading={busy} onClick={ask}>
-              Gửi mã cho phụ huynh
-            </Button>
-          </>
-        ) : (
-          <>
-            <p className="m-0">{sentTo ? <>Đã gửi mã tới <b>{sentTo}</b>.</> : 'Đã gửi mã cho phụ huynh.'} Nhập mã 6 số trong email (hiệu lực 24 giờ):</p>
-            <Input size="large" value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))} onPressEnter={confirm}
-              inputMode="numeric" placeholder="Mã 6 số" aria-label="Mã của phụ huynh" />
-            <Button type="primary" size="large" disabled={code.length !== 6} loading={busy} onClick={confirm}>Xác nhận</Button>
-            <Button type="text" onClick={() => { setSentTo(null); setCode('') }}>Gửi lại hoặc dùng email khác</Button>
-          </>
-        )}
-        <div className="flex justify-between text-sm pt-2 border-t border-slate-100">
-          <button type="button" className="cursor-pointer text-slate-500" onClick={() => logout()}>Đăng xuất</button>
-          <Link to="/delete-account" className="text-slate-500">Không đồng ý? Xoá tài khoản</Link>
-        </div>
       </div>
     </div>
   )

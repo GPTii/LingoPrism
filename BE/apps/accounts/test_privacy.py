@@ -1,4 +1,4 @@
-"""Terms acceptance, e-mail verification, parental consent for children, deleting one's own account, release notes."""
+"""Terms acceptance, e-mail verification, kid accounts, deleting one's own account, release notes."""
 from datetime import date
 from pathlib import Path
 
@@ -8,7 +8,7 @@ from django.core import mail
 from django.core.files.base import ContentFile
 from rest_framework.test import APIClient
 
-from apps.accounts.models import ParentalConsent, User
+from apps.accounts.models import User
 
 pytestmark = pytest.mark.django_db
 
@@ -78,32 +78,15 @@ def with_jwt(user):
     return c
 
 
-def test_a_child_needs_a_parent_before_using_the_app():
-    kid = User.objects.create_user("kid@example.com", "Strong!Pass123", learner_type="kid")
+def test_a_kid_account_learns_right_away():
+    # a parent signs in (often with Google) and picks kid mode for the child: no second consent step
+    kid = User.objects.create_user("kid@example.com", "Strong!Pass123", learner_type="kid",
+                                   birth_date=date(date.today().year - 8, 1, 1))
     client = with_jwt(kid)
-    assert client.get("/api/v1/me/").data["parent_consent"] == "missing"
-    assert client.get("/api/v1/topics/").status_code == 403  # nothing but the way to the consent
-    assert client.post("/api/v1/me/parent-consent/request/", {"parent_email": "mom@example.com", "agree": False},
-                       format="json").status_code == 400
-    res = client.post("/api/v1/me/parent-consent/request/", {"parent_email": "Mom@Example.com", "agree": True}, format="json")
-    assert res.data == {"status": "pending", "parent_email": "mom@example.com"}
-    sent = mail.outbox[-1]
-    assert sent.to == ["mom@example.com"] and "/privacy" in sent.body
-    assert client.get("/api/v1/topics/").status_code == 403
-    res = client.post("/api/v1/me/parent-consent/confirm/", {"code": code_in(sent)}, format="json")
-    assert res.data["parent_consent"] == "given"
-    consent = ParentalConsent.objects.get(user=kid)
-    assert consent.policy_version == settings.LEGAL_VERSION and consent.ip
+    assert "parent_consent" not in client.get("/api/v1/me/").data
     assert client.get("/api/v1/topics/").status_code == 200
-
-
-def test_an_adult_profile_under_16_is_a_child_too():
-    teen = User.objects.create_user("teen@example.com", "Strong!Pass123",
-                                    birth_date=date(date.today().year - 13, 1, 1))
-    adult = User.objects.create_user("adult@example.com", "Strong!Pass123", birth_date=date(1990, 1, 1))
-    assert teen.parent_consent_status == "missing" and adult.parent_consent_status == "not_needed"
-    assert as_user(adult).post("/api/v1/me/parent-consent/request/", {"parent_email": "x@example.com", "agree": True},
-                               format="json").data == {"status": "not_needed"}
+    assert client.post("/api/v1/me/parent-consent/request/", {"parent_email": "mom@example.com"},
+                       format="json").status_code == 404
 
 
 def test_deleting_my_account_removes_it_and_its_files(tmp_path, settings):

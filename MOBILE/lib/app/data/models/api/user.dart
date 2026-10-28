@@ -44,7 +44,6 @@ class AppUser {
     this.goal,
     this.mascot,
     this.emailVerified = true,
-    this.parentConsent = 'not_needed',
     this.hasPassword = true,
   });
 
@@ -79,12 +78,10 @@ class AppUser {
   final bool emailVerified;
 
   /// not_needed | missing | pending | given – a child's account (kid mode or under 16) waits for a parent
-  final String parentConsent;
 
   /// false for a Google-only account: deleting it asks for a typed word instead of the password
   final bool hasPassword;
 
-  bool get needsParent => parentConsent == 'missing' || parentConsent == 'pending';
 
   static const String defaultAvatar = 'assets/brand/avatar/avatar_1.png';
 
@@ -133,7 +130,6 @@ class AppUser {
         goal: j['goal'] is Map ? UserGoal.fromJson(asMap(j['goal'])) : null,
         mascot: MascotLook.fromJson(j['mascot']),
         emailVerified: j['email_verified'] != false,
-        parentConsent: asString(j['parent_consent'], 'not_needed'),
         hasPassword: j['has_password'] != false,
       );
 
@@ -159,7 +155,6 @@ class AppUser {
         'scales_balance': scales,
         'gems_balance': gems,
         'email_verified': emailVerified,
-        'parent_consent': parentConsent,
         'has_password': hasPassword,
         if (mascot != null) 'mascot': mascot!.toJson(),
         if (goal != null)

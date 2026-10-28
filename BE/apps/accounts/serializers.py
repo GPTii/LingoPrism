@@ -47,13 +47,11 @@ class UserSerializer(serializers.ModelSerializer):
             "learner_type", "learning_languages", "active_language", "zh_script", "show_zhuyin",
             "birth_date", "gender", "purpose", "daily_minutes", "onboarding_completed", "timezone",
             "scales_balance", "gems_balance", "goal", "mascot", "created_at",
-            "email_verified", "parent_consent", "has_password",
+            "email_verified", "has_password",
         ]
         read_only_fields = ["id", "public_id", "email", "role", "status", "scales_balance", "gems_balance", "created_at",
                             "email_verified"]
 
-    parent_consent = serializers.CharField(source="parent_consent_status", read_only=True,
-                                           help_text="not_needed | missing | pending | given")
     has_password = serializers.BooleanField(source="has_usable_password", read_only=True,
                                             help_text="False for Google-only accounts (deleting asks for a typed word)")
 
@@ -230,19 +228,8 @@ class AdminUserSerializer(serializers.ModelSerializer):
         return user
 
 
-
 class CodeSerializer(serializers.Serializer):
     code = serializers.RegexField(r"^\d{6}$", error_messages={"invalid": "Mã gồm 6 chữ số"})
-
-
-class ParentConsentRequestSerializer(serializers.Serializer):
-    parent_email = serializers.EmailField()
-    agree = serializers.BooleanField(help_text="Phụ huynh đã đọc Chính sách quyền riêng tư")
-
-    def validate_agree(self, value):
-        if not value:
-            raise serializers.ValidationError("Phụ huynh cần đọc và đồng ý Chính sách quyền riêng tư")
-        return value
 
 
 class DeleteAccountSerializer(serializers.Serializer):

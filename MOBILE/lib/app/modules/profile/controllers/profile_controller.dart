@@ -31,8 +31,8 @@ class ProfileController extends GetxController {
   static ProfileController get to => Get.find<ProfileController>();
 
   /// the account the summary was last loaded for. This controller lives for the whole app (created at the splash,
-  /// often before anyone is signed in), so it reloads when the account changes: sign-in, a parent's consent
-  /// unlocking a kid account (the first load was refused), or another account after sign-out.
+  /// often before anyone is signed in), so it reloads when the account changes: sign-in, or another account
+  /// after sign-out.
   int? _loadedFor;
 
   @override

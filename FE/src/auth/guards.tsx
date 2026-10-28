@@ -2,7 +2,6 @@ import { useEffect } from 'react'
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { authApi } from '../api/auth'
 import { isStaffRole, useAuth } from './store'
-import { ParentConsentGate } from '../components/AccountGates'
 
 export function RequireAuth() {
   const user = useAuth((s) => s.user)
@@ -14,9 +13,6 @@ export function RequireAuth() {
     authApi.me().then((fresh) => useAuth.getState().setUser(fresh)).catch(() => {})
   }, [signedIn])
   if (!user) return <Navigate to="/login" replace state={{ from: location.pathname }} />
-  // a child's account waits for a parent (after the first-visit survey, where kid mode is chosen)
-  const needsParent = user.parent_consent === 'missing' || user.parent_consent === 'pending'
-  if (needsParent && location.pathname !== '/welcome') return <ParentConsentGate />
   return <Outlet />
 }
 

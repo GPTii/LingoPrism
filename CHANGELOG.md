@@ -2,13 +2,12 @@
 
 <!-- Sinh từ BE/apps/core/releases.json bằng `python manage.py changelog` – sửa ở file đó, không sửa ở đây. -->
 
-## 1.4.0 – 28/10/2026: Quyền riêng tư và an toàn cho trẻ em
+## 1.4.0 – 28/10/2026: Quyền riêng tư và tài khoản
 
 ### Mới
 
 - Trang Chính sách quyền riêng tư và Điều khoản sử dụng; khi đăng ký cần đồng ý với hai văn bản này.
 - Xác minh email bằng mã 6 số sau khi đăng ký. Đăng bài, bình luận, kết bạn và nhắn tin cần email đã xác minh.
-- Tài khoản trẻ em (hoặc dưới 16 tuổi) cần phụ huynh đồng ý qua mã gửi tới email của phụ huynh.
 - Tự xoá tài khoản trong Hồ sơ, trên web và trong app: xoá hẳn tiến độ học, ảnh, bài đăng và tin nhắn.
 - Mục "Có gì mới" sau mỗi lần cập nhật.
 

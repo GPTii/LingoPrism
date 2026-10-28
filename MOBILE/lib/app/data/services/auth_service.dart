@@ -53,15 +53,15 @@ class AuthService extends GetxService {
     await TokenStorage.save(user: u.toJson());
   }
 
-  /// A fresh profile from an endpoint that answers with it (e-mail verified, parent agreed…).
+  /// A fresh profile from an endpoint that answers with it (e.g. e-mail verified).
   Future<void> applyUser(AppUser u) => _setUser(u);
 
-  /// Where a signed-in learner goes: the first-visit survey, then – for a child – the parent's consent, then home.
+  /// Where a signed-in learner goes: the first-visit survey (where kid mode is chosen), then home.
   String get nextRoute {
     final u = user.value;
     if (u == null) return Routes.login;
     if (!u.onboardingCompleted) return Routes.survey;
-    return u.needsParent ? Routes.parentConsent : Routes.home;
+    return Routes.home;
   }
 
   Future<void> _startSession(AppUser u, String access, String refresh) async {

@@ -33,14 +33,6 @@ class AuthRepository {
 
   static Future<String> resendEmailCode() async => asString(asMap(await _api.post('/auth/email/resend/'))['detail']);
 
-  /// A child's account: e-mails the parent a code; returns where it went.
-  static Future<String> askParent(String parentEmail) async => asString(
-      asMap(await _api.post('/me/parent-consent/request/', data: {'parent_email': parentEmail, 'agree': true}))['parent_email'],
-      parentEmail);
-
-  static Future<AppUser> confirmParent(String code) async =>
-      AppUser.fromJson(asMap(await _api.post('/me/parent-consent/confirm/', data: {'code': code})));
-
   /// For good: learning history, photos, posts, messages.
   static Future<void> deleteAccount({String? password, String? confirm}) =>
       _api.post('/me/delete/', data: {if (password != null) 'password': password, if (confirm != null) 'confirm': confirm});
