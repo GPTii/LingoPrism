@@ -8,8 +8,8 @@ import { Logo } from '../../components/brand/Brand'
 /** Version (date) of these two texts: must equal LEGAL_VERSION in BE/config/settings/base.py, which records
  * the version each learner accepted. Change both when the wording changes. */
 export const LEGAL_VERSION = '2026-10-28'
-/** shown as the contact address of the policies; until set, the in-app Support chat is the contact */
-export const CONTACT_EMAIL = ''
+/** contact address of the policies, next to the in-app Support chat */
+export const CONTACT_EMAIL = 'thanhtu20022004@gmail.com'
 
 const day = (iso: string) => iso.split('-').reverse().join('/')
 
