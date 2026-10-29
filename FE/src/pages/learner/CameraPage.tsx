@@ -268,7 +268,7 @@ export default function CameraPage() {
                 {added.map((a, k) => (
                   <div key={k} className="w-full flex items-center gap-2 rounded-xl bg-slate-50 px-3 py-2">
                     <div className="flex-1">
-                      {a.found?.card.target ? <TargetWord target={a.found.card.target} size="sm" /> : <span className="font-semibold">{a.typed}</span>}
+                      {a.found?.card.target ? <TargetWord target={a.found.card.target} size="md" /> : <span className="font-semibold">{a.typed}</span>}
                       <div className="text-sm text-slate-500">{a.found ? a.found.card.meaning_vi : 'Chưa có trong từ điển – đã ghi nhận để bổ sung'}</div>
                     </div>
                     <Button type="text" size="small" aria-label="Bỏ" icon={<CloseOutlined />} onClick={() => setAdded(added.filter((_, j) => j !== k))} />

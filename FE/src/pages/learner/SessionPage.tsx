@@ -252,7 +252,10 @@ export default function SessionPage() {
           transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
           className="lp-card p-6 sm:p-8 min-h-80 flex flex-col items-center justify-center gap-6">
           {q.type === 'flashcard' && (
-            <button type="button" onClick={() => setFlipped(!flipped)} className="w-full flex flex-col items-center gap-4 cursor-pointer">
+            // a div, not a <button>: the card holds its own sound button and picture credit link
+            <div role="button" tabIndex={0} aria-pressed={flipped} onClick={() => setFlipped(!flipped)}
+              onKeyDown={(e) => { if (e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); setFlipped(!flipped) } }}
+              className="w-full flex flex-col items-center gap-4 cursor-pointer">
               {session.language !== 'vi' && <WordPicture image={step.item.card.image} credit={step.item.card.image_credit} source={step.item.card.image_source} />}
               <TargetWord target={q.front} size="xl" />
               {session.language === 'vi'
@@ -260,7 +263,7 @@ export default function SessionPage() {
                     ? <WordPicture image={step.item.card.image} emoji={step.item.card.emoji || '—'} credit={step.item.card.image_credit} source={step.item.card.image_source} height="h-48" />
                     : <div className="text-slate-400">Chạm để xem hình</div>)
                 : (flipped ? <div className="text-2xl text-slate-700">{q.back || '—'}</div> : <div className="text-slate-400">Chạm để xem nghĩa tiếng Việt</div>)}
-            </button>
+            </div>
           )}
           {/* once the card is turned over: say the word and get a score (only where the browser can listen) */}
           {q.type === 'flashcard' && flipped && (
