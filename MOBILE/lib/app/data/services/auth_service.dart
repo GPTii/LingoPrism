@@ -64,6 +64,26 @@ class AuthService extends GetxService {
     return Routes.home;
   }
 
+  /// What the sign-in question asks for: a picture (photo, preset or Prismo), a birthday and a gender.
+  bool get profileMissing {
+    final u = user.value;
+    if (u == null) return false;
+    final picture = (u.avatar ?? '').isNotEmpty || u.avatarPreset.isNotEmpty || u.mascot?.asAvatar == true;
+    return !picture || u.birthDate == null || u.gender.isEmpty;
+  }
+
+  /// After a sign-in or the welcome survey: [nextRoute], but a learner whose profile lacks a picture, a birthday or
+  /// a gender is first asked for them once (the profile screen in welcome mode, which can be skipped).
+  Future<void> enterAfterSignIn() async {
+    final route = nextRoute;
+    final staff = const ['admin', 'staff'].contains(user.value?.role);
+    if (route == Routes.home && profileMissing && !staff) {
+      await Get.offAllNamed(Routes.profileEdit, arguments: const {'welcome': true});
+    } else {
+      await Get.offAllNamed(route);
+    }
+  }
+
   Future<void> _startSession(AppUser u, String access, String refresh) async {
     await TokenStorage.save(access: access, refresh: refresh, user: u.toJson());
     user.value = u;

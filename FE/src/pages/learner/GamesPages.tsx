@@ -2,16 +2,16 @@ import { App, Button, Modal, Progress, Result, Spin, Tooltip } from 'antd'
 import { CloseOutlined, LockFilled, StarFilled } from '@ant-design/icons'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { errorMessage } from '../../api/client'
-import { playApi, type GameFinish, type GameRound, type GameStop, type HelperKind } from '../../api/play'
+import { playApi, type GameFinish, type GameRound, type GameStop, type HelperKind, type MapFriend } from '../../api/play'
 import { useAuth } from '../../auth/store'
 import { AppIcon } from '../../components/brand/AppIcon'
 import { Prismo, ScaleIcon } from '../../components/brand/Brand'
 import { GAME_NAMES, HelpContext, MiniGameView, type GameHelp } from '../../components/MiniGames'
 import { langTag } from '../../components/TargetWord'
-import { PageHeader } from '../../components/ui'
+import { PageHeader, UserAvatar } from '../../components/ui'
 
 const LANG_NAME: Record<string, string> = { en: 'tiếng Anh', zh: 'tiếng Trung', vi: 'tiếng Việt' }
 const LEVEL_COLORS = ['#0E9F7B', '#1F7ED0', '#B26F00', '#E0445E']  // same as the learning path (LevelPath)
@@ -59,11 +59,34 @@ function StopButton({ stop, color, current, onClick }: { stop: GameStop; color: 
   )
 }
 
+/** Friends standing at a stop: up to 3 faces, then "+N"; their names on hover. */
+function FriendsHere({ friends, size = 34, className = '' }: { friends: MapFriend[]; size?: number; className?: string }) {
+  if (!friends.length) return null
+  const names = friends.map((f) => f.display_name || 'Bạn bè')
+  return (
+    <Tooltip title={names.length > 6 ? `${names.slice(0, 6).join(', ')} và ${names.length - 6} bạn khác` : names.join(', ')}>
+      <div className={`flex items-center ${className}`} aria-label={`Bạn bè ở đây: ${names.join(', ')}`}>
+        {friends.slice(0, 3).map((f, i) => (
+          <motion.span key={f.id} initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.15 + i * 0.08, type: 'spring', stiffness: 400, damping: 18 }}
+            className={`rounded-full ring-[3px] ring-white shadow-sm ${i ? '-ml-3' : ''}`} style={{ zIndex: 3 - i }}>
+            <UserAvatar name={f.display_name} src={f.avatar} mascot={f.mascot} size={size} />
+          </motion.span>
+        ))}
+        {friends.length > 3 && (
+          <span className="-ml-3 rounded-full ring-[3px] ring-white bg-slate-200 text-slate-600 text-xs font-bold grid place-items-center"
+            style={{ width: size, height: size }}>+{friends.length - 3}</span>
+        )}
+      </div>
+    </Tooltip>
+  )
+}
+
 export function GameMapPage() {
   const { message, modal } = App.useApp()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const { lang } = useLang()
+  const kid = useAuth((s) => s.user?.learner_type === 'kid')  // children stay out of the social side
   const { data, isLoading, error } = useQuery({ queryKey: ['game-map', lang], queryFn: playApi.map })
   const [chest, setChest] = useState<{ gems: number; scales: number } | null>(null)
 
@@ -73,6 +96,15 @@ export function GameMapPage() {
 
   if (isLoading) return <div className="flex justify-center py-20"><Spin size="large" /></div>
   if (error || !data) return <Result status="warning" title={errorMessage(error)} />
+
+  const friendsAt = new Map<string, MapFriend[]>()
+  for (const f of data.friends ?? []) friendsAt.set(f.node, [...(friendsAt.get(f.node) ?? []), f])
+  const levelOf = (node: string) => Number(node.split('-')[0].slice(1))
+  const showFriend = (f: MapFriend) => {
+    const el = document.getElementById(`stop-${f.node}`)
+    if (el) el.scrollIntoView({ block: 'center', behavior: 'smooth' })
+    else message.info(`${f.display_name} đang ở cấp ${levelOf(f.node)} – thắng màn trùm để theo kịp nhé!`)
+  }
 
   const tapLocked = (stop: GameStop) => {
     const lock = stop.lock
@@ -109,6 +141,30 @@ export function GameMapPage() {
       <PageHeader title="Trò chơi" description={data.track === 'reading'
         ? 'Học xong bài ở mục Học đọc – viết rồi vào đây chơi. Qua mỗi màn, mở rương nhận ngọc!'
         : `Chơi với những từ ${LANG_NAME[data.language] ?? ''} bạn đã học. Học thêm ở mục Học để mở màn mới.`} />
+      {data.track === 'words' && !kid && (
+        <section className="lp-card p-4 flex flex-col gap-3" aria-label="Bạn bè trên bản đồ">
+          <div className="flex items-center justify-between gap-3">
+            <div className="font-bold text-slate-800">Bạn bè đang chơi</div>
+            {!!data.friends?.length && <span className="text-sm text-slate-500">Chạm để xem họ ở màn nào</span>}
+          </div>
+          {data.friends?.length ? (
+            <div className="flex gap-3 overflow-x-auto pb-1 -mx-1 px-1">
+              {data.friends.map((f) => (
+                <button key={f.id} type="button" onClick={() => showFriend(f)}
+                  className="shrink-0 w-20 flex flex-col items-center gap-1 rounded-xl p-1.5 hover:bg-slate-100 cursor-pointer transition">
+                  <UserAvatar name={f.display_name} src={f.avatar} mascot={f.mascot} size={44} />
+                  <span className="text-xs font-semibold text-slate-700 w-full truncate text-center">{f.display_name || 'Bạn bè'}</span>
+                  <span className="text-[11px] text-slate-500">{f.finished ? 'Đã phá đảo!' : `Cấp ${levelOf(f.node)}`}</span>
+                </button>
+              ))}
+            </div>
+          ) : (
+            <div className="text-sm text-slate-500">
+              Chưa có bạn nào chơi {LANG_NAME[data.language] ?? ''} ở đây. <Link to="/friends">Rủ bạn bè</Link> cùng chơi để thấy họ trên bản đồ!
+            </div>
+          )}
+        </section>
+      )}
       {data.levels.map((level) => {
         const color = LEVEL_COLORS[level.level - 1]
         return (
@@ -119,18 +175,26 @@ export function GameMapPage() {
                 <div className="text-2xl font-extrabold">{level.name}</div>
                 <div className="text-sm opacity-90">{level.description}</div>
               </div>
-              <div className="text-right">
+              <div className="text-right flex flex-col items-end gap-1">
                 <div className="num text-xl font-bold">{level.done}/{level.total}</div>
                 {!level.unlocked && <LockFilled className="text-2xl opacity-80" />}
+                {!level.unlocked && <FriendsHere size={28}
+                  friends={(data.friends ?? []).filter((f) => levelOf(f.node) === level.level)} />}
               </div>
             </div>
             {level.unlocked ? (
               <div className="pt-16 pb-10 flex flex-col items-center gap-9">
-                {level.nodes.map((stop, k) => (
-                  <div key={stop.id} id={`stop-${stop.id}`} style={{ transform: `translateX(${Math.round(Math.sin(k * 0.85) * 80)}px)` }}>
-                    <StopButton stop={stop} color={color} current={stop.id === data.current} onClick={() => tap(stop)} />
-                  </div>
-                ))}
+                {level.nodes.map((stop, k) => {
+                  const shift = Math.round(Math.sin(k * 0.85) * 80)
+                  return (
+                    <div key={stop.id} id={`stop-${stop.id}`} className="relative" style={{ transform: `translateX(${shift}px)` }}>
+                      <StopButton stop={stop} color={color} current={stop.id === data.current} onClick={() => tap(stop)} />
+                      {/* friends stand beside the stop, on the side facing the middle of the path */}
+                      <FriendsHere friends={friendsAt.get(stop.id) ?? []}
+                        className={`absolute top-4 ${shift > 0 ? 'right-full mr-3' : 'left-full ml-3'}`} />
+                    </div>
+                  )
+                })}
               </div>
             ) : (
               <div className="p-6 flex items-center gap-4 text-slate-500">

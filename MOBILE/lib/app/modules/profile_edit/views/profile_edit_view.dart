@@ -17,13 +17,19 @@ class ProfileEditView extends GetView<ProfileEditController> {
       appBar: AppBar(
         backgroundColor: AppColors.primarySoft,
         elevation: 0,
-        leading: IconButton(
-          onPressed: goBack,
-          icon: const Icon(Icons.arrow_back_ios_new_rounded),
-          color: AppColors.textPrimary,
-        ),
+        automaticallyImplyLeading: false,
+        leading: controller.welcome
+            ? null
+            : IconButton(
+                onPressed: goBack,
+                icon: const Icon(Icons.arrow_back_ios_new_rounded),
+                color: AppColors.textPrimary,
+              ),
+        actions: [
+          if (controller.welcome) TextButton(onPressed: controller.skip, child: const Text('Để sau')),
+        ],
         title: Text(
-          'Cập nhật hồ sơ',
+          controller.welcome ? 'Hoàn thiện hồ sơ' : 'Cập nhật hồ sơ',
           style: TextStyle(
             color: AppColors.textPrimary,
             fontSize: 20.sp,
@@ -32,131 +38,220 @@ class ProfileEditView extends GetView<ProfileEditController> {
         ),
         centerTitle: false,
       ),
-      body: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 24.h),
+      body: SafeArea(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Obx(() {
-              final avatar = controller.selectedAvatar.value;
-              return Column(
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(24.r),
-                    child: Container(
-                      width: 140.w,
-                      height: 140.w,
-                      color: AppColors.surface,
-                      child: _avatarWidget(avatar),
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () => _showAvatarPicker(context),
-                    child: Text(
-                      'THAY ẢNH ĐẠI DIỆN',
-                      style: TextStyle(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 14.sp,
-                        letterSpacing: 0.5,
+            Expanded(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 16.h),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    if (controller.welcome)
+                      Padding(
+                        padding: EdgeInsets.only(bottom: 16.h),
+                        child: Text(
+                          controller.isKid
+                              ? 'Chọn ảnh đại diện và cho LingoPrism biết thêm về con nhé.'
+                              : 'Thêm ảnh đại diện và vài thông tin để bạn bè dễ nhận ra bạn.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: AppColors.textSecondary, fontSize: 14.sp, height: 1.4),
+                        ),
+                      ),
+                    Obx(() {
+                      final avatar = controller.selectedAvatar.value;
+                      return Column(
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(24.r),
+                            child: Container(
+                              width: 140.w,
+                              height: 140.w,
+                              color: AppColors.surface,
+                              child: _avatarWidget(avatar),
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () => _showAvatarPicker(context),
+                            child: Text(
+                              'THAY ẢNH ĐẠI DIỆN',
+                              style: TextStyle(
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 14.sp,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
+                    }),
+                    SizedBox(height: 28.h),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'Tên',
+                        style: TextStyle(
+                          color: AppColors.textPrimary,
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              );
-            }),
-            SizedBox(height: 28.h),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'Tên',
-                style: TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
-            SizedBox(height: 10.h),
-            TextField(
-              controller: controller.nameController,
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: AppColors.surface,
-                contentPadding:
-                    EdgeInsets.symmetric(horizontal: 18.w, vertical: 14.h),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(18.r),
-                  borderSide:
-                      BorderSide(color: AppColors.primary, width: 2),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(18.r),
-                  borderSide:
-                      BorderSide(color: AppColors.primary, width: 2),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(18.r),
-                  borderSide:
-                      BorderSide(color: AppColors.primary, width: 2),
-                ),
-              ),
-            ),
-            SizedBox(height: 16.h),
-            Obx(() {
-              final error = controller.errorMessage.value;
-              if (error.isEmpty) return const SizedBox.shrink();
-              return Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  error,
-                  style: TextStyle(
-                    color: AppColors.error,
-                    fontSize: 13.sp,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              );
-            }),
-            const Spacer(),
-            Obx(() {
-              final isSaving = controller.isSaving.value;
-              return SizedBox(
-                width: double.infinity,
-                height: 52.h,
-                child: ElevatedButton(
-                  onPressed: isSaving ? null : controller.saveProfile,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14.r),
+                    SizedBox(height: 10.h),
+                    TextField(
+                      controller: controller.nameController,
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: AppColors.surface,
+                        contentPadding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 14.h),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(18.r),
+                          borderSide: BorderSide(color: AppColors.primary, width: 2),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(18.r),
+                          borderSide: BorderSide(color: AppColors.primary, width: 2),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(18.r),
+                          borderSide: BorderSide(color: AppColors.primary, width: 2),
+                        ),
+                      ),
                     ),
-                    elevation: 0,
-                  ),
-                  child: isSaving
-                      ? SizedBox(
-                          width: 22.w,
-                          height: 22.w,
-                          child: const CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(Colors.white),
-                          ),
-                        )
-                      : Text(
-                          'Cập nhật',
+                    if (!controller.isKid) ...[
+                      SizedBox(height: 20.h),
+                      _label('Giới thiệu (không bắt buộc)'),
+                      SizedBox(height: 10.h),
+                      TextField(
+                        controller: controller.bioController,
+                        maxLength: 200,
+                        minLines: 2,
+                        maxLines: 4,
+                        decoration: _box(hint: 'VD: Đang luyện HSK 3, thích chụp đồ ăn để học từ'),
+                      ),
+                    ],
+                    SizedBox(height: 12.h),
+                    _label('Ngày sinh'),
+                    SizedBox(height: 10.h),
+                    Obx(() {
+                      final d = controller.birthDate.value;
+                      return InkWell(
+                        borderRadius: BorderRadius.circular(18.r),
+                        onTap: () => controller.pickBirthDate(context),
+                        child: InputDecorator(
+                          decoration: _box(),
+                          child: Row(children: [
+                            Expanded(
+                              child: Text(
+                                d == null
+                                    ? 'Chọn ngày'
+                                    : '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}',
+                                style: TextStyle(
+                                    fontSize: 15.sp,
+                                    color: d == null ? AppColors.textSecondary : AppColors.textPrimary),
+                              ),
+                            ),
+                            Icon(Icons.calendar_month_rounded, color: AppColors.primary),
+                          ]),
+                        ),
+                      );
+                    }),
+                    SizedBox(height: 20.h),
+                    _label('Giới tính'),
+                    SizedBox(height: 10.h),
+                    Obx(() => Align(
+                          alignment: Alignment.centerLeft,
+                          child: Wrap(spacing: 10.w, children: [
+                            for (final (value, label) in ProfileEditController.genders)
+                              ChoiceChip(
+                                label: Text(label),
+                                selected: controller.gender.value == value,
+                                onSelected: (_) => controller.gender.value = value,
+                              ),
+                          ]),
+                        )),
+                    SizedBox(height: 16.h),
+                    Obx(() {
+                      final error = controller.errorMessage.value;
+                      if (error.isEmpty) return const SizedBox.shrink();
+                      return Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          error,
                           style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.w700,
+                            color: AppColors.error,
+                            fontSize: 13.sp,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
+                      );
+                    }),
+                  ],
                 ),
-              );
-            }),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.fromLTRB(24.w, 8.h, 24.w, 16.h),
+              child: Obx(() {
+                final isSaving = controller.isSaving.value;
+                return SizedBox(
+                  width: double.infinity,
+                  height: 52.h,
+                  child: ElevatedButton(
+                    onPressed: isSaving ? null : controller.saveProfile,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14.r),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: isSaving
+                        ? SizedBox(
+                            width: 22.w,
+                            height: 22.w,
+                            child: const CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            ),
+                          )
+                        : Text(
+                            controller.welcome ? 'Lưu và bắt đầu' : 'Cập nhật',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                  ),
+                );
+              }),
+            ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _label(String text) => Align(
+        alignment: Alignment.centerLeft,
+        child: Text(text, style: TextStyle(color: AppColors.textPrimary, fontSize: 16.sp, fontWeight: FontWeight.w700)),
+      );
+
+  InputDecoration _box({String? hint}) {
+    final edge = OutlineInputBorder(
+      borderRadius: BorderRadius.circular(18.r),
+      borderSide: BorderSide(color: AppColors.primary, width: 2),
+    );
+    return InputDecoration(
+      hintText: hint,
+      filled: true,
+      fillColor: AppColors.surface,
+      contentPadding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 14.h),
+      border: edge,
+      enabledBorder: edge,
+      focusedBorder: edge,
     );
   }
 

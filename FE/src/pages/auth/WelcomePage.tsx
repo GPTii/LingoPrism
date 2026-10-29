@@ -9,9 +9,11 @@ import { errorMessage } from '../../api/client'
 import type { User } from '../../api/types'
 import { isStaffRole, useAuth } from '../../auth/store'
 import { LangGlyph } from '../../components/brand/Brand'
+import { AvatarChoice, GENDERS, birthDateLimit } from '../../components/ProfileSetup'
 
 interface Answers {
   display_name: string
+  bio?: string
   language: 'en' | 'zh:hans' | 'zh:hant' | 'vi'
   learner_type: 'adult' | 'kid'
   purpose: string
@@ -37,6 +39,7 @@ export default function WelcomePage() {
   const queryClient = useQueryClient()
   const user = useAuth((s) => s.user)
   const setUser = useAuth((s) => s.setUser)
+  const doneAskingProfile = useAuth((s) => s.doneAskingProfile)
   const [saving, setSaving] = useState(false)
 
   if (!user) return <Navigate to="/login" replace />
@@ -48,6 +51,7 @@ export default function WelcomePage() {
     try {
       const updated = await authApi.updateMe({
         display_name: v.display_name.trim(),
+        ...(v.learner_type === 'adult' && v.bio?.trim() ? { bio: v.bio.trim() } : {}),
         active_language: lang,
         learning_languages: [lang],
         ...(script ? { zh_script: script, show_zhuyin: script === 'hant' } : {}),
@@ -59,6 +63,7 @@ export default function WelcomePage() {
         onboarding_completed: true,
       })
       setUser(updated)
+      doneAskingProfile()  // the survey just asked for all of it
       queryClient.invalidateQueries()
       navigate('/', { replace: true })
     } catch (e) {
@@ -72,6 +77,9 @@ export default function WelcomePage() {
     <AuthCard title="Chào mừng bạn!" subtitle="Trả lời vài câu để LingoPrism chọn bài học hợp với bạn. Bạn đổi lại được trong Hồ sơ.">
       <Form<Answers> layout="vertical" requiredMark={false} onFinish={onFinish}
         initialValues={{ display_name: user.display_name, language: 'en', learner_type: 'adult', purpose: 'communication', daily_minutes: 10 }}>
+        <Form.Item label="Ảnh đại diện (không bắt buộc)">
+          <AvatarChoice user={user} />
+        </Form.Item>
         <Form.Item name="display_name" label="Bạn muốn được gọi là gì?" rules={[{ required: true, whitespace: true, message: 'Nhập tên gọi' }]}>
           <Input size="large" maxLength={80} />
         </Form.Item>
@@ -80,6 +88,13 @@ export default function WelcomePage() {
         </Form.Item>
         <Form.Item name="learner_type" label="Ai sẽ học?" extra="Chế độ trẻ em ẩn bảng tin và nhóm học trong Cộng đồng.">
           <Radio.Group optionType="button" buttonStyle="solid" options={[{ value: 'adult', label: 'Người lớn' }, { value: 'kid', label: 'Trẻ em' }]} />
+        </Form.Item>
+        <Form.Item noStyle dependencies={['learner_type']}>
+          {({ getFieldValue }) => getFieldValue('learner_type') === 'adult' && (
+            <Form.Item name="bio" label="Giới thiệu bản thân (không bắt buộc)" extra="Hiện trên trang cá nhân của bạn trong Cộng đồng.">
+              <Input.TextArea maxLength={200} showCount autoSize={{ minRows: 2, maxRows: 4 }} placeholder="VD: Đang luyện HSK 3, thích chụp đồ ăn để học từ" />
+            </Form.Item>
+          )}
         </Form.Item>
         <Form.Item name="purpose" label="Bạn học để làm gì?">
           <Radio.Group className="!flex flex-wrap gap-2" optionType="button" options={[
@@ -92,10 +107,10 @@ export default function WelcomePage() {
         </Form.Item>
         <div className="grid sm:grid-cols-2 gap-x-4">
           <Form.Item name="birth_date" label="Ngày sinh (không bắt buộc)">
-            <DatePicker size="large" className="w-full" format="DD/MM/YYYY" placeholder="Chọn ngày" />
+            <DatePicker size="large" className="w-full" format="DD/MM/YYYY" placeholder="Chọn ngày" disabledDate={birthDateLimit} />
           </Form.Item>
           <Form.Item name="gender" label="Giới tính (không bắt buộc)">
-            <Radio.Group optionType="button" options={[{ value: 'male', label: 'Nam' }, { value: 'female', label: 'Nữ' }, { value: 'other', label: 'Khác' }]} />
+            <Radio.Group optionType="button" options={GENDERS} />
           </Form.Item>
         </div>
         <Button type="primary" htmlType="submit" size="large" block loading={saving}>Bắt đầu học</Button>

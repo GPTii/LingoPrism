@@ -1,4 +1,5 @@
 import { api } from './client'
+import type { MascotLook } from './types'
 
 /** Trò chơi: the game map (BE apps/games). Rounds open once their words / reading lesson were learned. */
 
@@ -31,12 +32,23 @@ export interface GameLevel {
   nodes: GameStop[]
 }
 
+/** A friend on the same map: they stand at the stop they play next (the last stop once they passed everything). */
+export interface MapFriend {
+  id: number
+  display_name: string
+  avatar: string | null
+  mascot: MascotLook
+  node: string
+  finished: boolean
+}
+
 export interface GameMap {
   language: string
   track: 'words' | 'reading'
   current: string | null
   pass_percent: number
   levels: GameLevel[]
+  friends: MapFriend[]
 }
 
 export interface Audio { text: string; locale: string }

@@ -1,6 +1,7 @@
 """Trò chơi: the game map of the active language, its rounds, and the chests.
 
-GET  /games/map/                      the 4 levels with every stop and whether it is open
+GET  /games/map/                      the 4 levels with every stop and whether it is open, and the stop
+                                      each friend has reached (their avatar is shown there)
 GET  /games/rounds/<node>/            the mini games of an open round or boss round
 POST /games/rounds/<node>/finish/     {token, results: [[true, false, …] per game]} -> score, stars, rewards;
                                       a failed round says what to learn again (words or a reading lesson)
@@ -31,7 +32,7 @@ from apps.vocab.views import LANG_PARAMS
 
 from . import content
 from .models import GameNode
-from .path import PASS_PERCENT, game_map, round_words, stop_state
+from .path import PASS_PERCENT, friends_on_map, game_map, round_words, stop_state
 
 ROUND_XP = 10
 BOSS_XP = 30
@@ -59,7 +60,8 @@ def _locked(lock: dict | None):
 @extend_schema(tags=["games"], parameters=LANG_PARAMS, responses={200: dict})
 class GameMapView(APIView):
     def get(self, request):
-        return Response(game_map(request.user, resolve_target(request)))
+        target = resolve_target(request)
+        return Response({**game_map(request.user, target), "friends": friends_on_map(request.user, target, request)})
 
 
 @extend_schema(tags=["games"], parameters=LANG_PARAMS, responses={200: dict})

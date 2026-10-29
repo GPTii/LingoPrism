@@ -20,6 +20,8 @@ from apps.literacy.views import PASS_PERCENT as LESSON_PASS
 
 from .models import GameNode
 
+FRIENDS_SHOWN = 30
+
 ROUNDS = 15  # words track: rounds per level
 CHEST_EVERY = 4
 PASS_PERCENT = 70
@@ -171,3 +173,46 @@ def stop_state(user, target, node: str):
             if x["id"] == node:
                 return find_stop(data["track"], node), x["status"], x["lock"], data["track"]
     return None, None, None, data["track"]
+
+
+# ------------------------------------------------------------------ friends on the map
+
+def stop_order(track: str) -> list[str]:
+    """Every stop of the track, first to last (the same for every learner of that track)."""
+    return [s.id for n, _, _ in LEVELS for s in stops(track, n)]
+
+
+def friends_on_map(user, target, request=None) -> list[dict]:
+    """Where my friends are on this map: the stop after the furthest one they passed (the one they play next), or
+    the last stop once they passed everything. Only accepted friends playing the same language and track; never for
+    or about children (the social rules), people blocked either way, or locked accounts."""
+    from django.contrib.auth import get_user_model
+
+    from apps.community.models import friend_ids, hidden_user_ids
+    from apps.gamification.mascot import look
+
+    User = get_user_model()
+    if getattr(user, "learner_type", "") == "kid":
+        return []
+    ids = friend_ids(user.id) - hidden_user_ids(user.id)
+    if not ids:
+        return []
+    track = track_of(user, target.learn)
+    order = stop_order(track)
+    place = {node: i for i, node in enumerate(order)}
+    furthest: dict[int, int] = {}
+    rows = GameNode.objects.filter(user_id__in=ids, language=target.learn, track=track, passed_at__isnull=False)
+    for uid, node in rows.values_list("user_id", "node"):
+        if node in place:
+            furthest[uid] = max(furthest.get(uid, -1), place[node])
+    people = (User.objects.filter(id__in=furthest, is_active=True, status=User.Status.ACTIVE)
+              .exclude(learner_type=User.LearnerType.KID))
+    out = []
+    for u in people:
+        at = furthest[u.id]
+        out.append({"id": u.id, "display_name": u.display_name, "avatar": u.avatar_url(request), "mascot": look(u),
+                    "node": order[min(at + 1, len(order) - 1)], "finished": at == len(order) - 1, "_at": at})
+    out.sort(key=lambda f: (-f["_at"], f["display_name"].lower()))
+    for f in out:
+        del f["_at"]
+    return out[:FRIENDS_SHOWN]

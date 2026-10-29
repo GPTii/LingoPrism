@@ -229,3 +229,40 @@ def test_reading_hints_spell_the_syllable_out():
     games, _ = content.reading_round(stop, seed=3)
     hints = [item["hint"] for g in games if g["game"] != "match" for item in g["items"]]
     assert hints and all(h.startswith(("Đánh vần: ", "Bắt đầu bằng")) for h in hints)
+
+
+def test_friends_show_on_the_map_at_the_stop_they_play_next(words):
+    from django.utils import timezone
+
+    from apps.community.models import FriendRequest, UserBlock
+
+    from .models import GameNode
+
+    me = User.objects.create_user("me@example.com", "Strong!Pass123", active_language="en", display_name="Tôi")
+    ana = User.objects.create_user("ana@example.com", "Strong!Pass123", active_language="en", display_name="Ana")
+    bo = User.objects.create_user("bo@example.com", "Strong!Pass123", active_language="en", display_name="Bo")
+    stranger = User.objects.create_user("x@example.com", "Strong!Pass123", active_language="en")
+    blocked = User.objects.create_user("b@example.com", "Strong!Pass123", active_language="en")
+    for other in (ana, bo, blocked):
+        FriendRequest.objects.create(from_user=me, to_user=other, status=FriendRequest.Status.ACCEPTED)
+    UserBlock.objects.create(blocker=blocked, blocked=me)
+    now = timezone.now()
+    for u, nodes in ((ana, ["L1-r1", "L1-r2", "L1-r3"]), (bo, ["L1-r1"]), (stranger, ["L1-r1"]), (blocked, ["L1-r1"])):
+        for n in nodes:
+            GameNode.objects.create(user=u, language="en", track="words", node=n, stars=2, passed_at=now)
+    GameNode.objects.create(user=ana, language="zh", track="words", node="L2-boss", stars=3, passed_at=now)
+    GameNode.objects.create(user=bo, language="en", track="words", node="L1-r2", stars=0)  # played, not passed
+
+    friends = client_for(me).get("/api/v1/games/map/").data["friends"]
+    assert [(f["display_name"], f["node"]) for f in friends] == [("Ana", "L1-r4"), ("Bo", "L1-r2")]
+    assert set(friends[0]) == {"id", "display_name", "avatar", "mascot", "node", "finished"}
+
+    # a child sees no one (kids are kept out of the social side), and a friend who turns into a kid account is hidden
+    me.learner_type = User.LearnerType.KID
+    me.save()
+    assert client_for(me).get("/api/v1/games/map/").data["friends"] == []
+    me.learner_type = User.LearnerType.ADULT
+    me.save()
+    bo.learner_type = User.LearnerType.KID
+    bo.save()
+    assert [f["display_name"] for f in client_for(me).get("/api/v1/games/map/").data["friends"]] == ["Ana"]

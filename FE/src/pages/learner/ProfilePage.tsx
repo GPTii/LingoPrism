@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
-import { App, Button, Checkbox, Form, Input, InputNumber, Radio, Switch, TimePicker, Upload } from 'antd'
-import { ArrowRightOutlined, CameraOutlined } from '@ant-design/icons'
+import { App, Button, Checkbox, DatePicker, Form, Input, InputNumber, Radio, Switch, TimePicker } from 'antd'
+import { ArrowRightOutlined } from '@ant-design/icons'
 import dayjs, { type Dayjs } from 'dayjs'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
@@ -12,7 +12,8 @@ import { useLogout } from '../../auth/useLogout'
 import { AppIcon, type AppIconName } from '../../components/brand/AppIcon'
 import { LangGlyph, PrismoAvatar } from '../../components/brand/Brand'
 import { MyIdCard } from '../../components/Friends'
-import { PageHeader, Section, UserAvatar } from '../../components/ui'
+import { PageHeader, Section } from '../../components/ui'
+import { AvatarPicker, GENDERS, birthDateLimit, birthDateProps } from '../../components/ProfileSetup'
 import { DeleteAccountSection } from '../../components/AccountGates'
 
 const LANGS = [
@@ -30,32 +31,6 @@ function Shortcut({ to, icon, label }: { to: string; icon: AppIconName; label: s
     <Link to={to} className="lift lp-card flex items-center gap-3 px-4 py-3 !text-slate-800 font-semibold">
       <AppIcon name={icon} size={30} />{label}
     </Link>
-  )
-}
-
-/** Avatar: click to pick a photo; the server keeps it and every screen shows it. */
-function AvatarPicker({ user }: { user: User }) {
-  const { message } = App.useApp()
-  const setUser = useAuth((s) => s.setUser)
-  const [busy, setBusy] = useState(false)
-  return (
-    <Upload accept="image/*" showUploadList={false} beforeUpload={(file) => {
-      if (file.size > 5 * 1024 * 1024) {
-        message.error('Ảnh tối đa 5 MB')
-        return false
-      }
-      setBusy(true)
-      authApi.uploadAvatar(file).then((u) => { setUser(u); message.success('Đã đổi ảnh đại diện') })
-        .catch((e) => message.error(errorMessage(e))).finally(() => setBusy(false))
-      return false
-    }}>
-      <button type="button" aria-label="Đổi ảnh đại diện" className="relative cursor-pointer rounded-full">
-        <UserAvatar name={user.display_name} src={user.avatar} mascot={user.mascot} size={72} />
-        <span className={`absolute -bottom-1 -right-1 h-8 w-8 rounded-full grid place-items-center bg-brand-600 text-white ring-4 ring-[var(--page-bg)] ${busy ? 'animate-pulse' : ''}`}>
-          <CameraOutlined />
-        </span>
-      </button>
-    </Upload>
   )
 }
 
@@ -233,6 +208,14 @@ export default function ProfilePage() {
           <Form.Item name="bio" label="Giới thiệu" extra="Hiện trên trang cá nhân của bạn trong Cộng đồng.">
             <Input.TextArea maxLength={200} showCount autoSize={{ minRows: 2, maxRows: 4 }} placeholder="VD: Đang luyện HSK 3, thích chụp đồ ăn để học từ" />
           </Form.Item>
+          <div className="grid sm:grid-cols-2 gap-x-4">
+            <Form.Item name="birth_date" label="Ngày sinh" {...birthDateProps}>
+              <DatePicker size="large" className="w-full" format="DD/MM/YYYY" placeholder="Chọn ngày" disabledDate={birthDateLimit} />
+            </Form.Item>
+            <Form.Item name="gender" label="Giới tính">
+              <Radio.Group optionType="button" options={GENDERS} />
+            </Form.Item>
+          </div>
           <Form.Item name="learner_type" label="Đối tượng" extra="Chế độ trẻ em ẩn bảng tin, kết bạn và nhóm học trong Cộng đồng." className="!mb-0">
             <Radio.Group options={[{ value: 'adult', label: 'Người lớn' }, { value: 'kid', label: 'Trẻ em' }]} />
           </Form.Item>

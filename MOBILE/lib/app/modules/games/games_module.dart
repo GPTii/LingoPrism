@@ -10,6 +10,7 @@ import '../../core/network/api_client.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/vietnamese.dart';
 import '../../core/widgets/app_icon.dart';
+import '../../core/widgets/prismo_avatar.dart';
 import '../../core/widgets/target_word.dart';
 import '../../core/widgets/word_picture.dart';
 import '../../data/models/api/common.dart';
@@ -49,6 +50,25 @@ class GameMapController extends GetxController {
   final Rxn<Json> data = Rxn<Json>();
   final RxBool isLoading = false.obs;
   final RxString error = ''.obs;
+
+  /// one key per stop, to scroll to the stop a friend is at
+  final Map<String, GlobalKey> stopKeys = {};
+  GlobalKey keyOf(String node) => stopKeys.putIfAbsent(node, GlobalKey.new);
+
+  /// friends on this map: who they are, the stop they play next, whether they passed everything
+  List<({Author who, String node, bool finished})> get friends => [
+        for (final f in asMapList(data.value?['friends']))
+          (who: Author.fromJson(f), node: asString(f['node']), finished: f['finished'] == true),
+      ];
+
+  void showFriend(({Author who, String node, bool finished}) f) {
+    final at = stopKeys[f.node]?.currentContext;
+    if (at != null) {
+      Scrollable.ensureVisible(at, alignment: 0.5, duration: const Duration(milliseconds: 450), curve: Curves.easeOutCubic);
+    } else {
+      Get.snackbar(f.who.displayName, 'Đang ở cấp ${levelOf(f.node)} – thắng màn trùm để theo kịp nhé!', snackPosition: SnackPosition.BOTTOM);
+    }
+  }
 
   @override
   void onInit() {
@@ -133,6 +153,13 @@ class GameMapView extends GetView<GameMapController> {
         }
         final reading = asString(d['track']) == 'reading';
         final current = asString(d['current']);
+        final friends = controller.friends;
+        final here = <String, List<Author>>{};
+        for (final f in friends) {
+          (here[f.node] ??= []).add(f.who);
+        }
+        // children stay out of the social side
+        final kid = Get.find<AuthService>().currentUser?.learnerType == 'kid';
         return RefreshIndicator(
           onRefresh: controller.load,
           child: ListView(padding: EdgeInsets.all(16.w), children: [
@@ -148,14 +175,62 @@ class GameMapView extends GetView<GameMapController> {
               ),
             ]),
             SizedBox(height: 16.h),
-            for (final level in asMapList(d['levels'])) _level(level, current),
+            if (!reading && !kid) _friendsStrip(friends, asString(d['language'])),
+            for (final level in asMapList(d['levels'])) _level(level, current, here),
           ]),
         );
       }),
     );
   }
 
-  Widget _level(Json level, String current) {
+  Widget _friendsStrip(List<({Author who, String node, bool finished})> friends, String language) {
+    const names = {'en': 'tiếng Anh', 'zh': 'tiếng Trung', 'vi': 'tiếng Việt'};
+    return Container(
+      margin: EdgeInsets.only(bottom: 16.h),
+      padding: EdgeInsets.all(14.w),
+      decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(20.r), border: Border.all(color: AppColors.line)),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text('Bạn bè đang chơi', style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+        SizedBox(height: 10.h),
+        if (friends.isEmpty)
+          Text('Chưa có bạn nào chơi ${names[language] ?? ''} ở đây. Rủ bạn bè cùng chơi để thấy họ trên bản đồ!',
+              style: TextStyle(fontSize: 13.sp, color: AppColors.textSecondary, height: 1.35))
+        else
+          SizedBox(
+            height: 92.h,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: friends.length,
+              separatorBuilder: (_, __) => SizedBox(width: 10.w),
+              itemBuilder: (_, i) {
+                final f = friends[i];
+                return Semantics(
+                  button: true,
+                  label: '${f.who.displayName}, ${f.finished ? 'đã phá đảo' : 'cấp ${levelOf(f.node)}'}',
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(14.r),
+                    onTap: () => controller.showFriend(f),
+                    child: SizedBox(
+                      width: 72.w,
+                      child: Column(children: [
+                        PersonAvatar(avatar: f.who.avatar, look: f.who.mascot, size: 46.r),
+                        SizedBox(height: 4.h),
+                        Text(f.who.displayName, maxLines: 1, overflow: TextOverflow.ellipsis,
+                            style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+                        Text(f.finished ? 'Đã phá đảo!' : 'Cấp ${levelOf(f.node)}',
+                            style: TextStyle(fontSize: 11.sp, color: AppColors.textSecondary)),
+                      ]),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+      ]),
+    );
+  }
+
+  Widget _level(Json level, String current, Map<String, List<Author>> here) {
     final n = asInt(level['level']);
     final color = levelColors[n - 1];
     final unlocked = level['unlocked'] == true;
@@ -179,10 +254,12 @@ class GameMapView extends GetView<GameMapController> {
                 Text(asString(level['description']), style: TextStyle(color: Colors.white70, fontSize: 12.sp)),
               ]),
             ),
-            Column(children: [
+            Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
               Text('${asInt(level['done'])}/${asInt(level['total'])}',
                   style: TextStyle(color: Colors.white, fontSize: 18.sp, fontWeight: FontWeight.w700)),
               if (!unlocked) const Icon(Icons.lock_rounded, color: Colors.white70),
+              if (!unlocked)
+                _FriendsHere([for (final e in here.entries) if (levelOf(e.key) == n) ...e.value], size: 26.r),
             ]),
           ]),
         ),
@@ -201,15 +278,77 @@ class GameMapView extends GetView<GameMapController> {
             child: Column(children: [
               for (var k = 0; k < nodes.length; k++)
                 Padding(
+                  key: controller.keyOf(asString(nodes[k]['id'])),
                   padding: EdgeInsets.only(bottom: 30.h),
                   child: Transform.translate(
                     offset: Offset(math.sin(k * 0.85) * 70.w, 0),
-                    child: _StopButton(stop: nodes[k], color: color, current: asString(nodes[k]['id']) == current, onTap: () => controller.tap(nodes[k])),
+                    child: _withFriends(
+                      _StopButton(stop: nodes[k], color: color, current: asString(nodes[k]['id']) == current, onTap: () => controller.tap(nodes[k])),
+                      here[asString(nodes[k]['id'])] ?? const [],
+                      // friends stand beside the stop, on the side facing the middle of the path
+                      left: math.sin(k * 0.85) > 0,
+                    ),
                   ),
                 ),
             ]),
           ),
       ]),
+    );
+  }
+}
+
+/// The stop with room for friends on both sides, so the stop itself stays on the path.
+Widget _withFriends(Widget stop, List<Author> friends, {required bool left}) {
+  if (friends.isEmpty) return stop;
+  final side = SizedBox(width: 74.w);
+  final faces = SizedBox(width: 74.w, child: Align(alignment: left ? Alignment.centerRight : Alignment.centerLeft, child: _FriendsHere(friends)));
+  return Row(mainAxisSize: MainAxisSize.min, children: [
+    Padding(padding: EdgeInsets.only(right: 8.w), child: left ? faces : side),
+    stop,
+    Padding(padding: EdgeInsets.only(left: 8.w), child: left ? side : faces),
+  ]);
+}
+
+int levelOf(String node) => int.tryParse(node.split('-').first.substring(1)) ?? 1;
+
+/// Friends at one stop: up to 3 faces (or 2 and "+N"); a tap says who they are.
+class _FriendsHere extends StatelessWidget {
+  const _FriendsHere(this.friends, {this.size});
+
+  final List<Author> friends;
+  final double? size;
+
+  @override
+  Widget build(BuildContext context) {
+    if (friends.isEmpty) return const SizedBox.shrink();
+    final d = size ?? 30.r;
+    final shown = friends.length > 3 ? friends.take(2).toList() : friends;
+    final more = friends.length - shown.length;
+    final names = friends.map((f) => f.displayName).join(', ');
+    Widget ring(Widget child) => Container(
+        decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: Colors.white, width: 2.5), boxShadow: const [BoxShadow(color: Color(0x22000000), blurRadius: 3)]),
+        child: child);
+    final faces = [
+      for (final f in shown) ring(PersonAvatar(avatar: f.avatar, look: f.mascot, size: d)),
+      if (more > 0)
+        ring(Container(
+            width: d, height: d, alignment: Alignment.center,
+            decoration: const BoxDecoration(color: Color(0xFFE2E8F0), shape: BoxShape.circle),
+            child: Text('+$more', style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w800, color: AppColors.textSecondary)))),
+    ];
+    final step = d * 0.6;
+    return Semantics(
+      label: 'Bạn bè ở đây: $names',
+      child: GestureDetector(
+        onTap: () => Get.snackbar('Bạn bè ở màn này', names, snackPosition: SnackPosition.BOTTOM),
+        child: SizedBox(
+          width: d + 5 + step * (faces.length - 1),
+          height: d + 5,
+          child: Stack(children: [
+            for (var i = faces.length - 1; i >= 0; i--) Positioned(left: step * i, child: faces[i]),
+          ]),
+        ),
+      ),
     );
   }
 }

@@ -1,5 +1,5 @@
 import type React from 'react'
-import { App, Avatar, Badge, ConfigProvider, Drawer, Dropdown, Grid, Select, Tooltip } from 'antd'
+import { App, Badge, ConfigProvider, Drawer, Dropdown, Grid, Select, Tooltip } from 'antd'
 import { Suspense, useEffect, useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { communityApi, gameApi, messagesApi } from '../api/app'
@@ -17,6 +17,8 @@ import SideNav, { navGroups } from '../components/SideNav'
 import ErrorBoundary from '../components/ErrorBoundary'
 import { VerifyEmailBanner, WhatsNew } from '../components/AccountGates'
 import { vocabApi } from '../api/vocab'
+import { ProfilePrompt } from '../components/ProfileSetup'
+import { UserAvatar } from '../components/ui'
 
 /** One quiet colour system: the page you are on is marked, the rest stay out of the way. */
 const NAV: { to: string; label: string; short?: string; icon: AppIconName; only?: string }[] = [
@@ -181,7 +183,7 @@ export default function LearnerLayout() {
               </Badge>
               <Dropdown menu={{ items: menu }} placement="bottomRight" trigger={['click']}>
                 <button type="button" aria-label="Tài khoản" className="flex items-center gap-2 cursor-pointer rounded-full hover:bg-slate-100 p-0.5 lg:pr-3 transition">
-                  <Avatar src={user?.avatar ?? undefined} icon={<UserOutlined />} className="!bg-brand-600" />
+                  <UserAvatar name={user?.display_name} src={user?.avatar} mascot={user?.mascot} size={32} />
                   <span className="hidden lg:inline font-semibold text-slate-700 max-w-40 truncate">{user?.display_name}</span>
                 </button>
               </Dropdown>
@@ -191,6 +193,7 @@ export default function LearnerLayout() {
             <div className="mx-auto w-full max-w-7xl 2xl:max-w-[1600px]">
               <VerifyEmailBanner />
               <WhatsNew />
+              <ProfilePrompt />
               <div key={location.pathname} className="animate-page"><ErrorBoundary><Suspense fallback={null}><Outlet /></Suspense></ErrorBoundary></div>
             </div>
           </main>

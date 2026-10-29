@@ -97,6 +97,6 @@ class LoginController extends GetxController {
 
   Future<void> _enterApp() async {
     await AppInitializer.onSessionStarted();
-    await Get.offAllNamed(_authService.nextRoute);
+    await _authService.enterAfterSignIn();
   }
 }

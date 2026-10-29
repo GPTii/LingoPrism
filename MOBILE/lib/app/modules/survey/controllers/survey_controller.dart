@@ -150,7 +150,7 @@ class SurveyController extends GetxController {
   // Complete survey and navigate to home
   Future<void> completeSurvey() async {
     await _persistSurveyData();
-    Get.offAllNamed(AuthService.to.nextRoute); // a child's account asks a parent first
+    await AuthService.to.enterAfterSignIn(); // no picture yet: the profile screen asks for one
   }
 
   Future<void> _persistSurveyData() async {

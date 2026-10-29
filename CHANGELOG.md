@@ -2,6 +2,24 @@
 
 <!-- Sinh từ BE/apps/core/releases.json bằng `python manage.py changelog` – sửa ở file đó, không sửa ở đây. -->
 
+## 1.7.0 – 29/10/2026: Bạn bè trên bản đồ trò chơi, hoàn thiện hồ sơ
+
+### Mới
+
+- Bản đồ Trò chơi hiện ảnh đại diện của bạn bè ngay ở màn họ đang chơi, và một dải "Bạn bè đang chơi" ở đầu trang: chạm vào một bạn để cuộn tới màn của bạn ấy.
+- Sau khi đăng nhập, nếu hồ sơ còn thiếu ảnh đại diện, ngày sinh hoặc giới tính, LingoPrism hỏi một lần để bạn bổ sung (có nút Để sau).
+- Màn chào lúc mới đăng ký có thêm ảnh đại diện (tải ảnh lên hoặc dùng Prismo) và lời giới thiệu bản thân.
+
+### Cải thiện
+
+- Hồ sơ trên web và app sửa được ngày sinh và giới tính; app sửa được cả lời giới thiệu.
+- Ảnh đại diện ở góc trên trang web hiện đúng ảnh hoặc Prismo bạn đã chọn.
+
+### Sửa lỗi
+
+- Web: bản 1.6.0 không build được vì một lỗi kiểu ở màn chụp ảnh.
+- Màn học: thẻ lật không còn chứa nút lồng trong nút.
+
 ## 1.6.0 – 29/10/2026: Trợ giúp trong trò chơi, gõ tên đồ vật
 
 ### Mới
