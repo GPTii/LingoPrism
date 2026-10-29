@@ -115,6 +115,8 @@ export interface DetectionStats {
   per_label: { label: string; count: number; avg_confidence: number; wrong: number; correct: number }[]
   confusion: { label: string; corrected_label: string; count: number }[]
   by_device: { device: string; count: number; avg_ms: number | null }[]
+  missing_words: { text: string; count: number }[]
+  new_classes: { label: string; count: number }[]
 }
 
 export interface ModelVersion {

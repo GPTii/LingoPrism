@@ -35,6 +35,8 @@ class DetectedItem {
   final WordCard? correctedCard;
   String? picked; // label the learner chose instead of the model's answer (error report)
   WordCard? pickedCard; // its card when picked from the full list ("Vật khác…")
+  int? pickedWord; // the dictionary word chosen after typing the Vietnamese name
+  String? typed; // the Vietnamese name the learner typed ("it is something else")
   bool notObject = false; // error report: there is no such object here
 
   /// In the photo history: the learner's correction first, then the model's answer.
@@ -67,6 +69,20 @@ class DetectedItem {
         correctedLabel: asString(j['corrected_label']),
         correctedCard: j['corrected_card'] is Map ? WordCard.fromJson(asMap(j['corrected_card'])) : null,
       );
+}
+
+/// A word of the checked dictionary found from a typed Vietnamese name (GET /detections/lookup/), or only the name
+/// when the dictionary does not have it ([card] null: sent for the vocabulary team).
+class NamedObject {
+  NamedObject({required this.typed, this.label, this.wordId, this.card});
+
+  final String typed;
+  final String? label;
+  final int? wordId;
+  final WordCard? card;
+
+  factory NamedObject.fromJson(String typed, Map<String, dynamic> j) => NamedObject(
+      typed: typed, label: asString(j['label']), wordId: asInt(j['word_id']), card: WordCard.fromJson(asMap(j['card'])));
 }
 
 class DetectionResult {

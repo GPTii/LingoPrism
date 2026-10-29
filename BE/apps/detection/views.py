@@ -20,7 +20,7 @@ from apps.vocab.models import Topic, Word
 from apps.vocab.services import card, personal_map, resolve_target, words_for_target
 from apps.core.throttles import ActionThrottleMixin
 
-from . import memory
+from . import lookup, memory
 from .inference import Box, DetectorUnavailable, get_detector
 from .models import CorrectionMemory, Detection, DetectionItem, ModelVersion, Photo
 
@@ -36,12 +36,22 @@ def _often_wrong(labels) -> set[str]:
     return {r["label"] for r in rows if r["n"] >= OFTEN_WRONG_MIN_FEEDBACK and r["wrong"] / r["n"] >= OFTEN_WRONG_RATE}
 
 
+def words_by_label(labels, user=None, target=None) -> dict:
+    """label -> Word. A label is the detector's class (Word.yolo_label) or, for an object the detector has no class
+    for yet, the word's slug (a learner typed its Vietnamese name, see lookup.label_of)."""
+    qs = Word.objects.filter(Q(yolo_label__in=labels) | Q(slug__in=labels))
+    words = list(words_for_target(qs, user, target)) if target is not None else list(qs)
+    out = {w.slug: w for w in words if w.slug in labels}
+    out.update({w.yolo_label: w for w in words if w.yolo_label in labels})
+    return out
+
+
 def _items_payload(request, detection: Detection):
     target = resolve_target(request)
     items = list(detection.items.all())
     labels = {i.label for i in items} | {t["label"] for i in items for t in (i.top_k or [])}
     labels |= {i.corrected_label for i in items if i.corrected_label}
-    words = {w.yolo_label: w for w in words_for_target(Word.objects.filter(yolo_label__in=labels), request.user, target)}
+    words = words_by_label(labels - {""}, request.user, target)
     personal = personal_map(request.user, [w.id for w in words.values()], target)
     often_wrong = _often_wrong({i.label for i in items})
     out = []
@@ -57,6 +67,7 @@ def _items_payload(request, detection: Detection):
         out.append({
             "id": it.id, "label": it.label, "confidence": round(it.confidence, 4), "bbox": it.bbox, "top_k": it.top_k,
             "selected": it.selected, "feedback": it.feedback, "corrected_label": it.corrected_label,
+            "corrected_text": it.corrected_text, "manual": it.manual,
             "uncertain": (it.confidence < UNSURE_BELOW and bool(alternatives)) or it.label in often_wrong,
             "learned": it.learned_from_id is not None,  # relabelled from an earlier learner's error report
             "not_object": it.feedback == "wrong" and not it.corrected_label and hasattr(it, "report"),
@@ -72,11 +83,10 @@ def _items_payload(request, detection: Detection):
 
 
 def _link_words(detection: Detection):
-    labels = set(detection.items.values_list("label", flat=True))
-    by_label = dict(Word.objects.filter(yolo_label__in=labels).values_list("yolo_label", "id"))
+    by_label = words_by_label(set(detection.items.values_list("label", flat=True)))
     for it in detection.items.all():
         if it.label in by_label:
-            it.word_id = by_label[it.label]
+            it.word_id = by_label[it.label].id
             it.save(update_fields=["word"])
 
 
@@ -138,12 +148,23 @@ class ConfirmItemSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     selected = serializers.BooleanField(default=False)
     feedback = serializers.ChoiceField(choices=DetectionItem.Feedback.choices, default="unknown")
-    corrected_label = serializers.CharField(required=False, allow_blank=True, max_length=60)
+    corrected_label = serializers.CharField(required=False, allow_blank=True, max_length=80)
+    corrected_word = serializers.PrimaryKeyRelatedField(queryset=Word.objects.all(), required=False, allow_null=True,
+                                                        help_text="Từ chọn sau khi gõ tên tiếng Việt (GET lookup)")
+    typed = serializers.CharField(required=False, allow_blank=True, max_length=80, help_text="Tên tiếng Việt đã gõ")
     not_object = serializers.BooleanField(default=False, help_text="Báo lỗi: chỗ này không phải đồ vật nào")
+
+
+class AddedItemSerializer(serializers.Serializer):
+    word = serializers.PrimaryKeyRelatedField(queryset=Word.objects.all(), required=False, allow_null=True)
+    typed = serializers.CharField(max_length=80)
+    selected = serializers.BooleanField(default=True)
 
 
 class ConfirmSerializer(serializers.Serializer):
     items = ConfirmItemSerializer(many=True)
+    added = AddedItemSerializer(many=True, required=False, max_length=5,
+                                help_text="Đồ vật model bỏ sót: người dùng gõ tên tiếng Việt")
     topic = serializers.PrimaryKeyRelatedField(queryset=Topic.objects.all(), required=False, allow_null=True)
 
 
@@ -191,6 +212,14 @@ class DetectionViewSet(ActionThrottleMixin, BulkDeleteMixin, mixins.ListModelMix
         words = words_for_target(Word.objects.exclude(yolo_label="").exclude(yolo_label__isnull=True), request.user, target)
         return Response(sorted(({"label": w.yolo_label, "card": card(w, target, None, request)} for w in words),
                                key=lambda r: r["card"].get("meaning_vi") or r["label"]))
+
+    @action(detail=False, methods=["get"])
+    def lookup(self, request):
+        """?q=<Vietnamese name> -> the words of the checked dictionary it may be, in the language being learned."""
+        target = resolve_target(request)
+        words = lookup.find(request.user, target, request.query_params.get("q", "")[:80])
+        return Response([{"word_id": w.id, "label": lookup.label_of(w), "detector_knows": bool(w.yolo_label),
+                          "card": card(w, target, None, request)} for w in words])
 
     @extend_schema(request=LogDetectionSerializer)
     @action(detail=False, methods=["post"])
@@ -241,7 +270,12 @@ class DetectionViewSet(ActionThrottleMixin, BulkDeleteMixin, mixins.ListModelMix
         saved = reported = 0
         items = {i.id: i for i in det.items.all()}  # the prefetched instances: the response reads them back
         corrected = {c.get("corrected_label") for c in ser.validated_data["items"]} - {None, ""}
-        word_by_label = dict(Word.objects.filter(yolo_label__in=corrected).values_list("yolo_label", "id"))
+        word_by_label = {label: w.id for label, w in words_by_label(corrected).items()}
+        picked = {c["corrected_word"].id for c in ser.validated_data["items"] if c.get("corrected_word")}
+        picked |= {a["word"].id for a in ser.validated_data.get("added", []) if a.get("word")}
+        visible = set(words_for_target(Word.objects.filter(id__in=picked), request.user, target).values_list("id", flat=True))
+        if picked - visible:
+            return Response({"detail": "Từ đã chọn không có trong ngôn ngữ bạn đang học", "errors": {}}, status=400)
         with transaction.atomic():
             for c in ser.validated_data["items"]:
                 it = items.get(c["id"])
@@ -250,13 +284,20 @@ class DetectionViewSet(ActionThrottleMixin, BulkDeleteMixin, mixins.ListModelMix
                 was_wrong = it.feedback == DetectionItem.Feedback.WRONG
                 it.selected, it.feedback = c["selected"], c["feedback"]
                 it.corrected_label = c.get("corrected_label", "")
+                it.corrected_text = c.get("typed", "")
+                it.corrected_word = c.get("corrected_word")
+                if it.corrected_word:  # typed in Vietnamese, then picked from the dictionary
+                    it.corrected_label = lookup.label_of(it.corrected_word)
+                    word_by_label[it.corrected_label] = it.corrected_word.id
                 if c["not_object"]:  # error report: there is no such object here
                     it.corrected_label, it.feedback, it.selected = "", DetectionItem.Feedback.WRONG, False
                 elif it.corrected_label == it.label:  # learner confirmed the model's own answer
                     it.corrected_label, it.feedback = "", DetectionItem.Feedback.CORRECT
                 elif it.corrected_label:  # learner picked another object: the model was wrong, save that word
                     it.feedback = DetectionItem.Feedback.WRONG
-                it.save(update_fields=["selected", "feedback", "corrected_label"])
+                elif it.corrected_text:  # a name the dictionary does not have yet: kept for the vocabulary team
+                    it.feedback, it.selected = DetectionItem.Feedback.WRONG, False
+                it.save(update_fields=["selected", "feedback", "corrected_label", "corrected_text", "corrected_word"])
                 if it.feedback == DetectionItem.Feedback.WRONG and (it.corrected_label or c["not_object"]):
                     reported += memory.remember(it, request.user)
                     if it.learned_from_id and not was_wrong:
@@ -269,6 +310,20 @@ class DetectionViewSet(ActionThrottleMixin, BulkDeleteMixin, mixins.ListModelMix
                         defaults={"source": PersonalWord.Source.CAMERA, "source_ref": str(det.id),
                                   "topic": ser.validated_data.get("topic")})
                     saved += created
+            for a in ser.validated_data.get("added", []):  # objects the detector missed (no box)
+                w = a.get("word")
+                it = DetectionItem.objects.create(
+                    detection=det, label=lookup.label_of(w) if w else "", confidence=1.0, bbox=[], top_k=[], word=w,
+                    manual=True, selected=bool(w) and a["selected"], feedback=DetectionItem.Feedback.CORRECT,
+                    corrected_text=a["typed"])
+                if it.selected:
+                    _, created = PersonalWord.objects.get_or_create(
+                        user=request.user, word=w, language=target.learn,
+                        defaults={"source": PersonalWord.Source.CAMERA, "source_ref": str(det.id),
+                                  "topic": ser.validated_data.get("topic")})
+                    saved += created
+            if ser.validated_data.get("added"):
+                det = self.get_queryset().get(pk=det.pk)  # the prefetched items do not have the added ones
             first_time = not det.confirmed
             det.confirmed = True
             det.save(update_fields=["confirmed"])
@@ -338,7 +393,15 @@ class AdminDetectionViewSet(BulkDeleteMixin, mixins.ListModelMixin, mixins.Destr
         confusion = DetectionItem.objects.filter(feedback="wrong").exclude(corrected_label="").values(
             "label", "corrected_label").annotate(count=Count("id")).order_by("-count")[:50]
         by_device = Detection.objects.values("device").annotate(count=Count("id"), avg_ms=Avg("inference_ms"))
-        return Response({"per_label": list(per_label), "confusion": list(confusion), "by_device": list(by_device)})
+        # names learners typed that the dictionary does not have: words to add next
+        missing = DetectionItem.objects.filter(corrected_word__isnull=True).exclude(corrected_text="").values(
+            "corrected_text").annotate(count=Count("id")).order_by("-count")[:50]
+        # objects the detector has no class for yet (learners typed their name): classes for the next training
+        new_classes = DetectionItem.objects.filter(corrected_word__isnull=False, corrected_word__yolo_label="").values(
+            "corrected_word__slug").annotate(count=Count("id")).order_by("-count")[:50]
+        return Response({"per_label": list(per_label), "confusion": list(confusion), "by_device": list(by_device),
+                         "missing_words": [{"text": r["corrected_text"], "count": r["count"]} for r in missing],
+                         "new_classes": [{"label": r["corrected_word__slug"], "count": r["count"]} for r in new_classes]})
 
 
 # ------------------------------------------------------------------ admin: error reports

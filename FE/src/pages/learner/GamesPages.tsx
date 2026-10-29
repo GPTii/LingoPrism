@@ -1,15 +1,15 @@
-import { App, Button, Modal, Progress, Result, Spin } from 'antd'
+import { App, Button, Modal, Progress, Result, Spin, Tooltip } from 'antd'
 import { CloseOutlined, LockFilled, StarFilled } from '@ant-design/icons'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { errorMessage } from '../../api/client'
-import { playApi, type GameFinish, type GameRound, type GameStop } from '../../api/play'
+import { playApi, type GameFinish, type GameRound, type GameStop, type HelperKind } from '../../api/play'
 import { useAuth } from '../../auth/store'
 import { AppIcon } from '../../components/brand/AppIcon'
-import { Prismo } from '../../components/brand/Brand'
-import { GAME_NAMES, MiniGameView } from '../../components/MiniGames'
+import { Prismo, ScaleIcon } from '../../components/brand/Brand'
+import { GAME_NAMES, HelpContext, MiniGameView, type GameHelp } from '../../components/MiniGames'
 import { langTag } from '../../components/TargetWord'
 import { PageHeader } from '../../components/ui'
 
@@ -165,6 +165,7 @@ export function GameMapPage() {
 // ====================================================================== play
 
 export function GamePlayPage() {
+  const { message } = App.useApp()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const node = useParams().node ?? ''
@@ -176,11 +177,33 @@ export function GamePlayPage() {
   const [results, setResults] = useState<boolean[][]>([])
   const [finish, setFinish] = useState<GameFinish | null>(null)
   const [attempt, setAttempt] = useState(0)
+  const [scales, setScales] = useState(0)
+  const [left, setLeft] = useState<Record<HelperKind, number>>({ hint: 0, retry: 0 })
 
   useEffect(() => {
     setRound(null); setAt(0); setIntro(true); setResults([]); setFinish(null); setError('')
-    playApi.round(node).then(setRound).catch((e) => setError(errorMessage(e)))
+    playApi.round(node).then((r) => {
+      setRound(r)
+      setScales(r.helpers.scales)
+      setLeft({ hint: r.helpers.per_round, retry: r.helpers.per_round })
+    }).catch((e) => setError(errorMessage(e)))
   }, [node, attempt])
+
+  const help: GameHelp | null = round && {
+    scales, left, cost: round.helpers.cost, hintLabel: round.track === 'reading' ? 'Gợi ý' : 'Dịch nghĩa',
+    buy: async (kind) => {
+      try {
+        const r = await playApi.help(node, round.token, kind)
+        setScales(r.scales)
+        setLeft((x) => ({ ...x, [kind]: r.left }))
+        queryClient.invalidateQueries({ queryKey: ['game-summary'] })
+        return true
+      } catch (e) {
+        message.error(errorMessage(e))
+        return false
+      }
+    },
+  }
 
   const done = async (r: boolean[]) => {
     if (!round) return
@@ -252,6 +275,11 @@ export function GamePlayPage() {
         </button>
         <Progress percent={Math.round((at / round.games.length) * 100)} showInfo={false} className="flex-1 m-0" />
         <span className="num text-sm text-slate-500">{at + 1}/{round.games.length}</span>
+        <Tooltip title={`Vảy để mua trợ giúp: ${help!.hintLabel.toLowerCase()} ${round.helpers.cost.hint} vảy, làm lại câu sai ${round.helpers.cost.retry} vảy`}>
+          <span className="num flex items-center gap-1 rounded-xl bg-teal-50 px-2.5 py-1 text-sm font-bold text-teal-700" aria-label={`${scales} vảy`}>
+            <ScaleIcon size={18} />{scales}
+          </span>
+        </Tooltip>
       </div>
       <AnimatePresence mode="wait">
         {intro ? (
@@ -269,7 +297,9 @@ export function GamePlayPage() {
           <motion.div key={`game-${at}`} initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -16 }}
             className="lp-card p-6 sm:p-8 min-h-96 flex flex-col items-center gap-4">
             <div className="text-center text-slate-500 font-medium">{game.title}</div>
-            <MiniGameView game={game} lang={tag} onDone={done} />
+            <HelpContext.Provider value={help}>
+              <MiniGameView game={game} lang={tag} onDone={done} />
+            </HelpContext.Provider>
           </motion.div>
         )}
       </AnimatePresence>

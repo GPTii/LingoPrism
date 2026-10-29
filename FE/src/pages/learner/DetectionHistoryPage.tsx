@@ -15,7 +15,7 @@ import { DateRangeFilter, dateParams, Selectable, SelectionBar, useBulkDelete, u
 const wordOf = (i: DetectedItem) => i.corrected_card ?? i.card
 
 function Shot({ d }: { d: DetectionResult }) {
-  const items = d.items.filter((i) => !(i.feedback === 'wrong' && !i.corrected_label))
+  const items = d.items.filter((i) => !(i.feedback === 'wrong' && !i.corrected_label) && (i.corrected_label || i.label))
   // one chip per word: three slices of watermelon are one word, ×3
   const words = Object.values(items.reduce<Record<string, { key: string; item: DetectedItem; n: number; saved: boolean }>>((acc, i) => {
     const key = i.corrected_label || i.label

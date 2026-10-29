@@ -318,6 +318,14 @@ export function DetectionsAdminPage() {
             {stats.data?.by_device.map((d) => <div key={d.device}>{d.device === 'server' ? 'Máy chủ' : 'Điện thoại'}: {d.count} lượt · TB {Math.round(d.avg_ms ?? 0)} ms</div>)}
           </div>
         </Card>
+        <Card title="Tên người dùng gõ mà từ điển chưa có (từ cần bổ sung)">
+          <Table size="small" rowKey="text" dataSource={stats.data?.missing_words}
+            columns={[{ title: 'Tên tiếng Việt', dataIndex: 'text' }, { title: 'Số lần', dataIndex: 'count' }]} />
+        </Card>
+        <Card title="Đồ vật model chưa có lớp (lớp mới cho lần train sau)">
+          <Table size="small" rowKey="label" dataSource={stats.data?.new_classes}
+            columns={[{ title: 'Từ (slug)', dataIndex: 'label' }, { title: 'Số lần người dùng gõ', dataIndex: 'count' }]} />
+        </Card>
       </div>
       <DetectionReportsCard />
       <Card title="Nhật ký nhận diện">

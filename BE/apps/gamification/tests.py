@@ -58,7 +58,7 @@ def test_streak_and_freeze(user):
 
 def test_quests_claim_and_monthly(user):
     quests = services.ensure_quests(user)
-    assert len(quests) == 5
+    assert len(quests) == 6  # the 5 learning and community quests and "win 2 rounds"
     services.progress_quest(user, DailyQuest.Kind.SAVE_WORDS, 5)
     q = DailyQuest.objects.get(user=user, kind=DailyQuest.Kind.SAVE_WORDS)
     assert q.completed

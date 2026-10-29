@@ -329,3 +329,72 @@ def test_log_on_device_with_the_photo(setup, tmp_path, settings):
     bad = c.post("/api/v1/detections/log/", {"model_name": "m", "items": "not json", "image": SimpleUploadedFile(
         "a.jpg", buf.getvalue(), content_type="image/jpeg")}, format="multipart")
     assert bad.status_code == 400
+
+
+# ---------------------------------------------------------------- "it is something else": typed in Vietnamese
+
+@pytest.fixture
+def cup_env(setup):
+    user, c, cat = setup
+    cup = Word.objects.create(slug="cup", yolo_label="cup")
+    WordTranslation.objects.create(word=cup, language_id="vi", text="cái cốc", status=ReviewStatus.VERIFIED)
+    WordTranslation.objects.create(word=cup, language_id="en", text="cup", status=ReviewStatus.VERIFIED)
+    jar = Word.objects.create(slug="jar")  # the detector has no class for it
+    WordTranslation.objects.create(word=jar, language_id="vi", text="cái lọ", status=ReviewStatus.VERIFIED)
+    WordTranslation.objects.create(word=jar, language_id="en", text="jar", status=ReviewStatus.VERIFIED)
+    from django.core.cache import cache
+    cache.clear()
+    return user, c, cat, cup, jar
+
+
+def test_lookup_finds_the_word_from_its_vietnamese_name(cup_env):
+    user, c, cat, cup, jar = cup_env
+    for q in ("cốc", "cái cốc", "Cốc", "coc", "cốc thuỷ tinh"):
+        res = c.get("/api/v1/detections/lookup/", {"q": q}).data
+        assert res and res[0]["word_id"] == cup.id and res[0]["card"]["target"]["text"] == "cup", q
+    assert c.get("/api/v1/detections/lookup/", {"q": "lọ"}).data[0] == {
+        **c.get("/api/v1/detections/lookup/", {"q": "lọ"}).data[0], "label": "jar", "detector_knows": False}
+    assert c.get("/api/v1/detections/lookup/", {"q": "máy bay"}).data == []
+
+
+def test_a_typed_name_corrects_the_detector_and_saves_the_word(cup_env):
+    user, c, cat, cup, jar = cup_env
+    res = c.post("/api/v1/detections/log/", {"model_name": "t", "items": [
+        {"label": "cat", "confidence": 0.8, "bbox": [0.1, 0.1, 0.5, 0.6]},
+        {"label": "cat", "confidence": 0.7, "bbox": [0.5, 0.1, 0.9, 0.6]},
+        {"label": "cat", "confidence": 0.6, "bbox": [0.2, 0.6, 0.4, 0.9]},
+    ]}, format="json")
+    a, b, d = res.data["items"]
+    res = c.post(f"/api/v1/detections/{res.data['id']}/confirm/", {"items": [
+        {"id": a["id"], "selected": True, "feedback": "wrong", "corrected_word": cup.id, "typed": "cái ly"},
+        {"id": b["id"], "selected": True, "feedback": "wrong", "corrected_word": jar.id, "typed": "lọ"},
+        {"id": d["id"], "selected": True, "feedback": "wrong", "typed": "cái gáo dừa"},  # not in the dictionary
+    ], "added": [{"word": cup.id, "typed": "cốc"}, {"typed": "cái bình hoa"}]}, format="json")
+    assert res.status_code == 200, res.data
+    assert res.data["saved"] == 2  # cup and jar (the added cup is the same word)
+    items = {i["id"]: i for i in res.data["items"]}
+    assert items[a["id"]]["corrected_label"] == "cup" and items[a["id"]]["corrected_card"]["target"]["text"] == "cup"
+    assert items[b["id"]]["corrected_label"] == "jar" and items[b["id"]]["corrected_text"] == "lọ"
+    assert items[d["id"]]["feedback"] == "wrong" and not items[d["id"]]["selected"]
+    manual = [i for i in res.data["items"] if i["manual"]]
+    assert [(i["label"], i["corrected_text"]) for i in manual] == [("cup", "cốc"), ("", "cái bình hoa")]
+    assert set(PersonalWord.objects.filter(user=user).values_list("word__slug", flat=True)) == {"cup", "jar"}
+
+    staff = User.objects.create_user("s@example.com", "Strong!Pass123", role="staff")
+    s = APIClient()
+    s.force_authenticate(staff)
+    stats = s.get("/api/v1/admin/detections/stats/").data
+    assert {"text": "cái gáo dừa", "count": 1} in stats["missing_words"]
+    assert stats["new_classes"] == [{"label": "jar", "count": 1}]
+
+
+def test_a_picked_word_must_exist_in_the_language_learned(cup_env):
+    user, c, cat, cup, jar = cup_env
+    vi_only = Word.objects.create(slug="vi-only")
+    WordTranslation.objects.create(word=vi_only, language_id="vi", text="cái nơm", status=ReviewStatus.VERIFIED)
+    res = c.post("/api/v1/detections/log/", {"model_name": "t", "items": [
+        {"label": "cat", "confidence": 0.8, "bbox": [0.1, 0.1, 0.5, 0.6]}]}, format="json")
+    bad = c.post(f"/api/v1/detections/{res.data['id']}/confirm/", {"items": [
+        {"id": res.data["items"][0]["id"], "selected": True, "feedback": "wrong", "corrected_word": vi_only.id}]},
+        format="json")
+    assert bad.status_code == 400

@@ -380,6 +380,29 @@ export interface DetectedItem {
   /** relabelled automatically from an earlier learner's error report */
   learned: boolean
   not_object: boolean
+  /** the Vietnamese name the learner typed for it ("it is something else") */
+  corrected_text: string
+  /** an object the detector missed, added by the learner by name (no box) */
+  manual: boolean
+}
+
+/** A word of the checked dictionary found from a typed Vietnamese name (GET /detections/lookup/). */
+export interface NameLookup {
+  word_id: number
+  label: string
+  /** the detector has a class for it: the correction also fixes its next answers */
+  detector_knows: boolean
+  card: WordCard
+}
+
+export interface ConfirmItem {
+  id: number
+  selected: boolean
+  feedback: string
+  corrected_label?: string
+  corrected_word?: number | null
+  typed?: string
+  not_object?: boolean
 }
 
 export interface DetectionResult {
@@ -490,8 +513,9 @@ export const learnApi = {
     form.append('source', 'web')
     return api.post<DetectionResult>('/detect/', form).then((r) => r.data)
   },
-  confirm: (id: number, items: { id: number; selected: boolean; feedback: string; corrected_label?: string; not_object?: boolean }[]) =>
-    api.post<DetectionResult & { saved: number; reported: number }>(`/detections/${id}/confirm/`, { items }).then((r) => r.data),
+  confirm: (id: number, items: ConfirmItem[], added: { word: number | null; typed: string }[] = []) =>
+    api.post<DetectionResult & { saved: number; reported: number }>(`/detections/${id}/confirm/`, { items, added }).then((r) => r.data),
+  lookupName: (q: string) => api.get<NameLookup[]>('/detections/lookup/', { params: { q } }).then((r) => r.data),
   /** every object the detector knows, with its word card (error report: "it is something else") */
   detectLabels: () => api.get<{ label: string; card: WordCard }[]>('/detections/labels/').then((r) => r.data),
   nearby: (lat: number, lng: number, radius = 3000) =>

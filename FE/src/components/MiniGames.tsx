@@ -1,10 +1,11 @@
 import { Button, Input } from 'antd'
-import { CheckCircleFilled, CloseCircleFilled, SoundOutlined } from '@ant-design/icons'
+import { BulbOutlined, CheckCircleFilled, CloseCircleFilled, SoundOutlined, UndoOutlined } from '@ant-design/icons'
 import { AnimatePresence, motion } from 'framer-motion'
-import { useEffect, useMemo, useRef, useState } from 'react'
-import type { Audio, ChooseItem, ChooseKind, MatchItem, MiniGame, Option, Prompt, SortItem, TilesItem, TrainItem, TypeItem } from '../api/play'
+import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react'
+import type { Audio, ChooseItem, ChooseKind, HelperKind, MatchItem, MiniGame, Option, Prompt, SortItem, TilesItem, TrainItem, TypeItem } from '../api/play'
 import { speak } from '../lib/speech'
 import { VietInput } from '../pages/learner/LiteracyPages'
+import { ScaleIcon } from './brand/Brand'
 import WordPicture from './WordPicture'
 
 /** The mini games of the game map (Trò chơi). Every game reports, item by item, whether the first answer was right.
@@ -29,21 +30,78 @@ export function normalize(text: string): string {
   return text.normalize('NFC').toLowerCase().replace(/[.,!?;:"“”'’…。，！？]/g, '').replace(/\s+/g, ' ').trim()
 }
 
-/** Steps through the items of one game: `answer(ok)` records the first answer, then moves on after a moment. */
+/** Helpers bought with vảy during a round (GamePlayPage provides them): see an item's hint, take back a wrong answer. */
+export interface GameHelp {
+  scales: number
+  cost: Record<HelperKind, number>
+  left: Record<HelperKind, number>
+  hintLabel: string
+  buy: (kind: HelperKind) => Promise<boolean>
+}
+export const HelpContext = createContext<GameHelp | null>(null)
+
+/** Steps through the items of one game: `answer(ok)` records the first answer, then moves on after a moment.
+ * A wrong answer waits instead when the learner can pay to take it back (`retry`; `attempt` counts the tries,
+ * so a game clears its picks) – the right answer is not shown until they go on (`next`). */
 function useSteps(count: number, onDone: Done) {
+  const help = useContext(HelpContext)
   const [i, setI] = useState(0)
   const [answered, setAnswered] = useState<boolean | null>(null)
+  const [waiting, setWaiting] = useState(false)
+  const [attempt, setAttempt] = useState(0)
   const results = useRef<boolean[]>([])
+  const next = () => {
+    setWaiting(false)
+    if (results.current.length >= count) onDone(results.current)
+    else { setI((x) => x + 1); setAnswered(null) }
+  }
   const answer = (ok: boolean) => {
     if (answered !== null) return
     setAnswered(ok)
     results.current.push(ok)
-    setTimeout(() => {
-      if (results.current.length >= count) onDone(results.current)
-      else { setI((x) => x + 1); setAnswered(null) }
-    }, ok ? RIGHT_MS : WRONG_MS)
+    if (!ok && help && help.left.retry > 0 && help.scales >= help.cost.retry) setWaiting(true)
+    else setTimeout(next, ok ? RIGHT_MS : WRONG_MS)
   }
-  return { i, answered, answer }
+  const retry = async () => {
+    if (!help || !(await help.buy('retry'))) return
+    results.current.pop()
+    setWaiting(false)
+    setAnswered(null)
+    setAttempt((x) => x + 1)
+  }
+  /** the right answer may be shown: answered, and not waiting for a possible retry */
+  const reveal = answered !== null && !waiting
+  return { i, answered, answer, attempt, waiting, reveal, next, retry }
+}
+type Steps = ReturnType<typeof useSteps>
+
+/** Under an item: the paid hint before answering; after a wrong answer "Làm lại" (paid) or "Tiếp tục". */
+function HelpBar({ hint, steps }: { hint?: string; steps: Steps }) {
+  const help = useContext(HelpContext)
+  const [shown, setShown] = useState<string | null>(null)
+  const [busy, setBusy] = useState(false)
+  if (!help) return null
+  const pay = async (kind: HelperKind, then: () => void | Promise<void>) => {
+    setBusy(true)
+    try { if (kind === 'retry') await then(); else if (await help.buy(kind)) then() } finally { setBusy(false) }
+  }
+  if (steps.waiting)
+    return (
+      <div className="flex flex-wrap justify-center gap-3 animate-rise">
+        <Button size="large" icon={<UndoOutlined />} loading={busy} onClick={() => pay('retry', steps.retry)}>
+          Làm lại · {help.cost.retry} <ScaleIcon size={16} className="align-[-3px]" />
+        </Button>
+        <Button size="large" type="primary" onClick={steps.next}>Tiếp tục</Button>
+      </div>
+    )
+  if (!hint || steps.answered !== null) return null
+  if (shown === hint) return <div className="rounded-2xl bg-amber-50 text-amber-800 px-4 py-2 text-center font-medium animate-rise">💡 {hint}</div>
+  const why = help.left.hint <= 0 ? 'Đã dùng hết lượt của màn này' : help.scales < help.cost.hint ? `Cần ${help.cost.hint} vảy` : undefined
+  return (
+    <Button icon={<BulbOutlined />} disabled={!!why} title={why} loading={busy} onClick={() => pay('hint', () => setShown(hint))}>
+      {help.hintLabel} · {help.cost.hint} <ScaleIcon size={16} className="align-[-3px]" />
+    </Button>
+  )
 }
 
 function Dots({ count, at }: { count: number; at: number }) {
@@ -56,11 +114,12 @@ function Dots({ count, at }: { count: number; at: number }) {
   )
 }
 
-function Feedback({ ok, answer }: { ok: boolean | null; answer?: string }) {
+function Feedback({ ok, answer, hide = false }: { ok: boolean | null; answer?: string; hide?: boolean }) {
   if (ok === null) return <div className="h-12" />
   return (
     <div className={`h-12 rounded-2xl px-4 flex items-center justify-center gap-2 text-lg font-semibold animate-rise ${ok ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-600'}`}>
-      {ok ? <><CheckCircleFilled /> Giỏi lắm!</> : <><CloseCircleFilled /> Đáp án đúng: <span className="font-bold">{answer}</span></>}
+      {ok ? <><CheckCircleFilled /> Giỏi lắm!</> : hide || !answer ? <><CloseCircleFilled /> Chưa đúng rồi</>
+        : <><CloseCircleFilled /> Đáp án đúng: <span className="font-bold">{answer}</span></>}
     </div>
   )
 }
@@ -105,20 +164,21 @@ function OptionFace({ o, lang }: { o: Option; lang: string }) {
 const BUBBLES = ['#ff86c8', '#1cb0f6', '#ffc800', '#58cc02', '#ce82ff', '#ff9600']
 
 function ChooseGame({ kind, items, lang, onDone }: { kind: ChooseKind; items: ChooseItem[]; lang: string; onDone: Done }) {
-  const { i, answered, answer } = useSteps(items.length, onDone)
+  const steps = useSteps(items.length, onDone)
+  const { i, answered, answer, attempt, reveal } = steps
   const [picked, setPicked] = useState<string | null>(null)
   const item = items[i]
   useEffect(() => {
     setPicked(null)
     const t = setTimeout(() => sayAudio(item.prompt.audio), 350)
     return () => clearTimeout(t)
-  }, [item])
+  }, [item, attempt])
   const pick = (o: Option) => {
     if (answered !== null) return
     setPicked(o.t)
     answer(o.t === item.answer)
   }
-  const state = (o: Option) => answered === null ? '' : o.t === item.answer ? 'is-right' : o.t === picked ? 'is-wrong' : 'opacity-50'
+  const state = (o: Option) => answered === null ? '' : o.t === picked && !answered ? 'is-wrong' : !reveal ? '' : o.t === item.answer ? 'is-right' : 'opacity-50'
   const right = item.options.find((o) => o.t === item.answer)
 
   let options
@@ -136,7 +196,7 @@ function ChooseGame({ kind, items, lang, onDone }: { kind: ChooseKind; items: Ch
               className={`relative h-28 w-28 sm:h-32 sm:w-32 rounded-full text-2xl font-bold text-white [text-shadow:0_2px_0_#0003] cursor-pointer transition duration-300
                 ${popped ? 'scale-150 opacity-0' : 'lp-float'}
                 ${answered !== null && o.t === picked && o.t !== item.answer ? 'animate-[lp-shake_420ms]' : ''}
-                ${answered !== null && o.t === item.answer && o.t !== picked ? 'ring-4 ring-[#58cc02]' : ''}`}>
+                ${reveal && o.t === item.answer && o.t !== picked ? 'ring-4 ring-[#58cc02]' : ''}`}>
               <OptionFace o={o} lang={lang} />
               <span className="absolute left-1/2 -bottom-3 h-4 w-0.5 bg-slate-300" />
             </button>
@@ -162,7 +222,7 @@ function ChooseGame({ kind, items, lang, onDone }: { kind: ChooseKind; items: Ch
       <div className="flex justify-center gap-6">
         {item.options.map((o) => (
           <button key={o.t} type="button" data-opt={o.t} onClick={() => pick(o)} style={{ perspective: 600 }} className="cursor-pointer">
-            <motion.div animate={answered !== null && o.t === item.answer ? { rotateY: -55 } : { rotateY: 0 }}
+            <motion.div animate={reveal && o.t === item.answer ? { rotateY: -55 } : { rotateY: 0 }}
               transition={{ duration: 0.5 }} style={{ transformOrigin: 'left center' }}
               className={`h-44 w-28 rounded-t-[56px] rounded-b-lg border-4 border-[#a0662f] bg-[#c98546] grid place-items-center relative
                 ${answered !== null && o.t === picked && o.t !== item.answer ? 'animate-[lp-shake_420ms]' : ''}`}>
@@ -192,7 +252,8 @@ function ChooseGame({ kind, items, lang, onDone }: { kind: ChooseKind; items: Ch
       <PromptView prompt={item.prompt} lang={lang} big={kind !== 'meaning'} />
       {kind === 'tone' && lang === 'vi' && <div className="text-slate-500">Thêm dấu nào thì thành tiếng vừa nghe?</div>}
       {options}
-      <Feedback ok={answered} answer={right && (right.image || right.emoji ? undefined : right.t)} />
+      <Feedback ok={answered} answer={right && (right.image || right.emoji ? undefined : right.t)} hide={!reveal} />
+      <HelpBar hint={item.hint} steps={steps} />
     </div>
   )
 }
@@ -200,14 +261,15 @@ function ChooseGame({ kind, items, lang, onDone }: { kind: ChooseKind; items: Ch
 // ====================================================================== train (onset + rhyme + tone)
 
 function TrainGame({ items, onDone }: { items: TrainItem[]; onDone: Done }) {
-  const { i, answered, answer } = useSteps(items.length, onDone)
+  const steps = useSteps(items.length, onDone)
+  const { i, answered, answer, attempt, reveal } = steps
   const item = items[i]
   const [pick, setPick] = useState<{ onset?: string; rhyme?: string; tone?: string }>({})
   useEffect(() => {
     setPick({})
     const t = setTimeout(() => sayAudio(item.audio), 350)
     return () => clearTimeout(t)
-  }, [item])
+  }, [item, attempt])
   const toneLabel = (code?: string) => item.tones.find((t) => t.code === code)
   const cars: [string, string | undefined][] = [
     ['Âm đầu', pick.onset === '∅' ? '–' : pick.onset], ['Vần', pick.rhyme], ['Dấu', toneLabel(pick.tone)?.symbol || (pick.tone ? 'ngang' : undefined)],
@@ -248,7 +310,8 @@ function TrainGame({ items, onDone }: { items: TrainItem[]; onDone: Done }) {
       ))}
       {answered === null
         ? <Button type="primary" size="large" disabled={!pick.onset || !pick.rhyme || !pick.tone} onClick={check}>Cho tàu chạy</Button>
-        : <Feedback ok={answered} answer={item.text} />}
+        : <Feedback ok={answered} answer={item.text} hide={!reveal} />}
+      <HelpBar hint={item.hint} steps={steps} />
     </div>
   )
 }
@@ -256,7 +319,8 @@ function TrainGame({ items, onDone }: { items: TrainItem[]; onDone: Done }) {
 // ====================================================================== sort (fruit into rhyme baskets)
 
 function SortGame({ baskets, items, onDone }: { baskets: string[]; items: SortItem[]; onDone: Done }) {
-  const { i, answered, answer } = useSteps(items.length, onDone)
+  const steps = useSteps(items.length, onDone)
+  const { i, answered, answer, attempt, reveal } = steps
   const [counts, setCounts] = useState<Record<string, number>>({})
   const [target, setTarget] = useState<string | null>(null)
   const item = items[i]
@@ -264,7 +328,7 @@ function SortGame({ baskets, items, onDone }: { baskets: string[]; items: SortIt
     setTarget(null)
     const t = setTimeout(() => sayAudio(item.audio), 300)
     return () => clearTimeout(t)
-  }, [item])
+  }, [item, attempt])
   const drop = (b: string) => {
     if (answered !== null) return
     setTarget(b)
@@ -288,14 +352,15 @@ function SortGame({ baskets, items, onDone }: { baskets: string[]; items: SortIt
       <div className="flex gap-6">
         {baskets.map((b) => (
           <button key={b} type="button" data-basket={b} onClick={() => drop(b)}
-            className={`btn-3d w-36 py-3 flex flex-col items-center cursor-pointer ${answered !== null && b === item.answer ? 'is-right' : answered !== null && b === target ? 'is-wrong' : ''}`}>
+            className={`btn-3d w-36 py-3 flex flex-col items-center cursor-pointer ${reveal && b === item.answer ? 'is-right' : answered !== null && b === target ? 'is-wrong' : ''}`}>
             <span className="text-5xl" aria-hidden>🧺</span>
             <span className="text-2xl font-bold text-brand-700">vần {b}</span>
             <span className="text-xs text-slate-400">{counts[b] ?? 0} quả</span>
           </button>
         ))}
       </div>
-      <Feedback ok={answered} answer={`vần ${item.answer}`} />
+      <Feedback ok={answered} answer={`vần ${item.answer}`} hide={!reveal} />
+      <HelpBar hint={item.hint} steps={steps} />
     </div>
   )
 }
@@ -354,14 +419,15 @@ function MatchGame({ items, lang, onDone }: { items: MatchItem[]; lang: string; 
 // ====================================================================== tiles (spell a word / order a sentence)
 
 function TilesGame({ items, lang, onDone }: { items: TilesItem[]; lang: string; onDone: Done }) {
-  const { i, answered, answer } = useSteps(items.length, onDone)
+  const steps = useSteps(items.length, onDone)
+  const { i, answered, answer, attempt, reveal } = steps
   const item = items[i]
   const [used, setUsed] = useState<number[]>([])
   useEffect(() => {
     setUsed([])
     const t = setTimeout(() => sayAudio(item.prompt.audio), 350)
     return () => clearTimeout(t)
-  }, [item])
+  }, [item, attempt])
   const built = used.map((k) => item.tiles[k]).join(item.joiner)
   const sentence = item.joiner === ' '
   return (
@@ -387,7 +453,8 @@ function TilesGame({ items, lang, onDone }: { items: TilesItem[]; lang: string; 
       </div>
       {answered === null
         ? <Button type="primary" size="large" disabled={!used.length} onClick={() => answer(normalize(built) === normalize(item.answer))}>Kiểm tra</Button>
-        : <Feedback ok={answered} answer={item.answer} />}
+        : <Feedback ok={answered} answer={item.answer} hide={!reveal} />}
+      <HelpBar hint={item.hint} steps={steps} />
     </div>
   )
 }
@@ -395,14 +462,15 @@ function TilesGame({ items, lang, onDone }: { items: TilesItem[]; lang: string; 
 // ====================================================================== type (picture -> write the word)
 
 function TypeGame({ items, lang, onDone }: { items: TypeItem[]; lang: string; onDone: Done }) {
-  const { i, answered, answer } = useSteps(items.length, onDone)
+  const steps = useSteps(items.length, onDone)
+  const { i, answered, answer, attempt, reveal } = steps
   const item = items[i]
   const [typed, setTyped] = useState('')
   useEffect(() => {
     setTyped('')
     const t = setTimeout(() => sayAudio(item.prompt.audio), 350)
     return () => clearTimeout(t)
-  }, [item])
+  }, [item, attempt])
   const check = () => typed.trim() && answer(item.accepted.some((a) => normalize(a) === normalize(typed)))
   return (
     <div className="flex flex-col items-center gap-5 w-full">
@@ -415,7 +483,8 @@ function TypeGame({ items, lang, onDone }: { items: TypeItem[]; lang: string; on
             className="max-w-md text-center text-2xl" autoFocus />}
       {answered === null
         ? <Button type="primary" size="large" disabled={!typed.trim()} onClick={check}>Kiểm tra</Button>
-        : <Feedback ok={answered} answer={item.answer} />}
+        : <Feedback ok={answered} answer={item.answer} hide={!reveal} />}
+      <HelpBar hint={item.hint} steps={steps} />
     </div>
   )
 }

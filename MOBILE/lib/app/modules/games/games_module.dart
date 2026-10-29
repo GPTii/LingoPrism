@@ -338,6 +338,10 @@ class GamePlayController extends GetxController {
   final Rxn<Json> finish = Rxn<Json>();
   final RxString error = ''.obs;
   final List<List<bool>> results = [];
+  // helpers bought with vảy during the round (views.HELPERS on the server): see an item's hint, take back a wrong answer
+  final RxInt scales = 0.obs;
+  final RxMap<String, int> left = <String, int>{}.obs;
+  Map<String, int> cost = const {};
 
   @override
   void onInit() {
@@ -354,13 +358,35 @@ class GamePlayController extends GetxController {
     intro.value = true;
     results.clear();
     try {
-      round.value = await GamesRepository.round(node);
+      final r = await GamesRepository.round(node);
+      final helpers = asMap(r['helpers']);
+      cost = asMap(helpers['cost']).map((k, v) => MapEntry(k, asInt(v)));
+      scales.value = asInt(helpers['scales']);
+      left.assignAll({for (final k in cost.keys) k: asInt(helpers['per_round'])});
+      round.value = r;
     } catch (e) {
       error.value = ApiClient.toApiException(e).message;
     }
   }
 
   List<Json> get games => asMapList(round.value?['games']);
+
+  String get hintLabel => asString(round.value?['track']) == 'reading' ? 'Gợi ý' : 'Dịch nghĩa';
+
+  bool canBuy(String kind) => (left[kind] ?? 0) > 0 && scales.value >= (cost[kind] ?? 1 << 30);
+
+  Future<bool> buy(String kind) async {
+    try {
+      final r = await GamesRepository.help(node, asString(round.value!['token']), kind);
+      scales.value = asInt(r['scales']);
+      left[kind] = asInt(r['left']);
+      if (Get.isRegistered<GameService>()) GameService.to.refreshSummary();
+      return true;
+    } catch (e) {
+      Get.snackbar('Trò chơi', ApiClient.toApiException(e).message, snackPosition: SnackPosition.BOTTOM);
+      return false;
+    }
+  }
 
   Future<void> done(List<bool> r) async {
     results.add(r);
@@ -427,6 +453,16 @@ class GamePlayView extends GetView<GamePlayController> {
                 ),
                 SizedBox(width: 10.w),
                 Text('${at + 1}/${games.length}', style: TextStyle(color: AppColors.textSecondary, fontSize: 13.sp)),
+                SizedBox(width: 10.w),
+                Tooltip(
+                  message: 'Vảy để mua trợ giúp',
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                    decoration: BoxDecoration(color: AppColors.beamMint.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(12.r)),
+                    child: Text('🐟 ${controller.scales.value} vảy',
+                        style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w800, color: AppColors.beamMint)),
+                  ),
+                ),
               ]),
             ),
             Expanded(
@@ -577,12 +613,21 @@ class MiniGame extends StatelessWidget {
 
 String _normalize(String s) => s.toLowerCase().replaceAll(RegExp(r'[.,!?;:"“”‘’…。，！？]'), '').replaceAll(RegExp(r'\s+'), ' ').trim();
 
+GamePlayController? get _round => Get.isRegistered<GamePlayController>() ? Get.find<GamePlayController>() : null;
+
 /// Steps through the items of one game: [answer] records the first answer, then moves on after a moment.
+/// A wrong answer waits instead when the learner can pay to take it back ([retry]); the right answer is not shown
+/// ([reveal]) until they go on ([next]).
 mixin _Steps<T extends StatefulWidget> on State<T> {
   int i = 0;
   bool? answered;
+  bool waiting = false;
+  String? shownHint;
+  bool _buying = false;
   final List<bool> _results = [];
   Timer? _timer;
+
+  bool get reveal => answered != null && !waiting;
 
   int get count;
   void Function(List<bool>) get finished;
@@ -596,20 +641,93 @@ mixin _Steps<T extends StatefulWidget> on State<T> {
 
   void answer(bool ok) {
     if (answered != null) return;
-    setState(() => answered = ok);
     _results.add(ok);
-    _timer = Timer(Duration(milliseconds: ok ? 850 : 1700), () {
-      if (!mounted) return;
-      if (_results.length >= count) {
-        finished(_results);
-      } else {
-        setState(() {
-          i++;
-          answered = null;
-        });
-        onItem();
+    if (!ok && (_round?.canBuy('retry') ?? false)) {
+      setState(() {
+        answered = ok;
+        waiting = true;
+      });
+      return;
+    }
+    setState(() => answered = ok);
+    _timer = Timer(Duration(milliseconds: ok ? 850 : 1700), next);
+  }
+
+  void next() {
+    if (!mounted) return;
+    if (_results.length >= count) {
+      finished(_results);
+    } else {
+      setState(() {
+        i++;
+        answered = null;
+        waiting = false;
+      });
+      onItem();
+    }
+  }
+
+  Future<void> retry() async {
+    if (_buying) return;
+    setState(() => _buying = true);
+    final ok = await (_round?.buy('retry') ?? Future.value(false));
+    if (!mounted) return;
+    setState(() {
+      _buying = false;
+      if (ok) {
+        _results.removeLast();
+        answered = null;
+        waiting = false;
       }
     });
+    if (ok) onItem();
+  }
+
+  Future<void> _buyHint(String hint) async {
+    if (_buying) return;
+    setState(() => _buying = true);
+    final ok = await (_round?.buy('hint') ?? Future.value(false));
+    if (!mounted) return;
+    setState(() {
+      _buying = false;
+      if (ok) shownHint = hint;
+    });
+  }
+
+  /// Under an item: the paid hint before answering; after a wrong answer "Làm lại" (paid) or "Tiếp tục".
+  Widget helpBar(String hint) {
+    final round = _round;
+    if (round == null) return const SizedBox.shrink();
+    if (waiting) {
+      return Padding(
+        padding: EdgeInsets.only(top: 12.h),
+        child: Wrap(alignment: WrapAlignment.center, spacing: 12.w, children: [
+          OutlinedButton.icon(
+            onPressed: _buying ? null : retry,
+            icon: const Icon(Icons.undo_rounded),
+            label: Text('Làm lại · ${round.cost['retry']} vảy'),
+          ),
+          FilledButton(onPressed: next, child: const Text('Tiếp tục')),
+        ]),
+      );
+    }
+    if (hint.isEmpty || answered != null) return const SizedBox.shrink();
+    if (shownHint == hint) {
+      return Container(
+        margin: EdgeInsets.only(top: 12.h),
+        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
+        decoration: BoxDecoration(color: const Color(0xFFFFF7E0), borderRadius: BorderRadius.circular(14.r)),
+        child: Text('💡 $hint', textAlign: TextAlign.center, style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w600, color: const Color(0xFF8A5A00))),
+      );
+    }
+    return Padding(
+      padding: EdgeInsets.only(top: 12.h),
+      child: Obx(() => OutlinedButton.icon(
+            onPressed: !_buying && round.canBuy('hint') ? () => _buyHint(hint) : null,
+            icon: const Icon(Icons.lightbulb_outline_rounded),
+            label: Text('${round.hintLabel} · ${round.cost['hint']} vảy'),
+          )),
+    );
   }
 
   @override
@@ -631,7 +749,7 @@ Widget _dots(int count, int at) => Row(mainAxisAlignment: MainAxisAlignment.cent
         ),
     ]);
 
-Widget _feedback(bool? ok, String answer) {
+Widget _feedback(bool? ok, String answer, {bool hide = false}) {
   if (ok == null) return SizedBox(height: 48.h);
   return Container(
     height: 48.h,
@@ -639,7 +757,7 @@ Widget _feedback(bool? ok, String answer) {
     padding: EdgeInsets.symmetric(horizontal: 14.w),
     decoration: BoxDecoration(color: ok ? AppColors.successSoft : AppColors.errorSoft, borderRadius: BorderRadius.circular(14.r)),
     alignment: Alignment.center,
-    child: Text(ok ? '✓ Giỏi lắm!' : '✗ Đáp án đúng: $answer',
+    child: Text(ok ? '✓ Giỏi lắm!' : hide || answer.isEmpty ? '✗ Chưa đúng rồi' : '✗ Đáp án đúng: $answer',
         style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w700, color: ok ? AppColors.success : AppColors.error)),
   );
 }
@@ -750,8 +868,10 @@ class _ChooseGameState extends State<_ChooseGame> with _Steps<_ChooseGame>, Sing
   bool? stateOf(Json o) {
     if (answered == null) return null;
     final t = asString(o['t']);
+    if (t == picked && answered == false) return false;
+    if (!reveal) return null;
     if (t == asString(item['answer'])) return true;
-    return t == picked ? false : null;
+    return null;
   }
 
   @override
@@ -778,7 +898,8 @@ class _ChooseGameState extends State<_ChooseGame> with _Steps<_ChooseGame>, Sing
         Padding(padding: EdgeInsets.only(top: 6.h), child: Text('Thêm dấu nào thì thành tiếng vừa nghe?', style: TextStyle(color: AppColors.textSecondary, fontSize: 13.sp))),
       SizedBox(height: 18.h),
       _options(options),
-      _feedback(answered, rightLabel),
+      _feedback(answered, rightLabel, hide: !reveal),
+      helpBar(asString(item['hint'])),
     ]);
   }
 
@@ -996,7 +1117,8 @@ class _TrainGameState extends State<_TrainGame> with _Steps<_TrainGame> {
           child: const Text('Cho tàu chạy'),
         )
       else
-        _feedback(answered, asString(item['text'])),
+        _feedback(answered, asString(item['text']), hide: !reveal),
+      helpBar(asString(item['hint'])),
     ]);
   }
 }
@@ -1074,7 +1196,7 @@ class _SortGameState extends State<_SortGame> with _Steps<_SortGame> {
             padding: EdgeInsets.symmetric(horizontal: 8.w),
             child: _Tile(
               onTap: () => drop(b),
-              state: answered == null ? null : b == asString(item['answer']) ? true : b == target ? false : null,
+              state: answered == null ? null : b == target && answered == false ? false : reveal && b == asString(item['answer']) ? true : null,
               padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 10.h),
               child: Column(children: [
                 Text('🧺', style: TextStyle(fontSize: 42.sp)),
@@ -1084,7 +1206,8 @@ class _SortGameState extends State<_SortGame> with _Steps<_SortGame> {
             ),
           ),
       ]),
-      _feedback(answered, 'vần ${asString(item['answer'])}'),
+      _feedback(answered, 'vần ${asString(item['answer'])}', hide: !reveal),
+      helpBar(asString(item['hint'])),
     ]);
   }
 }
@@ -1270,7 +1393,8 @@ class _TilesGameState extends State<_TilesGame> with _Steps<_TilesGame> {
       if (answered == null)
         FilledButton(onPressed: used.isEmpty ? null : () => answer(_normalize(built) == _normalize(asString(item['answer']))), child: const Text('Kiểm tra'))
       else
-        _feedback(answered, asString(item['answer'])),
+        _feedback(answered, asString(item['answer']), hide: !reveal),
+      helpBar(asString(item['hint'])),
     ]);
   }
 }
@@ -1366,7 +1490,8 @@ class _TypeGameState extends State<_TypeGame> with _Steps<_TypeGame> {
           builder: (_, __) => FilledButton(onPressed: input.text.trim().isEmpty ? null : check, child: const Text('Kiểm tra')),
         )
       else
-        _feedback(answered, asString(item['answer'])),
+        _feedback(answered, asString(item['answer']), hide: !reveal),
+      helpBar(asString(item['hint'])),
     ]);
   }
 }

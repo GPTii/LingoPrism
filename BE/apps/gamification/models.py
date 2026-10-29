@@ -27,6 +27,9 @@ class UserStats(models.Model):
     night_owl = models.PositiveIntegerField(default=0, help_text="Buổi học xong sau 10 giờ tối")
     best_league = models.PositiveSmallIntegerField(default=1, help_text="Hạng giải đấu cao nhất (1..10)")
     league_wins = models.PositiveIntegerField(default=0, help_text="Số tuần về nhất giải đấu")
+    games_won = models.PositiveIntegerField(default=0, help_text="Màn trò chơi đã qua (mỗi màn tính một lần)")
+    bosses_won = models.PositiveIntegerField(default=0, help_text="Màn trùm đã thắng (mỗi màn tính một lần)")
+    games_perfect = models.PositiveIntegerField(default=0, help_text="Màn trò chơi đạt 3 sao")
     lost_streak = models.PositiveIntegerField(default=0, help_text="Chuỗi vừa bị mất, để Hồi chuỗi nối lại")
     lost_streak_on = models.DateField(null=True, blank=True)
 
@@ -93,6 +96,9 @@ class Badge(models.Model):
         NIGHT_OWL = "night_owl", "Học sau 10 giờ tối"
         LEAGUE = "league", "Hạng giải đấu cao nhất"
         LEAGUE_WINS = "league_wins", "Số tuần về nhất giải đấu"
+        GAMES = "games", "Màn trò chơi đã qua"
+        BOSSES = "bosses", "Màn trùm đã thắng"
+        GAME_STARS = "game_stars", "Màn trò chơi đạt 3 sao"
 
     code = models.SlugField(unique=True)
     name = models.CharField(max_length=80)
@@ -127,6 +133,7 @@ class DailyQuest(models.Model):
         REACH_REVIEW_GOAL = "reach_review_goal", "Đạt mục tiêu ôn tập từ hôm nay"
         POST_COMMUNITY_IMAGE = "post_community_image", "Đăng 1 hình ảnh lên cộng đồng"
         ENGAGE_COMMUNITY = "engage_community", "Bình luận hoặc thả tim 5 bài viết"
+        WIN_GAMES = "win_games", "Qua 2 màn ở mục Trò chơi"
 
     REWARD_SCALES = 15
     ALL_DONE_GEMS = 1  # claiming the last of the day's quests

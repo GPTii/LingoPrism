@@ -289,6 +289,8 @@ G = {  # white glyphs in a 40 × 40 box centred on 0 0
     "sun": '<circle r="8" fill="#fff"/><g stroke="#fff" stroke-width="3.5" stroke-linecap="round"><path d="M0 -17 L0 -13 M0 13 L0 17 M-17 0 L-13 0 M13 0 L17 0 M-12 -12 L-9 -9 M9 9 L12 12 M-12 12 L-9 9 M9 -9 L12 -12"/></g>',
     "moon": '<path d="M-2 -16 A16 16 0 1 0 15 7 A12 12 0 1 1 -2 -16 Z" fill="#fff"/><path d="M10 -12 l1.5 3.5 3.5 1.5 -3.5 1.5 -1.5 3.5 -1.5 -3.5 -3.5 -1.5 3.5 -1.5 Z" fill="#fff"/>',
     "trophy": '<path d="M-11 -15 L11 -15 L10 0 Q0 9 -10 0 Z" fill="#fff"/><path d="M-11 -11 Q-20 -11 -17 -3 Q-15 1 -9 1 M11 -11 Q20 -11 17 -3 Q15 1 9 1" stroke="#fff" stroke-width="3" fill="none"/><path d="M-3 4 L3 4 L4 11 L-4 11 Z M-9 11 L9 11 L9 16 L-9 16 Z" fill="#fff"/>',
+    "gamepad": '<path d="M-12 -9 L12 -9 Q20 -9 21 1 L22 9 Q22 15 16 14 L10 7 L-10 7 L-16 14 Q-22 15 -22 9 L-21 1 Q-20 -9 -12 -9 Z" fill="#fff"/><path d="M-12 -4 L-12 4 M-16 0 L-8 0" stroke="{c}" stroke-width="3" stroke-linecap="round"/><circle cx="10" cy="-3" r="2.6" fill="{c}"/><circle cx="15" cy="2" r="2.6" fill="{c}"/>',
+    "crown": '<path d="M-18 -8 L-9 2 L0 -15 L9 2 L18 -8 L15 12 L-15 12 Z" fill="#fff" stroke="#fff" stroke-width="2.5" stroke-linejoin="round"/><circle cx="0" cy="5" r="3" fill="{c}"/><rect x="-15" y="13" width="30" height="4" rx="2" fill="#fff"/>',
     "prism": '<path d="M0 -16 L15 13 L-15 13 Z" fill="#fff" stroke="#fff" stroke-width="4" stroke-linejoin="round"/><path d="M0 -12 L0 12 L-11 12 Z" fill="{c}" opacity="0.35"/>',
 }
 

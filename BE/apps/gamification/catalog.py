@@ -57,6 +57,7 @@ CONDITION_ART = {
     "cheers": ("heart", "#ff4b4b"), "friends": ("friends", "#14c9a8"), "quests": ("flag", "#e8566f"),
     "sessions": ("bolt", "#1899f0"), "perfect": ("target", "#00b38a"), "early_bird": ("sun", "#ffa31a"),
     "night_owl": ("moon", "#5b5fc7"), "league": ("trophy", "#a56eff"), "league_wins": ("trophy", "#f5b400"),
+    "games": ("gamepad", "#ff7a45"), "bosses": ("crown", "#e0445e"), "game_stars": ("star", "#ff9f1a"),
 }
 SOCIAL_CONDITIONS = {"posts", "cheers", "friends"}  # not offered to children
 
@@ -123,6 +124,16 @@ BADGES = [
     _b("league-10", "Lăng Kính Huyền Thoại", "Lên hạng cao nhất", "league", 10, 10, no_label=True, tier=6),
     _b("league-win-1", "Quán quân tuần", "Về nhất giải đấu tuần", "league_wins", 1, 3),
     _b("league-win-5", "Nhà vô địch", "Về nhất giải đấu 5 tuần", "league_wins", 5, 8),
+    # trò chơi
+    _b("games-1", "Màn chơi đầu tiên", "Qua màn đầu tiên ở mục Trò chơi", "games", 1, 1),
+    _b("games-10", "Tay chơi chăm chỉ", "Qua 10 màn trò chơi", "games", 10, 2),
+    _b("games-50", "Cao thủ trò chơi", "Qua 50 màn trò chơi", "games", 50, 3),
+    _b("games-150", "Huyền thoại sân chơi", "Qua 150 màn trò chơi", "games", 150, 5),
+    _b("bosses-1", "Hạ trùm đầu tiên", "Thắng một màn trùm", "bosses", 1, 2),
+    _b("bosses-4", "Chinh phục bốn cấp", "Thắng 4 màn trùm", "bosses", 4, 5),
+    _b("bosses-8", "Thợ săn trùm", "Thắng 8 màn trùm", "bosses", 8, 8),
+    _b("game-stars-10", "Mười màn ba sao", "Đạt 3 sao ở 10 màn trò chơi", "game_stars", 10, 2),
+    _b("game-stars-50", "Ngôi sao sân chơi", "Đạt 3 sao ở 50 màn trò chơi", "game_stars", 50, 5),
     # cộng đồng (không có với tài khoản trẻ em)
     _b("sharer-1", "Bài đăng đầu tiên", "Đăng bài đầu tiên lên cộng đồng", "posts", 1, 1),
     _b("sharer-5", "Người chia sẻ", "Đăng 5 bài lên cộng đồng", "posts", 5, 2),

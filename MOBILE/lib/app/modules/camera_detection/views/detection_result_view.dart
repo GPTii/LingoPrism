@@ -35,6 +35,7 @@ class _DetectionResultViewState extends State<DetectionResultView> {
   bool saving = false;
   List<DetectionAlternative>? allLabels; // loaded when the learner opens "Vật khác…"
   List<Map<String, dynamic>>? offlineItems; // phone boxes of a result made without network (sent later)
+  final List<NamedObject> added = []; // objects the detector missed, named by the learner
 
   bool get offline => offlineItems != null;
 
@@ -79,6 +80,105 @@ class _DetectionResultViewState extends State<DetectionResultView> {
         it.feedback = 'wrong';
         it.selected = false;
       });
+
+  void _named(DetectedItem it, NamedObject n) => setState(() {
+        it.notObject = false;
+        it.typed = n.typed;
+        it.feedback = 'wrong';
+        it.picked = n.label;
+        it.pickedCard = n.card;
+        it.pickedWord = n.wordId;
+        it.selected = n.card != null && n.card!.personal == null;
+      });
+
+  /// "Gõ tên tiếng Việt": the learner names the object, the checked dictionary gives its word in the language learned
+  /// (no machine translation). A name the dictionary lacks is still sent, for the vocabulary team.
+  Future<NamedObject?> _nameIt() {
+    var typed = '';
+    List<NamedObject>? found;
+    String? error;
+    var busy = false;
+    return showModalBottomSheet<NamedObject>(
+      context: context,
+      isScrollControlled: true,
+      builder: (ctx) => StatefulBuilder(builder: (ctx, setSheet) {
+        Future<void> search() async {
+          final q = typed.trim();
+          if (q.isEmpty) return;
+          setSheet(() {
+            busy = true;
+            error = null;
+          });
+          try {
+            final r = await DetectionRepository.lookup(q);
+            if (ctx.mounted) setSheet(() => found = r);
+          } catch (e) {  // a snackbar cannot show over the sheet: the message goes inside it
+            if (ctx.mounted) setSheet(() => error = ApiClient.toApiException(e).message);
+          } finally {
+            if (ctx.mounted) setSheet(() => busy = false);
+          }
+        }
+
+        return Padding(
+          padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
+          child: SizedBox(
+            height: MediaQuery.of(ctx).size.height * 0.6,
+            child: Column(children: [
+              Padding(
+                padding: EdgeInsets.all(16.w),
+                child: TextField(
+                  autofocus: true,
+                  textInputAction: TextInputAction.search,
+                  decoration: InputDecoration(
+                    hintText: 'Gõ tên tiếng Việt, VD: cái ly',
+                    prefixIcon: const Icon(Icons.edit_rounded),
+                    suffixIcon: busy
+                        ? const Padding(padding: EdgeInsets.all(12), child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)))
+                        : IconButton(icon: const Icon(Icons.translate_rounded), tooltip: 'Dịch', onPressed: search),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r)),
+                  ),
+                  onChanged: (v) => typed = v,
+                  onSubmitted: (_) => search(),
+                ),
+              ),
+              Expanded(
+                child: ListView(children: [
+                  if (error != null)
+                    Padding(padding: EdgeInsets.all(16.w), child: Text(error!, style: TextStyle(color: AppColors.error))),
+                  for (final n in found ?? const <NamedObject>[])
+                    ListTile(
+                      title: Text(n.card?.target?.text ?? n.card?.text ?? '', locale: localeFor(n.card?.target?.language ?? 'en'),
+                          style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w700)),
+                      subtitle: Text(n.card?.meaningVi ?? ''),
+                      trailing: const Icon(Icons.chevron_right_rounded),
+                      onTap: () => Navigator.pop(ctx, n),
+                    ),
+                  if (found != null && found!.isNotEmpty)
+                    ListTile(
+                      leading: const Icon(Icons.send_rounded),
+                      title: Text('Không phải từ nào ở trên – gửi “${typed.trim()}”'),
+                      onTap: () => Navigator.pop(ctx, NamedObject(typed: typed.trim())),
+                    ),
+                  if (found != null && found!.isEmpty)
+                    Padding(
+                      padding: EdgeInsets.all(16.w),
+                      child: Column(children: [
+                        Text('Từ điển đã kiểm tra chưa có “${typed.trim()}”.', textAlign: TextAlign.center),
+                        SizedBox(height: 8.h),
+                        OutlinedButton(
+                          onPressed: () => Navigator.pop(ctx, NamedObject(typed: typed.trim())),
+                          child: const Text('Vẫn gửi tên này để đội ngũ bổ sung'),
+                        ),
+                      ]),
+                    ),
+                ]),
+              ),
+            ]),
+          ),
+        );
+      }),
+    );
+  }
 
   /// "Vật khác…": every object the detector knows, searchable by the word or its Vietnamese meaning.
   Future<void> _pickOther(DetectedItem it) async {
@@ -140,8 +240,8 @@ class _DetectionResultViewState extends State<DetectionResultView> {
 
   Future<void> _save({bool share = false}) async {
     final chosen = _items.where((i) => i.selected && i.shownCard != null && (i.feedback != 'wrong' || i.picked != null)).toList();
-    final reports = _items.any((i) => i.notObject || i.picked != null);
-    if (chosen.isEmpty && !share && !reports) {
+    final reports = _items.any((i) => i.notObject || i.picked != null || i.typed != null);
+    if (chosen.isEmpty && !share && !reports && added.isEmpty) {
       Get.snackbar('Chưa chọn từ', 'Hãy chọn ít nhất một từ để lưu.', snackPosition: SnackPosition.BOTTOM);
       return;
     }
@@ -154,7 +254,7 @@ class _DetectionResultViewState extends State<DetectionResultView> {
     }
     setState(() => saving = true);
     try {
-      final (saved, reported) = await DetectionRepository.confirm(result.id, result.items, topic: topic?.id);
+      final (saved, reported) = await DetectionRepository.confirm(result.id, result.items, topic: topic?.id, added: added);
       if (share && image != null) {
         final caption = chosen.map((i) => i.shownCard!.text).join(' · ');
         await CommunityRepository.createPost(image!.path, caption, chosen.map((i) => i.shownCard!.id).toList(),
@@ -252,6 +352,15 @@ class _DetectionResultViewState extends State<DetectionResultView> {
             ),
           if (it.picked != null && !options.any((o) => o.label == it.picked))
             ChoiceChip(selected: true, onSelected: (_) {}, label: Text(it.shownCard?.target?.text ?? it.picked!)),
+          if (!offline)
+            ActionChip(
+              avatar: const Icon(Icons.translate_rounded, size: 18),
+              label: const Text('Gõ tên tiếng Việt'),
+              onPressed: () async {
+                final n = await _nameIt();
+                if (n != null) _named(it, n);
+              },
+            ),
           ActionChip(avatar: const Icon(Icons.search, size: 18), label: const Text('Vật khác…'), onPressed: () => _pickOther(it)),
           ChoiceChip(
             selected: it.notObject,
@@ -300,7 +409,7 @@ class _DetectionResultViewState extends State<DetectionResultView> {
                     child: Text('✓ Đã học từ báo lỗi của người dùng',
                         style: TextStyle(fontSize: 12.sp, color: AppColors.primary, fontWeight: FontWeight.w600)),
                   ),
-                Text('${it.picked != null ? 'Bạn đã chọn' : it.notObject ? 'Đã báo: không phải đồ vật' : 'Độ tin cậy ${(it.confidence * 100).round()}%'}'
+                Text('${it.picked != null ? 'Bạn đã chọn' : it.notObject ? 'Đã báo: không phải đồ vật' : it.typed != null ? 'Đã ghi nhận “${it.typed}” – đội ngũ sẽ bổ sung từ này' : 'Độ tin cậy ${(it.confidence * 100).round()}%'}'
                     '${card?.personal != null ? ' · đã có trong thư viện (${card!.personal!.statusLabel})' : ''}',
                     style: TextStyle(fontSize: 12.sp, color: it.uncertain && it.picked == null ? Colors.orange : AppColors.textSecondary)),
                 if (asking) _choices(it),
@@ -320,6 +429,8 @@ class _DetectionResultViewState extends State<DetectionResultView> {
                 it.feedback = it.feedback == 'wrong' ? 'unknown' : 'wrong';
                 it.picked = null;
                 it.pickedCard = null;
+                it.pickedWord = null;
+                it.typed = null;
                 it.notObject = false;
                 if (it.feedback == 'wrong') it.selected = false;
               }),
@@ -329,6 +440,37 @@ class _DetectionResultViewState extends State<DetectionResultView> {
       ),
     );
   }
+
+  /// Objects the detector missed: the learner adds them by their Vietnamese name.
+  Widget _addedSection() => Container(
+        margin: EdgeInsets.only(bottom: 12.h),
+        padding: EdgeInsets.all(12.w),
+        decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(16.r),
+            border: Border.fromBorderSide(BorderSide(color: AppColors.line))),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          Text('Máy bỏ sót đồ vật? Gõ tên để thêm', style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w700)),
+          for (var k = 0; k < added.length; k++)
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              title: Text(added[k].card?.target?.text ?? added[k].typed, locale: localeFor(added[k].card?.target?.language ?? 'vi'),
+                  style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w700)),
+              subtitle: Text(added[k].card != null ? added[k].card!.meaningVi : 'Chưa có trong từ điển – đã ghi nhận để bổ sung'),
+              trailing: IconButton(icon: const Icon(Icons.close_rounded), tooltip: 'Bỏ', onPressed: () => setState(() => added.removeAt(k))),
+            ),
+          if (added.length < 5)
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                icon: const Icon(Icons.add_rounded),
+                label: const Text('Thêm đồ vật'),
+                onPressed: () async {
+                  final n = await _nameIt();
+                  if (n != null) setState(() => added.add(n));
+                },
+              ),
+            ),
+        ]),
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -364,6 +506,7 @@ class _DetectionResultViewState extends State<DetectionResultView> {
           Text('Chọn từ muốn lưu', style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold)),
           SizedBox(height: 8.h),
           ..._items.map(_itemTile),
+          if (!offline) _addedSection(),
           SizedBox(height: 8.h),
           DropdownButtonFormField<Topic?>(
             initialValue: topic,

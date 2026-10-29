@@ -61,7 +61,7 @@ export function PrivacyPage() {
         <li>Cung cấp tính năng: học, ôn tập đúng lúc, nhận diện đồ vật, bảng xếp hạng, nhóm và tin nhắn.</li>
         <li>Đồng bộ tiến độ giữa web và app, gửi thông báo nhắc học (bạn tắt được trong Hồ sơ).</li>
         <li>Giữ an toàn: chống spam, chặn đăng nhập trái phép, kiểm duyệt nội dung bị báo cáo.</li>
-        <li>Cải thiện mô hình nhận diện: chỉ dùng những lần bạn <b>tự báo lỗi</b> nhận diện (phần ảnh của đồ vật đó).</li>
+        <li>Cải thiện mô hình nhận diện: chỉ dùng những ảnh mà bạn <b>tự báo lỗi</b> nhận diện hoặc <b>tự gõ tên</b> đồ vật (ảnh đó và tên bạn gõ), sau khi được duyệt.</li>
       </ul>
       <p>Chúng tôi <b>không bán dữ liệu</b>, <b>không hiển thị quảng cáo</b> và <b>không dùng mã quảng cáo</b> của thiết bị.</p>
 

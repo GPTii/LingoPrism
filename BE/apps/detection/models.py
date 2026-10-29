@@ -70,7 +70,11 @@ class DetectionItem(models.Model):
     word = models.ForeignKey(Word, null=True, blank=True, on_delete=models.SET_NULL)
     selected = models.BooleanField(default=False)
     feedback = models.CharField(max_length=7, choices=Feedback.choices, default=Feedback.UNKNOWN)
-    corrected_label = models.CharField(max_length=60, blank=True, help_text="Nhãn đúng do người dùng chọn khi sai")
+    corrected_label = models.CharField(max_length=80, blank=True, help_text="Nhãn đúng do người dùng chọn khi sai")
+    corrected_word = models.ForeignKey(Word, null=True, blank=True, on_delete=models.SET_NULL, related_name="+",
+                                       help_text="Từ người dùng chọn sau khi gõ tên tiếng Việt")
+    corrected_text = models.CharField(max_length=80, blank=True, help_text="Tên tiếng Việt người dùng gõ")
+    manual = models.BooleanField(default=False, help_text="Đồ vật model bỏ sót, người dùng tự thêm (không có khung)")
 
     class Meta:
         ordering = ["-confidence"]
@@ -94,7 +98,7 @@ class CorrectionMemory(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="correction_reports")
     item = models.OneToOneField(DetectionItem, on_delete=models.CASCADE, related_name="report")
     wrong_label = models.CharField(max_length=60, db_index=True, help_text="Nhãn model đã đoán")
-    correct_label = models.CharField(max_length=60, blank=True, help_text="Nhãn đúng; rỗng = không phải đồ vật nào")
+    correct_label = models.CharField(max_length=80, blank=True, help_text="Nhãn đúng; rỗng = không phải đồ vật nào")
     embedding = models.BinaryField(help_text="float32 vector của vùng ảnh (BE/models/embedder.onnx)")
     crop = models.ImageField(upload_to="corrections/%Y/%m/", null=True, blank=True)
     status = models.CharField(max_length=8, choices=Status.choices, default=Status.PENDING, db_index=True)

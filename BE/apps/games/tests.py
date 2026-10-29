@@ -175,3 +175,57 @@ def test_boss_needs_every_round_of_its_level(words):
     user = User.objects.create_user("p@example.com", "Strong!Pass123", active_language="en")
     learn(user, words)
     assert client_for(user).get("/api/v1/games/rounds/L1-boss/").status_code == 403
+
+
+# ---------------------------------------------------------------- rewards and helpers
+
+def test_winning_rounds_counts_for_the_daily_quest_and_the_game_badges(words):
+    from apps.gamification.models import Badge, DailyQuest, UserBadge, UserStats
+    from apps.gamification.sync import sync_catalog
+    from apps.gamification.models import Item
+    sync_catalog(Item, Badge)
+    user = User.objects.create_user("p@example.com", "Strong!Pass123", active_language="en")
+    c = client_for(user)
+    learn(user, words[:10])
+    play(c, "L1-r1")
+    quest = DailyQuest.objects.get(user=user, kind=DailyQuest.Kind.WIN_GAMES)
+    assert quest.progress == 1 and not quest.completed
+    stats = UserStats.objects.get(user=user)
+    assert (stats.games_won, stats.bosses_won, stats.games_perfect) == (1, 0, 1)
+    assert UserBadge.objects.filter(user=user, badge__code="games-1").exists()
+    play(c, "L1-r1")  # a replay: the quest counts it, the badges do not
+    stats.refresh_from_db()
+    quest.refresh_from_db()
+    assert quest.completed and stats.games_won == 1 and stats.games_perfect == 1
+    play(c, "L1-r2", ok=False)
+    stats.refresh_from_db()
+    assert stats.games_won == 1
+
+
+def test_helpers_cost_scales_and_are_limited_per_round(words):
+    user = User.objects.create_user("p@example.com", "Strong!Pass123", active_language="en")
+    c = client_for(user)
+    learn(user, words[:2])
+    r = c.get("/api/v1/games/rounds/L1-r1/").data
+    assert r["helpers"]["cost"] == {"hint": 5, "retry": 10} and r["helpers"]["scales"] == 0
+    assert all(item.get("hint") for g in r["games"] if g["game"] != "match" for item in g["items"])
+    body = {"token": r["token"], "kind": "hint"}
+    assert c.post("/api/v1/games/rounds/L1-r1/help/", body, format="json").status_code == 400  # no vảy
+    User.objects.filter(pk=user.pk).update(scales_balance=100)
+    res = c.post("/api/v1/games/rounds/L1-r1/help/", body, format="json")
+    assert res.status_code == 200 and res.data["scales"] == 95 and res.data["left"] == 2
+    assert c.post("/api/v1/games/rounds/L1-r1/help/", {**body, "kind": "retry"}, format="json").data["scales"] == 85
+    c.post("/api/v1/games/rounds/L1-r1/help/", body, format="json")
+    c.post("/api/v1/games/rounds/L1-r1/help/", body, format="json")
+    assert c.post("/api/v1/games/rounds/L1-r1/help/", body, format="json").status_code == 400  # 3 per round
+    assert User.objects.get(pk=user.pk).scales_balance == 75
+    other = User.objects.create_user("o@example.com", "Strong!Pass123", active_language="en")
+    assert client_for(other).post("/api/v1/games/rounds/L1-r1/help/", body, format="json").status_code == 400
+
+
+@pytest.mark.django_db
+def test_reading_hints_spell_the_syllable_out():
+    stop = next(s for s in stops("reading", 1) if s.kind == "round")
+    games, _ = content.reading_round(stop, seed=3)
+    hints = [item["hint"] for g in games if g["game"] != "match" for item in g["items"]]
+    assert hints and all(h.startswith(("Đánh vần: ", "Bắt đầu bằng")) for h in hints)

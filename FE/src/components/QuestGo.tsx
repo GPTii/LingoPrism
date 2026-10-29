@@ -9,6 +9,7 @@ const QUEST_LINK: Record<string, string> = {
   reach_review_goal: '/learn?kind=review',
   post_community_image: '/community',
   engage_community: '/community',
+  win_games: '/tro-choi',
 }
 
 /** The arrow beside an unfinished quest that takes the learner to where it is done. */

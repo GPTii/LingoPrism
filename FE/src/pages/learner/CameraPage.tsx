@@ -1,9 +1,9 @@
-import { App, Button, Checkbox, Input, Select, Spin, Tooltip, Upload } from 'antd'
-import { CameraOutlined, DislikeOutlined, LikeOutlined, ShareAltOutlined } from '@ant-design/icons'
+import { App, Button, Checkbox, Input, Spin, Tooltip, Upload } from 'antd'
+import { CameraOutlined, CloseOutlined, DislikeOutlined, LikeOutlined, PlusOutlined, ShareAltOutlined } from '@ant-design/icons'
 import { useState, type ReactNode } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
-import { communityApi, learnApi, type DetectedItem, type DetectionResult } from '../../api/app'
+import { communityApi, learnApi, type DetectedItem, type DetectionResult, type NameLookup } from '../../api/app'
 import { useAuth } from '../../auth/store'
 import type { WordCard } from '../../api/vocab'
 import { errorMessage } from '../../api/client'
@@ -18,8 +18,44 @@ const Note = ({ tone, children }: { tone: 'brand' | 'amber' | 'red' | 'green' | 
   return <span className={`num rounded-md px-2 py-0.5 text-xs font-semibold ${cls}`}>{children}</span>
 }
 
-/** picked: the object the learner says it is (error report); notObject: "there is no object here" */
-type Item = DetectedItem & { picked?: string; pickedCard?: WordCard; notObject?: boolean }
+/** picked: the object the learner says it is (error report); notObject: "there is no object here";
+ * typed: the Vietnamese name they typed, pickedWord the dictionary word they chose for it */
+type Item = DetectedItem & { picked?: string; pickedCard?: WordCard; pickedWord?: number; typed?: string; notObject?: boolean }
+/** an object the detector missed, named by the learner */
+type Added = { typed: string; found: NameLookup | null }
+
+/** "Gõ tên tiếng Việt": the learner names the object, the checked dictionary gives its word in the language learned
+ * (no machine translation). A name the dictionary lacks is still sent: the vocabulary team adds it later. */
+function NameIt({ onPick, placeholder = 'Gõ tên tiếng Việt, VD: cái ly' }: {
+  onPick: (found: NameLookup | null, typed: string) => void
+  placeholder?: string
+}) {
+  const [query, setQuery] = useState('')
+  const found = useQuery({ queryKey: ['name-lookup', query], queryFn: () => learnApi.lookupName(query), enabled: !!query, staleTime: 600_000 })
+  return (
+    <div className="flex flex-col items-center gap-2 w-full">
+      <Input.Search placeholder={placeholder} enterButton="Dịch" maxLength={80} allowClear className="max-w-xs"
+        aria-label="Tên đồ vật bằng tiếng Việt" loading={found.isFetching} onSearch={(v) => setQuery(v.trim())} />
+      {query && found.data && (found.data.length ? (
+        <div className="flex flex-wrap justify-center gap-1.5">
+          {found.data.map((r) => (
+            <Button key={r.word_id} size="small" data-word={r.word_id} onClick={() => onPick(r, query)}>
+              <span lang={r.card.target ? langTag(r.card.target.language) : undefined} className="font-semibold">{r.card.target?.text}</span>
+              {r.card.meaning_vi && <span className="opacity-70 ml-1">({r.card.meaning_vi})</span>}
+            </Button>
+          ))}
+          <Button size="small" type="link" onClick={() => onPick(null, query)}>Không phải từ nào ở đây – gửi “{query}”</Button>
+        </div>
+      ) : (
+        <div className="text-sm text-slate-500 text-center">
+          Từ điển đã kiểm tra chưa có “{query}”.{' '}
+          <Button size="small" type="link" className="!px-0" onClick={() => onPick(null, query)}>Vẫn gửi tên này</Button>
+          {' '}để đội ngũ bổ sung.
+        </div>
+      ))}
+    </div>
+  )
+}
 
 /** The word shown for an object: the one the learner picked, else the model's answer. */
 const shownCard = (i: Item) =>
@@ -65,12 +101,13 @@ export default function CameraPage() {
   const [result, setResult] = useState<DetectionResult | null>(null)
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
-  const allLabels = useQuery({ queryKey: ['detect-labels'], queryFn: learnApi.detectLabels, enabled: !!result, staleTime: 3600_000 })
+  const [added, setAdded] = useState<Added[]>([])
 
   const detect = async (file: File) => {
     setFile(file)
     setPreview(URL.createObjectURL(file))
     setResult(null)
+    setAdded([])
     setLoading(true)
     try {
       const r = await learnApi.detect(file)
@@ -99,7 +136,11 @@ export default function CameraPage() {
     update(i.id, { picked: label, pickedCard: c, notObject: false, feedback: 'wrong', selected: !!c && !c.personal })
   }
   // error report: nothing of the kind in the photo – the server remembers it and stops showing this box
-  const notObject = (i: Item) => update(i.id, { picked: undefined, pickedCard: undefined, notObject: true, feedback: 'wrong', selected: false })
+  const notObject = (i: Item) => update(i.id, { picked: undefined, pickedCard: undefined, pickedWord: undefined, typed: undefined, notObject: true, feedback: 'wrong', selected: false })
+  // the learner typed the object's Vietnamese name: the word found (or only the name, for the vocabulary team)
+  const named = (i: Item, found: NameLookup | null, typed: string) => found
+    ? update(i.id, { picked: found.label, pickedCard: found.card, pickedWord: found.word_id, typed, notObject: false, feedback: 'wrong', selected: !found.card.personal })
+    : update(i.id, { picked: undefined, pickedCard: undefined, pickedWord: undefined, typed, notObject: false, feedback: 'wrong', selected: false })
 
   const save = async () => {
     if (!result) return
@@ -107,7 +148,8 @@ export default function CameraPage() {
     try {
       const r = await learnApi.confirm(result.id, (result.items as Item[]).map((i) => ({
         id: i.id, selected: i.selected, feedback: i.feedback, corrected_label: i.picked ?? '', not_object: !!i.notObject,
-      })))
+        corrected_word: i.pickedWord ?? null, typed: i.typed ?? '',
+      })), added.map((a) => ({ word: a.found?.word_id ?? null, typed: a.typed })))
       message.success(`Đã lưu ${r.saved} từ vào thư viện`)
       if (r.reported) message.info(`Cảm ơn bạn đã báo lỗi! Lần sau gặp vật tương tự, hệ thống sẽ nhận đúng.`, 5)
       queryClient.invalidateQueries({ queryKey: ['summary'] })
@@ -167,7 +209,6 @@ export default function CameraPage() {
             {(result?.items as Item[] | undefined)?.map((i) => {
               const c = shownCard(i)
               const asking = (i.uncertain || i.feedback === 'wrong') && !result!.confirmed
-              const listed = new Set([i.label, ...i.alternatives.map((a) => a.label)])
               return (
               <div key={i.id} className="lp-card p-4 flex gap-3 items-start">
                 <Checkbox checked={i.selected} disabled={!c || (i.feedback === 'wrong' && !i.picked) || result!.confirmed}
@@ -197,16 +238,10 @@ export default function CameraPage() {
                           </Button>
                         ))}
                       </div>
+                      <div className="mt-3 text-sm font-semibold text-slate-600 mb-1.5">Không có trong đó? Gõ tên tiếng Việt:</div>
+                      <NameIt onPick={(found, typed) => named(i, found, typed)} />
+                      {i.typed && !i.pickedWord && <div className="mt-1"><Note tone="amber">Đã ghi nhận “{i.typed}” – đội ngũ sẽ bổ sung từ này</Note></div>}
                       <div className="flex flex-wrap justify-center items-center gap-1.5 mt-2">
-                        <Select size="small" showSearch placeholder="Vật khác…" className="min-w-[180px]"
-                          loading={allLabels.isLoading} value={i.picked && !listed.has(i.picked) ? i.picked : undefined}
-                          optionFilterProp="search"
-                          options={(allLabels.data ?? []).filter((o) => !listed.has(o.label)).map((o) => ({
-                            value: o.label,
-                            label: `${o.card.target?.text ?? o.label}${o.card.meaning_vi ? ` (${o.card.meaning_vi})` : ''}`,
-                            search: `${o.label} ${o.card.target?.text ?? ''} ${o.card.meaning_vi ?? ''}`,
-                          }))}
-                          onChange={(label: string) => pick(i, label, allLabels.data?.find((o) => o.label === label)?.card)} />
                         <Button size="small" danger type={i.notObject ? 'primary' : 'default'} onClick={() => notObject(i)}>
                           Không phải đồ vật
                         </Button>
@@ -227,9 +262,25 @@ export default function CameraPage() {
               </div>
               )
             })}
-            {result && result.items.length > 0 && (
+            {result && !result.confirmed && (
+              <div className="lp-card p-4 flex flex-col items-center gap-2">
+                <div className="font-semibold text-slate-700 flex items-center gap-1.5"><PlusOutlined /> Máy bỏ sót đồ vật? Gõ tên để thêm</div>
+                {added.map((a, k) => (
+                  <div key={k} className="w-full flex items-center gap-2 rounded-xl bg-slate-50 px-3 py-2">
+                    <div className="flex-1">
+                      {a.found?.card.target ? <TargetWord target={a.found.card.target} size="sm" /> : <span className="font-semibold">{a.typed}</span>}
+                      <div className="text-sm text-slate-500">{a.found ? a.found.card.meaning_vi : 'Chưa có trong từ điển – đã ghi nhận để bổ sung'}</div>
+                    </div>
+                    <Button type="text" size="small" aria-label="Bỏ" icon={<CloseOutlined />} onClick={() => setAdded(added.filter((_, j) => j !== k))} />
+                  </div>
+                ))}
+                {added.length < 5 && <NameIt key={added.length} placeholder="VD: cái ly, quả bơ…" onPick={(found, typed) => setAdded([...added, { found, typed }])} />}
+              </div>
+            )}
+            {result && (result.items.length > 0 || added.length > 0) && (
               <Button type="primary" size="large" loading={saving} disabled={result.confirmed} onClick={save}>
-                {result.confirmed ? 'Đã lưu vào thư viện' : `Lưu ${result.items.filter((x) => x.selected).length} từ đã chọn`}
+                {result.confirmed ? 'Đã lưu vào thư viện'
+                  : `Lưu ${result.items.filter((x) => x.selected).length + added.filter((a) => a.found && !a.found.card.personal).length} từ đã chọn`}
               </Button>
             )}
             {result?.confirmed && file && !isKid && (result.items as Item[]).some((x) => x.selected && shownCard(x)) && (

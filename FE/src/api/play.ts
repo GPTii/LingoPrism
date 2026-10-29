@@ -44,7 +44,8 @@ export interface Prompt { text?: string; sub?: string; audio?: Audio; image?: st
 export interface Option { t: string; s?: string; image?: string | null; emoji?: string }
 
 export type ChooseKind = 'pop' | 'fish' | 'tone' | 'picture' | 'meaning' | 'gate'
-export interface ChooseItem { prompt: Prompt; options: Option[]; answer: string }
+/** hint: the word's meaning / how the syllable is spelt out, shown when the learner pays vảy for it */
+export interface ChooseItem { prompt: Prompt; options: Option[]; answer: string; hint?: string }
 export interface TrainItem {
   audio: Audio
   text: string
@@ -52,11 +53,15 @@ export interface TrainItem {
   rhymes: string[]
   tones: { code: string; label: string; symbol: string }[]
   answer: { onset: string; rhyme: string; tone: string }
+  hint?: string
 }
-export interface SortItem { t: string; audio: Audio; answer: string }
+export interface SortItem { t: string; audio: Audio; answer: string; hint?: string }
 export interface MatchItem { a: Option; b: Option }
-export interface TilesItem { prompt: Prompt; tiles: string[]; joiner: string; answer: string }
-export interface TypeItem { prompt: Prompt; answer: string; accepted: string[] }
+export interface TilesItem { prompt: Prompt; tiles: string[]; joiner: string; answer: string; hint?: string }
+export interface TypeItem { prompt: Prompt; answer: string; accepted: string[]; hint?: string }
+
+export type HelperKind = 'hint' | 'retry'
+export interface GameHelpers { cost: Record<HelperKind, number>; per_round: number; scales: number }
 
 export type MiniGame =
   | { game: ChooseKind; title: string; items: ChooseItem[] }
@@ -75,6 +80,7 @@ export interface GameRound {
   pass_percent: number
   games: MiniGame[]
   token: string
+  helpers: GameHelpers
 }
 
 export interface GameFinish {
@@ -95,5 +101,7 @@ export const playApi = {
   round: (node: string) => api.get<GameRound>(`/games/rounds/${node}/`).then((r) => r.data),
   finish: (node: string, token: string, results: boolean[][]) =>
     api.post<GameFinish>(`/games/rounds/${node}/finish/`, { token, results }).then((r) => r.data),
+  help: (node: string, token: string, kind: HelperKind) =>
+    api.post<{ kind: HelperKind; cost: number; scales: number; left: number }>(`/games/rounds/${node}/help/`, { token, kind }).then((r) => r.data),
   openChest: (node: string) => api.post<{ gems: number; scales: number }>(`/games/chests/${node}/open/`).then((r) => r.data),
 }

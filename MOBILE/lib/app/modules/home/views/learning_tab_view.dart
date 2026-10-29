@@ -762,6 +762,8 @@ class LearningTabView extends GetView<HomeStatsController> {
       case 'post_community_image':
       case 'engage_community':
         return () => HomeController.to.changeTab(2);
+      case 'win_games':
+        return () => Get.toNamed(Routes.games);
     }
     return null;
   }

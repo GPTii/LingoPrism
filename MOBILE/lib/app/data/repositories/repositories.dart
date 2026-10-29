@@ -360,23 +360,33 @@ class DetectionRepository {
               fields: {'model_name': modelName, 'inference_ms': inferenceMs, 'items': jsonEncode(items)})));
 
   /// Returns (words saved, error reports remembered by the server).
-  static Future<(int, int)> confirm(int detectionId, List<DetectedItem> items, {int? topic}) => confirmRaw(
-      detectionId,
-      items
-          .map((i) => <String, dynamic>{
-                'id': i.id,
-                'selected': i.selected,
-                'feedback': i.feedback,
-                'corrected_label': i.picked ?? '',
-                'not_object': i.notObject,
-              })
-          .toList(),
-      topic: topic);
+  /// [added]: objects the detector missed, named by the learner.
+  static Future<(int, int)> confirm(int detectionId, List<DetectedItem> items, {int? topic, List<NamedObject> added = const []}) =>
+      confirmRaw(
+          detectionId,
+          items
+              .map((i) => <String, dynamic>{
+                    'id': i.id,
+                    'selected': i.selected,
+                    'feedback': i.feedback,
+                    'corrected_label': i.picked ?? '',
+                    'corrected_word': i.pickedWord,
+                    'typed': i.typed ?? '',
+                    'not_object': i.notObject,
+                  })
+              .toList(),
+          topic: topic,
+          added: [for (final a in added) {'word': a.wordId, 'typed': a.typed}]);
 
-  static Future<(int, int)> confirmRaw(int detectionId, List<Map<String, dynamic>> items, {int? topic}) async {
-    final d = asMap(await _api.post('/detections/$detectionId/confirm/', data: {'items': items, 'topic': topic}));
+  static Future<(int, int)> confirmRaw(int detectionId, List<Map<String, dynamic>> items,
+      {int? topic, List<Map<String, dynamic>> added = const []}) async {
+    final d = asMap(await _api.post('/detections/$detectionId/confirm/', data: {'items': items, 'topic': topic, 'added': added}));
     return (asInt(d['saved']), asInt(d['reported']));
   }
+
+  /// The words of the checked dictionary a typed Vietnamese name may be, in the language being learned.
+  static Future<List<NamedObject>> lookup(String typed) async =>
+      asMapList(await _api.get('/detections/lookup/', query: {'q': typed})).map((j) => NamedObject.fromJson(typed, j)).toList();
 
   /// Every object the detector knows with its word card – the list for "it is something else".
   static Future<List<DetectionAlternative>> labels() async => (await labelsRaw())
@@ -449,6 +459,10 @@ class GamesRepository {
       asMap(await _api.post('/games/rounds/$node/finish/', data: {'token': token, 'results': results}));
 
   static Future<Map<String, dynamic>> openChest(String node) async => asMap(await _api.post('/games/chests/$node/open/'));
+
+  /// Pay vảy for a helper during a round: 'hint' or 'retry'.
+  static Future<Map<String, dynamic>> help(String node, String token, String kind) async =>
+      asMap(await _api.post('/games/rounds/$node/help/', data: {'token': token, 'kind': kind}));
 }
 
 class LevelRepository {

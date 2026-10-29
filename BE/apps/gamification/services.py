@@ -178,6 +178,9 @@ def badge_values(stats: UserStats) -> dict:
         Badge.Condition.NIGHT_OWL: stats.night_owl,
         Badge.Condition.LEAGUE: stats.best_league,
         Badge.Condition.LEAGUE_WINS: stats.league_wins,
+        Badge.Condition.GAMES: stats.games_won,
+        Badge.Condition.BOSSES: stats.bosses_won,
+        Badge.Condition.GAME_STARS: stats.games_perfect,
     }
 
 
@@ -204,9 +207,10 @@ def check_badges(user, stats: UserStats | None = None):
         push_event(user.id, "badge", {"code": badge.code, "name": badge.name, "gems": badge.reward_gems, "icon": badge.icon})
 
 
-def bump_stat(user, field: str, by: int = 1):
+def bump_stat(user, field: str, by: int = 1, **more: int):
+    """Add to one or more counters (bump_stat(u, "games_won", bosses_won=1)), then award the badges reached."""
     UserStats.objects.get_or_create(user=user)
-    UserStats.objects.filter(user=user).update(**{field: F(field) + by})
+    UserStats.objects.filter(user=user).update(**{f: F(f) + n for f, n in {field: by, **more}.items()})
     check_badges(user)
 
 
@@ -221,6 +225,7 @@ def ensure_quests(user, day: date | None = None) -> list[DailyQuest]:
         DailyQuest.Kind.REACH_REVIEW_GOAL: goal.daily_review_target if goal else 20,
         DailyQuest.Kind.POST_COMMUNITY_IMAGE: 1,
         DailyQuest.Kind.ENGAGE_COMMUNITY: 5,
+        DailyQuest.Kind.WIN_GAMES: 2,
     }
     if user.learner_type == "kid":  # no social quests for children
         targets.pop(DailyQuest.Kind.POST_COMMUNITY_IMAGE)

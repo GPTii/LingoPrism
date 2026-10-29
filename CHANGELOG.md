@@ -2,6 +2,21 @@
 
 <!-- Sinh từ BE/apps/core/releases.json bằng `python manage.py changelog` – sửa ở file đó, không sửa ở đây. -->
 
+## 1.6.0 – 29/10/2026: Trợ giúp trong trò chơi, gõ tên đồ vật
+
+### Mới
+
+- Trò chơi có nhiệm vụ ngày riêng: qua 2 màn ở mục Trò chơi.
+- 9 huy hiệu trò chơi: qua 1, 10, 50, 150 màn; thắng 1, 4, 8 màn trùm; đạt 3 sao ở 10 và 50 màn.
+- Dùng vảy để mua trợ giúp khi chơi: Dịch nghĩa (hoặc Gợi ý đánh vần với bé) 5 vảy, Làm lại câu vừa sai 10 vảy; mỗi màn dùng được 3 lần mỗi loại.
+- Chụp ảnh: máy nhận sai thì gõ tên đồ vật bằng tiếng Việt (VD "cái ly") để có ngay từ đó trong ngôn ngữ đang học, lấy từ từ điển đã kiểm tra.
+- Chụp ảnh: máy bỏ sót đồ vật thì gõ tên để thêm và lưu từ.
+- Tên bạn gõ được dùng để dạy lại máy nhận diện: lần sau gặp vật trông giống thế, máy nhận đúng; ảnh được đưa vào dữ liệu cho lần huấn luyện sau.
+
+### Cải thiện
+
+- Quản trị: danh sách tên người dùng gõ mà từ điển chưa có và các đồ vật máy chưa biết, để bổ sung từ và lớp mới.
+
 ## 1.5.0 – 29/10/2026: Mục Trò chơi
 
 ### Mới
