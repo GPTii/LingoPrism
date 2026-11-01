@@ -10,6 +10,7 @@ import { Prismo } from '../../components/brand/Brand'
 import { EmptyState, PageHeader, UserAvatar } from '../../components/ui'
 import { ReportUserButton } from './ReportUser'
 import { StickerImage, StickerPicker } from '../../components/Stickers'
+import ChatVoiceTools from '../../components/ChatVoiceTools'
 
 const when = (iso: string) => (dayjs(iso).isSame(dayjs(), 'day') ? dayjs(iso).format('HH:mm') : dayjs(iso).format('DD/MM'))
 
@@ -155,10 +156,13 @@ function Conversation({ id }: { id: number }) {
         {t && !t.can_message ? (
           <div className="text-center text-sm text-slate-500">Hai bạn không còn theo dõi nhau nên không gửi thêm tin được.</div>
         ) : (
-          <div className="flex gap-2">
-            <Input.Search placeholder="Nhập tin nhắn…" enterButton="Gửi" aria-label="Tin nhắn" maxLength={1000}
-              value={text} onChange={(e) => setText(e.target.value)} onSearch={() => send()} />
-            <StickerPicker onPick={send} />
+          <div className="flex flex-col gap-2">
+            <ChatVoiceTools text={text} setText={setText} />
+            <div className="flex gap-2">
+              <Input.Search placeholder="Nhập tin nhắn…" enterButton="Gửi" aria-label="Tin nhắn" maxLength={1000}
+                value={text} onChange={(e) => setText(e.target.value)} onSearch={() => send()} />
+              <StickerPicker onPick={send} />
+            </div>
           </div>
         )}
       </div>

@@ -106,3 +106,28 @@ def test_wrong_script_uses_cedict():
         pytest.skip("CC-CEDICT not downloaded")
     assert translator.wrong_script("馬鈴薯", "zh-Hans") and not translator.wrong_script("马铃薯", "zh-Hans")
     assert translator.wrong_script("头发", "zh-Hant") and not translator.wrong_script("頭髮", "zh-Hant")
+
+
+def test_chat_composer_can_leave_the_source_to_the_model(client, gemini):
+    calls, answer = gemini
+    answer["text"] = "我叫兰。"
+    res = client.post("/api/v1/translate/", {"text": "Tôi tên Lan", "source": "auto", "target": "zh-Hans"},
+                      format="json")
+    assert res.status_code == 200, res.data
+    assert res.data["translation"] == "我叫兰。" and res.data["reading"] == "wǒ jiào lán"
+    assert res.data["source_tts"] == "" and res.data["source_reading"] == ""
+    assert "Detect the language" in calls[0]["contents"][0]["parts"][0]["text"]
+    assert client.post("/api/v1/translate/", {"text": "hi", "source": "en", "target": "auto"},
+                       format="json").status_code == 400  # auto is a source only
+
+
+def test_auto_does_not_turn_one_chinese_script_into_the_other(client, gemini):
+    pytest.importorskip("pypinyin")
+    try:
+        from apps.vocab.lang.sources import cedict
+        cedict()
+    except FileNotFoundError:
+        pytest.skip("CC-CEDICT not downloaded")
+    res = client.post("/api/v1/translate/", {"text": "我的頭髮", "source": "auto", "target": "zh-Hans"},
+                      format="json")
+    assert res.status_code == 400 and gemini[0] == []

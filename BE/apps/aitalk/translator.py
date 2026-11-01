@@ -15,6 +15,7 @@ from . import generator
 from .generator import LANGUAGE_NAMES, AiUnavailable
 
 LANGUAGES = ("vi", "en", "zh-Hans", "zh-Hant")
+AUTO = "auto"  # source only: the model detects it
 MAX_CHARS = 500
 MAX_WORDS = 8
 
@@ -42,10 +43,16 @@ def translate(text: str, source: str, target: str) -> dict:
     """→ {"translation", "reading", "source_reading", "model"}; raises AiUnavailable."""
     if not generator.enabled():
         raise AiUnavailable("Tính năng dịch chưa được bật trên máy chủ.")
-    prompt = (
-        f"Translate from {LANGUAGE_NAMES[source]} into {LANGUAGE_NAMES[target]}.\n"
-        f"Text:\n{text}"
-    )
+    if source == AUTO:  # chat: the learner may type or speak any of the languages
+        prompt = (
+            f"Detect the language of the text and translate it into {LANGUAGE_NAMES[target]}. If it is already "
+            f"in that language, return it unchanged.\nText:\n{text}"
+        )
+    else:
+        prompt = (
+            f"Translate from {LANGUAGE_NAMES[source]} into {LANGUAGE_NAMES[target]}.\n"
+            f"Text:\n{text}"
+        )
     if settings.GEMINI_API_KEY:  # a small fast model: the learner is waiting with the mic in hand
         raw, model = generator._gemini(prompt, system=SYSTEM, schema=SCHEMA, fail=FAIL,
                                        model=settings.GEMINI_TRANSLATE_MODEL, timeout=25)
@@ -84,7 +91,7 @@ def verified_words(texts: dict[str, str], user) -> list[dict]:
     found: list[dict] = []
     seen: set[int] = set()
     for language, text in texts.items():
-        if language == "vi" or not text:
+        if language in ("vi", AUTO) or not text:
             continue
         rows = WordTranslation.objects.filter(visible_translations_q(user), language_id=language)
         if language.startswith("zh"):

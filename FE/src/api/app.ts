@@ -527,7 +527,7 @@ export const learnApi = {
   /** which AI features the server has switched on */
   aiStatus: () => api.get<{ dialogue: boolean; translate?: boolean }>('/ai/status/').then((r) => r.data),
   /** machine translation of typed or spoken text (not stored), with the verified words found in it */
-  translate: (text: string, source: TranslateLang, target: TranslateLang) =>
+  translate: (text: string, source: TranslateLang | 'auto', target: TranslateLang) =>
     api.post<Translation>('/translate/', { text, source, target }).then((r) => r.data),
   /** save a verified word found in a translation, in that word's own language */
   saveTranslatedWord: (w: TranslatedWord) =>

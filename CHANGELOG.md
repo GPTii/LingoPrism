@@ -2,13 +2,14 @@
 
 <!-- Sinh từ BE/apps/core/releases.json bằng `python manage.py changelog` – sửa ở file đó, không sửa ở đây. -->
 
-## 1.8.0 – 02/11/2026: Dịch bằng giọng nói
+## 1.8.0 – 02/11/2026: Dịch bằng giọng nói, nói và dịch trong chat
 
 ### Mới
 
 - Mục Dịch mới (web: Từ vựng → Dịch, app: tab Học): gõ hoặc nói một câu bằng tiếng Việt, tiếng Anh, tiếng Trung giản thể hoặc phồn thể, nghe bản dịch đọc to và chép lại.
 - Hai người nói chuyện qua máy: mỗi bên có một nút mic, nói bên nào thì dịch sang bên kia.
 - Bản dịch tiếng Trung có pinyin; những từ đã kiểm duyệt có trong câu hiện bên dưới, bấm Lưu để đưa vào Từ của tôi.
+- Trong tin nhắn riêng và chat nhóm: bấm Nói để nói thay vì gõ (chữ hiện ngay trong ô chat), rồi bấm Dịch để đổi tin sang tiếng Anh hoặc tiếng Trung trước khi gửi; có pinyin để xem và nút Hoàn tác.
 
 ### Cải thiện
 

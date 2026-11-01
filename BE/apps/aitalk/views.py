@@ -90,7 +90,8 @@ class PhotoDialogueView(APIView):
 
 
 class TranslateView(APIView):
-    """POST {text, source, target}: a machine translation (not stored) + verified words found in it."""
+    """POST {text, source, target}: a machine translation (not stored) + verified words found in it.
+    source may be "auto" (chat composer): the model detects it."""
 
     throttle_scope = "translate"
 
@@ -99,9 +100,10 @@ class TranslateView(APIView):
         text = str(request.data.get("text", "")).strip()
         source, target = request.data.get("source"), request.data.get("target")
         langs = translator.LANGUAGES
-        if source not in langs or target not in langs or source == target:
+        if source not in (*langs, translator.AUTO) or target not in langs or source == target:
             return Response({"detail": "Cặp ngôn ngữ không hợp lệ", "errors": {}}, status=400)
-        if {source, target} == {"zh-Hans", "zh-Hant"}:
+        if {source, target} == {"zh-Hans", "zh-Hant"} or (
+                source == translator.AUTO and translator.wrong_script(text, target)):
             # giản ↔ phồn is not a translation: the words themselves differ by region (土豆 / 馬鈴薯)
             return Response({"detail": "Không chuyển trực tiếp giữa giản thể và phồn thể", "errors": {}}, status=400)
         if not text:
@@ -114,6 +116,6 @@ class TranslateView(APIView):
             return Response({"detail": str(e), "errors": {}}, status=503)
         return Response({
             "text": text, "source": source, "target": target, **out, "machine_translated": True,
-            "source_tts": tts_locale(source), "target_tts": tts_locale(target),
+            "source_tts": tts_locale(source) if source != translator.AUTO else "", "target_tts": tts_locale(target),
             "words": translator.verified_words({source: text, target: out["translation"]}, request.user),
         })

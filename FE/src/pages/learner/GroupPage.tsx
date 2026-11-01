@@ -9,6 +9,7 @@ import { useAuth } from '../../auth/store'
 import { LiveSocket } from '../../lib/ws'
 import { PageHeader, Section, ShowMore, UserAvatar } from '../../components/ui'
 import { StickerImage, StickerPicker } from '../../components/Stickers'
+import ChatVoiceTools from '../../components/ChatVoiceTools'
 
 /** Study group: realtime chat (WebSocket) + members ranked by this week's XP. */
 export default function GroupPage() {
@@ -103,9 +104,12 @@ export default function GroupPage() {
             })}
             <div ref={bottom} />
           </div>
-          <div className="mt-3 flex gap-2">
-            <Input.Search placeholder="Nhập tin nhắn…" enterButton="Gửi" aria-label="Tin nhắn" value={text} onChange={(e) => setText(e.target.value)} onSearch={send} />
-            <StickerPicker onPick={sendSticker} />
+          <div className="mt-3 flex flex-col gap-2">
+            <ChatVoiceTools text={text} setText={setText} />
+            <div className="flex gap-2">
+              <Input.Search placeholder="Nhập tin nhắn…" enterButton="Gửi" aria-label="Tin nhắn" value={text} onChange={(e) => setText(e.target.value)} onSearch={send} />
+              <StickerPicker onPick={sendSticker} />
+            </div>
           </div>
         </Section>
         <div className="flex flex-col gap-4">

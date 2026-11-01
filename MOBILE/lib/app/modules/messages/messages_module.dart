@@ -8,6 +8,7 @@ import 'package:get/get.dart';
 import '../../core/network/api_client.dart';
 import '../../core/network/ws_client.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/widgets/chat_voice_tools.dart';
 import '../../core/widgets/sticker_picker.dart';
 import '../../data/models/api/common.dart';
 import '../../data/services/auth_service.dart';
@@ -397,7 +398,9 @@ class DirectChatView extends GetView<DirectChatController> {
           return SafeArea(
             child: Padding(
               padding: EdgeInsets.fromLTRB(12.w, 4.h, 12.w, 8.h),
-              child: Row(children: [
+              child: Column(mainAxisSize: MainAxisSize.min, children: [
+                ChatVoiceTools(controller: controller.input),
+                Row(children: [
                 StickerButton(onPick: (code) => controller.send(sticker: code)),
                 Expanded(
                   child: TextField(
@@ -418,6 +421,7 @@ class DirectChatView extends GetView<DirectChatController> {
                 ),
                 IconButton(
                     tooltip: 'Gửi', icon: Icon(Icons.send_rounded, color: AppColors.buttonActive), onPressed: () => controller.send()),
+                ]),
               ]),
             ),
           );

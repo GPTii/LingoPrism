@@ -32,6 +32,7 @@ import '../controllers/community_chat_controller.dart';
 import '../models/community_chat_models.dart';
 import 'package:lingoprism/app/core/theme/app_colors.dart';
 import 'package:lingoprism/app/core/navigation/back.dart';
+import 'package:lingoprism/app/core/widgets/chat_voice_tools.dart';
 import 'package:lingoprism/app/core/widgets/sticker_picker.dart';
 
 /// Main chat view widget for community group conversations
@@ -602,7 +603,9 @@ class _ChatInputState extends State<_ChatInput> {
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
         color: AppColors.primarySoft,
-        child: Row(
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          ChatVoiceTools(controller: _controller),
+          Row(
           children: [
             StickerButton(onPick: widget.onSticker),
             Expanded(
@@ -677,6 +680,7 @@ class _ChatInputState extends State<_ChatInput> {
             ),
           ],
         ),
+        ]),
       ),
     );
   }
