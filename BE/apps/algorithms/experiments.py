@@ -5,6 +5,8 @@
   vip         SM-2 / FSRS with and without VIP on simulated learners (overall + confusable words)
   distractor  random same-topic baseline vs Smart Distractor on every word
   proximity   self-implemented grid index vs brute force vs PostgreSQL earthdistance (correctness + speed)
+  geofence    trigger delay / detection rate of the app's check policy on the real POIs (simulated passes)
+  realtime    chat + event latency, consistency and flood control through the real ASGI app
 """
 import random
 import statistics
@@ -168,9 +170,32 @@ def proximity(queries=500, seed=0):
     return _save("proximity", res, t0)
 
 
+def geofence(passes=120, seed=0):
+    from apps.gis.models import Poi
+
+    from . import geofence as gf
+
+    t0 = time.time()
+    pois = list(Poi.objects.filter(is_active=True).values_list("id", "lat", "lng", "radius_m"))
+    if not pois:
+        return _save("geofence", {"error": "Chưa có POI"}, t0)
+    res = {"pois": len(pois), **gf.simulate(pois, passes, seed), "server_check": gf.server_check_ms(pois),
+           "note": "Mô phỏng: đi thẳng qua POI thật, GPS mỗi giây lệch ~8 m, app áp dụng đúng chính sách kiểm tra "
+                   "(distanceFilter + khoảng cách thời gian tối thiểu). Chưa tính thời gian mạng của điện thoại."}
+    return _save("geofence", res, t0)
+
+
+def realtime():
+    from . import realtime as rt
+
+    t0 = time.time()
+    return _save("realtime", rt.run(), t0)
+
+
 def latest() -> dict:
     out = {}
-    for kind in ("benchmark", "yolo", "vision", "word2vec", "srs", "ga", "vip", "distractor", "proximity"):
+    for kind in ("benchmark", "yolo", "vision", "word2vec", "srs", "ga", "vip", "distractor", "proximity", "geofence",
+                 "realtime"):
         run = ExperimentRun.objects.filter(kind=kind).first()
         if run:
             out[kind] = {"created_at": run.created_at, "duration_s": run.duration_s, "results": run.results}

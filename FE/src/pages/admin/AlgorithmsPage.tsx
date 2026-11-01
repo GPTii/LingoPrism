@@ -11,7 +11,8 @@ type Exp = { created_at: string; duration_s: number; results: any }
 interface AlgoData {
   config: Record<string, any>
   choices: Record<string, { value: string; label: string }[]>
-  experiments: Partial<Record<'benchmark' | 'yolo' | 'vision' | 'word2vec' | 'srs' | 'ga' | 'vip' | 'distractor' | 'proximity', Exp>>
+  experiments: Partial<Record<'benchmark' | 'yolo' | 'vision' | 'word2vec' | 'srs' | 'ga' | 'vip' | 'distractor' | 'proximity'
+    | 'geofence' | 'realtime', Exp>>
 }
 
 const algoApi = {
@@ -129,6 +130,8 @@ export default function AlgorithmsPage() {
   const ga = ex.ga?.results
   const vipRes = ex.vip?.results
   const prox = ex.proximity?.results
+  const geo = ex.geofence?.results
+  const rt = ex.realtime?.results
   const dis = ex.distractor?.results
   const w2v = ex.word2vec?.results
   const vis = ex.vision?.results
@@ -360,6 +363,60 @@ export default function AlgorithmsPage() {
                   { title: 'Grid (ms)', dataIndex: 'grid_ms' }, { title: 'Brute force (ms)', dataIndex: 'brute_ms' }, { title: 'Nhanh hơn', dataIndex: 'speedup', render: (v) => `${v}×` }]} />
             </Space>
           ) : <Empty description="Chưa chạy" />,
+        },
+        {
+          key: 'geofence', label: 'Geofencing',
+          children: geo && !geo.error ? (
+            <Space direction="vertical" className="w-full">
+              <div className="flex flex-wrap justify-between gap-2">{meta(ex.geofence)}<RunButton kind="geofence" onDone={refresh} /></div>
+              <Descriptions size="small" bordered column={{ xs: 1, md: 3 }} items={[
+                { label: 'POI thật', children: geo.pois }, { label: 'Lượt đi qua mỗi ô', children: geo.passes_per_cell },
+                { label: 'Nhiễu GPS', children: `${geo.gps_sigma_m} m` },
+                { label: 'Máy chủ kiểm tra 1 lần (TB / p95)', children: `${geo.server_check.mean_ms} / ${geo.server_check.p95_ms} ms`, span: 3 }]} />
+              <div className="text-xs text-slate-500">{geo.note}</div>
+              <Table size="small" pagination={false} rowKey={(r: any) => `${r.policy}-${r.mode}`} dataSource={geo.rows} scroll={{ x: true }}
+                rowClassName={(r: any) => (r.policy === geo.current ? 'bg-brand-50' : '')}
+                columns={[
+                  { title: 'Chính sách kiểm tra', dataIndex: 'policy', render: (v) => (v === geo.current ? <b>{v}</b> : v === geo.baseline ? <Tag>{v}</Tag> : v) },
+                  { title: 'Di chuyển', dataIndex: 'mode' },
+                  { title: <Tooltip title="Tỷ lệ lần đi ngang POI được phát hiện trước khi ra khỏi vùng + 30 giây">Phát hiện</Tooltip>, dataIndex: 'detected_rate', render: (v) => pct(v) },
+                  { title: 'Trễ TB (s)', dataIndex: 'delay_mean_s' }, { title: 'Trễ trung vị (s)', dataIndex: 'delay_p50_s' },
+                  { title: 'Trễ p95 (s)', dataIndex: 'delay_p95_s' },
+                  { title: <Tooltip title="Đi ngoài vùng 10–50% bán kính nhưng bị báo là đã vào, do nhiễu GPS">Báo nhầm</Tooltip>, dataIndex: 'false_rate', render: (v) => pct(v) },
+                  { title: <Tooltip title="Số lần app gọi máy chủ mỗi giờ di chuyển (tải máy chủ, pin)">Lần gọi / giờ</Tooltip>, dataIndex: 'checks_per_hour' }]} />
+            </Space>
+          ) : geo?.error ? <Alert type="warning" message={geo.error} /> : (
+            <Space direction="vertical"><Empty description="Chưa chạy" /><RunButton kind="geofence" onDone={refresh} primary label="Chạy thực nghiệm" /></Space>
+          ),
+        },
+        {
+          key: 'realtime', label: 'Realtime',
+          children: rt ? (
+            <Space direction="vertical" className="w-full">
+              <div className="flex flex-wrap justify-between gap-2">{meta(ex.realtime)}<RunButton kind="realtime" onDone={refresh} /></div>
+              <div className="text-xs text-slate-500">{rt.note} Channel layer: <Tag>{rt.setup.channel_layer}</Tag></div>
+              <Table size="small" pagination={false} rowKey="name" scroll={{ x: true }}
+                dataSource={[
+                  { name: 'Ping → pong (/ws/events/)', ...rt.ping },
+                  { name: `Chat nhóm → ${rt.group.members - 1} thành viên khác`, ...rt.group.to_other_members },
+                  { name: 'Chat nhóm → chính người gửi', ...rt.group.echo_to_sender },
+                  { name: 'Tin nhắn riêng: gửi + lưu', ...rt.dm.send_and_store },
+                  { name: 'Tin nhắn riêng → người nhận', ...rt.dm.to_recipient.latency },
+                  { name: 'Tin nhắn riêng → thiết bị khác của người gửi', ...rt.dm.to_sender_devices.latency }]}
+                columns={[{ title: 'Đường đi', dataIndex: 'name' }, { title: 'Số mẫu', dataIndex: 'n' },
+                  { title: 'TB (ms)', dataIndex: 'mean_ms' }, { title: 'p50', dataIndex: 'p50_ms' }, { title: 'p95', dataIndex: 'p95_ms' },
+                  { title: 'p99', dataIndex: 'p99_ms' }, { title: 'Lớn nhất', dataIndex: 'max_ms' }]} />
+              <Descriptions size="small" bordered column={{ xs: 1, md: 2 }} title="Tính nhất quán" items={[
+                { label: 'Chat nhóm: lượt giao tin', children: `${rt.group.deliveries} / ${rt.group.deliveries_expected}` },
+                { label: 'Mất / trùng', children: `${rt.group.missing} / ${rt.group.duplicates}` },
+                { label: 'Mọi người thấy cùng thứ tự', children: rt.group.same_order_everywhere ? 'Có' : 'Không' },
+                { label: 'Gửi lại cùng client_id tạo tin mới', children: rt.group.resend_creates_new ? 'Có (lỗi)' : 'Không' },
+                { label: 'Tin riêng: người nhận nhận đủ, đúng thứ tự', children: `${rt.dm.to_recipient.received}/${rt.dm.messages} · ${rt.dm.to_recipient.in_order ? 'đúng thứ tự' : 'sai thứ tự'}` },
+                { label: 'Dồn tin: nhận / từ chối', children: `${rt.flood.accepted} / ${rt.flood.refused} (cho phép ${rt.flood.burst_allowed} liên tiếp)` }]} />
+            </Space>
+          ) : (
+            <Space direction="vertical"><Empty description="Chưa chạy" /><RunButton kind="realtime" onDone={refresh} primary label="Chạy thực nghiệm" /></Space>
+          ),
         },
       ]} />
     </Card>

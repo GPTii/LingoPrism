@@ -2,11 +2,12 @@ from django.core.management.base import BaseCommand
 
 from apps.algorithms import experiments, vision, yolo_report
 
-STEPS = ["yolo", "vision", "srs", "ga", "vip", "distractor", "proximity"]
+STEPS = ["yolo", "vision", "srs", "ga", "vip", "distractor", "proximity", "geofence", "realtime"]
 
 
 class Command(BaseCommand):
-    help = "Chạy các thực nghiệm của đề cương (SM-2/FSRS, GA, VIP, Smart Distractor, Proximity Search) và lưu kết quả"
+    help = ("Chạy các thực nghiệm của đề cương (SM-2/FSRS, GA, VIP, Smart Distractor, Proximity Search, geofence, "
+            "realtime) và lưu kết quả")
 
     def add_arguments(self, parser):
         parser.add_argument("--only", nargs="*", choices=STEPS)

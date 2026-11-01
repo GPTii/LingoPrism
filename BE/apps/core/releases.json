@@ -11,7 +11,9 @@
       "Mỗi tin nhắn có nút ⋯ (trên app: nhấn giữ): Thả tim, hoặc Dịch sang tiếng Việt khi bạn bè nhắn bằng tiếng Anh hay tiếng Trung – bản dịch hiện ngay dưới tin, có pinyin. Chạm hai lần vào tin trên app để thả tim."
     ],
     "improved": [
-      "Bản dịch luôn ghi rõ \"Bản dịch máy\" và không bao giờ thành bài học; chữ Trung sai bộ chữ (giản/phồn) bị loại trước khi tới bạn."
+      "Bản dịch luôn ghi rõ \"Bản dịch máy\" và không bao giờ thành bài học; chữ Trung sai bộ chữ (giản/phồn) bị loại trước khi tới bạn.",
+      "App báo chủ đề theo địa điểm nhanh hơn nhiều: kiểm tra vị trí sau mỗi 25 m và tối đa 15 giây một lần (trước đây 100 m và 2 phút), nên đi xe đạp hay xe máy ngang qua cũng không bị bỏ lỡ.",
+      "Trang quản trị Thuật toán có thêm thực nghiệm Geofencing (độ trễ kích hoạt, tỷ lệ phát hiện theo cách di chuyển) và Realtime (độ trễ, tính nhất quán, chống dồn tin)."
     ],
     "fixed": []
   },

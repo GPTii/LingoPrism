@@ -11,7 +11,8 @@ from .models import AlgorithmConfig
 
 RUNNERS = {"benchmark": lambda: benchmark.run(apply=False), "benchmark_apply": lambda: benchmark.run(apply=True),
            "yolo": yolo_report.run, "vision": lambda: vision.build(), "srs": experiments.srs, "ga": experiments.run_ga, "vip": experiments.vip,
-           "distractor": experiments.distractor, "proximity": experiments.proximity}
+           "distractor": experiments.distractor, "proximity": experiments.proximity, "geofence": experiments.geofence,
+           "realtime": experiments.realtime}
 
 
 class ConfigSerializer(serializers.ModelSerializer):
@@ -47,7 +48,8 @@ class AlgorithmsView(APIView):
 
 @extend_schema(tags=["admin-algorithms"])
 class RunExperimentView(APIView):
-    """Chạy lại một thực nghiệm: benchmark | yolo | vision | srs | ga | vip | distractor | proximity (benchmark không tự áp dụng)."""
+    """Chạy lại một thực nghiệm: benchmark | yolo | vision | srs | ga | vip | distractor | proximity | geofence | realtime
+    (benchmark không tự áp dụng)."""
 
     permission_classes = [IsStaffRole]
 

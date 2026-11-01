@@ -39,15 +39,17 @@ class LocationService extends GetxService {
     return ok;
   }
 
-  /// Watch position while the app is open; check geofences at most every 2 minutes or after moving ~100 m.
+  /// Watch position while the app is open: a position after every 25 m moved, a geofence check at most every 15 s.
+  /// The old 100 m / 2 minutes missed 43 % of bike and 61 % of motorbike passes by a POI; 25 m / 15 s found every pass,
+  /// ~8 s after entering (server: run_algorithm_experiments --only geofence, BE/apps/algorithms/geofence.py).
   Future<void> startGeofencing() async {
     if (_sub != null || !await _ensurePermission()) return;
     _sub = Geolocator.getPositionStream(
-      locationSettings: const LocationSettings(accuracy: LocationAccuracy.high, distanceFilter: 100),
+      locationSettings: const LocationSettings(accuracy: LocationAccuracy.high, distanceFilter: 25),
     ).listen((p) {
       position.value = p;
       final now = DateTime.now();
-      if (_lastCheck == null || now.difference(_lastCheck!) > const Duration(minutes: 2)) {
+      if (_lastCheck == null || now.difference(_lastCheck!) > const Duration(seconds: 15)) {
         _lastCheck = now;
         if (AuthService.to.isLoggedIn) {
           GisRepository.checkGeofence(p.latitude, p.longitude).catchError((_) => <Map<String, dynamic>>[]);

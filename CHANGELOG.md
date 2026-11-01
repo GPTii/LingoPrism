@@ -15,6 +15,8 @@
 ### Cải thiện
 
 - Bản dịch luôn ghi rõ "Bản dịch máy" và không bao giờ thành bài học; chữ Trung sai bộ chữ (giản/phồn) bị loại trước khi tới bạn.
+- App báo chủ đề theo địa điểm nhanh hơn nhiều: kiểm tra vị trí sau mỗi 25 m và tối đa 15 giây một lần (trước đây 100 m và 2 phút), nên đi xe đạp hay xe máy ngang qua cũng không bị bỏ lỡ.
+- Trang quản trị Thuật toán có thêm thực nghiệm Geofencing (độ trễ kích hoạt, tỷ lệ phát hiện theo cách di chuyển) và Realtime (độ trễ, tính nhất quán, chống dồn tin).
 
 ## 1.7.0 – 29/10/2026: Bạn bè trên bản đồ trò chơi, hoàn thiện hồ sơ
 
