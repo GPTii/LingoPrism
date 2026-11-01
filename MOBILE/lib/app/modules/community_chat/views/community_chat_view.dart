@@ -33,6 +33,8 @@ import '../models/community_chat_models.dart';
 import 'package:lingoprism/app/core/theme/app_colors.dart';
 import 'package:lingoprism/app/core/navigation/back.dart';
 import 'package:lingoprism/app/core/widgets/chat_voice_tools.dart';
+import 'package:lingoprism/app/core/widgets/message_actions.dart';
+import 'package:lingoprism/app/data/services/auth_service.dart';
 import 'package:lingoprism/app/core/widgets/sticker_picker.dart';
 
 /// Main chat view widget for community group conversations
@@ -104,7 +106,7 @@ class CommunityChatView extends GetView<CommunityChatController> {
         final message = displayMessages[index];
         return RepaintBoundary(
           key: ValueKey('message_${message.messageId ?? index}'),
-          child: _ChatBubble(message: message),
+          child: _ChatBubble(message: message, onHeart: controller.heart),
         );
       },
     );
@@ -271,9 +273,10 @@ class _ChatHeader extends StatelessWidget {
 /// - Enhanced validation using model validation methods
 /// - Accessibility features and proper text overflow handling
 class _ChatBubble extends StatelessWidget {
-  const _ChatBubble({required this.message});
+  const _ChatBubble({required this.message, required this.onHeart});
 
   final CommunityChatMessage message;
+  final Future<void> Function(int messageId) onHeart;
 
   @override
   Widget build(BuildContext context) {
@@ -314,7 +317,13 @@ class _ChatBubble extends StatelessWidget {
             ),
           ),
           SizedBox(height: 6.h),
-          if (message.isSticker)
+          MessageActions(
+            text: message.text,
+            hearts: message.hearts,
+            me: AuthService.to.userId,
+            mine: message.isCurrentUser,
+            onHeart: message.serverId == null ? null : () => onHeart(message.serverId!),
+            child: message.isSticker ?
             Container(
               padding: EdgeInsets.all(4.w),
               decoration: BoxDecoration(
@@ -323,8 +332,7 @@ class _ChatBubble extends StatelessWidget {
               ),
               child: _StickerImage(path: message.validatedContent),
             )
-          else
-            Container(
+          : Container(
               constraints: BoxConstraints(
                 maxWidth: 280.w,
                 minWidth: 40.w,
@@ -353,6 +361,7 @@ class _ChatBubble extends StatelessWidget {
                 ),
               ),
             ),
+          ),
         ],
       ),
     );

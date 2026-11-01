@@ -2,7 +2,7 @@
 
 <!-- Sinh từ BE/apps/core/releases.json bằng `python manage.py changelog` – sửa ở file đó, không sửa ở đây. -->
 
-## 1.8.0 – 02/11/2026: Dịch bằng giọng nói, nói và dịch trong chat
+## 1.8.0 – 02/11/2026: Dịch bằng giọng nói, nói, dịch và thả tim trong chat
 
 ### Mới
 
@@ -10,6 +10,7 @@
 - Hai người nói chuyện qua máy: mỗi bên có một nút mic, nói bên nào thì dịch sang bên kia.
 - Bản dịch tiếng Trung có pinyin; những từ đã kiểm duyệt có trong câu hiện bên dưới, bấm Lưu để đưa vào Từ của tôi.
 - Trong tin nhắn riêng và chat nhóm: bấm Nói để nói thay vì gõ (chữ hiện ngay trong ô chat), rồi bấm Dịch để đổi tin sang tiếng Anh hoặc tiếng Trung trước khi gửi; có pinyin để xem và nút Hoàn tác.
+- Mỗi tin nhắn có nút ⋯ (trên app: nhấn giữ): Thả tim, hoặc Dịch sang tiếng Việt khi bạn bè nhắn bằng tiếng Anh hay tiếng Trung – bản dịch hiện ngay dưới tin, có pinyin. Chạm hai lần vào tin trên app để thả tim.
 
 ### Cải thiện
 

@@ -9,6 +9,7 @@ import '../../core/network/api_client.dart';
 import '../../core/network/ws_client.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/chat_voice_tools.dart';
+import '../../core/widgets/message_actions.dart';
 import '../../core/widgets/sticker_picker.dart';
 import '../../data/models/api/common.dart';
 import '../../data/services/auth_service.dart';
@@ -21,7 +22,7 @@ import '../community/views/report_user_sheet.dart';
 
 class DirectMessage {
   DirectMessage({required this.id, required this.sender, required this.content, this.sticker = '', this.clientId = '',
-      this.readAt, required this.createdAt, this.pending = false});
+      this.readAt, required this.createdAt, this.pending = false, this.hearts = const []});
 
   final int id;
   final int sender;
@@ -34,6 +35,9 @@ class DirectMessage {
   final DateTime createdAt;
   final bool pending;
 
+  /// ids of the people who put a heart on it
+  final List<int> hearts;
+
   factory DirectMessage.fromJson(Map<String, dynamic> j) => DirectMessage(
         id: asInt(j['id']),
         sender: asInt(j['sender']),
@@ -42,10 +46,14 @@ class DirectMessage {
         clientId: asString(j['client_id']),
         readAt: DateTime.tryParse(asString(j['read_at'])),
         createdAt: DateTime.tryParse(asString(j['created_at']))?.toLocal() ?? DateTime.now(),
+        hearts: (j['hearts'] as List? ?? const []).map(asInt).toList(),
       );
 
   DirectMessage seen() => DirectMessage(id: id, sender: sender, content: content, sticker: sticker, clientId: clientId,
-      readAt: readAt ?? DateTime.now(), createdAt: createdAt);
+      readAt: readAt ?? DateTime.now(), createdAt: createdAt, hearts: hearts);
+
+  DirectMessage withHearts(List<int> h) => DirectMessage(id: id, sender: sender, content: content, sticker: sticker,
+      clientId: clientId, readAt: readAt, createdAt: createdAt, hearts: h);
 
   /// one line for the list of conversations
   String get preview => sticker.isNotEmpty ? 'Sticker' : content;
@@ -248,6 +256,10 @@ class DirectChatController extends GetxController {
 
   void _onEvent(WsEvent e) {
     if (asInt(e.payload['thread']) != threadId) return;
+    if (e.event == 'dm_heart') {
+      _setHearts(asInt(e.payload['id']), (e.payload['hearts'] as List? ?? const []).map(asInt).toList());
+      return;
+    }
     if (e.event == 'dm_read') {
       messages.assignAll(messages.map((m) => m.sender == me && m.readAt == null ? m.seen() : m));
       return;
@@ -261,6 +273,21 @@ class DirectChatController extends GetxController {
       _toBottom();
     }
     if (m.sender != me) MessagesRepository.read(threadId).catchError((_) {});
+  }
+
+  void _setHearts(int id, List<int> hearts) {
+    final i = messages.indexWhere((m) => m.id == id);
+    if (i >= 0) messages[i] = messages[i].withHearts(hearts);
+  }
+
+  /// Put a heart on a message, or take it back.
+  Future<void> heart(int messageId) async {
+    try {
+      final d = asMap(await ApiClient.to.post<dynamic>('/messages/threads/$threadId/heart/', data: {'message': messageId}));
+      _setHearts(messageId, (d['hearts'] as List? ?? const []).map(asInt).toList());
+    } catch (e) {
+      Get.snackbar('Lỗi', ApiClient.toApiException(e).message, snackPosition: SnackPosition.BOTTOM);
+    }
   }
 
   /// The typed text, or a sticker when one is given.
@@ -359,19 +386,26 @@ class DirectChatView extends GetView<DirectChatController> {
                 return Column(
                   crossAxisAlignment: mine ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                   children: [
-                    if (m.sticker.isNotEmpty)
-                      Padding(padding: EdgeInsets.only(top: 6.h), child: StickerImage(code: m.sticker, size: 120))
-                    else
-                      Container(
-                        margin: EdgeInsets.only(top: 6.h),
-                        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-                        constraints: BoxConstraints(maxWidth: 0.75.sw),
-                        decoration: BoxDecoration(
-                          color: mine ? AppColors.buttonActive : AppColors.surface,
-                          borderRadius: BorderRadius.circular(16.r),
-                        ),
-                        child: Text(m.content, style: TextStyle(color: mine ? Colors.white : AppColors.textPrimary, fontSize: 15.sp)),
-                      ),
+                    MessageActions(
+                      text: m.sticker.isNotEmpty ? '' : m.content,
+                      hearts: m.hearts,
+                      me: controller.me,
+                      mine: mine,
+                      onHeart: m.id > 0 && controller.thread.value?.canMessage == true ? () => controller.heart(m.id) : null,
+                      child: m.sticker.isNotEmpty
+                          ? Padding(padding: EdgeInsets.only(top: 6.h), child: StickerImage(code: m.sticker, size: 120))
+                          : Container(
+                              margin: EdgeInsets.only(top: 6.h),
+                              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                              constraints: BoxConstraints(maxWidth: 0.7.sw),
+                              decoration: BoxDecoration(
+                                color: mine ? AppColors.buttonActive : AppColors.surface,
+                                borderRadius: BorderRadius.circular(16.r),
+                              ),
+                              child: Text(m.content,
+                                  style: TextStyle(color: mine ? Colors.white : AppColors.textPrimary, fontSize: 15.sp)),
+                            ),
+                    ),
                     if (i == lastMine)
                       Padding(
                         padding: EdgeInsets.only(top: 2.h),

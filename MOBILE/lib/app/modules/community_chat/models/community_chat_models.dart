@@ -26,6 +26,8 @@ class CommunityChatMessage {
     this.isSticker = false,
     this.timestamp,
     this.messageId,
+    this.text = '',
+    this.hearts = const [],
   });
 
   /// Name of the message sender with leader indicator
@@ -48,6 +50,15 @@ class CommunityChatMessage {
 
   /// Optional unique identifier for the message
   final String? messageId;
+
+  /// The words of a text message ('' for stickers and badges): what "Dịch" translates
+  final String text;
+
+  /// ids of the people who put a heart on it
+  final List<int> hearts;
+
+  /// the server id (null while it is still being sent)
+  int? get serverId => int.tryParse(messageId ?? '');
 
   /// Validated content with safety checks
   String get validatedContent {
@@ -84,6 +95,8 @@ class CommunityChatMessage {
     bool? isSticker,
     DateTime? timestamp,
     String? messageId,
+    String? text,
+    List<int>? hearts,
   }) {
     return CommunityChatMessage(
       senderName: senderName ?? this.senderName,
@@ -93,6 +106,8 @@ class CommunityChatMessage {
       isSticker: isSticker ?? this.isSticker,
       timestamp: timestamp ?? this.timestamp,
       messageId: messageId ?? this.messageId,
+      text: text ?? this.text,
+      hearts: hearts ?? this.hearts,
     );
   }
 }

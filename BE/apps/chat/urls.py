@@ -9,4 +9,6 @@ router.register("messages/threads", views.DirectThreadViewSet, basename="direct-
 
 urlpatterns = [
     path("groups/<int:group_id>/messages/", views.GroupMessagesView.as_view(), name="group-messages"),
+    path("groups/<int:group_id>/messages/<int:message_id>/heart/", views.GroupMessageHeartView.as_view(),
+         name="group-message-heart"),
 ] + router.urls

@@ -41,7 +41,7 @@ export function useUserEvents() {
           queryClient.invalidateQueries({ queryKey: ['groups'] })
           queryClient.invalidateQueries({ queryKey: ['members'] })
         }
-      } else if (e.event === 'dm' || e.event === 'dm_read') {
+      } else if (e.event === 'dm' || e.event === 'dm_read' || e.event === 'dm_heart') {
         // the open conversation listens for this; the list of conversations just reloads
         window.dispatchEvent(new CustomEvent('lingoprism:dm', { detail: { event: e.event, payload: e.payload } }))
         queryClient.invalidateQueries({ queryKey: ['dm-threads'] })

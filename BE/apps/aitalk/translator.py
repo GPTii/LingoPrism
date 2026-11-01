@@ -65,7 +65,14 @@ def translate(text: str, source: str, target: str) -> dict:
     if not out or wrong_script(out, target):
         raise AiUnavailable(FAIL)
     return {"translation": out[:MAX_CHARS * 3], "reading": generator._reading(out, target),
-            "source_reading": generator._reading(text, source), "model": model}
+            "source_reading": generator._reading(text, _script_of(text) if source == AUTO else source), "model": model}
+
+
+def _script_of(text: str) -> str:
+    """For pinyin of an auto-detected text: Chinese in the script its characters show ('' when not Chinese)."""
+    if not HAN.search(text):
+        return ""
+    return "zh-Hant" if wrong_script(text, "zh-Hans") else "zh-Hans"
 
 
 def wrong_script(text: str, language: str) -> bool:

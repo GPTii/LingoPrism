@@ -2,6 +2,7 @@ import logging
 
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
+from django.db import transaction
 from django.utils import timezone
 
 from apps.core.permissions import UNVERIFIED_EMAIL
@@ -34,7 +35,7 @@ def group_message_payload(m: GroupMessage) -> dict:
     return {
         "id": m.id, "group": m.group_id, "kind": m.kind, "content": m.content, "sticker": m.sticker,
         "badge": {"code": m.badge.code, "name": m.badge.name, "icon": m.badge.icon} if m.badge_id else None,
-        "client_id": m.client_id, "created_at": m.created_at.isoformat(),
+        "client_id": m.client_id, "created_at": m.created_at.isoformat(), "hearts": m.hearts,
         "user": {"id": m.user_id, "display_name": m.user.display_name if m.user else ""},
     }
 
@@ -76,6 +77,31 @@ def send_group_message(user, group_id: int, kind: str = "text", content: str = "
                                     sticker=sticker, badge=badge, client_id=client_id[:40])
     _broadcast(group_channel(group_id), "message", group_message_payload(m))
     return m
+
+
+def _toggle_heart(model, message_id: int, user, **scope) -> list[int]:
+    """Add or take back the user's heart on one message; returns who has hearted it now."""
+    with transaction.atomic():
+        m = model.objects.select_for_update().filter(pk=message_id, **scope).first()
+        if m is None:
+            raise ChatError("Không tìm thấy tin nhắn")
+        hearts = [uid for uid in m.hearts if uid != user.id]
+        if len(hearts) == len(m.hearts):
+            hearts.append(user.id)
+        m.hearts = hearts
+        m.save(update_fields=["hearts"])
+    return hearts
+
+
+def heart_group_message(user, group_id: int, message_id: int) -> dict:
+    if user.learner_type == "kid" and not user.is_staff_role:
+        raise ChatError("Tài khoản trẻ em không dùng được chat nhóm")
+    if not is_active_member(user, group_id):
+        raise ChatError("Bạn chưa tham gia nhóm này")
+    hearts = _toggle_heart(GroupMessage, message_id, user, group_id=group_id)
+    payload = {"id": message_id, "group": group_id, "hearts": hearts}
+    _broadcast(group_channel(group_id), "heart", payload)
+    return payload
 
 
 def support_message_payload(m: SupportMessage) -> dict:
@@ -158,7 +184,7 @@ def thread_with(user, other):
 
 def direct_message_payload(m) -> dict:
     return {"id": m.id, "thread": m.thread_id, "sender": m.sender_id, "content": m.content, "sticker": m.sticker,
-            "client_id": m.client_id,
+            "client_id": m.client_id, "hearts": m.hearts,
             "read_at": m.read_at.isoformat() if m.read_at else None, "created_at": m.created_at.isoformat()}
 
 
@@ -194,6 +220,21 @@ def send_direct_message(user, thread, content: str, client_id: str = "", sticker
         notify(other, Notification.Kind.MESSAGE, f"{user.display_name} nhắn tin cho bạn", content[:120] or "[Sticker]",
                data={"route": f"/messages/{thread.id}"})
     return m
+
+
+def heart_direct_message(user, thread, message_id: int) -> dict:
+    from apps.notifications.services import push_event
+
+    from .models import DirectMessage
+
+    other = thread.other(user)
+    if not can_message(user, other):
+        raise ChatError("Hai bạn cần theo dõi nhau mới nhắn tin được")
+    hearts = _toggle_heart(DirectMessage, message_id, user, thread=thread)
+    payload = {"id": message_id, "thread": thread.id, "hearts": hearts}
+    for uid in (user.id, other.id):
+        push_event(uid, "dm_heart", payload)
+    return payload
 
 
 def mark_direct_read(user, thread) -> int:

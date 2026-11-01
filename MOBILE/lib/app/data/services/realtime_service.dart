@@ -17,7 +17,7 @@ class RealtimeService extends GetxService {
   final _notifications = StreamController<Map<String, dynamic>>.broadcast();
   Stream<Map<String, dynamic>> get notifications => _notifications.stream;
   final _directMessages = StreamController<WsEvent>.broadcast();
-  /// "dm" (a new private message) and "dm_read" events, for the messages screens.
+  /// "dm" (a new private message), "dm_read" and "dm_heart" events, for the messages screens.
   Stream<WsEvent> get directMessages => _directMessages.stream;
 
   WsClient? _client;
@@ -60,6 +60,7 @@ class RealtimeService extends GetxService {
         break;
       case 'dm':
       case 'dm_read':
+      case 'dm_heart':
         _directMessages.add(e);
         break;
       case 'quest_completed':

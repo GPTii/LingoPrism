@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 
 import '../../../core/network/api_client.dart';
 import '../../../core/network/ws_client.dart';
+import '../../../data/models/api/common.dart';
 import '../../../data/models/api/game.dart' show stickerAsset;
 import '../../../data/models/api/social.dart';
 import '../../../data/repositories/repositories.dart';
@@ -52,6 +53,8 @@ class CommunityChatController extends GetxController {
     _sub = _ws!.events.listen((e) {
       if (e.event == 'message') {
         _add(ChatMessage.fromJson(e.payload));
+      } else if (e.event == 'heart') {
+        _setHearts(asInt(e.payload['id']), (e.payload['hearts'] as List? ?? const []).map(asInt).toList());
       } else if (e.event == 'error') {
         Get.snackbar('Không gửi được', '${e.payload['detail']}', snackPosition: SnackPosition.BOTTOM);
       }
@@ -73,7 +76,24 @@ class CommunityChatController extends GetxController {
       isSticker: isSticker,
       timestamp: m.createdAt,
       messageId: '${m.id}',
+      text: m.kind == 'text' ? m.content : '',
+      hearts: m.hearts,
     );
+  }
+
+  void _setHearts(int id, List<int> hearts) {
+    final i = messages.indexWhere((x) => x.serverId == id);
+    if (i >= 0) messages[i] = messages[i].copyWith(hearts: hearts);
+  }
+
+  /// Put a heart on a message, or take it back.
+  Future<void> heart(int messageId) async {
+    try {
+      final d = asMap(await ApiClient.to.post<dynamic>('/groups/$_groupId/messages/$messageId/heart/'));
+      _setHearts(messageId, (d['hearts'] as List? ?? const []).map(asInt).toList());
+    } catch (e) {
+      Get.snackbar('Lỗi', ApiClient.toApiException(e).message, snackPosition: SnackPosition.BOTTOM);
+    }
   }
 
   void _add(ChatMessage m) {

@@ -193,7 +193,8 @@ class GroupMemberInfo {
 
 class ChatMessage {
   ChatMessage({required this.id, required this.userId, required this.displayName, this.kind = 'text', this.content = '',
-      this.sticker = '', this.badgeName, this.badgeIcon, this.clientId = '', required this.createdAt, this.pending = false});
+      this.sticker = '', this.badgeName, this.badgeIcon, this.clientId = '', required this.createdAt, this.pending = false,
+      this.hearts = const []});
 
   final int id;
   final int userId;
@@ -206,6 +207,9 @@ class ChatMessage {
   final String clientId;
   final DateTime createdAt;
   final bool pending;
+
+  /// ids of the people who put a heart on it
+  final List<int> hearts;
 
   factory ChatMessage.fromJson(Map<String, dynamic> j) {
     final user = asMap(j['user'] ?? j['sender']);
@@ -221,6 +225,7 @@ class ChatMessage {
       badgeIcon: badge?['icon'] as String?,
       clientId: asString(j['client_id']),
       createdAt: parseDate(j['created_at']) ?? DateTime.now(),
+      hearts: (j['hearts'] as List? ?? const []).map(asInt).toList(),
     );
   }
 }

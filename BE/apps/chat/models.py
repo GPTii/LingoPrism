@@ -17,6 +17,7 @@ class GroupMessage(models.Model):
     sticker = models.CharField(max_length=40, blank=True)
     badge = models.ForeignKey("gamification.Badge", null=True, blank=True, on_delete=models.SET_NULL)
     client_id = models.CharField(max_length=40, blank=True, help_text="ID tạm do client sinh để khử trùng lặp")
+    hearts = models.JSONField(default=list, blank=True, help_text="ID những người đã thả tim")
     created_at = models.DateTimeField(default=timezone.now, db_index=True)
 
     class Meta:
@@ -74,6 +75,7 @@ class DirectMessage(models.Model):
     content = models.CharField(max_length=1000, blank=True)
     sticker = models.CharField(max_length=40, blank=True, help_text="Mã sticker (thay cho nội dung chữ)")
     client_id = models.CharField(max_length=40, blank=True)
+    hearts = models.JSONField(default=list, blank=True, help_text="ID những người đã thả tim")
     read_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(default=timezone.now, db_index=True)
 

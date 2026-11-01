@@ -10,6 +10,7 @@ import { LiveSocket } from '../../lib/ws'
 import { PageHeader, Section, ShowMore, UserAvatar } from '../../components/ui'
 import { StickerImage, StickerPicker } from '../../components/Stickers'
 import ChatVoiceTools from '../../components/ChatVoiceTools'
+import MessageActions from '../../components/MessageActions'
 
 /** Study group: realtime chat (WebSocket) + members ranked by this week's XP. */
 export default function GroupPage() {
@@ -40,6 +41,9 @@ export default function GroupPage() {
           if (i >= 0) return list.map((x, j) => (j === i ? m : x))
           return list.some((x) => x.id === m.id) ? list : [...list, m]
         })
+      } else if (e.event === 'heart') {
+        const h = e.payload as unknown as { id: number; hearts: number[] }
+        setMessages((list) => list.map((x) => (x.id === h.id ? { ...x, hearts: h.hearts } : x)))
       } else if (e.event === 'error') {
         message.error(String(e.payload.detail))
       }
@@ -70,6 +74,15 @@ export default function GroupPage() {
     }
   }
 
+  const heart = async (messageId: number) => {
+    try {
+      const r = await communityApi.heart(groupId, messageId)
+      setMessages((list) => list.map((x) => (x.id === r.id ? { ...x, hearts: r.hearts } : x)))
+    } catch (e) {
+      message.error(errorMessage(e))
+    }
+  }
+
   const leave = async () => {
     await communityApi.leave(groupId)
     queryClient.invalidateQueries({ queryKey: ['groups'] })
@@ -94,11 +107,14 @@ export default function GroupPage() {
               const mine = m.user?.id === me?.id
               return (
                 <div key={m.id} className={`flex ${mine ? 'justify-end' : 'justify-start'}`}>
-                  <div className={m.kind === 'sticker' ? 'max-w-[75%]'
-                    : `max-w-[75%] rounded-2xl px-3 py-2 ${mine ? 'bg-brand-600 text-white rounded-br-md' : 'bg-slate-100 text-slate-800 rounded-bl-md'}`}>
-                    {!mine && <div className="text-xs font-semibold text-slate-500">{m.user?.display_name}{m.user && leaderIds.has(m.user.id) && <CrownFilled className="text-amber-500 ml-1" aria-label="trưởng nhóm" />}</div>}
-                    {m.kind === 'sticker' && m.sticker ? <StickerImage code={m.sticker} size={112} /> : <div>{m.content}</div>}
-                  </div>
+                  <MessageActions text={m.kind === 'text' || !m.kind ? m.content : ''} hearts={m.hearts} meId={me?.id} mine={mine}
+                    onHeart={m.id > 0 && m.kind !== 'system' ? () => heart(m.id) : undefined}>
+                    <div className={m.kind === 'sticker' ? ''
+                      : `rounded-2xl px-3 py-2 break-words ${mine ? 'bg-brand-600 text-white rounded-br-md' : 'bg-slate-100 text-slate-800 rounded-bl-md'}`}>
+                      {!mine && <div className="text-xs font-semibold text-slate-500">{m.user?.display_name}{m.user && leaderIds.has(m.user.id) && <CrownFilled className="text-amber-500 ml-1" aria-label="trưởng nhóm" />}</div>}
+                      {m.kind === 'sticker' && m.sticker ? <StickerImage code={m.sticker} size={112} /> : <div>{m.content}</div>}
+                    </div>
+                  </MessageActions>
                 </div>
               )
             })}

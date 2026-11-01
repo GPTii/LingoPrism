@@ -158,3 +158,40 @@ def test_staff_cannot_be_locked_from_a_report(people):
     assert client_for(staff).post(f"/api/v1/admin/user-reports/{report.id}/resolve/", {}, format="json").status_code == 200
     report.refresh_from_db()
     assert report.status == "dismissed"
+
+
+def test_hearts_on_private_messages(people):
+    a, b, kid = people
+    follow_both(a, b)
+    ca, cb = client_for(a), client_for(b)
+    thread = ca.post("/api/v1/messages/threads/", {"user": b.id}, format="json").data["id"]
+    m = ca.post(f"/api/v1/messages/threads/{thread}/messages/", {"content": "我叫兰"}, format="json").data
+    assert m["hearts"] == []
+    url = f"/api/v1/messages/threads/{thread}/heart/"
+    assert cb.post(url, {"message": m["id"]}, format="json").data["hearts"] == [b.id]
+    assert ca.post(url, {"message": m["id"]}, format="json").data["hearts"] == [b.id, a.id]
+    assert cb.post(url, {"message": m["id"]}, format="json").data["hearts"] == [a.id]  # tapped again: taken back
+    assert cb.get(f"/api/v1/messages/threads/{thread}/messages/").data["results"][0]["hearts"] == [a.id]
+    # someone else's thread / a message of another thread
+    c = User.objects.create_user("c@example.com", "Strong!Pass123")
+    follow_both(a, c)
+    other = ca.post("/api/v1/messages/threads/", {"user": c.id}, format="json").data["id"]
+    assert client_for(c).post(url, {"message": m["id"]}, format="json").status_code == 404
+    assert ca.post(f"/api/v1/messages/threads/{other}/heart/", {"message": m["id"]}, format="json").status_code == 400
+
+
+def test_hearts_on_group_messages(people):
+    from apps.community.models import Group, GroupMember
+
+    a, b, kid = people
+    g = Group.objects.create(name="g", created_by=a)
+    for u in (a, b, kid):
+        GroupMember.objects.create(group=g, user=u, status="active")
+    outsider = User.objects.create_user("o@example.com", "Strong!Pass123")
+    m = client_for(a).post(f"/api/v1/groups/{g.id}/messages/", {"content": "Hello!"}, format="json").data
+    url = f"/api/v1/groups/{g.id}/messages/{m['id']}/heart/"
+    assert client_for(b).post(url).data["hearts"] == [b.id]
+    assert client_for(b).post(url).data["hearts"] == []
+    assert client_for(outsider).post(url).status_code == 400
+    assert client_for(kid).post(url).status_code == 400  # kids are kept out of group chat
+    assert client_for(a).post(f"/api/v1/groups/{g.id}/messages/999999/heart/").status_code == 400

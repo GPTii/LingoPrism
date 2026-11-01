@@ -48,6 +48,17 @@ class GroupMessagesView(APIView):
         return Response(services.group_message_payload(m), status=201)
 
 
+class GroupMessageHeartView(APIView):
+    """POST: put a heart on a group message, or take it back."""
+
+    @extend_schema(tags=["chat"], request=None, responses={200: dict})
+    def post(self, request, group_id, message_id):
+        try:
+            return Response(services.heart_group_message(request.user, group_id, message_id))
+        except services.ChatError as e:
+            return Response({"detail": str(e), "errors": {}}, status=400)
+
+
 class ConversationSerializer(serializers.ModelSerializer):
     learner = serializers.SerializerMethodField()
     staff_name = serializers.CharField(source="staff.display_name", default=None, read_only=True)
@@ -134,6 +145,10 @@ class SendDirectSerializer(serializers.Serializer):
     client_id = serializers.CharField(required=False, allow_blank=True, max_length=40)
 
 
+class HeartSerializer(serializers.Serializer):
+    message = serializers.IntegerField()
+
+
 class OpenThreadSerializer(serializers.Serializer):
     user = serializers.IntegerField()
 
@@ -201,6 +216,17 @@ class DirectThreadViewSet(ActionThrottleMixin, mixins.ListModelMixin, mixins.Ret
         except services.ChatError as e:
             return Response({"detail": str(e), "errors": {}}, status=400)
         return Response(services.direct_message_payload(m), status=201)
+
+    @extend_schema(request=HeartSerializer, responses={200: dict})
+    @action(detail=True, methods=["post"])
+    def heart(self, request, pk=None):
+        """Put a heart on one message of this thread, or take it back."""
+        ser = HeartSerializer(data=request.data)
+        ser.is_valid(raise_exception=True)
+        try:
+            return Response(services.heart_direct_message(request.user, self.get_object(), ser.validated_data["message"]))
+        except services.ChatError as e:
+            return Response({"detail": str(e), "errors": {}}, status=400)
 
     @action(detail=True, methods=["post"])
     def read(self, request, pk=None):

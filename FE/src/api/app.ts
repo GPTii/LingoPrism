@@ -260,6 +260,8 @@ export interface ChatMessage {
   sticker?: string
   client_id: string
   created_at: string
+  /** ids of the people who put a heart on it */
+  hearts?: number[]
   user?: { id: number; display_name: string }
   sender?: { id: number; display_name: string; is_staff: boolean }
   read_at?: string | null
@@ -351,6 +353,9 @@ export const communityApi = {
     api.post<ChatMessage>(`/groups/${groupId}/messages/`, { kind: 'text', content, client_id }).then((r) => r.data),
   sendSticker: (groupId: number, sticker: string, client_id: string) =>
     api.post<ChatMessage>(`/groups/${groupId}/messages/`, { kind: 'sticker', sticker, client_id }).then((r) => r.data),
+  /** put a heart on a message, or take it back */
+  heart: (groupId: number, messageId: number) =>
+    api.post<{ id: number; hearts: number[] }>(`/groups/${groupId}/messages/${messageId}/heart/`).then((r) => r.data),
   openSupport: () => api.post<SupportConversation>('/support/conversations/', {}).then((r) => r.data),
   conversations: (params?: Record<string, unknown>) =>
     api.get<Paginated<SupportConversation>>('/support/conversations/', { params }).then((r) => r.data.results),
@@ -578,6 +583,8 @@ export interface DirectMessage {
   /** a sticker code instead of text */
   sticker: string
   client_id: string
+  /** ids of the people who put a heart on it */
+  hearts?: number[]
   read_at: string | null
   created_at: string
 }
@@ -602,4 +609,7 @@ export const messagesApi = {
   sendSticker: (id: number, sticker: string, client_id: string) =>
     api.post<DirectMessage>(`/messages/threads/${id}/messages/`, { sticker, client_id }).then((r) => r.data),
   read: (id: number) => api.post(`/messages/threads/${id}/read/`),
+  /** put a heart on a message, or take it back */
+  heart: (id: number, messageId: number) =>
+    api.post<{ id: number; hearts: number[] }>(`/messages/threads/${id}/heart/`, { message: messageId }).then((r) => r.data),
 }

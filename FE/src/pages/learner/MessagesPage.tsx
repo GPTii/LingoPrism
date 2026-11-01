@@ -11,6 +11,7 @@ import { EmptyState, PageHeader, UserAvatar } from '../../components/ui'
 import { ReportUserButton } from './ReportUser'
 import { StickerImage, StickerPicker } from '../../components/Stickers'
 import ChatVoiceTools from '../../components/ChatVoiceTools'
+import MessageActions from '../../components/MessageActions'
 
 const when = (iso: string) => (dayjs(iso).isSame(dayjs(), 'day') ? dayjs(iso).format('HH:mm') : dayjs(iso).format('DD/MM'))
 
@@ -68,6 +69,10 @@ function Conversation({ id }: { id: number }) {
     const on = (ev: Event) => {
       const { event, payload } = (ev as CustomEvent).detail as { event: string; payload: DirectMessage & { thread: number } }
       if (payload.thread !== id) return
+      if (event === 'dm_heart') {
+        setMessages((l) => l?.map((m) => (m.id === payload.id ? { ...m, hearts: payload.hearts } : m)) ?? l)
+        return
+      }
       if (event === 'dm_read') {
         setMessages((l) => l?.map((m) => (m.sender === me?.id && !m.read_at ? { ...m, read_at: new Date().toISOString() } : m)) ?? l)
         return
@@ -110,6 +115,15 @@ function Conversation({ id }: { id: number }) {
     }
   }
 
+  const heart = async (messageId: number) => {
+    try {
+      const r = await messagesApi.heart(id, messageId)
+      setMessages((l) => l?.map((m) => (m.id === r.id ? { ...m, hearts: r.hearts } : m)) ?? l)
+    } catch (e) {
+      message.error(errorMessage(e))
+    }
+  }
+
   const t = thread.data
   return (
     <div className="lp-card min-w-0 flex flex-col h-[calc(100dvh-320px)] min-h-[340px] md:h-[min(640px,calc(100dvh-200px))]">
@@ -138,14 +152,17 @@ function Conversation({ id }: { id: number }) {
           const lastMine = mine && !messages.slice(i + 1).some((x) => x.sender === me?.id)
           return (
             <div key={m.id} className={`flex flex-col ${mine ? 'items-end' : 'items-start'}`}>
-              {m.sticker ? (
-                <div title={dayjs(m.created_at).format('HH:mm DD/MM/YYYY')}><StickerImage code={m.sticker} size={120} /></div>
-              ) : (
-                <div title={dayjs(m.created_at).format('HH:mm DD/MM/YYYY')}
-                  className={`max-w-[75%] whitespace-pre-wrap break-words rounded-2xl px-3 py-2 ${mine ? 'bg-brand-600 text-white rounded-br-md' : 'bg-slate-100 text-slate-800 rounded-bl-md'}`}>
-                  {m.content}
-                </div>
-              )}
+              <MessageActions text={m.sticker ? '' : m.content} hearts={m.hearts} meId={me?.id} mine={mine}
+                onHeart={m.id > 0 && t?.can_message ? () => heart(m.id) : undefined}>
+                {m.sticker ? (
+                  <div title={dayjs(m.created_at).format('HH:mm DD/MM/YYYY')}><StickerImage code={m.sticker} size={120} /></div>
+                ) : (
+                  <div title={dayjs(m.created_at).format('HH:mm DD/MM/YYYY')}
+                    className={`whitespace-pre-wrap break-words rounded-2xl px-3 py-2 ${mine ? 'bg-brand-600 text-white rounded-br-md' : 'bg-slate-100 text-slate-800 rounded-bl-md'}`}>
+                    {m.content}
+                  </div>
+                )}
+              </MessageActions>
               {lastMine && <span className="text-[11px] text-slate-500 mt-0.5">{m.id < 0 ? 'Đang gửi…' : m.read_at ? 'Đã xem' : 'Đã gửi'}</span>}
             </div>
           )

@@ -131,3 +131,10 @@ def test_auto_does_not_turn_one_chinese_script_into_the_other(client, gemini):
     res = client.post("/api/v1/translate/", {"text": "我的頭髮", "source": "auto", "target": "zh-Hans"},
                       format="json")
     assert res.status_code == 400 and gemini[0] == []
+
+
+def test_a_chinese_chat_message_translated_into_vietnamese_shows_its_pinyin(client, gemini):
+    gemini[1]["text"] = "Tôi tên Lan."
+    res = client.post("/api/v1/translate/", {"text": "我叫兰", "source": "auto", "target": "vi"}, format="json")
+    assert res.status_code == 200, res.data
+    assert res.data["translation"] == "Tôi tên Lan." and res.data["source_reading"] == "wǒ jiào lán"
