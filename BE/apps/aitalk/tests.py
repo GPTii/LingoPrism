@@ -79,7 +79,7 @@ def test_off_without_key_and_private_to_owner(photo, claude, settings):
     other.force_authenticate(User.objects.create_user("o@example.com", "Strong!Pass123"))
     assert other.post(f"/api/v1/detections/{det.id}/dialogue/").status_code == 404
     settings.ANTHROPIC_API_KEY = ""
-    assert c.get("/api/v1/ai/status/").data == {"dialogue": False}
+    assert c.get("/api/v1/ai/status/").data == {"dialogue": False, "translate": False}
     res = c.post(f"/api/v1/detections/{det.id}/dialogue/")
     assert res.status_code == 503 and claude == []
     assert c.get(f"/api/v1/detections/{det.id}/dialogue/").status_code == 404

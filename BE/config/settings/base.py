@@ -177,6 +177,7 @@ REST_FRAMEWORK = {
         "upload": env("THROTTLE_UPLOAD", default="30/hour"),  # community posts, avatars
         "report": env("THROTTLE_REPORT", default="30/hour"),
         "ai_dialogue": env("THROTTLE_AI_DIALOGUE", default="20/hour"),  # each one is a paid AI call
+        "translate": env("THROTTLE_TRANSLATE", default="120/hour"),  # AI translation, typed or spoken
         "message": env("THROTTLE_MESSAGE", default="60/min"),  # private messages
     },
     # proxies in front of Django whose X-Forwarded-For is trusted (nginx = 1, Cloudflare + nginx = 2)
@@ -217,6 +218,7 @@ AI_TALK_MODEL = env("AI_TALK_MODEL", default="claude-opus-5-5")
 # Gemini (Google AI Studio, free tier) is used first when its key is set
 GEMINI_API_KEY = env("GEMINI_API_KEY", default="")
 GEMINI_MODEL = env("GEMINI_MODEL", default="gemini-flash-latest")
+GEMINI_TRANSLATE_MODEL = env("GEMINI_TRANSLATE_MODEL", default="gemini-flash-lite-latest")
 # the "Web application" client the web page signs in with (public; defaults to the first accepted ID)
 GOOGLE_WEB_CLIENT_ID = env("GOOGLE_WEB_CLIENT_ID", default="") or (GOOGLE_CLIENT_IDS[0] if GOOGLE_CLIENT_IDS else "")
 

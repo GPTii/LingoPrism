@@ -119,38 +119,40 @@ def generate(words: list[dict], language: str, level: int) -> dict:
     return {"title_vi": data.get("title_vi", "")[:200], "lines": lines, "model": model}
 
 
-def _gemini(prompt: str) -> tuple[str, str]:
+def _gemini(prompt: str, system: str = SYSTEM, schema: dict = SCHEMA,
+            fail: str = "Không tạo được hội thoại lúc này.", model: str = "", timeout: int = 60) -> tuple[str, str]:
     import requests
 
-    model = settings.GEMINI_MODEL
+    model = model or settings.GEMINI_MODEL
     try:
         res = requests.post(
             f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent",
             headers={"x-goog-api-key": settings.GEMINI_API_KEY},
             json={
-                "systemInstruction": {"parts": [{"text": SYSTEM}]},
+                "systemInstruction": {"parts": [{"text": system}]},
                 "contents": [{"role": "user", "parts": [{"text": prompt}]}],
-                "generationConfig": {"responseMimeType": "application/json", "responseJsonSchema": SCHEMA,
+                "generationConfig": {"responseMimeType": "application/json", "responseJsonSchema": schema,
                                      "maxOutputTokens": 4000},
             },
-            timeout=60,
+            timeout=timeout,
         )
     except requests.RequestException as e:
         raise AiUnavailable("Máy chủ không kết nối được tới dịch vụ AI.") from e
-    if res.status_code == 429:
+    if res.status_code in (429, 503):  # 503: the model is overloaded for a while
         raise AiUnavailable("AI đang bận, thử lại sau ít phút.")
     if res.status_code != 200:
         log.warning("Gemini API error %s: %s", res.status_code, res.text[:300])
-        raise AiUnavailable("Không tạo được hội thoại lúc này.")
+        raise AiUnavailable(fail)
     body = res.json()
     cand = (body.get("candidates") or [{}])[0]
     if cand.get("finishReason") not in (None, "STOP"):  # SAFETY, MAX_TOKENS, ... → nothing usable
-        raise AiUnavailable("Không tạo được hội thoại cho ảnh này.")
+        raise AiUnavailable(fail)
     text = "".join(p.get("text", "") for p in cand.get("content", {}).get("parts", []) if not p.get("thought"))
     return text, body.get("modelVersion") or model
 
 
-def _claude(prompt: str) -> tuple[str, str]:
+def _claude(prompt: str, system: str = SYSTEM, schema: dict = SCHEMA,
+            fail: str = "Không tạo được hội thoại lúc này.") -> tuple[str, str]:
     import anthropic
 
     client = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY, timeout=60.0, max_retries=1)
@@ -158,9 +160,9 @@ def _claude(prompt: str) -> tuple[str, str]:
         response = client.beta.messages.create(
             model=settings.AI_TALK_MODEL,
             max_tokens=4000,
-            system=SYSTEM,
+            system=system,
             messages=[{"role": "user", "content": prompt}],
-            output_config={"effort": "low", "format": {"type": "json_schema", "schema": SCHEMA}},
+            output_config={"effort": "low", "format": {"type": "json_schema", "schema": schema}},
             betas=["server-side-fallback-2026-07-01"],
             fallbacks="default",
         )
@@ -168,10 +170,10 @@ def _claude(prompt: str) -> tuple[str, str]:
         raise AiUnavailable("AI đang bận, thử lại sau ít phút.") from e
     except anthropic.APIStatusError as e:
         log.warning("Anthropic API error %s (request %s)", e.status_code, getattr(e, "request_id", ""))
-        raise AiUnavailable("Không tạo được hội thoại lúc này.") from e
+        raise AiUnavailable(fail) from e
     except anthropic.APIConnectionError as e:
         raise AiUnavailable("Máy chủ không kết nối được tới dịch vụ AI.") from e
 
     if response.stop_reason in ("refusal", "max_tokens"):
-        raise AiUnavailable("Không tạo được hội thoại cho ảnh này.")
+        raise AiUnavailable(fail)
     return next((b.text for b in response.content if b.type == "text"), ""), response.model

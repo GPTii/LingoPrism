@@ -2,6 +2,18 @@
 
 <!-- Sinh từ BE/apps/core/releases.json bằng `python manage.py changelog` – sửa ở file đó, không sửa ở đây. -->
 
+## 1.8.0 – 02/11/2026: Dịch bằng giọng nói
+
+### Mới
+
+- Mục Dịch mới (web: Từ vựng → Dịch, app: tab Học): gõ hoặc nói một câu bằng tiếng Việt, tiếng Anh, tiếng Trung giản thể hoặc phồn thể, nghe bản dịch đọc to và chép lại.
+- Hai người nói chuyện qua máy: mỗi bên có một nút mic, nói bên nào thì dịch sang bên kia.
+- Bản dịch tiếng Trung có pinyin; những từ đã kiểm duyệt có trong câu hiện bên dưới, bấm Lưu để đưa vào Từ của tôi.
+
+### Cải thiện
+
+- Bản dịch luôn ghi rõ "Bản dịch máy" và không bao giờ thành bài học; chữ Trung sai bộ chữ (giản/phồn) bị loại trước khi tới bạn.
+
 ## 1.7.0 – 29/10/2026: Bạn bè trên bản đồ trò chơi, hoàn thiện hồ sơ
 
 ### Mới

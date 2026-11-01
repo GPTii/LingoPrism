@@ -494,12 +494,44 @@ export interface Submission {
   answers: AnswerResult[]
 }
 
+export type TranslateLang = 'vi' | 'en' | 'zh-Hans' | 'zh-Hant'
+
+export interface TranslatedWord {
+  word_id: number
+  language: TranslateLang
+  text: string
+  reading: string
+  meaning_vi: string
+  lang: string
+  script: string
+}
+
+export interface Translation {
+  text: string
+  source: TranslateLang
+  target: TranslateLang
+  translation: string
+  /** pinyin of a Chinese translation, computed by the server */
+  reading: string
+  source_reading: string
+  source_tts: string
+  target_tts: string
+  machine_translated: true
+  words: TranslatedWord[]
+}
+
 export const learnApi = {
   /** my earlier photos, newest first */
   detections: (page = 1, confirmed?: '0' | '1', params?: Record<string, unknown>) =>
     api.get<Paginated<DetectionResult>>('/detections/', { params: { page, confirmed, ...params } }).then((r) => r.data),
   /** which AI features the server has switched on */
-  aiStatus: () => api.get<{ dialogue: boolean }>('/ai/status/').then((r) => r.data),
+  aiStatus: () => api.get<{ dialogue: boolean; translate?: boolean }>('/ai/status/').then((r) => r.data),
+  /** machine translation of typed or spoken text (not stored), with the verified words found in it */
+  translate: (text: string, source: TranslateLang, target: TranslateLang) =>
+    api.post<Translation>('/translate/', { text, source, target }).then((r) => r.data),
+  /** save a verified word found in a translation, in that word's own language */
+  saveTranslatedWord: (w: TranslatedWord) =>
+    api.post('/my-words/', { word: w.word_id, source: 'manual' }, { params: { lang: w.lang, script: w.script || undefined } }),
   /** the dialogue already written for a photo, or null */
   dialogue: (id: number) =>
     api.get<PhotoDialogue>(`/detections/${id}/dialogue/`).then((r) => r.data).catch((e) => {

@@ -3,6 +3,7 @@ import '../modules/exams/exams_module.dart';
 import '../modules/stats/stats_module.dart';
 import '../modules/wardrobe/wardrobe_module.dart';
 import '../modules/speak/speak_module.dart';
+import '../modules/translate/translate_module.dart';
 import '../modules/live_camera/live_camera_module.dart';
 import '../modules/photo_dialogue/photo_dialogue_module.dart';
 import '../modules/photo_history/photo_history_module.dart';
@@ -247,6 +248,7 @@ class AppPages {
       GetPage(name: _Paths.stats, page: () => const StatsView()),
       GetPage(name: _Paths.wardrobe, page: () => const WardrobeView()),
       GetPage(name: _Paths.speakPractice, page: () => const SpeakPracticeView()),
+      GetPage(name: _Paths.translate, page: () => const TranslateView()),
       GetPage(name: _Paths.liveCamera, page: () => const LiveCameraView()),
       GetPage(name: _Paths.photoDialogue, page: () => const PhotoDialogueView()),
       GetPage(name: _Paths.photoHistory, page: () => const PhotoHistoryView()),

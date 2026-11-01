@@ -5,9 +5,9 @@ from rest_framework.views import APIView
 
 from apps.detection.models import Detection, DetectionItem
 from apps.vocab.models import Word
-from apps.vocab.services import resolve_target, words_for_target
+from apps.vocab.services import resolve_target, tts_locale, words_for_target
 
-from . import generator
+from . import generator, translator
 from .models import PhotoDialogue
 
 MAX_WORDS = 6
@@ -45,7 +45,7 @@ def _payload(d: PhotoDialogue) -> dict:
 class AiStatusView(APIView):
     @extend_schema(tags=["ai"], responses={200: dict})
     def get(self, request):
-        return Response({"dialogue": generator.enabled()})
+        return Response({"dialogue": generator.enabled(), "translate": generator.enabled()})
 
 
 class PhotoDialogueView(APIView):
@@ -87,3 +87,33 @@ class PhotoDialogueView(APIView):
                       "model_name": out["model"]},
         )
         return Response(_payload(d))
+
+
+class TranslateView(APIView):
+    """POST {text, source, target}: a machine translation (not stored) + verified words found in it."""
+
+    throttle_scope = "translate"
+
+    @extend_schema(tags=["ai"], request=dict, responses={200: dict})
+    def post(self, request):
+        text = str(request.data.get("text", "")).strip()
+        source, target = request.data.get("source"), request.data.get("target")
+        langs = translator.LANGUAGES
+        if source not in langs or target not in langs or source == target:
+            return Response({"detail": "Cặp ngôn ngữ không hợp lệ", "errors": {}}, status=400)
+        if {source, target} == {"zh-Hans", "zh-Hant"}:
+            # giản ↔ phồn is not a translation: the words themselves differ by region (土豆 / 馬鈴薯)
+            return Response({"detail": "Không chuyển trực tiếp giữa giản thể và phồn thể", "errors": {}}, status=400)
+        if not text:
+            return Response({"detail": "Chưa có nội dung để dịch", "errors": {}}, status=400)
+        if len(text) > translator.MAX_CHARS:
+            return Response({"detail": f"Tối đa {translator.MAX_CHARS} ký tự mỗi lần dịch", "errors": {}}, status=400)
+        try:
+            out = translator.translate(text, source, target)
+        except generator.AiUnavailable as e:
+            return Response({"detail": str(e), "errors": {}}, status=503)
+        return Response({
+            "text": text, "source": source, "target": target, **out, "machine_translated": True,
+            "source_tts": tts_locale(source), "target_tts": tts_locale(target),
+            "words": translator.verified_words({source: text, target: out["translation"]}, request.user),
+        })

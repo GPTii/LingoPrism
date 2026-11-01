@@ -39,6 +39,7 @@ const AchievementsPage = lazy(() => import('./pages/learner/AchievementsPage'))
 const WardrobePage = lazy(() => import('./pages/learner/WardrobePage'))
 const StatsPage = lazy(() => import('./pages/learner/StatsPage'))
 const SpeakPage = lazy(() => import('./pages/learner/SpeakPage'))
+const TranslatePage = lazy(() => import('./pages/learner/TranslatePage'))
 const SupportPage = lazy(() => import('./pages/learner/SupportPage'))
 const MessagesPage = lazy(() => import('./pages/learner/MessagesPage'))
 const NotificationsPage = lazy(() => import('./pages/learner/NotificationsPage'))
@@ -99,6 +100,7 @@ export default function App() {
             <Route path="prismo" element={<WardrobePage />} />
             <Route path="stats" element={<StatsPage />} />
             <Route path="speak" element={<SpeakPage />} />
+            <Route path="dich" element={<TranslatePage />} />
             <Route path="support" element={<SupportPage />} />
             <Route path="messages" element={<MessagesPage />} />
             <Route path="messages/:id" element={<MessagesPage />} />

@@ -327,15 +327,23 @@ class LearningTabView extends GetView<HomeStatsController> {
         SizedBox(width: 8.w),
         item('mic', 'Luyện phát âm', Routes.speakPractice),
         SizedBox(width: 8.w),
-        item('exam', 'Bài kiểm tra', Routes.examList),
+        item('chat', 'Dịch', Routes.translate),
       ]),
       SizedBox(height: 8.h),
       Row(children: [
+        item('exam', 'Bài kiểm tra', Routes.examList),
+        SizedBox(width: 8.w),
         item('pin', 'Học theo vị trí', Routes.poiMap),
         SizedBox(width: 8.w),
         item('cap', 'Hỏi giáo viên', Routes.supportChat),
-        SizedBox(width: 8.w),
+      ]),
+      SizedBox(height: 8.h),
+      Row(children: [
         item('chart', 'Thống kê', Routes.stats),
+        SizedBox(width: 8.w),
+        const Expanded(child: SizedBox()),
+        SizedBox(width: 8.w),
+        const Expanded(child: SizedBox()),
       ]),
     ]);
   }

@@ -1,5 +1,19 @@
 [
   {
+    "version": "1.8.0",
+    "date": "2026-11-02",
+    "title": "Dịch bằng giọng nói",
+    "new": [
+      "Mục Dịch mới (web: Từ vựng → Dịch, app: tab Học): gõ hoặc nói một câu bằng tiếng Việt, tiếng Anh, tiếng Trung giản thể hoặc phồn thể, nghe bản dịch đọc to và chép lại.",
+      "Hai người nói chuyện qua máy: mỗi bên có một nút mic, nói bên nào thì dịch sang bên kia.",
+      "Bản dịch tiếng Trung có pinyin; những từ đã kiểm duyệt có trong câu hiện bên dưới, bấm Lưu để đưa vào Từ của tôi."
+    ],
+    "improved": [
+      "Bản dịch luôn ghi rõ \"Bản dịch máy\" và không bao giờ thành bài học; chữ Trung sai bộ chữ (giản/phồn) bị loại trước khi tới bạn."
+    ],
+    "fixed": []
+  },
+  {
     "version": "1.7.0",
     "date": "2026-10-29",
     "title": "Bạn bè trên bản đồ trò chơi, hoàn thiện hồ sơ",

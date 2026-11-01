@@ -27,6 +27,7 @@ export function navGroups(counts: { due?: number; unread?: number; quests?: numb
       key: 'vocab', label: 'Từ vựng', icon: 'vocab', children: [
         { to: '/vocab', label: 'Chủ đề', icon: 'shapes' },
         { to: '/vocab?tab=library', label: 'Từ của tôi', icon: 'bookmark' },
+        { to: '/dich', label: 'Dịch', icon: 'chat' },
       ],
     },
     {
