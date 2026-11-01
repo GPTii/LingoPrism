@@ -67,7 +67,7 @@ def _run_policy(fixes, poi_id, radius_of, index, distance_filter, min_interval, 
     """Seconds at which the app checks, and the first second a check finds `poi_id`."""
     last_emit = fixes[0]
     last_check = -rng.uniform(0, min_interval)  # the app has been running for a while
-    checks, found = 0, None
+    checks, found = [], None
     for t, (lat, lng) in enumerate(fixes):
         if t and haversine(last_emit[0], last_emit[1], lat, lng) < distance_filter:
             continue
@@ -75,7 +75,7 @@ def _run_policy(fixes, poi_id, radius_of, index, distance_filter, min_interval, 
         if t - last_check <= min_interval:
             continue
         last_check = t
-        checks += 1
+        checks.append(t)
         if found is None and any(pid == poi_id and d <= radius_of[pid] for pid, d in index.query(lat, lng, 2000)):
             found = t
     return checks, found
@@ -94,8 +94,8 @@ def simulate(pois, passes=120, seed=0) -> dict:
                 poi = rng.choice(pois)
                 inside = k % 4 != 3  # one pass in four goes by just outside the circle
                 fixes, entry, exit_ = _pass(rng, poi, speed, inside)
-                n, found = _run_policy(fixes, poi[0], radius_of, index, dist_f, interval, rng)
-                checks += n
+                times, found = _run_policy(fixes, poi[0], radius_of, index, dist_f, interval, rng)
+                checks += len(times)
                 seconds += len(fixes)
                 if not inside:
                     false_hits += found is not None
