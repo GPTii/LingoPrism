@@ -73,6 +73,8 @@ def add_model(name: str, onnx: str):
     BASE[name] = str(Path(onnx).resolve())
     SETUPS[name] = (name, None, name)
     SETUPS[f"{name}+coco"] = (name, "coco", f"{name} + COCO")
+    # exactly what the server runs, with this model in place of OIV7 m: the fair before / after comparison
+    SETUPS[f"{name}+coco-m-int8+clip"] = (name, "coco-m-int8", f"{name} + COCO m INT8 + CLIP (như server)")
 
 
 def add_base(name: str, onnx: str):

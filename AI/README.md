@@ -55,6 +55,29 @@ từ được chọn mới được lưu, và lựa chọn đó được ghi l�
 (gối trong ảnh COCO, người trong ảnh Open Images…) – chỉ trên tập train, val/test giữ nhãn người gắn.
 Notebook Colab đã bật sẵn (`PSEUDO = True`). Train xong so với model pretrained bằng `eval_photos.py` rồi chọn model tốt hơn.
 
+## Fine-tune v5: model đang chạy, nhãn sạch (Colab)
+
+v1–v4 đều thua model pretrained: train từ đầu thì thiếu dữ liệu và GPU, v4 fine-tune với đầu 78 lớp và nhãn tự gán nên
+precision tụt. v5 (`notebooks/finetune_oiv7_colab.ipynb`) train tiếp **đúng yolov8m-oiv7 server đang chạy**:
+
+- giữ nguyên 601 lớp Open Images (mọi trọng số được giữ, kể cả đầu ra), đóng băng backbone, learning rate nhỏ;
+- chỉ nhãn do người vẽ của Open Images V7 **train** (tập test lấy từ validation nên không lẫn), không nhãn tự gán;
+- 29 lớp yếu (AP50 < 0,55 trên tập test + các cặp hay nhầm trên ảnh thật) lấy 300 ảnh / lớp Open Images, các lớp còn lại
+  30 ảnh để không quên (`build_oiv7_finetune.py`);
+- đo trước / sau trên cùng ảnh val, rồi export ONNX gộp về 232 nhãn như model đang chạy (`finetune_oiv7.py`).
+
+Chấm và quyết định trên máy phát triển, đúng cấu hình server (COCO m INT8 + CLIP):
+
+```bash
+python AI/scripts/quantize_onnx.py AI/runs/oiv7m-ft-v5/yolov8m-oiv7-ft-lingoprism.onnx
+python AI/scripts/eval_testset.py --model ft=AI/runs/oiv7m-ft-v5/yolov8m-oiv7-ft-lingoprism-int8.onnx
+python AI/scripts/compare_finetune.py --name ft --run AI/runs/oiv7m-ft-v5   # → AI/report/yolo/finetune_ft.md
+```
+
+Quy tắc dùng: mAP50 chung không giảm quá 0,005 **và** trung bình AP50 của lớp yếu tăng. Đạt thì thay
+`BE/models/yolov8m-oiv7-lingoprism-int8.onnx` bằng bản mới và `manage.py register_model`; không đạt thì vẫn là một
+thực nghiệm có số liệu cho báo cáo.
+
 ## So sánh model trên ảnh thật
 
 `AI/scripts/eval_photos.py` chạy đúng code inference của server; đáp án lấy từ tên file/thư mục (`cup.jpg`, `cup+spoon.jpg`, `pillow/IMG_01.jpg`).
