@@ -36,6 +36,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from export_pretrained_oiv7 import EXTRA  # noqa: E402  (the same label -> Open Images classes folding as the server)
 
 SERVER_SETUP = "oiv7m-int8+coco-m-int8+clip"
+BATCH = 25  # replay classes per FiftyOne call
 # mistaken for one another on the vocabulary photos (ghi_chu.md, CLIP section); these labels are "extra" classes the
 # test set does not score, so they are added by hand
 CONFUSED = ["lemon", "mango", "peach", "orange", "sandals", "shoes", "violin", "guitar", "scissors", "knife", "spoon",
@@ -70,13 +71,16 @@ def _flag(det, field: str) -> bool:
         return False
 
 
-def load_samples(oi_class: str, split: str, n: int, seed: int):
+def load_samples(oi_classes: list[str], split: str, n: int, seed: int):
+    """n images showing any of oi_classes. Every call re-reads the large Open Images label files, so the replay
+    classes are asked for in batches, not one by one."""
     import fiftyone.zoo as foz
 
+    name = f"lp-ft-{split}-{oi_classes[0]}-{len(oi_classes)}-{n}-{seed}".replace(" ", "_")
     ds = foz.load_zoo_dataset(
-        "open-images-v7", split=split, label_types=["detections"], classes=[oi_class], max_samples=n, shuffle=True,
+        "open-images-v7", split=split, label_types=["detections"], classes=oi_classes, max_samples=n, shuffle=True,
         seed=seed, only_matching=False,  # every box of the image, not only this class: fewer unlabeled objects
-        dataset_name=f"lp-ft-{split}-{oi_class}-{n}-{seed}".replace(" ", "_"), drop_existing_dataset=True)
+        dataset_name=name, drop_existing_dataset=True)
     return [(s.filepath, (s.ground_truth.detections if s.ground_truth else [])) for s in ds]
 
 
@@ -107,18 +111,23 @@ def main():
     print(f"{len(weak)} lớp yếu: {', '.join(weak)}")
     print(f"{len(others)} lớp ôn lại (replay {args.replay} ảnh / lớp Open Images)")
 
-    plan = [(names[i], args.per_class) for lab in weak for i in groups[lab]]
+    # weak classes one by one (each gets its share of images); replay classes in batches of BATCH
+    weak_oi = list(dict.fromkeys(names[i] for lab in weak for i in groups[lab]))
+    replay_oi = [c for c in dict.fromkeys(names[i] for lab in others for i in groups[lab]) if c not in weak_oi]
+    plan = [([c], args.per_class) for c in weak_oi]
     if args.replay:
-        plan += [(names[i], args.replay) for lab in others for i in groups[lab]]
-    plan = list(dict.fromkeys(plan))
+        plan += [(replay_oi[k:k + BATCH], args.replay * len(replay_oi[k:k + BATCH]))
+                 for k in range(0, len(replay_oi), BATCH)]
+    print(f"{len(plan)} lượt tải ({len(weak_oi)} lớp yếu, {len(replay_oi)} lớp ôn lại theo nhóm {BATCH})")
 
     images: dict[str, list] = {}
-    for oi_class, n in plan:
+    for step, (oi_classes, n) in enumerate(plan, 1):
+        print(f"[{step}/{len(plan)}] {', '.join(oi_classes[:3])}{'…' if len(oi_classes) > 3 else ''}", flush=True)
         try:
-            for path, dets in load_samples(oi_class, args.split, n, args.seed):
+            for path, dets in load_samples(oi_classes, args.split, n, args.seed):
                 images.setdefault(path, dets)
         except Exception as e:  # a class with no train boxes, a download hiccup: skip it, report it
-            print(f"[bỏ qua] {oi_class}: {e}")
+            print(f"[bỏ qua] {oi_classes[0]}…: {e}")
 
     out = Path(args.out)
     rng = random.Random(args.seed)
