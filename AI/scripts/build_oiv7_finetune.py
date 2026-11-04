@@ -241,7 +241,7 @@ def main():
     (out / "data.yaml").write_text(yaml.safe_dump(
         {"path": str(out.resolve()), "train": "images/train", "val": "images/val", "names": dict(names)},
         allow_unicode=True, sort_keys=False), encoding="utf-8")
-    summary = {"base": args.base, "split": args.split, "threshold": args.threshold, "weak": weak, "replay": others,
+    summary = {"builder": 2, "base": args.base, "split": args.split, "threshold": args.threshold, "weak": weak, "replay": others,
                "images": kept, "val_images": sum(1 for p in keep if ok.get(p) and part_of[p] == "val"),
                "skipped_depiction": skipped_depiction,
                "per_label": {lab: {"images": len(images_per_label[lab]), "boxes": boxes_per_label[lab]}
