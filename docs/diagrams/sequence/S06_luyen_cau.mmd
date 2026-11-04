@@ -1,0 +1,24 @@
+---
+title: "S06 – Luyện câu"
+---
+sequenceDiagram
+    autonumber
+
+    actor U as Học viên
+    participant C as Web / App
+    participant API as API Django<br/>SentencePracticeViewSet
+    participant DB as PostgreSQL
+    participant GM as gamification
+    U->>C: Mở Luyện câu
+    C->>API: GET /sentences/lesson/
+    API->>DB: ExampleSentence verified của các từ đang học (Tatoeba)
+    API-->>C: Bài: sắp xếp, nghe – sắp xếp, điền từ, chọn nghĩa
+    loop Mỗi bài
+        U->>C: Trả lời
+        C->>API: POST /sentences/check/ {example, answer}
+        API->>API: Chuẩn hoá và so khớp (tiếng Trung theo chữ)
+        opt Đúng
+            API->>GM: award_xp(practice), mark_activity
+        end
+        API-->>C: {correct, expected, translation_vi, xp}
+    end

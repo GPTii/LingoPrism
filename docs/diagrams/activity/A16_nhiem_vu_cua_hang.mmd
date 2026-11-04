@@ -1,0 +1,26 @@
+---
+title: "A16 – Nhiệm vụ, huy hiệu, cửa hàng và giải đấu tuần"
+---
+flowchart TD
+    S((●)):::se
+    E((◉)):::se
+
+    S --> A["Học, chơi, lưu từ, làm bài…"]
+    A --> B["Cộng tiến độ nhiệm vụ ngày / tháng, kiểm tra huy hiệu"]:::sys
+    B --> C{"Nhiệm vụ đạt?"}:::dec
+    C -- Có --> D["Bấm Nhận: cộng XP / vảy, một lần"]:::sys --> F
+    C -- Chưa --> F{"Vào cửa hàng?"}:::dec
+    F -- Có --> G["Chọn vật phẩm"]
+    G --> H{"Đủ vảy / ngọc, chưa sở hữu<br/>(với đồ dùng một lần)?"}:::dec
+    H -- Không --> H1["Báo không đủ"]:::err --> F
+    H -- Có --> I["Trừ tiền, thêm vào kho"]:::sys
+    I --> J{"Loại"}:::dec
+    J -- Tăng tốc XP --> J1["Dùng: bật hệ số XP có thời hạn"]:::sys --> K
+    J -- Đóng băng chuỗi --> J2["Tự dùng khi lỡ đúng một ngày, giữ chuỗi"]:::sys --> K
+    J -- Sticker / đồ Prismo --> J3["Dùng trong chat / thay đồ"]:::sys --> K
+    F -- Không --> K["XP vào giải đấu tuần theo hạng"]
+    K --> L["Cuối tuần: đóng giải, lên / xuống hạng, thưởng"]:::sys --> E
+    classDef se fill:#333,stroke:#333,color:#fff
+    classDef dec fill:#fff8e1,stroke:#d9a400
+    classDef sys fill:#eaf4fe,stroke:#1899f0
+    classDef err fill:#fdecea,stroke:#e4572e

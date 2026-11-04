@@ -1,0 +1,35 @@
+---
+title: "UC05 – Chụp ảnh nhận diện, hội thoại AI và dịch (apps.detection, apps.aitalk)"
+---
+flowchart LR
+    Learner["👤 Học viên"]:::actor
+    Det["🖥 Bộ nhận diện<br/>(YOLOv8m-OIV7 + YOLOv10m + CLIP)"]:::ext
+    Phone["🖥 Model trên máy<br/>(TFLite)"]:::ext
+    LLM["🖥 Gemini / Claude"]:::ext
+    subgraph SYS["Hệ thống LingoPrism"]
+        A(["Chụp / chọn ảnh để nhận diện"]):::uc
+        B(["Nhận diện trên máy chủ"]):::uc
+        C(["Nhận diện offline trên điện thoại"]):::uc
+        D(["Camera trực tiếp"]):::uc
+        E(["Xác nhận đúng / sai, sửa tên vật"]):::uc
+        F(["Gõ tên vật bằng tiếng Việt"]):::uc
+        G(["Lưu từ từ ảnh"]):::uc
+        H(["Xem lịch sử ảnh"]):::uc
+        I(["Tạo hội thoại AI từ ảnh"]):::uc
+        J(["Dịch văn bản / giọng nói"]):::uc
+        K(["Lưu từ đã kiểm duyệt từ bản dịch"]):::uc
+    end
+    Learner --- A & D & H & I & J
+    A -. «include» .-> B
+    A -. «extend» .-> C
+    A -. «include» .-> E
+    E -. «extend» .-> F
+    E -. «extend» .-> G
+    J -. «extend» .-> K
+    B --- Det
+    C & D --- Phone
+    I & J --- LLM
+
+    classDef actor fill:#fff,stroke:#333,stroke-width:1.5px
+    classDef uc fill:#eaf4fe,stroke:#1899f0,color:#0b3b66
+    classDef ext fill:#f5f5f5,stroke:#888,stroke-dasharray:4 3

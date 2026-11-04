@@ -1,0 +1,30 @@
+---
+title: "S23 – Quản trị: kiểm duyệt bản dịch và duyệt từ mới"
+---
+sequenceDiagram
+    autonumber
+
+    actor T as Giáo viên
+    participant A as Trang Kiểm duyệt ngôn ngữ
+    participant API as API Django<br/>AdminTranslation / AdminCandidate
+    participant CHK as vocab.lang.checks
+    participant SRC as Nguồn: CC-CEDICT, HSK,<br/>moedict, TOCFL, CMUdict
+    participant DB as PostgreSQL
+    A->>API: GET /admin/translations/?status=flagged
+    API-->>A: Bản dịch + lỗi tự động
+    T->>A: Sửa / kiểm tra lại
+    A->>API: POST /admin/translations/{id}/recheck/
+    API->>CHK: Chạy lại kiểm tra
+    CHK->>SRC: Đối chiếu chữ, pinyin, bộ chữ, phát âm
+    API->>DB: Lưu issues, status
+    T->>A: Duyệt
+    A->>API: POST /admin/translations/{id}/verify/
+    API->>DB: status=verified, method=manual, verified_by
+    A->>API: POST /admin/candidates/{id}/approve/
+    API->>CHK: check(candidate) cho vi, en, zh-Hans, zh-Hant
+    alt Không lỗi
+        API->>DB: build_vocab: Word + WordTranslation, ghi CSV đã duyệt
+        API-->>A: 200
+    else Có lỗi
+        API-->>A: 400 + lỗi
+    end

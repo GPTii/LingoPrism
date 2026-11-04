@@ -1,0 +1,25 @@
+---
+title: "S25 – Quản trị: xử lý báo cáo người dùng"
+---
+sequenceDiagram
+    autonumber
+
+    actor T as Giáo viên
+    participant A as Trang Kiểm duyệt
+    participant API as API Django<br/>AdminUserReportViewSet
+    participant DB as PostgreSQL
+    participant N as notifications
+    participant AU as AuditLogMiddleware
+    A->>API: GET /admin/user-reports/?status=pending
+    API-->>A: Báo cáo + lý do + 30 tin bằng chứng
+    T->>A: Khoá tài khoản
+    A->>API: POST /admin/user-reports/{id}/resolve/ {lock: true}
+    alt Người bị báo là học viên
+        API->>DB: User.status = locked
+        API->>DB: Mọi báo cáo pending về người này → resolved
+    else Giáo viên / quản trị
+        API-->>A: 400
+    end
+    API->>N: notify(người báo cáo, "đã được xem xét")
+    API-->>A: 200
+    AU->>DB: INSERT AuditLog (người làm, đường dẫn, đối tượng)

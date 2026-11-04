@@ -1,0 +1,23 @@
+---
+title: "S09 – Kiểm tra vượt cấp độ"
+---
+sequenceDiagram
+    autonumber
+
+    actor U as Học viên
+    participant C as Web / App
+    participant API as API Django<br/>LevelTestView
+    participant DB as PostgreSQL
+    C->>API: GET /levels/{n}/test/
+    API->>DB: 10 từ của cấp n
+    API->>API: Ký token (user, cấp, đáp án) bằng django.signing
+    API-->>C: 10 câu + token
+    U->>C: Làm bài
+    C->>API: POST /levels/{n}/test/ {token, answers}
+    API->>API: Giải token, kiểm tra người + cấp
+    alt ≥ 8 câu đúng
+        API->>DB: Mở cấp n+1, đặt làm cấp hiện tại
+        API-->>C: {passed: true}
+    else
+        API-->>C: {passed: false, score}
+    end

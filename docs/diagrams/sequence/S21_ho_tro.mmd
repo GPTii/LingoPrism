@@ -1,0 +1,34 @@
+---
+title: "S21 – Hỏi giáo viên"
+---
+sequenceDiagram
+    autonumber
+
+    actor U as Học viên
+    actor T as Giáo viên
+    participant C as App / Web
+    participant A as Trang hỗ trợ
+    participant WS as SupportChatConsumer<br/>/ws/support/{id}/
+    participant SV as chat.services
+    participant DB as PostgreSQL
+    participant R as Redis
+    participant N as notifications
+    C->>WS: POST /support/conversations/ rồi connect
+    U->>C: Câu hỏi
+    C->>WS: {action: send}
+    WS->>SV: send_support_message
+    SV->>DB: INSERT SupportMessage, mở lại hội thoại
+    SV->>R: group_send(message)
+    opt Đã có giáo viên phụ trách
+        SV->>N: notify(giáo viên)
+    end
+    T->>A: Mở hộp thư hỗ trợ
+    A->>WS: connect, gửi trả lời
+    WS->>SV: send_support_message (staff)
+    SV->>DB: Gán giáo viên phụ trách nếu chưa có
+    SV->>N: notify(học viên)
+    R-->>C: {event: message}
+    C->>WS: {action: read}
+    WS->>R: {event: read}
+    T->>A: Đóng
+    A->>SV: POST /support/conversations/{id}/close/

@@ -1,0 +1,32 @@
+---
+title: "A19 – Nhóm học và chat nhóm realtime"
+---
+flowchart TD
+    S((●)):::se
+    E((◉)):::se
+
+    S --> A["Chọn nhóm, bấm Tham gia"]
+    A --> B{"Nhóm cần duyệt?"}:::dec
+    B -- Có --> C["Thành viên pending, báo trưởng nhóm"]:::sys
+    C --> D{"Trưởng nhóm duyệt?"}:::dec
+    D -- Không --> E
+    D -- Có --> F
+    B -- Không --> F["Thành viên active, báo trưởng nhóm"]:::sys
+    F --> G["Mở WebSocket /ws/groups/id (JWT)"]
+    G --> H{"Là thành viên active, không phải trẻ em,<br/>email đã xác minh?"}:::dec
+    H -- Không --> H1["Đóng kết nối 4403"]:::err --> E
+    H -- Có --> I["Soạn tin: gõ / Nói / Dịch, sticker, khoe huy hiệu"]
+    I --> J{"Quá 8 tin liên tiếp (1 tin / giây)?"}:::dec
+    J -- Có --> J1["Từ chối: gửi quá nhanh"]:::err --> I
+    J -- Không --> K{"client_id đã lưu?"}:::dec
+    K -- Có --> K1["Bỏ qua bản gửi lại"] --> I
+    K -- Không --> L["Lưu GroupMessage, phát tới cả nhóm qua Redis"]:::sys
+    L --> M["Mọi thành viên nhận cùng thứ tự"]
+    M --> N{"⋯ trên một tin"}:::dec
+    N -- Thả tim --> N1["Bật / tắt tim, phát sự kiện heart"]:::sys --> I
+    N -- Dịch --> N2["Dịch sang tiếng Việt, chỉ mình thấy"] --> I
+    N -- Không --> E
+    classDef se fill:#333,stroke:#333,color:#fff
+    classDef dec fill:#fff8e1,stroke:#d9a400
+    classDef sys fill:#eaf4fe,stroke:#1899f0
+    classDef err fill:#fdecea,stroke:#e4572e

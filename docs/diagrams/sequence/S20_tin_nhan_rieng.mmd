@@ -1,0 +1,30 @@
+---
+title: "S20 – Tin nhắn riêng"
+---
+sequenceDiagram
+    autonumber
+
+    actor U as Học viên A
+    participant C as Web / App của A
+    participant API as API Django<br/>DirectThreadViewSet
+    participant SV as chat.services
+    participant DB as PostgreSQL
+    participant R as Redis → /ws/events/
+    participant B as Thiết bị của B
+    C->>API: POST /messages/threads/ {user: B}
+    API->>SV: can_message(A, B): người lớn, không chặn, bạn bè / theo dõi nhau
+    API->>DB: get_or_create DirectThread
+    U->>C: Gửi tin
+    C->>API: POST /messages/threads/{id}/messages/ {content, client_id} (throttle message)
+    API->>SV: send_direct_message
+    SV->>DB: INSERT DirectMessage
+    SV->>R: push_event(A, dm) · push_event(B, dm)
+    R-->>B: {event: dm}
+    opt B đã đọc hết tin trước đó
+        SV->>DB: notify(B) → FCM
+    end
+    B->>API: GET messages → mark_direct_read
+    API->>R: push_event(A, dm_read)
+    R-->>C: Đã xem
+    B->>API: POST /messages/threads/{id}/heart/ {message}
+    API->>R: push_event(A và B, dm_heart)

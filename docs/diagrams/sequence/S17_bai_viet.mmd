@@ -1,0 +1,26 @@
+---
+title: "S17 – Cộng đồng: bài viết"
+---
+sequenceDiagram
+    autonumber
+
+    actor U as Học viên
+    participant C as Web / App
+    participant API as API Django<br/>PostViewSet
+    participant DB as PostgreSQL + media
+    participant N as notifications
+    C->>API: GET /posts/ (bảng tin, ẩn bài của người đã chặn)
+    API-->>C: Bài viết
+    U->>C: Đăng bài + ảnh
+    C->>API: POST /posts/ (throttle upload, cần email xác minh)
+    API->>DB: INSERT Post
+    U->>C: Thích / bình luận
+    C->>API: POST /posts/{id}/like/ · /comments/
+    API->>DB: Lưu
+    API->>N: notify(chủ bài)
+    U->>C: Lưu từ trong bài
+    C->>API: POST /posts/{id}/save-words/
+    API->>DB: PersonalWord (source=community)
+    U->>C: Báo cáo
+    C->>API: POST /posts/{id}/report/
+    API->>DB: INSERT PostReport (pending)

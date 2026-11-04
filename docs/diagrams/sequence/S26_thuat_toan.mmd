@@ -1,0 +1,27 @@
+---
+title: "S26 – Quản trị: thuật toán và thực nghiệm"
+---
+sequenceDiagram
+    autonumber
+
+    actor A as Quản trị viên
+    participant P as Trang Thuật toán
+    participant API as API Django<br/>AlgorithmsView / RunExperimentView
+    participant EX as algorithms.experiments<br/>/ benchmark / ga
+    participant DB as PostgreSQL
+    P->>API: GET /admin/algorithms/
+    API->>DB: AlgorithmConfig + ExperimentRun mới nhất mỗi loại
+    API-->>P: Cấu hình, lựa chọn, kết quả
+    A->>P: Đổi lịch ôn / thứ tự ôn / đáp án nhiễu / tìm POI
+    P->>API: PATCH /admin/algorithms/
+    API->>DB: UPDATE AlgorithmConfig (phiên học sau dùng)
+    A->>P: Chạy lại GA
+    P->>API: POST /admin/algorithms/run/ga/
+    API->>EX: histories → chia train / test → GA (24 cá thể × 25 thế hệ)
+    EX->>EX: Đánh giá log-loss trên thẻ test
+    opt Tốt hơn tham số cũ
+        EX->>DB: AlgorithmConfig.fsrs_weights
+    end
+    EX->>DB: INSERT ExperimentRun(kind=ga)
+    API-->>P: Kết quả
+    Note over P,EX: Tương tự: srs, vip, distractor, proximity, geofence, realtime, yolo, benchmark

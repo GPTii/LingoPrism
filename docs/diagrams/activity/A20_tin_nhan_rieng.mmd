@@ -1,0 +1,28 @@
+---
+title: "A20 – Tin nhắn riêng"
+---
+flowchart TD
+    S((●)):::se
+    E((◉)):::se
+
+    S --> A["Mở hội thoại với một người"]
+    A --> B{"Cả hai người lớn, không chặn nhau,<br/>là bạn bè hoặc theo dõi nhau?"}:::dec
+    B -- Không --> B1["Không nhắn được, chỉ xem lịch sử"]:::err --> E
+    B -- Có --> C["Tải 50 tin gần nhất, đánh dấu đã đọc"]:::sys
+    C --> D["Gửi tin: chữ (Nói / Dịch) hoặc sticker đã sở hữu"]
+    D --> F{"Email đã xác minh?"}:::dec
+    F -- Không --> F1["Báo cần xác minh"]:::err --> E
+    F -- Có --> G["Lưu DirectMessage (chống trùng client_id)"]:::sys
+    G --> H["push_event dm tới mọi thiết bị của hai người"]:::sys
+    H --> I{"Người nhận đã đọc hết tin trước?"}:::dec
+    I -- Có --> I1["Một thông báo cho cả loạt tin"]:::sys --> J
+    I -- Không --> J["Người nhận mở → dm_read → Đã xem"]
+    J --> K{"⋯"}:::dec
+    K -- Thả tim --> K1["dm_heart tới hai người"]:::sys --> D
+    K -- Dịch --> K2["Bản dịch máy dưới tin"] --> D
+    K -- Báo cáo --> K3["Xem A18"] --> E
+    K -- Thoát --> E
+    classDef se fill:#333,stroke:#333,color:#fff
+    classDef dec fill:#fff8e1,stroke:#d9a400
+    classDef sys fill:#eaf4fe,stroke:#1899f0
+    classDef err fill:#fdecea,stroke:#e4572e

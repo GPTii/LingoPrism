@@ -1,0 +1,20 @@
+---
+title: "S28 – Quản trị: gửi thông báo hàng loạt"
+---
+sequenceDiagram
+    autonumber
+
+    actor T as Giáo viên / Quản trị
+    participant A as Trang Thông báo
+    participant API as API Django<br/>BroadcastView
+    participant DB as PostgreSQL
+    participant N as notifications.services
+    participant C as Web / App người học
+    T->>A: Tiêu đề, nội dung, đối tượng (vai trò, người lớn / trẻ em)
+    A->>API: POST /admin/broadcast/
+    API->>DB: User is_active, lọc theo đối tượng
+    loop Mỗi người
+        API->>N: notify(user, broadcast)
+        N-->>C: Realtime + FCM
+    end
+    API-->>A: {sent: n}

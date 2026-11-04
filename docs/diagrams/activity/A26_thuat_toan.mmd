@@ -1,0 +1,28 @@
+---
+title: "A26 – Quản trị: thuật toán và thực nghiệm"
+---
+flowchart TD
+    S((●)):::se
+    E((◉)):::se
+
+    S --> A["Mở Thuật toán AI & thực nghiệm"]
+    A --> B["Xem cấu hình đang dùng + kết quả mới nhất"]:::sys
+    B --> C{"Thao tác"}:::dec
+    C -- Đổi cấu hình --> D["Chọn lịch ôn SM-2 / FSRS, thứ tự ôn Theo hạn / VIP,<br/>đáp án nhiễu Ngẫu nhiên / Smart, tìm POI PostgreSQL / Lưới"]
+    D --> D1["Lưu AlgorithmConfig: áp dụng cho phiên học mới"]:::sys --> B
+    C -- Chạy lại thực nghiệm --> F{"Loại"}:::dec
+    F -- srs / vip / distractor / proximity /<br/>geofence / realtime / yolo --> G["Chạy, lưu ExperimentRun"]:::sys --> B
+    F -- GA --> H["Tối ưu 17 tham số FSRS trên thẻ huấn luyện"]:::sys
+    H --> I{"Log-loss trên thẻ kiểm tra tốt hơn?"}:::dec
+    I -- Có --> I1["Ghi tham số mới vào cấu hình"]:::sys --> B
+    I -- Không --> I2["Giữ tham số cũ"] --> B
+    F -- Benchmark --> J["Thử mọi tổ hợp, chọn theo quy tắc,<br/>kiểm tra lại trên nhóm mới"]:::sys
+    J --> K{"Áp dụng tốt nhất?"}:::dec
+    K -- Có --> I1
+    K -- Không --> B
+    C -- Xem trước --> L["Thứ tự VIP của một học viên /<br/>đáp án nhiễu của một từ"] --> B
+    C -- Thoát --> E
+    classDef se fill:#333,stroke:#333,color:#fff
+    classDef dec fill:#fff8e1,stroke:#d9a400
+    classDef sys fill:#eaf4fe,stroke:#1899f0
+    classDef err fill:#fdecea,stroke:#e4572e

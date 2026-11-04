@@ -1,0 +1,25 @@
+---
+title: "AR02 – Sơ đồ triển khai (Azure VM B2als_v2: 2 vCPU, 4 GB, ufw 22/80/443, fail2ban; docker compose lingoprism-prod)"
+---
+flowchart TB
+    U["Trình duyệt / Điện thoại"] -->|443| CF["Cloudflare proxy"]
+    subgraph VM["Azure VM – Ubuntu 24.04"]
+        subgraph DC["docker compose"]
+            web["web: nginx + bản build React<br/>:80 / :443 (chỉ nhận IP Cloudflare)"]
+            backend["backend: uvicorn config.asgi<br/>(WEB_CONCURRENCY tiến trình), migrate khi khởi động"]
+            worker["worker: celery -A config worker"]
+            db[("db: postgres:16")]
+            redis[("redis: redis:7-alpine")]
+        end
+        vol[("volumes: pgdata, media, static<br/>BE/models (.onnx, chỉ đọc), secrets (Firebase)")]
+        cron["cron 03:00 VN: deploy/backup.sh<br/>(dump DB, media, .env → ~/backups)"]
+    end
+    PC["Máy phát triển (Windows)"]
+    CF --> web -->|proxy /api /ws /admin| backend
+    backend --> db & redis
+    worker --> redis & db
+    backend & worker --- vol
+    cron --> db
+    PC -->|deploy.bat: push.sh qua SSH| VM
+    PC -->|pull-backups: mỗi 10 ngày| cron
+    PC -->|run-experiments.bat| backend

@@ -1,0 +1,36 @@
+---
+title: "AR03 – Các module của máy chủ (modular monolith, mỗi module một app Django)"
+---
+flowchart LR
+    accounts["accounts<br/>tài khoản, JWT, Google, email"]
+    vocab["vocab<br/>ngôn ngữ, chủ đề, từ, bản dịch,<br/>kiểm duyệt nguồn"]
+    learning["learning<br/>thư viện từ, phiên học, luyện câu,<br/>lộ trình cấp độ"]
+    literacy["literacy<br/>học đọc – viết"]
+    quizzes["quizzes<br/>câu hỏi, đề, bài làm, chấm"]
+    detection["detection<br/>ảnh, nhận diện, phản hồi, model"]
+    aitalk["aitalk<br/>hội thoại AI, dịch"]
+    algorithms["algorithms<br/>SM-2, FSRS, GA, VIP, Word2Vec,<br/>Distractor, Proximity, thực nghiệm"]
+    gis["gis<br/>POI, lân cận, geofence"]
+    gamification["gamification<br/>XP, chuỗi, nhiệm vụ, huy hiệu,<br/>giải đấu, cửa hàng, Prismo"]
+    games["games<br/>bản đồ trò chơi, màn, rương"]
+    community["community<br/>bài viết, nhóm, bạn bè, chặn, báo cáo"]
+    chat["chat<br/>chat nhóm, tin riêng, hỗ trợ"]
+    notifications["notifications<br/>thông báo, sự kiện realtime"]
+    push["push<br/>Firebase FCM"]
+    audit["audit<br/>nhật ký quản trị"]
+    core["core<br/>dashboard, health, phiên bản, quyền"]
+
+    learning --> vocab & algorithms & gamification
+    literacy --> vocab & gamification
+    quizzes --> vocab & gamification
+    detection --> vocab & learning
+    aitalk --> detection & vocab
+    algorithms --> learning & detection & gis & vocab
+    gis --> vocab & notifications & algorithms
+    games --> learning & gamification
+    gamification --> notifications
+    community --> chat & notifications & vocab
+    chat --> community & notifications
+    notifications --> push
+    accounts --> notifications
+    core --> audit

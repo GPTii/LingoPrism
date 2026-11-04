@@ -1,0 +1,25 @@
+---
+title: "UC07 – Game hoá và trò chơi (apps.gamification, apps.games)"
+---
+flowchart LR
+    Learner["👤 Học viên"]:::actor
+    subgraph SYS["Hệ thống LingoPrism"]
+        A(["Nhận XP, giữ chuỗi ngày học"]):::uc
+        B(["Làm nhiệm vụ ngày / tháng, nhận thưởng"]):::uc
+        C(["Mở khoá huy hiệu"]):::uc
+        D(["Thi đấu giải tuần, bảng xếp hạng"]):::uc
+        E(["Mua vật phẩm (vảy, ngọc), dùng tăng tốc"]):::uc
+        F(["Thay đồ cho Prismo"]):::uc
+        G(["Chơi bản đồ trò chơi theo ngôn ngữ"]):::uc
+        H(["Dùng trợ giúp trong màn chơi"]):::uc
+        I(["Mở rương thưởng"]):::uc
+        J(["Xem bạn bè trên bản đồ trò chơi"]):::uc
+    end
+    Learner --- A & B & C & D & E & F & G
+    G -. «extend» .-> H
+    G -. «extend» .-> I
+    G -. «extend» .-> J
+
+    classDef actor fill:#fff,stroke:#333,stroke-width:1.5px
+    classDef uc fill:#eaf4fe,stroke:#1899f0,color:#0b3b66
+    classDef ext fill:#f5f5f5,stroke:#888,stroke-dasharray:4 3

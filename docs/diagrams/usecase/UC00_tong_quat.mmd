@@ -1,0 +1,39 @@
+---
+title: "UC00 – Use case tổng quát hệ thống LingoPrism"
+---
+flowchart LR
+    Guest["👤 Khách"]:::actor
+    Learner["👤 Học viên"]:::actor
+    Adult["👤 Học viên người lớn"]:::actor
+    Kid["👤 Học viên trẻ em"]:::actor
+    Staff["👤 Giáo viên / Hỗ trợ"]:::actor
+    Admin["👤 Quản trị viên"]:::actor
+    AI["🖥 Mô hình AI<br/>(YOLO + CLIP, Gemini)"]:::ext
+    Ext["🖥 Dịch vụ ngoài<br/>(Google, Firebase, SMTP, GPS)"]:::ext
+
+    Adult -. kế thừa .-> Learner
+    Kid -. kế thừa .-> Learner
+    Admin -. kế thừa .-> Staff
+
+    subgraph SYS["Hệ thống LingoPrism"]
+        U1(["Quản lý tài khoản<br/>(UC01)"]):::uc
+        U2(["Học từ vựng theo chủ đề<br/>(UC02)"]):::uc
+        U3(["Học & ôn tập cá nhân hoá<br/>(UC03)"]):::uc
+        U4(["Làm bài kiểm tra<br/>(UC04)"]):::uc
+        U5(["Chụp ảnh nhận diện, AI hội thoại, dịch<br/>(UC05)"]):::uc
+        U6(["Học theo vị trí – GIS<br/>(UC06)"]):::uc
+        U7(["Game hoá & trò chơi<br/>(UC07)"]):::uc
+        U8(["Cộng đồng, nhắn tin, hỗ trợ<br/>(UC08)"]):::uc
+        U9(["Nhận thông báo<br/>(UC09)"]):::uc
+        U10(["Quản trị hệ thống<br/>(UC10)"]):::uc
+    end
+
+    Guest --- U1
+    Learner --- U1 & U2 & U3 & U4 & U5 & U6 & U7 & U8 & U9
+    Staff --- U4 & U8 & U10
+    U5 --- AI
+    U1 & U6 & U9 --- Ext
+
+    classDef actor fill:#fff,stroke:#333,stroke-width:1.5px
+    classDef uc fill:#eaf4fe,stroke:#1899f0,color:#0b3b66
+    classDef ext fill:#f5f5f5,stroke:#888,stroke-dasharray:4 3

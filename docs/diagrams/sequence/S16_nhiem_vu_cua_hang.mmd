@@ -1,0 +1,29 @@
+---
+title: "S16 – Nhiệm vụ, cửa hàng và giải đấu tuần"
+---
+sequenceDiagram
+    autonumber
+
+    actor U as Học viên
+    participant C as Web / App
+    participant API as API Django<br/>Quest / Shop / Leaderboard
+    participant GS as gamification.services
+    participant DB as PostgreSQL
+    actor A as Quản trị viên
+    C->>API: GET /quests/today/
+    API->>GS: ensure_quests(user)
+    API-->>C: Nhiệm vụ + tiến độ
+    U->>C: Nhận thưởng
+    C->>API: POST /quests/{id}/claim/
+    API->>GS: claim_quest → XP / vảy (một lần)
+    U->>C: Mua vật phẩm
+    C->>API: POST /shop/items/{id}/buy/
+    API->>GS: purchase(): đủ tiền? trừ, thêm UserInventory
+    U->>C: Dùng tăng tốc XP
+    C->>API: POST /shop/items/{id}/use/
+    API->>GS: use_item → ActiveBoost (hệ số XP có hạn)
+    C->>API: GET /leaderboard/
+    API->>DB: LeagueMember tuần này theo weekly_xp
+    API-->>C: Bảng xếp hạng hạng của tôi
+    A->>API: POST /admin/league-tiers/close-week/ (hoặc lệnh close_league_week)
+    API->>GS: close_cycle: lên / xuống hạng, thưởng, thông báo

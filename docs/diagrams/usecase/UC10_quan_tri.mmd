@@ -1,0 +1,29 @@
+---
+title: "UC10 – Quản trị hệ thống"
+---
+flowchart LR
+    Staff["👤 Giáo viên / Hỗ trợ"]:::actor
+    Admin["👤 Quản trị viên"]:::actor
+    Admin -. kế thừa .-> Staff
+    subgraph SYS["Hệ thống LingoPrism"]
+        A(["Xem bảng điều khiển"]):::uc
+        B(["Quản lý người dùng, phân quyền, khoá"]):::uc
+        C(["Quản lý chủ đề, từ, câu ví dụ"]):::uc
+        D(["Kiểm duyệt dữ liệu ngôn ngữ (đối chiếu nguồn)"]):::uc
+        E(["Duyệt từ mới HSK"]):::uc
+        F(["Quản lý câu hỏi, đề, chấm tự luận"]):::uc
+        G(["Quản lý POI (WebGIS)"]):::uc
+        H(["Xử lý báo cáo, ẩn bài, khoá tài khoản"]):::uc
+        I(["Quản lý nhận diện: ảnh, phản hồi sai, phiên bản model"]):::uc
+        J(["Quản lý game hoá: huy hiệu, vật phẩm, giải đấu"]):::uc
+        K(["Chọn thuật toán, chạy thực nghiệm"]):::uc
+        L(["Gửi thông báo hàng loạt"]):::uc
+        M(["Xem nhật ký thao tác (audit log)"]):::uc
+        N(["Hộp thư hỗ trợ học viên"]):::uc
+    end
+    Staff --- A & C & D & E & F & G & H & I & L & N
+    Admin --- B & J & K & M
+
+    classDef actor fill:#fff,stroke:#333,stroke-width:1.5px
+    classDef uc fill:#eaf4fe,stroke:#1899f0,color:#0b3b66
+    classDef ext fill:#f5f5f5,stroke:#888,stroke-dasharray:4 3

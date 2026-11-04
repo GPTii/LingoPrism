@@ -1,0 +1,33 @@
+---
+title: "UC01 – Quản lý tài khoản (apps.accounts)"
+---
+flowchart LR
+    Guest["👤 Khách"]:::actor
+    Learner["👤 Học viên"]:::actor
+    Google["🖥 Google Sign-In"]:::ext
+    Mail["🖥 Email SMTP (Celery)"]:::ext
+    subgraph SYS["Hệ thống LingoPrism"]
+        R(["Đăng ký bằng email"]):::uc
+        V(["Xác minh email bằng mã 6 số"]):::uc
+        L(["Đăng nhập email / mật khẩu"]):::uc
+        G(["Đăng nhập bằng Google"]):::uc
+        F(["Quên mật khẩu (mã qua email)"]):::uc
+        O(["Đăng xuất"]):::uc
+        P(["Xem / sửa hồ sơ"]):::uc
+        S(["Khảo sát chào mừng: ngôn ngữ, người lớn / trẻ em"]):::uc
+        K(["Đặt mục tiêu & giờ nhắc học"]):::uc
+        C(["Đổi mật khẩu"]):::uc
+        D(["Xoá tài khoản"]):::uc
+        T(["Đồng ý điều khoản"]):::uc
+    end
+    Guest --- R & L & G & F
+    Learner --- O & P & S & K & C & D
+    R -. «include» .-> T
+    R -. «include» .-> V
+    V --- Mail
+    F --- Mail
+    G --- Google
+
+    classDef actor fill:#fff,stroke:#333,stroke-width:1.5px
+    classDef uc fill:#eaf4fe,stroke:#1899f0,color:#0b3b66
+    classDef ext fill:#f5f5f5,stroke:#888,stroke-dasharray:4 3

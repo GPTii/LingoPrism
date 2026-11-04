@@ -1,0 +1,31 @@
+---
+title: "S11 – Chụp ảnh nhận diện và xác nhận"
+---
+sequenceDiagram
+    autonumber
+
+    actor U as Học viên
+    participant C as App / Web
+    participant API as API Django<br/>DetectView / DetectionViewSet
+    participant DET as Bộ nhận diện ONNX<br/>OIV7 + COCO INT8 + CLIP
+    participant MEM as Bộ nhớ sửa lỗi<br/>(MobileNetV3 embedder)
+    participant DB as PostgreSQL + media
+    U->>C: Chụp ảnh
+    C->>API: POST /detect/ (multipart, throttle detect)
+    API->>DET: predict(image)
+    DET->>DET: Hai YOLO, gộp box, CLIP kiểm tra box không chắc
+    DET-->>API: boxes (label, confidence, bbox, top_k), ms
+    API->>MEM: apply(user, image, boxes)
+    MEM-->>API: Box được sửa theo lỗi đã báo (nếu giống)
+    API->>DB: INSERT Photo, Detection, DetectionItem
+    API->>DB: Nối nhãn → Word verified
+    API-->>C: Vật + thẻ từ theo ngôn ngữ đang học
+    U->>C: Đánh dấu đúng / sai / sửa tên / chọn từ
+    C->>API: POST /detections/{id}/confirm/ {items, added}
+    API->>DB: UPDATE DetectionItem (feedback, corrected_label)
+    opt Có vật bị báo sai
+        API->>MEM: Nhúng vùng ảnh → CorrectionMemory
+    end
+    API->>DB: INSERT PersonalWord (source=camera) → nhiệm vụ Lưu từ
+    API-->>C: {saved, reported}
+    Note over C,API: Offline: TFLite trên máy, sau đó POST /detections/log/

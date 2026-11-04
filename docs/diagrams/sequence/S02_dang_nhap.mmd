@@ -1,0 +1,34 @@
+---
+title: "S02 – Đăng nhập bằng mật khẩu hoặc Google, mở kết nối realtime"
+---
+sequenceDiagram
+    autonumber
+
+    actor U as Học viên
+    participant C as Web / App
+    participant G as Google Identity
+    participant API as API Django<br/>LoginView / GoogleLoginView
+    participant DB as PostgreSQL
+    participant WS as ASGI /ws/events/
+    alt Email / mật khẩu
+        U->>C: Email, mật khẩu
+        C->>API: POST /auth/login/
+        API->>API: Throttle theo IP (login) và theo email (auth_email)
+        API->>DB: Lấy User, kiểm tra mật khẩu, status != locked
+    else Google
+        U->>C: Chọn tài khoản Google
+        C->>G: google_sign_in / Google Identity
+        G-->>C: ID token
+        C->>API: POST /auth/google/ {id_token}
+        API->>G: Xác thực chữ ký + audience (client ID web / Android)
+        API->>DB: Tìm hoặc tạo User + AuthProvider
+    end
+    API->>DB: UPDATE last_login
+    API-->>C: 200 {access, refresh, user}
+    C->>C: Lưu token (persist store / secure storage)
+    C->>WS: WebSocket ?token=access
+    WS->>WS: JWTAuthMiddleware xác thực
+    WS-->>C: {event: connected}
+    Note over C: App: bật geofence, đăng ký FCM, đồng bộ bài học offline
+    C->>API: Hết hạn access → POST /auth/refresh/
+    API-->>C: access mới

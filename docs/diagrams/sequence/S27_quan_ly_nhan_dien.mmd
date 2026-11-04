@@ -1,0 +1,23 @@
+---
+title: "S27 – Quản trị: phản hồi nhận diện"
+---
+sequenceDiagram
+    autonumber
+
+    actor T as Giáo viên
+    participant A as Trang Nhận diện
+    participant API as API Django<br/>AdminCorrectionViewSet
+    participant MEM as detection.memory
+    participant DB as PostgreSQL
+    A->>API: GET /admin/detection-reports/summary/
+    API-->>A: pending / approved / chưa xuất
+    A->>API: GET /admin/detection-reports/
+    API-->>A: Ảnh, nhãn model, nhãn học viên sửa
+    T->>A: Duyệt
+    A->>API: POST /admin/detection-reports/{id}/approve/
+    API->>MEM: Áp dụng cho mọi người (không chờ 3 người báo)
+    API->>DB: status=approved
+    T->>A: Xuất dữ liệu train
+    A->>API: GET /admin/detection-reports/export/
+    API->>DB: exported_at
+    API-->>A: File nhãn YOLO cho lần train sau

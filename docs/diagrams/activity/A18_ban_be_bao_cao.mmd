@@ -1,0 +1,27 @@
+---
+title: "A18 – Bạn bè, theo dõi, chặn và báo cáo người dùng"
+---
+flowchart TD
+    S((●)):::se
+    E((◉)):::se
+
+    S --> A{"Là tài khoản trẻ em?"}:::dec
+    A -- Có --> A1["Không dùng được tính năng xã hội"] --> E
+    A -- Không --> B["Tìm bằng tên hoặc ID 8 số / gợi ý"]
+    B --> C{"Thao tác"}:::dec
+    C -- Theo dõi --> D["Theo dõi / bỏ theo dõi"]:::sys --> E
+    C -- Kết bạn --> F["Gửi lời mời, thông báo người kia"]:::sys
+    F --> G{"Người kia"}:::dec
+    G -- Đồng ý --> G1["Thành bạn bè: nhắn tin được"]:::sys --> E
+    G -- Từ chối --> E
+    C -- Chặn --> H["Chặn: huỷ theo dõi, bạn bè, ẩn bài, cấm nhắn"]:::sys --> E
+    C -- Báo cáo --> I{"Đã có báo cáo đang chờ?"}:::dec
+    I -- Có --> I1["Báo đã gửi trước đó"] --> E
+    I -- Không --> J["Tạo UserReport, kèm 30 tin nhắn cuối làm bằng chứng"]:::sys
+    J --> K{"Chặn luôn?"}:::dec
+    K -- Có --> H
+    K -- Không --> E
+    classDef se fill:#333,stroke:#333,color:#fff
+    classDef dec fill:#fff8e1,stroke:#d9a400
+    classDef sys fill:#eaf4fe,stroke:#1899f0
+    classDef err fill:#fdecea,stroke:#e4572e

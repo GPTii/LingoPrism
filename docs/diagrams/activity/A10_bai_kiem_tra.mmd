@@ -1,0 +1,28 @@
+---
+title: "A10 – Làm bài kiểm tra và chấm tự luận"
+---
+flowchart TD
+    S((●)):::se
+    E((◉)):::se
+
+    S --> A["Học viên chọn đề"]
+    A --> B["POST /exams/id/start: tạo Submission in_progress"]:::sys
+    B --> C["Làm bài: trắc nghiệm, điền từ, tự luận"]
+    C --> D["POST /submissions/id/submit"]
+    D --> F{"Đã nộp trước đó?"}:::dec
+    F -- Rồi --> F1["Báo bài đã nộp"]:::err --> E
+    F -- Chưa --> G["Chấm từng câu"]:::sys
+    G --> G1["Trắc nghiệm: so phương án đúng<br/>Điền từ: so tập đáp án chấp nhận sau chuẩn hoá<br/>Tự luận: để trống = 0 điểm, có viết = chờ chấm"]:::sys
+    G1 --> H{"Còn câu tự luận chờ chấm?"}:::dec
+    H -- Không --> I["Trạng thái graded, cộng XP theo %"]:::sys --> R
+    H -- Có --> J["Trạng thái submitted – chờ giáo viên"]:::sys
+    J --> K["Giáo viên mở bài, cho điểm + nhận xét từng câu"]
+    K --> L{"Điểm ≤ điểm tối đa?"}:::dec
+    L -- Không --> K
+    L -- Có --> M["Tính lại tổng, trạng thái graded"]:::sys
+    M --> N["Thông báo cho học viên: Bài đã được chấm"]:::sys --> R
+    R["Học viên xem kết quả, đáp án, nhận xét"] --> E
+    classDef se fill:#333,stroke:#333,color:#fff
+    classDef dec fill:#fff8e1,stroke:#d9a400
+    classDef sys fill:#eaf4fe,stroke:#1899f0
+    classDef err fill:#fdecea,stroke:#e4572e

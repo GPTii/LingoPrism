@@ -1,0 +1,16 @@
+---
+title: "AR05 – Đường ống nhận diện ảnh"
+---
+flowchart TB
+    IMG["Ảnh từ camera / thư viện"] --> MODE{"Có mạng?"}
+    MODE -- Không --> TFL["TFLite trên điện thoại<br/>(on_device_detector)"] --> LOG["POST /detections/log/"]
+    MODE -- Có --> UP["POST /detect/ (ảnh ≤ giới hạn MB)"]
+    UP --> Y1["YOLOv8m-OIV7 INT8<br/>232 lớp"] & Y2["YOLOv10m COCO INT8"]
+    Y1 & Y2 --> MERGE["Gộp box, mỗi vật giữ nhãn tự tin nhất"]
+    MERGE --> CLIP{"YOLO không chắc<br/>(conf &lt; 0.6, box ≥ 10% ảnh)?"}
+    CLIP -- Có --> V["CLIP MobileCLIP2 kiểm tra lại nhãn"] --> MEM
+    CLIP -- Không --> MEM["Áp dụng bộ nhớ sửa lỗi<br/>(phản hồi đã duyệt)"]
+    MEM --> SAVE[("Photo, Detection,<br/>DetectionItem (label, confidence, bbox, top_k)")]
+    LOG --> SAVE
+    SAVE --> WORDS["Nối nhãn → Word đã kiểm duyệt<br/>→ thẻ từ theo ngôn ngữ đang học"]
+    WORDS --> FB["Người học xác nhận / sửa"] --> VIP["Hồ sơ nhầm lẫn thị giác → VIP"]

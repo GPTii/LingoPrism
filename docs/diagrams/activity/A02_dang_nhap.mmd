@@ -1,0 +1,29 @@
+---
+title: "A02 – Đăng nhập (mật khẩu hoặc Google)"
+---
+flowchart TD
+    S((●)):::se
+    E((◉)):::se
+
+    S --> A{"Cách đăng nhập"}:::dec
+    A -- Email / mật khẩu --> B["Nhập email, mật khẩu"]
+    B --> C{"Quá giới hạn thử?<br/>theo IP và theo email"}:::dec
+    C -- Có --> C1["429 – thử lại sau"]:::err --> E
+    C -- Không --> D{"Đúng mật khẩu và<br/>tài khoản không bị khoá?"}:::dec
+    D -- Không --> D1["Ghi log đăng nhập thất bại, báo lỗi"]:::err --> B
+    A -- Google --> G["Google trả ID token"]
+    G --> H{"Xác thực token với Google"}:::dec
+    H -- Sai --> H1["Báo lỗi"]:::err --> E
+    H -- Đúng --> I{"Email đã có tài khoản?"}:::dec
+    I -- Chưa --> J["Tạo tài khoản, liên kết Google"]:::sys --> K
+    I -- Rồi --> K["Liên kết AuthProvider nếu chưa có"]:::sys
+    D -- Đúng --> K
+    K --> L["Cập nhật last_login, trả JWT + hồ sơ"]:::sys
+    L --> M["Client lưu token, mở WebSocket /ws/events/,<br/>bật geofence + thông báo đẩy trên app"]
+    M --> N{"Hồ sơ thiếu ảnh / ngày sinh / giới tính?"}:::dec
+    N -- Có --> N1["Hỏi bổ sung một lần, có Để sau"] --> E
+    N -- Không --> E
+    classDef se fill:#333,stroke:#333,color:#fff
+    classDef dec fill:#fff8e1,stroke:#d9a400
+    classDef sys fill:#eaf4fe,stroke:#1899f0
+    classDef err fill:#fdecea,stroke:#e4572e

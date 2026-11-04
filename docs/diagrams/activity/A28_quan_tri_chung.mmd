@@ -1,0 +1,20 @@
+---
+title: "A28 – Quản trị: người dùng, đề thi, game hoá, thông báo hàng loạt, nhật ký"
+---
+flowchart TD
+    S((●)):::se
+    E((◉)):::se
+
+    S --> A{"Chức năng"}:::dec
+    A -- Người dùng --> B["Tìm, tạo, sửa vai trò / trạng thái, xoá"] --> L
+    A -- Câu hỏi & đề --> C["Tạo câu hỏi, ghép đề, đặt điểm từng câu"] --> L
+    A -- Game hoá --> D["Huy hiệu, vật phẩm, hạng giải đấu, đóng tuần"] --> L
+    A -- Thông báo hàng loạt --> F["Nhập tiêu đề, nội dung, chọn đối tượng<br/>(vai trò, người lớn / trẻ em)"]
+    F --> G["notify từng người → realtime + đẩy"]:::sys --> L
+    A -- Bảng điều khiển --> H["Số người dùng, hoạt động, nhận diện, nội dung"] --> E
+    A -- Nhật ký --> I["Xem audit log, lọc theo người / thao tác"] --> E
+    L["Ghi audit log thao tác quản trị"]:::sys --> E
+    classDef se fill:#333,stroke:#333,color:#fff
+    classDef dec fill:#fff8e1,stroke:#d9a400
+    classDef sys fill:#eaf4fe,stroke:#1899f0
+    classDef err fill:#fdecea,stroke:#e4572e

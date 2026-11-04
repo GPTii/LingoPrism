@@ -1,0 +1,25 @@
+---
+title: "A13 – Dịch văn bản / giọng nói (trang Dịch và trong chat)"
+---
+flowchart TD
+    S((●)):::se
+    E((◉)):::se
+
+    S --> A{"Nhập bằng"}:::dec
+    A -- Gõ --> C["Văn bản ≤ 500 ký tự"]
+    A -- Nói --> B["Nhận dạng giọng nói trên thiết bị<br/>theo ngôn ngữ đã chọn"] --> C
+    C --> D{"Cặp ngôn ngữ hợp lệ?<br/>khác nhau, không giản ↔ phồn"}:::dec
+    D -- Không --> D1["Báo lỗi"]:::err --> E
+    D -- Có --> F{"Quá 120 lần / giờ?"}:::dec
+    F -- Có --> F1["429"]:::err --> E
+    F -- Không --> G["Gemini flash-lite dịch<br/>(nguồn auto: tự nhận ngôn ngữ)"]:::sys
+    G --> H{"Bản dịch tiếng Trung đúng bộ chữ?<br/>(đối chiếu CC-CEDICT)"}:::dec
+    H -- Sai --> H1["Từ chối, báo không dịch được"]:::err --> E
+    H -- Đúng --> I["Tính pinyin, tìm từ đã kiểm duyệt trong câu"]:::sys
+    I --> J{"Đang ở đâu?"}:::dec
+    J -- Trang Dịch --> K["Hiện bản dịch máy, nghe, chép,<br/>Lưu từ đã kiểm duyệt"] --> E
+    J -- Ô chat --> L["Thay chữ trong ô bằng bản dịch,<br/>hiện pinyin + Hoàn tác"] --> M["Gửi tin như bình thường"] --> E
+    classDef se fill:#333,stroke:#333,color:#fff
+    classDef dec fill:#fff8e1,stroke:#d9a400
+    classDef sys fill:#eaf4fe,stroke:#1899f0
+    classDef err fill:#fdecea,stroke:#e4572e

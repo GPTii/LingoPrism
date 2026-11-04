@@ -1,0 +1,35 @@
+---
+title: "S14 – Học theo vị trí: bản đồ và geofence"
+---
+sequenceDiagram
+    autonumber
+
+    actor U as Học viên
+    participant GPS as GPS (Geolocator)
+    participant C as App
+    participant API as API Django<br/>NearbyView / GeofenceCheckView
+    participant IDX as GridIndex<br/>(proximity.py)
+    participant DB as PostgreSQL
+    participant N as notifications
+    U->>C: Mở bản đồ
+    C->>API: GET /pois-nearby/?lat&lng&radius
+    API->>IDX: query(lat, lng, r): ô lưới → Haversine
+    API-->>C: POI + chủ đề
+    loop App đang mở
+        GPS-->>C: Vị trí mới (đi được 25 m)
+        opt Lần kiểm tra trước đã > 15 giây
+            C->>API: POST /geofence/check/ {lat, lng}
+            API->>IDX: POI trong 2 km
+            API->>DB: Giữ POI có d ≤ radius_m
+            loop Mỗi POI chứa điểm
+                API->>DB: Có GeofenceEvent trong 6 giờ? INSERT GeofenceEvent
+                opt Chưa báo + cho phép gợi ý vị trí + POI có chủ đề
+                    API->>N: notify("Bạn đang ở gần …", route=/vocab/topics/id)
+                    N-->>C: Banner realtime + FCM
+                end
+            end
+            API-->>C: {entered}
+        end
+    end
+    U->>C: Bấm banner
+    C->>C: DeepLink → màn chủ đề

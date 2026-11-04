@@ -1,0 +1,26 @@
+---
+title: "S12 – Hội thoại AI từ ảnh"
+---
+sequenceDiagram
+    autonumber
+
+    actor U as Học viên
+    participant C as Web / App
+    participant API as API Django<br/>PhotoDialogueView
+    participant DB as PostgreSQL
+    participant AI as Gemini API<br/>(Claude dự phòng)
+    C->>API: GET /ai/status/
+    API-->>C: {dialogue: true}
+    U->>C: Tạo hội thoại
+    C->>API: POST /detections/{id}/dialogue/ (throttle ai_dialogue)
+    API->>DB: Đã có PhotoDialogue cho ngôn ngữ này?
+    alt Đã có
+        API-->>C: Hội thoại đã lưu
+    else Chưa có
+        API->>DB: Các từ verified của ảnh
+        API->>AI: generateContent (JSON schema, đúng bộ chữ, hợp trẻ em)
+        AI-->>API: {title_vi, lines}
+        API->>API: Tính pinyin (pypinyin + CC-CEDICT thanh nhẹ)
+        API->>DB: INSERT PhotoDialogue
+        API-->>C: Hội thoại (nhãn AI tạo)
+    end

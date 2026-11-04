@@ -1,0 +1,21 @@
+---
+title: "A17 – Cộng đồng: đăng bài, bình luận, lưu từ trong bài"
+---
+flowchart TD
+    S((●)):::se
+    E((◉)):::se
+
+    S --> A["Xem bảng tin"]
+    A --> B{"Thao tác"}:::dec
+    B -- Đăng bài --> C{"Email đã xác minh, không quá giới hạn tải lên?"}:::dec
+    C -- Không --> C1["Báo lỗi"]:::err --> A
+    C -- Có --> D["Lưu bài + ảnh, có thể kèm từ vựng"]:::sys --> A
+    B -- Thích / lưu bài --> F["Bật / tắt"]:::sys --> A
+    B -- Bình luận --> G["Lưu bình luận, thông báo chủ bài"]:::sys --> A
+    B -- Lưu từ trong bài --> H["Thêm các từ đã kiểm duyệt vào thư viện"]:::sys --> A
+    B -- Báo cáo bài --> I["Tạo PostReport cho kiểm duyệt"]:::sys --> A
+    B -- Thoát --> E
+    classDef se fill:#333,stroke:#333,color:#fff
+    classDef dec fill:#fff8e1,stroke:#d9a400
+    classDef sys fill:#eaf4fe,stroke:#1899f0
+    classDef err fill:#fdecea,stroke:#e4572e

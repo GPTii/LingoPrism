@@ -1,0 +1,32 @@
+---
+title: "A05 – Phiên học từ mới / ôn tập (SRS + VIP + Smart Distractor)"
+---
+flowchart TD
+    S((●)):::se
+    E((◉)):::se
+
+    S --> A{"Loại phiên"}:::dec
+    A -- Học mới --> B["Lấy từ status new theo cấp độ / chủ đề,<br/>thiếu thì bổ sung từ lộ trình"]:::sys
+    A -- Ôn tập --> C["Lấy từ đến hạn due_at ≤ bây giờ"]:::sys
+    C --> D{"Thứ tự ôn = VIP?"}:::dec
+    D -- Có --> D1["Xếp theo điểm VIP: quên + độ khó<br/>+ độ không chắc nhận diện + nhầm lẫn thị giác"]:::sys --> F
+    D -- Không --> D2["Xếp theo hạn ôn"] --> F
+    B --> F{"Có từ nào?"}:::dec
+    F -- Không --> F1["Báo chưa có từ đến hạn / để học"]:::err --> E
+    F -- Có --> G["Tạo StudySession, ghi bộ lập lịch đang dùng<br/>SM-2 hoặc FSRS + tham số GA"]:::sys
+    G --> H["Sinh câu hỏi cho mỗi từ,<br/>đáp án nhiễu bằng Smart Distractor / ngẫu nhiên"]:::sys
+    H --> I["Học viên trả lời một câu"]
+    I --> J["Tính rating: đúng lần đầu = 4, đúng sau khi sai = 3, sai = 1"]:::sys
+    J --> K["Bộ lập lịch cập nhật trạng thái + hạn ôn mới"]:::sys
+    K --> L["Ghi ReviewLog: trạng thái trước / sau, thời gian trả lời"]:::sys
+    L --> M{"Còn câu?"}:::dec
+    M -- Còn --> I
+    M -- Hết --> N["Kết thúc phiên: XP = 5 × số câu + 5 × số đúng lần đầu"]:::sys
+    N --> O["Cộng XP có hệ số tăng tốc, trần XP ngày,<br/>chuỗi ngày, nhiệm vụ, vảy, huy hiệu, giải tuần"]:::sys
+    O --> P{"Đủ % để mở cấp tiếp?"}:::dec
+    P -- Có --> P1["Lên cấp"] --> Q
+    P -- Không --> Q["Hiện kết quả + từ cần luyện thêm"] --> E
+    classDef se fill:#333,stroke:#333,color:#fff
+    classDef dec fill:#fff8e1,stroke:#d9a400
+    classDef sys fill:#eaf4fe,stroke:#1899f0
+    classDef err fill:#fdecea,stroke:#e4572e

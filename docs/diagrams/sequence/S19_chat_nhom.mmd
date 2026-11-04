@@ -1,0 +1,34 @@
+---
+title: "S19 – Nhóm học và chat nhóm realtime"
+---
+sequenceDiagram
+    autonumber
+
+    actor U as Học viên
+    participant C as Web / App
+    participant API as API Django<br/>GroupViewSet / GroupMessages
+    participant WS as GroupChatConsumer<br/>/ws/groups/{id}/
+    participant SV as chat.services
+    participant DB as PostgreSQL
+    participant R as Redis channel layer
+    participant O as Thành viên khác
+    U->>C: Tham gia nhóm
+    C->>API: POST /groups/{id}/join/
+    API->>DB: GroupMember (pending nếu cần duyệt / active)
+    C->>API: GET /groups/{id}/messages/
+    API-->>C: 50 tin gần nhất
+    C->>WS: connect ?token
+    WS->>DB: is_active_member?
+    WS->>R: group_add(chat_group_id)
+    U->>C: Gửi tin (đã Nói / Dịch nếu muốn)
+    C->>WS: {action: send, content, client_id}
+    WS->>WS: Token bucket: 8 tin liên tiếp, 1 tin / giây
+    WS->>SV: send_group_message
+    SV->>DB: Không phải trẻ em, email xác minh, chống trùng client_id, INSERT
+    SV->>R: group_send(message)
+    R-->>C: {event: message}
+    R-->>O: {event: message}
+    O->>API: POST /groups/{id}/messages/{mid}/heart/
+    API->>SV: heart_group_message (select_for_update)
+    SV->>R: group_send(heart)
+    R-->>C: {event: heart, hearts}

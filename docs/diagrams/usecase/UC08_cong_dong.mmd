@@ -1,0 +1,31 @@
+---
+title: "UC08 – Cộng đồng, nhắn tin và hỗ trợ (apps.community, apps.chat)"
+---
+flowchart LR
+    Adult["👤 Học viên người lớn"]:::actor
+    Learner["👤 Học viên"]:::actor
+    Staff["👤 Giáo viên / Hỗ trợ"]:::actor
+    Adult -. kế thừa .-> Learner
+    subgraph SYS["Hệ thống LingoPrism"]
+        A(["Xem bảng tin, đăng bài kèm ảnh"]):::uc
+        B(["Thích, bình luận, lưu bài, lưu từ trong bài"]):::uc
+        C(["Tham gia / tạo nhóm học"]):::uc
+        D(["Chat nhóm realtime"]):::uc
+        E(["Kết bạn bằng ID 8 số, theo dõi"]):::uc
+        F(["Nhắn tin riêng"]):::uc
+        G(["Nói thành chữ, dịch tin trước khi gửi"]):::uc
+        H(["Thả tim, dịch tin sang tiếng Việt"]):::uc
+        I(["Chặn, báo cáo người dùng / bài viết"]):::uc
+        J(["Hỏi giáo viên (chat hỗ trợ)"]):::uc
+        K(["Trả lời học viên, đóng hội thoại"]):::uc
+    end
+    Learner --- A & B & J
+    Adult --- C & E & F & I
+    Staff --- K
+    C -. «extend» .-> D
+    D & F -. «extend» .-> G
+    D & F -. «extend» .-> H
+
+    classDef actor fill:#fff,stroke:#333,stroke-width:1.5px
+    classDef uc fill:#eaf4fe,stroke:#1899f0,color:#0b3b66
+    classDef ext fill:#f5f5f5,stroke:#888,stroke-dasharray:4 3

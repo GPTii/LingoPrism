@@ -1,0 +1,30 @@
+---
+title: "A14 – Học theo vị trí: bản đồ và geofence"
+---
+flowchart TD
+    S((●)):::se
+    E((◉)):::se
+
+    S --> A{"Cách dùng"}:::dec
+    A -- Mở bản đồ --> B["Lấy vị trí hiện tại, chọn bán kính"]
+    B --> C["GET /pois-nearby: chỉ mục lưới + Haversine"]:::sys
+    C --> D["Hiện POI trên bản đồ"] --> F["Chạm POI → chủ đề → học"] --> E
+    A -- Tự động (app đang mở) --> G["Nhận vị trí sau mỗi 25 m"]
+    G --> H{"Lần kiểm tra trước đã quá 15 giây?"}:::dec
+    H -- Chưa --> G
+    H -- Rồi --> I["POST /geofence/check"]
+    I --> J["Tìm POI có d ≤ bán kính POI"]:::sys
+    J --> K{"Có POI?"}:::dec
+    K -- Không --> G
+    K -- Có --> L["Ghi GeofenceEvent"]:::sys
+    L --> M{"Đã báo POI này trong 6 giờ qua<br/>hoặc tắt gợi ý vị trí<br/>hoặc POI chưa gắn chủ đề?"}:::dec
+    M -- Có --> G
+    M -- Không --> N["Tạo thông báo: Bạn đang ở gần … học ngay chủ đề …"]:::sys
+    N --> O["Banner trong app + thông báo đẩy"]
+    O --> P{"Học viên bấm?"}:::dec
+    P -- Có --> F
+    P -- Không --> G
+    classDef se fill:#333,stroke:#333,color:#fff
+    classDef dec fill:#fff8e1,stroke:#d9a400
+    classDef sys fill:#eaf4fe,stroke:#1899f0
+    classDef err fill:#fdecea,stroke:#e4572e

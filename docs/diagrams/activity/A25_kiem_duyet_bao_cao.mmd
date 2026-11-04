@@ -1,0 +1,23 @@
+---
+title: "A25 – Quản trị: xử lý báo cáo và khoá tài khoản"
+---
+flowchart TD
+    S((●)):::se
+    E((◉)):::se
+
+    S --> A{"Loại báo cáo"}:::dec
+    A -- Bài viết --> B["Xem bài và lý do"]
+    B --> C{"Quyết định"}:::dec
+    C -- Ẩn bài --> C1["Đặt bài ẩn, đánh dấu đã xử lý"]:::sys --> N
+    C -- Bỏ qua --> C2["Đóng báo cáo"]:::sys --> N
+    A -- Người dùng --> D["Xem lý do + bằng chứng 30 tin nhắn"]
+    D --> F{"Khoá tài khoản?"}:::dec
+    F -- Có --> G{"Là học viên?"}:::dec
+    G -- Không --> G1["Không khoá được giáo viên / quản trị từ đây"]:::err --> E
+    G -- Có --> H["status = locked: không đăng nhập được,<br/>đóng mọi báo cáo đang chờ về người này"]:::sys --> N
+    F -- Không --> I["Bỏ qua báo cáo này"]:::sys --> N
+    N["Thông báo người báo cáo: đã xem xét (không nói cách xử lý)"]:::sys --> O["Ghi audit log"] --> E
+    classDef se fill:#333,stroke:#333,color:#fff
+    classDef dec fill:#fff8e1,stroke:#d9a400
+    classDef sys fill:#eaf4fe,stroke:#1899f0
+    classDef err fill:#fdecea,stroke:#e4572e

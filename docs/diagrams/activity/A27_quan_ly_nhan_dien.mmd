@@ -1,0 +1,21 @@
+---
+title: "A27 – Quản trị: phản hồi nhận diện và phiên bản model"
+---
+flowchart TD
+    S((●)):::se
+    E((◉)):::se
+
+    S --> A{"Thao tác"}:::dec
+    A -- Phản hồi sai của học viên --> B["Xem ảnh, nhãn model, nhãn học viên sửa"]
+    B --> C{"Quyết định"}:::dec
+    C -- Duyệt --> D["Bộ nhớ sửa lỗi áp dụng cho mọi người<br/>(tự động khi ≥ 3 người báo cùng lỗi)"]:::sys --> F
+    C -- Từ chối --> D2["Loại bỏ"]:::sys --> F
+    F{"Xuất dữ liệu train?"}:::dec
+    F -- Có --> G["Xuất phản hồi đã duyệt thành dữ liệu train YOLO"]:::sys --> E
+    F -- Không --> E
+    A -- Phiên bản model --> H["Đăng ký / bật phiên bản (tên, chỉ số mAP)"]:::sys --> E
+    A -- Ảnh & thống kê --> I["Xem độ tin trung bình, lớp hay sai, xoá ảnh"]:::sys --> E
+    classDef se fill:#333,stroke:#333,color:#fff
+    classDef dec fill:#fff8e1,stroke:#d9a400
+    classDef sys fill:#eaf4fe,stroke:#1899f0
+    classDef err fill:#fdecea,stroke:#e4572e

@@ -1,0 +1,22 @@
+---
+title: "A24 – Quản trị: quản lý POI (WebGIS)"
+---
+flowchart TD
+    S((●)):::se
+    E((◉)):::se
+
+    S --> A["Mở bản đồ quản lý POI"]
+    A --> B{"Thao tác"}:::dec
+    B -- Thêm --> C["Bấm lên bản đồ để đặt ghim"]
+    B -- Sửa --> D["Chọn ghim, kéo đến vị trí mới"]
+    C & D --> F["Nhập tên, loại, địa chỉ, bán kính geofence,<br/>gắn chủ đề, bật / tắt"]
+    F --> G["Xem trước vòng tròn bán kính"]
+    G --> H{"Hợp lệ?"}:::dec
+    H -- Không --> F
+    H -- Có --> I["Lưu POI"]:::sys
+    I --> J["Làm mới chỉ mục lưới Proximity"]:::sys --> E
+    B -- Xoá / xoá nhiều --> K["Xoá POI"]:::sys --> J
+    classDef se fill:#333,stroke:#333,color:#fff
+    classDef dec fill:#fff8e1,stroke:#d9a400
+    classDef sys fill:#eaf4fe,stroke:#1899f0
+    classDef err fill:#fdecea,stroke:#e4572e

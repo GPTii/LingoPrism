@@ -1,0 +1,21 @@
+---
+title: "AR04 – Kiến trúc realtime (Django Channels + Redis)"
+---
+flowchart LR
+    subgraph Clients
+        A1["Web / App A"]
+        A2["Web / App B"]
+    end
+    subgraph Server["ASGI"]
+        E["UserEventsConsumer<br/>/ws/events/?token=JWT"]
+        G["GroupChatConsumer<br/>/ws/groups/&lt;id&gt;/"]
+        S["SupportChatConsumer<br/>/ws/support/&lt;id&gt;/"]
+        SV["services: send_group_message,<br/>send_direct_message, notify, push_event"]
+    end
+    R[("Redis channel layer<br/>nhóm user_&lt;id&gt;, chat_group_&lt;id&gt;,<br/>chat_support_&lt;id&gt;")]
+    DB[("PostgreSQL")]
+    FCM["Firebase FCM"]
+    A1 & A2 <-->|JWT trong query| E & G & S
+    G & S -->|gửi tin| SV --> DB
+    SV -->|group_send| R --> E & G & S
+    SV -->|Notification post_save| FCM

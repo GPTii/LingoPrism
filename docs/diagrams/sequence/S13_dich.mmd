@@ -1,0 +1,36 @@
+---
+title: "S13 – Dịch văn bản / giọng nói"
+---
+sequenceDiagram
+    autonumber
+
+    actor U as Học viên
+    participant C as Web / App
+    participant SR as Nhận dạng giọng nói<br/>(thiết bị)
+    participant API as API Django<br/>TranslateView
+    participant AI as Gemini flash-lite
+    participant SRC as CC-CEDICT
+    participant DB as PostgreSQL
+    opt Nói
+        U->>C: Bấm mic
+        C->>SR: listen(locale)
+        SR-->>C: Văn bản
+    end
+    C->>API: POST /translate/ {text, source (hoặc auto), target}
+    API->>API: Kiểm tra cặp ngôn ngữ, ≤ 500 ký tự, throttle 120/giờ
+    API->>AI: generateContent (timeout 25 s)
+    AI-->>API: {translation}
+    API->>SRC: Bản dịch tiếng Trung có chữ của bộ chữ kia?
+    alt Sai bộ chữ / AI lỗi
+        API-->>C: 503 "Không dịch được"
+    else
+        API->>API: Tính pinyin
+        API->>DB: Tìm từ verified trong hai câu
+        API-->>C: {translation, reading, words, machine_translated}
+    end
+    alt Trang Dịch
+        U->>C: Lưu một từ
+        C->>API: POST /my-words/?lang=&script=
+    else Ô chat
+        C->>C: Thay chữ bằng bản dịch, hiện pinyin + Hoàn tác
+    end

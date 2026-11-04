@@ -1,0 +1,21 @@
+---
+title: "S07 – Luyện phát âm (chấm trên thiết bị)"
+---
+sequenceDiagram
+    autonumber
+
+    actor U as Học viên
+    participant C as Web / App
+    participant API as API Django
+    participant SR as Nhận dạng giọng nói<br/>(Web Speech API / speech_to_text)
+    participant TTS as TTS của thiết bị
+    C->>API: GET /my-words/?page_size=50
+    API-->>C: Từ trong thư viện + tts_locale
+    loop Mỗi từ (tối đa 10)
+        C->>TTS: Đọc mẫu (đúng locale)
+        U->>C: Bấm mic, đọc
+        C->>SR: listen(locale)
+        SR-->>C: Các phương án nghe được
+        C->>C: score(): Levenshtein theo chữ / chữ cái → 0–100, tô phần sai
+        C-->>U: Điểm + phần đọc chưa đúng
+    end

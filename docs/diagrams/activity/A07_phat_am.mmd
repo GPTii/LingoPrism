@@ -1,0 +1,24 @@
+---
+title: "A07 – Luyện phát âm"
+---
+flowchart TD
+    S((●)):::se
+    E((◉)):::se
+
+    S --> A["Lấy tối đa 10 từ trong thư viện có giọng đọc"]
+    A --> B{"Thiết bị nhận dạng được giọng nói?"}:::dec
+    B -- Không --> B1["Hướng dẫn dùng Chrome / Edge / app"] --> E
+    B -- Có --> C["Nghe giọng mẫu (TTS đúng vùng)"]
+    C --> D["Bấm mic, đọc to từ"]
+    D --> F["Bộ nhận dạng của thiết bị trả các phương án nghe được"]
+    F --> G["So với từ mẫu: tiếng Trung theo chữ,<br/>ngôn ngữ khác theo chữ cái (Levenshtein)"]
+    G --> H["Điểm 0–100, tô đỏ phần đọc chưa đúng"]
+    H --> I{"Đọc lại?"}:::dec
+    I -- Có --> D
+    I -- Không --> J{"Còn từ?"}:::dec
+    J -- Còn --> C
+    J -- Hết --> K["Điểm trung bình của lượt"] --> E
+    classDef se fill:#333,stroke:#333,color:#fff
+    classDef dec fill:#fff8e1,stroke:#d9a400
+    classDef sys fill:#eaf4fe,stroke:#1899f0
+    classDef err fill:#fdecea,stroke:#e4572e

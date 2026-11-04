@@ -1,0 +1,24 @@
+---
+title: "A22 – Thông báo"
+---
+flowchart TD
+    S((●)):::se
+    E((◉)):::se
+
+    S --> A["Một sự kiện: tin nhắn, chấm bài, lời mời, gần POI,<br/>mốc XP, thông báo hàng loạt…"]
+    A --> B["notify: tạo Notification"]:::sys
+    B --> C["push_event tới /ws/events của người nhận"]:::sys
+    B --> D{"Người nhận có thiết bị đăng ký<br/>và Firebase đã bật?"}:::dec
+    D -- Có --> D1["Gửi FCM ở luồng nền"]:::sys
+    D -- Không --> F
+    C --> F{"App / web đang mở?"}:::dec
+    F -- Có --> G["Banner + tăng số chưa đọc"]
+    F -- Không --> H["Thông báo hệ thống trên điện thoại"]
+    G & H --> I{"Bấm vào?"}:::dec
+    I -- Có --> J["DeepLink: mở màn hình theo data.route"]
+    I -- Không --> K["Còn trong mục Thông báo"]
+    J & K --> E
+    classDef se fill:#333,stroke:#333,color:#fff
+    classDef dec fill:#fff8e1,stroke:#d9a400
+    classDef sys fill:#eaf4fe,stroke:#1899f0
+    classDef err fill:#fdecea,stroke:#e4572e

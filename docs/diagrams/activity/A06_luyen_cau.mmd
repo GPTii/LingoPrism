@@ -1,0 +1,24 @@
+---
+title: "A06 – Luyện câu"
+---
+flowchart TD
+    S((●)):::se
+    E((◉)):::se
+
+    S --> A["Yêu cầu một bài luyện câu"]
+    A --> B["Chọn câu ví dụ đã kiểm duyệt (Tatoeba)<br/>chứa từ học viên đang học"]:::sys
+    B --> C{"Có câu phù hợp?"}:::dec
+    C -- Không --> C1["Báo cần học thêm từ"] --> E
+    C -- Có --> D["Tạo bài: sắp xếp câu, nghe – sắp xếp,<br/>điền từ, chọn nghĩa (nghĩa luôn bằng tiếng Việt)"]:::sys
+    D --> F["Học viên làm một bài"]
+    F --> G["Máy chủ chấm: so khớp chuẩn hoá,<br/>tiếng Trung so từng chữ"]:::sys
+    G --> H{"Đúng?"}:::dec
+    H -- Có --> I["Cộng XP luyện tập, đánh dấu hoạt động"]:::sys --> J
+    H -- Sai --> I2["Hiện đáp án đúng + bản dịch"] --> J
+    J{"Còn bài?"}:::dec
+    J -- Còn --> F
+    J -- Hết --> E
+    classDef se fill:#333,stroke:#333,color:#fff
+    classDef dec fill:#fff8e1,stroke:#d9a400
+    classDef sys fill:#eaf4fe,stroke:#1899f0
+    classDef err fill:#fdecea,stroke:#e4572e

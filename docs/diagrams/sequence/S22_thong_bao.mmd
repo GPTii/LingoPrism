@@ -1,0 +1,23 @@
+---
+title: "S22 – Thông báo realtime và thông báo đẩy"
+---
+sequenceDiagram
+    autonumber
+
+    participant SRC as Một chức năng bất kỳ<br/>(chat, chấm bài, geofence…)
+    participant N as notifications.services
+    participant DB as PostgreSQL
+    participant R as Redis → /ws/events/
+    participant P as push (signal post_save)
+    participant F as Firebase FCM
+    participant C as Web / App
+    SRC->>N: notify(user, kind, title, body, data.route)
+    N->>DB: INSERT Notification
+    N->>R: push_event(user, notification)
+    R-->>C: Banner + số chưa đọc (bấm → DeepLink)
+    DB-->>P: post_save(Notification)
+    P->>DB: Thiết bị đã đăng ký của user
+    P->>F: send (luồng nền, khi Firebase bật)
+    F-->>C: Thông báo hệ thống khi app đóng
+    C->>C: Bấm → DeepLink.open(route)
+    C->>N: POST /notifications/{id}/read/

@@ -1,0 +1,24 @@
+---
+title: "A12 – Hội thoại AI từ ảnh"
+---
+flowchart TD
+    S((●)):::se
+    E((◉)):::se
+
+    S --> A["Bấm Tạo hội thoại với các từ này"]
+    A --> B{"Máy chủ đã bật AI?"}:::dec
+    B -- Không --> B1["Ẩn nút"] --> E
+    B -- Có --> C{"Ảnh đã có hội thoại cho ngôn ngữ này?"}:::dec
+    C -- Có --> C1["Trả hội thoại đã lưu, không gọi AI"] --> K
+    C -- Chưa --> D["Lấy các từ đã kiểm duyệt trong ảnh<br/>(vật được chọn, nhãn đã sửa)"]:::sys
+    D --> F{"Có từ nào?"}:::dec
+    F -- Không --> F1["Báo ảnh chưa có từ kiểm duyệt"]:::err --> E
+    F -- Có --> G["Gọi Gemini (Claude dự phòng): 4–6 câu,<br/>dùng đủ các từ, hợp trẻ em, đúng bộ chữ"]:::sys
+    G --> H{"AI trả JSON hợp lệ?"}:::dec
+    H -- Không --> H1["Báo AI đang bận / thử lại"]:::err --> E
+    H -- Có --> I["Máy chủ tự tính pinyin (pypinyin + CC-CEDICT)"]:::sys
+    I --> J["Lưu PhotoDialogue"]:::sys --> K["Hiện hội thoại, nhãn AI tạo, nghe từng câu"] --> E
+    classDef se fill:#333,stroke:#333,color:#fff
+    classDef dec fill:#fff8e1,stroke:#d9a400
+    classDef sys fill:#eaf4fe,stroke:#1899f0
+    classDef err fill:#fdecea,stroke:#e4572e

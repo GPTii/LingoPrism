@@ -1,0 +1,23 @@
+---
+title: "UC02 – Học từ vựng theo chủ đề (apps.vocab, apps.learning)"
+---
+flowchart LR
+    Learner["👤 Học viên"]:::actor
+    subgraph SYS["Hệ thống LingoPrism"]
+        A(["Chọn ngôn ngữ học: Anh / Trung giản thể / Trung phồn thể / Việt"]):::uc
+        B(["Xem danh sách chủ đề"]):::uc
+        C(["Xem thẻ từ: nghĩa, phiên âm, ảnh, câu ví dụ"]):::uc
+        D(["Nghe phát âm (TTS đúng vùng)"]):::uc
+        E(["Lưu từ / cả chủ đề vào Từ của tôi"]):::uc
+        F(["Tạo chủ đề riêng"]):::uc
+        G(["Báo lỗi dữ liệu từ vựng"]):::uc
+        H(["Quản lý thư viện từ (lọc, xoá)"]):::uc
+    end
+    Learner --- A & B & F & G & H
+    B -. «extend» .-> C
+    C -. «extend» .-> D
+    C -. «extend» .-> E
+
+    classDef actor fill:#fff,stroke:#333,stroke-width:1.5px
+    classDef uc fill:#eaf4fe,stroke:#1899f0,color:#0b3b66
+    classDef ext fill:#f5f5f5,stroke:#888,stroke-dasharray:4 3

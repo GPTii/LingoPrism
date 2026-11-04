@@ -1,0 +1,32 @@
+---
+title: "A11 – Chụp ảnh nhận diện và lưu từ"
+---
+flowchart TD
+    S((●)):::se
+    E((◉)):::se
+
+    S --> A["Chụp hoặc chọn ảnh"]
+    A --> B{"Có mạng?"}:::dec
+    B -- Không --> C["Nhận diện bằng TFLite trên máy"]
+    C --> C1["Lưu tạm, gửi /detections/log khi có mạng"]:::sys --> H
+    B -- Có --> D{"Ảnh quá dung lượng / quá tần suất?"}:::dec
+    D -- Có --> D1["Báo lỗi"]:::err --> E
+    D -- Không --> F["Máy chủ: OIV7 + COCO INT8,<br/>CLIP kiểm tra box không chắc,<br/>áp dụng bộ nhớ sửa lỗi"]:::sys
+    F --> G["Lưu Photo, Detection, DetectionItem<br/>(nhãn, độ tin, khung, top-k)"]:::sys
+    G --> H["Nối nhãn → từ đã kiểm duyệt, hiện thẻ từ theo ngôn ngữ học"]
+    H --> I{"Mỗi vật: đúng không?"}:::dec
+    I -- Đúng --> J["feedback = correct"]
+    I -- Sai, chọn vật khác --> K["corrected_label, feedback = wrong"]
+    I -- Không phải vật --> L["Báo không có vật này"]
+    I -- Gõ tên tiếng Việt --> M["Tra từ điển đã kiểm duyệt → từ đúng"]
+    J & K & L & M --> N["Chọn từ muốn lưu, POST /detections/id/confirm"]
+    N --> O["Lưu phản hồi, tạo PersonalWord source = camera"]:::sys
+    O --> O2["Vật bị báo sai: nhúng vùng ảnh (MobileNetV3)<br/>vào bộ nhớ sửa lỗi – áp dụng ngay cho người báo"]:::sys
+    O2 --> P["Nhiệm vụ Lưu từ, hồ sơ nhầm lẫn thị giác cho VIP"]:::sys
+    P --> Q{"Tạo hội thoại AI từ ảnh?"}:::dec
+    Q -- Có --> Q1["Xem A12"] --> E
+    Q -- Không --> E
+    classDef se fill:#333,stroke:#333,color:#fff
+    classDef dec fill:#fff8e1,stroke:#d9a400
+    classDef sys fill:#eaf4fe,stroke:#1899f0
+    classDef err fill:#fdecea,stroke:#e4572e

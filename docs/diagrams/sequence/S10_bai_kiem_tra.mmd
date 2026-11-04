@@ -1,0 +1,33 @@
+---
+title: "S10 – Làm bài kiểm tra và giáo viên chấm tự luận"
+---
+sequenceDiagram
+    autonumber
+
+    actor U as Học viên
+    actor T as Giáo viên
+    participant C as Web / App
+    participant A as Trang quản trị
+    participant API as API Django<br/>Exam / Submission / AdminSubmission
+    participant DB as PostgreSQL
+    participant N as notifications
+    C->>API: POST /exams/{id}/start/
+    API->>DB: INSERT Submission (in_progress)
+    API-->>C: Câu hỏi (không kèm đáp án)
+    U->>C: Làm bài, nộp
+    C->>API: POST /submissions/{id}/submit/ {answers}
+    loop Mỗi câu
+        API->>API: MCQ: so phương án · FILL: so đáp án chấp nhận · ESSAY: chờ chấm
+        API->>DB: INSERT Answer(score, is_correct)
+    end
+    API->>DB: _recompute → graded / submitted
+    opt Không có tự luận chờ chấm
+        API->>DB: award_xp(exam, percent / 5)
+    end
+    API-->>C: Kết quả tạm
+    T->>A: Mở bài chờ chấm
+    A->>API: POST /admin/submissions/{id}/grade/ {grades, feedback}
+    API->>DB: Cập nhật điểm từng câu (≤ điểm tối đa), tính lại
+    API->>N: notify(học viên, "Bài kiểm tra đã được chấm")
+    N-->>C: Realtime + đẩy
+    API-->>A: 200

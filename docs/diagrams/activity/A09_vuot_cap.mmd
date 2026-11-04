@@ -1,0 +1,20 @@
+---
+title: "A09 – Kiểm tra vượt cấp độ"
+---
+flowchart TD
+    S((●)):::se
+    E((◉)):::se
+
+    S --> A["Chọn cấp muốn vượt"]
+    A --> B["GET /levels/n/test: 10 câu + token ký số"]:::sys
+    B --> C["Làm 10 câu"]
+    C --> D["POST đáp án + token"]
+    D --> F{"Token hợp lệ và đúng người, đúng cấp?"}:::dec
+    F -- Không --> F1["Báo đề hết hạn"] --> E
+    F -- Có --> G{"Đúng ≥ 8 câu?"}:::dec
+    G -- Có --> H["Mở cấp tiếp theo, chuyển sang cấp đó"]:::sys --> E
+    G -- Không --> I["Giữ cấp hiện tại, gợi ý ôn thêm"] --> E
+    classDef se fill:#333,stroke:#333,color:#fff
+    classDef dec fill:#fff8e1,stroke:#d9a400
+    classDef sys fill:#eaf4fe,stroke:#1899f0
+    classDef err fill:#fdecea,stroke:#e4572e

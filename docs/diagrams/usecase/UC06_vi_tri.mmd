@@ -1,0 +1,27 @@
+---
+title: "UC06 – Học theo vị trí (GIS, Proximity Search, Geofencing) (apps.gis, apps.algorithms.proximity)"
+---
+flowchart LR
+    Learner["👤 Học viên"]:::actor
+    Staff["👤 Giáo viên / Hỗ trợ"]:::actor
+    GPS["🖥 GPS điện thoại"]:::ext
+    subgraph SYS["Hệ thống LingoPrism"]
+        A(["Xem bản đồ POI quanh mình"]):::uc
+        B(["Tìm POI lân cận (chỉ mục lưới + Haversine)"]):::uc
+        C(["Mở chủ đề gắn với POI"]):::uc
+        D(["Nhận gợi ý khi vào vùng POI (geofence)"]):::uc
+        E(["Bật / tắt gợi ý theo vị trí"]):::uc
+        F(["Quản lý POI trên bản đồ (WebGIS)"]):::uc
+        G(["Gắn chủ đề, bán kính cho POI"]):::uc
+    end
+    Learner --- A & D & E
+    Staff --- F
+    A -. «include» .-> B
+    A -. «extend» .-> C
+    D -. «include» .-> B
+    F -. «include» .-> G
+    D --- GPS
+
+    classDef actor fill:#fff,stroke:#333,stroke-width:1.5px
+    classDef uc fill:#eaf4fe,stroke:#1899f0,color:#0b3b66
+    classDef ext fill:#f5f5f5,stroke:#888,stroke-dasharray:4 3

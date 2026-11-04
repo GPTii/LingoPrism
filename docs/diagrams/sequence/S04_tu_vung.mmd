@@ -1,0 +1,26 @@
+---
+title: "S04 – Duyệt chủ đề và lưu từ"
+---
+sequenceDiagram
+    autonumber
+
+    actor U as Học viên
+    participant C as Web / App
+    participant API as API Django<br/>TopicViewSet / MyWordViewSet
+    participant SV as vocab.services
+    participant DB as PostgreSQL
+    U->>C: Mở Từ vựng
+    C->>API: GET /topics/?lang=zh&script=hans
+    API->>DB: Chủ đề hệ thống + chủ đề của người học
+    API-->>C: Danh sách chủ đề
+    U->>C: Mở một chủ đề
+    C->>API: GET /topics/{id}/words/
+    API->>SV: resolve_target(), words_for_target()
+    SV->>DB: Chỉ bản dịch verified (hoặc từ tự tạo), lọc audience trẻ em
+    API-->>C: Thẻ từ: chữ, pinyin/IPA/zhuyin, nghĩa Việt, ảnh, câu ví dụ
+    C->>C: TTS theo tts_locale (zh-CN / zh-TW / en-US / vi-VN)
+    U->>C: Lưu từ
+    C->>API: POST /my-words/ {word, source: topic}
+    API->>SV: Kiểm tra từ có bản dịch hiển thị cho ngôn ngữ đang học
+    API->>DB: get_or_create PersonalWord (status=new)
+    API-->>C: 201 (mới) / 200 (đã có)

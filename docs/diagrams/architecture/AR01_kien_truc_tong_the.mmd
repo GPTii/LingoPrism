@@ -1,0 +1,40 @@
+---
+title: "AR01 – Kiến trúc tổng thể"
+---
+flowchart TB
+    subgraph C["Client"]
+        WEB["Web React + Vite<br/>(Ant Design, Leaflet)"]
+        APP["App Flutter Android / iOS<br/>(GetX, TFLite, speech_to_text, flutter_tts)"]
+    end
+    CF["Cloudflare<br/>(DNS, HTTPS, che IP máy chủ)"]
+    subgraph S["Máy chủ lingoprism.id.vn"]
+        NG["nginx<br/>(file tĩnh web, reverse proxy, giới hạn tần suất)"]
+        subgraph DJ["Django 5 ASGI – uvicorn"]
+            REST["REST API /api/v1<br/>(DRF, JWT, Swagger)"]
+            WS["WebSocket /ws<br/>(Django Channels)"]
+            ALG["Thuật toán tự cài<br/>SM-2, FSRS, GA, VIP,<br/>Word2Vec, Distractor, Proximity"]
+            DET["Nhận diện ONNX Runtime<br/>YOLOv8m-OIV7 + YOLOv10m (INT8) + CLIP"]
+        end
+        CEL["Celery worker<br/>(gửi email)"]
+        PG[("PostgreSQL 16<br/>+ cube / earthdistance")]
+        RD[("Redis 7<br/>channel layer, hàng đợi, cache")]
+        MED[("Ảnh tải lên, model .onnx")]
+    end
+    subgraph X["Dịch vụ ngoài"]
+        GO["Google Sign-In"]
+        FCM["Firebase Cloud Messaging"]
+        SMTP["Gmail SMTP"]
+        GEM["Gemini API (Claude dự phòng)"]
+        OSM["OpenStreetMap tiles"]
+    end
+    WEB & APP -->|HTTPS + WSS| CF --> NG
+    NG -->|/api| REST
+    NG -->|/ws| WS
+    REST --- ALG & DET
+    REST & WS --> PG
+    WS <--> RD
+    REST --> RD --> CEL --> SMTP
+    DET --- MED
+    REST --> GO & FCM & GEM
+    FCM -.-> APP
+    WEB & APP -.-> OSM

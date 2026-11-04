@@ -1,0 +1,30 @@
+---
+title: "UC03 – Học & ôn tập cá nhân hoá (apps.learning, apps.literacy, apps.algorithms)"
+---
+flowchart LR
+    Learner["👤 Học viên"]:::actor
+    Kid["👤 Học viên trẻ em"]:::actor
+    Kid -. kế thừa .-> Learner
+    subgraph SYS["Hệ thống LingoPrism"]
+        A(["Học từ mới (phiên học)"]):::uc
+        B(["Ôn từ đến hạn"]):::uc
+        S(["Lập lịch ôn: SM-2 / FSRS (+ tham số GA)"]):::uc
+        V(["Ưu tiên ôn theo VIP<br/>(nhầm lẫn thị giác)"]):::uc
+        Q(["Trả lời câu hỏi trắc nghiệm<br/>(Smart Distractor)"]):::uc
+        C(["Luyện câu: sắp xếp, nghe, điền từ"]):::uc
+        P(["Luyện phát âm (nhận dạng giọng nói)"]):::uc
+        L(["Lộ trình 4 cấp độ"]):::uc
+        T(["Kiểm tra vượt cấp"]):::uc
+        R(["Học đọc – viết tiếng Việt"]):::uc
+        X(["Xem thống kê học tập"]):::uc
+    end
+    Learner --- A & B & C & P & L & X
+    Kid --- R
+    A & B -. «include» .-> Q
+    B -. «include» .-> V
+    A & B -. «include» .-> S
+    L -. «extend» .-> T
+
+    classDef actor fill:#fff,stroke:#333,stroke-width:1.5px
+    classDef uc fill:#eaf4fe,stroke:#1899f0,color:#0b3b66
+    classDef ext fill:#f5f5f5,stroke:#888,stroke-dasharray:4 3

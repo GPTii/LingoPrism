@@ -1,0 +1,24 @@
+---
+title: "A21 – Hỏi giáo viên (chat hỗ trợ)"
+---
+flowchart TD
+    S((●)):::se
+    E((◉)):::se
+
+    S --> A["Học viên mở Hỏi giáo viên"]
+    A --> B["Tạo / mở SupportConversation"]:::sys
+    B --> C["Gửi câu hỏi qua /ws/support/id"]
+    C --> D["Lưu tin, cập nhật thời gian, mở lại nếu đã đóng"]:::sys
+    D --> F{"Hội thoại đã có giáo viên phụ trách?"}:::dec
+    F -- Chưa --> G["Hiện trong hộp thư chung của giáo viên"]
+    F -- Rồi --> H["Thông báo giáo viên phụ trách"]:::sys
+    G --> I["Giáo viên trả lời: tự nhận phụ trách"]:::sys
+    H --> I
+    I --> J["Thông báo học viên, đánh dấu đã nhận / đã đọc"]:::sys
+    J --> K{"Xong?"}:::dec
+    K -- Chưa --> C
+    K -- Rồi --> L["Giáo viên đóng hội thoại"]:::sys --> E
+    classDef se fill:#333,stroke:#333,color:#fff
+    classDef dec fill:#fff8e1,stroke:#d9a400
+    classDef sys fill:#eaf4fe,stroke:#1899f0
+    classDef err fill:#fdecea,stroke:#e4572e

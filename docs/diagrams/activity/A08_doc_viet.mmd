@@ -1,0 +1,25 @@
+---
+title: "A08 – Học đọc – viết tiếng Việt (trẻ em)"
+---
+flowchart TD
+    S((●)):::se
+    E((◉)):::se
+
+    S --> A["Mở lộ trình bài học đọc – viết"]
+    A --> B["Máy chủ tính bài cao nhất được mở<br/>(giáo viên mở được tất cả)"]:::sys
+    B --> C["Chọn một bài đã mở"]
+    C --> D{"Bài được mở?"}:::dec
+    D -- Không --> D1["Khoá, học bài trước"] --> A
+    D -- Có --> F["Học âm, vần, ghép chữ, nghe đọc"]
+    F --> G["Làm bài tập: chọn, ghép, gõ có dấu"]
+    G --> H["POST /literacy/check: chấm từng câu"]:::sys
+    H --> I{"Còn câu?"}:::dec
+    I -- Còn --> G
+    I -- Hết --> J["POST /literacy/lessons/n/finish"]:::sys
+    J --> K{"Đạt ≥ 60%?"}:::dec
+    K -- Có --> K1["Lưu tiến độ, cộng XP, mở bài tiếp theo"]:::sys --> E
+    K -- Không --> K2["Lưu điểm tốt nhất, học lại"]:::sys --> E
+    classDef se fill:#333,stroke:#333,color:#fff
+    classDef dec fill:#fff8e1,stroke:#d9a400
+    classDef sys fill:#eaf4fe,stroke:#1899f0
+    classDef err fill:#fdecea,stroke:#e4572e

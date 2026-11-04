@@ -1,0 +1,43 @@
+---
+title: "S05 – Phiên học / ôn tập (SM-2 hoặc FSRS, VIP, Smart Distractor)"
+---
+sequenceDiagram
+    autonumber
+
+    actor U as Học viên
+    participant C as Web / App
+    participant API as API Django<br/>StudySessionViewSet
+    participant ALG as algorithms<br/>VIP · Scheduler · Distractor
+    participant DB as PostgreSQL
+    participant GM as gamification<br/>(signal session_finished)
+    participant WS as Redis → /ws/events/
+    U->>C: Ôn tập
+    C->>API: POST /sessions/ {kind: review}
+    API->>DB: PersonalWord due_at ≤ now
+    API->>DB: AlgorithmConfig (scheduler, review_priority, distractor)
+    alt review_priority = vip
+        API->>ALG: vip.rank(due, weights)
+        ALG->>DB: Hồ sơ nhầm lẫn thị giác của lớp YOLO
+        ALG-->>API: Từ theo điểm VIP
+    end
+    API->>DB: INSERT StudySession(scheduler), SessionItem
+    loop Mỗi từ
+        API->>ALG: build_questions(word, provider)
+        ALG-->>API: Câu hỏi + 3 đáp án nhiễu (Word2Vec, lọc, xếp hạng)
+    end
+    API-->>C: 201 {items, questions}
+    loop Mỗi câu trả lời
+        U->>C: Chọn đáp án
+        C->>API: POST /sessions/{id}/answer/ {correct, first_try, response_ms}
+        API->>ALG: scheduler.review(state, đúng?, rating, elapsed)
+        ALG-->>API: Trạng thái mới + due_at
+        API->>DB: UPDATE PersonalWord, INSERT ReviewLog
+        API-->>C: {status, stage, due_at}
+    end
+    C->>API: POST /sessions/{id}/finish/
+    API->>DB: ended_at, xp_earned
+    API->>GM: session_finished
+    GM->>DB: XP (hệ số, trần ngày), chuỗi ngày, nhiệm vụ, vảy, huy hiệu, giải tuần
+    GM->>WS: push_event(xp)
+    WS-->>C: {event: xp}
+    API-->>C: Kết quả + từ cần luyện + level_up

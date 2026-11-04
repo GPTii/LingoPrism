@@ -1,0 +1,31 @@
+---
+title: "S18 – Kết bạn, chặn và báo cáo người dùng"
+---
+sequenceDiagram
+    autonumber
+
+    actor U as Học viên A
+    actor V as Học viên B
+    participant C as Web / App
+    participant API as API Django<br/>CommunityUserViewSet
+    participant DB as PostgreSQL
+    participant N as notifications
+    U->>C: Tìm theo ID 8 số
+    C->>API: GET /community/users/search/?q=
+    API-->>C: Người học (không có trẻ em)
+    U->>C: Kết bạn
+    C->>API: POST /community/users/{B}/friend/
+    API->>DB: INSERT FriendRequest
+    API->>N: notify(B)
+    V->>C: Đồng ý
+    C->>API: POST /community/users/friend-requests/{id}/accept/
+    API->>DB: Tạo quan hệ bạn bè, cập nhật bộ đếm
+    API->>N: notify(A)
+    U->>C: Báo cáo B (kèm hội thoại, chặn luôn)
+    C->>API: POST /community/users/{B}/report/ {reason, thread, block}
+    API->>DB: Lấy 30 tin cuối của thread A–B làm bằng chứng
+    API->>DB: INSERT UserReport (pending)
+    opt block
+        API->>DB: Chặn: xoá theo dõi / bạn bè, cấm nhắn
+    end
+    API-->>C: 201

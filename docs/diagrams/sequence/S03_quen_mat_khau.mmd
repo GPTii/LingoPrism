@@ -1,0 +1,29 @@
+---
+title: "S03 – Quên và đặt lại mật khẩu"
+---
+sequenceDiagram
+    autonumber
+
+    actor U as Người dùng
+    participant C as Web / App
+    participant API as API Django<br/>Forgot / VerifyReset / ResetPassword
+    participant DB as PostgreSQL
+    participant W as Celery + SMTP
+    U->>C: Nhập email
+    C->>API: POST /auth/password/forgot/
+    API->>DB: Tìm User
+    opt Email tồn tại
+        API->>DB: Lưu PasswordResetCode
+        API->>W: send_reset_code.delay()
+        W-->>U: Email chứa mã
+    end
+    API-->>C: 200 (giống nhau dù email có hay không)
+    U->>C: Nhập mã
+    C->>API: POST /auth/password/verify/
+    API->>DB: Kiểm tra mã, đếm lần sai
+    API-->>C: 200 {reset_token}
+    U->>C: Mật khẩu mới
+    C->>API: POST /auth/password/reset/
+    API->>DB: set_password, xoá mã
+    API->>DB: Thu hồi mọi refresh token (blacklist)
+    API-->>C: 200 → đăng nhập lại

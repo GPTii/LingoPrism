@@ -1,0 +1,24 @@
+---
+title: "A01 – Đăng ký và xác minh email"
+---
+flowchart TD
+    S((●)):::se
+    E((◉)):::se
+
+    S --> A["Nhập email, mật khẩu, tên, tick đồng ý điều khoản"]
+    A --> B{"Hợp lệ?<br/>email chưa dùng, mật khẩu đủ mạnh,<br/>đã đồng ý điều khoản"}:::dec
+    B -- Không --> B1["Hiện lỗi từng ô"]:::err --> A
+    B -- Có --> C["Tạo User email_verified = false + UserGoal"]:::sys
+    C --> D["Sinh mã 6 số, Celery gửi email"]:::sys
+    D --> F["Trả JWT access + refresh, đăng nhập luôn"]:::sys
+    F --> G["Khảo sát chào mừng: ngôn ngữ học, người lớn / trẻ em"]
+    G --> H["Nhập mã 6 số từ email"]
+    H --> I{"Mã đúng và còn hạn?"}:::dec
+    I -- Sai --> I1{"Sai lần thứ 5?"}:::dec
+    I1 -- Chưa --> H
+    I1 -- Rồi --> J["Mã bị huỷ, bấm Gửi lại mã"]:::err --> D
+    I -- Đúng --> K["email_verified = true<br/>mở chat, đăng bài"]:::sys --> E
+    classDef se fill:#333,stroke:#333,color:#fff
+    classDef dec fill:#fff8e1,stroke:#d9a400
+    classDef sys fill:#eaf4fe,stroke:#1899f0
+    classDef err fill:#fdecea,stroke:#e4572e

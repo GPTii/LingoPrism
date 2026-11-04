@@ -1,0 +1,22 @@
+---
+title: "A03 – Quên và đặt lại mật khẩu"
+---
+flowchart TD
+    S((●)):::se
+    E((◉)):::se
+
+    S --> A["Nhập email"]
+    A --> B["Máy chủ luôn trả lời giống nhau<br/>dù email có tồn tại hay không"]:::sys
+    B --> C{"Email tồn tại?"}:::dec
+    C -- Có --> D["Sinh mã, Celery gửi email"]:::sys --> F
+    C -- Không --> F["Người dùng nhập mã 6 số"]
+    F --> G{"Mã đúng, còn hạn, chưa sai 5 lần?"}:::dec
+    G -- Không --> G1["Báo lỗi / mã hết hiệu lực"]:::err --> F
+    G -- Có --> H["Nhập mật khẩu mới"]
+    H --> I{"Đủ mạnh?"}:::dec
+    I -- Không --> H
+    I -- Có --> J["Lưu mật khẩu, thu hồi mọi refresh token cũ"]:::sys --> K["Đăng nhập lại"] --> E
+    classDef se fill:#333,stroke:#333,color:#fff
+    classDef dec fill:#fff8e1,stroke:#d9a400
+    classDef sys fill:#eaf4fe,stroke:#1899f0
+    classDef err fill:#fdecea,stroke:#e4572e

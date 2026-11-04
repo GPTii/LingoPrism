@@ -1,0 +1,20 @@
+---
+title: "S24 – Quản trị: quản lý POI (WebGIS)"
+---
+sequenceDiagram
+    autonumber
+
+    actor T as Giáo viên
+    participant A as Bản đồ quản trị<br/>(React Leaflet)
+    participant API as API Django<br/>PoiViewSet
+    participant DB as PostgreSQL
+    participant IDX as poi_index (GridIndex)
+    A->>API: GET /pois/
+    API-->>A: Mọi POI (kể cả đã tắt)
+    T->>A: Bấm bản đồ / kéo ghim, nhập bán kính, chủ đề
+    A->>A: Xem trước vòng tròn geofence
+    A->>API: POST /pois/ hoặc PATCH /pois/{id}/
+    API->>DB: Lưu Poi (lat, lng, radius_m, topics)
+    DB-->>IDX: Tín hiệu lưu → invalidate()
+    IDX->>IDX: Dựng lại chỉ mục lưới ở truy vấn sau
+    API-->>A: 201 / 200

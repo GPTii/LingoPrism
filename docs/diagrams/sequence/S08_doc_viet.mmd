@@ -1,0 +1,29 @@
+---
+title: "S08 – Học đọc – viết tiếng Việt"
+---
+sequenceDiagram
+    autonumber
+
+    actor U as Trẻ em
+    participant C as Web / App
+    participant API as API Django<br/>literacy views
+    participant DB as PostgreSQL
+    participant GM as gamification
+    C->>API: GET /literacy/lessons/
+    API->>DB: LiteracyProgress → bài cao nhất được mở
+    API-->>C: Lộ trình + trạng thái khoá
+    U->>C: Mở bài n
+    C->>API: GET /literacy/lessons/{n}/
+    API-->>C: Nội dung bài (âm, vần, bài tập) hoặc 403 nếu chưa mở
+    loop Mỗi bài tập
+        C->>API: POST /literacy/check/ {item, answer}
+        API-->>C: Đúng / sai + đáp án
+    end
+    C->>API: POST /literacy/lessons/{n}/finish/ {percent}
+    API->>DB: Lưu best_percent
+    alt percent ≥ 60
+        API->>GM: award_xp, mark_activity
+        API-->>C: Mở bài n+1
+    else
+        API-->>C: Học lại
+    end

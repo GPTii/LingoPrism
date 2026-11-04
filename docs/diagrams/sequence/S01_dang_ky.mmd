@@ -1,0 +1,36 @@
+---
+title: "S01 – Đăng ký và xác minh email"
+---
+sequenceDiagram
+    autonumber
+
+    actor U as Khách
+    participant C as Web / App
+    participant API as API Django<br/>RegisterView / VerifyEmailView
+    participant DB as PostgreSQL
+    participant R as Redis
+    participant W as Celery worker
+    participant M as Gmail SMTP
+    U->>C: Nhập email, mật khẩu, tên, đồng ý điều khoản
+    C->>API: POST /auth/register/
+    API->>API: Kiểm tra throttle register, email trùng, độ mạnh mật khẩu
+    alt Không hợp lệ
+        API-->>C: 400 {errors theo từng ô}
+    else Hợp lệ
+        API->>DB: INSERT User (email_verified=false), UserGoal
+        API->>DB: INSERT EmailVerificationCode
+        API->>R: send_email_code.delay(email, code)
+        API-->>C: 201 {access, refresh, user}
+        R->>W: Nhận tác vụ
+        W->>M: send_mail(mã 6 số)
+        M-->>U: Email chứa mã
+    end
+    U->>C: Nhập mã
+    C->>API: POST /auth/email/verify/ {code} (Bearer)
+    API->>DB: Kiểm tra mã, hạn, số lần sai
+    alt Mã đúng
+        API->>DB: UPDATE User email_verified=true
+        API-->>C: 200
+    else Sai (lần 5 huỷ mã)
+        API-->>C: 400 "Mã không đúng"
+    end

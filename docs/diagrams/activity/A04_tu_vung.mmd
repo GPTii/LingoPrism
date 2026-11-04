@@ -1,0 +1,23 @@
+---
+title: "A04 – Duyệt chủ đề và lưu từ"
+---
+flowchart TD
+    S((●)):::se
+    E((◉)):::se
+
+    S --> A["Chọn ngôn ngữ đang học<br/>Anh / Trung giản thể / Trung phồn thể / Việt"]
+    A --> B["Lấy danh sách chủ đề hệ thống + chủ đề của mình"]:::sys
+    B --> C["Mở một chủ đề"]
+    C --> D["Lọc từ có bản dịch đã kiểm duyệt cho ngôn ngữ đó,<br/>trẻ em chỉ thấy từ dành cho trẻ"]:::sys
+    D --> F["Xem thẻ từ: chữ, pinyin / IPA, nghĩa Việt, ảnh, câu ví dụ"]
+    F --> G{"Thao tác"}:::dec
+    G -- Nghe --> H["TTS đúng vùng: zh-CN / zh-TW / en-US / vi-VN"] --> F
+    G -- Báo lỗi --> I["Tạo ErrorReport cho đội nội dung"]:::sys --> F
+    G -- Lưu từ --> J{"Từ đã có trong thư viện?"}:::dec
+    J -- Có --> K["Giữ nguyên"] --> E
+    J -- Chưa --> L["Tạo PersonalWord status = new,<br/>chờ vào phiên học"]:::sys --> E
+    G -- Lưu cả chủ đề --> L
+    classDef se fill:#333,stroke:#333,color:#fff
+    classDef dec fill:#fff8e1,stroke:#d9a400
+    classDef sys fill:#eaf4fe,stroke:#1899f0
+    classDef err fill:#fdecea,stroke:#e4572e

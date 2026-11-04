@@ -1,0 +1,30 @@
+---
+title: "S15 – Trò chơi"
+---
+sequenceDiagram
+    autonumber
+
+    actor U as Học viên
+    participant C as Web / App
+    participant API as API Django<br/>games views
+    participant DB as PostgreSQL
+    participant GM as gamification
+    C->>API: GET /games/map/
+    API->>DB: GameNode của người học, bạn bè đang chơi
+    API-->>C: Bản đồ màn, rương, bạn bè
+    U->>C: Chọn màn
+    C->>API: GET /games/rounds/{node}/
+    API->>DB: Từ đã học → câu hỏi
+    API-->>C: Các vòng + token ký số (user, màn, ngôn ngữ, đáp án)
+    opt Trợ giúp
+        C->>API: POST /games/rounds/{node}/help/
+        API->>DB: Trừ vảy (tối đa 3 lần / loại)
+    end
+    C->>API: POST /games/rounds/{node}/finish/ {token, results}
+    API->>API: Giải token, đối chiếu số câu
+    API->>DB: Cập nhật GameNode (sao, %, lần qua)
+    opt Qua lần đầu
+        API->>GM: award_xp(game), màn trùm cộng ngọc
+    end
+    API->>GM: mark_activity, nhiệm vụ Thắng màn, thống kê huy hiệu
+    API-->>C: {percent, stars, xp, gems, next / review}
