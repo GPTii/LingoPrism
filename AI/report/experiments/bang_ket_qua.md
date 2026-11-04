@@ -1,6 +1,6 @@
 # Kết quả geofence và realtime
 
-Nguồn geofence: production (lingoprism.id.vn), 30 POI, 120 lượt đi qua mỗi ô, nhiễu GPS 8.0 m. Máy chủ kiểm tra một lần: TB 3.696 ms, p95 4.391 ms.
+Nguồn geofence: production (lingoprism.id.vn), 30 POI, 120 lượt đi qua mỗi ô, nhiễu GPS 8.0 m. Máy chủ kiểm tra một lần: TB 3.704 ms, p95 4.429 ms.
 
 ## Bảng 1. Geofence: tỷ lệ phát hiện và độ trễ kích hoạt
 
@@ -23,23 +23,23 @@ Nguồn geofence: production (lingoprism.id.vn), 30 POI, 120 lượt đi qua m�
 
 | Đường đi | Mẫu | TB (ms) | p50 (ms) | p95 (ms) | p99 (ms) | Lớn nhất (ms) |
 |---|---|---|---|---|---|---|
-| Ping → pong | 50 | 0.77 | 0.55 | 2.43 | 5.07 | 5.07 |
-| Nhóm → thành viên khác | 240 | 7.66 | 7.27 | 10.32 | 15.58 | 15.77 |
-| Nhóm → người gửi | 48 | 8.24 | 7.89 | 10.94 | 16.06 | 16.06 |
-| Tin riêng: gửi + lưu | 30 | 12.87 | 11.3 | 24.96 | 41.43 | 41.43 |
-| Tin riêng → người nhận | 30 | 13.27 | 11.83 | 25.36 | 42.33 | 42.33 |
-| Tin riêng → máy khác người gửi | 30 | 13.08 | 11.49 | 25.22 | 41.82 | 41.82 |
+| Ping → pong | 50 | 0.5 | 0.49 | 0.77 | 0.83 | 0.83 |
+| Nhóm → thành viên khác | 240 | 8.01 | 7.31 | 11.52 | 24.52 | 29.8 |
+| Nhóm → người gửi | 48 | 8.65 | 7.69 | 12.56 | 24.77 | 24.77 |
+| Tin riêng: gửi + lưu | 30 | 13.07 | 12.27 | 16.15 | 43.57 | 43.57 |
+| Tin riêng → người nhận | 30 | 13.43 | 12.71 | 16.87 | 43.75 | 43.75 |
+| Tin riêng → máy khác người gửi | 30 | 13.27 | 12.58 | 16.51 | 43.69 | 43.69 |
 
 ## Bảng 3. Realtime – production (RedisChannelLayer)
 
 | Đường đi | Mẫu | TB (ms) | p50 (ms) | p95 (ms) | p99 (ms) | Lớn nhất (ms) |
 |---|---|---|---|---|---|---|
-| Ping → pong | 50 | 0.3 | 0.29 | 0.34 | 0.37 | 0.37 |
-| Nhóm → thành viên khác | 240 | 12.45 | 7.76 | 54.59 | 63.69 | 65.3 |
-| Nhóm → người gửi | 48 | 12.37 | 7.69 | 54.52 | 63.85 | 63.85 |
-| Tin riêng: gửi + lưu | 30 | 17.83 | 13.16 | 46.32 | 49.86 | 49.86 |
-| Tin riêng → người nhận | 30 | 18.19 | 13.41 | 46.55 | 50.09 | 50.09 |
-| Tin riêng → máy khác người gửi | 30 | 17.96 | 13.25 | 46.42 | 49.96 | 49.96 |
+| Ping → pong | 50 | 0.3 | 0.29 | 0.34 | 0.35 | 0.35 |
+| Nhóm → thành viên khác | 240 | 28.08 | 7.94 | 145.89 | 167.95 | 169.0 |
+| Nhóm → người gửi | 48 | 27.77 | 7.78 | 140.77 | 166.25 | 166.25 |
+| Tin riêng: gửi + lưu | 30 | 15.37 | 12.8 | 46.01 | 53.97 | 53.97 |
+| Tin riêng → người nhận | 30 | 15.83 | 13.14 | 46.27 | 54.21 | 54.21 |
+| Tin riêng → máy khác người gửi | 30 | 15.51 | 12.89 | 46.1 | 54.13 | 54.13 |
 
 ## Bảng 4. Realtime – tính nhất quán
 
