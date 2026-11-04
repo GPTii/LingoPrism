@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 
+import '../../core/navigation/deep_link.dart';
 import '../../core/network/api_client.dart';
 
 /// Push notifications (FCM). The server sends one for every new in-app notification (apps.push).
@@ -80,9 +81,10 @@ class PushService {
     } catch (_) {/* tried again at the next start */}
   }
 
-  /// A notification can carry the screen to open ({"route": "/review"}).
+  /// A notification can carry the screen to open ({"route": "/vocab/topics/5"}). The server sends the web's paths,
+  /// so they go through DeepLink like a tap in the notification list.
   static void _open(Map<String, dynamic> data) {
     final route = data['route'];
-    if (route is String && route.startsWith('/')) Get.toNamed(route);
+    if (route is String && route.startsWith('/')) DeepLink.open(route);
   }
 }

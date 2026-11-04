@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../core/navigation/deep_link.dart';
 import '../../core/network/ws_client.dart';
 import '../repositories/repositories.dart';
 import 'auth_service.dart';
@@ -51,8 +52,18 @@ class RealtimeService extends GetxService {
         final title = e.payload['title']?.toString() ?? '';
         final inMessages = e.payload['kind'] == 'message' && (Get.currentRoute.startsWith('/messages'));
         if (title.isNotEmpty && !inMessages) {
+          // a tap opens what the notification is about, e.g. the topic of the place the learner just reached
+          final data = e.payload['data'];
+          final route = data is Map ? data['route']?.toString() : null;
+          final hasRoute = route != null && route.startsWith('/');
           Get.snackbar(title, e.payload['body']?.toString() ?? '',
-              snackPosition: SnackPosition.TOP, duration: const Duration(seconds: 3), margin: const EdgeInsets.all(12));
+              snackPosition: SnackPosition.TOP, duration: Duration(seconds: hasRoute ? 5 : 3), margin: const EdgeInsets.all(12),
+              onTap: hasRoute
+                  ? (_) {
+                      Get.closeCurrentSnackbar();
+                      DeepLink.open(route);
+                    }
+                  : null);
         }
         break;
       case 'xp':

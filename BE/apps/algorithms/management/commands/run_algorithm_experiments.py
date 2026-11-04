@@ -12,8 +12,10 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument("--only", nargs="*", choices=STEPS)
         parser.add_argument("--confusion", help="confusion_matrix.json của model YOLO đã train (nếu có)")
+        parser.add_argument("--no-apply", action="store_true",
+                            help="GA chỉ đo, không ghi bộ tham số mới vào hệ thống (dùng khi lấy số cho báo cáo)")
 
-    def handle(self, *args, only=None, confusion=None, **opts):
+    def handle(self, *args, only=None, confusion=None, no_apply=False, **opts):
         for step in only or STEPS:
             self.stdout.write(f"▶ {step}")
             if step == "yolo":
@@ -25,7 +27,7 @@ class Command(BaseCommand):
                 top = sorted(profile.items(), key=lambda kv: -kv[1]["score"])[:8]
                 self.stdout.write("  dễ nhầm nhất: " + ", ".join(f"{k}={v['score']}" for k, v in top))
             elif step == "ga":
-                run = experiments.run_ga(log=self.stdout.write)
+                run = experiments.run_ga(apply=not no_apply, log=self.stdout.write)
                 self.stdout.write(f"  test: {run.results['test']}  áp dụng={run.results['applied']}")
             else:
                 run = getattr(experiments, step)()
