@@ -36,6 +36,7 @@ import 'package:lingoprism/app/core/widgets/chat_voice_tools.dart';
 import 'package:lingoprism/app/core/widgets/message_actions.dart';
 import 'package:lingoprism/app/data/services/auth_service.dart';
 import 'package:lingoprism/app/core/widgets/sticker_picker.dart';
+import 'package:lingoprism/app/modules/classwork/classwork_module.dart';
 
 /// Main chat view widget for community group conversations
 ///
@@ -211,6 +212,13 @@ class _ChatHeader extends StatelessWidget {
                 ),
               ],
             ),
+          ),
+          // assignments of the group: leaders give and mark them, members do them
+          TextButton.icon(
+            onPressed: () => Get.to(() => AssignmentListView(
+                groupId: int.tryParse(details.group.groupId) ?? 0, groupName: details.group.validatedName)),
+            icon: const Icon(Icons.assignment_rounded),
+            label: const Text('Bài tập'),
           ),
         ],
       ),

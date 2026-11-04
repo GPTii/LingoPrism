@@ -266,9 +266,10 @@ function Groups() {
   const create = async () => {
     const v = await form.validateFields()
     try {
-      await communityApi.createGroup(v)
+      const g = await communityApi.createGroup(v)
       setCreating(false)
       queryClient.invalidateQueries({ queryKey: ['groups'] })
+      navigate(`/community/groups/${g.id}`)
     } catch (e) {
       message.error(errorMessage(e))
     }
@@ -284,10 +285,12 @@ function Groups() {
             <div className="min-w-0">
               <div className="font-bold text-lg text-slate-800">{g.name} {g.my_role === 'leader' && <CrownFilled className="text-amber-500" aria-label="Bạn là trưởng nhóm" />}</div>
               {g.description && <div className="text-slate-500 text-sm mt-0.5">{g.description}</div>}
-              <div className="num text-sm text-slate-500 mt-1.5">{g.member_count} thành viên{g.require_approval && ' · cần trưởng nhóm duyệt'}</div>
+              <div className="num text-sm text-slate-500 mt-1.5">{g.member_count} thành viên{g.is_private ? ' · nhóm riêng' : g.require_approval && ' · cần trưởng nhóm duyệt'}</div>
             </div>
             {g.my_status === 'active' ? (
               <Button type="primary" onClick={() => navigate(`/community/groups/${g.id}`)}>Vào nhóm</Button>
+            ) : g.my_status === 'invited' ? (
+              <Button type="primary" onClick={() => navigate(`/community/groups/${g.id}`)}>Xem lời mời</Button>
             ) : g.my_status === 'pending' ? (
               <span className="flex flex-col items-end gap-1 shrink-0">
                 <span className="text-sm font-semibold text-amber-700 whitespace-nowrap">Chờ duyệt</span>
@@ -316,9 +319,13 @@ function Groups() {
           placeholder="VD: Mình đang ôn HSK 3, mỗi tối học 20 phút, muốn tìm bạn cùng luyện nói." aria-label="Giới thiệu bản thân" />
       </Modal>
       <Modal title="Tạo nhóm học" open={creating} onOk={create} onCancel={() => setCreating(false)} okText="Tạo nhóm" cancelText="Huỷ">
-        <Form form={form} layout="vertical" initialValues={{ require_approval: false }}>
+        <Form form={form} layout="vertical" initialValues={{ require_approval: false, is_private: false }}>
           <Form.Item name="name" label="Tên nhóm" rules={[{ required: true, message: 'Đặt tên cho nhóm' }]}><Input /></Form.Item>
           <Form.Item name="description" label="Giới thiệu / yêu cầu của nhóm"><Input.TextArea maxLength={300} showCount placeholder="Nhóm học gì, mỗi tuần làm gì, cần điều kiện gì để vào" /></Form.Item>
+          <Form.Item name="is_private" label="Nhóm riêng (lớp học)" valuePropName="checked"
+            extra="Không hiện trong danh sách nhóm; bạn thêm thành viên bằng ID 8 số. Trưởng nhóm giao và chấm bài tập trong tab Bài tập.">
+            <Switch />
+          </Form.Item>
           <Form.Item name="require_approval" label="Cần trưởng nhóm duyệt" valuePropName="checked"><Switch /></Form.Item>
         </Form>
       </Modal>

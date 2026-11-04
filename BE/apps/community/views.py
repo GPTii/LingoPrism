@@ -24,7 +24,7 @@ from apps.core.throttles import ActionThrottleMixin
 
 from .models import (
     FriendRequest, Group, GroupMember, Post, PostBookmark, PostComment, PostLike, PostReport, PostWord, UserBlock,
-    UserFollow, UserReport, blocked_between, friend_ids, friendship, hidden_user_ids,
+    UserFollow, UserReport, are_friends, blocked_between, friend_ids, friendship, hidden_user_ids,
 )
 
 User = get_user_model()
@@ -504,8 +504,8 @@ class GroupSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Group
-        fields = ["id", "name", "description", "icon", "require_approval", "member_count", "my_status", "my_role",
-                  "created_by", "created_at"]
+        fields = ["id", "name", "description", "icon", "require_approval", "is_private", "member_count", "my_status",
+                  "my_role", "created_by", "created_at"]
         read_only_fields = ["id", "created_by", "created_at"]
 
     def _membership(self, obj):
@@ -561,7 +561,10 @@ class GroupViewSet(ActionThrottleMixin, mixins.ListModelMixin, mixins.RetrieveMo
         ).prefetch_related("members")
         if self.request.query_params.get("mine") == "1":
             qs = qs.filter(members__user=self.request.user, members__status="active")
-        return qs.order_by("-created_at")
+        elif not self.request.user.is_staff_role:
+            # private groups (a class) are seen only by the people in them or invited to them
+            qs = qs.filter(Q(is_private=False) | Q(members__user=self.request.user))
+        return qs.distinct().order_by("-created_at")
 
     def _leader(self, group):
         if not GroupMember.objects.filter(group=group, user=self.request.user, role="leader").exists() and not self.request.user.is_staff_role:
@@ -583,6 +586,16 @@ class GroupViewSet(ActionThrottleMixin, mixins.ListModelMixin, mixins.RetrieveMo
     @action(detail=True, methods=["post"])
     def join(self, request, pk=None):
         group = self.get_object()
+        invite = GroupMember.objects.filter(group=group, user=request.user, status=GroupMember.Status.INVITED).first()
+        if invite:  # accepting a leader's invitation
+            invite.status, invite.joined_at = GroupMember.Status.ACTIVE, timezone.now()
+            invite.save(update_fields=["status", "joined_at"])
+            for leader in group.members.filter(role="leader").select_related("user"):
+                notify(leader.user, Notification.Kind.GROUP, f"{request.user.display_name} đã vào nhóm {group.name}",
+                       data={"route": f"/community/groups/{group.id}", "user_id": request.user.id})
+            return Response({"status": invite.status})
+        if group.is_private:
+            raise PermissionDenied("Nhóm riêng: chỉ vào được khi trưởng nhóm thêm bạn.")
         status_value = "pending" if group.require_approval else "active"
         m, created = GroupMember.objects.get_or_create(
             group=group, user=request.user,
@@ -612,15 +625,61 @@ class GroupViewSet(ActionThrottleMixin, mixins.ListModelMixin, mixins.RetrieveMo
     def members(self, request, pk=None):
         group = self.get_object()
         qs = group.members.select_related("user__mascot").order_by("role", "joined_at")
-        if not GroupMember.objects.filter(group=group, user=request.user, role="leader").exists():
+        if not GroupMember.objects.filter(group=group, user=request.user, role="leader", status="active").exists():
             qs = qs.filter(status="active")
         return Response(MemberSerializer(qs, many=True, context={"request": request}).data)
 
-    @action(detail=True, methods=["post"], url_path=r"members/(?P<member_id>\d+)/(?P<decision>approve|reject|remove)")
+    @action(detail=True, methods=["post"], url_path="members/add")
+    def add_member(self, request, pk=None):
+        """Leader adds someone by their 8-digit ID: a friend (or someone they follow both ways) joins at once,
+        anyone else gets an invitation to accept. Children's accounts cannot be added."""
+        group = self.get_object()
+        self._leader(group)
+        key = str(request.data.get("user", "")).strip()
+        User = get_user_model()
+        target = (User.objects.filter(public_id=key).first() if len(key) == 8 and key.isdigit()
+                  else User.objects.filter(pk=key).first() if key.isdigit() else None)
+        if target is None or not target.is_active or target.status == User.Status.LOCKED:
+            return Response({"detail": "Không tìm thấy người dùng với ID này", "errors": {}}, status=404)
+        if target.id == request.user.id:
+            return Response({"detail": "Bạn đã ở trong nhóm", "errors": {}}, status=400)
+        if target.learner_type == "kid" and not target.is_staff_role:
+            return Response({"detail": "Tài khoản trẻ em không tham gia nhóm học được", "errors": {}}, status=400)
+        if blocked_between(request.user.id, target.id):
+            return Response({"detail": "Không thêm được người này", "errors": {}}, status=400)
+        m = GroupMember.objects.filter(group=group, user=target).first()
+        if m and m.status == GroupMember.Status.ACTIVE:
+            return Response({"detail": f"{target.display_name} đã ở trong nhóm", "errors": {}}, status=400)
+        close = are_friends(request.user.id, target.id) or can_message(request.user, target)
+        if (m and m.status == GroupMember.Status.PENDING) or close:
+            m = m or GroupMember(group=group, user=target)
+            m.status, m.joined_at = GroupMember.Status.ACTIVE, timezone.now()
+            m.save()
+            notify(target, Notification.Kind.GROUP, f"{request.user.display_name} đã thêm bạn vào nhóm {group.name}",
+                   data={"route": f"/community/groups/{group.id}"})
+        else:
+            m = m or GroupMember.objects.create(group=group, user=target, status=GroupMember.Status.INVITED)
+            notify(target, Notification.Kind.GROUP, f"{request.user.display_name} mời bạn vào nhóm {group.name}",
+                   "Mở nhóm để nhận lời mời.", data={"route": f"/community/groups/{group.id}", "action": "group_invite",
+                                                     "group_id": group.id})
+        return Response(MemberSerializer(m, context={"request": request}).data, status=201)
+
+    @action(detail=True, methods=["post"],
+            url_path=r"members/(?P<member_id>\d+)/(?P<decision>approve|reject|remove|promote|demote)")
     def moderate(self, request, pk=None, member_id=None, decision=None):
         group = self.get_object()
         self._leader(group)
         m = get_object_or_404(GroupMember, pk=member_id, group=group)
+        if decision in ("promote", "demote"):
+            # several leaders can give and mark assignments; the creator always stays one
+            if m.status != GroupMember.Status.ACTIVE or (decision == "demote" and m.user_id == group.created_by_id):
+                return Response({"detail": "Không đổi được quyền của người này.", "errors": {}}, status=400)
+            m.role = GroupMember.Role.LEADER if decision == "promote" else GroupMember.Role.MEMBER
+            m.save(update_fields=["role"])
+            if decision == "promote":
+                notify(m.user, Notification.Kind.GROUP, f"Bạn là trưởng nhóm {group.name}",
+                       "Bạn có thể giao và chấm bài tập trong nhóm.", data={"route": f"/community/groups/{group.id}"})
+            return Response({"ok": True, "role": m.role})
         if decision == "approve":
             if m.status != "active":
                 m.status = "active"

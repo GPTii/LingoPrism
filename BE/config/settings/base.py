@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     "apps.audit",
     "apps.push",
     "apps.aitalk",
+    "apps.classwork",
 ]
 
 MIDDLEWARE = [
@@ -178,6 +179,7 @@ REST_FRAMEWORK = {
         "report": env("THROTTLE_REPORT", default="30/hour"),
         "ai_dialogue": env("THROTTLE_AI_DIALOGUE", default="20/hour"),  # each one is a paid AI call
         "translate": env("THROTTLE_TRANSLATE", default="120/hour"),  # AI translation, typed or spoken
+        "ai_import": env("THROTTLE_AI_IMPORT", default="20/hour"),  # exercise file -> questions (AI)
         "message": env("THROTTLE_MESSAGE", default="60/min"),  # private messages
     },
     # proxies in front of Django whose X-Forwarded-For is trusted (nginx = 1, Cloudflare + nginx = 2)

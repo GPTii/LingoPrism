@@ -4,6 +4,7 @@ import '../../data/repositories/repositories.dart';
 import '../../modules/community/controllers/community_controller.dart';
 import '../../modules/community_detail/controllers/community_detail_controller.dart';
 import '../../modules/community_member_profile/controllers/community_member_profile_controller.dart';
+import '../../modules/classwork/classwork_module.dart';
 import '../../modules/vocabulary_topic/controllers/vocabulary_topic_controller.dart';
 import '../../routes/app_pages.dart';
 
@@ -14,7 +15,13 @@ class DeepLink {
   static Future<void> open(String route) async {
     int? id(String pattern) => int.tryParse(RegExp(pattern).firstMatch(route)?.group(1) ?? '');
     try {
-      if (route.startsWith('/vocab/topics/')) {
+      final assignment = int.tryParse(Uri.parse(route).queryParameters['a'] ?? '');
+      final group = id(r'/community/groups/(\d+)');
+      if (route.startsWith('/community/groups/') && assignment != null) {
+        Get.to(() => AssignmentDetailView(id: assignment));
+      } else if (route.startsWith('/community/groups/') && group != null) {
+        await GroupInvite.open(group);
+      } else if (route.startsWith('/vocab/topics/')) {
         final topic = await VocabRepository.topic(id(r'/vocab/topics/(\d+)')!);
         Get.toNamed(Routes.vocabularyTopic, arguments: VocabularyTopicArguments(topic: topic));
       } else if (route.startsWith('/community/posts/')) {

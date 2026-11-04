@@ -2,6 +2,16 @@
 
 <!-- Sinh từ BE/apps/core/releases.json bằng `python manage.py changelog` – sửa ở file đó, không sửa ở đây. -->
 
+## 1.9.0 – 04/11/2026: Bài tập trong nhóm học
+
+### Mới
+
+- Nhóm học có tab Bài tập: trưởng nhóm tạo bài trắc nghiệm, điền từ, tự luận hoặc nộp file, đặt hạn nộp, rồi giao cho cả nhóm – không cần tài khoản giáo viên.
+- Tải file đề (PDF, Word, ảnh chụp phiếu bài tập) lên để AI tách thành câu hỏi; trưởng nhóm kiểm tra, sửa đáp án rồi mới giao. Hoặc đính kèm nguyên file để thành viên nộp bài làm / ảnh chụp.
+- Trắc nghiệm và điền từ được chấm ngay; tự luận và file do trưởng nhóm chấm, kèm nhận xét từng câu. Thành viên nhận thông báo khi có bài mới và khi bài đã chấm, xem lại đáp án đúng.
+- Bảng điểm của nhóm: mỗi thành viên × mỗi bài, điểm trung bình.
+- Nhóm riêng (lớp học): không hiện trong danh sách; trưởng nhóm thêm người bằng ID 8 số – bạn bè vào ngay, người khác nhận lời mời. Trưởng nhóm có thể cho thêm người làm trưởng nhóm để cùng giao và chấm bài.
+
 ## 1.8.0 – 02/11/2026: Dịch bằng giọng nói, nói, dịch và thả tim trong chat
 
 ### Mới

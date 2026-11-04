@@ -138,7 +138,7 @@ class FriendRequestItem {
 
 class StudyGroup {
   StudyGroup({required this.id, required this.name, this.description = '', this.icon = '', this.requireApproval = false,
-      this.memberCount = 0, this.myStatus, this.myRole, required this.createdAt});
+      this.memberCount = 0, this.myStatus, this.myRole, required this.createdAt, this.isPrivate = false});
 
   final int id;
   final String name;
@@ -146,13 +146,17 @@ class StudyGroup {
   final String icon;
   final bool requireApproval;
   final int memberCount;
-  final String? myStatus; // null | pending | active
+  final String? myStatus; // null | pending | invited | active
   final String? myRole; // leader | member
   final DateTime createdAt;
+
+  /// a class: not listed, joined only when a leader adds / invites you
+  final bool isPrivate;
 
   bool get isMember => myStatus == 'active';
   bool get isLeader => myRole == 'leader' && isMember;
   bool get isPending => myStatus == 'pending';
+  bool get isInvited => myStatus == 'invited';
 
   factory StudyGroup.fromJson(Map<String, dynamic> j) => StudyGroup(
         id: asInt(j['id']),
@@ -164,6 +168,7 @@ class StudyGroup {
         myStatus: j['my_status'] as String?,
         myRole: j['my_role'] as String?,
         createdAt: parseDate(j['created_at']) ?? DateTime.now(),
+        isPrivate: j['is_private'] == true,
       );
 }
 

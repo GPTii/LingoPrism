@@ -18,6 +18,9 @@ class CommunityCreateGroupController extends GetxController {
   final Rx<StudyGroupApprovalMode> approvalMode =
       StudyGroupApprovalMode.auto.obs;
   final RxBool canSubmit = false.obs;
+
+  /// a class: not listed in the group list, members are added by their 8-digit ID
+  final RxBool isPrivate = false.obs;
   final RxBool isSubmitting = false.obs;
 
   static const List<String> iconAssets = BrandAssets.groupIcons;
@@ -73,7 +76,8 @@ class CommunityCreateGroupController extends GetxController {
     final description = requirementController.text.trim();
     isSubmitting.value = true;
     try {
-      final group = await CommunityRepository.createGroup(name, description, requireApproval, icon: iconPath);
+      final group = await CommunityRepository.createGroup(name, description, requireApproval,
+          icon: iconPath, isPrivate: isPrivate.value);
       goBack(result: group);
     } catch (e) {
       Get.snackbar(

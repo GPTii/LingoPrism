@@ -310,9 +310,16 @@ class CommunityRepository {
       .map(StudyGroup.fromJson)
       .toList();
   static Future<StudyGroup> group(int id) async => StudyGroup.fromJson(asMap(await _api.get('/groups/$id/')));
-  static Future<StudyGroup> createGroup(String name, String description, bool requireApproval, {String icon = ''}) async =>
-      StudyGroup.fromJson(asMap(await _api.post('/groups/',
-          data: {'name': name, 'description': description, 'require_approval': requireApproval, 'icon': icon})));
+  static Future<StudyGroup> createGroup(String name, String description, bool requireApproval,
+          {String icon = '', bool isPrivate = false}) async =>
+      StudyGroup.fromJson(asMap(await _api.post('/groups/', data: {
+        'name': name, 'description': description, 'require_approval': requireApproval, 'icon': icon,
+        'is_private': isPrivate,
+      })));
+
+  /// By 8-digit ID: a friend joins at once, anyone else is invited. Returns the member's status (active / invited).
+  static Future<Map<String, dynamic>> addMember(int groupId, String user) async =>
+      asMap(await _api.post('/groups/$groupId/members/add/', data: {'user': user}));
   static Future<void> deleteGroup(int id) => _api.delete('/groups/$id/');
   static Future<String> join(int id, {String message = ''}) async =>
       asString(asMap(await _api.post('/groups/$id/join/', data: {'message': message}))['status']);

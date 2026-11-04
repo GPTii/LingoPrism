@@ -237,8 +237,10 @@ export interface StudyGroup {
   description: string
   icon: string
   require_approval: boolean
+  /** a class: not listed, joined only when a leader adds / invites you */
+  is_private?: boolean
   member_count: number
-  my_status: 'pending' | 'active' | null
+  my_status: 'pending' | 'invited' | 'active' | null
   my_role: 'leader' | 'member' | null
   created_at: string
 }
@@ -247,7 +249,7 @@ export interface GroupMember {
   id: number
   user: Author
   role: 'leader' | 'member'
-  status: 'pending' | 'active'
+  status: 'pending' | 'invited' | 'active'
   request_message: string
   weekly_xp: number
   lifetime_xp: number
@@ -346,8 +348,10 @@ export const communityApi = {
   join: (id: number, message = '') => api.post<{ status: string }>(`/groups/${id}/join/`, { message }).then((r) => r.data),
   leave: (id: number) => api.post(`/groups/${id}/leave/`),
   members: (id: number) => api.get<GroupMember[]>(`/groups/${id}/members/`).then((r) => r.data),
-  moderate: (groupId: number, memberId: number, decision: 'approve' | 'reject' | 'remove') =>
+  moderate: (groupId: number, memberId: number, decision: 'approve' | 'reject' | 'remove' | 'promote' | 'demote') =>
     api.post(`/groups/${groupId}/members/${memberId}/${decision}/`),
+  /** by 8-digit ID: a friend joins at once, anyone else is invited */
+  addMember: (groupId: number, user: string) => api.post<GroupMember>(`/groups/${groupId}/members/add/`, { user }).then((r) => r.data),
   messages: (groupId: number) => api.get<{ results: ChatMessage[]; has_more: boolean }>(`/groups/${groupId}/messages/`).then((r) => r.data),
   send: (groupId: number, content: string, client_id: string) =>
     api.post<ChatMessage>(`/groups/${groupId}/messages/`, { kind: 'text', content, client_id }).then((r) => r.data),
@@ -523,6 +527,136 @@ export interface Translation {
   target_tts: string
   machine_translated: true
   words: TranslatedWord[]
+}
+
+// ---------------------------------------------------------------- group assignments (bài tập nhóm)
+
+export type QuestionKind = 'mcq' | 'fill' | 'essay' | 'file'
+
+export interface AssignmentQuestion {
+  id?: number
+  order?: number
+  kind: QuestionKind
+  prompt: string
+  /** leaders (and the learner once marked) see `correct` */
+  options: { text: string; correct?: boolean }[]
+  accepted_answers?: string[]
+  points: number | string
+  explanation?: string
+}
+
+export interface HandInBrief {
+  id: number
+  status: 'submitted' | 'graded'
+  score: string | null
+  max_score: string
+  percent: number | null
+  late: boolean
+  submitted_at: string
+  graded_at: string | null
+}
+
+export interface HandInAnswer {
+  id: number
+  question: number
+  selected_option: number | null
+  text: string
+  attachment: string | null
+  attachment_name: string
+  is_correct: boolean | null
+  score: string | null
+  feedback: string
+}
+
+export interface HandIn extends HandInBrief {
+  text: string
+  attachment: string | null
+  attachment_name: string
+  feedback: string
+  answers: HandInAnswer[]
+  user?: Author
+}
+
+export interface AssignmentSummary {
+  id: number
+  group: number
+  group_name: string
+  title: string
+  status: 'draft' | 'published' | 'closed'
+  due_at: string | null
+  published_at: string | null
+  created_at: string
+  question_count: number
+  max_score: string | number
+  has_attachment: boolean
+  ai_generated: boolean
+  is_leader: boolean
+  counts?: { submitted: number; graded: number; members: number }
+  my_submission: HandInBrief | HandIn | null
+}
+
+export interface Assignment extends AssignmentSummary {
+  instructions: string
+  points: string
+  allow_late: boolean
+  show_answers: boolean
+  attachment: string | null
+  attachment_name: string
+  questions: AssignmentQuestion[]
+  my_submission: HandIn | null
+}
+
+export interface AssignmentDraft {
+  group: number
+  title: string
+  instructions?: string
+  due_at?: string | null
+  points?: number
+  allow_late?: boolean
+  show_answers?: boolean
+  ai_generated?: boolean
+  questions?: AssignmentQuestion[]
+}
+
+export interface Gradebook {
+  assignments: { id: number; title: string; due_at: string | null; max_score: string }[]
+  rows: { user: Author; cells: (HandInBrief | null)[]; average: number | null }[]
+  is_leader: boolean
+}
+
+const fileForm = (fields: Record<string, string | Blob | undefined>) => {
+  const f = new FormData()
+  Object.entries(fields).forEach(([k, v]) => v !== undefined && f.append(k, v))
+  return f
+}
+
+export const classworkApi = {
+  list: (group: number) => api.get<AssignmentSummary[]>('/assignments/', { params: { group } }).then((r) => r.data),
+  get: (id: number) => api.get<Assignment>(`/assignments/${id}/`).then((r) => r.data),
+  create: (d: AssignmentDraft) => api.post<Assignment>('/assignments/', d).then((r) => r.data),
+  update: (id: number, d: Partial<AssignmentDraft>) => api.patch<Assignment>(`/assignments/${id}/`, d).then((r) => r.data),
+  remove: (id: number) => api.delete(`/assignments/${id}/`),
+  attach: (id: number, file: File) => api.post<Assignment>(`/assignments/${id}/attachment/`, fileForm({ file })).then((r) => r.data),
+  detach: (id: number) => api.delete<Assignment>(`/assignments/${id}/attachment/`).then((r) => r.data),
+  publish: (id: number) => api.post<Assignment>(`/assignments/${id}/publish/`).then((r) => r.data),
+  close: (id: number) => api.post<Assignment>(`/assignments/${id}/close/`).then((r) => r.data),
+  reopen: (id: number) => api.post<Assignment>(`/assignments/${id}/reopen/`).then((r) => r.data),
+  /** an exercise file -> draft questions (AI, not saved) */
+  importFile: (group: number, file: File) =>
+    api.post<{ title: string; questions: AssignmentQuestion[]; model: string }>('/assignments/import/',
+      fileForm({ group: String(group), file }), { timeout: 180000 }).then((r) => r.data),
+  submit: (id: number, answers: { question: number; selected_option?: number | null; text?: string }[],
+    files: Record<string, File>, text = '') => {
+    const f = fileForm({ answers: JSON.stringify(answers), text })
+    Object.entries(files).forEach(([k, v]) => f.append(k, v))
+    return api.post<Assignment>(`/assignments/${id}/submit/`, f).then((r) => r.data)
+  },
+  submissions: (id: number) =>
+    api.get<{ user: Author; submission: HandInBrief | null }[]>(`/assignments/${id}/submissions/`).then((r) => r.data),
+  submission: (id: number, sid: number) => api.get<HandIn>(`/assignments/${id}/submissions/${sid}/`).then((r) => r.data),
+  grade: (id: number, sid: number, d: { answers?: { answer: number; score: number; feedback?: string }[]; score?: number; feedback?: string }) =>
+    api.post<HandIn>(`/assignments/${id}/submissions/${sid}/grade/`, d).then((r) => r.data),
+  gradebook: (group: number) => api.get<Gradebook>('/assignments/gradebook/', { params: { group } }).then((r) => r.data),
 }
 
 export const learnApi = {

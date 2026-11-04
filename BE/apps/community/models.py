@@ -208,6 +208,8 @@ class Group(TimeStampedModel):
     description = models.CharField(max_length=300, blank=True)
     icon = models.CharField(max_length=200, blank=True)
     require_approval = models.BooleanField(default=False)
+    is_private = models.BooleanField(default=False, help_text="Nhóm riêng (lớp học): không hiện trong danh sách, "
+                                                              "chỉ vào được khi trưởng nhóm thêm / mời")
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="created_groups")
     status = models.CharField(max_length=6, choices=Status.choices, default=Status.ACTIVE)
 
@@ -222,6 +224,7 @@ class GroupMember(models.Model):
 
     class Status(models.TextChoices):
         PENDING = "pending", "Chờ duyệt"
+        INVITED = "invited", "Được mời"
         ACTIVE = "active", "Đã tham gia"
 
     group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name="members")

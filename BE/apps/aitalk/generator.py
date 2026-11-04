@@ -120,7 +120,9 @@ def generate(words: list[dict], language: str, level: int) -> dict:
 
 
 def _gemini(prompt: str, system: str = SYSTEM, schema: dict = SCHEMA,
-            fail: str = "Không tạo được hội thoại lúc này.", model: str = "", timeout: int = 60) -> tuple[str, str]:
+            fail: str = "Không tạo được hội thoại lúc này.", model: str = "", timeout: int = 60,
+            parts: list | None = None) -> tuple[str, str]:
+    """parts: files sent with the prompt, e.g. [{"inline_data": {"mime_type": "application/pdf", "data": base64}}]."""
     import requests
 
     model = model or settings.GEMINI_MODEL
@@ -130,7 +132,7 @@ def _gemini(prompt: str, system: str = SYSTEM, schema: dict = SCHEMA,
             headers={"x-goog-api-key": settings.GEMINI_API_KEY},
             json={
                 "systemInstruction": {"parts": [{"text": system}]},
-                "contents": [{"role": "user", "parts": [{"text": prompt}]}],
+                "contents": [{"role": "user", "parts": [*(parts or []), {"text": prompt}]}],
                 "generationConfig": {"responseMimeType": "application/json", "responseJsonSchema": schema,
                                      "maxOutputTokens": 4000},
             },

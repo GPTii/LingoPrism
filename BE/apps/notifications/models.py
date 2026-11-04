@@ -21,6 +21,7 @@ class Notification(models.Model):
         EXAM = "exam", "Bài kiểm tra"
         LOCATION = "location", "Gợi ý theo vị trí"
         BROADCAST = "broadcast", "Thông báo từ quản trị"
+        ASSIGNMENT = "assignment", "Bài tập nhóm"
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="notifications")
     kind = models.CharField(max_length=14, choices=Kind.choices)
