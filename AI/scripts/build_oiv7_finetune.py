@@ -17,6 +17,9 @@ v5 keeps everything the pretrained model knows and only adds clean examples of w
     # Colab (needs ~20 GB disk the first time: FiftyOne downloads the Open Images train labels)
     python AI/scripts/build_oiv7_finetune.py --out /content/oiv7_ft --per-class 400 --replay 40
     # quick local check on the cached validation split (never train on it)
+Each download step runs in its own process (FiftyOne keeps the multi-GB Open Images label tables in memory: a second
+step in the same process ran a free Colab out of RAM) and writes _parts/<step>.json, so a rerun carries on where it
+stopped instead of starting over.
     python AI/scripts/build_oiv7_finetune.py --split validation --per-class 3 --replay 0 --limit-classes 3 --out ds_check
 
 Output: YOLO format (images/{train,val}, labels/{train,val}), data.yaml with the base model's 601 names, summary.json
@@ -25,6 +28,7 @@ Output: YOLO format (images/{train,val}, labels/{train,val}), data.yaml with the
 import argparse
 import json
 import random
+import subprocess
 import sys
 from collections import Counter, defaultdict
 from pathlib import Path
@@ -81,7 +85,10 @@ def load_samples(oi_classes: list[str], split: str, n: int, seed: int):
         "open-images-v7", split=split, label_types=["detections"], classes=oi_classes, max_samples=n, shuffle=True,
         seed=seed, only_matching=False,  # every box of the image, not only this class: fewer unlabeled objects
         dataset_name=name, drop_existing_dataset=True)
-    return [(s.filepath, (s.ground_truth.detections if s.ground_truth else [])) for s in ds]
+    out = [(s.filepath, [(d.label, list(d.bounding_box), _flag(d, "IsDepiction"))
+                         for d in (s.ground_truth.detections if s.ground_truth else [])]) for s in ds]
+    ds.delete()  # the sample records live in FiftyOne's database: not needed once read
+    return out
 
 
 def main():
@@ -96,6 +103,7 @@ def main():
     ap.add_argument("--val", type=float, default=0.1)
     ap.add_argument("--max-side", type=int, default=640)
     ap.add_argument("--seed", type=int, default=2026)
+    ap.add_argument("--step", type=int, default=-1, help=argparse.SUPPRESS)  # internal: one download step
     args = ap.parse_args()
 
     from PIL import Image
@@ -108,8 +116,9 @@ def main():
     others = [lab for lab in groups if lab not in weak]
     if args.limit_classes:
         weak, others = weak[:args.limit_classes], others[:args.limit_classes]
-    print(f"{len(weak)} lớp yếu: {', '.join(weak)}")
-    print(f"{len(others)} lớp ôn lại (replay {args.replay} ảnh / lớp Open Images)")
+    if args.step < 0:
+        print(f"{len(weak)} lớp yếu: {', '.join(weak)}")
+        print(f"{len(others)} lớp ôn lại (replay {args.replay} ảnh / lớp Open Images)")
 
     # weak classes one by one (each gets its share of images); replay classes in batches of BATCH
     weak_oi = list(dict.fromkeys(names[i] for lab in weak for i in groups[lab]))
@@ -118,18 +127,30 @@ def main():
     if args.replay:
         plan += [(replay_oi[k:k + BATCH], args.replay * len(replay_oi[k:k + BATCH]))
                  for k in range(0, len(replay_oi), BATCH)]
+    out = Path(args.out)
+    parts = out / "_parts"
+    parts.mkdir(parents=True, exist_ok=True)
+    if args.step >= 0:  # child process: one download, written to disk, then exit (its memory goes back to the system)
+        oi_classes, n = plan[args.step]
+        (parts / f"{args.step}.json").write_text(json.dumps(load_samples(oi_classes, args.split, n, args.seed)), encoding="utf-8")
+        return
     print(f"{len(plan)} lượt tải ({len(weak_oi)} lớp yếu, {len(replay_oi)} lớp ôn lại theo nhóm {BATCH})")
 
     images: dict[str, list] = {}
-    for step, (oi_classes, n) in enumerate(plan, 1):
-        print(f"[{step}/{len(plan)}] {', '.join(oi_classes[:3])}{'…' if len(oi_classes) > 3 else ''}", flush=True)
-        try:
-            for path, dets in load_samples(oi_classes, args.split, n, args.seed):
-                images.setdefault(path, dets)
-        except Exception as e:  # a class with no train boxes, a download hiccup: skip it, report it
-            print(f"[bỏ qua] {oi_classes[0]}…: {e}")
+    for step, (oi_classes, n) in enumerate(plan):
+        part_file = parts / f"{step}.json"
+        label = f"[{step + 1}/{len(plan)}] {', '.join(oi_classes[:3])}{'…' if len(oi_classes) > 3 else ''}"
+        if not part_file.exists():
+            print(label, flush=True)
+            done = subprocess.run([sys.executable, __file__, *sys.argv[1:], "--step", str(step)])
+            if done.returncode != 0 or not part_file.exists():  # a class with no train boxes, a download hiccup
+                print(f"[bỏ qua] {label} (mã lỗi {done.returncode})", flush=True)
+                continue
+        else:
+            print(label, "– đã có, bỏ qua", flush=True)
+        for path, dets in json.loads(part_file.read_text(encoding="utf-8")):
+            images.setdefault(path, dets)
 
-    out = Path(args.out)
     rng = random.Random(args.seed)
     paths = sorted(images)
     rng.shuffle(paths)
@@ -138,15 +159,14 @@ def main():
     kept, skipped_depiction, boxes_per_label, images_per_label = 0, 0, Counter(), defaultdict(set)
     for k, path in enumerate(paths):
         dets = images[path]
-        if any(_flag(d, "IsDepiction") and index.get(d.label) in label_of for d in dets):
+        if any(depiction and index.get(name) in label_of for name, _, depiction in dets):
             skipped_depiction += 1  # a drawn cup must not teach what a cup looks like
             continue
         lines = []
-        for d in dets:
-            if d.label not in index:
+        for name, (x, y, w, h), _ in dets:  # box relative, top-left
+            if name not in index:
                 continue
-            x, y, w, h = d.bounding_box  # relative, top-left
-            cls = index[d.label]
+            cls = index[name]
             lines.append(f"{cls} {x + w / 2:.6f} {y + h / 2:.6f} {w:.6f} {h:.6f}")
             if cls in label_of:
                 boxes_per_label[label_of[cls]] += 1
