@@ -14,23 +14,30 @@ v5 keeps everything the pretrained model knows and only adds clean examples of w
   * weak classes get many images (AP50 of the server setup below --threshold on the test set, plus the pairs it confuses
     on real photos), every other LingoPrism class a few "replay" images so the model does not forget them.
 
-    # Colab (needs ~20 GB disk the first time: FiftyOne downloads the Open Images train labels)
-    python AI/scripts/build_oiv7_finetune.py --out /content/oiv7_ft --per-class 400 --replay 40
+Low memory on purpose: the Open Images box file of the train split has 14.6 million rows. FiftyOne loads it into memory
+for every request and a free Colab (12 GB) was killed (exit -9) on the large classes, so the file is streamed twice
+here – pass 1 picks the images (a seeded random sample per class, kept in small heaps), pass 2 collects every box of the
+picked images – and the images are downloaded directly from the public Open Images bucket. A rerun skips the images
+already downloaded.
+
+    # Colab
+    python AI/scripts/build_oiv7_finetune.py --out /content/oiv7_ft --per-class 300 --replay 30
     # quick local check on the cached validation split (never train on it)
-Each download step runs in its own process (FiftyOne keeps the multi-GB Open Images label tables in memory: a second
-step in the same process ran a free Colab out of RAM) and writes _parts/<step>.json, so a rerun carries on where it
-stopped instead of starting over.
-    python AI/scripts/build_oiv7_finetune.py --split validation --per-class 3 --replay 0 --limit-classes 3 --out ds_check
+    python AI/scripts/build_oiv7_finetune.py --split validation --per-class 3 --replay 1 --limit-classes 3 --out ds_check
 
 Output: YOLO format (images/{train,val}, labels/{train,val}), data.yaml with the base model's 601 names, summary.json
 (labels chosen, images and boxes per LingoPrism label).
 """
 import argparse
+import csv
+import hashlib
+import heapq
 import json
 import random
-import subprocess
 import sys
+import urllib.request
 from collections import Counter, defaultdict
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import yaml
@@ -40,11 +47,17 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from export_pretrained_oiv7 import EXTRA  # noqa: E402  (the same label -> Open Images classes folding as the server)
 
 SERVER_SETUP = "oiv7m-int8+coco-m-int8+clip"
-BATCH = 25  # replay classes per FiftyOne call
 # mistaken for one another on the vocabulary photos (ghi_chu.md, CLIP section); these labels are "extra" classes the
 # test set does not score, so they are added by hand
 CONFUSED = ["lemon", "mango", "peach", "orange", "sandals", "shoes", "violin", "guitar", "scissors", "knife", "spoon",
             "taxi", "car"]
+CACHE = Path.home() / "fiftyone" / "open-images-v7"  # FiftyOne's copy of the label files, used when present
+URLS = {
+    "train": "https://storage.googleapis.com/openimages/v6/oidv6-train-annotations-bbox.csv",
+    "validation": "https://storage.googleapis.com/openimages/v5/validation-annotations-bbox.csv",
+    "classes": "https://storage.googleapis.com/openimages/v7/oidv7-class-descriptions-boxable.csv",
+}
+IMAGE_URL = "https://open-images-dataset.s3.amazonaws.com/{split}/{id}.jpg"
 
 
 def label_groups(names: dict[int, str]) -> dict[str, list[int]]:
@@ -68,27 +81,72 @@ def weak_labels(threshold: float, groups: dict) -> list[str]:
     return [lab for lab in dict.fromkeys(weak + CONFUSED) if lab in groups]
 
 
-def _flag(det, field: str) -> bool:
-    try:
-        return bool(det[field])
-    except (KeyError, AttributeError):
-        return False
+def _file(cached: Path, url: str, work: Path) -> Path:
+    if cached.exists():
+        return cached
+    dst = work / Path(url).name
+    if not dst.exists():
+        print(f"Tải {url} ...", flush=True)
+        urllib.request.urlretrieve(url, dst.with_suffix(".part"))
+        dst.with_suffix(".part").rename(dst)
+    return dst
 
 
-def load_samples(oi_classes: list[str], split: str, n: int, seed: int):
-    """n images showing any of oi_classes. Every call re-reads the large Open Images label files, so the replay
-    classes are asked for in batches, not one by one."""
-    import fiftyone.zoo as foz
+def _rows(path: Path):
+    with open(path, newline="", encoding="utf-8") as fh:
+        yield from csv.DictReader(fh)
 
-    name = f"lp-ft-{split}-{oi_classes[0]}-{len(oi_classes)}-{n}-{seed}".replace(" ", "_")
-    ds = foz.load_zoo_dataset(
-        "open-images-v7", split=split, label_types=["detections"], classes=oi_classes, max_samples=n, shuffle=True,
-        seed=seed, only_matching=False,  # every box of the image, not only this class: fewer unlabeled objects
-        dataset_name=name, drop_existing_dataset=True)
-    out = [(s.filepath, [(d.label, list(d.bounding_box), _flag(d, "IsDepiction"))
-                         for d in (s.ground_truth.detections if s.ground_truth else [])]) for s in ds]
-    ds.delete()  # the sample records live in FiftyOne's database: not needed once read
+
+def pick_images(boxes_csv: Path, quotas: dict[str, int], seed: int) -> set[str]:
+    """Pass 1: for every Open Images class id with a quota, the `quota` images with the smallest seeded hash – a
+    reproducible random sample that never holds more than `quota` ids per class in memory."""
+    heaps: dict[str, list] = {mid: [] for mid in quotas}
+    last: dict[str, str] = {}  # the file is sorted by ImageID: one image's boxes of a class are consecutive rows
+    for r in _rows(boxes_csv):
+        mid, image = r["LabelName"], r["ImageID"]
+        if mid not in heaps or last.get(mid) == image:
+            continue
+        last[mid] = image
+        h = -int(hashlib.blake2b(f"{seed}:{image}".encode(), digest_size=8).hexdigest(), 16)  # max-heap of size quota
+        heap = heaps[mid]
+        if len(heap) < quotas[mid]:
+            heapq.heappush(heap, (h, image))
+        elif h > heap[0][0]:
+            heapq.heapreplace(heap, (h, image))
+    return {i for heap in heaps.values() for _, i in heap}
+
+
+def collect_boxes(boxes_csv: Path, images: set[str]) -> dict[str, list]:
+    """Pass 2: every box of the picked images: (class id, (xmin, xmax, ymin, ymax), is_depiction)."""
+    out: dict[str, list] = defaultdict(list)
+    for r in _rows(boxes_csv):
+        if r["ImageID"] in images:
+            out[r["ImageID"]].append((r["LabelName"], tuple(float(r[k]) for k in ("XMin", "XMax", "YMin", "YMax")),
+                                      r["IsDepiction"] == "1"))
     return out
+
+
+def _fetch(split: str, image_id: str, dst: Path, max_side: int) -> bool:
+    from PIL import Image
+
+    if dst.exists():
+        return True
+    local = CACHE / split / "data" / f"{image_id}.jpg"
+    try:
+        if local.exists():
+            im = Image.open(local)
+        else:
+            import io
+
+            with urllib.request.urlopen(IMAGE_URL.format(split=split, id=image_id), timeout=30) as resp:
+                im = Image.open(io.BytesIO(resp.read()))
+        im = im.convert("RGB")
+        im.thumbnail((max_side, max_side))
+        im.save(dst, quality=92)
+        return True
+    except Exception as e:  # a missing / broken image: skip it
+        print(f"[bỏ qua ảnh] {image_id}: {e}", flush=True)
+        return False
 
 
 def main():
@@ -96,19 +154,21 @@ def main():
     ap.add_argument("--out", required=True)
     ap.add_argument("--base", default="yolov8m-oiv7.pt", help="model the head comes from (its 601 names)")
     ap.add_argument("--split", default="train", help="train (Colab). validation only for a quick local check")
-    ap.add_argument("--per-class", type=int, default=400, help="ảnh mỗi lớp Open Images của lớp yếu")
-    ap.add_argument("--replay", type=int, default=40, help="ảnh mỗi lớp Open Images của các lớp còn lại (chống quên)")
+    ap.add_argument("--per-class", type=int, default=300, help="ảnh mỗi lớp Open Images của lớp yếu")
+    ap.add_argument("--replay", type=int, default=30, help="ảnh mỗi lớp Open Images của các lớp còn lại (chống quên)")
     ap.add_argument("--threshold", type=float, default=0.55, help="lớp yếu: AP50 trên tập test dưới ngưỡng này")
     ap.add_argument("--limit-classes", type=int, default=0, help="chỉ để thử nhanh")
     ap.add_argument("--val", type=float, default=0.1)
     ap.add_argument("--max-side", type=int, default=640)
+    ap.add_argument("--workers", type=int, default=16, help="số ảnh tải song song")
     ap.add_argument("--seed", type=int, default=2026)
-    ap.add_argument("--step", type=int, default=-1, help=argparse.SUPPRESS)  # internal: one download step
     args = ap.parse_args()
 
-    from PIL import Image
     from ultralytics import YOLO
 
+    out = Path(args.out)
+    work = out / "_work"
+    work.mkdir(parents=True, exist_ok=True)
     names = YOLO(args.base).names  # {0: "Accordion", ...} – the head we keep
     index = {n: i for i, n in names.items()}
     groups = label_groups(names)
@@ -116,77 +176,74 @@ def main():
     others = [lab for lab in groups if lab not in weak]
     if args.limit_classes:
         weak, others = weak[:args.limit_classes], others[:args.limit_classes]
-    if args.step < 0:
-        print(f"{len(weak)} lớp yếu: {', '.join(weak)}")
-        print(f"{len(others)} lớp ôn lại (replay {args.replay} ảnh / lớp Open Images)")
+    print(f"{len(weak)} lớp yếu: {', '.join(weak)}")
+    print(f"{len(others)} lớp ôn lại (replay {args.replay} ảnh / lớp Open Images)", flush=True)
 
-    # weak classes one by one (each gets its share of images); replay classes in batches of BATCH
-    weak_oi = list(dict.fromkeys(names[i] for lab in weak for i in groups[lab]))
-    replay_oi = [c for c in dict.fromkeys(names[i] for lab in others for i in groups[lab]) if c not in weak_oi]
-    plan = [([c], args.per_class) for c in weak_oi]
-    if args.replay:
-        plan += [(replay_oi[k:k + BATCH], args.replay * len(replay_oi[k:k + BATCH]))
-                 for k in range(0, len(replay_oi), BATCH)]
-    out = Path(args.out)
-    parts = out / "_parts"
-    parts.mkdir(parents=True, exist_ok=True)
-    if args.step >= 0:  # child process: one download, written to disk, then exit (its memory goes back to the system)
-        oi_classes, n = plan[args.step]
-        (parts / f"{args.step}.json").write_text(json.dumps(load_samples(oi_classes, args.split, n, args.seed)), encoding="utf-8")
-        return
-    print(f"{len(plan)} lượt tải ({len(weak_oi)} lớp yếu, {len(replay_oi)} lớp ôn lại theo nhóm {BATCH})")
+    classes_csv = _file(CACHE / args.split / "metadata" / "classes.csv", URLS["classes"], work)
+    mid_of = {row[1]: row[0] for row in csv.reader(open(classes_csv, encoding="utf-8")) if len(row) >= 2}
+    name_of = {m: n for n, m in mid_of.items()}
+    quotas: dict[str, int] = {}
+    for labs, n in ((others, args.replay), (weak, args.per_class)):  # weak last: their larger quota wins
+        for lab in labs:
+            for i in groups[lab]:
+                if names[i] in mid_of and n:
+                    quotas[mid_of[names[i]]] = n
+    boxes_csv = _file(CACHE / args.split / "labels" / "detections.csv", URLS[args.split], work)
 
-    images: dict[str, list] = {}
-    for step, (oi_classes, n) in enumerate(plan):
-        part_file = parts / f"{step}.json"
-        label = f"[{step + 1}/{len(plan)}] {', '.join(oi_classes[:3])}{'…' if len(oi_classes) > 3 else ''}"
-        if not part_file.exists():
-            print(label, flush=True)
-            done = subprocess.run([sys.executable, __file__, *sys.argv[1:], "--step", str(step)])
-            if done.returncode != 0 or not part_file.exists():  # a class with no train boxes, a download hiccup
-                print(f"[bỏ qua] {label} (mã lỗi {done.returncode})", flush=True)
-                continue
-        else:
-            print(label, "– đã có, bỏ qua", flush=True)
-        for path, dets in json.loads(part_file.read_text(encoding="utf-8")):
-            images.setdefault(path, dets)
+    picked_file = work / "picked.json"
+    if picked_file.exists():
+        picked = json.loads(picked_file.read_text(encoding="utf-8"))
+    else:
+        print(f"Lượt 1/3: chọn ảnh cho {len(quotas)} lớp Open Images (đọc {boxes_csv.name} theo dòng)...", flush=True)
+        ids = pick_images(boxes_csv, quotas, args.seed)
+        print(f"Lượt 2/3: lấy mọi box của {len(ids)} ảnh...", flush=True)
+        picked = collect_boxes(boxes_csv, ids)
+        picked_file.write_text(json.dumps(picked), encoding="utf-8")
 
-    rng = random.Random(args.seed)
-    paths = sorted(images)
-    rng.shuffle(paths)
+    paths = sorted(picked)
+    random.Random(args.seed).shuffle(paths)
     n_val = max(1, int(len(paths) * args.val)) if len(paths) > 1 else 0
     label_of = {i: lab for lab, idx in groups.items() for i in idx}
-    kept, skipped_depiction, boxes_per_label, images_per_label = 0, 0, Counter(), defaultdict(set)
-    for k, path in enumerate(paths):
-        dets = images[path]
-        if any(depiction and index.get(name) in label_of for name, _, depiction in dets):
-            skipped_depiction += 1  # a drawn cup must not teach what a cup looks like
-            continue
-        lines = []
-        for name, (x, y, w, h), _ in dets:  # box relative, top-left
-            if name not in index:
-                continue
-            cls = index[name]
-            lines.append(f"{cls} {x + w / 2:.6f} {y + h / 2:.6f} {w:.6f} {h:.6f}")
-            if cls in label_of:
-                boxes_per_label[label_of[cls]] += 1
-                images_per_label[label_of[cls]].add(path)
-        part = "val" if k < n_val else "train"
-        stem = Path(path).stem
+    keep = [p for p in paths if not any(dep and index.get(name_of.get(m)) in label_of for m, _, dep in picked[p])]
+    skipped_depiction = len(paths) - len(keep)  # a drawn cup must not teach what a cup looks like
+    for part in ("train", "val"):
         (out / "images" / part).mkdir(parents=True, exist_ok=True)
         (out / "labels" / part).mkdir(parents=True, exist_ok=True)
-        with Image.open(path) as im:
-            im = im.convert("RGB")
-            im.thumbnail((args.max_side, args.max_side))
-            im.save(out / "images" / part / f"{stem}.jpg", quality=92)
-        (out / "labels" / part / f"{stem}.txt").write_text("\n".join(lines) + ("\n" if lines else ""), encoding="utf-8")
+    part_of = {p: "val" if k < n_val else "train" for k, p in enumerate(paths)}
+
+    print(f"Lượt 3/3: tải và thu nhỏ {len(keep)} ảnh...", flush=True)
+    done = 0
+    with ThreadPoolExecutor(args.workers) as pool:
+        futures = {p: pool.submit(_fetch, args.split, p, out / "images" / part_of[p] / f"{p}.jpg", args.max_side) for p in keep}
+        ok = {}
+        for k, (p, f) in enumerate(futures.items(), 1):
+            ok[p] = f.result()
+            done += ok[p]
+            if k % 500 == 0:
+                print(f"   {k}/{len(keep)} ảnh", flush=True)
+
+    kept, boxes_per_label, images_per_label = 0, Counter(), defaultdict(set)
+    for p in keep:
+        if not ok.get(p):
+            continue
+        lines = []
+        for m, (x0, x1, y0, y1), _ in picked[p]:
+            cls = index.get(name_of.get(m))
+            if cls is None:
+                continue
+            lines.append(f"{cls} {(x0 + x1) / 2:.6f} {(y0 + y1) / 2:.6f} {x1 - x0:.6f} {y1 - y0:.6f}")
+            if cls in label_of:
+                boxes_per_label[label_of[cls]] += 1
+                images_per_label[label_of[cls]].add(p)
+        (out / "labels" / part_of[p] / f"{p}.txt").write_text("\n".join(lines) + ("\n" if lines else ""), encoding="utf-8")
         kept += 1
 
     (out / "data.yaml").write_text(yaml.safe_dump(
         {"path": str(out.resolve()), "train": "images/train", "val": "images/val", "names": dict(names)},
         allow_unicode=True, sort_keys=False), encoding="utf-8")
     summary = {"base": args.base, "split": args.split, "threshold": args.threshold, "weak": weak, "replay": others,
-               "images": kept, "val_images": min(n_val, kept), "skipped_depiction": skipped_depiction,
+               "images": kept, "val_images": sum(1 for p in keep if ok.get(p) and part_of[p] == "val"),
+               "skipped_depiction": skipped_depiction,
                "per_label": {lab: {"images": len(images_per_label[lab]), "boxes": boxes_per_label[lab]}
                              for lab in weak + others}}
     (out / "summary.json").write_text(json.dumps(summary, indent=1, ensure_ascii=False), encoding="utf-8")
