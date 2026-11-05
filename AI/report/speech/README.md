@@ -28,6 +28,8 @@ căn chuỗi theo đặc trưng cấu âm; điểm kiểu GOP; thanh điệu the
 | Tiếng Anh | think 99/100; cùng bản ghi chấm với "sink" → 84, báo /s/ đọc thành /θ/ |
 | Tiếng Việt (19 từ) | điểm âm của người bản ngữ chỉ 27–92: model gần như không được train tiếng Việt → **tắt chấm chi tiết cho tiếng Việt** |
 | Thanh tiếng Việt theo F0 (32 âm tiết bản ngữ) | 16 đúng, 7 gần đúng, 9 sai (hay nhầm nặng → ngang: giọng miền Nam) |
+| Tiếng Anh (12 từ khác) | trung bình ~81/100 (51–100); điểm thấp chủ yếu do bản ghi có thêm tiếng / mạo từ (*cat* nghe thành "Friday cat") |
+| Tiếng Trung (3 từ, giọng Đài Loan) | điểm âm 40–94; thanh đúng 10/18 âm tiết (55%) – thanh 3 hay bị nghe thành 1 |
 
 ## 3. Kiểm tra trên trình duyệt (luồng thật: ghi âm → WAV 16 kHz → server → kết quả)
 
@@ -35,6 +37,6 @@ căn chuỗi theo đặc trưng cấu âm; điểm kiểu GOP; thanh điệu the
 
 ## Hạn chế, hướng tiếp
 
-* Thanh điệu dựa trên luật hình dạng đường cao độ: đánh dấu "thử nghiệm" trong app.
+* Thanh điệu dựa trên luật hình dạng đường cao độ, đúng khoảng 55–70% với giọng bản ngữ: đánh dấu "thử nghiệm" trong app, điểm thanh chỉ chiếm 20%. Hướng sửa: bộ phân loại thanh học từ dữ liệu (ví dụ AISHELL-1 cho tiếng Trung).
 * Tiếng Việt cần model âm vị được train tiếng Việt (VIVOS, Common Voice vi) – fine-tune wav2vec2 khi có GPU.
 * Chưa có: cặp âm dễ nhầm, nói theo, bài "đọc to" trong bài tập nhóm.
