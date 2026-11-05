@@ -22,11 +22,17 @@ class OnDeviceBox {
 ///
 /// Supports YOLOv10 NMS-free output `[1, 300, 6]` (x1, y1, x2, y2, score, class) and
 /// YOLOv8/11 output `[1, 4 + nc, N]` (cx, cy, w, h, scores…) with NMS.
+///
+/// Two bundled models, same 232 labels (AI/runs/oiv7m-tflite, AI/runs/oiv7s):
+///  * [instance] – yolov8m (test mAP50 0.639 vs 0.595 for s), for a taken photo, where a second does not matter;
+///  * [fast] – yolov8s, ~2.4x faster, for the live camera that looks about once a second.
 class OnDeviceDetector {
-  OnDeviceDetector._();
-  static final OnDeviceDetector instance = OnDeviceDetector._();
+  OnDeviceDetector._(this.modelAsset, this.modelName);
+  static final OnDeviceDetector instance = OnDeviceDetector._('assets/ml_models/lingoprism.tflite', 'yolov8m-oiv7-tflite');
+  static final OnDeviceDetector fast = OnDeviceDetector._('assets/ml_models/lingoprism_fast.tflite', 'yolov8s-oiv7-tflite');
 
-  static const modelAsset = 'assets/ml_models/lingoprism.tflite';
+  final String modelAsset;
+  final String modelName;
   static const labelsAsset = 'assets/ml_models/labels.txt';
   static const double confThreshold = 0.30;
   static const double iouThreshold = 0.45;
@@ -39,8 +45,6 @@ class OnDeviceDetector {
   List<String> _labels = const [];
   int _size = 640;
   bool _triedLoading = false;
-
-  String get modelName => 'yolov8s-oiv7-tflite';
 
   Future<bool> get available async {
     await _ensureLoaded();

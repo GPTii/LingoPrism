@@ -14,8 +14,8 @@ import '../../data/services/on_device_detector.dart';
 import '../../data/services/tts_service.dart';
 
 /// Camera trực tiếp (thử nghiệm): the phone keeps looking and names what it sees, live, in the
-/// language being learned – no photo to take. Runs the same on-device TFLite model as the camera
-/// screen, about once a second (research finds real-time detection costly, so it stays an
+/// language being learned – no photo to take. Runs the smaller on-device TFLite model (OnDeviceDetector.fast, yolov8s)
+/// about once a second (the photo screen uses the larger m; research finds real-time detection costly, so it stays an
 /// experiment next to the normal photo flow). Tap a label to hear it.
 class LiveCameraView extends StatefulWidget {
   const LiveCameraView({super.key});
@@ -42,7 +42,7 @@ class _LiveCameraViewState extends State<LiveCameraView> with WidgetsBindingObse
 
   Future<void> _start() async {
     try {
-      if (!await OnDeviceDetector.instance.available) {
+      if (!await OnDeviceDetector.fast.available) {
         setState(() => _error = 'Máy này chưa có mô hình nhận diện offline.');
         return;
       }
@@ -65,7 +65,7 @@ class _LiveCameraViewState extends State<LiveCameraView> with WidgetsBindingObse
     _busy = true;
     try {
       final shot = await cam.takePicture();
-      final (boxes, ms) = await OnDeviceDetector.instance.detect(File(shot.path));
+      final (boxes, ms) = await OnDeviceDetector.fast.detect(File(shot.path));
       unawaited(File(shot.path).delete().catchError((_) => File(shot.path)));
       final missing = boxes.map((b) => b.label).where((l) => !_words.containsKey(l)).toSet().toList();
       if (missing.isNotEmpty) {
