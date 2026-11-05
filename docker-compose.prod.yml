@@ -60,7 +60,9 @@ services:
       RUN_MIGRATIONS: "0"
       DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
       REDIS_URL: redis://redis:6379/0
-    command: celery -A config worker -l info --concurrency=1   # e-mails only: 1 process saves RAM on a 4 GB VPS
+    # 1 process saves RAM on a 4 GB VPS: e-mails, and pronunciation scoring (apps.speech) – the only process that loads
+    # the 320 MB phone recogniser; the API waits for its answer (SPEECH_TIMEOUT)
+    command: celery -A config worker -l info --concurrency=1
 
   web:
     build: ./FE

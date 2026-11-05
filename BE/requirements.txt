@@ -22,3 +22,6 @@ pytest>=8.3
 pytest-django>=4.9
 numpy>=2.0
 onnxruntime>=1.20
+# speaking practice (apps.speech): expected phones from espeak-ng (Docker: apt espeak-ng; Windows: the loader wheel)
+phonemizer>=3.3,<4
+espeakng-loader>=0.2; sys_platform == "win32"

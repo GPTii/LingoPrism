@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     "apps.push",
     "apps.aitalk",
     "apps.classwork",
+    "apps.speech",
 ]
 
 MIDDLEWARE = [
@@ -179,6 +180,7 @@ REST_FRAMEWORK = {
         "report": env("THROTTLE_REPORT", default="30/hour"),
         "ai_dialogue": env("THROTTLE_AI_DIALOGUE", default="20/hour"),  # each one is a paid AI call
         "translate": env("THROTTLE_TRANSLATE", default="120/hour"),  # AI translation, typed or spoken
+        "speech": env("THROTTLE_SPEECH", default="300/hour"),  # pronunciation scoring (CPU of the worker)
         "ai_import": env("THROTTLE_AI_IMPORT", default="20/hour"),  # exercise file -> questions (AI)
         "message": env("THROTTLE_MESSAGE", default="60/min"),  # private messages
     },
@@ -237,6 +239,11 @@ YOLO_MODEL_PATH = env("YOLO_MODEL_PATH", default=str(BASE_DIR / "models" / "yolo
 YOLO_BASE_MODEL_PATH = env("YOLO_BASE_MODEL_PATH", default=str(BASE_DIR / "models" / "yolov10m-int8.onnx"))
 # CLIP re-check of look-alike labels (AI/scripts/export_clip.py, detection.inference.LabelVerifier); missing = off
 DETECTION_CLIP_PATH = env("DETECTION_CLIP_PATH", default=str(BASE_DIR / "models" / "clip-mobileclip2-s2.onnx"))
+# speaking practice (apps.speech): phone recogniser exported by AI/scripts/export_phoneme_model.py; scored in the
+# Celery worker (one copy of the 320 MB model in RAM), the API waits up to SPEECH_TIMEOUT seconds for the answer
+SPEECH_MODEL_PATH = env("SPEECH_MODEL_PATH", default=str(BASE_DIR / "models" / "phoneme-xlsr53-int8.onnx"))
+SPEECH_VOCAB_PATH = env("SPEECH_VOCAB_PATH", default=str(BASE_DIR / "models" / "phoneme-vocab.json"))
+SPEECH_TIMEOUT = env.int("SPEECH_TIMEOUT", default=25)
 # image embedder of the detection correction memory (AI/scripts/export_embedder.py); missing = memory off
 DETECTION_EMBEDDER_PATH = env("DETECTION_EMBEDDER_PATH", default=str(BASE_DIR / "models" / "embedder.onnx"))
 DATA_UPLOAD_MAX_MEMORY_SIZE = 12 * 1024 * 1024

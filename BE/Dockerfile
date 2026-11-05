@@ -5,9 +5,10 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PIP_NO_CACHE_DIR=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1
 
-# GeoDjango needs GDAL/GEOS/PROJ; libgl/libglib for OpenCV (YOLO inference).
+# GeoDjango needs GDAL/GEOS/PROJ; libgl/libglib for OpenCV (YOLO inference); espeak-ng for the expected phones of
+# speaking practice (apps.speech).
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        binutils gdal-bin libproj-dev libgl1 libglib2.0-0 \
+        binutils gdal-bin libproj-dev libgl1 libglib2.0-0 espeak-ng \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app

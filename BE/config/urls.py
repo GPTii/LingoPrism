@@ -25,6 +25,7 @@ api_v1 = [
     path("", include("apps.audit.urls")),
     path("", include("apps.aitalk.urls")),
     path("", include("apps.classwork.urls")),
+    path("", include("apps.speech.urls")),
     path("admin/dashboard/", DashboardView.as_view(), name="admin-dashboard"),
 ]
 
