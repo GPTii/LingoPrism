@@ -40,13 +40,30 @@ thì model đó tự quyết.
 ## Cấu hình đưa lên server (06/11/2026)
 
 yolov8l-oiv7 INT8 + COCO yolov10m INT8, gộp **WBF** (IoU 0.55, COCO trọng số 2, mỗi model giải mã từ 0.05, hiện box
-từ 0.25) + CLIP (ngưỡng đổi nhãn hạ 0.6 → 0.4 vì độ tin cậy sau WBF thấp hơn). yolov8m vẫn đăng ký, không kích hoạt,
-làm bản dự phòng.
+từ 0.25) + CLIP đổi nhãn khi YOLO < 0.6 (như cũ). yolov8m vẫn đăng ký, không kích hoạt, làm bản dự phòng.
 
-| Cấu hình | P | R | mAP50 | mAP50-95 | TB lớp yếu |
-|---|---|---|---|---|---|
-| Cũ: yolov8m, gộp "tự tin nhất thắng", CLIP < 0.6 | 0.751 | 0.602 | 0.696 | 0.564 | 0.483 |
-| yolov8m, WBF, CLIP < 0.4 | 0.842 | 0.554 | 0.708 | 0.576 | 0.506 |
-| **Mới: yolov8l, WBF, CLIP < 0.4** | **0.845** | 0.562 | **0.716** | **0.585** | **0.514** |
+### Tập test 2542 ảnh
 
-Dò ngưỡng CLIP với WBF (yolov8l): không CLIP 0.715 / 0.583; < 0.5: 0.715; **< 0.4: 0.716 / 0.585**; < 0.3: 0.716 / 0.585.
+| Cấu hình | P | R | mAP50 | mAP50-95 |
+|---|---|---|---|---|
+| Cũ: yolov8m, gộp "tự tin nhất thắng", CLIP < 0.6 | 0.751 | 0.602 | 0.696 | 0.564 |
+| yolov8l, WBF, CLIP < 0.4 | 0.845 | 0.562 | 0.716 | 0.585 |
+| **Mới: yolov8l, WBF, CLIP < 0.6** | **0.831** | 0.559 | **0.712** | **0.583** |
+
+### Ảnh thật (`AI/scripts/eval_word_photos.py`, `word_photos.json`)
+
+Ảnh từ vựng: ảnh Wikimedia đã duyệt của mỗi từ có nhãn YOLO (một vật). Ảnh nhiều vật: 21 ảnh Wikimedia Commons trong
+`AI/eval_photos/` (nguồn, giấy phép: `AI/eval_photos/SOURCES.md`), gắn nhãn bằng tay.
+
+| Bộ ảnh | Cấu hình | Số ảnh | Top-1 | Top-1 lớp ngoài COCO | Tìm thấy | Precision | Box sai |
+|---|---|---|---|---|---|---|---|
+| ảnh từ vựng | cũ | 231 | 77% | 71% | 85% | 61% | 227 |
+| ảnh từ vựng | **mới** | 231 | **81%** | **77%** | **87%** | **69%** | **160** |
+| ảnh nhiều vật | cũ | 21 | 76% | 77% | 81% | 73% | 47 |
+| ảnh nhiều vật | **mới** | 21 | **86%** | 77% | 74% | 72% | **39** |
+
+Tách từng phần trên ảnh từ vựng (top-1 / box sai): m + gộp cũ + CLIP 0.6 77% / 227; m + gộp cũ + CLIP 0.4 70% / 259;
+l + gộp cũ + CLIP 0.6 76% / 233; l + gộp cũ + CLIP 0.4 69% / 266; m + WBF + CLIP 0.6 81% / 155; l + WBF + CLIP 0.6
+81% / 160; l + WBF + CLIP 0.4 72% / 200. → WBF mang lại phần lớn cái lợi trên ảnh thật; CLIP phải giữ ngưỡng 0.6 (hạ
+xuống 0.4 cho tập test +0.004 mAP nhưng mất 9 điểm top-1 trên ảnh thật); yolov8l hơn m trên tập test (+0.010 mAP50),
+ngang m trên ảnh từ vựng.

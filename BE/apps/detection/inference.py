@@ -336,9 +336,10 @@ class EnsembleDetector:
 # (>= CLIP_MIN_AREA of the photo), CLIP is sure of another label (>= CLIP_SURE) and gives YOLO's label < CLIP_DOUBT.
 # Chosen so that the test set's mAP does not drop (renaming every box: word photos top-1 68% -> 90% but test mAP50
 # 0.705 -> 0.653, CLIP is poor on small or hidden objects); see AI/report/yolo/ghi_chu.md.
-# 0.6 -> 0.4 with box fusion (WBF): fused confidences are lower (a model that saw nothing counts 0), so 0.6 sent many
-# more boxes to CLIP and the test mAP50 dropped 0.715 -> 0.714 (yolov8l); at 0.4: 0.716, precision 0.845.
-CLIP_MAX_CONF = 0.4
+# With box fusion (WBF) fused confidences are lower, so more boxes reach CLIP. Kept at 0.6: on the 231 word photos
+# (one object, Wikimedia Commons) yolov8l + WBF top-1 is 81% at 0.6 vs 69% at 0.4; the test set barely moves
+# (mAP50 0.712 vs 0.716). AI/scripts/eval_word_photos.py, AI/report/yolo/ensemble_upgrade.md.
+CLIP_MAX_CONF = 0.6
 CLIP_MIN_AREA = 0.1
 CLIP_SURE = 0.6
 CLIP_DOUBT = 0.1
