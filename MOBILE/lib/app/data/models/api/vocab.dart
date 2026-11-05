@@ -53,14 +53,16 @@ class TargetText {
 }
 
 class ExampleSentence {
-  ExampleSentence({required this.text, this.transliteration = '', this.translationVi = '', this.translationEn = ''});
+  ExampleSentence({this.id = 0, required this.text, this.transliteration = '', this.translationVi = '', this.translationEn = ''});
 
+  final int id; // 0 when the server did not send it
   final String text;
   final String transliteration;
   final String translationVi;
   final String translationEn;
 
   factory ExampleSentence.fromJson(Map<String, dynamic> j) => ExampleSentence(
+        id: asInt(j['id']),
         text: asString(j['text']),
         transliteration: asString(j['transliteration']),
         translationVi: asString(j['translation_vi']),

@@ -8,6 +8,7 @@ import '../models/api/levels.dart';
 import '../models/api/literacy.dart';
 import '../models/api/sentence.dart';
 import '../models/api/social.dart';
+import '../models/api/speech.dart';
 import '../models/api/user.dart';
 import '../models/api/vocab.dart';
 import '../services/offline_learning.dart';
@@ -482,4 +483,29 @@ class LevelRepository {
 
   static Future<LevelTestResult> submit(int level, String token, List<String> answers) async => LevelTestResult.fromJson(
       asMap(await _api.post('/levels/$level/test/', data: {'token': token, 'answers': answers})));
+}
+
+/// Speaking practice: phone-level scoring on the server (BE apps.speech).
+class SpeechRepository {
+  static bool? _enabled;
+
+  /// Whether the server scores recordings (model installed). Cached for the session; false when unreachable.
+  static Future<bool> enabled() async {
+    if (_enabled != null) return _enabled!;
+    try {
+      _enabled = asMap(await _api.get('/speech/status/'))['enabled'] == true;
+    } catch (_) {
+      return false;
+    }
+    return _enabled!;
+  }
+
+  /// [wavPath]: 16 kHz mono WAV. One of [translationId] (a word) or [sentenceId] (an example sentence).
+  static Future<PronunciationResult> assess(String wavPath, {int? translationId, int? sentenceId}) async =>
+      PronunciationResult.fromJson(asMap(await _api.upload('/speech/assess/', filePath: wavPath, field: 'audio', fields: {
+        if (translationId != null) 'translation_id': translationId,
+        if (sentenceId != null) 'sentence_id': sentenceId,
+      })));
+
+  static Future<SpeechProgress> progress() async => SpeechProgress.fromJson(asMap(await _api.get('/speech/progress/')));
 }
