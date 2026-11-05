@@ -29,7 +29,8 @@ class _SpeakPracticeViewState extends State<SpeakPracticeView> {
   late Future<List<WordCard>> _deck = _load();
   int _index = 0;
   final Map<int, int> _scores = {};
-  final Future<bool> _detailed = SpeechRepository.enabled();
+  final Future<Set<String>> _detailedLanguages = SpeechRepository.languages();
+  late final Future<bool> _detailed = _detailedLanguages.then((l) => l.isNotEmpty);
   bool _sentences = false;
 
   Future<List<WordCard>> _load() async {
@@ -109,9 +110,9 @@ class _SpeakPracticeViewState extends State<SpeakPracticeView> {
                 SizedBox(width: 10.w),
                 Text('${_index + 1}/${deck.length}', style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.textSecondary)),
               ]),
-              FutureBuilder<bool>(
-                future: _detailed,
-                builder: (context, on) => on.data != true
+              FutureBuilder<Set<String>>(
+                future: _detailedLanguages,
+                builder: (context, on) => !(on.data ?? const {}).contains(t.language)
                     ? const SizedBox.shrink()
                     : Padding(
                         padding: EdgeInsets.only(top: 12.h),
@@ -156,11 +157,11 @@ class _SpeakPracticeViewState extends State<SpeakPracticeView> {
                     ),
                   ],
                   SizedBox(height: 18.h),
-                  FutureBuilder<bool>(
-                    future: _detailed,
+                  FutureBuilder<Set<String>>(
+                    future: _detailedLanguages,
                     builder: (context, on) => on.connectionState != ConnectionState.done
                         ? const SizedBox(height: 48)
-                        : on.data == true
+                        : (on.data ?? const {}).contains(t.language) && !(_sentences && sentence == null)
                             ? PronunciationCheck(
                                 key: ValueKey('${c.id}-$_sentences'),
                                 translationId: _sentences ? null : t.id,

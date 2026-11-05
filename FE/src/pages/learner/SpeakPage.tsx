@@ -28,7 +28,9 @@ export default function SpeakPage() {
   const user = useAuth((s) => s.user)
   const words = useQuery({ queryKey: ['my-words', user?.active_language, user?.zh_script, 'speak'], queryFn: () => vocabApi.myWords({ page_size: 50 }) })
   const status = useQuery({ queryKey: ['speech-status'], queryFn: speechApi.status, staleTime: 10 * 60_000, retry: false })
-  const detailed = !!status.data?.enabled && canRecord()
+  const userLang = user?.active_language === 'zh' ? (user?.zh_script === 'hant' ? 'zh-Hant' : 'zh-Hans') : user?.active_language
+  // sound-by-sound scoring for the languages the server supports (not Vietnamese yet: the device check stays)
+  const detailed = !!status.data?.enabled && !!userLang && status.data.languages.includes(userLang) && canRecord()
   const [sentences, setSentences] = useState(false)
   const [round, setRound] = useState(0)
   const [index, setIndex] = useState(0)

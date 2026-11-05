@@ -141,7 +141,7 @@ def judge_zh(expected: int, heard: int, following: int | None) -> str:
 
 
 VI_CLOSE = {frozenset({"hỏi", "ngã"}), frozenset({"sắc", "ngã"}), frozenset({"nặng", "huyền"}),
-            frozenset({"ngang", "huyền"})}
+            frozenset({"ngang", "huyền"}), frozenset({"nặng", "ngang"})}  # southern nặng: short, barely falling
 
 
 def judge_vi(expected: str, heard: str) -> str:

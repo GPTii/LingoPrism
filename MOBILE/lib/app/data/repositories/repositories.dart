@@ -487,17 +487,19 @@ class LevelRepository {
 
 /// Speaking practice: phone-level scoring on the server (BE apps.speech).
 class SpeechRepository {
-  static bool? _enabled;
+  static Set<String>? _languages;
 
-  /// Whether the server scores recordings (model installed). Cached for the session; false when unreachable.
-  static Future<bool> enabled() async {
-    if (_enabled != null) return _enabled!;
+  /// The languages the server scores sound by sound (empty when the model is not installed or the server is
+  /// unreachable). Cached for the session.
+  static Future<Set<String>> languages() async {
+    if (_languages != null) return _languages!;
     try {
-      _enabled = asMap(await _api.get('/speech/status/'))['enabled'] == true;
+      final m = asMap(await _api.get('/speech/status/'));
+      _languages = m['enabled'] == true ? (m['languages'] as List? ?? const []).map((e) => '$e').toSet() : <String>{};
     } catch (_) {
-      return false;
+      return <String>{};
     }
-    return _enabled!;
+    return _languages!;
   }
 
   /// [wavPath]: 16 kHz mono WAV. One of [translationId] (a word) or [sentenceId] (an example sentence).

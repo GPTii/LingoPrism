@@ -21,6 +21,9 @@ from .tasks import assess_recording
 
 MAX_AUDIO_BYTES = 2 * 1024 * 1024  # ~60 s of 16 kHz mono WAV; the scorer keeps 12 s
 MAX_SENTENCE = 120
+# Vietnamese is off: the recogniser saw little Vietnamese in training and scored native speakers 27-90 on single
+# words (AI/report/speech/README.md) – learners of Vietnamese keep the device speech check.
+LANGUAGES = ("en", "zh-Hans", "zh-Hant")
 
 
 def _err(detail: str, status: int, code: str = ""):
@@ -38,8 +41,7 @@ def _pinyin_of(language: str, translation=None, sentence=None) -> list[str] | No
 class SpeechStatusView(APIView):
     @extend_schema(tags=["speech"], responses={200: dict})
     def get(self, request):
-        return Response({"enabled": recognizer.available(), "languages": ["en", "zh-Hans", "zh-Hant", "vi"],
-                         "tones_experimental": True})
+        return Response({"enabled": recognizer.available(), "languages": list(LANGUAGES), "tones_experimental": True})
 
 
 class AssessView(APIView):
@@ -71,6 +73,8 @@ class AssessView(APIView):
                 return _err("Câu quá dài để chấm", 400, "too_long")
         else:
             return _err("Cần translation_id hoặc sentence_id", 400, "no_item")
+        if language not in LANGUAGES:
+            return _err("Chưa chấm chi tiết được ngôn ngữ này", 400, "language")
         if not recognizer.available():
             return _err("Server chưa bật chấm phát âm chi tiết", 503, "disabled")
 

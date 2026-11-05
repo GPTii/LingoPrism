@@ -180,6 +180,11 @@ def test_assess_refuses_unverified_words_and_silence(client):
     assert c.post("/api/v1/speech/assess/", {"translation_id": tr.id}, format="multipart").status_code == 400
 
 
-def test_status(client):
+def test_status_and_languages(client):
     c, *_ = client
-    assert c.get("/api/v1/speech/status/").data["enabled"] is True
+    data = c.get("/api/v1/speech/status/").data
+    assert data["enabled"] is True and "vi" not in data["languages"]
+    vi = WordTranslation.objects.create(word=Word.objects.create(slug="me"), language_id="vi", text="mẹ",
+                                        status=ReviewStatus.VERIFIED)
+    res = _post(c, translation_id=vi.id)
+    assert res.status_code == 400 and res.data["code"] == "language"

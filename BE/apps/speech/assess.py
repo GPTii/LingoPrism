@@ -13,6 +13,8 @@ from .tones import judge_vi, judge_zh, syllable_tones
 SR = 16000
 MAX_SECONDS = 12
 RIGHT, CLOSE = 90, 60
+# posterior of the expected sound that still counts it as said (ok) / nearly said (close); tuned on speechocean762
+GOP_OK, GOP_CLOSE = 0.3, 0.1
 
 
 class AudioProblem(Exception):
@@ -90,25 +92,50 @@ def assess(audio_bytes: bytes, text: str, language: str, pinyin: list[str] | Non
     phones = [[] for _ in units]
     unit_frames: list[list[int]] = [[] for _ in units]
     vowel_frames: list[list[int]] = [[] for _ in units]  # where each syllable's vowel was heard (tones)
-    extras, errors = 0, []
+    extras, errors, gops = 0, [], []
     last_index = {u: i for i, (u, _) in enumerate(exp)}
-    for ei, hi, c in pairs:
+    # frames around each expected sound: from the last heard sound before it to the next heard one after it
+    frames_before, last = [], 0
+    for ei, hi, _ in pairs:
+        if hi is not None:
+            last = heard[hi].end
+        frames_before.append(last)
+    frames_after, nxt = [], len(post) - 1
+    for ei, hi, _ in reversed(pairs):
+        if hi is not None:
+            nxt = heard[hi].frame
+        frames_after.append(nxt)
+    frames_after.reverse()
+    for k, (ei, hi, c) in enumerate(pairs):
         if ei is None:
             extras += 1
             continue
         u, e = exp[ei]
         h = heard[hi] if hi is not None else None
         if h is None:
-            status, score = "missing", 0.0
-        elif c == 0:
+            # not decoded: said only weakly (connected speech often swallows a final n / l / r)? look at the gap
+            ids = by_base.get(base(e), [])
+            a, b = frames_before[k], max(frames_before[k] + 1, frames_after[k] + 1)
+            p = float(post[a:b][:, ids].sum(axis=1).max()) if ids and b > a else 0.0
+            gops.append(p)
+            if p >= GOP_OK:
+                status, score = "ok", 70 + 30 * min(1.0, p / 0.6)
+            elif p >= GOP_CLOSE:
+                status, score = "close", 40.0
+            else:
+                status, score = "missing", 0.0
+        else:
+            # GOP-like: how much the recogniser believed in the EXPECTED sound where it heard this one
             ids = by_base.get(base(e), [])
             a, b = max(0, h.frame - 1), min(len(post), h.end + 2)
-            p = float(post[a:b][:, ids].sum(axis=1).max()) if ids else h.prob
-            status, score = "ok", 70 + 30 * min(1.0, p / 0.6)
-        elif c <= NEAR:
-            status, score = "close", 40.0
-        else:
-            status, score = "wrong", 0.0
+            p = float(post[a:b][:, ids].sum(axis=1).max()) if ids else (h.prob if c == 0 else 0.0)
+            gops.append(p)
+            if c == 0 or p >= GOP_OK:  # heard as expected, or a close second choice of the recogniser
+                status, score = "ok", 70 + 30 * min(1.0, p / 0.6)
+            elif c <= NEAR or p >= GOP_CLOSE:
+                status, score = "close", 40.0
+            else:
+                status, score = "wrong", 0.0
         if h is not None:
             unit_frames[u] += [h.frame, h.end]
             if is_vowel(e):
@@ -182,6 +209,7 @@ def assess(audio_bytes: bytes, text: str, language: str, pinyin: list[str] | Non
         "score": score, "verdict": "right" if score >= RIGHT else "close" if score >= CLOSE else "wrong",
         "phone_score": round(phone_score), "tone_score": round(tone_score) if tone_score is not None else None,
         "completeness": round(completeness), "extra_sounds": extras, "units": out_units,
+        "gop": round(sum(gops) / len(gops), 3) if gops else 0.0,
         "heard_ipa": " ".join(split_tone(h.token)[0] for h in heard), "errors": unique_errors[:6],
         "duration_s": round(len(audio) / SR, 2), "ms": int((time.perf_counter() - t0) * 1000),
     }

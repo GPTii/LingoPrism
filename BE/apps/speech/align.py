@@ -27,6 +27,27 @@ CONS = {
 _MANNER_NEAR = {frozenset({"stop", "affr"}), frozenset({"fric", "affr"}), frozenset({"approx", "lateral"}),
                 frozenset({"tap", "stop"}), frozenset({"approx", "tap"})}
 
+# vowel -> (height 0 open .. 3 close, backness 0 front .. 2 back, rounded)
+VOWELS = {"i": (3, 0, 0), "y": (3, 0, 1), "ɪ": (2.5, 0.2, 0), "e": (2, 0, 0), "ø": (2, 0, 1), "ɛ": (1, 0, 0),
+          "œ": (1, 0, 1), "æ": (0.5, 0, 0), "a": (0, 0.5, 0), "ɐ": (0.7, 1, 0), "ə": (1.5, 1, 0), "ɚ": (1.5, 1, 0),
+          "ɜ": (1, 1, 0), "ɨ": (3, 1, 0), "ʉ": (3, 1, 1), "ʌ": (1, 1.5, 0), "ɑ": (0, 2, 0), "ɒ": (0, 2, 1),
+          "ɔ": (1, 2, 1), "o": (2, 2, 1), "ʊ": (2.5, 1.8, 1), "u": (3, 2, 1), "ɯ": (3, 2, 0), "ɤ": (2, 2, 0),
+          "ɵ": (2, 1, 1)}
+
+
+def vowel_cost(a: str, b: str) -> float:
+    """Distance of two vowels (or diphthongs, r-coloured vowels) from height, backness and rounding: ə / ɪ or ɔːɹ /
+    oʊ are near misses (non-natives and their raters vary there), i / ɑ is wrong."""
+    ra, rb = a.endswith("ɹ") and len(a) > 1, b.endswith("ɹ") and len(b) > 1
+    a, b = (a[:-1] if ra else a), (b[:-1] if rb else b)
+    fa, fb = VOWELS.get(a[0]), VOWELS.get(b[0])
+    if not fa or not fb:
+        return 0.5
+    c = 0.1 + 0.12 * abs(fa[0] - fb[0]) + 0.12 * abs(fa[1] - fb[1]) + 0.1 * (fa[2] != fb[2])
+    c += 0.1 * ((len(a) > 1) != (len(b) > 1)) + 0.1 * (ra != rb)
+    return min(c, 1.0)
+
+
 GAP = 0.7
 NEAR = 0.45  # a substitution at most this costly is "gần đúng"
 
@@ -37,9 +58,7 @@ def cost(a: str, b: str, equivalent=None) -> float:
         return 0.0
     va, vb = bool(a) and a[0] in VOWEL_CHARS, bool(b) and b[0] in VOWEL_CHARS
     if va and vb:
-        if a[0] == b[0] or a[-1] == b[-1]:  # diphthong vs its part, or a near vowel (ɪ / iː is not this: i vs ɪ)
-            return 0.35
-        return 0.55
+        return vowel_cost(a, b)
     if va != vb:
         return 1.0
     ca, cb = CONS.get(a), CONS.get(b)

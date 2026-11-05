@@ -1,6 +1,21 @@
 # Thiết kế: Luyện nói – chấm phát âm chi tiết
 
-Ngày: 06/11/2026. Trạng thái: **bản thiết kế, chưa làm**.
+Ngày: 06/11/2026. Trạng thái: **đã làm bản đầu** (BE `apps/speech`, web `PronunciationCheck`, điện thoại
+`pronunciation_check.dart`); số liệu đánh giá: `AI/report/speech/`.
+
+### Đã làm so với thiết kế
+
+| Hạng mục | Trạng thái |
+|---|---|
+| Nhận dạng âm vị wav2vec2 XLSR-53 espeak, ONNX INT8 318 MB, chạy trong Celery worker | xong |
+| Âm mong đợi: espeak-ng (cùng ký hiệu với lúc train model); tiếng Trung đọc từ pinyin đã duyệt | xong |
+| Căn chuỗi Needleman–Wunsch, chi phí theo đặc trưng cấu âm (phụ âm: vị trí, cách, thanh; nguyên âm: độ cao, trước/sau, tròn môi) | xong |
+| Điểm kiểu GOP (xác suất âm đúng tại chỗ đã căn, cả khi âm bị nuốt) | xong |
+| Thanh điệu theo F0 (YIN) – tiếng Trung, tiếng Việt | xong, **thử nghiệm** |
+| Mẹo sửa lỗi tiếng Việt, lưu lịch sử, trang tiến bộ, chế độ từ / câu | xong |
+| Cặp âm dễ nhầm, nói theo (shadowing), bài "đọc to" trong bài tập nhóm | chưa |
+| Tiếng Việt | **tắt**: model nghe tiếng Việt kém (người bản ngữ chỉ được 27–90 điểm mỗi từ), người học tiếng Việt dùng lại cách chấm cũ |
+
 
 ## 1. Hiện trạng
 

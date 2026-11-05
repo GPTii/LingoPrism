@@ -27,7 +27,7 @@ export interface SpeechProgress {
 }
 
 export const speechApi = {
-  status: () => api.get<{ enabled: boolean }>('/speech/status/').then((r) => r.data),
+  status: () => api.get<{ enabled: boolean; languages: string[] }>('/speech/status/').then((r) => r.data),
   assess: (wav: Blob, item: { translation_id?: number; sentence_id?: number }) => {
     const form = new FormData()
     form.append('audio', wav, 'speech.wav')

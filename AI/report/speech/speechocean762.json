@@ -1,0 +1,50 @@
+{
+ "dataset": "speechocean762 test",
+ "skipped_unscorable": 1,
+ "all": {
+  "sentences": 2499,
+  "pcc_sentence_accuracy": 0.632,
+  "pcc_sentence_total": 0.66,
+  "pcc_phone_score_accuracy": 0.59,
+  "pcc_gop_accuracy": 0.565,
+  "pcc_word_accuracy": 0.321,
+  "mispronounced_words": {
+   "precision": 0.227,
+   "recall": 0.638,
+   "f1": 0.335,
+   "positives": 1127,
+   "words": 15937
+  }
+ },
+ "children_le_12": {
+  "sentences": 1039,
+  "pcc_sentence_accuracy": 0.519,
+  "pcc_sentence_total": 0.56,
+  "pcc_phone_score_accuracy": 0.49,
+  "pcc_gop_accuracy": 0.439,
+  "pcc_word_accuracy": 0.305,
+  "mispronounced_words": {
+   "precision": 0.174,
+   "recall": 0.67,
+   "f1": 0.276,
+   "positives": 297,
+   "words": 5511
+  }
+ },
+ "older": {
+  "sentences": 1460,
+  "pcc_sentence_accuracy": 0.712,
+  "pcc_sentence_total": 0.729,
+  "pcc_phone_score_accuracy": 0.686,
+  "pcc_gop_accuracy": 0.67,
+  "pcc_word_accuracy": 0.331,
+  "mispronounced_words": {
+   "precision": 0.257,
+   "recall": 0.627,
+   "f1": 0.364,
+   "positives": 830,
+   "words": 10426
+  }
+ },
+ "ms_per_sentence": 733.8
+}
