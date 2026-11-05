@@ -68,11 +68,19 @@ fi
 $COMPOSE exec -T backend python manage.py secure_demo_accounts | tr -d '\r' >> ADMIN_PASSWORDS.txt
 chmod 600 ADMIN_PASSWORDS.txt
 
-# detector: Open Images model (232 labels) + COCO yolov10m ensemble, both INT8, + CLIP re-check, see AI/README.md
-# (BE/models is not in git: copy the .onnx files and AI/runs/oiv7-pretrained/model_card.json there first)
+# detector: Open Images model (236 labels) + COCO yolov10m ensemble (weighted box fusion), both INT8, + CLIP re-check,
+# see AI/report/yolo/ensemble_upgrade.md. Active: yolov8l-oiv7; yolov8m-oiv7 stays registered, inactive, as the
+# fallback (tick is_active on it in the admin, ModelVersion). BE/models is not in git: deploy/push.sh sends it.
+OIV7_L=BE/models/yolov8l-oiv7-lingoprism-int8.onnx
 if [ -f BE/models/yolov8m-oiv7-lingoprism-int8.onnx ] && [ -f BE/models/oiv7_model_card.json ]; then
-  $COMPOSE exec -T backend python manage.py register_model \
+  NO_ACTIVATE=""
+  [ -f "$OIV7_L" ] && [ -f BE/models/oiv7l_model_card.json ] && NO_ACTIVATE="--no-activate"
+  $COMPOSE exec -T backend python manage.py register_model $NO_ACTIVATE \
     --onnx /app/models/yolov8m-oiv7-lingoprism-int8.onnx --card /app/models/oiv7_model_card.json
+fi
+if [ -f "$OIV7_L" ] && [ -f BE/models/oiv7l_model_card.json ]; then
+  $COMPOSE exec -T backend python manage.py register_model \
+    --onnx /app/models/yolov8l-oiv7-lingoprism-int8.onnx --card /app/models/oiv7l_model_card.json
 fi
 
 # algorithms chosen by the benchmark on the dev machine (manage.py algorithm_config --export deploy/algorithm_config.json):

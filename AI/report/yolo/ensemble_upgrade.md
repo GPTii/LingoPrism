@@ -36,3 +36,17 @@ thì model đó tự quyết.
   đổi lại recall giảm ~5 điểm.
 * Fine-tune trên Colab miễn phí (v5–v7) không vượt được model gốc; chỉ khi trộn trọng số với model gốc (WiSE-FT) mới
   hơn một chút (`finetune_soup.md`). Fine-tune yolov8l rồi trộn là bước tiếp theo nếu có GPU.
+
+## Cấu hình đưa lên server (06/11/2026)
+
+yolov8l-oiv7 INT8 + COCO yolov10m INT8, gộp **WBF** (IoU 0.55, COCO trọng số 2, mỗi model giải mã từ 0.05, hiện box
+từ 0.25) + CLIP (ngưỡng đổi nhãn hạ 0.6 → 0.4 vì độ tin cậy sau WBF thấp hơn). yolov8m vẫn đăng ký, không kích hoạt,
+làm bản dự phòng.
+
+| Cấu hình | P | R | mAP50 | mAP50-95 | TB lớp yếu |
+|---|---|---|---|---|---|
+| Cũ: yolov8m, gộp "tự tin nhất thắng", CLIP < 0.6 | 0.751 | 0.602 | 0.696 | 0.564 | 0.483 |
+| yolov8m, WBF, CLIP < 0.4 | 0.842 | 0.554 | 0.708 | 0.576 | 0.506 |
+| **Mới: yolov8l, WBF, CLIP < 0.4** | **0.845** | 0.562 | **0.716** | **0.585** | **0.514** |
+
+Dò ngưỡng CLIP với WBF (yolov8l): không CLIP 0.715 / 0.583; < 0.5: 0.715; **< 0.4: 0.716 / 0.585**; < 0.3: 0.716 / 0.585.

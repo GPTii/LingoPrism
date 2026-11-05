@@ -285,7 +285,7 @@ def evaluate(setups=tuple(SETUPS)) -> dict:
         if base:
             ens = EnsembleDetector.__new__(EnsembleDetector)
             ens.classes, ens._base_classes = model_classes[primary], set(model_classes[base])
-            preds = [ens.combine(a, b) for a, b in zip(raw[primary], raw[base])]
+            preds = [ens.combine(a, b, min_conf=LOW_CONF) for a, b in zip(raw[primary], raw[base])]
             t = [a + b for a, b in zip(ms[primary], ms[base])]
         else:
             preds, t = raw[primary], ms[primary]

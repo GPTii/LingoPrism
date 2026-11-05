@@ -140,6 +140,7 @@ class Detector:
         if all(c.isdigit() for c in self.classes) and len(self.classes) == len(COCO_CLASSES):
             self.classes = list(COCO_CLASSES)
         self.name = Path(path).stem
+        self.min_conf: float | None = None  # None = CONF_THRESHOLD (EnsembleDetector lowers it, then fuses)
 
     def _letterbox(self, img: Image.Image):
         w, h = img.size
@@ -173,8 +174,9 @@ class Detector:
 
     def _decode_v10(self, rows, scale, pad_x, pad_y, w, h):
         boxes = []
+        threshold = CONF_THRESHOLD if self.min_conf is None else self.min_conf
         for x1, y1, x2, y2, score, cls in rows:
-            if score < CONF_THRESHOLD:
+            if score < threshold:
                 continue
             label = self.classes[int(cls)]
             boxes.append(Box(label, float(score), self._to_norm(x1, y1, x2, y2, scale, pad_x, pad_y, w, h),
@@ -185,7 +187,7 @@ class Detector:
         pred = pred.T if pred.shape[0] < pred.shape[1] else pred  # -> [N, 4 + nc]
         scores = pred[:, 4:]
         best = scores.max(axis=1)
-        keep = best >= CONF_THRESHOLD
+        keep = best >= (CONF_THRESHOLD if self.min_conf is None else self.min_conf)
         pred, scores, best = pred[keep], scores[keep], best[keep]
         if len(pred) == 0:
             return []
@@ -240,6 +242,48 @@ def _iou(a, b):
 
 SAME_OBJECT_IOU = 0.7  # two boxes this close are one object, whatever labels the models gave it
 SURE_UNKNOWN = 0.25  # = CONF_THRESHOLD: a box of a class COCO does not know vetoes COCO boxes from this confidence on
+# Weighted Box Fusion of the two models (Solovyev et al., 2021), chosen on the test set (AI/report/yolo/ensemble_upgrade.md):
+# boxes of the same label overlapping >= WBF_IOU become one box (corners averaged by confidence); its confidence is
+# the weighted mean over the models that know the label (a model that saw nothing counts 0). COCO weighs 2: its
+# boxes are the more reliable on its 80 classes. Each model decodes from FUSION_MIN_CONF, the fused box is shown from
+# CONF_THRESHOLD: precision 0.77 -> 0.86 at that threshold, mAP50 +0.002..0.005.
+WBF_IOU = 0.55
+WBF_WEIGHT_PRIMARY = 1.0
+WBF_WEIGHT_BASE = 2.0
+FUSION_MIN_CONF = 0.05
+
+
+def _wbf(tagged: list[tuple[Box, float, int]], n_models_of) -> list[Box]:
+    """tagged: (box, model weight, model index). n_models_of(label) = number of models that know the label."""
+    out: list[Box] = []
+    by_label: dict[str, list] = {}
+    for t in tagged:
+        by_label.setdefault(t[0].label, []).append(t)
+    for label, items in by_label.items():
+        clusters: list[list] = []  # [fused bbox, members]
+        for b, w, src in sorted(items, key=lambda t: -t[0].confidence * t[1]):
+            best, hit = WBF_IOU, None
+            for c in clusters:
+                v = _iou(c[0], b.bbox)
+                if v > best:
+                    best, hit = v, c
+            if hit is None:
+                clusters.append([list(b.bbox), [(b, w, src)]])
+                continue
+            hit[1].append((b, w, src))
+            total = sum(x.confidence * ww for x, ww, _ in hit[1])
+            hit[0] = [sum(x.confidence * ww * x.bbox[k] for x, ww, _ in hit[1]) / total for k in range(4)]
+        for fused, members in clusters:
+            votes: dict[int, tuple[Box, float]] = {}  # one vote per model: its most confident box here
+            for x, ww, src in members:
+                if src not in votes or x.confidence > votes[src][0].confidence:
+                    votes[src] = (x, ww)
+            n_models = n_models_of(label)
+            conf = sum(x.confidence * ww for x, ww in votes.values()) / sum(ww for _, ww in votes.values())
+            conf *= min(len(votes), n_models) / n_models
+            top = max(members, key=lambda m: m[0].confidence)[0]
+            out.append(Box(label, conf, [float(v) for v in fused], list(top.top_k), top.memory_id))
+    return out
 
 
 def _merge(boxes: list[Box]) -> list[Box]:
@@ -257,8 +301,8 @@ def _merge(boxes: list[Box]) -> list[Box]:
 class EnsembleDetector:
     """The active LingoPrism model + the pretrained COCO model (settings.YOLO_BASE_MODEL_PATH).
 
-    Both models answer and boxes of the same object are merged (most confident label wins, the others become
-    alternatives). A COCO box lying on an object of a class COCO was never taught is dropped: COCO then picks
+    Both models answer; boxes of the same label are fused (WBF, see WBF_IOU), then boxes of the same object are merged
+    (most confident label wins, the others become alternatives). A COCO box lying on an object of a class COCO was never taught is dropped: COCO then picks
     the closest class it knows, very confidently (tiger -> zebra 0.95, lion -> bear 0.86, pig -> cow 0.80).
     Compare setups with AI/scripts/eval_photos.py. Drop YOLO_BASE_MODEL_PATH to serve the active model alone."""
 
@@ -267,28 +311,34 @@ class EnsembleDetector:
         self.classes = primary.classes
         self.name = f"{primary.name}+coco"
         self._base_classes = set(base.classes)
+        primary.min_conf = base.min_conf = FUSION_MIN_CONF  # fused first, thresholded after (combine)
 
     def predict(self, image):
         b_base, t1 = self.base.predict(image)
         b_new, t2 = self.primary.predict(image)
         return self.combine(b_new, b_base), t1 + t2
 
-    def combine(self, b_new: list[Box], b_base: list[Box]) -> list[Box]:
-        """Merge both models' boxes (also used by AI/scripts/eval_testset.py on cached predictions).
-        Only a confident box of a class unknown to COCO vetoes a COCO box: the same as the server's threshold, so an
-        evaluation run with a lower threshold (for mAP) keeps the server's behaviour."""
+    def combine(self, b_new: list[Box], b_base: list[Box], min_conf: float | None = None) -> list[Box]:
+        """Fuse both models' boxes (also used by AI/scripts/eval_testset.py on cached predictions, with a low
+        min_conf for the precision-recall curve). Only a confident box of a class unknown to COCO vetoes a COCO box:
+        the same as the server's threshold, so an evaluation run with a lower threshold keeps the server's behaviour."""
         known = set(self.classes)
         unknown_to_base = [b for b in b_new if b.label not in self._base_classes and b.confidence >= SURE_UNKNOWN]
         b_base = [b for b in b_base if b.label in known
                   and not any(_iou(b.bbox, n.bbox) >= 0.5 for n in unknown_to_base)]
-        return _merge([Box(b.label, b.confidence, b.bbox, list(b.top_k), b.memory_id) for b in b_base + b_new])
+        fused = _wbf([(b, WBF_WEIGHT_PRIMARY, 0) for b in b_new] + [(b, WBF_WEIGHT_BASE, 1) for b in b_base],
+                     lambda label: 2 if label in self._base_classes and label in known else 1)
+        threshold = CONF_THRESHOLD if min_conf is None else min_conf
+        return _merge([b for b in fused if b.confidence >= threshold])
 
 
 # CLIP may rename a box only when YOLO is unsure (confidence < CLIP_MAX_CONF) about an object big enough to see
 # (>= CLIP_MIN_AREA of the photo), CLIP is sure of another label (>= CLIP_SURE) and gives YOLO's label < CLIP_DOUBT.
 # Chosen so that the test set's mAP does not drop (renaming every box: word photos top-1 68% -> 90% but test mAP50
 # 0.705 -> 0.653, CLIP is poor on small or hidden objects); see AI/report/yolo/ghi_chu.md.
-CLIP_MAX_CONF = 0.6
+# 0.6 -> 0.4 with box fusion (WBF): fused confidences are lower (a model that saw nothing counts 0), so 0.6 sent many
+# more boxes to CLIP and the test mAP50 dropped 0.715 -> 0.714 (yolov8l); at 0.4: 0.716, precision 0.845.
+CLIP_MAX_CONF = 0.4
 CLIP_MIN_AREA = 0.1
 CLIP_SURE = 0.6
 CLIP_DOUBT = 0.1

@@ -6,6 +6,7 @@ from PIL import Image
 from rest_framework.test import APIClient
 
 from apps.accounts.models import User
+from apps.detection import inference
 from apps.detection.inference import Box, EnsembleDetector, LabelVerifier
 from apps.learning.models import PersonalWord
 from apps.vocab.models import Language, ReviewStatus, Word, WordTranslation
@@ -81,7 +82,7 @@ def test_unsure_detection_offers_alternatives_and_saves_the_picked_word(setup):
 
 class _FakeDetector:
     def __init__(self, classes, boxes):
-        self.classes, self.boxes, self.name = classes, boxes, "fake"
+        self.classes, self.boxes, self.name, self.min_conf = classes, boxes, "fake", None
 
     def predict(self, image):
         return [Box(b.label, b.confidence, list(b.bbox), list(b.top_k)) for b in self.boxes], 1
@@ -105,6 +106,25 @@ def test_ensemble_merges_one_object_and_keeps_other_label_as_alternative():
     boxes, _ = EnsembleDetector(primary, base).predict(None)
     assert len(boxes) == 1 and boxes[0].label == "couch"
     assert [t["label"] for t in boxes[0].top_k] == ["couch", "dining table"]
+
+
+def test_ensemble_fuses_boxes_of_both_models_into_one():
+    # same object, same label: one box, corners averaged by confidence x weight (COCO weighs 2)
+    base = _FakeDetector(["cup"], [_box("cup", 0.8, (0.1, 0.1, 0.5, 0.5))])
+    primary = _FakeDetector(["cup"], [_box("cup", 0.4, (0.15, 0.15, 0.55, 0.55))])
+    boxes, _ = EnsembleDetector(primary, base).predict(None)
+    assert len(boxes) == 1 and boxes[0].label == "cup"
+    assert boxes[0].confidence == pytest.approx((0.8 * 2 + 0.4) / 3)
+    assert boxes[0].bbox[0] == pytest.approx((0.1 * 1.6 + 0.15 * 0.4) / 2.0)
+    assert primary.min_conf == base.min_conf == inference.FUSION_MIN_CONF
+
+
+def test_ensemble_hides_a_box_only_one_of_two_knowing_models_is_unsure_about():
+    # both models know "cup": one 0.4 vote and a silent model -> 0.4 / 2 < 0.25, not shown
+    base = _FakeDetector(["cup"], [_box("cup", 0.4)])
+    primary = _FakeDetector(["cup"], [])
+    boxes, _ = EnsembleDetector(primary, base).predict(None)
+    assert boxes == []
 
 
 class _FakeClip:
