@@ -40,8 +40,11 @@ def main():
 
     rows = [("Precision", "precision"), ("Recall", "recall"), ("F1", "f1"), ("mAP50", "map50"), ("mAP50-95", "map50_95")]
     lines = [f"# Fine-tune {args.name}: trước / sau trên tập test {old['images']} ảnh", "",
-             f"Dữ liệu: {summary['images']} ảnh Open Images V7 *train* (nhãn người gắn, không nhãn tự gán), "
-             f"{len(summary['weak'])} lớp yếu + {len(summary['replay'])} lớp ôn lại.", "",
+             f"Dữ liệu: {summary['images']} ảnh ({summary.get('images_open_images', summary['images'])} Open Images V7 *train*"
+             + (f" + {summary['lvis']['images']} COCO train2017/LVIS" if summary.get("lvis") else "")
+             + "; nhãn người vẽ" + (" + nhãn giả của model gốc cho phần chưa vẽ" if (Path(args.run) / "pseudo.json").exists()
+                                     or summary.get("pseudo") else "")
+             + f"), {len(summary['weak'])} lớp yếu + {len(summary['replay'])} lớp ôn lại.", "",
              "| Chỉ số | Đang dùng | Sau fine-tune | Chênh |", "|---|---|---|---|"]
     lines += [f"| {label} | {old[k]:.3f} | {new[k]:.3f} | {new[k] - old[k]:+.3f} |" for label, k in rows]
     lines += [f"| mAP50 trung bình {len(weak)} lớp yếu | {mean(old):.3f} | {mean(new):.3f} | {mean(new) - mean(old):+.3f} |",
