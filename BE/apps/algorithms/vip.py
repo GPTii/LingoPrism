@@ -17,6 +17,7 @@ Two ways to use the score (benchmark.py tests both and picks one):
                  order and VIP moves a word at most `due_days` days earlier – review on time first, confusable
                  words a little earlier.
 """
+
 from datetime import timedelta
 
 from django.utils import timezone

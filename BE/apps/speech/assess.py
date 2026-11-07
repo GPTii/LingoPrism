@@ -1,4 +1,5 @@
 """Score one recording against a verified text: phones, tones, completeness (docs/thiet-ke/luyen-noi.md §4)."""
+
 import io
 import time
 import wave
@@ -36,7 +37,7 @@ def read_wav(data: bytes) -> np.ndarray:
     if width == 2:
         a = np.frombuffer(raw, "<i2").astype(np.float32) / 32768
     elif width == 4:
-        a = np.frombuffer(raw, "<i4").astype(np.float32) / 2 ** 31
+        a = np.frombuffer(raw, "<i4").astype(np.float32) / 2**31
     elif width == 1:
         a = (np.frombuffer(raw, np.uint8).astype(np.float32) - 128) / 128
     else:
@@ -142,10 +143,25 @@ def assess(audio_bytes: bytes, text: str, language: str, pinyin: list[str] | Non
                 vowel_frames[u].append(h.frame)
         if status in ("missing", "wrong", "close"):
             code, tip = tips.phone_error(language, e, h.token if h else None, ei == last_index[u])
-            errors.append({"code": code, "unit": u, "expected": base(e), "heard": base(h.token) if h else None,
-                           "tip": tip, "severity": "minor" if status == "close" else "major"})
-        phones[u].append({"expected": split_tone(e)[0], "heard": split_tone(h.token)[0] if h else None,
-                          "status": status, "score": round(score), "heard_tone": split_tone(h.token)[1] if h else ""})
+            errors.append(
+                {
+                    "code": code,
+                    "unit": u,
+                    "expected": base(e),
+                    "heard": base(h.token) if h else None,
+                    "tip": tip,
+                    "severity": "minor" if status == "close" else "major",
+                }
+            )
+        phones[u].append(
+            {
+                "expected": split_tone(e)[0],
+                "heard": split_tone(h.token)[0] if h else None,
+                "status": status,
+                "score": round(score),
+                "heard_tone": split_tone(h.token)[1] if h else "",
+            }
+        )
 
     # tones (the pitch curve of each syllable: the recogniser's own tone marks are not reliable)
     tone_results: list[dict | None] = [None] * len(units)
@@ -156,7 +172,7 @@ def assess(audio_bytes: bytes, text: str, language: str, pinyin: list[str] | Non
             if not f:
                 spans.append(None)
                 continue
-            nxt = next((s for s in starts[u + 1:] if s is not None), None)
+            nxt = next((s for s in starts[u + 1 :] if s is not None), None)
             end = (nxt - 2) if nxt is not None else max(f) + 12
             start = min(vowel_frames[u]) - 1 if vowel_frames[u] else min(f)
             spans.append((start * recognizer.FRAME_S, max(end, start + 3) * recognizer.FRAME_S))
@@ -175,8 +191,16 @@ def assess(audio_bytes: bytes, text: str, language: str, pinyin: list[str] | Non
     for u, t in enumerate(tone_results):
         if t and t["status"] != "ok":
             code, tip = tips.tone_error(language, t["expected"], t["heard"])
-            errors.append({"code": code, "unit": u, "expected": str(t["expected"]), "heard": str(t["heard"]), "tip": tip,
-                           "severity": "minor" if t["status"] == "close" else "major"})
+            errors.append(
+                {
+                    "code": code,
+                    "unit": u,
+                    "expected": str(t["expected"]),
+                    "heard": str(t["heard"]),
+                    "tip": tip,
+                    "severity": "minor" if t["status"] == "close" else "major",
+                }
+            )
 
     # scores
     out_units = []
@@ -187,16 +211,28 @@ def assess(audio_bytes: bytes, text: str, language: str, pinyin: list[str] | Non
         if t:
             s = 0.75 * s + 25 * {"ok": 1, "close": 0.5, "wrong": 0}[t["status"]]
         s = round(s)
-        out_units.append({"text": unit.text, "reading": unit.reading, "score": s,
-                          "status": "right" if s >= RIGHT else "close" if s >= CLOSE else "wrong",
-                          "tone": t, "phones": [{k: v for k, v in p.items() if k != "heard_tone"} for p in phones[u]]})
+        out_units.append(
+            {
+                "text": unit.text,
+                "reading": unit.reading,
+                "score": s,
+                "status": "right" if s >= RIGHT else "close" if s >= CLOSE else "wrong",
+                "tone": t,
+                "phones": [{k: v for k, v in p.items() if k != "heard_tone"} for p in phones[u]],
+            }
+        )
     all_phones = [p for ps in phones for p in ps]
     phone_score = sum(p["score"] for p in all_phones) / len(all_phones)
     completeness = 100 * sum(p["status"] in ("ok", "close") for p in all_phones) / len(all_phones)
     judged = [t for t in tone_results if t]
-    tone_score = (100 * sum({"ok": 1, "close": 0.5, "wrong": 0}[t["status"]] for t in judged) / len(judged)) if judged else None
-    total = (0.65 * phone_score + 0.15 * completeness + 0.2 * tone_score) if tone_score is not None \
+    tone_score = (
+        (100 * sum({"ok": 1, "close": 0.5, "wrong": 0}[t["status"]] for t in judged) / len(judged)) if judged else None
+    )
+    total = (
+        (0.65 * phone_score + 0.15 * completeness + 0.2 * tone_score)
+        if tone_score is not None
         else (0.8 * phone_score + 0.2 * completeness)
+    )
     total *= 1 - min(0.2, 0.04 * extras)
     seen, unique_errors = set(), []
     for e in sorted(errors, key=lambda e: e["severity"] != "major"):
@@ -206,10 +242,16 @@ def assess(audio_bytes: bytes, text: str, language: str, pinyin: list[str] | Non
             unique_errors.append(e)
     score = round(total)
     return {
-        "score": score, "verdict": "right" if score >= RIGHT else "close" if score >= CLOSE else "wrong",
-        "phone_score": round(phone_score), "tone_score": round(tone_score) if tone_score is not None else None,
-        "completeness": round(completeness), "extra_sounds": extras, "units": out_units,
+        "score": score,
+        "verdict": "right" if score >= RIGHT else "close" if score >= CLOSE else "wrong",
+        "phone_score": round(phone_score),
+        "tone_score": round(tone_score) if tone_score is not None else None,
+        "completeness": round(completeness),
+        "extra_sounds": extras,
+        "units": out_units,
         "gop": round(sum(gops) / len(gops), 3) if gops else 0.0,
-        "heard_ipa": " ".join(split_tone(h.token)[0] for h in heard), "errors": unique_errors[:6],
-        "duration_s": round(len(audio) / SR, 2), "ms": int((time.perf_counter() - t0) * 1000),
+        "heard_ipa": " ".join(split_tone(h.token)[0] for h in heard),
+        "errors": unique_errors[:6],
+        "duration_s": round(len(audio) / SR, 2),
+        "ms": int((time.perf_counter() - t0) * 1000),
     }

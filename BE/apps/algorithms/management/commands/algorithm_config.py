@@ -10,8 +10,10 @@ FIELDS = ["scheduler", "review_priority", "distractor", "proximity", "fsrs_weigh
 
 
 class Command(BaseCommand):
-    help = ("Xuất / nạp cấu hình thuật toán (AlgorithmConfig) và hồ sơ nhầm lẫn thị giác của VIP dạng JSON – đưa kết quả "
-            "benchmark ở máy lên server: --export deploy/algorithm_config.json ở máy, deploy.sh nạp lại bằng --load -")
+    help = (
+        "Xuất / nạp cấu hình thuật toán (AlgorithmConfig) và hồ sơ nhầm lẫn thị giác của VIP dạng JSON – đưa kết quả "
+        "benchmark ở máy lên server: --export deploy/algorithm_config.json ở máy, deploy.sh nạp lại bằng --load -"
+    )
 
     def add_arguments(self, parser):
         parser.add_argument("--export", metavar="FILE")
@@ -43,6 +45,9 @@ class Command(BaseCommand):
         config.save()
         if vision:
             ExperimentRun.objects.create(kind="vision", results=vision)
-        self.stdout.write(self.style.SUCCESS(
-            f"Đã nạp: {config.scheduler} · {config.review_priority} · {config.distractor} · {config.proximity}"
-            + (f" · hồ sơ thị giác {len(vision.get('classes', {}))} lớp ({vision.get('source')})" if vision else "")))
+        self.stdout.write(
+            self.style.SUCCESS(
+                f"Đã nạp: {config.scheduler} · {config.review_priority} · {config.distractor} · {config.proximity}"
+                + (f" · hồ sơ thị giác {len(vision.get('classes', {}))} lớp ({vision.get('source')})" if vision else "")
+            )
+        )

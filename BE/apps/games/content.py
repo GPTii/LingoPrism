@@ -19,6 +19,7 @@ Every item but a match pair also has "hint": the meaning of the word (words trac
 Words track: only words the learner has learned in this round (distractors may come from the whole level).
 Reading track: only real syllables made of the sounds, rhymes and tones already taught (apps.literacy).
 """
+
 import random
 
 from django.core import signing
@@ -96,13 +97,16 @@ def _assemble(order: list[str], start: int, count: int, make) -> tuple[list[dict
 
 # ====================================================================== words track
 
+
 class WordGames:
     def __init__(self, user, target, request, word_ids: list[int], level: int, rng: random.Random):
         self.target, self.rng, self.request = target, rng, request
         self.locale = tts_locale(target.code)
         batch = {w.id: w for w in words_for_target(Word.objects.filter(id__in=word_ids), user, target)}
         self.words = [e for e in (self._entry(batch[i]) for i in word_ids if i in batch) if e]
-        pool_ids = list(level_words(user, target, level).exclude(id__in=word_ids).order_by("?").values_list("id", flat=True)[:60])
+        pool_ids = list(
+            level_words(user, target, level).exclude(id__in=word_ids).order_by("?").values_list("id", flat=True)[:60]
+        )
         pool = words_for_target(Word.objects.filter(id__in=pool_ids), user, target)
         self.pool = [e for e in (self._entry(w) for w in pool) if e]
 
@@ -115,10 +119,16 @@ class WordGames:
         if image and image.startswith("/") and self.request is not None:
             image = self.request.build_absolute_uri(image)
         vi = by_lang.get("vi")
-        return {"id": w.id, "text": tr.text, "sub": tr.pinyin if self.target.learn == "zh" else "",
-                "numbered": tr.pinyin_numbered, "meaning": vi.text if vi and self.target.learn != "vi" else "",
-                "image": image or None, "emoji": w.emoji,
-                "examples": [e for e in getattr(w, "visible_examples", []) if e.tokens]}
+        return {
+            "id": w.id,
+            "text": tr.text,
+            "sub": tr.pinyin if self.target.learn == "zh" else "",
+            "numbered": tr.pinyin_numbered,
+            "meaning": vi.text if vi and self.target.learn != "vi" else "",
+            "image": image or None,
+            "emoji": w.emoji,
+            "examples": [e for e in getattr(w, "visible_examples", []) if e.tokens],
+        }
 
     def _audio(self, text: str) -> dict:
         return {"text": text, "locale": self.locale}
@@ -158,17 +168,28 @@ class WordGames:
         words, text_opt = self.words, (lambda e: {"t": e["text"], "s": e["sub"]})
         pictured = lambda e: bool(e["image"] or e["emoji"])  # noqa: E731
         if game == "pop":
-            return self._choose("pop", self._sample(words, ITEMS), lambda e: {"audio": self._audio(e["text"])},
-                                text_opt, "text")
+            return self._choose(
+                "pop", self._sample(words, ITEMS), lambda e: {"audio": self._audio(e["text"])}, text_opt, "text"
+            )
         if game == "meaning":
             with_meaning = [e for e in words if e["meaning"]]
-            return self._choose("meaning", self._sample(with_meaning, ITEMS),
-                                lambda e: {"text": e["text"], "sub": e["sub"], "audio": self._audio(e["text"])},
-                                lambda e: {"t": e["meaning"]}, "meaning", need=lambda e: bool(e["meaning"]))
+            return self._choose(
+                "meaning",
+                self._sample(with_meaning, ITEMS),
+                lambda e: {"text": e["text"], "sub": e["sub"], "audio": self._audio(e["text"])},
+                lambda e: {"t": e["meaning"]},
+                "meaning",
+                need=lambda e: bool(e["meaning"]),
+            )
         if game == "picture":
-            return self._choose("picture", self._sample([e for e in words if pictured(e)], ITEMS),
-                                lambda e: {"audio": self._audio(e["text"])},
-                                lambda e: {"t": str(e["id"]), "image": e["image"], "emoji": e["emoji"]}, "id", need=pictured)
+            return self._choose(
+                "picture",
+                self._sample([e for e in words if pictured(e)], ITEMS),
+                lambda e: {"audio": self._audio(e["text"])},
+                lambda e: {"t": str(e["id"]), "image": e["image"], "emoji": e["emoji"]},
+                "id",
+                need=pictured,
+            )
         if game == "tone":
             return self._tone()
         if game == "match":
@@ -189,14 +210,20 @@ class WordGames:
             base, right = syls[i][:-1], syls[i][-1]
             variants = []
             for tone in "1234":
-                v = syls[:i] + [base + tone] + syls[i + 1:]
+                v = syls[:i] + [base + tone] + syls[i + 1 :]
                 variants.append(py.numbered_to_marked(" ".join(v)))
             answer = py.numbered_to_marked(" ".join(syls))
             if right == "5" or answer not in variants:
                 continue
             opts = [{"t": v} for v in variants]
-            items.append({"prompt": {"text": e["text"], "audio": self._audio(e["text"])}, "options": opts, "answer": answer,
-                          "hint": f"{self._hint(e)}, đọc là {answer}"})
+            items.append(
+                {
+                    "prompt": {"text": e["text"], "audio": self._audio(e["text"])},
+                    "options": opts,
+                    "answer": answer,
+                    "hint": f"{self._hint(e)}, đọc là {answer}",
+                }
+            )
             keys.append(e["id"])
             if len(items) == ITEMS:
                 break
@@ -220,7 +247,9 @@ class WordGames:
                 break
         if len(chosen) < 3:
             return None
-        return {"game": "match", "title": TITLES["match"], "items": [pair(e) for e in chosen]}, [e["id"] for e in chosen]
+        return {"game": "match", "title": TITLES["match"], "items": [pair(e) for e in chosen]}, [
+            e["id"] for e in chosen
+        ]
 
     def _spell(self):
         learn, items, keys = self.target.learn, [], []
@@ -248,9 +277,20 @@ class WordGames:
                 title = "Ghép các tiếng thành từ vừa nghe"
             shuffled = tiles + extra
             self.rng.shuffle(shuffled)
-            items.append({"prompt": {"audio": self._audio(text), "sub": e["meaning"], "image": e["image"], "emoji": e["emoji"]},
-                          "tiles": shuffled, "joiner": joiner, "answer": joiner.join(tiles),
-                          "hint": f"{self._hint(e)} · bắt đầu bằng “{tiles[0]}”"})
+            items.append(
+                {
+                    "prompt": {
+                        "audio": self._audio(text),
+                        "sub": e["meaning"],
+                        "image": e["image"],
+                        "emoji": e["emoji"],
+                    },
+                    "tiles": shuffled,
+                    "joiner": joiner,
+                    "answer": joiner.join(tiles),
+                    "hint": f"{self._hint(e)} · bắt đầu bằng “{tiles[0]}”",
+                }
+            )
             keys.append(e["id"])
             if len(items) == ITEMS:
                 break
@@ -268,8 +308,15 @@ class WordGames:
                 while shuffled == tiles:
                     self.rng.shuffle(shuffled)
                 hint = ex.translation_vi if self.target.learn != "vi" else ""
-                items.append({"prompt": {"audio": self._audio(ex.text), "sub": hint}, "tiles": shuffled,
-                              "joiner": joiner, "answer": joiner.join(tiles), "hint": starts_with(tiles)})
+                items.append(
+                    {
+                        "prompt": {"audio": self._audio(ex.text), "sub": hint},
+                        "tiles": shuffled,
+                        "joiner": joiner,
+                        "answer": joiner.join(tiles),
+                        "hint": starts_with(tiles),
+                    }
+                )
                 keys.append(e["id"])
                 break
             if len(items) == 3:
@@ -279,8 +326,14 @@ class WordGames:
 
 def word_round(user, target, request, stop: Stop, word_ids: list[int], seed: int) -> tuple[list[dict], list[list]]:
     rng = random.Random(seed)
-    gen = WordGames(user, target, request, word_ids if stop.kind != "boss" else rng.sample(word_ids, min(30, len(word_ids))),
-                    stop.level, rng)
+    gen = WordGames(
+        user,
+        target,
+        request,
+        word_ids if stop.kind != "boss" else rng.sample(word_ids, min(30, len(word_ids))),
+        stop.level,
+        rng,
+    )
     order = WORD_GAMES[target.learn]
     count = BOSS_GAMES if stop.kind == "boss" else ROUND_GAMES
     return _assemble(order, stop.index + rng.randrange(len(order)), count, gen.make)
@@ -325,7 +378,14 @@ class ReadingGames:
             if len(pool) < 2:
                 continue
             opts = [{"t": x} for x in lit._options(s.text, pool, 4, self.rng)]
-            items.append({"prompt": {"audio": self._audio(s.text)}, "options": opts, "answer": s.text, "hint": self._hint(s.text)})
+            items.append(
+                {
+                    "prompt": {"audio": self._audio(s.text)},
+                    "options": opts,
+                    "answer": s.text,
+                    "hint": self._hint(s.text),
+                }
+            )
             keys.append(lesson)
             if len(items) == ITEMS:
                 break
@@ -336,7 +396,11 @@ class ReadingGames:
         for unit, lesson in self.units:
             for s in lit._weighted_pick(lit._examples(unit, self.n), 2, self.rng):
                 if unit.kind == "thanh":
-                    pool, answer, ask = [ph.TONE_LABEL[x] for x in ["ngang", *sorted(t.tones)]], ph.TONE_LABEL[s.tone], "dấu thanh"
+                    pool, answer, ask = (
+                        [ph.TONE_LABEL[x] for x in ["ngang", *sorted(t.tones)]],
+                        ph.TONE_LABEL[s.tone],
+                        "dấu thanh",
+                    )
                 elif unit.kind == "van" or unit.is_vowel:
                     pool, answer, ask = sorted(t.rhymes | t.vowels), s.rhyme, "vần"
                 else:
@@ -344,8 +408,18 @@ class ReadingGames:
                 if len(set(pool)) < 2:
                     continue
                 opts = [{"t": x} for x in lit._options(answer, pool, 4, self.rng)]
-                items.append({"prompt": {"text": s.text, "sub": f"Tiếng “{s.text}” có {ask} nào?", "audio": self._audio(s.text)},
-                              "options": opts, "answer": answer, "hint": self._hint(s.text)})
+                items.append(
+                    {
+                        "prompt": {
+                            "text": s.text,
+                            "sub": f"Tiếng “{s.text}” có {ask} nào?",
+                            "audio": self._audio(s.text),
+                        },
+                        "options": opts,
+                        "answer": answer,
+                        "hint": self._hint(s.text),
+                    }
+                )
                 keys.append(lesson)
         picked = list(range(len(items)))
         self.rng.shuffle(picked)
@@ -357,15 +431,25 @@ class ReadingGames:
             return None
         items, keys = [], []
         for s, lesson in self.rng.sample(self.examples, len(self.examples)):
-            variants = [ph.compose(s.onset, s.rhyme, t) for t in ["ngang", *ph.TONES[1:]] if t == "ngang" or t in self.taught.tones]
+            variants = [
+                ph.compose(s.onset, s.rhyme, t)
+                for t in ["ngang", *ph.TONES[1:]]
+                if t == "ngang" or t in self.taught.tones
+            ]
             variants = [v for v in dict.fromkeys(variants) if v in self.known or v == s.text]
             if len(variants) < 2 or s.text not in variants:
                 continue
             others = [v for v in variants if v != s.text]
             opts = [{"t": v} for v in self.rng.sample(others, min(3, len(others))) + [s.text]]
             self.rng.shuffle(opts)
-            items.append({"prompt": {"text": ph.compose(s.onset, s.rhyme, "ngang"), "audio": self._audio(s.text)},
-                          "options": opts, "answer": s.text, "hint": self._hint(s.text)})
+            items.append(
+                {
+                    "prompt": {"text": ph.compose(s.onset, s.rhyme, "ngang"), "audio": self._audio(s.text)},
+                    "options": opts,
+                    "answer": s.text,
+                    "hint": self._hint(s.text),
+                }
+            )
             keys.append(lesson)
             if len(items) == ITEMS:
                 break
@@ -379,9 +463,17 @@ class ReadingGames:
             rhymes = lit._options(s.rhyme, sorted(t.rhymes | t.vowels), 3, self.rng)
             if len(rhymes) < 2:
                 continue
-            items.append({"audio": self._audio(s.text), "text": s.text, "onsets": onsets, "rhymes": rhymes,
-                          "tones": [{"code": x, "label": ph.TONE_LABEL[x], "symbol": ph.TONE_SYMBOL[x]} for x in tones],
-                          "answer": {"onset": s.onset or "∅", "rhyme": s.rhyme, "tone": s.tone}, "hint": self._hint(s.text)})
+            items.append(
+                {
+                    "audio": self._audio(s.text),
+                    "text": s.text,
+                    "onsets": onsets,
+                    "rhymes": rhymes,
+                    "tones": [{"code": x, "label": ph.TONE_LABEL[x], "symbol": ph.TONE_SYMBOL[x]} for x in tones],
+                    "answer": {"onset": s.onset or "∅", "rhyme": s.rhyme, "tone": s.tone},
+                    "hint": self._hint(s.text),
+                }
+            )
             keys.append(lesson)
             if len(items) == 4:
                 break
@@ -395,8 +487,14 @@ class ReadingGames:
         candidates = [s for s, c in cur.readable_syllables(self.n)[:600] if c > 0 and any(s.onset in p for p in pairs)]
         for s in self.rng.sample(candidates, min(ITEMS, len(candidates))):
             pair = next(p for p in pairs if s.onset in p)
-            items.append({"prompt": {"text": "_" + ph.compose("", s.rhyme, s.tone), "audio": self._audio(s.text)},
-                          "options": [{"t": x} for x in pair], "answer": s.onset, "hint": self._hint(s.text)})
+            items.append(
+                {
+                    "prompt": {"text": "_" + ph.compose("", s.rhyme, s.tone), "audio": self._audio(s.text)},
+                    "options": [{"t": x} for x in pair],
+                    "answer": s.onset,
+                    "hint": self._hint(s.text),
+                }
+            )
             keys.append(RULES[pair])
         return {"game": "gate", "title": TITLES["gate"], "items": items}, keys
 
@@ -418,8 +516,10 @@ class ReadingGames:
             return None
         order = list(range(len(items)))
         self.rng.shuffle(order)
-        return ({"game": "sort", "title": TITLES["sort"], "baskets": [a[0], b[0]], "items": [items[i] for i in order]},
-                [keys[i] for i in order])
+        return (
+            {"game": "sort", "title": TITLES["sort"], "baskets": [a[0], b[0]], "items": [items[i] for i in order]},
+            [keys[i] for i in order],
+        )
 
     def _pictured_words(self):
         words = [dict(w) for w in lit._words(self.n) if len(w["text"]) <= 14]
@@ -440,24 +540,46 @@ class ReadingGames:
                 break
         if len(chosen) < 3:
             return None
-        return ({"game": "match", "title": TITLES["match"],
-                 "items": [{"a": {"t": w["text"]}, "b": {"t": "", "image": w["image"], "emoji": w["emoji"]}} for w in chosen]},
-                [self.default_lesson] * len(chosen))
+        return (
+            {
+                "game": "match",
+                "title": TITLES["match"],
+                "items": [
+                    {"a": {"t": w["text"]}, "b": {"t": "", "image": w["image"], "emoji": w["emoji"]}} for w in chosen
+                ],
+            },
+            [self.default_lesson] * len(chosen),
+        )
 
     def _type(self):
         words = self._pictured_words()
         chosen = self.rng.sample(words, min(3, len(words)))
-        return ({"game": "type", "title": TITLES["type"],
-                 "items": [{"prompt": {"audio": self._audio(w["text"]), "image": w["image"], "emoji": w["emoji"]},
-                            "answer": w["text"], "accepted": [w["text"]], "hint": self._word_hint(w["text"])} for w in chosen]},
-                [self.default_lesson] * len(chosen))
+        return (
+            {
+                "game": "type",
+                "title": TITLES["type"],
+                "items": [
+                    {
+                        "prompt": {"audio": self._audio(w["text"]), "image": w["image"], "emoji": w["emoji"]},
+                        "answer": w["text"],
+                        "accepted": [w["text"]],
+                        "hint": self._word_hint(w["text"]),
+                    }
+                    for w in chosen
+                ],
+            },
+            [self.default_lesson] * len(chosen),
+        )
 
     def _order(self):
         if self.n < 17:
             return None
         longest = 6 if self.n < 40 else 8
-        sentences = [x for x in cur.corpus()["sentences"]
-                     if 3 <= x["syllables"] <= longest and cur.readable_text(x["text"], self.n)]
+        sentences = [
+            x
+            for x in cur.corpus()["sentences"]
+            if 3 <= x["syllables"] <= longest and cur.readable_text(x["text"], self.n)
+        ]
         items = []
         for x in self.rng.sample(sentences, min(3, len(sentences))):
             tiles = ph.syllables_of(x["text"])
@@ -466,8 +588,15 @@ class ReadingGames:
             shuffled = tiles[:]
             while shuffled == tiles:
                 self.rng.shuffle(shuffled)
-            items.append({"prompt": {"audio": self._audio(x["text"])}, "tiles": shuffled, "joiner": " ",
-                          "answer": " ".join(tiles), "hint": starts_with(tiles)})
+            items.append(
+                {
+                    "prompt": {"audio": self._audio(x["text"])},
+                    "tiles": shuffled,
+                    "joiner": " ",
+                    "answer": " ".join(tiles),
+                    "hint": starts_with(tiles),
+                }
+            )
         return {"game": "order", "title": TITLES["order"], "items": items}, [self.default_lesson] * len(items)
 
 

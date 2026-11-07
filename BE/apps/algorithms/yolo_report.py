@@ -9,6 +9,7 @@ Plus a comparison on real photos (the reviewed photo of every word, never used i
 each model vs the pretrained COCO model vs both combined (detection.inference.EnsembleDetector). A pretrained model
 has no labelled test split: the precision / recall measured on the photos are written to its ModelVersion.
 """
+
 import csv
 import json
 import re
@@ -24,24 +25,46 @@ from apps.vocab.models import Word
 from .models import ExperimentRun
 
 RUNS = settings.BASE_DIR.parent / "AI" / "runs"
-PLOTS = ["results.png", "test/confusion_matrix_normalized.png", "test/confusion_matrix.png", "test/BoxPR_curve.png",
-         "test/BoxF1_curve.png", "test/BoxP_curve.png", "test/BoxR_curve.png", "test/val_batch0_pred.jpg",
-         "test/val_batch0_labels.jpg", "test/val_batch1_pred.jpg", "test/val_batch2_pred.jpg"]
+PLOTS = [
+    "results.png",
+    "test/confusion_matrix_normalized.png",
+    "test/confusion_matrix.png",
+    "test/BoxPR_curve.png",
+    "test/BoxF1_curve.png",
+    "test/BoxP_curve.png",
+    "test/BoxR_curve.png",
+    "test/val_batch0_pred.jpg",
+    "test/val_batch0_labels.jpg",
+    "test/val_batch1_pred.jpg",
+    "test/val_batch2_pred.jpg",
+]
 
 
 def _curves(path: Path) -> dict:
     with open(path, encoding="utf-8") as fh:
         rows = [{k.strip(): v for k, v in r.items()} for r in csv.DictReader(fh)]
-    pick = {"epoch": "epoch", "map50": "metrics/mAP50(B)", "map50_95": "metrics/mAP50-95(B)",
-            "precision": "metrics/precision(B)", "recall": "metrics/recall(B)", "train_box_loss": "train/box_loss",
-            "train_cls_loss": "train/cls_loss", "val_box_loss": "val/box_loss", "val_cls_loss": "val/cls_loss"}
+    pick = {
+        "epoch": "epoch",
+        "map50": "metrics/mAP50(B)",
+        "map50_95": "metrics/mAP50-95(B)",
+        "precision": "metrics/precision(B)",
+        "recall": "metrics/recall(B)",
+        "train_box_loss": "train/box_loss",
+        "train_cls_loss": "train/cls_loss",
+        "val_box_loss": "val/box_loss",
+        "val_cls_loss": "val/cls_loss",
+    }
     return {k: [float(r[c]) for r in rows if r.get(c)] for k, c in pick.items()}
 
 
 def import_run(folder: Path) -> dict:
     card = json.loads((folder / "model_card.json").read_text(encoding="utf-8"))
     name = card["name"]
-    metrics = json.loads((folder / "report" / "metrics.json").read_text(encoding="utf-8")) if (folder / "report" / "metrics.json").exists() else {}
+    metrics = (
+        json.loads((folder / "report" / "metrics.json").read_text(encoding="utf-8"))
+        if (folder / "report" / "metrics.json").exists()
+        else {}
+    )
     args = {}
     if (folder / "args.yaml").exists():
         for line in (folder / "args.yaml").read_text(encoding="utf-8").splitlines():
@@ -58,8 +81,12 @@ def import_run(folder: Path) -> dict:
             plots.append(f"{settings.MEDIA_URL}model_reports/{name}/{src.name}")
     per_class = metrics.get("per_class", {})
     return {
-        "name": name, "base_model": card.get("base_model"), "classes": len(card.get("classes", [])),
-        "train_args": args, "metrics": card.get("metrics", {}), "tflite": bool(card.get("tflite")),
+        "name": name,
+        "base_model": card.get("base_model"),
+        "classes": len(card.get("classes", [])),
+        "train_args": args,
+        "metrics": card.get("metrics", {}),
+        "tflite": bool(card.get("tflite")),
         "per_class": [{"label": k, **(v if isinstance(v, dict) else {"map50": v})} for k, v in per_class.items()],
         "curves": _curves(folder / "results.csv") if (folder / "results.csv").exists() else {},
         "plots": plots,
@@ -94,9 +121,11 @@ def photo_sets(classes) -> dict:
     own_photos: AI/eval_photos/ (real photos taken for the evaluation, several objects allowed)."""
     folder = settings.BASE_DIR / "seed" / "images"
     known = set(classes)
-    words = [(folder / f"{slug}.jpg", {label}) for slug, label in
-             Word.objects.exclude(yolo_label="").order_by("slug").values_list("slug", "yolo_label")
-             if label in known and (folder / f"{slug}.jpg").exists()]
+    words = [
+        (folder / f"{slug}.jpg", {label})
+        for slug, label in Word.objects.exclude(yolo_label="").order_by("slug").values_list("slug", "yolo_label")
+        if label in known and (folder / f"{slug}.jpg").exists()
+    ]
     own = []
     if EVAL_DIR.exists():
         aliases = _aliases()
@@ -126,16 +155,34 @@ def _score(det, photos, coco_classes) -> tuple[dict, list]:
         if not exp <= coco_classes:
             n_new += 1
             top1_new += hit
-        per_photo.append({"photo": path.name, "expected": sorted(exp), "top1_ok": hit,
-                          "boxes": [{"label": b.label, "confidence": round(b.confidence, 4),
-                                     "bbox": [round(v, 4) for v in b.bbox]} for b in boxes[:8]]})
+        per_photo.append(
+            {
+                "photo": path.name,
+                "expected": sorted(exp),
+                "top1_ok": hit,
+                "boxes": [
+                    {"label": b.label, "confidence": round(b.confidence, 4), "bbox": [round(v, 4) for v in b.bbox]}
+                    for b in boxes[:8]
+                ],
+            }
+        )
 
     def r(a, b):
         return round(a / b, 4) if b else None
 
-    return ({"photos": n, "top1": r(top1, n), "found": r(found, total), "precision": r(boxes_ok, boxes_all),
-             "wrong_boxes": boxes_all - boxes_ok, "top1_new_classes": r(top1_new, n_new), "new_class_photos": n_new,
-             "ms_per_image": round(sum(ms) / len(ms), 1) if ms else None}, per_photo)
+    return (
+        {
+            "photos": n,
+            "top1": r(top1, n),
+            "found": r(found, total),
+            "precision": r(boxes_ok, boxes_all),
+            "wrong_boxes": boxes_all - boxes_ok,
+            "top1_new_classes": r(top1_new, n_new),
+            "new_class_photos": n_new,
+            "ms_per_image": round(sum(ms) / len(ms), 1) if ms else None,
+        },
+        per_photo,
+    )
 
 
 def compare_on_photos() -> dict:
@@ -167,12 +214,22 @@ def compare_on_photos() -> dict:
                 results[name][key], per_photo = _score(det, photos, coco_classes)
                 if mv.is_active and key == ("combined" if coco else "trained"):
                     details[name] = per_photo
-        out.append({"model": mv.name, "map50": mv.map50, "active": mv.is_active,
-                    "results": results["word_photos"], "own_photos": results["own_photos"]})
-    return {"models": out, "active_per_photo": details,
-            "note": "Ảnh từ vựng: mỗi từ một ảnh thật đã duyệt (Wikimedia Commons), không nằm trong dữ liệu train. "
-                    "Ảnh tự chụp: AI/eval_photos/ (tên file = vật trong ảnh). 'combined' = cả hai model cùng chạy, "
-                    "mỗi vật giữ nhãn tự tin nhất (cách server đang chạy). precision = box có nhãn đúng / mọi box."}
+        out.append(
+            {
+                "model": mv.name,
+                "map50": mv.map50,
+                "active": mv.is_active,
+                "results": results["word_photos"],
+                "own_photos": results["own_photos"],
+            }
+        )
+    return {
+        "models": out,
+        "active_per_photo": details,
+        "note": "Ảnh từ vựng: mỗi từ một ảnh thật đã duyệt (Wikimedia Commons), không nằm trong dữ liệu train. "
+        "Ảnh tự chụp: AI/eval_photos/ (tên file = vật trong ảnh). 'combined' = cả hai model cùng chạy, "
+        "mỗi vật giữ nhãn tự tin nhất (cách server đang chạy). precision = box có nhãn đúng / mọi box.",
+    }
 
 
 def apply_metrics(comparison: dict) -> dict | None:
@@ -191,11 +248,19 @@ def apply_metrics(comparison: dict) -> dict | None:
         return None
     mv.precision = round(sum(r["precision"] * r["photos"] for r in rows) / photos, 4)
     mv.recall = round(sum(r["found"] * r["photos"] for r in rows) / photos, 4)
-    mv.notes = (f"Đo trên {photos} ảnh thật ({kind}), {time.strftime('%d/%m/%Y')}: precision = box đúng nhãn / mọi box, "
-                f"recall = vật tìm thấy / vật có trong ảnh. Model pretrained, không có tập test gắn box nên không có mAP.")
+    mv.notes = (
+        f"Đo trên {photos} ảnh thật ({kind}), {time.strftime('%d/%m/%Y')}: precision = box đúng nhãn / mọi box, "
+        f"recall = vật tìm thấy / vật có trong ảnh. Model pretrained, không có tập test gắn box nên không có mAP."
+    )
     mv.save(update_fields=["precision", "recall", "notes"])
-    return {"model": mv.name, "precision": mv.precision, "recall": mv.recall, "photos": photos, "setup": kind,
-            "notes": mv.notes}
+    return {
+        "model": mv.name,
+        "precision": mv.precision,
+        "recall": mv.recall,
+        "photos": photos,
+        "setup": kind,
+        "notes": mv.notes,
+    }
 
 
 def save_report(run: ExperimentRun, folder: Path) -> Path:
@@ -204,8 +269,10 @@ def save_report(run: ExperimentRun, folder: Path) -> Path:
 
     folder.mkdir(parents=True, exist_ok=True)
     comp = run.results["comparison"]
-    (folder / "metrics.json").write_text(json.dumps({**comp, "applied_metrics": run.results.get("applied_metrics")},
-                                                    ensure_ascii=False, indent=1), encoding="utf-8")
+    (folder / "metrics.json").write_text(
+        json.dumps({**comp, "applied_metrics": run.results.get("applied_metrics")}, ensure_ascii=False, indent=1),
+        encoding="utf-8",
+    )
     sources = {"word_photos": settings.BASE_DIR / "seed" / "images", "own_photos": EVAL_DIR}
     for name, rows in comp.get("active_per_photo", {}).items():
         for sub in ("dung", "sai"):

@@ -9,6 +9,7 @@ overall and on the weak classes the fine-tune targeted (summary.json of build_oi
 Rule: use it only if mAP50 over all classes does not drop by more than TOLERANCE and the weak classes' mean AP50 rises.
 Writes AI/report/yolo/finetune_<name>.md (tables for the report) and prints the verdict.
 """
+
 import argparse
 import json
 from pathlib import Path
@@ -38,28 +39,56 @@ def main():
         vals = [setup["per_class"][c][key] for c in weak]
         return sum(vals) / len(vals) if vals else 0.0
 
-    rows = [("Precision", "precision"), ("Recall", "recall"), ("F1", "f1"), ("mAP50", "map50"), ("mAP50-95", "map50_95")]
-    lines = [f"# Fine-tune {args.name}: trước / sau trên tập test {old['images']} ảnh", "",
-             f"Dữ liệu: {summary['images']} ảnh ({summary.get('images_open_images', summary['images'])} Open Images V7 *train*"
-             + (f" + {summary['lvis']['images']} COCO train2017/LVIS" if summary.get("lvis") else "")
-             + "; nhãn người vẽ" + (" + nhãn giả của model gốc cho phần chưa vẽ" if (Path(args.run) / "pseudo.json").exists()
-                                     or summary.get("pseudo") else "")
-             + f"), {len(summary['weak'])} lớp yếu + {len(summary['replay'])} lớp ôn lại.", "",
-             "| Chỉ số | Đang dùng | Sau fine-tune | Chênh |", "|---|---|---|---|"]
+    rows = [
+        ("Precision", "precision"),
+        ("Recall", "recall"),
+        ("F1", "f1"),
+        ("mAP50", "map50"),
+        ("mAP50-95", "map50_95"),
+    ]
+    lines = [
+        f"# Fine-tune {args.name}: trước / sau trên tập test {old['images']} ảnh",
+        "",
+        f"Dữ liệu: {summary['images']} ảnh ({summary.get('images_open_images', summary['images'])} Open Images V7 *train*"
+        + (f" + {summary['lvis']['images']} COCO train2017/LVIS" if summary.get("lvis") else "")
+        + "; nhãn người vẽ"
+        + (
+            " + nhãn giả của model gốc cho phần chưa vẽ"
+            if (Path(args.run) / "pseudo.json").exists() or summary.get("pseudo")
+            else ""
+        )
+        + f"), {len(summary['weak'])} lớp yếu + {len(summary['replay'])} lớp ôn lại.",
+        "",
+        "| Chỉ số | Đang dùng | Sau fine-tune | Chênh |",
+        "|---|---|---|---|",
+    ]
     lines += [f"| {label} | {old[k]:.3f} | {new[k]:.3f} | {new[k] - old[k]:+.3f} |" for label, k in rows]
-    lines += [f"| mAP50 trung bình {len(weak)} lớp yếu | {mean(old):.3f} | {mean(new):.3f} | {mean(new) - mean(old):+.3f} |",
-              f"| Thời gian (ms / ảnh) | {old['ms_per_image']} | {new['ms_per_image']} | |", "",
-              "## Từng lớp yếu (AP50)", "", "| Lớp | Đang dùng | Sau | Chênh | Recall trước → sau |", "|---|---|---|---|---|"]
+    lines += [
+        f"| mAP50 trung bình {len(weak)} lớp yếu | {mean(old):.3f} | {mean(new):.3f} | {mean(new) - mean(old):+.3f} |",
+        f"| Thời gian (ms / ảnh) | {old['ms_per_image']} | {new['ms_per_image']} | |",
+        "",
+        "## Từng lớp yếu (AP50)",
+        "",
+        "| Lớp | Đang dùng | Sau | Chênh | Recall trước → sau |",
+        "|---|---|---|---|---|",
+    ]
     for c in sorted(weak, key=lambda c: new["per_class"][c]["map50"] - old["per_class"][c]["map50"], reverse=True):
         o, n = old["per_class"][c], new["per_class"][c]
-        lines.append(f"| {c} | {o['map50']:.3f} | {n['map50']:.3f} | {n['map50'] - o['map50']:+.3f} | "
-                     f"{o['recall']:.3f} → {n['recall']:.3f} |")
+        lines.append(
+            f"| {c} | {o['map50']:.3f} | {n['map50']:.3f} | {n['map50'] - o['map50']:+.3f} | "
+            f"{o['recall']:.3f} → {n['recall']:.3f} |"
+        )
     keep = new["map50"] >= old["map50"] - TOLERANCE and mean(new) > mean(old)
-    verdict = ("DÙNG model mới: lớp yếu tốt lên, mAP chung không giảm quá "
-               f"{TOLERANCE}." if keep else
-               "KHÔNG dùng: " + ("mAP chung giảm quá ngưỡng." if new["map50"] < old["map50"] - TOLERANCE
-                                 else "lớp yếu không tốt lên."))
-    lines += ["", f"**Kết luận (quy tắc: mAP50 chung không giảm quá {TOLERANCE}, trung bình lớp yếu phải tăng): {verdict}**"]
+    verdict = (
+        f"DÙNG model mới: lớp yếu tốt lên, mAP chung không giảm quá {TOLERANCE}."
+        if keep
+        else "KHÔNG dùng: "
+        + ("mAP chung giảm quá ngưỡng." if new["map50"] < old["map50"] - TOLERANCE else "lớp yếu không tốt lên.")
+    )
+    lines += [
+        "",
+        f"**Kết luận (quy tắc: mAP50 chung không giảm quá {TOLERANCE}, trung bình lớp yếu phải tăng): {verdict}**",
+    ]
     out = REPORT / f"finetune_{args.name}.md"
     out.write_text("\n".join(lines) + "\n", encoding="utf-8")
     print("\n".join(lines[4:12]))

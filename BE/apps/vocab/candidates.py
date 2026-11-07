@@ -8,6 +8,7 @@ automatic sense matching is wrong surprisingly often (打 → "dozen", 把手 �
 Approval runs exactly the checks of ``build_vocab`` (CC-CEDICT, HSK, MOE dictionary, CMUdict, Vietnamese spelling);
 the approved row is appended to ``seed/concepts/words_approved.csv`` so a fresh ``seed_all`` rebuilds it.
 """
+
 import csv
 import gzip
 import json
@@ -32,7 +33,19 @@ from .models import Topic, Word, WordCandidate
 
 APPROVED_CSV = settings.BASE_DIR / "seed" / "concepts" / "words_approved.csv"
 WIKTIONARY = sources.SEED_DIR / "sources" / "wiktionary" / "vi.jsonl.gz"
-CSV_FIELDS = ["slug", "topics", "yolo_label", "pos", "audience", "difficulty", "vi", "en", "en_aliases", "zh_hans", "zh_hant"]
+CSV_FIELDS = [
+    "slug",
+    "topics",
+    "yolo_label",
+    "pos",
+    "audience",
+    "difficulty",
+    "vi",
+    "en",
+    "en_aliases",
+    "zh_hans",
+    "zh_hant",
+]
 _SKIP = ("surname", "variant", "old variant", "used in", "abbr.", "(literary)", "(old)", "(dialect)")
 
 
@@ -44,8 +57,11 @@ def clean_gloss(g: str) -> str | None:
 
 def _vietnamese_index():
     """English gloss → Vietnamese words (primary sense first), restricted to words of the Vietnamese dictionary."""
-    v74 = {s for line in (sources.SEED_DIR / "sources" / "viet74k.txt").read_text(encoding="utf-8").splitlines()
-           for s in line.strip().lower().split()}
+    v74 = {
+        s
+        for line in (sources.SEED_DIR / "sources" / "viet74k.txt").read_text(encoding="utf-8").splitlines()
+        for s in line.strip().lower().split()
+    }
     primary, other = defaultdict(list), defaultdict(list)
     with gzip.open(WIKTIONARY, "rt", encoding="utf-8") as fh:
         for line in fh:
@@ -66,13 +82,17 @@ def _vietnamese_index():
 def suggest(levels=(1, 2, 3)) -> int:
     hsk = json.loads((sources.SEED_DIR / "sources" / "hsk_complete.json").read_text(encoding="utf-8"))
     ced, cmu = sources.cedict(), sources.cmudict()
-    existing = set(Word.objects.filter(translations__language_id="zh-Hans").values_list("translations__text", flat=True))
+    existing = set(
+        Word.objects.filter(translations__language_id="zh-Hans").values_list("translations__text", flat=True)
+    )
     existing |= set(WordCandidate.objects.values_list("zh_hans", flat=True))
     primary, other = _vietnamese_index()
     made = 0
     for e in hsk:
         simp = e["simplified"]
-        lv = next((int(x.split("-")[1]) for x in sorted(e.get("level", [])) if x.startswith("new-") and x[4:].isdigit()), None)
+        lv = next(
+            (int(x.split("-")[1]) for x in sorted(e.get("level", [])) if x.startswith("new-") and x[4:].isdigit()), None
+        )
         if lv not in levels or simp in existing:
             continue
         entries = [x for x in ced.by_simp.get(simp, []) if not x.glosses[0].lower().startswith(_SKIP)]
@@ -83,10 +103,18 @@ def suggest(levels=(1, 2, 3)) -> int:
         if not glosses:
             continue
         en = glosses[0]
-        options = list(dict.fromkeys(primary.get(en, []) + [w for g in glosses for w in primary.get(g, []) + other.get(g, [])]))
+        options = list(
+            dict.fromkeys(primary.get(en, []) + [w for g in glosses for w in primary.get(g, []) + other.get(g, [])])
+        )
         WordCandidate.objects.create(
-            zh_hans=simp, zh_hant=entry.traditional, pinyin=py.numbered_to_marked(entry.pinyin),
-            hsk_level=lv, glosses=entry.glosses[:8], en=en, vi=options[0] if options else "", vi_options=options[:8],
+            zh_hans=simp,
+            zh_hant=entry.traditional,
+            pinyin=py.numbered_to_marked(entry.pinyin),
+            hsk_level=lv,
+            glosses=entry.glosses[:8],
+            en=en,
+            vi=options[0] if options else "",
+            vi_options=options[:8],
             part_of_speech="verb" if entry.glosses[0].startswith("to ") else "noun",
             confidence="high" if primary.get(en) and len(primary[en]) <= 2 else "low",
         )
@@ -111,8 +139,13 @@ def check(c: WordCandidate) -> dict:
         out["topics"] = {"errors": ["Chọn ít nhất một chủ đề"], "warnings": []}
     elif unknown := [t for t in c.topics.split("|") if not Topic.objects.filter(slug=t).exists()]:
         out["topics"] = {"errors": [f"Không có chủ đề: {', '.join(unknown)}"], "warnings": []}
-    if Word.objects.filter(translations__language_id="vi", translations__text=checks.build_vi(c.vi)["text"]).exists() and c.vi:
-        out.setdefault("vi", {"errors": [], "warnings": []})["warnings"].append("Đã có từ khác cùng nghĩa tiếng Việt này")
+    if (
+        Word.objects.filter(translations__language_id="vi", translations__text=checks.build_vi(c.vi)["text"]).exists()
+        and c.vi
+    ):
+        out.setdefault("vi", {"errors": [], "warnings": []})["warnings"].append(
+            "Đã có từ khác cùng nghĩa tiếng Việt này"
+        )
     return out
 
 
@@ -128,10 +161,19 @@ def _slug(c: WordCandidate) -> str:
 def approve(c: WordCandidate, user) -> Word:
     from .management.commands.build_vocab import Command as BuildVocab
 
-    row = {"slug": _slug(c), "topics": c.topics, "yolo_label": "", "pos": c.part_of_speech, "audience": c.audience,
-           "difficulty": str(min(c.hsk_level, 3)), "vi": c.vi, "en": c.en,
-           "en_aliases": ";".join(dict.fromkeys(g for g in (clean_gloss(x) for x in c.glosses[:4]) if g and g != c.en)),
-           "zh_hans": c.zh_hans, "zh_hant": c.zh_hant}
+    row = {
+        "slug": _slug(c),
+        "topics": c.topics,
+        "yolo_label": "",
+        "pos": c.part_of_speech,
+        "audience": c.audience,
+        "difficulty": str(min(c.hsk_level, 3)),
+        "vi": c.vi,
+        "en": c.en,
+        "en_aliases": ";".join(dict.fromkeys(g for g in (clean_gloss(x) for x in c.glosses[:4]) if g and g != c.en)),
+        "zh_hans": c.zh_hans,
+        "zh_hant": c.zh_hant,
+    }
     BuildVocab()._word(row, Word.objects.count(), offline=False)
     word = Word.objects.get(slug=row["slug"])
     word.levels = {"zh": min(c.hsk_level, 4), "en": min(c.hsk_level, 4), "vi": min(c.hsk_level, 4)}
@@ -149,21 +191,50 @@ def approve(c: WordCandidate, user) -> Word:
 
 # ------------------------------------------------------------------ API
 
+
 class CandidateSerializer(serializers.ModelSerializer):
     word_slug = serializers.CharField(source="word.slug", read_only=True, default=None)
 
     class Meta:
         model = WordCandidate
-        fields = ["id", "zh_hans", "zh_hant", "pinyin", "hsk_level", "glosses", "en", "vi", "vi_options",
-                  "part_of_speech", "topics", "audience", "confidence", "status", "checks", "note", "word_slug",
-                  "reviewed_at"]
-        read_only_fields = ["zh_hans", "pinyin", "hsk_level", "glosses", "vi_options", "confidence", "status", "checks",
-                            "word_slug", "reviewed_at"]
+        fields = [
+            "id",
+            "zh_hans",
+            "zh_hant",
+            "pinyin",
+            "hsk_level",
+            "glosses",
+            "en",
+            "vi",
+            "vi_options",
+            "part_of_speech",
+            "topics",
+            "audience",
+            "confidence",
+            "status",
+            "checks",
+            "note",
+            "word_slug",
+            "reviewed_at",
+        ]
+        read_only_fields = [
+            "zh_hans",
+            "pinyin",
+            "hsk_level",
+            "glosses",
+            "vi_options",
+            "confidence",
+            "status",
+            "checks",
+            "word_slug",
+            "reviewed_at",
+        ]
 
 
 @extend_schema(tags=["admin-vocab"])
-class AdminCandidateViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
-                            viewsets.GenericViewSet):
+class AdminCandidateViewSet(
+    mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.UpdateModelMixin, viewsets.GenericViewSet
+):
     """Hàng chờ từ mới (HSK): sửa nghĩa → kiểm tra nguồn → duyệt (thêm vào kho từ) hoặc bỏ qua."""
 
     serializer_class = CandidateSerializer
@@ -188,8 +259,10 @@ class AdminCandidateViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, mi
         c.save(update_fields=["checks", "updated_at"])
         errors = [m for r in c.checks.values() for m in r["errors"]]
         if errors:
-            return Response({"detail": "Chưa qua kiểm tra nguồn: " + "; ".join(errors), "candidate": self.get_serializer(c).data},
-                            status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"detail": "Chưa qua kiểm tra nguồn: " + "; ".join(errors), "candidate": self.get_serializer(c).data},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         approve(c, request.user)
         return Response(self.get_serializer(c).data)
 

@@ -24,22 +24,42 @@ def photo_words(request, detection: Detection, target) -> list[dict]:
         label = it.corrected_label or it.label
         if label not in labels:
             labels.append(label)
-    words = {w.yolo_label: w for w in words_for_target(Word.objects.filter(yolo_label__in=labels), request.user, target)}
+    words = {
+        w.yolo_label: w for w in words_for_target(Word.objects.filter(yolo_label__in=labels), request.user, target)
+    }
     out = []
     for label in labels:
         w = words.get(label)
-        tr = next((t for t in getattr(w, "visible_translations", []) if t.language_id == target.code), None) if w else None
+        tr = (
+            next((t for t in getattr(w, "visible_translations", []) if t.language_id == target.code), None)
+            if w
+            else None
+        )
         vi = next((t for t in getattr(w, "visible_translations", []) if t.language_id == "vi"), None) if w else None
         if tr:
-            out.append({"word_id": w.id, "text": tr.text, "meaning_vi": (vi.text if vi else tr.meaning_vi),
-                        "level": (w.levels or {}).get(target.learn) or 1})
+            out.append(
+                {
+                    "word_id": w.id,
+                    "text": tr.text,
+                    "meaning_vi": (vi.text if vi else tr.meaning_vi),
+                    "level": (w.levels or {}).get(target.learn) or 1,
+                }
+            )
     return out[:MAX_WORDS]
 
 
 def _payload(d: PhotoDialogue) -> dict:
-    return {"id": d.id, "detection": d.detection_id, "language": d.language, "title_vi": d.title_vi,
-            "words": d.words, "lines": d.lines, "ai_generated": True, "model": d.model_name,
-            "created_at": d.created_at}
+    return {
+        "id": d.id,
+        "detection": d.detection_id,
+        "language": d.language,
+        "title_vi": d.title_vi,
+        "words": d.words,
+        "lines": d.lines,
+        "ai_generated": True,
+        "model": d.model_name,
+        "created_at": d.created_at,
+    }
 
 
 class AiStatusView(APIView):
@@ -76,15 +96,23 @@ class PhotoDialogueView(APIView):
             return Response(_payload(existing))
         words = photo_words(request, det, target)
         if not words:
-            return Response({"detail": "Ảnh này chưa có từ nào đã kiểm duyệt để tạo hội thoại", "errors": {}}, status=400)
+            return Response(
+                {"detail": "Ảnh này chưa có từ nào đã kiểm duyệt để tạo hội thoại", "errors": {}}, status=400
+            )
         try:
             out = generator.generate(words, target.code, max(w["level"] for w in words))
         except generator.AiUnavailable as e:
             return Response({"detail": str(e), "errors": {}}, status=503)
         d, _ = PhotoDialogue.objects.get_or_create(
-            detection=det, language=target.code,
-            defaults={"user": request.user, "words": words, "title_vi": out["title_vi"], "lines": out["lines"],
-                      "model_name": out["model"]},
+            detection=det,
+            language=target.code,
+            defaults={
+                "user": request.user,
+                "words": words,
+                "title_vi": out["title_vi"],
+                "lines": out["lines"],
+                "model_name": out["model"],
+            },
         )
         return Response(_payload(d))
 
@@ -103,7 +131,8 @@ class TranslateView(APIView):
         if source not in (*langs, translator.AUTO) or target not in langs or source == target:
             return Response({"detail": "Cặp ngôn ngữ không hợp lệ", "errors": {}}, status=400)
         if {source, target} == {"zh-Hans", "zh-Hant"} or (
-                source == translator.AUTO and translator.wrong_script(text, target)):
+            source == translator.AUTO and translator.wrong_script(text, target)
+        ):
             # giản ↔ phồn is not a translation: the words themselves differ by region (土豆 / 馬鈴薯)
             return Response({"detail": "Không chuyển trực tiếp giữa giản thể và phồn thể", "errors": {}}, status=400)
         if not text:
@@ -114,8 +143,15 @@ class TranslateView(APIView):
             out = translator.translate(text, source, target)
         except generator.AiUnavailable as e:
             return Response({"detail": str(e), "errors": {}}, status=503)
-        return Response({
-            "text": text, "source": source, "target": target, **out, "machine_translated": True,
-            "source_tts": tts_locale(source) if source != translator.AUTO else "", "target_tts": tts_locale(target),
-            "words": translator.verified_words({source: text, target: out["translation"]}, request.user),
-        })
+        return Response(
+            {
+                "text": text,
+                "source": source,
+                "target": target,
+                **out,
+                "machine_translated": True,
+                "source_tts": tts_locale(source) if source != translator.AUTO else "",
+                "target_tts": tts_locale(target),
+                "words": translator.verified_words({source: text, target: out["translation"]}, request.user),
+            }
+        )

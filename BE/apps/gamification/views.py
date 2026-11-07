@@ -14,8 +14,18 @@ from apps.core.permissions import IsStaffRole
 
 from . import catalog, mascot, services
 from .models import (
-    ActiveBoost, Badge, DailyProgress, DailyQuest, Item, LeagueCycle, LeagueMember, LeagueTier, Outfit, UserBadge,
-    UserInventory, XpTransaction,
+    ActiveBoost,
+    Badge,
+    DailyProgress,
+    DailyQuest,
+    Item,
+    LeagueCycle,
+    LeagueMember,
+    LeagueTier,
+    Outfit,
+    UserBadge,
+    UserInventory,
+    XpTransaction,
 )
 
 
@@ -31,37 +41,83 @@ class SummaryView(APIView):
         stats = services.stats_for(user)
         progress = services.progress_for(user)
         boosts = ActiveBoost.objects.filter(user=user, expires_at__gt=timezone.now()).select_related("item")
-        member = LeagueMember.objects.filter(user=user, cycle__start_at=services.week_bounds()[0]).select_related("cycle__tier").first()
-        return Response({
-            "lifetime_xp": stats.lifetime_xp, "level": stats.level, "today_xp": progress.xp,
-            "daily_xp_cap": services.DAILY_XP_CAP,
-            "streak": services.current_streak(user), "longest_streak": stats.longest_streak,
-            "repairable_streak": services.repairable_streak(user, stats),
-            "studied_today": progress.active,
-            "scales": user.scales_balance, "gems": user.gems_balance,
-            "streak_freezes": UserInventory.objects.filter(user=user, item__effect=Item.Effect.STREAK_FREEZE).aggregate(n=Sum("quantity"))["n"] or 0,
-            "freezes_used": stats.freezes_used,
-            "words_learned": stats.words_learned, "words_mastered": stats.words_mastered,
-            "today": {"new_learned": progress.new_learned, "new_target": progress.new_target,
-                      "reviews_done": progress.reviews_done, "review_target": progress.review_target},
-            "active_boosts": [{"item": b.item.code, "name": b.item.name, "multiplier": b.multiplier, "expires_at": b.expires_at} for b in boosts],
-            "league": {"tier": member.cycle.tier.name, "tier_code": member.cycle.tier.code, "weekly_xp": member.weekly_xp} if member else None,
-        })
+        member = (
+            LeagueMember.objects.filter(user=user, cycle__start_at=services.week_bounds()[0])
+            .select_related("cycle__tier")
+            .first()
+        )
+        return Response(
+            {
+                "lifetime_xp": stats.lifetime_xp,
+                "level": stats.level,
+                "today_xp": progress.xp,
+                "daily_xp_cap": services.DAILY_XP_CAP,
+                "streak": services.current_streak(user),
+                "longest_streak": stats.longest_streak,
+                "repairable_streak": services.repairable_streak(user, stats),
+                "studied_today": progress.active,
+                "scales": user.scales_balance,
+                "gems": user.gems_balance,
+                "streak_freezes": UserInventory.objects.filter(
+                    user=user, item__effect=Item.Effect.STREAK_FREEZE
+                ).aggregate(n=Sum("quantity"))["n"]
+                or 0,
+                "freezes_used": stats.freezes_used,
+                "words_learned": stats.words_learned,
+                "words_mastered": stats.words_mastered,
+                "today": {
+                    "new_learned": progress.new_learned,
+                    "new_target": progress.new_target,
+                    "reviews_done": progress.reviews_done,
+                    "review_target": progress.review_target,
+                },
+                "active_boosts": [
+                    {"item": b.item.code, "name": b.item.name, "multiplier": b.multiplier, "expires_at": b.expires_at}
+                    for b in boosts
+                ],
+                "league": {
+                    "tier": member.cycle.tier.name,
+                    "tier_code": member.cycle.tier.code,
+                    "weekly_xp": member.weekly_xp,
+                }
+                if member
+                else None,
+            }
+        )
 
 
 class ProgressView(APIView):
-    @extend_schema(tags=["gamification"], parameters=[
-        OpenApiParameter("start", str, description="YYYY-MM-DD"), OpenApiParameter("end", str, description="YYYY-MM-DD")],
-        responses={200: dict})
+    @extend_schema(
+        tags=["gamification"],
+        parameters=[
+            OpenApiParameter("start", str, description="YYYY-MM-DD"),
+            OpenApiParameter("end", str, description="YYYY-MM-DD"),
+        ],
+        responses={200: dict},
+    )
     def get(self, request):
-        end = date.fromisoformat(request.query_params.get("end")) if request.query_params.get("end") else services.today()
-        start = date.fromisoformat(request.query_params.get("start")) if request.query_params.get("start") else end - timedelta(days=89)
+        end = (
+            date.fromisoformat(request.query_params.get("end")) if request.query_params.get("end") else services.today()
+        )
+        start = (
+            date.fromisoformat(request.query_params.get("start"))
+            if request.query_params.get("start")
+            else end - timedelta(days=89)
+        )
         rows = DailyProgress.objects.filter(user=request.user, date__range=(start, end)).order_by("date")
-        return Response([
-            {"date": r.date, "xp": r.xp, "new_learned": r.new_learned, "reviews_done": r.reviews_done,
-             "active": r.active, "freeze_used": r.freeze_used}
-            for r in rows
-        ])
+        return Response(
+            [
+                {
+                    "date": r.date,
+                    "xp": r.xp,
+                    "new_learned": r.new_learned,
+                    "reviews_done": r.reviews_done,
+                    "active": r.active,
+                    "freeze_used": r.freeze_used,
+                }
+                for r in rows
+            ]
+        )
 
 
 class QuestSerializer(serializers.ModelSerializer):
@@ -71,7 +127,17 @@ class QuestSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = DailyQuest
-        fields = ["id", "kind", "title", "target", "progress", "completed", "completed_at", "reward_claimed", "reward_scales"]
+        fields = [
+            "id",
+            "kind",
+            "title",
+            "target",
+            "progress",
+            "completed",
+            "completed_at",
+            "reward_claimed",
+            "reward_scales",
+        ]
 
     def get_reward_scales(self, obj):
         return DailyQuest.REWARD_SCALES
@@ -90,11 +156,18 @@ class QuestViewSet(viewsets.GenericViewSet):
     def today(self, request):
         quests = services.ensure_quests(request.user)
         monthly = services.monthly_for(request.user)
-        return Response({
-            "quests": QuestSerializer(quests, many=True).data,
-            "monthly": {"month": monthly.month, "completed_count": monthly.completed_count,
-                        "target": monthly.TARGET, "reward_gems": monthly.REWARD_GEMS, "reward_claimed": monthly.reward_claimed},
-        })
+        return Response(
+            {
+                "quests": QuestSerializer(quests, many=True).data,
+                "monthly": {
+                    "month": monthly.month,
+                    "completed_count": monthly.completed_count,
+                    "target": monthly.TARGET,
+                    "reward_gems": monthly.REWARD_GEMS,
+                    "reward_claimed": monthly.reward_claimed,
+                },
+            }
+        )
 
     @action(detail=True, methods=["post"])
     def claim(self, request, pk=None):
@@ -118,8 +191,19 @@ class BadgeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Badge
-        fields = ["id", "code", "name", "description", "icon", "sticker", "condition", "threshold", "reward_gems", "owned",
-                  "awarded_at"]
+        fields = [
+            "id",
+            "code",
+            "name",
+            "description",
+            "icon",
+            "sticker",
+            "condition",
+            "threshold",
+            "reward_gems",
+            "owned",
+            "awarded_at",
+        ]
 
     def _owned(self):
         if not hasattr(self, "_cache"):
@@ -156,8 +240,11 @@ class BadgeViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
 
 
 class LeaderboardView(APIView):
-    @extend_schema(tags=["gamification"], parameters=[OpenApiParameter("scope", str, description="league | global | friends")],
-                   responses={200: dict})
+    @extend_schema(
+        tags=["gamification"],
+        parameters=[OpenApiParameter("scope", str, description="league | global | friends")],
+        responses={200: dict},
+    )
     def get(self, request):
         scope = request.query_params.get("scope", "league")
         User = get_user_model()
@@ -166,36 +253,100 @@ class LeaderboardView(APIView):
             # you and the people you follow, by XP earned this week (Monday 00:00, local time)
             from apps.community.models import UserFollow
 
-            ids = [request.user.id, *UserFollow.objects.filter(follower=request.user).values_list("following_id", flat=True)]
+            ids = [
+                request.user.id,
+                *UserFollow.objects.filter(follower=request.user).values_list("following_id", flat=True),
+            ]
             today = timezone.localdate()
             week_start = timezone.make_aware(datetime.combine(today - timedelta(days=today.weekday()), time.min))
-            xp = dict(XpTransaction.objects.filter(user_id__in=ids, created_at__gte=week_start)
-                      .values("user_id").annotate(s=Sum("amount")).values_list("user_id", "s"))
-            people = sorted(User.objects.filter(id__in=ids, is_active=True).select_related("mascot"), key=lambda u: (-(xp.get(u.id) or 0), u.id))
-            return Response({"scope": "friends", "tiers": tiers, "members": [
-                {"rank": i + 1, "user_id": u.id, "display_name": u.display_name, "avatar": _avatar(request, u),
-                 "mascot": mascot.look(u), "xp": xp.get(u.id) or 0, "is_me": u.id == request.user.id}
-                for i, u in enumerate(people)
-            ]})
+            xp = dict(
+                XpTransaction.objects.filter(user_id__in=ids, created_at__gte=week_start)
+                .values("user_id")
+                .annotate(s=Sum("amount"))
+                .values_list("user_id", "s")
+            )
+            people = sorted(
+                User.objects.filter(id__in=ids, is_active=True).select_related("mascot"),
+                key=lambda u: (-(xp.get(u.id) or 0), u.id),
+            )
+            return Response(
+                {
+                    "scope": "friends",
+                    "tiers": tiers,
+                    "members": [
+                        {
+                            "rank": i + 1,
+                            "user_id": u.id,
+                            "display_name": u.display_name,
+                            "avatar": _avatar(request, u),
+                            "mascot": mascot.look(u),
+                            "xp": xp.get(u.id) or 0,
+                            "is_me": u.id == request.user.id,
+                        }
+                        for i, u in enumerate(people)
+                    ],
+                }
+            )
         if scope == "global":
-            top = User.objects.filter(is_active=True, stats__lifetime_xp__gt=0).select_related("stats", "mascot").order_by("-stats__lifetime_xp")[:50]
-            return Response({"scope": "global", "tiers": tiers, "members": [
-                {"rank": i + 1, "user_id": u.id, "display_name": u.display_name, "avatar": _avatar(request, u),
-                 "mascot": mascot.look(u), "xp": u.stats.lifetime_xp, "is_me": u.id == request.user.id}
-                for i, u in enumerate(top)
-            ]})
+            top = (
+                User.objects.filter(is_active=True, stats__lifetime_xp__gt=0)
+                .select_related("stats", "mascot")
+                .order_by("-stats__lifetime_xp")[:50]
+            )
+            return Response(
+                {
+                    "scope": "global",
+                    "tiers": tiers,
+                    "members": [
+                        {
+                            "rank": i + 1,
+                            "user_id": u.id,
+                            "display_name": u.display_name,
+                            "avatar": _avatar(request, u),
+                            "mascot": mascot.look(u),
+                            "xp": u.stats.lifetime_xp,
+                            "is_me": u.id == request.user.id,
+                        }
+                        for i, u in enumerate(top)
+                    ],
+                }
+            )
         me = services.join_current_league(request.user)
         cycle = me.cycle
         members = list(cycle.members.select_related("user__mascot").order_by("-weekly_xp", "id"))
         n = len(members)
         out = []
         for i, m in enumerate(members, start=1):
-            zone = "promotion" if i <= cycle.tier.promote_top else (
-                "demotion" if i > n - cycle.tier.demote_bottom and n > cycle.tier.promote_top + cycle.tier.demote_bottom else "safe")
-            out.append({"rank": i, "user_id": m.user_id, "display_name": m.user.display_name, "avatar": _avatar(request, m.user),
-                        "mascot": mascot.look(m.user), "xp": m.weekly_xp, "zone": zone, "is_me": m.user_id == request.user.id})
-        return Response({"scope": "league", "tiers": tiers, "tier": {"code": cycle.tier.code, "name": cycle.tier.name},
-                         "ends_at": cycle.end_at, "members": out})
+            zone = (
+                "promotion"
+                if i <= cycle.tier.promote_top
+                else (
+                    "demotion"
+                    if i > n - cycle.tier.demote_bottom and n > cycle.tier.promote_top + cycle.tier.demote_bottom
+                    else "safe"
+                )
+            )
+            out.append(
+                {
+                    "rank": i,
+                    "user_id": m.user_id,
+                    "display_name": m.user.display_name,
+                    "avatar": _avatar(request, m.user),
+                    "mascot": mascot.look(m.user),
+                    "xp": m.weekly_xp,
+                    "zone": zone,
+                    "is_me": m.user_id == request.user.id,
+                }
+            )
+        return Response(
+            {
+                "scope": "league",
+                "tiers": tiers,
+                "tier": {"code": cycle.tier.code, "name": cycle.tier.name},
+                "ends_at": cycle.end_at,
+                "members": out,
+            }
+        )
 
 
 PACKS = {p["code"]: p for p in catalog.STICKER_PACKS}
@@ -212,7 +363,18 @@ class ItemSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Item
-        fields = ["id", "code", "name", "description", "image", "effect", "cost_scales", "cost_gems", "owned", "stickers"]
+        fields = [
+            "id",
+            "code",
+            "name",
+            "description",
+            "image",
+            "effect",
+            "cost_scales",
+            "cost_gems",
+            "owned",
+            "stickers",
+        ]
 
     def get_owned(self, obj):
         inv = {i.item_id: i.quantity for i in self.context.get("inventory", [])}
@@ -242,15 +404,26 @@ class ShopViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
         except services.ShopError as e:
             return Response({"detail": str(e), "errors": {}}, status=400)
         request.user.refresh_from_db(fields=["scales_balance", "gems_balance"])
-        return Response({"item": item.code, "quantity": inv.quantity,
-                         "scales": request.user.scales_balance, "gems": request.user.gems_balance})
+        return Response(
+            {
+                "item": item.code,
+                "quantity": inv.quantity,
+                "scales": request.user.scales_balance,
+                "gems": request.user.gems_balance,
+            }
+        )
 
     @extend_schema(responses={200: dict})
     @action(detail=False, methods=["get"])
     def stickers(self, request):
         """The stickers I can send, for the sticker picker (empty until a pack is bought in the shop)."""
         codes = services.owned_stickers(request.user)
-        return Response([{"code": c, "caption": catalog.STICKER_CAPTION.get(c, ""), "image": catalog.sticker_path(c)} for c in codes])
+        return Response(
+            [
+                {"code": c, "caption": catalog.STICKER_CAPTION.get(c, ""), "image": catalog.sticker_path(c)}
+                for c in codes
+            ]
+        )
 
     @action(detail=True, methods=["post"])
     def use(self, request, pk=None):
@@ -270,14 +443,26 @@ def wardrobe(request) -> dict:
     day = services.today()
     owned = mascot.owned_codes(user)
     return {
-        "name": m.name, "as_avatar": m.as_avatar, "gems": user.gems_balance,
+        "name": m.name,
+        "as_avatar": m.as_avatar,
+        "gems": user.gems_balance,
         "wearing": {slot: getattr(m, slot) for slot in mascot.SLOTS},
         "slots": [{"code": c, "label": label} for c, label in catalog.SLOTS],
-        "outfits": [{
-            "code": o.code, "name": o.name, "slot": o.slot, "image": o.image, "cost_gems": o.cost_gems,
-            "owned": o.code in owned, "for_sale": mascot.for_sale(o, day), "how": mascot.how_to_get(o, day),
-            "badge": o.badge_code, "event": o.event,
-        } for o in Outfit.objects.filter(active=True)],
+        "outfits": [
+            {
+                "code": o.code,
+                "name": o.name,
+                "slot": o.slot,
+                "image": o.image,
+                "cost_gems": o.cost_gems,
+                "owned": o.code in owned,
+                "for_sale": mascot.for_sale(o, day),
+                "how": mascot.how_to_get(o, day),
+                "badge": o.badge_code,
+                "event": o.event,
+            }
+            for o in Outfit.objects.filter(active=True)
+        ],
     }
 
 
@@ -294,8 +479,12 @@ class MascotView(APIView):
         if not isinstance(wearing, dict):
             return Response({"detail": "wearing phải là {ô: mã đồ}", "errors": {}}, status=400)
         try:
-            mascot.dress(request.user, {k: str(v or "") for k, v in wearing.items()},
-                         name=request.data.get("name"), as_avatar=request.data.get("as_avatar"))
+            mascot.dress(
+                request.user,
+                {k: str(v or "") for k, v in wearing.items()},
+                name=request.data.get("name"),
+                as_avatar=request.data.get("as_avatar"),
+            )
         except mascot.MascotError as e:
             return Response({"detail": str(e), "errors": {}}, status=400)
         return Response(wardrobe(request))
@@ -319,8 +508,18 @@ class XpHistoryView(APIView):
     @extend_schema(tags=["gamification"], responses={200: dict})
     def get(self, request):
         rows = XpTransaction.objects.filter(user=request.user)[:100]
-        return Response([{"source": r.source, "amount": r.amount, "multiplier": r.multiplier, "note": r.note,
-                          "created_at": r.created_at} for r in rows])
+        return Response(
+            [
+                {
+                    "source": r.source,
+                    "amount": r.amount,
+                    "multiplier": r.multiplier,
+                    "note": r.note,
+                    "created_at": r.created_at,
+                }
+                for r in rows
+            ]
+        )
 
 
 class PublicProfileStatsView(APIView):
@@ -328,16 +527,29 @@ class PublicProfileStatsView(APIView):
     def get(self, request, user_id):
         user = get_object_or_404(get_user_model(), pk=user_id, is_active=True)
         stats = services.stats_for(user)
-        member = LeagueMember.objects.filter(user=user).select_related("cycle__tier").order_by("-cycle__start_at").first()
-        return Response({
-            "user_id": user.id, "display_name": user.display_name, "avatar": _avatar(request, user),
-            "mascot": mascot.look(user), "lifetime_xp": stats.lifetime_xp, "level": stats.level, "streak": services.current_streak(user),
-            "words_learned": stats.words_learned, "tier": member.cycle.tier.name if member else None,
-            "badges": BadgeSerializer(Badge.objects.filter(userbadge__user=user), many=True, context={"user_id": user.id}).data,
-        })
+        member = (
+            LeagueMember.objects.filter(user=user).select_related("cycle__tier").order_by("-cycle__start_at").first()
+        )
+        return Response(
+            {
+                "user_id": user.id,
+                "display_name": user.display_name,
+                "avatar": _avatar(request, user),
+                "mascot": mascot.look(user),
+                "lifetime_xp": stats.lifetime_xp,
+                "level": stats.level,
+                "streak": services.current_streak(user),
+                "words_learned": stats.words_learned,
+                "tier": member.cycle.tier.name if member else None,
+                "badges": BadgeSerializer(
+                    Badge.objects.filter(userbadge__user=user), many=True, context={"user_id": user.id}
+                ).data,
+            }
+        )
 
 
 # ------------------------------------------------------------------ admin
+
 
 class AdminBadgeSerializer(serializers.ModelSerializer):
     class Meta:

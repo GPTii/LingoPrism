@@ -5,6 +5,7 @@ with a human translation linked directly on Tatoeba (vi for English, vi or en fo
 Chinese sentences keep their original script: Tatoeba's transcriptions tell whether a sentence was written in
 simplified or traditional characters, so zh-Hans and zh-Hant never come from automatic conversion.
 """
+
 import bz2
 import csv
 import io
@@ -63,8 +64,14 @@ class Command(BaseCommand):
             for v in vs:
                 vie_eng[v].append(e)
         # translations need not be written by natives of the translation language, but must exist on Tatoeba
-        eng_any = self.sentences("eng", None, 200, keep={e for es in links["cmn-eng"].values() for e in es}
-                                 | {e for es in vie_eng.values() for e in es} | set(links["eng-vie"]))
+        eng_any = self.sentences(
+            "eng",
+            None,
+            200,
+            keep={e for es in links["cmn-eng"].values() for e in es}
+            | {e for es in vie_eng.values() for e in es}
+            | set(links["eng-vie"]),
+        )
         eng = {k: v for k, v in eng_any.items() if k in links["eng-vie"] and v[1] in natives["eng"] and len(v[0]) <= 80}
         vie_any = self.sentences("vie", None, 200)
         script, latn = self.transcriptions()
@@ -108,11 +115,22 @@ class Command(BaseCommand):
                 span = sl.word_spans(zh.tokens, wtext, lang)
                 if not span:
                     continue
-                candidates[(word_id, lang)].append(self.example(
-                    word_id, lang, sid, text, zh.tokens, span, vi, en, zh.errors,
-                    zh.warnings + via + ([f"Pinyin đã được {reviewer} duyệt trên Tatoeba"] if reviewer else []),
-                    sl.py.numbered_to_marked(zh.numbered), reviewed=bool(reviewer),
-                ))
+                candidates[(word_id, lang)].append(
+                    self.example(
+                        word_id,
+                        lang,
+                        sid,
+                        text,
+                        zh.tokens,
+                        span,
+                        vi,
+                        en,
+                        zh.errors,
+                        zh.warnings + via + ([f"Pinyin đã được {reviewer} duyệt trên Tatoeba"] if reviewer else []),
+                        sl.py.numbered_to_marked(zh.numbered),
+                        reviewed=bool(reviewer),
+                    )
+                )
 
         # ---- English (needs a Vietnamese translation) and Vietnamese (needs an English one)
         for lang, pool, trans in (("en", eng, links["eng-vie"]), ("vi", vie, vie_eng)):
@@ -136,8 +154,14 @@ class Command(BaseCommand):
         rows = []
         for (word_id, lang), items in candidates.items():
             # verified first, then sentences with a Vietnamese translation, reviewed pinyin, short ones
-            items.sort(key=lambda e: (e.status != ReviewStatus.VERIFIED, not e.translation_vi,
-                                      not e.checks.get("reviewed"), len(e.text)))
+            items.sort(
+                key=lambda e: (
+                    e.status != ReviewStatus.VERIFIED,
+                    not e.translation_vi,
+                    not e.checks.get("reviewed"),
+                    len(e.text),
+                )
+            )
             rows.extend(items[:per_word])
             for e in items[:per_word]:
                 stats[f"{lang} {e.status}"] += 1
@@ -157,9 +181,18 @@ class Command(BaseCommand):
     @staticmethod
     def example(word_id, lang, sid, text, tokens, span, vi, en, errors=(), warnings=(), translit="", reviewed=False):
         return ExampleSentence(
-            word_id=word_id, language_id=lang, text=text, transliteration=translit, translation_vi=vi,
-            translation_en=en, source="tatoeba", source_id=str(sid), license=LICENSE, tokens=tokens,
-            target_tokens=span, checks={"errors": list(errors), "warnings": list(warnings), "reviewed": reviewed},
+            word_id=word_id,
+            language_id=lang,
+            text=text,
+            transliteration=translit,
+            translation_vi=vi,
+            translation_en=en,
+            source="tatoeba",
+            source_id=str(sid),
+            license=LICENSE,
+            tokens=tokens,
+            target_tokens=span,
+            checks={"errors": list(errors), "warnings": list(warnings), "reviewed": reviewed},
             status=ReviewStatus.FLAGGED if errors else ReviewStatus.VERIFIED,
         )
 

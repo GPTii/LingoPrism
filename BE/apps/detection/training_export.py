@@ -14,6 +14,7 @@ A photo with an object the detector missed (the learner added it by name, no box
 object would be learnt as background. It goes to missed/ with missed.csv (file, label, typed name), to be boxed by
 hand (e.g. in Label Studio) before training.
 """
+
 import csv
 import io
 import zipfile
@@ -41,10 +42,17 @@ def _jpeg(photo) -> bytes:
 
 
 def build_feedback_zip() -> tuple[bytes, int]:
-    detections = {m.item.detection for m in CorrectionMemory.objects.filter(status="approved").select_related(
-        "item__detection__photo") if m.item.detection.photo and m.item.detection.photo.image}
-    missed = list(DetectionItem.objects.filter(manual=True, detection__photo__isnull=False).exclude(
-        detection__photo__image="").select_related("detection__photo").order_by("detection_id", "id"))
+    detections = {
+        m.item.detection
+        for m in CorrectionMemory.objects.filter(status="approved").select_related("item__detection__photo")
+        if m.item.detection.photo and m.item.detection.photo.image
+    }
+    missed = list(
+        DetectionItem.objects.filter(manual=True, detection__photo__isnull=False)
+        .exclude(detection__photo__image="")
+        .select_related("detection__photo")
+        .order_by("detection_id", "id")
+    )
     with_missed = {it.detection_id for it in missed}
     names: list[str] = []
     buf = io.BytesIO()

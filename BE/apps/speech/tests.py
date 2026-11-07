@@ -45,13 +45,14 @@ class FakeRecogniser:
         post = np.full((len(rows) + 4, len(self.vocab)), 0.01)
         for f, i in enumerate(rows):
             post[f, i] = 0.95
-        post[len(rows):, 0] = 0.95
+        post[len(rows) :, 0] = 0.95
         return post / post.sum(axis=1, keepdims=True)
 
     decode = recognizer.Recogniser.decode
 
 
 # --- pieces --------------------------------------------------------------------------------------------------------
+
 
 def test_tone_marks_and_comparable_forms():
     assert split_tone("ɑ5") == ("ɑ", "5") and split_tone("aːɜ") == ("aː", "ɜ")
@@ -110,11 +111,13 @@ def test_expected_phones_golden():
 
 # --- scoring with a stand-in recogniser ------------------------------------------------------------------------------
 
+
 @pytest.fixture
 def fake(monkeypatch):
     def use(heard, units):
         monkeypatch.setattr(recognizer, "get", lambda: FakeRecogniser(heard))
         monkeypatch.setattr(A, "expected_units", lambda text, language, pinyin=None: units)
+
     return use
 
 
@@ -140,14 +143,18 @@ def test_dropped_final_sound(fake):
 
 # --- API ------------------------------------------------------------------------------------------------------------
 
+
 @pytest.fixture
 def client(db, settings, monkeypatch, fake):
     for code in ("vi", "en", "zh-Hans", "zh-Hant"):
         Language.objects.create(code=code, name=code, native_name=code, tts_locale=code)
     w = Word.objects.create(slug="think")
-    tr = WordTranslation.objects.create(word=w, language_id="en", text="think", ipa="θɪŋk", status=ReviewStatus.VERIFIED)
-    draft = WordTranslation.objects.create(word=Word.objects.create(slug="x"), language_id="en", text="sink",
-                                           status=ReviewStatus.DRAFT)
+    tr = WordTranslation.objects.create(
+        word=w, language_id="en", text="think", ipa="θɪŋk", status=ReviewStatus.VERIFIED
+    )
+    draft = WordTranslation.objects.create(
+        word=Word.objects.create(slug="x"), language_id="en", text="sink", status=ReviewStatus.DRAFT
+    )
     monkeypatch.setattr(recognizer, "available", lambda: True)
     fake(["t", "ɪ", "ŋ", "k"], [Unit("think", ["θ", "ɪ", "ŋ", "k"])])
     user = User.objects.create_user("s@example.com", "Strong!Pass123", active_language="en")
@@ -174,8 +181,9 @@ def test_assess_scores_and_keeps_the_attempt(client):
 def test_assess_refuses_unverified_words_and_silence(client):
     c, _, tr, draft = client
     assert _post(c, translation_id=draft.id).status_code == 404
-    res = c.post("/api/v1/speech/assess/", {"audio": io.BytesIO(_wav(amp=0.0)), "translation_id": tr.id},
-                 format="multipart")
+    res = c.post(
+        "/api/v1/speech/assess/", {"audio": io.BytesIO(_wav(amp=0.0)), "translation_id": tr.id}, format="multipart"
+    )
     assert res.status_code == 422 and res.data["code"] == "too_quiet"
     assert c.post("/api/v1/speech/assess/", {"translation_id": tr.id}, format="multipart").status_code == 400
 
@@ -184,7 +192,8 @@ def test_status_and_languages(client):
     c, *_ = client
     data = c.get("/api/v1/speech/status/").data
     assert data["enabled"] is True and "vi" not in data["languages"]
-    vi = WordTranslation.objects.create(word=Word.objects.create(slug="me"), language_id="vi", text="mẹ",
-                                        status=ReviewStatus.VERIFIED)
+    vi = WordTranslation.objects.create(
+        word=Word.objects.create(slug="me"), language_id="vi", text="mẹ", status=ReviewStatus.VERIFIED
+    )
     res = _post(c, translation_id=vi.id)
     assert res.status_code == 400 and res.data["code"] == "language"

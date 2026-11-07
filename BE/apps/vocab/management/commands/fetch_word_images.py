@@ -12,6 +12,7 @@ Result: ``seed/images/<slug>.jpg`` + ``seed/concepts/images.csv`` (committed). `
 automatic pick) → ``verified`` once a person looked at it; ``none`` = no suitable free photo, keep the emoji.
 ``build_vocab`` attaches only verified pictures to the words.
 """
+
 import csv
 import html
 import io
@@ -28,37 +29,121 @@ API_COMMONS = "https://commons.wikimedia.org/w/api.php"
 UA = "LingoPrism/1.0 (graduation project; https://github.com/GPTii/LingoPrism)"
 SIZE = 480
 FIELDS = ["slug", "wiki_title", "commons_file", "license", "author", "source_url", "status"]
-FREE = re.compile(r"^(cc0|public domain|pd\b|pd-|gfdl|fal\b|no restrictions|cc[ -]by(-sa)?[ -]?\d|cc by(-sa)? \d)", re.I)
+FREE = re.compile(
+    r"^(cc0|public domain|pd\b|pd-|gfdl|fal\b|no restrictions|cc[ -]by(-sa)?[ -]?\d|cc by(-sa)? \d)", re.I
+)
 
 # English Wikipedia article whose lead photo illustrates the word (default: the English word itself).
 WIKI_TITLES = {
-    "person": "Human", "friend": "Friendship", "doctor": "Physician", "subway": "Rapid transit",
-    "bench": "Bench (furniture)", "mouse-animal": "House mouse", "hippo": "Hippopotamus", "tie": "Necktie",
-    "baseball-bat": "Baseball bat", "tennis-racket": "Racket (sports equipment)", "orange": "Orange (fruit)",
-    "donut": "Doughnut", "table": "Table (furniture)", "television": "Television set", "computer-mouse": "Computer mouse",
-    "keyboard": "Computer keyboard", "microwave": "Microwave oven", "glue": "Adhesive", "corn": "Maize",
-    "noodles": "Noodle", "egg": "Egg as food", "lamp": "Balanced-arm lamp", "light-bulb": "Incandescent light bulb",
-    "fan": "Mechanical fan", "key": "Key (lock)", "trash-can": "Waste container", "plate": "Plate (dishware)",
-    "pot": "Cookware and bakeware", "pants": "Trousers", "shoes": "Shoe", "socks": "Sock", "ring": "Ring (jewellery)",
-    "gloves": "Glove", "belt": "Belt (clothing)", "eye": "Human eye", "nose": "Human nose", "mouth": "Lip",
-    "head": "Human head", "leg": "Human leg", "tablet": "Tablet computer", "charger": "Battery charger",
-    "printer": "Printer (computing)", "screen": "Computer monitor", "battery": "Electric battery", "grass": "Lawn",
-    "stone": "Rock (geology)", "football": "Ball (association football)", "basketball": "Basketball (ball)",
-    "volleyball": "Volleyball (ball)", "ticket": "Ticket (admission)", "market": "Marketplace",
-    "cinema": "Movie theater", "pharmacy": "Pharmacy (shop)", "church": "Church (building)", "glasses": "Glasses",
-    "mobile-phone": "Mobile phone", "pen": "Pen", "ruler": "Ruler", "map": "Map", "bank": "Bank",
+    "person": "Human",
+    "friend": "Friendship",
+    "doctor": "Physician",
+    "subway": "Rapid transit",
+    "bench": "Bench (furniture)",
+    "mouse-animal": "House mouse",
+    "hippo": "Hippopotamus",
+    "tie": "Necktie",
+    "baseball-bat": "Baseball bat",
+    "tennis-racket": "Racket (sports equipment)",
+    "orange": "Orange (fruit)",
+    "donut": "Doughnut",
+    "table": "Table (furniture)",
+    "television": "Television set",
+    "computer-mouse": "Computer mouse",
+    "keyboard": "Computer keyboard",
+    "microwave": "Microwave oven",
+    "glue": "Adhesive",
+    "corn": "Maize",
+    "noodles": "Noodle",
+    "egg": "Egg as food",
+    "lamp": "Balanced-arm lamp",
+    "light-bulb": "Incandescent light bulb",
+    "fan": "Mechanical fan",
+    "key": "Key (lock)",
+    "trash-can": "Waste container",
+    "plate": "Plate (dishware)",
+    "pot": "Cookware and bakeware",
+    "pants": "Trousers",
+    "shoes": "Shoe",
+    "socks": "Sock",
+    "ring": "Ring (jewellery)",
+    "gloves": "Glove",
+    "belt": "Belt (clothing)",
+    "eye": "Human eye",
+    "nose": "Human nose",
+    "mouth": "Lip",
+    "head": "Human head",
+    "leg": "Human leg",
+    "tablet": "Tablet computer",
+    "charger": "Battery charger",
+    "printer": "Printer (computing)",
+    "screen": "Computer monitor",
+    "battery": "Electric battery",
+    "grass": "Lawn",
+    "stone": "Rock (geology)",
+    "football": "Ball (association football)",
+    "basketball": "Basketball (ball)",
+    "volleyball": "Volleyball (ball)",
+    "ticket": "Ticket (admission)",
+    "market": "Marketplace",
+    "cinema": "Movie theater",
+    "pharmacy": "Pharmacy (shop)",
+    "church": "Church (building)",
+    "glasses": "Glasses",
+    "mobile-phone": "Mobile phone",
+    "pen": "Pen",
+    "ruler": "Ruler",
+    "map": "Map",
+    "bank": "Bank",
 }
 COLORS = {
-    "red": "#E53935", "blue": "#1E88E5", "yellow": "#FDD835", "green": "#43A047", "white": "#FFFFFF",
-    "black": "#212121", "pink": "#F48FB1", "purple": "#8E24AA", "orange-color": "#FB8C00", "brown": "#795548",
-    "gray": "#9E9E9E", "beige": "#E8D8B8", "cyan": "#00BCD4", "gold-color": "#D4AF37", "silver-color": "#C0C0C0",
+    "red": "#E53935",
+    "blue": "#1E88E5",
+    "yellow": "#FDD835",
+    "green": "#43A047",
+    "white": "#FFFFFF",
+    "black": "#212121",
+    "pink": "#F48FB1",
+    "purple": "#8E24AA",
+    "orange-color": "#FB8C00",
+    "brown": "#795548",
+    "gray": "#9E9E9E",
+    "beige": "#E8D8B8",
+    "cyan": "#00BCD4",
+    "gold-color": "#D4AF37",
+    "silver-color": "#C0C0C0",
 }
 # Numbers get a card with the numeral (drawn here, so no licence question).
 NUMERALS = {
-    "zero": "0", "one": "1", "two": "2", "three": "3", "four": "4", "five": "5", "six": "6", "seven": "7", "eight": "8",
-    "nine": "9", "ten": "10", "eleven": "11", "twelve": "12", "thirteen": "13", "fourteen": "14", "fifteen": "15",
-    "sixteen": "16", "seventeen": "17", "eighteen": "18", "nineteen": "19", "twenty": "20", "thirty": "30",
-    "forty": "40", "fifty": "50", "sixty": "60", "seventy": "70", "eighty": "80", "ninety": "90", "hundred": "100",
+    "zero": "0",
+    "one": "1",
+    "two": "2",
+    "three": "3",
+    "four": "4",
+    "five": "5",
+    "six": "6",
+    "seven": "7",
+    "eight": "8",
+    "nine": "9",
+    "ten": "10",
+    "eleven": "11",
+    "twelve": "12",
+    "thirteen": "13",
+    "fourteen": "14",
+    "fifteen": "15",
+    "sixteen": "16",
+    "seventeen": "17",
+    "eighteen": "18",
+    "nineteen": "19",
+    "twenty": "20",
+    "thirty": "30",
+    "forty": "40",
+    "fifty": "50",
+    "sixty": "60",
+    "seventy": "70",
+    "eighty": "80",
+    "ninety": "90",
+    "hundred": "100",
     "thousand": "1000",
 }
 
@@ -93,8 +178,11 @@ class Command(BaseCommand):
         for slug in words:  # a reviewer decided no photo fits (the app falls back to the emoji)
             if rows[slug].get("status") == "none":
                 (self.out_dir / f"{slug}.jpg").unlink(missing_ok=True)
-        todo = [s for s in words if s in wanted and rows[s].get("status") != "none"
-                and (force or not (self.out_dir / f"{s}.jpg").exists())]
+        todo = [
+            s
+            for s in words
+            if s in wanted and rows[s].get("status") != "none" and (force or not (self.out_dir / f"{s}.jpg").exists())
+        ]
         self.session = requests.Session()
         self.session.headers["User-Agent"] = UA
 
@@ -102,12 +190,22 @@ class Command(BaseCommand):
             swatch = Image.new("RGB", (SIZE, SIZE), COLORS[slug])
             ImageDraw.Draw(swatch).rectangle((0, 0, SIZE - 1, SIZE - 1), outline="#BDBDBD", width=6)  # white on white
             swatch.save(self.out_dir / f"{slug}.jpg", quality=90)
-            rows[slug].update(commons_file="", license="CC0", author="LingoPrism (ô màu tự tạo)", source_url="",
-                              status=rows[slug].get("status") or "verified")
+            rows[slug].update(
+                commons_file="",
+                license="CC0",
+                author="LingoPrism (ô màu tự tạo)",
+                source_url="",
+                status=rows[slug].get("status") or "verified",
+            )
         for slug in [s for s in todo if s in NUMERALS]:
             self._numeral(NUMERALS[slug], self.out_dir / f"{slug}.jpg")
-            rows[slug].update(commons_file="", license="CC0", author="LingoPrism (thẻ số tự tạo)", source_url="",
-                              status=rows[slug].get("status") or "verified")
+            rows[slug].update(
+                commons_file="",
+                license="CC0",
+                author="LingoPrism (thẻ số tự tạo)",
+                source_url="",
+                status=rows[slug].get("status") or "verified",
+            )
         photos = [s for s in todo if s not in COLORS and s not in NUMERALS]
         need_title = [s for s in photos if not rows[s].get("commons_file")]
         for slug, file in self._page_images([rows[s]["wiki_title"] for s in need_title], need_title).items():
@@ -133,8 +231,12 @@ class Command(BaseCommand):
                 self.stderr.write(f"  ✗ {slug}: tải lỗi {exc}")
                 continue
             # a file picked by a reviewer stays verified; an automatic pick waits for review
-            row.update(license=meta["license"], author=meta["author"][:200], source_url=meta["page"],
-                       status="verified" if row.get("status") == "verified" else "unreviewed")
+            row.update(
+                license=meta["license"],
+                author=meta["author"][:200],
+                source_url=meta["page"],
+                status="verified" if row.get("status") == "verified" else "unreviewed",
+            )
             ok += 1
         with open(self.csv_path, "w", encoding="utf-8", newline="") as fh:
             w = csv.DictWriter(fh, fieldnames=FIELDS, extrasaction="ignore")
@@ -169,9 +271,11 @@ class Command(BaseCommand):
         """Wikipedia article title -> lead image file name (free images only)."""
         found = {}
         for i in range(0, len(titles), 50):
-            chunk = titles[i:i + 50]
-            data = self._get(API_WIKI, {"action": "query", "prop": "pageimages", "piprop": "name",
-                                        "redirects": 1, "titles": "|".join(chunk)})
+            chunk = titles[i : i + 50]
+            data = self._get(
+                API_WIKI,
+                {"action": "query", "prop": "pageimages", "piprop": "name", "redirects": 1, "titles": "|".join(chunk)},
+            )
             q = data.get("query", {})
             alias = {n["from"]: n["to"] for n in q.get("normalized", []) + q.get("redirects", [])}
             by_title = {p["title"]: p.get("pageimage") for p in q.get("pages", [])}
@@ -185,9 +289,17 @@ class Command(BaseCommand):
         info = {}
         files = sorted(f for f in files if f)
         for i in range(0, len(files), 50):
-            chunk = files[i:i + 50]
-            data = self._get(API_COMMONS, {"action": "query", "prop": "imageinfo", "iiprop": "url|extmetadata",
-                                           "iiurlwidth": SIZE, "titles": "|".join(f"File:{f}" for f in chunk)})
+            chunk = files[i : i + 50]
+            data = self._get(
+                API_COMMONS,
+                {
+                    "action": "query",
+                    "prop": "imageinfo",
+                    "iiprop": "url|extmetadata",
+                    "iiurlwidth": SIZE,
+                    "titles": "|".join(f"File:{f}" for f in chunk),
+                },
+            )
             q = data.get("query", {})
             alias = {n["to"]: n["from"] for n in q.get("normalized", [])}
             for p in q.get("pages", []):

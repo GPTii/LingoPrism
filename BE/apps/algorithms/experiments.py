@@ -1,13 +1,14 @@
 """Experiments of the thesis outline (§ "So sánh – đối chiếu"), each stored as an ExperimentRun for the admin page:
 
-  srs         SM-2 vs FSRS (and the old Leitner) predicting recall on the review history
-  ga          Genetic Algorithm tuning the FSRS weights (train cards) → compared on held-out cards
-  vip         SM-2 / FSRS with and without VIP on simulated learners (overall + confusable words)
-  distractor  random same-topic baseline vs Smart Distractor on every word
-  proximity   self-implemented grid index vs brute force vs PostgreSQL earthdistance (correctness + speed)
-  geofence    trigger delay / detection rate of the app's check policy on the real POIs (simulated passes)
-  realtime    chat + event latency, consistency and flood control through the real ASGI app
+srs         SM-2 vs FSRS (and the old Leitner) predicting recall on the review history
+ga          Genetic Algorithm tuning the FSRS weights (train cards) → compared on held-out cards
+vip         SM-2 / FSRS with and without VIP on simulated learners (overall + confusable words)
+distractor  random same-topic baseline vs Smart Distractor on every word
+proximity   self-implemented grid index vs brute force vs PostgreSQL earthdistance (correctness + speed)
+geofence    trigger delay / detection rate of the app's check policy on the real POIs (simulated passes)
+realtime    chat + event latency, consistency and flood control through the real ASGI app
 """
+
 import random
 import statistics
 import time
@@ -18,8 +19,8 @@ from apps.vocab.models import ReviewStatus, Word, WordTranslation
 from apps.vocab.services import Target
 
 from . import evaluation, ga, simulate, vision
-from .vip import DEFAULT_WEIGHTS
 from .models import AlgorithmConfig, ExperimentRun
+from .vip import DEFAULT_WEIGHTS
 
 
 def _save(kind, results, t0):
@@ -30,8 +31,12 @@ def srs():
     t0 = time.time()
     hist = evaluation.histories()
     cfg = AlgorithmConfig.get()
-    res = {"cards": len(hist), "reviews": sum(len(h) for h in hist), "models": evaluation.compare(hist, cfg.fsrs_weights or None),
-           "note": "Dữ liệu ôn tập hiện là của người học mẫu (seed_demo_activity) – kết quả cần chạy lại khi có người dùng thật."}
+    res = {
+        "cards": len(hist),
+        "reviews": sum(len(h) for h in hist),
+        "models": evaluation.compare(hist, cfg.fsrs_weights or None),
+        "note": "Dữ liệu ôn tập hiện là của người học mẫu (seed_demo_activity) – kết quả cần chạy lại khi có người dùng thật.",
+    }
     return _save("srs", res, t0)
 
 
@@ -40,10 +45,16 @@ def run_ga(population=24, generations=25, apply=True, log=print):
     hist = evaluation.histories()
     train, test = evaluation.split(hist)
     out = ga.run(train, population, generations, log=log)
-    res = {**out, "train_cards": len(train), "test_cards": len(test),
-           "test": {"fsrs_default": evaluation.metrics([x for h in test for x in evaluation.predict_fsrs(h)]),
-                    "fsrs_ga": evaluation.metrics([x for h in test for x in evaluation.predict_fsrs(h, out["weights"])]),
-                    "sm2": evaluation.metrics([x for h in test for x in evaluation.predict_sm2(h)])}}
+    res = {
+        **out,
+        "train_cards": len(train),
+        "test_cards": len(test),
+        "test": {
+            "fsrs_default": evaluation.metrics([x for h in test for x in evaluation.predict_fsrs(h)]),
+            "fsrs_ga": evaluation.metrics([x for h in test for x in evaluation.predict_fsrs(h, out["weights"])]),
+            "sm2": evaluation.metrics([x for h in test for x in evaluation.predict_sm2(h)]),
+        },
+    }
     improved = res["test"]["fsrs_ga"].get("log_loss", 9) < res["test"]["fsrs_default"].get("log_loss", 9)
     res["applied"] = bool(apply and improved)
     if res["applied"]:  # only a parameter set that is better on unseen cards becomes the reference configuration
@@ -58,9 +69,14 @@ def _sim_words():
     words = []
     for w in Word.objects.filter(translations__language_id="en", translations__status=ReviewStatus.VERIFIED).distinct():
         vis = profile.get(w.yolo_label) if w.yolo_label else None
-        words.append({"slug": w.slug, "level": (w.levels or {}).get("en", 2),
-                      "confusion": vis["score"] if vis else 0.0,
-                      "conf": vis["mean_conf"] if vis and vis.get("mean_conf") is not None else 1.0})
+        words.append(
+            {
+                "slug": w.slug,
+                "level": (w.levels or {}).get("en", 2),
+                "confusion": vis["score"] if vis else 0.0,
+                "conf": vis["mean_conf"] if vis and vis.get("mean_conf") is not None else 1.0,
+            }
+        )
     return words
 
 
@@ -72,15 +88,36 @@ def vip(learners=12, days=60):
     hybrid = {**pure, "due_days": (cfg.vip_weights or {}).get("due_days") or 3}
     rows = []
     for sched in ("sm2", "fsrs"):
-        for prio, vw in (("due", None), ("vip", pure), ("vip_hybrid", hybrid)):  # pure VIP order / hybrid (benchmark.py)
-            r = simulate.run(words, sched, "due" if prio == "due" else "vip", weights=cfg.fsrs_weights or None,
-                             vip_weights=vw, learners=learners, days=days, retention=cfg.desired_retention)
+        for prio, vw in (
+            ("due", None),
+            ("vip", pure),
+            ("vip_hybrid", hybrid),
+        ):  # pure VIP order / hybrid (benchmark.py)
+            r = simulate.run(
+                words,
+                sched,
+                "due" if prio == "due" else "vip",
+                weights=cfg.fsrs_weights or None,
+                vip_weights=vw,
+                learners=learners,
+                days=days,
+                retention=cfg.desired_retention,
+            )
             rows.append({**r, "priority": prio})
     rows.append(simulate.run(words, "leitner", "due", learners=learners, days=days))
-    res = {"rows": rows, "words": len(words), "confusable_words": sum(1 for w in words if w["confusion"] >= 0.3),
-           "setup": {"learners": learners, "days": days, "new_per_day": 8, "review_budget": 25,
-                     "hybrid_due_days": hybrid["due_days"]},
-           "note": "Mô phỏng: trí nhớ thật theo mô hình quên hàm mũ + hiệu ứng giãn cách, từ dễ nhầm thị giác khó nhớ hơn."}
+    res = {
+        "rows": rows,
+        "words": len(words),
+        "confusable_words": sum(1 for w in words if w["confusion"] >= 0.3),
+        "setup": {
+            "learners": learners,
+            "days": days,
+            "new_per_day": 8,
+            "review_budget": 25,
+            "hybrid_due_days": hybrid["due_days"],
+        },
+        "note": "Mô phỏng: trí nhớ thật theo mô hình quên hàm mũ + hiệu ứng giãn cách, từ dễ nhầm thị giác khó nhớ hơn.",
+    }
     return _save("vip", res, t0)
 
 
@@ -109,13 +146,22 @@ def distractor(sample=250, seed=0):
                     cos.append(float(vec[w.slug] @ vec[p.slug]))
                 same_pos += p.part_of_speech == w.part_of_speech
                 invalid += vi.get(p.id) == vi.get(w.id)  # would also be a right answer
-        stats[name] = {"distractors": total, "mean_similarity": round(statistics.mean(cos), 4) if cos else None,
-                       "same_pos_rate": round(same_pos / max(total, 1), 4), "invalid_rate": round(invalid / max(total, 1), 4)}
+        stats[name] = {
+            "distractors": total,
+            "mean_similarity": round(statistics.mean(cos), 4) if cos else None,
+            "same_pos_rate": round(same_pos / max(total, 1), 4),
+            "invalid_rate": round(invalid / max(total, 1), 4),
+        }
     vi_word = {w.id: vi.get(w.id, w.slug) for w in Word.objects.all()}
     for w in words[:12]:
-        examples.append({"word": vi_word.get(w.id), "en": w.slug,
-                         "random": [vi_word.get(p.id) for p in RandomSameTopicDistractors().pick(w, target, 3)],
-                         "smart": [vi_word.get(p.id) for p in SmartDistractors().pick(w, target, 3)]})
+        examples.append(
+            {
+                "word": vi_word.get(w.id),
+                "en": w.slug,
+                "random": [vi_word.get(p.id) for p in RandomSameTopicDistractors().pick(w, target, 3)],
+                "smart": [vi_word.get(p.id) for p in SmartDistractors().pick(w, target, 3)],
+            }
+        )
     return _save("distractor", {"words": len(words), "stats": stats, "examples": examples}, t0)
 
 
@@ -133,7 +179,10 @@ def proximity(queries=500, seed=0):
         return _save("proximity", {"error": "Chưa có POI"}, t0)
     lats, lngs = [p[1] for p in pois], [p[2] for p in pois]
     box = (min(lats) - 0.05, max(lats) + 0.05, min(lngs) - 0.05, max(lngs) + 0.05)
-    qs = [(rng.uniform(box[0], box[1]), rng.uniform(box[2], box[3]), rng.choice([500, 1000, 3000, 10000])) for _ in range(queries)]
+    qs = [
+        (rng.uniform(box[0], box[1]), rng.uniform(box[2], box[3]), rng.choice([500, 1000, 3000, 10000]))
+        for _ in range(queries)
+    ]
     index = GridIndex(pois)
 
     def timed(fn):
@@ -143,14 +192,26 @@ def proximity(queries=500, seed=0):
 
     grid, t_grid = timed(lambda a, b, r: index.query(a, b, r))
     brute, t_brute = timed(lambda a, b, r: brute_force(pois, a, b, r))
-    pg, t_pg = timed(lambda a, b, r: nearby(a, b, r, limit=1000, using="postgres")) if connection.vendor == "postgresql" else ([], None)
+    pg, t_pg = (
+        timed(lambda a, b, r: nearby(a, b, r, limit=1000, using="postgres"))
+        if connection.vendor == "postgresql"
+        else ([], None)
+    )
     same_ids = sum(1 for g, b in zip(grid, brute) if [x[0] for x in g] == [x[0] for x in b])
-    max_diff_pg = max((abs(d1 - d2) for g, p in zip(grid, pg) for (i1, d1), (i2, d2) in zip(g, p) if i1 == i2), default=0)
-    res.update(queries=queries, grid_ms=round(t_grid, 4), brute_ms=round(t_brute, 4), postgres_ms=round(t_pg, 4) if t_pg else None,
-               grid_equals_brute=f"{same_ids}/{queries}", grid_vs_postgres_ids=f"{sum(1 for g, p in zip(grid, pg) if [x[0] for x in g] == [x[0] for x in p])}/{len(pg)}",
-               max_distance_diff_m=round(max_diff_pg, 3),
-               note="earthdistance dùng bán kính Trái Đất 6 378 168 m, Haversine ở đây dùng bán kính trung bình 6 371 009 m "
-                    "→ lệch ~0,1 % khoảng cách; khác biệt chỉ xảy ra với POI nằm sát mép bán kính.")
+    max_diff_pg = max(
+        (abs(d1 - d2) for g, p in zip(grid, pg) for (i1, d1), (i2, d2) in zip(g, p) if i1 == i2), default=0
+    )
+    res.update(
+        queries=queries,
+        grid_ms=round(t_grid, 4),
+        brute_ms=round(t_brute, 4),
+        postgres_ms=round(t_pg, 4) if t_pg else None,
+        grid_equals_brute=f"{same_ids}/{queries}",
+        grid_vs_postgres_ids=f"{sum(1 for g, p in zip(grid, pg) if [x[0] for x in g] == [x[0] for x in p])}/{len(pg)}",
+        max_distance_diff_m=round(max_diff_pg, 3),
+        note="earthdistance dùng bán kính Trái Đất 6 378 168 m, Haversine ở đây dùng bán kính trung bình 6 371 009 m "
+        "→ lệch ~0,1 % khoảng cách; khác biệt chỉ xảy ra với POI nằm sát mép bán kính.",
+    )
     # scaling: synthetic POIs around Ha Noi, same queries
     scale = []
     for n in (1_000, 10_000, 50_000):
@@ -165,7 +226,9 @@ def proximity(queries=500, seed=0):
         for a, b, r in q2[:20]:
             brute_force(pts, a, b, r)
         tb = (time.perf_counter() - s) / 20 * 1000
-        scale.append({"pois": n, "grid_ms": round(tg, 3), "brute_ms": round(tb, 3), "speedup": round(tb / tg, 1) if tg else None})
+        scale.append(
+            {"pois": n, "grid_ms": round(tg, 3), "brute_ms": round(tb, 3), "speedup": round(tb / tg, 1) if tg else None}
+        )
     res["scaling"] = scale
     return _save("proximity", res, t0)
 
@@ -179,9 +242,13 @@ def geofence(passes=120, seed=0):
     pois = list(Poi.objects.filter(is_active=True).values_list("id", "lat", "lng", "radius_m"))
     if not pois:
         return _save("geofence", {"error": "Chưa có POI"}, t0)
-    res = {"pois": len(pois), **gf.simulate(pois, passes, seed), "server_check": gf.server_check_ms(pois),
-           "note": "Mô phỏng: đi thẳng qua POI thật, GPS mỗi giây lệch ~8 m, app áp dụng đúng chính sách kiểm tra "
-                   "(distanceFilter + khoảng cách thời gian tối thiểu). Chưa tính thời gian mạng của điện thoại."}
+    res = {
+        "pois": len(pois),
+        **gf.simulate(pois, passes, seed),
+        "server_check": gf.server_check_ms(pois),
+        "note": "Mô phỏng: đi thẳng qua POI thật, GPS mỗi giây lệch ~8 m, app áp dụng đúng chính sách kiểm tra "
+        "(distanceFilter + khoảng cách thời gian tối thiểu). Chưa tính thời gian mạng của điện thoại.",
+    }
     return _save("geofence", res, t0)
 
 
@@ -194,8 +261,19 @@ def realtime():
 
 def latest() -> dict:
     out = {}
-    for kind in ("benchmark", "yolo", "vision", "word2vec", "srs", "ga", "vip", "distractor", "proximity", "geofence",
-                 "realtime"):
+    for kind in (
+        "benchmark",
+        "yolo",
+        "vision",
+        "word2vec",
+        "srs",
+        "ga",
+        "vip",
+        "distractor",
+        "proximity",
+        "geofence",
+        "realtime",
+    ):
         run = ExperimentRun.objects.filter(kind=kind).first()
         if run:
             out[kind] = {"created_at": run.created_at, "duration_s": run.duration_s, "results": run.results}

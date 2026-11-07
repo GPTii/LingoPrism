@@ -15,6 +15,7 @@ Measures:
   * the same split by age (children <= 12 / older), and the scoring time.
 Writes AI/report/speech/speechocean762.json and .md.
 """
+
 import argparse
 import json
 import os
@@ -43,8 +44,13 @@ def prf(pred, gold) -> dict:
     tp, fp, fn = int((pred & gold).sum()), int((pred & ~gold).sum()), int((~pred & gold).sum())
     p = tp / (tp + fp) if tp + fp else 0.0
     r = tp / (tp + fn) if tp + fn else 0.0
-    return {"precision": round(p, 3), "recall": round(r, 3), "f1": round(2 * p * r / (p + r), 3) if p + r else 0.0,
-            "positives": int(gold.sum()), "words": len(gold)}
+    return {
+        "precision": round(p, 3),
+        "recall": round(r, 3),
+        "f1": round(2 * p * r / (p + r), 3) if p + r else 0.0,
+        "positives": int(gold.sum()),
+        "words": len(gold),
+    }
 
 
 def main():
@@ -66,13 +72,27 @@ def main():
             continue
         ms.append(r["ms"])
         child = it["age"] <= 12
-        rows.append({"ours": r["score"], "phone": r["phone_score"], "gop": r["gop"], "acc": it["accuracy"], "total": it["total"],
-                     "child": child})
+        rows.append(
+            {
+                "ours": r["score"],
+                "phone": r["phone_score"],
+                "gop": r["gop"],
+                "acc": it["accuracy"],
+                "total": it["total"],
+                "child": child,
+            }
+        )
         if len(r["units"]) == len(it["words"]):
             for u, w in zip(r["units"], it["words"]):
-                words.append({"ours": u["score"], "acc": w["accuracy"], "child": child,
-                              "ours_bad": any(p["status"] in ("wrong", "missing") for p in u["phones"]),
-                              "gold_bad": min(w["phones_accuracy"]) < 1.0})
+                words.append(
+                    {
+                        "ours": u["score"],
+                        "acc": w["accuracy"],
+                        "child": child,
+                        "ours_bad": any(p["status"] in ("wrong", "missing") for p in u["phones"]),
+                        "gold_bad": min(w["phones_accuracy"]) < 1.0,
+                    }
+                )
         if (k + 1) % 250 == 0:
             print(f"   {k + 1}/{len(items)} ({time.time() - t0:.0f}s)", flush=True)
 
@@ -87,23 +107,33 @@ def main():
             "mispronounced_words": prf([x["ours_bad"] for x in ws], [x["gold_bad"] for x in ws]),
         }
 
-    out = {"dataset": "speechocean762 test", "skipped_unscorable": skipped, "all": block(rows, words),
-           "children_le_12": block([x for x in rows if x["child"]], [x for x in words if x["child"]]),
-           "older": block([x for x in rows if not x["child"]], [x for x in words if not x["child"]]),
-           "ms_per_sentence": round(float(np.mean(ms)), 1) if ms else None}
+    out = {
+        "dataset": "speechocean762 test",
+        "skipped_unscorable": skipped,
+        "all": block(rows, words),
+        "children_le_12": block([x for x in rows if x["child"]], [x for x in words if x["child"]]),
+        "older": block([x for x in rows if not x["child"]], [x for x in words if not x["child"]]),
+        "ms_per_sentence": round(float(np.mean(ms)), 1) if ms else None,
+    }
     rep = ROOT / "AI" / "report" / "speech"
     rep.mkdir(parents=True, exist_ok=True)
     (rep / "speechocean762.json").write_text(json.dumps(out, indent=1, ensure_ascii=False), encoding="utf-8")
-    lines = ["# Chấm phát âm so với giám khảo – speechocean762 (tập test)", "",
-             f"{out['all']['sentences']} câu chấm được, {skipped} câu bỏ qua (máy không nghe được); "
-             f"{out['ms_per_sentence']} ms / câu trên CPU (máy phát triển).", "",
-             "| Nhóm | Số câu | PCC câu (accuracy) | PCC câu (total) | PCC từ (accuracy) | Phát hiện từ đọc sai P / R / F1 |",
-             "|---|---|---|---|---|---|"]
+    lines = [
+        "# Chấm phát âm so với giám khảo – speechocean762 (tập test)",
+        "",
+        f"{out['all']['sentences']} câu chấm được, {skipped} câu bỏ qua (máy không nghe được); "
+        f"{out['ms_per_sentence']} ms / câu trên CPU (máy phát triển).",
+        "",
+        "| Nhóm | Số câu | PCC câu (accuracy) | PCC câu (total) | PCC từ (accuracy) | Phát hiện từ đọc sai P / R / F1 |",
+        "|---|---|---|---|---|---|",
+    ]
     for name, key in (("Tất cả", "all"), ("Trẻ em ≤ 12 tuổi", "children_le_12"), ("Trên 12 tuổi", "older")):
         b = out[key]
         m = b["mispronounced_words"]
-        lines.append(f"| {name} | {b['sentences']} | {b['pcc_sentence_accuracy']} | {b['pcc_sentence_total']} | "
-                     f"{b['pcc_word_accuracy']} | {m['precision']} / {m['recall']} / {m['f1']} |")
+        lines.append(
+            f"| {name} | {b['sentences']} | {b['pcc_sentence_accuracy']} | {b['pcc_sentence_total']} | "
+            f"{b['pcc_word_accuracy']} | {m['precision']} / {m['recall']} / {m['f1']} |"
+        )
     (rep / "speechocean762.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     print("\n".join(lines))
 

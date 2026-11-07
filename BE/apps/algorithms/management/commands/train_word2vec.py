@@ -1,4 +1,5 @@
 """Train the self-implemented Word2Vec on Tatoeba English sentences and store one vector per vocabulary concept."""
+
 import time
 
 import numpy as np
@@ -43,9 +44,18 @@ class Command(BaseCommand):
             if q in index:
                 sims = unit @ unit[index[q]]
                 probes[q] = [list(index)[i] for i in np.argsort(-sims)[1:7]]
-        res = {"sentences": len(corpus), "vocab": len(index), "dim": dim, "epochs": epochs,
-               "concepts_with_vector": len(slugs), "concepts_total": Word.objects.count(), "neighbours": probes}
+        res = {
+            "sentences": len(corpus),
+            "vocab": len(index),
+            "dim": dim,
+            "epochs": epochs,
+            "concepts_with_vector": len(slugs),
+            "concepts_total": Word.objects.count(),
+            "neighbours": probes,
+        }
         ExperimentRun.objects.create(kind="word2vec", results=res, duration_s=time.time() - t0)
-        self.stdout.write(self.style.SUCCESS(f"Đã lưu {len(slugs)} vector khái niệm → {VECTORS.name} ({time.time() - t0:.0f}s)"))
+        self.stdout.write(
+            self.style.SUCCESS(f"Đã lưu {len(slugs)} vector khái niệm → {VECTORS.name} ({time.time() - t0:.0f}s)")
+        )
         for q, nn in probes.items():
             self.stdout.write(f"  {q}: {', '.join(nn)}")

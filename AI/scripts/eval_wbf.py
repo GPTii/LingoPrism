@@ -6,11 +6,13 @@
 Each argument is a primary model eval_testset.py knows, or name=path of another ONNX; it is combined with
 COCO yolov10m INT8 (predictions cached in AI/testset/predictions). Results: AI/report/yolo/ensemble_upgrade.md.
 """
+
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import eval_testset as E  # noqa: E402
+
 import apps.detection.inference as I  # noqa: E402
 from apps.detection.inference import Box, EnsembleDetector, _iou, _merge  # noqa: E402
 
@@ -82,8 +84,11 @@ def run(name, primary, fn):
     r = E.score(images, preds, classes, scope)
     c = E.score(images, preds, classes, scope & coco_scope)
     o = E.score(images, preds, classes, scope - coco_scope)
-    print(f"{name:42} mAP50 {r['map50']:.4f} 50-95 {r['map50_95']:.4f} P {r['precision']:.3f} R {r['recall']:.3f}"
-          f" | COCO {c['map50']:.4f} | khác {o['map50']:.4f}", flush=True)
+    print(
+        f"{name:42} mAP50 {r['map50']:.4f} 50-95 {r['map50_95']:.4f} P {r['precision']:.3f} R {r['recall']:.3f}"
+        f" | COCO {c['map50']:.4f} | khác {o['map50']:.4f}",
+        flush=True,
+    )
 
 
 def server(a, b, known):

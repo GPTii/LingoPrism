@@ -1,8 +1,9 @@
 """Language resolution and learner-facing word cards."""
+
 from dataclasses import dataclass
 
-from django.utils import timezone
 from django.db.models import Prefetch, Q
+from django.utils import timezone
 
 from .models import ExampleSentence, ReviewStatus, Word, WordTranslation
 
@@ -72,8 +73,9 @@ def translation_payload(tr: WordTranslation | None) -> dict | None:
     if tr.language_id == "en":
         data["ipa"] = tr.ipa
     if tr.language_id.startswith("zh"):
-        data.update(pinyin=tr.pinyin, measure_word=tr.measure_word, level=tr.level,
-                    regional_difference=tr.regional_difference)
+        data.update(
+            pinyin=tr.pinyin, measure_word=tr.measure_word, level=tr.level, regional_difference=tr.regional_difference
+        )
         if tr.language_id == "zh-Hant":
             data["zhuyin"] = tr.zhuyin
     if tr.status != ReviewStatus.VERIFIED:
@@ -104,16 +106,28 @@ def card(word: Word, target: Target, personal=None, request=None) -> dict:
         # learners are Vietnamese: a Chinese word is explained in Vietnamese, never through English
         "english": None,
         "examples": [
-            {"id": e.id, "text": e.text, "transliteration": e.transliteration, "tokens": e.tokens,
-             "target_tokens": e.target_tokens, "translation_vi": e.translation_vi,
-             # Vietnamese is taught to Vietnamese children – no English gloss
-             "translation_en": "",
-             "source": e.source, "source_id": e.source_id}
+            {
+                "id": e.id,
+                "text": e.text,
+                "transliteration": e.transliteration,
+                "tokens": e.tokens,
+                "target_tokens": e.target_tokens,
+                "translation_vi": e.translation_vi,
+                # Vietnamese is taught to Vietnamese children – no English gloss
+                "translation_en": "",
+                "source": e.source,
+                "source_id": e.source_id,
+            }
             for e in getattr(word, "visible_examples", [])[:3]
         ],
-        "personal": None if personal is None else {
-            "id": personal.id, "status": personal.status, "stage": personal.stage,
-            "due_at": personal.due_at, "last_reviewed_at": personal.last_reviewed_at,
+        "personal": None
+        if personal is None
+        else {
+            "id": personal.id,
+            "status": personal.status,
+            "stage": personal.stage,
+            "due_at": personal.due_at,
+            "last_reviewed_at": personal.last_reviewed_at,
             "recall": recall_now(personal),
         },
     }
@@ -135,6 +149,5 @@ def personal_map(user, word_ids, target: Target) -> dict:
     from apps.learning.models import PersonalWord
 
     return {
-        p.word_id: p
-        for p in PersonalWord.objects.filter(user=user, language=target.learn, word_id__in=list(word_ids))
+        p.word_id: p for p in PersonalWord.objects.filter(user=user, language=target.learn, word_id__in=list(word_ids))
     }

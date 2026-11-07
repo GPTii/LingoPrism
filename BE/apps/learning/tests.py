@@ -45,12 +45,16 @@ def test_learn_session_flow(setup):
     assert {"flashcard", "choose_target", "choose_meaning", "type_target"} <= types
 
     first, second = session["items"][0], session["items"][1]
-    client.post(f"/api/v1/sessions/{session['id']}/answer/",
-                {"personal_word": first["personal_word"], "question_type": "type_target", "correct": True, "graded": True},
-                format="json")
-    client.post(f"/api/v1/sessions/{session['id']}/answer/",
-                {"personal_word": second["personal_word"], "question_type": "choose_target", "correct": False, "graded": True},
-                format="json")
+    client.post(
+        f"/api/v1/sessions/{session['id']}/answer/",
+        {"personal_word": first["personal_word"], "question_type": "type_target", "correct": True, "graded": True},
+        format="json",
+    )
+    client.post(
+        f"/api/v1/sessions/{session['id']}/answer/",
+        {"personal_word": second["personal_word"], "question_type": "choose_target", "correct": False, "graded": True},
+        format="json",
+    )
     p1, p2 = PersonalWord.objects.get(id=first["personal_word"]), PersonalWord.objects.get(id=second["personal_word"])
     # default scheduler is SM-2 (apps.algorithms): first success → 1 day, a lapse → back to 1 day
     assert (p1.stage, p1.interval_days, p1.status) == (1, 1, "learning")
@@ -66,7 +70,9 @@ def test_review_only_due(setup):
     user, client, topic = setup
     assert client.post("/api/v1/sessions/", {"kind": "review"}, format="json").status_code == 400
     w = Word.objects.get(slug="cat")
-    PersonalWord.objects.create(user=user, word=w, language="en", status="learning", due_at=timezone.now() - timedelta(hours=1))
+    PersonalWord.objects.create(
+        user=user, word=w, language="en", status="learning", due_at=timezone.now() - timedelta(hours=1)
+    )
     res = client.post("/api/v1/sessions/", {"kind": "review"}, format="json")
     assert res.status_code == 201 and len(res.data["items"]) == 1
     assert client.get("/api/v1/my-words/summary/").data["due"] == 1
@@ -78,15 +84,33 @@ def test_sentence_lesson_and_check(setup):
     from apps.vocab.models import ExampleSentence
 
     user, client, topic = setup
-    texts = [("cat", "The cat is sleeping.", "Con mèo đang ngủ."), ("dog", "My dog likes water.", "Con chó của tôi thích nước."),
-             ("chicken", "We ate chicken today.", "Hôm nay chúng tôi ăn gà."), ("duck", "A duck is swimming.", "Một con vịt đang bơi.")]
+    texts = [
+        ("cat", "The cat is sleeping.", "Con mèo đang ngủ."),
+        ("dog", "My dog likes water.", "Con chó của tôi thích nước."),
+        ("chicken", "We ate chicken today.", "Hôm nay chúng tôi ăn gà."),
+        ("duck", "A duck is swimming.", "Một con vịt đang bơi."),
+    ]
     for i, (slug, text, vi) in enumerate(texts):
         toks = tokens_latin(text, "en")
-        ExampleSentence.objects.create(word=Word.objects.get(slug=slug), language_id="en", text=text, translation_vi=vi,
-                                       source="tatoeba", source_id=str(i + 1), tokens=toks, target_tokens=word_spans(toks, slug, "en"),
-                                       status=ReviewStatus.VERIFIED)
-    ExampleSentence.objects.create(word=Word.objects.get(slug="cat"), language_id="en", text="Hidden cat.", source="tatoeba",
-                                   source_id="99", status=ReviewStatus.FLAGGED)
+        ExampleSentence.objects.create(
+            word=Word.objects.get(slug=slug),
+            language_id="en",
+            text=text,
+            translation_vi=vi,
+            source="tatoeba",
+            source_id=str(i + 1),
+            tokens=toks,
+            target_tokens=word_spans(toks, slug, "en"),
+            status=ReviewStatus.VERIFIED,
+        )
+    ExampleSentence.objects.create(
+        word=Word.objects.get(slug="cat"),
+        language_id="en",
+        text="Hidden cat.",
+        source="tatoeba",
+        source_id="99",
+        status=ReviewStatus.FLAGGED,
+    )
 
     res = client.get("/api/v1/sentences/lesson/", {"topic": topic.id, "size": 4})
     assert res.status_code == 200, res.data
@@ -97,13 +121,25 @@ def test_sentence_lesson_and_check(setup):
     arrange = next(e for e in ex if e["type"] == "arrange")
     sentence = ExampleSentence.objects.get(pk=arrange["id"])
     words = [t["t"] for t in sentence.tokens if not t.get("x")]
-    res = client.post("/api/v1/sentences/check/", {"sentence": sentence.id, "type": "arrange", "answer": words}, format="json")
+    res = client.post(
+        "/api/v1/sentences/check/", {"sentence": sentence.id, "type": "arrange", "answer": words}, format="json"
+    )
     assert res.data["correct"] and res.data["xp"] > 0
-    res = client.post("/api/v1/sentences/check/", {"sentence": sentence.id, "type": "arrange", "answer": words[::-1]}, format="json")
+    res = client.post(
+        "/api/v1/sentences/check/", {"sentence": sentence.id, "type": "arrange", "answer": words[::-1]}, format="json"
+    )
     assert not res.data["correct"]
-    res = client.post("/api/v1/sentences/check/", {"sentence": sentence.id, "type": "fill", "answer": sentence.word.slug.upper()}, format="json")
+    res = client.post(
+        "/api/v1/sentences/check/",
+        {"sentence": sentence.id, "type": "fill", "answer": sentence.word.slug.upper()},
+        format="json",
+    )
     assert res.data["correct"] and res.data["answer"] == sentence.word.slug
-    res = client.post("/api/v1/sentences/check/", {"sentence": sentence.id, "type": "meaning", "answer": sentence.translation_vi}, format="json")
+    res = client.post(
+        "/api/v1/sentences/check/",
+        {"sentence": sentence.id, "type": "meaning", "answer": sentence.translation_vi},
+        format="json",
+    )
     assert res.data["correct"]
     assert SentenceAttempt.objects.filter(user=user).count() == 4
 
@@ -121,9 +157,17 @@ def test_chinese_learner_never_gets_english(setup):
         text = f"我有一只{zh}。"
         toks = [{"t": ch, "p": "x"} for ch in "我有一只"] + [{"t": zh, "p": "x"}, {"t": "。", "x": 1}]
         ExampleSentence.objects.create(
-            word=w, language_id="zh-Hans", text=text, source="tatoeba", source_id=str(i + 1), tokens=toks,
-            target_tokens=[4], translation_en=f"I have a {slug}.", status=ReviewStatus.VERIFIED,
-            translation_vi=f"Tôi có một con {slug}." if i < 2 else "")
+            word=w,
+            language_id="zh-Hans",
+            text=text,
+            source="tatoeba",
+            source_id=str(i + 1),
+            tokens=toks,
+            target_tokens=[4],
+            translation_en=f"I have a {slug}.",
+            status=ReviewStatus.VERIFIED,
+            translation_vi=f"Tôi có một con {slug}." if i < 2 else "",
+        )
 
     ex = client.get("/api/v1/sentences/lesson/", {"topic": topic.id, "size": 8}).data["exercises"]
     assert ex and "I have a" not in str(ex)
@@ -147,7 +191,7 @@ def test_levels_path_unlock_and_test(setup):
         w = Word.objects.get(slug=slug)
         w.levels = {"en": n, "zh": n, "vi": n}
         w.save()
-    for i, (vi, en) in enumerate([("ngựa", "horse"), ("bò", "cow")]):
+    for _i, (vi, en) in enumerate([("ngựa", "horse"), ("bò", "cow")]):
         w = Word.objects.create(slug=en, levels={"en": 2, "zh": 2, "vi": 2})
         WordTranslation.objects.create(word=w, language_id="vi", text=vi, status=ReviewStatus.VERIFIED)
         WordTranslation.objects.create(word=w, language_id="en", text=en, status=ReviewStatus.VERIFIED)
@@ -163,17 +207,22 @@ def test_levels_path_unlock_and_test(setup):
 
     # studying both level-1 words opens level 2 and moves the learner up when the session ends
     for item in s["items"]:
-        client.post(f"/api/v1/sessions/{s['id']}/answer/", {"personal_word": item["personal_word"],
-                    "question_type": "type_target", "correct": True, "graded": True}, format="json")
+        client.post(
+            f"/api/v1/sessions/{s['id']}/answer/",
+            {"personal_word": item["personal_word"], "question_type": "type_target", "correct": True, "graded": True},
+            format="json",
+        )
     assert client.post(f"/api/v1/sessions/{s['id']}/finish/").data["level_up"] == 2
     assert client.get("/api/v1/levels/").data["current"] == 2
 
     # skip test of level 2: all answers right → level 3 opens
     test = client.get("/api/v1/levels/2/test/").data
     from django.core import signing
+
     answers = signing.loads(test["token"], salt="learning.level-test")["a"]
     res = client.post("/api/v1/levels/2/test/", {"token": test["token"], "answers": answers}, format="json").data
     assert res["passed"] and res["unlocked"] == 3 and res["progress"]["levels"][2]["unlocked"]
-    wrong = client.post("/api/v1/levels/2/test/", {"token": test["token"], "answers": ["x"] * len(answers)},
-                        format="json").data
+    wrong = client.post(
+        "/api/v1/levels/2/test/", {"token": test["token"], "answers": ["x"] * len(answers)}, format="json"
+    ).data
     assert not wrong["passed"] and wrong["score"] == 0

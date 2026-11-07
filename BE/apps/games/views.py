@@ -11,6 +11,7 @@ POST /games/rounds/<node>/help/       {token, kind: hint | retry} -> pay vảy f
 Rewards join the rest of the app: XP (daily goal, league, XP badges), the streak, the daily quest "win 2 rounds",
 and the game badges (rounds won, bosses won, rounds with 3 stars – each round counted once).
 """
+
 import hashlib
 import random
 from collections import Counter
@@ -51,9 +52,11 @@ def stars_for(percent: int) -> int:
 
 def _locked(lock: dict | None):
     reason = (lock or {}).get("reason")
-    detail = {"previous": "Hãy qua màn trước đã.",
-              "learn": f"Hãy học thêm {(lock or {}).get('need', 0)} từ ở mục Học để mở màn này.",
-              "lesson": f"Hãy học xong bài “{(lock or {}).get('title', '')}” ở mục Học để mở màn này."}.get(reason, "Màn này chưa mở.")
+    detail = {
+        "previous": "Hãy qua màn trước đã.",
+        "learn": f"Hãy học thêm {(lock or {}).get('need', 0)} từ ở mục Học để mở màn này.",
+        "lesson": f"Hãy học xong bài “{(lock or {}).get('title', '')}” ở mục Học để mở màn này.",
+    }.get(reason, "Màn này chưa mở.")
     return Response({"detail": detail, "lock": lock, "errors": {}}, status=403)
 
 
@@ -77,21 +80,33 @@ class GameRoundView(APIView):
         if track == GameNode.Track.READING:
             games, keys = content.reading_round(stop, seed, request)
         else:
-            games, keys = content.word_round(request.user, target, request, stop, round_words(request.user, target, stop), seed)
+            games, keys = content.word_round(
+                request.user, target, request, stop, round_words(request.user, target, stop), seed
+            )
         if not games:
             return Response({"detail": "Màn này chưa đủ từ để chơi. Hãy học thêm ở mục Học.", "errors": {}}, status=400)
         token = content.sign(u=request.user.id, l=target.learn, k=track, n=node, keys=keys)
         request.user.refresh_from_db(fields=["scales_balance"])
-        return Response({"node": node, "kind": stop.kind, "level": stop.level, "title": stop.title, "track": track,
-                         "pass_percent": PASS_PERCENT, "games": games, "token": token,
-                         "helpers": {"cost": HELPERS, "per_round": HELPERS_PER_ROUND,
-                                     "scales": request.user.scales_balance}})
+        return Response(
+            {
+                "node": node,
+                "kind": stop.kind,
+                "level": stop.level,
+                "title": stop.title,
+                "track": track,
+                "pass_percent": PASS_PERCENT,
+                "games": games,
+                "token": token,
+                "helpers": {"cost": HELPERS, "per_round": HELPERS_PER_ROUND, "scales": request.user.scales_balance},
+            }
+        )
 
 
 class FinishSerializer(serializers.Serializer):
     token = serializers.CharField()
-    results = serializers.ListField(child=serializers.ListField(child=serializers.BooleanField(), max_length=20),
-                                    max_length=10)
+    results = serializers.ListField(
+        child=serializers.ListField(child=serializers.BooleanField(), max_length=20), max_length=10
+    )
 
 
 def _review(track: str, keys: list[list], results: list[list[bool]]) -> dict | None:
@@ -126,7 +141,8 @@ class GameFinishView(APIView):
         xp = gems = 0
         with transaction.atomic():
             g, _ = GameNode.objects.select_for_update().get_or_create(
-                user=request.user, language=target.learn, track=data["k"], node=node)
+                user=request.user, language=target.learn, track=data["k"], node=node
+            )
             first_pass = passed and not g.passed_at
             first_perfect = stars == 3 and g.stars < 3
             g.plays += 1
@@ -139,24 +155,44 @@ class GameFinishView(APIView):
                 gems = BOSS_GEMS
                 type(request.user).objects.filter(pk=request.user.pk).update(gems_balance=F("gems_balance") + gems)
         if first_pass:
-            xp = award_xp(request.user, XpTransaction.Source.GAME, BOSS_XP if boss else ROUND_XP, source_id=node,
-                          note=f"Trò chơi {target.learn} {node}")
+            xp = award_xp(
+                request.user,
+                XpTransaction.Source.GAME,
+                BOSS_XP if boss else ROUND_XP,
+                source_id=node,
+                note=f"Trò chơi {target.learn} {node}",
+            )
         mark_activity(request.user)
         if passed:
             progress_quest(request.user, DailyQuest.Kind.WIN_GAMES)
         if first_pass or first_perfect:
-            bump_stat(request.user, "games_won", int(first_pass), bosses_won=int(first_pass and boss),
-                      games_perfect=int(first_perfect))
+            bump_stat(
+                request.user,
+                "games_won",
+                int(first_pass),
+                bosses_won=int(first_pass and boss),
+                games_perfect=int(first_perfect),
+            )
         nxt = None
         if passed:
             nodes = [x for level in game_map(request.user, target)["levels"] for x in level["nodes"]]
             ids = [x["id"] for x in nodes]
-            after = nodes[ids.index(node) + 1:] if node in ids else []
+            after = nodes[ids.index(node) + 1 :] if node in ids else []
             nxt = next((x for x in after if x["status"] != "done"), None)
-        return Response({"correct": correct, "total": total, "percent": percent, "stars": stars, "passed": passed,
-                         "best_stars": g.stars, "xp": xp, "gems": gems,
-                         "review": None if passed else _review(data["k"], keys, results),
-                         "next": nxt})
+        return Response(
+            {
+                "correct": correct,
+                "total": total,
+                "percent": percent,
+                "stars": stars,
+                "passed": passed,
+                "best_stars": g.stars,
+                "xp": xp,
+                "gems": gems,
+                "review": None if passed else _review(data["k"], keys, results),
+                "next": nxt,
+            }
+        )
 
 
 @extend_schema(tags=["games"], parameters=LANG_PARAMS, request=None, responses={200: dict})
@@ -170,7 +206,8 @@ class ChestOpenView(APIView):
             return _locked(lock)
         with transaction.atomic():
             g, _ = GameNode.objects.select_for_update().get_or_create(
-                user=request.user, language=target.learn, track=track, node=node)
+                user=request.user, language=target.learn, track=track, node=node
+            )
             if g.passed_at:
                 return Response({"detail": "Rương này đã được mở", "errors": {}}, status=400)
             g.passed_at = timezone.now()
@@ -178,7 +215,8 @@ class ChestOpenView(APIView):
             g.save()
             gems = CHEST_GEMS.get(stop.level, 3)
             type(request.user).objects.filter(pk=request.user.pk).update(
-                gems_balance=F("gems_balance") + gems, scales_balance=F("scales_balance") + CHEST_SCALES)
+                gems_balance=F("gems_balance") + gems, scales_balance=F("scales_balance") + CHEST_SCALES
+            )
         return Response({"gems": gems, "scales": CHEST_SCALES})
 
 
@@ -209,8 +247,11 @@ class GameHelpView(APIView):
         cost = HELPERS[kind]
         User = type(request.user)
         if not User.objects.filter(pk=request.user.pk, scales_balance__gte=cost).update(
-                scales_balance=F("scales_balance") - cost):
-            return Response({"detail": f"Cần {cost} vảy – qua màn và mở rương để có thêm vảy", "errors": {}}, status=400)
+            scales_balance=F("scales_balance") - cost
+        ):
+            return Response(
+                {"detail": f"Cần {cost} vảy – qua màn và mở rương để có thêm vảy", "errors": {}}, status=400
+            )
         used = cache.incr(key)
         scales = User.objects.values_list("scales_balance", flat=True).get(pk=request.user.pk)
         return Response({"kind": kind, "cost": cost, "scales": scales, "left": HELPERS_PER_ROUND - used})

@@ -60,8 +60,9 @@ class AssessView(APIView):
             return _err("File ghi âm quá dài", 400, "too_long")
         translation = sentence = None
         if request.data.get("translation_id"):
-            translation = get_object_or_404(WordTranslation.objects.filter(visible_translations_q(request.user)),
-                                            pk=request.data["translation_id"])
+            translation = get_object_or_404(
+                WordTranslation.objects.filter(visible_translations_q(request.user)), pk=request.data["translation_id"]
+            )
             language, text, kind = translation.language_id, translation.text, PronunciationAttempt.Kind.WORD
         elif request.data.get("sentence_id"):
             qs = ExampleSentence.objects.all()
@@ -90,10 +91,21 @@ class AssessView(APIView):
             return _err(result["detail"], 422, result["problem"])
 
         attempt = PronunciationAttempt.objects.create(
-            user=request.user, language=language, kind=kind, translation=translation, sentence=sentence, text=text,
-            score=result["score"], phone_score=result["phone_score"], tone_score=result["tone_score"],
-            completeness=result["completeness"], heard_ipa=result["heard_ipa"][:500],
-            error_codes=sorted({e["code"] for e in result["errors"]}), result=result, ms=result["ms"])
+            user=request.user,
+            language=language,
+            kind=kind,
+            translation=translation,
+            sentence=sentence,
+            text=text,
+            score=result["score"],
+            phone_score=result["phone_score"],
+            tone_score=result["tone_score"],
+            completeness=result["completeness"],
+            heard_ipa=result["heard_ipa"][:500],
+            error_codes=sorted({e["code"] for e in result["errors"]}),
+            result=result,
+            ms=result["ms"],
+        )
         return Response({"id": attempt.id, "text": text, "language": language, **result})
 
 
@@ -116,12 +128,27 @@ class ProgressView(APIView):
                 errors[key] += 1
                 example.setdefault(key, e)
         week = [a.score for a in attempts if a.created_at >= timezone.now() - timedelta(days=7)]
-        return Response({
-            "language": target.code, "attempts": len(attempts),
-            "average_7d": round(sum(week) / len(week)) if week else None,
-            "by_day": [{"date": d, "average": round(sum(v) / len(v)), "count": len(v)} for d, v in sorted(by_day.items())],
-            "weak_sounds": [{"code": re.sub(r":.*", "", k), "count": n, "expected": example[k]["expected"],
-                             "heard": example[k]["heard"], "tip": example[k]["tip"]} for k, n in errors.most_common(5)],
-            "recent": [{"id": a.id, "text": a.text, "kind": a.kind, "score": a.score, "created_at": a.created_at}
-                       for a in attempts[:10]],
-        })
+        return Response(
+            {
+                "language": target.code,
+                "attempts": len(attempts),
+                "average_7d": round(sum(week) / len(week)) if week else None,
+                "by_day": [
+                    {"date": d, "average": round(sum(v) / len(v)), "count": len(v)} for d, v in sorted(by_day.items())
+                ],
+                "weak_sounds": [
+                    {
+                        "code": re.sub(r":.*", "", k),
+                        "count": n,
+                        "expected": example[k]["expected"],
+                        "heard": example[k]["heard"],
+                        "tip": example[k]["tip"],
+                    }
+                    for k, n in errors.most_common(5)
+                ],
+                "recent": [
+                    {"id": a.id, "text": a.text, "kind": a.kind, "score": a.score, "created_at": a.created_at}
+                    for a in attempts[:10]
+                ],
+            }
+        )

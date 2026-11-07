@@ -6,34 +6,116 @@ All rules are deterministic properties of the Vietnamese writing system:
   * spelling rules: k / gh / ngh before i, e, ê (y for k); c / g / ng elsewhere; q only as 'qu'
 Tone marks are placed with the same convention as the vocabulary data (vietnamese.normalize – "kiểu cũ").
 """
+
 import unicodedata
 from dataclasses import dataclass
 
 from .vietnamese import _apply_tone, _split_tone
 
-ONSETS = ["ngh", "ng", "gh", "gi", "kh", "nh", "ph", "qu", "th", "tr", "ch",
-          "b", "c", "d", "đ", "g", "h", "k", "l", "m", "n", "p", "r", "s", "t", "v", "x"]
+ONSETS = [
+    "ngh",
+    "ng",
+    "gh",
+    "gi",
+    "kh",
+    "nh",
+    "ph",
+    "qu",
+    "th",
+    "tr",
+    "ch",
+    "b",
+    "c",
+    "d",
+    "đ",
+    "g",
+    "h",
+    "k",
+    "l",
+    "m",
+    "n",
+    "p",
+    "r",
+    "s",
+    "t",
+    "v",
+    "x",
+]
 VOWELS = set("aăâeêioôơuưy")
 
 TONE_MARKS = {"̀": "huyen", "́": "sac", "̉": "hoi", "̃": "nga", "̣": "nang"}
 MARK_OF = {v: k for k, v in TONE_MARKS.items()}
 TONES = ["ngang", "huyen", "sac", "hoi", "nga", "nang"]
-TONE_LABEL = {"ngang": "thanh ngang", "huyen": "dấu huyền", "sac": "dấu sắc", "hoi": "dấu hỏi",
-              "nga": "dấu ngã", "nang": "dấu nặng"}
+TONE_LABEL = {
+    "ngang": "thanh ngang",
+    "huyen": "dấu huyền",
+    "sac": "dấu sắc",
+    "hoi": "dấu hỏi",
+    "nga": "dấu ngã",
+    "nang": "dấu nặng",
+}
 TONE_SPELL = {"huyen": "huyền", "sac": "sắc", "hoi": "hỏi", "nga": "ngã", "nang": "nặng"}
 TONE_SYMBOL = {"ngang": "", "huyen": "`", "sac": "´", "hoi": "ˀ", "nga": "~", "nang": "."}
 
 # how an initial is pronounced when spelling (đánh vần) – Tiếng Việt 1
 ONSET_SOUND = {
-    "b": "bờ", "c": "cờ", "ch": "chờ", "d": "dờ", "đ": "đờ", "g": "gờ", "gh": "gờ", "gi": "di", "h": "hờ",
-    "k": "ca", "kh": "khờ", "l": "lờ", "m": "mờ", "n": "nờ", "ng": "ngờ", "ngh": "ngờ", "nh": "nhờ", "p": "pờ",
-    "ph": "phờ", "qu": "quờ", "r": "rờ", "s": "sờ", "t": "tờ", "th": "thờ", "tr": "trờ", "v": "vờ", "x": "xờ",
+    "b": "bờ",
+    "c": "cờ",
+    "ch": "chờ",
+    "d": "dờ",
+    "đ": "đờ",
+    "g": "gờ",
+    "gh": "gờ",
+    "gi": "di",
+    "h": "hờ",
+    "k": "ca",
+    "kh": "khờ",
+    "l": "lờ",
+    "m": "mờ",
+    "n": "nờ",
+    "ng": "ngờ",
+    "ngh": "ngờ",
+    "nh": "nhờ",
+    "p": "pờ",
+    "ph": "phờ",
+    "qu": "quờ",
+    "r": "rờ",
+    "s": "sờ",
+    "t": "tờ",
+    "th": "thờ",
+    "tr": "trờ",
+    "v": "vờ",
+    "x": "xờ",
 }
 ONSET_NAME = {**ONSET_SOUND, "gh": "gờ kép", "ngh": "ngờ kép"}
-VOWEL_SOUND = {"a": "a", "ă": "á", "â": "ớ", "e": "e", "ê": "ê", "i": "i", "o": "o", "ô": "ô", "ơ": "ơ",
-               "u": "u", "ư": "ư", "y": "i"}
-FINAL_SOUND = {"c": "cờ", "ch": "chờ", "m": "mờ", "n": "nờ", "ng": "ngờ", "nh": "nhờ", "p": "pờ", "t": "tờ",
-               "i": "i", "y": "i", "o": "o", "u": "u"}
+VOWEL_SOUND = {
+    "a": "a",
+    "ă": "á",
+    "â": "ớ",
+    "e": "e",
+    "ê": "ê",
+    "i": "i",
+    "o": "o",
+    "ô": "ô",
+    "ơ": "ơ",
+    "u": "u",
+    "ư": "ư",
+    "y": "i",
+}
+FINAL_SOUND = {
+    "c": "cờ",
+    "ch": "chờ",
+    "m": "mờ",
+    "n": "nờ",
+    "ng": "ngờ",
+    "nh": "nhờ",
+    "p": "pờ",
+    "t": "tờ",
+    "i": "i",
+    "y": "i",
+    "o": "o",
+    "u": "u",
+}
 FRONT = ("i", "e", "ê", "y")  # vowels that require k / gh / ngh
 
 
@@ -63,7 +145,7 @@ def parse(syllable: str) -> Syllable | None:
     if not base or not any(c in VOWELS for c in base):
         return None
     onset = next((o for o in ONSETS if base.startswith(o)), "")
-    rhyme = base[len(onset):]
+    rhyme = base[len(onset) :]
     if onset == "gi":
         if not rhyme:  # gi, gì
             rhyme = "i"

@@ -10,6 +10,7 @@ COCO answers for the classes it knows, this model for the rest (helmet, pig, pen
     cd BE && python manage.py register_model --onnx ../AI/runs/oiv7-pretrained/yolov8s-oiv7-lingoprism.onnx \
         --card ../AI/runs/oiv7-pretrained/model_card.json
 """
+
 import argparse
 import json
 from pathlib import Path
@@ -84,11 +85,21 @@ def main():
     onnx_path = out / f"{name}.onnx"
     dummy = torch.zeros(1, 3, args.imgsz, args.imgsz)
     with torch.no_grad():
-        torch.onnx.export(Folded(model), dummy, str(onnx_path), input_names=["images"], output_names=["output0"],
-                          opset_version=12, dynamo=False)
+        torch.onnx.export(
+            Folded(model),
+            dummy,
+            str(onnx_path),
+            input_names=["images"],
+            output_names=["output0"],
+            opset_version=12,
+            dynamo=False,
+        )
     m = onnx.load(str(onnx_path))
-    for k, v in {"names": str(dict(enumerate(labels))), "imgsz": str([args.imgsz, args.imgsz]),
-                 "description": f"{args.weights} (Open Images V7) folded to LingoPrism labels"}.items():
+    for k, v in {
+        "names": str(dict(enumerate(labels))),
+        "imgsz": str([args.imgsz, args.imgsz]),
+        "description": f"{args.weights} (Open Images V7) folded to LingoPrism labels",
+    }.items():
         entry = m.metadata_props.add()
         entry.key, entry.value = k, v
     onnx.save(m, str(onnx_path))
@@ -96,8 +107,13 @@ def main():
     tflite = export_tflite(onnx_path, out, name, labels) if args.tflite else None
 
     card = {
-        "name": name, "base_model": args.weights, "imgsz": args.imgsz, "classes": labels,
-        "metrics": {}, "onnx": str(onnx_path), "tflite": str(tflite) if tflite else None,
+        "name": name,
+        "base_model": args.weights,
+        "imgsz": args.imgsz,
+        "classes": labels,
+        "metrics": {},
+        "onnx": str(onnx_path),
+        "tflite": str(tflite) if tflite else None,
         "note": "Pretrained on Open Images V7 by Ultralytics, not fine-tuned; Open Images class groups below.",
         "oi_classes": {lab: [yolo.names[i] for i in g] for lab, g in zip(labels, groups)},
     }
@@ -119,8 +135,9 @@ def export_tflite(onnx_path: Path, out: Path, name: str, labels: list[str]) -> P
     work.mkdir(exist_ok=True)
     slim = work / "model.onnx"
     onnx.save(onnxslim.slim(onnx.load(str(onnx_path))), str(slim))
-    subprocess.run([sys.executable, "-m", "onnx2tf", "-i", str(slim), "-o", str(work), "-nuo",
-                    "-tb", "tf_converter"], check=True)
+    subprocess.run(
+        [sys.executable, "-m", "onnx2tf", "-i", str(slim), "-o", str(work), "-nuo", "-tb", "tf_converter"], check=True
+    )
     tflite = out / f"{name}_float16.tflite"
     shutil.copy(work / "model_float16.tflite", tflite)
     (out / "labels.txt").write_text("\n".join(labels) + "\n", encoding="utf-8")

@@ -6,6 +6,7 @@
 * the image is re-encoded and downscaled: a crafted file cannot smuggle anything else, and storage stays bounded.
 * decompression bombs (a small file declaring 100 000 x 100 000 px) are refused: Image.MAX_IMAGE_PIXELS.
 """
+
 import io
 import uuid
 

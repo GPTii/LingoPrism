@@ -1,4 +1,5 @@
 """Terms acceptance, e-mail verification, kid accounts, deleting one's own account, release notes."""
+
 from datetime import date
 from pathlib import Path
 
@@ -26,7 +27,9 @@ def code_in(message) -> str:
 
 
 def signup(email="new@example.com", **extra):
-    return APIClient().post("/api/v1/auth/register/", {"email": email, "password": "Strong!Pass123", **extra}, format="json")
+    return APIClient().post(
+        "/api/v1/auth/register/", {"email": email, "password": "Strong!Pass123", **extra}, format="json"
+    )
 
 
 def test_sign_up_needs_the_terms_and_records_them():
@@ -80,13 +83,18 @@ def with_jwt(user):
 
 def test_a_kid_account_learns_right_away():
     # a parent signs in (often with Google) and picks kid mode for the child: no second consent step
-    kid = User.objects.create_user("kid@example.com", "Strong!Pass123", learner_type="kid",
-                                   birth_date=date(date.today().year - 8, 1, 1))
+    kid = User.objects.create_user(
+        "kid@example.com", "Strong!Pass123", learner_type="kid", birth_date=date(date.today().year - 8, 1, 1)
+    )
     client = with_jwt(kid)
     assert "parent_consent" not in client.get("/api/v1/me/").data
     assert client.get("/api/v1/topics/").status_code == 200
-    assert client.post("/api/v1/me/parent-consent/request/", {"parent_email": "mom@example.com"},
-                       format="json").status_code == 404
+    assert (
+        client.post(
+            "/api/v1/me/parent-consent/request/", {"parent_email": "mom@example.com"}, format="json"
+        ).status_code
+        == 404
+    )
 
 
 def test_deleting_my_account_removes_it_and_its_files(tmp_path, settings):
@@ -95,7 +103,7 @@ def test_deleting_my_account_removes_it_and_its_files(tmp_path, settings):
 
     settings.MEDIA_ROOT = tmp_path
     user = User.objects.create_user("me@example.com", "Strong!Pass123", birth_date=date(1990, 1, 1))
-    photo = Photo.objects.create(user=user)
+    Photo.objects.create(user=user)
     user.avatar.save("a.png", ContentFile(_png()), save=True)
     post = Post(user=user)
     post.image.save("p.png", ContentFile(_png()), save=True)

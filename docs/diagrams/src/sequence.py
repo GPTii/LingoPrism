@@ -8,7 +8,9 @@ def seq(title, body):
 
 DIAGRAMS = {}
 
-DIAGRAMS["sequence/S01_dang_ky"] = seq("S01 – Đăng ký và xác minh email", """
+DIAGRAMS["sequence/S01_dang_ky"] = seq(
+    "S01 – Đăng ký và xác minh email",
+    """
     actor U as Khách
     participant C as Web / App
     participant API as API Django<br/>RegisterView / VerifyEmailView
@@ -38,9 +40,12 @@ DIAGRAMS["sequence/S01_dang_ky"] = seq("S01 – Đăng ký và xác minh email",
         API-->>C: 200
     else Sai (lần 5 huỷ mã)
         API-->>C: 400 "Mã không đúng"
-    end""")
+    end""",
+)
 
-DIAGRAMS["sequence/S02_dang_nhap"] = seq("S02 – Đăng nhập bằng mật khẩu hoặc Google, mở kết nối realtime", """
+DIAGRAMS["sequence/S02_dang_nhap"] = seq(
+    "S02 – Đăng nhập bằng mật khẩu hoặc Google, mở kết nối realtime",
+    """
     actor U as Học viên
     participant C as Web / App
     participant G as Google Identity
@@ -68,9 +73,12 @@ DIAGRAMS["sequence/S02_dang_nhap"] = seq("S02 – Đăng nhập bằng mật kh�
     WS-->>C: {event: connected}
     Note over C: App: bật geofence, đăng ký FCM, đồng bộ bài học offline
     C->>API: Hết hạn access → POST /auth/refresh/
-    API-->>C: access mới""")
+    API-->>C: access mới""",
+)
 
-DIAGRAMS["sequence/S03_quen_mat_khau"] = seq("S03 – Quên và đặt lại mật khẩu", """
+DIAGRAMS["sequence/S03_quen_mat_khau"] = seq(
+    "S03 – Quên và đặt lại mật khẩu",
+    """
     actor U as Người dùng
     participant C as Web / App
     participant API as API Django<br/>Forgot / VerifyReset / ResetPassword
@@ -93,9 +101,12 @@ DIAGRAMS["sequence/S03_quen_mat_khau"] = seq("S03 – Quên và đặt lại m�
     C->>API: POST /auth/password/reset/
     API->>DB: set_password, xoá mã
     API->>DB: Thu hồi mọi refresh token (blacklist)
-    API-->>C: 200 → đăng nhập lại""")
+    API-->>C: 200 → đăng nhập lại""",
+)
 
-DIAGRAMS["sequence/S04_tu_vung"] = seq("S04 – Duyệt chủ đề và lưu từ", """
+DIAGRAMS["sequence/S04_tu_vung"] = seq(
+    "S04 – Duyệt chủ đề và lưu từ",
+    """
     actor U as Học viên
     participant C as Web / App
     participant API as API Django<br/>TopicViewSet / MyWordViewSet
@@ -115,9 +126,12 @@ DIAGRAMS["sequence/S04_tu_vung"] = seq("S04 – Duyệt chủ đề và lưu t�
     C->>API: POST /my-words/ {word, source: topic}
     API->>SV: Kiểm tra từ có bản dịch hiển thị cho ngôn ngữ đang học
     API->>DB: get_or_create PersonalWord (status=new)
-    API-->>C: 201 (mới) / 200 (đã có)""")
+    API-->>C: 201 (mới) / 200 (đã có)""",
+)
 
-DIAGRAMS["sequence/S05_phien_hoc"] = seq("S05 – Phiên học / ôn tập (SM-2 hoặc FSRS, VIP, Smart Distractor)", """
+DIAGRAMS["sequence/S05_phien_hoc"] = seq(
+    "S05 – Phiên học / ôn tập (SM-2 hoặc FSRS, VIP, Smart Distractor)",
+    """
     actor U as Học viên
     participant C as Web / App
     participant API as API Django<br/>StudySessionViewSet
@@ -154,9 +168,12 @@ DIAGRAMS["sequence/S05_phien_hoc"] = seq("S05 – Phiên học / ôn tập (SM-2
     GM->>DB: XP (hệ số, trần ngày), chuỗi ngày, nhiệm vụ, vảy, huy hiệu, giải tuần
     GM->>WS: push_event(xp)
     WS-->>C: {event: xp}
-    API-->>C: Kết quả + từ cần luyện + level_up""")
+    API-->>C: Kết quả + từ cần luyện + level_up""",
+)
 
-DIAGRAMS["sequence/S06_luyen_cau"] = seq("S06 – Luyện câu", """
+DIAGRAMS["sequence/S06_luyen_cau"] = seq(
+    "S06 – Luyện câu",
+    """
     actor U as Học viên
     participant C as Web / App
     participant API as API Django<br/>SentencePracticeViewSet
@@ -174,9 +191,12 @@ DIAGRAMS["sequence/S06_luyen_cau"] = seq("S06 – Luyện câu", """
             API->>GM: award_xp(practice), mark_activity
         end
         API-->>C: {correct, expected, translation_vi, xp}
-    end""")
+    end""",
+)
 
-DIAGRAMS["sequence/S07_phat_am"] = seq("S07 – Luyện phát âm (chấm trên thiết bị)", """
+DIAGRAMS["sequence/S07_phat_am"] = seq(
+    "S07 – Luyện phát âm (chấm trên thiết bị)",
+    """
     actor U as Học viên
     participant C as Web / App
     participant API as API Django
@@ -191,9 +211,12 @@ DIAGRAMS["sequence/S07_phat_am"] = seq("S07 – Luyện phát âm (chấm trên 
         SR-->>C: Các phương án nghe được
         C->>C: score(): Levenshtein theo chữ / chữ cái → 0–100, tô phần sai
         C-->>U: Điểm + phần đọc chưa đúng
-    end""")
+    end""",
+)
 
-DIAGRAMS["sequence/S08_doc_viet"] = seq("S08 – Học đọc – viết tiếng Việt", """
+DIAGRAMS["sequence/S08_doc_viet"] = seq(
+    "S08 – Học đọc – viết tiếng Việt",
+    """
     actor U as Trẻ em
     participant C as Web / App
     participant API as API Django<br/>literacy views
@@ -216,9 +239,12 @@ DIAGRAMS["sequence/S08_doc_viet"] = seq("S08 – Học đọc – viết tiếng
         API-->>C: Mở bài n+1
     else
         API-->>C: Học lại
-    end""")
+    end""",
+)
 
-DIAGRAMS["sequence/S09_vuot_cap"] = seq("S09 – Kiểm tra vượt cấp độ", """
+DIAGRAMS["sequence/S09_vuot_cap"] = seq(
+    "S09 – Kiểm tra vượt cấp độ",
+    """
     actor U as Học viên
     participant C as Web / App
     participant API as API Django<br/>LevelTestView
@@ -235,9 +261,12 @@ DIAGRAMS["sequence/S09_vuot_cap"] = seq("S09 – Kiểm tra vượt cấp độ"
         API-->>C: {passed: true}
     else
         API-->>C: {passed: false, score}
-    end""")
+    end""",
+)
 
-DIAGRAMS["sequence/S10_bai_kiem_tra"] = seq("S10 – Làm bài kiểm tra và giáo viên chấm tự luận", """
+DIAGRAMS["sequence/S10_bai_kiem_tra"] = seq(
+    "S10 – Làm bài kiểm tra và giáo viên chấm tự luận",
+    """
     actor U as Học viên
     actor T as Giáo viên
     participant C as Web / App
@@ -264,9 +293,12 @@ DIAGRAMS["sequence/S10_bai_kiem_tra"] = seq("S10 – Làm bài kiểm tra và gi
     API->>DB: Cập nhật điểm từng câu (≤ điểm tối đa), tính lại
     API->>N: notify(học viên, "Bài kiểm tra đã được chấm")
     N-->>C: Realtime + đẩy
-    API-->>A: 200""")
+    API-->>A: 200""",
+)
 
-DIAGRAMS["sequence/S11_nhan_dien"] = seq("S11 – Chụp ảnh nhận diện và xác nhận", """
+DIAGRAMS["sequence/S11_nhan_dien"] = seq(
+    "S11 – Chụp ảnh nhận diện và xác nhận",
+    """
     actor U as Học viên
     participant C as App / Web
     participant API as API Django<br/>DetectView / DetectionViewSet
@@ -291,9 +323,12 @@ DIAGRAMS["sequence/S11_nhan_dien"] = seq("S11 – Chụp ảnh nhận diện và
     end
     API->>DB: INSERT PersonalWord (source=camera) → nhiệm vụ Lưu từ
     API-->>C: {saved, reported}
-    Note over C,API: Offline: TFLite trên máy, sau đó POST /detections/log/""")
+    Note over C,API: Offline: TFLite trên máy, sau đó POST /detections/log/""",
+)
 
-DIAGRAMS["sequence/S12_hoi_thoai_ai"] = seq("S12 – Hội thoại AI từ ảnh", """
+DIAGRAMS["sequence/S12_hoi_thoai_ai"] = seq(
+    "S12 – Hội thoại AI từ ảnh",
+    """
     actor U as Học viên
     participant C as Web / App
     participant API as API Django<br/>PhotoDialogueView
@@ -313,9 +348,12 @@ DIAGRAMS["sequence/S12_hoi_thoai_ai"] = seq("S12 – Hội thoại AI từ ảnh
         API->>API: Tính pinyin (pypinyin + CC-CEDICT thanh nhẹ)
         API->>DB: INSERT PhotoDialogue
         API-->>C: Hội thoại (nhãn AI tạo)
-    end""")
+    end""",
+)
 
-DIAGRAMS["sequence/S13_dich"] = seq("S13 – Dịch văn bản / giọng nói", """
+DIAGRAMS["sequence/S13_dich"] = seq(
+    "S13 – Dịch văn bản / giọng nói",
+    """
     actor U as Học viên
     participant C as Web / App
     participant SR as Nhận dạng giọng nói<br/>(thiết bị)
@@ -345,9 +383,12 @@ DIAGRAMS["sequence/S13_dich"] = seq("S13 – Dịch văn bản / giọng nói", 
         C->>API: POST /my-words/?lang=&script=
     else Ô chat
         C->>C: Thay chữ bằng bản dịch, hiện pinyin + Hoàn tác
-    end""")
+    end""",
+)
 
-DIAGRAMS["sequence/S14_geofence"] = seq("S14 – Học theo vị trí: bản đồ và geofence", """
+DIAGRAMS["sequence/S14_geofence"] = seq(
+    "S14 – Học theo vị trí: bản đồ và geofence",
+    """
     actor U as Học viên
     participant GPS as GPS (Geolocator)
     participant C as App
@@ -376,9 +417,12 @@ DIAGRAMS["sequence/S14_geofence"] = seq("S14 – Học theo vị trí: bản đ�
         end
     end
     U->>C: Bấm banner
-    C->>C: DeepLink → màn chủ đề""")
+    C->>C: DeepLink → màn chủ đề""",
+)
 
-DIAGRAMS["sequence/S15_tro_choi"] = seq("S15 – Trò chơi", """
+DIAGRAMS["sequence/S15_tro_choi"] = seq(
+    "S15 – Trò chơi",
+    """
     actor U as Học viên
     participant C as Web / App
     participant API as API Django<br/>games views
@@ -402,9 +446,12 @@ DIAGRAMS["sequence/S15_tro_choi"] = seq("S15 – Trò chơi", """
         API->>GM: award_xp(game), màn trùm cộng ngọc
     end
     API->>GM: mark_activity, nhiệm vụ Thắng màn, thống kê huy hiệu
-    API-->>C: {percent, stars, xp, gems, next / review}""")
+    API-->>C: {percent, stars, xp, gems, next / review}""",
+)
 
-DIAGRAMS["sequence/S16_nhiem_vu_cua_hang"] = seq("S16 – Nhiệm vụ, cửa hàng và giải đấu tuần", """
+DIAGRAMS["sequence/S16_nhiem_vu_cua_hang"] = seq(
+    "S16 – Nhiệm vụ, cửa hàng và giải đấu tuần",
+    """
     actor U as Học viên
     participant C as Web / App
     participant API as API Django<br/>Quest / Shop / Leaderboard
@@ -427,9 +474,12 @@ DIAGRAMS["sequence/S16_nhiem_vu_cua_hang"] = seq("S16 – Nhiệm vụ, cửa h�
     API->>DB: LeagueMember tuần này theo weekly_xp
     API-->>C: Bảng xếp hạng hạng của tôi
     A->>API: POST /admin/league-tiers/close-week/ (hoặc lệnh close_league_week)
-    API->>GS: close_cycle: lên / xuống hạng, thưởng, thông báo""")
+    API->>GS: close_cycle: lên / xuống hạng, thưởng, thông báo""",
+)
 
-DIAGRAMS["sequence/S17_bai_viet"] = seq("S17 – Cộng đồng: bài viết", """
+DIAGRAMS["sequence/S17_bai_viet"] = seq(
+    "S17 – Cộng đồng: bài viết",
+    """
     actor U as Học viên
     participant C as Web / App
     participant API as API Django<br/>PostViewSet
@@ -449,9 +499,12 @@ DIAGRAMS["sequence/S17_bai_viet"] = seq("S17 – Cộng đồng: bài viết", "
     API->>DB: PersonalWord (source=community)
     U->>C: Báo cáo
     C->>API: POST /posts/{id}/report/
-    API->>DB: INSERT PostReport (pending)""")
+    API->>DB: INSERT PostReport (pending)""",
+)
 
-DIAGRAMS["sequence/S18_ban_be"] = seq("S18 – Kết bạn, chặn và báo cáo người dùng", """
+DIAGRAMS["sequence/S18_ban_be"] = seq(
+    "S18 – Kết bạn, chặn và báo cáo người dùng",
+    """
     actor U as Học viên A
     actor V as Học viên B
     participant C as Web / App
@@ -476,9 +529,12 @@ DIAGRAMS["sequence/S18_ban_be"] = seq("S18 – Kết bạn, chặn và báo cáo
     opt block
         API->>DB: Chặn: xoá theo dõi / bạn bè, cấm nhắn
     end
-    API-->>C: 201""")
+    API-->>C: 201""",
+)
 
-DIAGRAMS["sequence/S19_chat_nhom"] = seq("S19 – Nhóm học và chat nhóm realtime", """
+DIAGRAMS["sequence/S19_chat_nhom"] = seq(
+    "S19 – Nhóm học và chat nhóm realtime",
+    """
     actor U as Học viên
     participant C as Web / App
     participant API as API Django<br/>GroupViewSet / GroupMessages
@@ -506,9 +562,12 @@ DIAGRAMS["sequence/S19_chat_nhom"] = seq("S19 – Nhóm học và chat nhóm rea
     O->>API: POST /groups/{id}/messages/{mid}/heart/
     API->>SV: heart_group_message (select_for_update)
     SV->>R: group_send(heart)
-    R-->>C: {event: heart, hearts}""")
+    R-->>C: {event: heart, hearts}""",
+)
 
-DIAGRAMS["sequence/S20_tin_nhan_rieng"] = seq("S20 – Tin nhắn riêng", """
+DIAGRAMS["sequence/S20_tin_nhan_rieng"] = seq(
+    "S20 – Tin nhắn riêng",
+    """
     actor U as Học viên A
     participant C as Web / App của A
     participant API as API Django<br/>DirectThreadViewSet
@@ -532,9 +591,12 @@ DIAGRAMS["sequence/S20_tin_nhan_rieng"] = seq("S20 – Tin nhắn riêng", """
     API->>R: push_event(A, dm_read)
     R-->>C: Đã xem
     B->>API: POST /messages/threads/{id}/heart/ {message}
-    API->>R: push_event(A và B, dm_heart)""")
+    API->>R: push_event(A và B, dm_heart)""",
+)
 
-DIAGRAMS["sequence/S21_ho_tro"] = seq("S21 – Hỏi giáo viên", """
+DIAGRAMS["sequence/S21_ho_tro"] = seq(
+    "S21 – Hỏi giáo viên",
+    """
     actor U as Học viên
     actor T as Giáo viên
     participant C as App / Web
@@ -562,9 +624,12 @@ DIAGRAMS["sequence/S21_ho_tro"] = seq("S21 – Hỏi giáo viên", """
     C->>WS: {action: read}
     WS->>R: {event: read}
     T->>A: Đóng
-    A->>SV: POST /support/conversations/{id}/close/""")
+    A->>SV: POST /support/conversations/{id}/close/""",
+)
 
-DIAGRAMS["sequence/S22_thong_bao"] = seq("S22 – Thông báo realtime và thông báo đẩy", """
+DIAGRAMS["sequence/S22_thong_bao"] = seq(
+    "S22 – Thông báo realtime và thông báo đẩy",
+    """
     participant SRC as Một chức năng bất kỳ<br/>(chat, chấm bài, geofence…)
     participant N as notifications.services
     participant DB as PostgreSQL
@@ -581,9 +646,12 @@ DIAGRAMS["sequence/S22_thong_bao"] = seq("S22 – Thông báo realtime và thôn
     P->>F: send (luồng nền, khi Firebase bật)
     F-->>C: Thông báo hệ thống khi app đóng
     C->>C: Bấm → DeepLink.open(route)
-    C->>N: POST /notifications/{id}/read/""")
+    C->>N: POST /notifications/{id}/read/""",
+)
 
-DIAGRAMS["sequence/S23_kiem_duyet_ngon_ngu"] = seq("S23 – Quản trị: kiểm duyệt bản dịch và duyệt từ mới", """
+DIAGRAMS["sequence/S23_kiem_duyet_ngon_ngu"] = seq(
+    "S23 – Quản trị: kiểm duyệt bản dịch và duyệt từ mới",
+    """
     actor T as Giáo viên
     participant A as Trang Kiểm duyệt ngôn ngữ
     participant API as API Django<br/>AdminTranslation / AdminCandidate
@@ -607,9 +675,12 @@ DIAGRAMS["sequence/S23_kiem_duyet_ngon_ngu"] = seq("S23 – Quản trị: kiểm
         API-->>A: 200
     else Có lỗi
         API-->>A: 400 + lỗi
-    end""")
+    end""",
+)
 
-DIAGRAMS["sequence/S24_webgis"] = seq("S24 – Quản trị: quản lý POI (WebGIS)", """
+DIAGRAMS["sequence/S24_webgis"] = seq(
+    "S24 – Quản trị: quản lý POI (WebGIS)",
+    """
     actor T as Giáo viên
     participant A as Bản đồ quản trị<br/>(React Leaflet)
     participant API as API Django<br/>PoiViewSet
@@ -623,9 +694,12 @@ DIAGRAMS["sequence/S24_webgis"] = seq("S24 – Quản trị: quản lý POI (Web
     API->>DB: Lưu Poi (lat, lng, radius_m, topics)
     DB-->>IDX: Tín hiệu lưu → invalidate()
     IDX->>IDX: Dựng lại chỉ mục lưới ở truy vấn sau
-    API-->>A: 201 / 200""")
+    API-->>A: 201 / 200""",
+)
 
-DIAGRAMS["sequence/S25_kiem_duyet_bao_cao"] = seq("S25 – Quản trị: xử lý báo cáo người dùng", """
+DIAGRAMS["sequence/S25_kiem_duyet_bao_cao"] = seq(
+    "S25 – Quản trị: xử lý báo cáo người dùng",
+    """
     actor T as Giáo viên
     participant A as Trang Kiểm duyệt
     participant API as API Django<br/>AdminUserReportViewSet
@@ -644,9 +718,12 @@ DIAGRAMS["sequence/S25_kiem_duyet_bao_cao"] = seq("S25 – Quản trị: xử l�
     end
     API->>N: notify(người báo cáo, "đã được xem xét")
     API-->>A: 200
-    AU->>DB: INSERT AuditLog (người làm, đường dẫn, đối tượng)""")
+    AU->>DB: INSERT AuditLog (người làm, đường dẫn, đối tượng)""",
+)
 
-DIAGRAMS["sequence/S26_thuat_toan"] = seq("S26 – Quản trị: thuật toán và thực nghiệm", """
+DIAGRAMS["sequence/S26_thuat_toan"] = seq(
+    "S26 – Quản trị: thuật toán và thực nghiệm",
+    """
     actor A as Quản trị viên
     participant P as Trang Thuật toán
     participant API as API Django<br/>AlgorithmsView / RunExperimentView
@@ -667,9 +744,12 @@ DIAGRAMS["sequence/S26_thuat_toan"] = seq("S26 – Quản trị: thuật toán v
     end
     EX->>DB: INSERT ExperimentRun(kind=ga)
     API-->>P: Kết quả
-    Note over P,EX: Tương tự: srs, vip, distractor, proximity, geofence, realtime, yolo, benchmark""")
+    Note over P,EX: Tương tự: srs, vip, distractor, proximity, geofence, realtime, yolo, benchmark""",
+)
 
-DIAGRAMS["sequence/S27_quan_ly_nhan_dien"] = seq("S27 – Quản trị: phản hồi nhận diện", """
+DIAGRAMS["sequence/S27_quan_ly_nhan_dien"] = seq(
+    "S27 – Quản trị: phản hồi nhận diện",
+    """
     actor T as Giáo viên
     participant A as Trang Nhận diện
     participant API as API Django<br/>AdminCorrectionViewSet
@@ -686,9 +766,12 @@ DIAGRAMS["sequence/S27_quan_ly_nhan_dien"] = seq("S27 – Quản trị: phản h
     T->>A: Xuất dữ liệu train
     A->>API: GET /admin/detection-reports/export/
     API->>DB: exported_at
-    API-->>A: File nhãn YOLO cho lần train sau""")
+    API-->>A: File nhãn YOLO cho lần train sau""",
+)
 
-DIAGRAMS["sequence/S28_thong_bao_hang_loat"] = seq("S28 – Quản trị: gửi thông báo hàng loạt", """
+DIAGRAMS["sequence/S28_thong_bao_hang_loat"] = seq(
+    "S28 – Quản trị: gửi thông báo hàng loạt",
+    """
     actor T as Giáo viên / Quản trị
     participant A as Trang Thông báo
     participant API as API Django<br/>BroadcastView
@@ -702,4 +785,5 @@ DIAGRAMS["sequence/S28_thong_bao_hang_loat"] = seq("S28 – Quản trị: gửi 
         API->>N: notify(user, broadcast)
         N-->>C: Realtime + FCM
     end
-    API-->>A: {sent: n}""")
+    API-->>A: {sent: n}""",
+)

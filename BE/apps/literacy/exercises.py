@@ -9,6 +9,7 @@ cannot forge answers. Exercise types (all audio-first, no English):
   dictation     – hear a word (picture as hint) and write it
   sentence      – hear a short sentence and write it (from lesson 17, review lessons)
 """
+
 import random
 import uuid
 
@@ -34,6 +35,7 @@ def unsign(token: str, max_age: int = 6 * 3600) -> dict:
 
 
 # ------------------------------------------------------------------ helpers
+
 
 def _weighted_pick(items: list, k: int, rng: random.Random) -> list:
     """Prefer frequent syllables (they come first) but keep some variety."""
@@ -85,12 +87,17 @@ def _similar(target: ph.Syllable, n: int) -> list[str]:
 
 # ------------------------------------------------------------------ exercise builders
 
+
 def listen_choose(s: ph.Syllable, n: int, rng, ctx) -> dict | None:
     pool = _similar(s, n)
     if len(pool) < 2:
         return None
-    return {"type": "listen_choose", "tts": {"text": s.text, "locale": TTS}, "options": _options(s.text, pool, 4, rng),
-            "token": sign(t="listen_choose", a=s.text, **ctx)}
+    return {
+        "type": "listen_choose",
+        "tts": {"text": s.text, "locale": TTS},
+        "options": _options(s.text, pool, 4, rng),
+        "token": sign(t="listen_choose", a=s.text, **ctx),
+    }
 
 
 def find_unit(s: ph.Syllable, unit: cur.Unit, n: int, rng, ctx) -> dict | None:
@@ -103,9 +110,14 @@ def find_unit(s: ph.Syllable, unit: cur.Unit, n: int, rng, ctx) -> dict | None:
         pool, answer, ask = sorted(t.onsets), s.onset, "âm đầu"
     if len(set(pool)) < 2:
         return None
-    return {"type": "find_unit", "question": f"Tiếng “{s.text}” có {ask} nào?", "syllable": s.text,
-            "tts": {"text": s.text, "locale": TTS}, "options": _options(answer, pool, 4, rng),
-            "token": sign(t="find_unit", a=answer, **ctx)}
+    return {
+        "type": "find_unit",
+        "question": f"Tiếng “{s.text}” có {ask} nào?",
+        "syllable": s.text,
+        "tts": {"text": s.text, "locale": TTS},
+        "options": _options(answer, pool, 4, rng),
+        "token": sign(t="find_unit", a=answer, **ctx),
+    }
 
 
 def build(s: ph.Syllable, n: int, rng, ctx) -> dict | None:
@@ -115,41 +127,67 @@ def build(s: ph.Syllable, n: int, rng, ctx) -> dict | None:
     tones = ["ngang", *[x for x in ph.TONES if x in t.tones]]
     if len(rhymes) < 2:
         return None
-    return {"type": "build", "tts": {"text": s.text, "locale": TTS},
-            "onsets": onsets, "rhymes": rhymes,
-            "tones": [{"code": x, "label": ph.TONE_LABEL[x], "symbol": ph.TONE_SYMBOL[x]} for x in tones],
-            "token": sign(t="build", a=s.text, **ctx)}
+    return {
+        "type": "build",
+        "tts": {"text": s.text, "locale": TTS},
+        "onsets": onsets,
+        "rhymes": rhymes,
+        "tones": [{"code": x, "label": ph.TONE_LABEL[x], "symbol": ph.TONE_SYMBOL[x]} for x in tones],
+        "token": sign(t="build", a=s.text, **ctx),
+    }
 
 
 def rule(s: ph.Syllable, pair: tuple[str, str], rng, ctx) -> dict:
-    return {"type": "rule", "tts": {"text": s.text, "locale": TTS},
-            "question": "Chọn chữ đúng để điền vào chỗ trống",
-            "pattern": "_" + ph.compose("", s.rhyme, s.tone), "options": list(pair),
-            "token": sign(t="rule", a=s.onset, w=s.text, **ctx)}
+    return {
+        "type": "rule",
+        "tts": {"text": s.text, "locale": TTS},
+        "question": "Chọn chữ đúng để điền vào chỗ trống",
+        "pattern": "_" + ph.compose("", s.rhyme, s.tone),
+        "options": list(pair),
+        "token": sign(t="rule", a=s.onset, w=s.text, **ctx),
+    }
 
 
 def dictation(word: dict | None, s: ph.Syllable | None, ctx) -> dict:
     text = word["text"] if word else s.text
-    return {"type": "dictation", "tts": {"text": text, "locale": TTS}, "emoji": word["emoji"] if word else "",
-            "image": word["image"] if word else None,
-            "syllables": len(ph.syllables_of(text)), "token": sign(t="dictation", a=text, **ctx)}
+    return {
+        "type": "dictation",
+        "tts": {"text": text, "locale": TTS},
+        "emoji": word["emoji"] if word else "",
+        "image": word["image"] if word else None,
+        "syllables": len(ph.syllables_of(text)),
+        "token": sign(t="dictation", a=text, **ctx),
+    }
 
 
 def sentence(item: dict, ctx) -> dict:
-    return {"type": "sentence", "tts": {"text": item["text"], "locale": TTS}, "syllables": item["syllables"],
-            "source": {"name": "Tatoeba", "id": item["id"], "license": "CC BY 2.0 FR",
-                       "url": f"https://tatoeba.org/sentences/show/{item['id']}"},
-            "token": sign(t="sentence", a=item["text"], **ctx)}
+    return {
+        "type": "sentence",
+        "tts": {"text": item["text"], "locale": TTS},
+        "syllables": item["syllables"],
+        "source": {
+            "name": "Tatoeba",
+            "id": item["id"],
+            "license": "CC BY 2.0 FR",
+            "url": f"https://tatoeba.org/sentences/show/{item['id']}",
+        },
+        "token": sign(t="sentence", a=item["text"], **ctx),
+    }
 
 
 # ------------------------------------------------------------------ lesson
 
+
 def intro(unit: cur.Unit, n: int) -> dict:
     ex = _examples(unit, n)
     words = [w for w in _words(n) if any(unit.matches(p) for p in map(ph.parse, ph.syllables_of(w["text"])) if p)]
-    return {"type": "intro", "unit": unit.payload(),
-            "examples": [spell_payload(s) for s in ex[:4]], "words": words[:4],
-            "rhyme_spell": ph.spell_rhyme(unit.code) if unit.kind == "van" else []}
+    return {
+        "type": "intro",
+        "unit": unit.payload(),
+        "examples": [spell_payload(s) for s in ex[:4]],
+        "words": words[:4],
+        "rhyme_spell": ph.spell_rhyme(unit.code) if unit.kind == "van" else [],
+    }
 
 
 def build_lesson(n: int, seed: int | None = None) -> dict:
@@ -193,8 +231,11 @@ def build_lesson(n: int, seed: int | None = None) -> dict:
     if n >= 17:
         sentences = [x for x in cur.corpus()["sentences"] if cur.readable_text(x["text"], n)]
         if not lesson.get("review"):
-            sentences = [x for x in sentences
-                         if any(u.matches(p) for u in units for p in map(ph.parse, ph.syllables_of(x["text"])) if p)]
+            sentences = [
+                x
+                for x in sentences
+                if any(u.matches(p) for u in units for p in map(ph.parse, ph.syllables_of(x["text"])) if p)
+            ]
         sentences = [x for x in sentences if x["syllables"] <= (6 if n < 40 else 8)]
         for item in rng.sample(sentences, min(2 if not lesson.get("review") else 8, len(sentences))):
             exercises.append(sentence(item, ctx(None)))
@@ -218,11 +259,18 @@ def build_lesson(n: int, seed: int | None = None) -> dict:
     # listening first, writing last
     order = {"listen_choose": 0, "find_unit": 1, "build": 2, "rule": 3, "dictation": 4, "sentence": 5}
     exercises.sort(key=lambda e: order[e["type"]])
-    return {"n": n, "title": lesson["title"], "session": session, "units": [u.payload() for u in units],
-            "intro": [intro(u, n) for u in units], "exercises": exercises}
+    return {
+        "n": n,
+        "title": lesson["title"],
+        "session": session,
+        "units": [u.payload() for u in units],
+        "intro": [intro(u, n) for u in units],
+        "exercises": exercises,
+    }
 
 
 # ------------------------------------------------------------------ checking
+
 
 def _norm(text: str) -> str:
     return " ".join(ph.syllables_of(vietnamese.normalize(text)))
@@ -238,10 +286,17 @@ def compare_text(expected: str, given: str) -> list[dict]:
         if not item["ok"] and g:
             pe, pg = ph.parse(e), ph.parse(g)
             if pe and pg:
-                item["hint"] = ("sai dấu thanh" if (pe.onset, pe.rhyme) == (pg.onset, pg.rhyme) else
-                                "sai âm đầu" if pe.rhyme == pg.rhyme else "sai vần" if pe.onset == pg.onset else "")
+                item["hint"] = (
+                    "sai dấu thanh"
+                    if (pe.onset, pe.rhyme) == (pg.onset, pg.rhyme)
+                    else "sai âm đầu"
+                    if pe.rhyme == pg.rhyme
+                    else "sai vần"
+                    if pe.onset == pg.onset
+                    else ""
+                )
         out.append(item)
-    for g in got[len(exp):]:
+    for g in got[len(exp) :]:
         out.append({"expected": "", "given": g, "ok": False})
     return out
 
@@ -259,7 +314,11 @@ def check(data: dict, answer) -> tuple[bool, dict]:
         ok = _norm(str(answer)) == _norm(expected)
         return ok, {"expected": expected, "diff": diff}
     if kind == "rule":
-        return str(answer) == expected, {"expected": expected, "word": data.get("w", ""), "spell": ph.spell(data.get("w", ""))}
+        return str(answer) == expected, {
+            "expected": expected,
+            "word": data.get("w", ""),
+            "spell": ph.spell(data.get("w", "")),
+        }
     ok = str(answer).strip() == expected
     extra = {"expected": expected}
     if kind == "listen_choose" and (s := ph.parse(expected)):

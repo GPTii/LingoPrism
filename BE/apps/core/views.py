@@ -29,5 +29,6 @@ def releases(request):
 
     from .releases import releases as all_releases
 
-    return Response({"latest": all_releases()[0]["version"], "legal_version": settings.LEGAL_VERSION,
-                     "results": all_releases()})
+    return Response(
+        {"latest": all_releases()[0]["version"], "legal_version": settings.LEGAL_VERSION, "results": all_releases()}
+    )

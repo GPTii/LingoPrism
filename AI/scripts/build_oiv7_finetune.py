@@ -28,6 +28,7 @@ already downloaded.
 Output: YOLO format (images/{train,val}, labels/{train,val}), data.yaml with the base model's 601 names, summary.json
 (labels chosen, images and boxes per LingoPrism label).
 """
+
 import argparse
 import csv
 import hashlib
@@ -49,8 +50,21 @@ from export_pretrained_oiv7 import EXTRA  # noqa: E402  (the same label -> Open 
 SERVER_SETUP = "oiv7m-int8+coco-m-int8+clip"
 # mistaken for one another on the vocabulary photos (ghi_chu.md, CLIP section); these labels are "extra" classes the
 # test set does not score, so they are added by hand
-CONFUSED = ["lemon", "mango", "peach", "orange", "sandals", "shoes", "violin", "guitar", "scissors", "knife", "spoon",
-            "taxi", "car"]
+CONFUSED = [
+    "lemon",
+    "mango",
+    "peach",
+    "orange",
+    "sandals",
+    "shoes",
+    "violin",
+    "guitar",
+    "scissors",
+    "knife",
+    "spoon",
+    "taxi",
+    "car",
+]
 CACHE = Path.home() / "fiftyone" / "open-images-v7"  # FiftyOne's copy of the label files, used when present
 URLS = {
     "train": "https://storage.googleapis.com/openimages/v6/oidv6-train-annotations-bbox.csv",
@@ -121,8 +135,9 @@ def collect_boxes(boxes_csv: Path, images: set[str]) -> dict[str, list]:
     out: dict[str, list] = defaultdict(list)
     for r in _rows(boxes_csv):
         if r["ImageID"] in images:
-            out[r["ImageID"]].append((r["LabelName"], tuple(float(r[k]) for k in ("XMin", "XMax", "YMin", "YMax")),
-                                      r["IsDepiction"] == "1"))
+            out[r["ImageID"]].append(
+                (r["LabelName"], tuple(float(r[k]) for k in ("XMin", "XMax", "YMin", "YMax")), r["IsDepiction"] == "1")
+            )
     return out
 
 
@@ -175,7 +190,7 @@ def main():
     weak = weak_labels(args.threshold, groups)
     others = [lab for lab in groups if lab not in weak]
     if args.limit_classes:
-        weak, others = weak[:args.limit_classes], others[:args.limit_classes]
+        weak, others = weak[: args.limit_classes], others[: args.limit_classes]
     print(f"{len(weak)} lớp yếu: {', '.join(weak)}")
     print(f"{len(others)} lớp ôn lại (replay {args.replay} ảnh / lớp Open Images)", flush=True)
 
@@ -214,7 +229,9 @@ def main():
     print(f"Lượt 3/3: tải và thu nhỏ {len(keep)} ảnh...", flush=True)
     done = 0
     with ThreadPoolExecutor(args.workers) as pool:
-        futures = {p: pool.submit(_fetch, args.split, p, out / "images" / part_of[p] / f"{p}.jpg", args.max_side) for p in keep}
+        futures = {
+            p: pool.submit(_fetch, args.split, p, out / "images" / part_of[p] / f"{p}.jpg", args.max_side) for p in keep
+        }
         ok = {}
         for k, (p, f) in enumerate(futures.items(), 1):
             ok[p] = f.result()
@@ -235,17 +252,33 @@ def main():
             if cls in label_of:
                 boxes_per_label[label_of[cls]] += 1
                 images_per_label[label_of[cls]].add(p)
-        (out / "labels" / part_of[p] / f"{p}.txt").write_text("\n".join(lines) + ("\n" if lines else ""), encoding="utf-8")
+        (out / "labels" / part_of[p] / f"{p}.txt").write_text(
+            "\n".join(lines) + ("\n" if lines else ""), encoding="utf-8"
+        )
         kept += 1
 
-    (out / "data.yaml").write_text(yaml.safe_dump(
-        {"path": str(out.resolve()), "train": "images/train", "val": "images/val", "names": dict(names)},
-        allow_unicode=True, sort_keys=False), encoding="utf-8")
-    summary = {"builder": 2, "base": args.base, "split": args.split, "threshold": args.threshold, "weak": weak, "replay": others,
-               "images": kept, "val_images": sum(1 for p in keep if ok.get(p) and part_of[p] == "val"),
-               "skipped_depiction": skipped_depiction,
-               "per_label": {lab: {"images": len(images_per_label[lab]), "boxes": boxes_per_label[lab]}
-                             for lab in weak + others}}
+    (out / "data.yaml").write_text(
+        yaml.safe_dump(
+            {"path": str(out.resolve()), "train": "images/train", "val": "images/val", "names": dict(names)},
+            allow_unicode=True,
+            sort_keys=False,
+        ),
+        encoding="utf-8",
+    )
+    summary = {
+        "builder": 2,
+        "base": args.base,
+        "split": args.split,
+        "threshold": args.threshold,
+        "weak": weak,
+        "replay": others,
+        "images": kept,
+        "val_images": sum(1 for p in keep if ok.get(p) and part_of[p] == "val"),
+        "skipped_depiction": skipped_depiction,
+        "per_label": {
+            lab: {"images": len(images_per_label[lab]), "boxes": boxes_per_label[lab]} for lab in weak + others
+        },
+    }
     (out / "summary.json").write_text(json.dumps(summary, indent=1, ensure_ascii=False), encoding="utf-8")
     print(f"→ {out}: {kept} ảnh ({skipped_depiction} ảnh có tranh vẽ bị bỏ), data.yaml + summary.json")
 

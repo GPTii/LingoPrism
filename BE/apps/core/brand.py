@@ -4,6 +4,7 @@ Paths stored in the database (avatar presets, badges, shop items, league tiers, 
 there. `brand_path` translates a path of the earlier app's artwork ("assets/images/...") – kept in sync with
 MOBILE/lib/app/core/utils/brand_assets.dart.
 """
+
 import re
 
 MASCOT = "assets/brand/mascot/"
@@ -33,29 +34,74 @@ def mascot(name: str) -> str:
 
 # 10 league tiers, lowest first: from a ray of light to the legendary prism
 TIERS = [
-    ("tia-sang", "Tia Sáng"), ("anh-dong", "Ánh Đồng"), ("anh-bac", "Ánh Bạc"), ("anh-vang", "Ánh Vàng"),
-    ("bach-kim", "Bạch Kim"), ("ngoc-luc", "Ngọc Lục"), ("lam-ngoc", "Lam Ngọc"), ("tu-ngoc", "Tử Ngọc"),
-    ("cau-vong", "Cầu Vồng"), ("lang-kinh", "Lăng Kính Huyền Thoại"),
+    ("tia-sang", "Tia Sáng"),
+    ("anh-dong", "Ánh Đồng"),
+    ("anh-bac", "Ánh Bạc"),
+    ("anh-vang", "Ánh Vàng"),
+    ("bach-kim", "Bạch Kim"),
+    ("ngoc-luc", "Ngọc Lục"),
+    ("lam-ngoc", "Lam Ngọc"),
+    ("tu-ngoc", "Tử Ngọc"),
+    ("cau-vong", "Cầu Vồng"),
+    ("lang-kinh", "Lăng Kính Huyền Thoại"),
 ]
 # codes of the earlier ladders → the tier at the same place, so members keep their league history
 OLD_TIER_CODES = {
-    "bang-non": "tia-sang", "vay-dong": "anh-dong", "long-vu-bac": "anh-bac", "igloo-vang": "anh-vang",
-    "tang-bang-bach-kim": "bach-kim", "cuc-quang-luc": "ngoc-luc", "dao-bang-lam": "lam-ngoc", "bao-tuyet-tim": "tu-ngoc",
-    "thuyen-truong-nam-cuc": "cau-vong", "vuong-mien-cuc-quang": "lang-kinh",
-    "tan-binh": "tia-sang", "igloo-dong": "anh-dong", "igloo-bac": "anh-bac", "igloo-kim-cuong": "lang-kinh",
+    "bang-non": "tia-sang",
+    "vay-dong": "anh-dong",
+    "long-vu-bac": "anh-bac",
+    "igloo-vang": "anh-vang",
+    "tang-bang-bach-kim": "bach-kim",
+    "cuc-quang-luc": "ngoc-luc",
+    "dao-bang-lam": "lam-ngoc",
+    "bao-tuyet-tim": "tu-ngoc",
+    "thuyen-truong-nam-cuc": "cau-vong",
+    "vuong-mien-cuc-quang": "lang-kinh",
+    "tan-binh": "tia-sang",
+    "igloo-dong": "anh-dong",
+    "igloo-bac": "anh-bac",
+    "igloo-kim-cuong": "lang-kinh",
 }
 
 _MASCOT_OLD = {
-    "chim_vui1": AVATARS[0], "chim_vui": AVATARS[3], "chim_ok": mascot("ok"), "chim_mung": mascot("celebrate"),
-    "chim_thich": mascot("love"), "chim_yeu": mascot("love"), "chim_xinchao": mascot("hello"), "chim_chaomung": mascot("hello"),
-    "chim_chienthang": mascot("celebrate"), "chim_yes": mascot("celebrate"), "chim_thoibong": mascot("party"),
-    "chim_moqua": mascot("gift"), "chim_camqua": mascot("wink"), "chim_camon": mascot("wink"), "chim_nhachoc": mascot("reminder"),
-    "chim_hoi": mascot("think"), "chim_xinloi": mascot("sorry"), "chim_chupanh": mascot("camera"), "chim_totnghiep": mascot("graduate"),
+    "chim_vui1": AVATARS[0],
+    "chim_vui": AVATARS[3],
+    "chim_ok": mascot("ok"),
+    "chim_mung": mascot("celebrate"),
+    "chim_thich": mascot("love"),
+    "chim_yeu": mascot("love"),
+    "chim_xinchao": mascot("hello"),
+    "chim_chaomung": mascot("hello"),
+    "chim_chienthang": mascot("celebrate"),
+    "chim_yes": mascot("celebrate"),
+    "chim_thoibong": mascot("party"),
+    "chim_moqua": mascot("gift"),
+    "chim_camqua": mascot("wink"),
+    "chim_camon": mascot("wink"),
+    "chim_nhachoc": mascot("reminder"),
+    "chim_hoi": mascot("think"),
+    "chim_xinloi": mascot("sorry"),
+    "chim_chupanh": mascot("camera"),
+    "chim_totnghiep": mascot("graduate"),
 }
-_MASCOT_FAMILY = {"chim_buon": "sad", "chim_ngu": "sleepy", "chim_hocnhom": "group", "chim_muadong": "explore", "chim_lolang": "think"}
-_OTHER = {"XP": XP, "XPx2": XP_DOUBLE, "binhcucquang": XP_POTION, "vay": "assets/brand/icons/scale.png",
-          "ngoc": "assets/brand/icons/gem.png", "thongbao": "assets/brand/icons/bell.png", "streakbang": STREAK_FREEZE,
-          "nhom_default": "assets/brand/group/group_default.png", "logo": "assets/brand/logo.png"}
+_MASCOT_FAMILY = {
+    "chim_buon": "sad",
+    "chim_ngu": "sleepy",
+    "chim_hocnhom": "group",
+    "chim_muadong": "explore",
+    "chim_lolang": "think",
+}
+_OTHER = {
+    "XP": XP,
+    "XPx2": XP_DOUBLE,
+    "binhcucquang": XP_POTION,
+    "vay": "assets/brand/icons/scale.png",
+    "ngoc": "assets/brand/icons/gem.png",
+    "thongbao": "assets/brand/icons/bell.png",
+    "streakbang": STREAK_FREEZE,
+    "nhom_default": "assets/brand/group/group_default.png",
+    "logo": "assets/brand/logo.png",
+}
 
 
 def brand_path(path: str) -> str:

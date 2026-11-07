@@ -5,6 +5,7 @@ Supports both export formats:
   * YOLOv8 / YOLO11 style:         output [1, 4 + nc, N] = cx, cy, w, h, class scores...  (needs NMS)
 Class names are read from the ultralytics ONNX metadata ("names") or the active ModelVersion.
 """
+
 import ast
 import threading
 import time
@@ -155,8 +156,10 @@ class Detector:
 
     def _to_norm(self, x1, y1, x2, y2, scale, pad_x, pad_y, w, h):
         return [
-            float(np.clip((x1 - pad_x) / scale / w, 0, 1)), float(np.clip((y1 - pad_y) / scale / h, 0, 1)),
-            float(np.clip((x2 - pad_x) / scale / w, 0, 1)), float(np.clip((y2 - pad_y) / scale / h, 0, 1)),
+            float(np.clip((x1 - pad_x) / scale / w, 0, 1)),
+            float(np.clip((y1 - pad_y) / scale / h, 0, 1)),
+            float(np.clip((x2 - pad_x) / scale / w, 0, 1)),
+            float(np.clip((y2 - pad_y) / scale / h, 0, 1)),
         ]
 
     def predict(self, image: Image.Image) -> tuple[list[Box], int]:
@@ -179,8 +182,14 @@ class Detector:
             if score < threshold:
                 continue
             label = self.classes[int(cls)]
-            boxes.append(Box(label, float(score), self._to_norm(x1, y1, x2, y2, scale, pad_x, pad_y, w, h),
-                             [{"label": label, "confidence": round(float(score), 4)}]))
+            boxes.append(
+                Box(
+                    label,
+                    float(score),
+                    self._to_norm(x1, y1, x2, y2, scale, pad_x, pad_y, w, h),
+                    [{"label": label, "confidence": round(float(score), 4)}],
+                )
+            )
         return sorted(boxes, key=lambda b: -b.confidence)
 
     def _decode_v8(self, pred, scale, pad_x, pad_y, w, h):
@@ -198,10 +207,14 @@ class Detector:
         boxes = []
         for i in order:
             top = np.argsort(-scores[i])[:TOP_K]
-            boxes.append(Box(
-                self.classes[int(cls[i])], float(best[i]), self._to_norm(*xyxy[i], scale, pad_x, pad_y, w, h),
-                [{"label": self.classes[int(j)], "confidence": round(float(scores[i][j]), 4)} for j in top],
-            ))
+            boxes.append(
+                Box(
+                    self.classes[int(cls[i])],
+                    float(best[i]),
+                    self._to_norm(*xyxy[i], scale, pad_x, pad_y, w, h),
+                    [{"label": self.classes[int(j)], "confidence": round(float(scores[i][j]), 4)} for j in top],
+                )
+            )
         return boxes
 
 
@@ -324,10 +337,13 @@ class EnsembleDetector:
         the same as the server's threshold, so an evaluation run with a lower threshold keeps the server's behaviour."""
         known = set(self.classes)
         unknown_to_base = [b for b in b_new if b.label not in self._base_classes and b.confidence >= SURE_UNKNOWN]
-        b_base = [b for b in b_base if b.label in known
-                  and not any(_iou(b.bbox, n.bbox) >= 0.5 for n in unknown_to_base)]
-        fused = _wbf([(b, WBF_WEIGHT_PRIMARY, 0) for b in b_new] + [(b, WBF_WEIGHT_BASE, 1) for b in b_base],
-                     lambda label: 2 if label in self._base_classes and label in known else 1)
+        b_base = [
+            b for b in b_base if b.label in known and not any(_iou(b.bbox, n.bbox) >= 0.5 for n in unknown_to_base)
+        ]
+        fused = _wbf(
+            [(b, WBF_WEIGHT_PRIMARY, 0) for b in b_new] + [(b, WBF_WEIGHT_BASE, 1) for b in b_base],
+            lambda label: 2 if label in self._base_classes and label in known else 1,
+        )
         threshold = CONF_THRESHOLD if min_conf is None else min_conf
         return _merge([b for b in fused if b.confidence >= threshold])
 
@@ -374,8 +390,13 @@ class LabelVerifier:
         return np.asarray(c, dtype=np.float32).transpose(2, 0, 1) / 255.0
 
     def check(self, image: Image.Image, boxes: list[Box]) -> tuple[list[Box], int]:
-        todo = [i for i, b in enumerate(boxes) if b.label in self.index and CONF_THRESHOLD <= b.confidence < CLIP_MAX_CONF
-                and (b.bbox[2] - b.bbox[0]) * (b.bbox[3] - b.bbox[1]) >= CLIP_MIN_AREA]
+        todo = [
+            i
+            for i, b in enumerate(boxes)
+            if b.label in self.index
+            and CONF_THRESHOLD <= b.confidence < CLIP_MAX_CONF
+            and (b.bbox[2] - b.bbox[0]) * (b.bbox[3] - b.bbox[1]) >= CLIP_MIN_AREA
+        ]
         if not todo:
             return boxes, 0
         image = ImageOps.exif_transpose(image).convert("RGB")  # the boxes are relative to the upright photo
@@ -387,8 +408,13 @@ class LabelVerifier:
             b, j = boxes[i], int(p.argmax())
             if self.labels[j] != b.label and p[j] >= CLIP_SURE and p[self.index[b.label]] < CLIP_DOUBT:
                 alt = [t for t in b.top_k if t["label"] != self.labels[j]]
-                out[i] = Box(self.labels[j], b.confidence, b.bbox,
-                             ([{"label": self.labels[j], "confidence": round(float(p[j]), 4)}] + alt)[:TOP_K], b.memory_id)
+                out[i] = Box(
+                    self.labels[j],
+                    b.confidence,
+                    b.bbox,
+                    ([{"label": self.labels[j], "confidence": round(float(p[j]), 4)}] + alt)[:TOP_K],
+                    b.memory_id,
+                )
         return out, ms
 
 

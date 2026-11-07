@@ -22,18 +22,66 @@ def item_path(code: str) -> str:
 # Sticker packs: bought once, every sticker in the pack can then be sent in comments, group chats and messages.
 # Chinese captions use only characters written the same in Simplified and Traditional (你好, 加油).
 STICKER_PACKS = [
-    {"code": "pack_hello", "name": "Prismo chào hỏi", "colour": "#1899f0", "cost_scales": None, "cost_gems": 1,
-     "stickers": [("hello", "Xin chào!"), ("thanks", "Cảm ơn nha!"), ("sticker_ok", "OK luôn!"),
-                  ("great", "Tuyệt vời!"), ("good_night", "Ngủ ngon"), ("bye", "Tạm biệt!")]},
-    {"code": "pack_feelings", "name": "Prismo cảm xúc", "colour": "#ff4b6e", "cost_scales": None, "cost_gems": 2,
-     "stickers": [("sticker_love", "Yêu quá!"), ("sticker_sad", "Buồn hiu"), ("wow", "Wow!"),
-                  ("huh", "Hả?"), ("sorry", "Xin lỗi mà"), ("haha", "Haha!")]},
-    {"code": "pack_study", "name": "Học cùng nhau", "colour": "#ff9600", "cost_scales": None, "cost_gems": 3,
-     "stickers": [("fighting", "Cố lên!"), ("study_yet", "Học bài chưa?"), ("smart", "Giỏi quá!"),
-                  ("score100", "100 điểm!"), ("keep_fire", "Giữ lửa nha!"), ("review_time", "Ôn bài thôi!")]},
-    {"code": "pack_world", "name": "Chào thế giới", "colour": "#10b981", "cost_scales": None, "cost_gems": 3,
-     "stickers": [("en_hello", "Hello!"), ("zh_hello", "你好!"), ("zh_jiayou", "加油!"),
-                  ("en_thanks", "Thank you!"), ("en_goodjob", "Good job!"), ("en_bye", "Bye bye!")]},
+    {
+        "code": "pack_hello",
+        "name": "Prismo chào hỏi",
+        "colour": "#1899f0",
+        "cost_scales": None,
+        "cost_gems": 1,
+        "stickers": [
+            ("hello", "Xin chào!"),
+            ("thanks", "Cảm ơn nha!"),
+            ("sticker_ok", "OK luôn!"),
+            ("great", "Tuyệt vời!"),
+            ("good_night", "Ngủ ngon"),
+            ("bye", "Tạm biệt!"),
+        ],
+    },
+    {
+        "code": "pack_feelings",
+        "name": "Prismo cảm xúc",
+        "colour": "#ff4b6e",
+        "cost_scales": None,
+        "cost_gems": 2,
+        "stickers": [
+            ("sticker_love", "Yêu quá!"),
+            ("sticker_sad", "Buồn hiu"),
+            ("wow", "Wow!"),
+            ("huh", "Hả?"),
+            ("sorry", "Xin lỗi mà"),
+            ("haha", "Haha!"),
+        ],
+    },
+    {
+        "code": "pack_study",
+        "name": "Học cùng nhau",
+        "colour": "#ff9600",
+        "cost_scales": None,
+        "cost_gems": 3,
+        "stickers": [
+            ("fighting", "Cố lên!"),
+            ("study_yet", "Học bài chưa?"),
+            ("smart", "Giỏi quá!"),
+            ("score100", "100 điểm!"),
+            ("keep_fire", "Giữ lửa nha!"),
+            ("review_time", "Ôn bài thôi!"),
+        ],
+    },
+    {
+        "code": "pack_world",
+        "name": "Chào thế giới",
+        "colour": "#10b981",
+        "cost_scales": None,
+        "cost_gems": 3,
+        "stickers": [
+            ("en_hello", "Hello!"),
+            ("zh_hello", "你好!"),
+            ("zh_jiayou", "加油!"),
+            ("en_thanks", "Thank you!"),
+            ("en_goodjob", "Good job!"),
+            ("en_bye", "Bye bye!"),
+        ],
+    },
 ]
 STICKER_PACK_OF = {code: p["code"] for p in STICKER_PACKS for code, _ in p["stickers"]}
 STICKER_CAPTION = {code: text for p in STICKER_PACKS for code, text in p["stickers"]}
@@ -43,28 +91,87 @@ LEGACY_STICKERS = {"sticker_ok": "pack_hello", "sticker_love": "pack_feelings", 
 # Shop items other than sticker packs: (code, name, description, image, effect, cost_scales, cost_gems)
 # Vảy buys what helps you keep learning (streak, XP); ngọc buys looks (stickers, Prismo's outfits).
 ITEMS = [
-    ("streak_freeze", "Đá băng", "Giữ chuỗi streak khi nghỉ 1 ngày", "assets/brand/icons/streak_freeze.png", "streak_freeze", 200, None),
-    ("xp_boost", "Vảy tăng tốc", "Nhận đôi XP trong 15 phút", "assets/brand/icons/xp_x2.png", "xp_double_15m", 150, None),
-    ("super_boost", "Bình ánh sáng", "Tăng 25% XP toàn app trong 24 giờ", "assets/brand/icons/xp_potion.png", "xp_plus25_24h", 400, None),
-    ("streak_repair", "Hồi chuỗi", "Lỡ mất streak? Nối lại chuỗi cũ trong vòng 3 ngày", item_path("streak_repair"), "streak_repair", 800, None),
-    ("gem_exchange", "Đổi vảy lấy ngọc", "Đổi 500 vảy lấy 1 ngọc, nhận ngay", item_path("gem_exchange"), "gem_exchange", 500, None),
+    (
+        "streak_freeze",
+        "Đá băng",
+        "Giữ chuỗi streak khi nghỉ 1 ngày",
+        "assets/brand/icons/streak_freeze.png",
+        "streak_freeze",
+        200,
+        None,
+    ),
+    (
+        "xp_boost",
+        "Vảy tăng tốc",
+        "Nhận đôi XP trong 15 phút",
+        "assets/brand/icons/xp_x2.png",
+        "xp_double_15m",
+        150,
+        None,
+    ),
+    (
+        "super_boost",
+        "Bình ánh sáng",
+        "Tăng 25% XP toàn app trong 24 giờ",
+        "assets/brand/icons/xp_potion.png",
+        "xp_plus25_24h",
+        400,
+        None,
+    ),
+    (
+        "streak_repair",
+        "Hồi chuỗi",
+        "Lỡ mất streak? Nối lại chuỗi cũ trong vòng 3 ngày",
+        item_path("streak_repair"),
+        "streak_repair",
+        800,
+        None,
+    ),
+    (
+        "gem_exchange",
+        "Đổi vảy lấy ngọc",
+        "Đổi 500 vảy lấy 1 ngọc, nhận ngay",
+        item_path("gem_exchange"),
+        "gem_exchange",
+        500,
+        None,
+    ),
 ]
 
 # What each badge condition looks like: (glyph, colour) – see make-rewards.py
 CONDITION_ART = {
-    "words_learned": ("book", "#1cb0f6"), "words_mastered": ("cap", "#58cc02"), "streak": ("flame", "#ff9600"),
-    "xp": ("star", "#f5b400"), "detections": ("camera", "#ce82ff"), "posts": ("image", "#ff86c8"),
-    "cheers": ("heart", "#ff4b4b"), "friends": ("friends", "#14c9a8"), "quests": ("flag", "#e8566f"),
-    "sessions": ("bolt", "#1899f0"), "perfect": ("target", "#00b38a"), "early_bird": ("sun", "#ffa31a"),
-    "night_owl": ("moon", "#5b5fc7"), "league": ("trophy", "#a56eff"), "league_wins": ("trophy", "#f5b400"),
-    "games": ("gamepad", "#ff7a45"), "bosses": ("crown", "#e0445e"), "game_stars": ("star", "#ff9f1a"),
+    "words_learned": ("book", "#1cb0f6"),
+    "words_mastered": ("cap", "#58cc02"),
+    "streak": ("flame", "#ff9600"),
+    "xp": ("star", "#f5b400"),
+    "detections": ("camera", "#ce82ff"),
+    "posts": ("image", "#ff86c8"),
+    "cheers": ("heart", "#ff4b4b"),
+    "friends": ("friends", "#14c9a8"),
+    "quests": ("flag", "#e8566f"),
+    "sessions": ("bolt", "#1899f0"),
+    "perfect": ("target", "#00b38a"),
+    "early_bird": ("sun", "#ffa31a"),
+    "night_owl": ("moon", "#5b5fc7"),
+    "league": ("trophy", "#a56eff"),
+    "league_wins": ("trophy", "#f5b400"),
+    "games": ("gamepad", "#ff7a45"),
+    "bosses": ("crown", "#e0445e"),
+    "game_stars": ("star", "#ff9f1a"),
 }
 SOCIAL_CONDITIONS = {"posts", "cheers", "friends"}  # not offered to children
 
 
 def _b(code, name, description, condition, threshold, gems, **extra):
-    return {"code": code, "name": name, "description": description, "condition": condition, "threshold": threshold,
-            "gems": gems, **extra}
+    return {
+        "code": code,
+        "name": name,
+        "description": description,
+        "condition": condition,
+        "threshold": threshold,
+        "gems": gems,
+        **extra,
+    }
 
 
 BADGES = [
@@ -114,7 +221,9 @@ BADGES = [
     _b("quests-150", "Chiến binh nhiệm vụ", "Hoàn thành 150 nhiệm vụ ngày", "quests", 150, 3),
     _b("quests-500", "Đại sư nhiệm vụ", "Hoàn thành 500 nhiệm vụ ngày", "quests", 500, 8),
     # giờ học
-    _b("early-bird", "Dậy sớm học bài", "Học xong một buổi trước 7 giờ sáng", "early_bird", 1, 1, no_label=True, tier=2),
+    _b(
+        "early-bird", "Dậy sớm học bài", "Học xong một buổi trước 7 giờ sáng", "early_bird", 1, 1, no_label=True, tier=2
+    ),
     _b("night-owl", "Cú đêm chăm học", "Học xong một buổi sau 10 giờ tối", "night_owl", 1, 1, no_label=True, tier=2),
     # giải đấu (thứ hạng: 2 = Ánh Đồng … 10 = Lăng Kính Huyền Thoại)
     _b("league-2", "Lên hạng Ánh Đồng", "Thăng lên hạng Ánh Đồng", "league", 2, 1, no_label=True),
@@ -151,6 +260,7 @@ BADGES = [
 # Every learner has their own Prismo and dresses it: one piece per slot. Pieces are bought with ngọc, or earned
 # (a badge unlocks them; they cannot be bought), or sold only during a festival. Each piece is one SVG layer drawn on
 # Prismo's own grid (FE/scripts/make-outfits.py): public/outfits/<code>.svg on the web, assets/outfits/<code>.svg in the app.
+
 
 def outfit_path(code: str) -> str:
     return f"assets/outfits/{code}.svg"

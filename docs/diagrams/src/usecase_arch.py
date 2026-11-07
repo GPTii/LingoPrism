@@ -7,7 +7,8 @@ USECASE_STYLE = """
 
 DIAGRAMS = {}
 
-DIAGRAMS["usecase/UC00_tong_quat"] = """---
+DIAGRAMS["usecase/UC00_tong_quat"] = (
+    """---
 title: UC00 – Use case tổng quát hệ thống LingoPrism
 ---
 flowchart LR
@@ -42,9 +43,12 @@ flowchart LR
     Staff --- U4 & U8 & U10
     U5 --- AI
     U1 & U6 & U9 --- Ext
-""" + USECASE_STYLE
+"""
+    + USECASE_STYLE
+)
 
-DIAGRAMS["usecase/UC01_tai_khoan"] = """---
+DIAGRAMS["usecase/UC01_tai_khoan"] = (
+    """---
 title: UC01 – Quản lý tài khoản (apps.accounts)
 ---
 flowchart LR
@@ -73,9 +77,12 @@ flowchart LR
     V --- Mail
     F --- Mail
     G --- Google
-""" + USECASE_STYLE
+"""
+    + USECASE_STYLE
+)
 
-DIAGRAMS["usecase/UC02_tu_vung"] = """---
+DIAGRAMS["usecase/UC02_tu_vung"] = (
+    """---
 title: UC02 – Học từ vựng theo chủ đề (apps.vocab, apps.learning)
 ---
 flowchart LR
@@ -94,9 +101,12 @@ flowchart LR
     B -. «extend» .-> C
     C -. «extend» .-> D
     C -. «extend» .-> E
-""" + USECASE_STYLE
+"""
+    + USECASE_STYLE
+)
 
-DIAGRAMS["usecase/UC03_hoc_on_tap"] = """---
+DIAGRAMS["usecase/UC03_hoc_on_tap"] = (
+    """---
 title: UC03 – Học & ôn tập cá nhân hoá (apps.learning, apps.literacy, apps.algorithms)
 ---
 flowchart LR
@@ -122,9 +132,12 @@ flowchart LR
     B -. «include» .-> V
     A & B -. «include» .-> S
     L -. «extend» .-> T
-""" + USECASE_STYLE
+"""
+    + USECASE_STYLE
+)
 
-DIAGRAMS["usecase/UC04_kiem_tra"] = """---
+DIAGRAMS["usecase/UC04_kiem_tra"] = (
+    """---
 title: UC04 – Bài kiểm tra (apps.quizzes)
 ---
 flowchart LR
@@ -142,9 +155,12 @@ flowchart LR
     Learner --- A & B & D
     Staff --- E & F & G
     B -. «include» .-> C
-""" + USECASE_STYLE
+"""
+    + USECASE_STYLE
+)
 
-DIAGRAMS["usecase/UC05_nhan_dien_ai"] = """---
+DIAGRAMS["usecase/UC05_nhan_dien_ai"] = (
+    """---
 title: UC05 – Chụp ảnh nhận diện, hội thoại AI và dịch (apps.detection, apps.aitalk)
 ---
 flowchart LR
@@ -175,9 +191,12 @@ flowchart LR
     B --- Det
     C & D --- Phone
     I & J --- LLM
-""" + USECASE_STYLE
+"""
+    + USECASE_STYLE
+)
 
-DIAGRAMS["usecase/UC06_vi_tri"] = """---
+DIAGRAMS["usecase/UC06_vi_tri"] = (
+    """---
 title: UC06 – Học theo vị trí (GIS, Proximity Search, Geofencing) (apps.gis, apps.algorithms.proximity)
 ---
 flowchart LR
@@ -200,9 +219,12 @@ flowchart LR
     D -. «include» .-> B
     F -. «include» .-> G
     D --- GPS
-""" + USECASE_STYLE
+"""
+    + USECASE_STYLE
+)
 
-DIAGRAMS["usecase/UC07_game_hoa"] = """---
+DIAGRAMS["usecase/UC07_game_hoa"] = (
+    """---
 title: UC07 – Game hoá và trò chơi (apps.gamification, apps.games)
 ---
 flowchart LR
@@ -223,9 +245,12 @@ flowchart LR
     G -. «extend» .-> H
     G -. «extend» .-> I
     G -. «extend» .-> J
-""" + USECASE_STYLE
+"""
+    + USECASE_STYLE
+)
 
-DIAGRAMS["usecase/UC08_cong_dong"] = """---
+DIAGRAMS["usecase/UC08_cong_dong"] = (
+    """---
 title: UC08 – Cộng đồng, nhắn tin và hỗ trợ (apps.community, apps.chat)
 ---
 flowchart LR
@@ -252,9 +277,12 @@ flowchart LR
     C -. «extend» .-> D
     D & F -. «extend» .-> G
     D & F -. «extend» .-> H
-""" + USECASE_STYLE
+"""
+    + USECASE_STYLE
+)
 
-DIAGRAMS["usecase/UC09_thong_bao"] = """---
+DIAGRAMS["usecase/UC09_thong_bao"] = (
+    """---
 title: UC09 – Thông báo (apps.notifications, apps.push)
 ---
 flowchart LR
@@ -274,9 +302,12 @@ flowchart LR
     Staff --- G
     C -. «extend» .-> D
     B --- FCM
-""" + USECASE_STYLE
+"""
+    + USECASE_STYLE
+)
 
-DIAGRAMS["usecase/UC10_quan_tri"] = """---
+DIAGRAMS["usecase/UC10_quan_tri"] = (
+    """---
 title: UC10 – Quản trị hệ thống
 ---
 flowchart LR
@@ -301,7 +332,9 @@ flowchart LR
     end
     Staff --- A & C & D & E & F & G & H & I & L & N
     Admin --- B & J & K & M
-""" + USECASE_STYLE
+"""
+    + USECASE_STYLE
+)
 
 # ---------------------------------------------------------------- architecture
 

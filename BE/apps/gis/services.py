@@ -1,5 +1,6 @@
 """Proximity search with PostgreSQL cube + earthdistance (baseline for the self-implemented
 Proximity Search of Phase 5). Uses the GiST index on ll_to_earth(lat, lng)."""
+
 from datetime import timedelta
 
 from django.db import connection
@@ -58,11 +59,21 @@ def check_geofence(user, lat: float, lng: float) -> list[dict]:
         recent = GeofenceEvent.objects.filter(user=user, poi=poi, created_at__gte=since).exists()
         GeofenceEvent.objects.create(user=user, poi=poi, lat=lat, lng=lng, distance_m=distance)
         topics = list(poi.topics.all())
-        info = {"poi": poi.id, "name": poi.name, "category": poi.category, "distance_m": round(distance, 1),
-                "topics": [{"id": t.id, "name_vi": t.name_vi, "icon": t.icon} for t in topics], "new": not recent}
+        info = {
+            "poi": poi.id,
+            "name": poi.name,
+            "category": poi.category,
+            "distance_m": round(distance, 1),
+            "topics": [{"id": t.id, "name_vi": t.name_vi, "icon": t.icon} for t in topics],
+            "new": not recent,
+        }
         entered.append(info)
         if not recent and allow_notify and topics:
-            notify(user, Notification.Kind.LOCATION, f"Bạn đang ở gần {poi.name} 📍",
-                   f"Học ngay chủ đề {topics[0].name_vi.lower()} phù hợp với nơi này!",
-                   data={"route": f"/vocab/topics/{topics[0].id}", "poi": poi.id, "topic": topics[0].id})
+            notify(
+                user,
+                Notification.Kind.LOCATION,
+                f"Bạn đang ở gần {poi.name} 📍",
+                f"Học ngay chủ đề {topics[0].name_vi.lower()} phù hợp với nơi này!",
+                data={"route": f"/vocab/topics/{topics[0].id}", "poi": poi.id, "topic": topics[0].id},
+            )
     return entered

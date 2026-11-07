@@ -6,14 +6,19 @@ STEPS = ["yolo", "vision", "srs", "ga", "vip", "distractor", "proximity", "geofe
 
 
 class Command(BaseCommand):
-    help = ("Chạy các thực nghiệm của đề cương (SM-2/FSRS, GA, VIP, Smart Distractor, Proximity Search, geofence, "
-            "realtime) và lưu kết quả")
+    help = (
+        "Chạy các thực nghiệm của đề cương (SM-2/FSRS, GA, VIP, Smart Distractor, Proximity Search, geofence, "
+        "realtime) và lưu kết quả"
+    )
 
     def add_arguments(self, parser):
         parser.add_argument("--only", nargs="*", choices=STEPS)
         parser.add_argument("--confusion", help="confusion_matrix.json của model YOLO đã train (nếu có)")
-        parser.add_argument("--no-apply", action="store_true",
-                            help="GA chỉ đo, không ghi bộ tham số mới vào hệ thống (dùng khi lấy số cho báo cáo)")
+        parser.add_argument(
+            "--no-apply",
+            action="store_true",
+            help="GA chỉ đo, không ghi bộ tham số mới vào hệ thống (dùng khi lấy số cho báo cáo)",
+        )
 
     def handle(self, *args, only=None, confusion=None, no_apply=False, **opts):
         for step in only or STEPS:

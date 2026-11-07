@@ -8,6 +8,7 @@ and score the predictions against what really happened.
     accuracy = share of answers predicted right with the threshold p ≥ 0.5 (easy to read, but a model that always
                says "remembered" already scores the recall rate – hence log-loss / AUC as the main measures)
 """
+
 import math
 import random
 from collections import defaultdict
@@ -27,7 +28,9 @@ def histories(language: str | None = None) -> list[list[tuple[float, bool, int]]
     if language:
         qs = qs.filter(language=language)
     seen, cards = set(), defaultdict(list)
-    for pw, sess, created, correct, rating in qs.values_list("personal_word_id", "session_id", "created_at", "correct", "rating"):
+    for pw, sess, created, correct, rating in qs.values_list(
+        "personal_word_id", "session_id", "created_at", "correct", "rating"
+    ):
         if (pw, sess) in seen:
             continue
         seen.add((pw, sess))
@@ -76,7 +79,9 @@ def predict_fsrs(h, w=None):
 def metrics(pairs) -> dict:
     if not pairs:
         return {"n": 0}
-    ll = -sum(math.log(min(1 - EPS, max(EPS, p))) if y else math.log(min(1 - EPS, max(EPS, 1 - p))) for p, y in pairs) / len(pairs)
+    ll = -sum(
+        math.log(min(1 - EPS, max(EPS, p))) if y else math.log(min(1 - EPS, max(EPS, 1 - p))) for p, y in pairs
+    ) / len(pairs)
     rmse = math.sqrt(sum((p - y) ** 2 for p, y in pairs) / len(pairs))
     pos = [p for p, y in pairs if y]
     neg = [p for p, y in pairs if not y]
@@ -93,8 +98,14 @@ def metrics(pairs) -> dict:
             i = j
         auc = (rank_sum - len(pos) * (len(pos) + 1) / 2) / (len(pos) * len(neg))
     acc = sum((p >= 0.5) == bool(y) for p, y in pairs) / len(pairs)
-    return {"n": len(pairs), "log_loss": round(ll, 4), "rmse": round(rmse, 4), "accuracy": round(acc, 4),
-            "auc": round(auc, 4) if auc is not None else None, "recall_rate": round(len(pos) / len(pairs), 4)}
+    return {
+        "n": len(pairs),
+        "log_loss": round(ll, 4),
+        "rmse": round(rmse, 4),
+        "accuracy": round(acc, 4),
+        "auc": round(auc, 4) if auc is not None else None,
+        "recall_rate": round(len(pos) / len(pairs), 4),
+    }
 
 
 def compare(hist, fsrs_weights=None) -> dict:

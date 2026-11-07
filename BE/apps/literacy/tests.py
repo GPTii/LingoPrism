@@ -50,10 +50,15 @@ def test_lesson_flow_unlocks_next(kid):
     lesson = client.get("/api/v1/literacy/lessons/1/").data
     assert lesson["intro"][0]["unit"]["code"] == "a"
     for item in lesson["exercises"]:
-        res = client.post("/api/v1/literacy/check/", {"token": item["token"], "answer": right_answer(item)}, format="json")
+        res = client.post(
+            "/api/v1/literacy/check/", {"token": item["token"], "answer": right_answer(item)}, format="json"
+        )
         assert res.status_code == 200 and res.data["correct"], (item["type"], res.data)
-    res = client.post("/api/v1/literacy/lessons/1/finish/", {"session": lesson["session"], "total": len(lesson["exercises"])},
-                      format="json")
+    res = client.post(
+        "/api/v1/literacy/lessons/1/finish/",
+        {"session": lesson["session"], "total": len(lesson["exercises"])},
+        format="json",
+    )
     assert res.data["passed"] and res.data["stars"] == 3
     assert client.get("/api/v1/literacy/lessons/").data["lessons"][1]["status"] == "open"
 
@@ -61,7 +66,11 @@ def test_lesson_flow_unlocks_next(kid):
 def test_check_build_dictation_and_tampering(kid):
     _, client = kid
     token = ex.sign(t="build", a="bà", l=1, s="abc", i=1, u="am:b")
-    res = client.post("/api/v1/literacy/check/", {"token": token, "answer": {"onset": "b", "rhyme": "a", "tone": "sac"}}, format="json")
+    res = client.post(
+        "/api/v1/literacy/check/",
+        {"token": token, "answer": {"onset": "b", "rhyme": "a", "tone": "sac"}},
+        format="json",
+    )
     assert not res.data["correct"] and res.data["given"] == "bá" and res.data["spell"][-1] == "bà"
 
     token = ex.sign(t="dictation", a="con mèo", l=8, s="abc", i=2, u="am:m")
@@ -74,4 +83,7 @@ def test_check_build_dictation_and_tampering(kid):
     token = ex.sign(t="dictation", a="hòa", l=45, s="abc", i=3, u="van:oa")
     assert client.post("/api/v1/literacy/check/", {"token": token, "answer": "hoà"}, format="json").data["correct"]
 
-    assert client.post("/api/v1/literacy/check/", {"token": token + "x", "answer": "hòa"}, format="json").status_code == 400
+    assert (
+        client.post("/api/v1/literacy/check/", {"token": token + "x", "answer": "hòa"}, format="json").status_code
+        == 400
+    )

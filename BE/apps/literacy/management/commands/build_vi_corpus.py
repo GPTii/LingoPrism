@@ -7,6 +7,7 @@ A syllable is kept when it is well-formed (initial + rhyme, spelling rules, one 
 placement), is written in lower case in the sentences (not a name like "Tom"), occurs at least --min-count
 times AND appears in the dictionary. Sentences with a capitalised word after the first one (names) are skipped.
 """
+
 import json
 import re
 import unicodedata
@@ -25,8 +26,34 @@ WORDLIST_URL = "https://raw.githubusercontent.com/duyet/vietnamese-wordlist/mast
 WORD_RE = re.compile(r"[^\W\d_]+")
 # this is a children's course: no vulgar or violent syllables, in drills or in dictation sentences
 KID_BLOCKLIST = {
-    "đéo", "đếch", "địt", "đụ", "lồn", "cặc", "buồi", "đĩ", "dái", "chửi", "giết", "chém", "đâm", "súng", "máu",
-    "tởm", "rượu", "bia", "thuốc", "ma", "quỷ", "chết", "say", "nghiện", "khốn", "ngu", "đần", "cút",
+    "đéo",
+    "đếch",
+    "địt",
+    "đụ",
+    "lồn",
+    "cặc",
+    "buồi",
+    "đĩ",
+    "dái",
+    "chửi",
+    "giết",
+    "chém",
+    "đâm",
+    "súng",
+    "máu",
+    "tởm",
+    "rượu",
+    "bia",
+    "thuốc",
+    "ma",
+    "quỷ",
+    "chết",
+    "say",
+    "nghiện",
+    "khốn",
+    "ngu",
+    "đần",
+    "cút",
 }
 
 
@@ -64,8 +91,11 @@ class Command(BaseCommand):
                 else:
                     bad[syl] += 1
         # a lower-case "tom" that is mostly written "Tom" is a name typed in lower case, not a Vietnamese word
-        syllables = {s: n for s, n in counts.most_common()
-                     if n >= min_count and s not in KID_BLOCKLIST and capitalised[s] <= 3 * lower_mid[s]}
+        syllables = {
+            s: n
+            for s, n in counts.most_common()
+            if n >= min_count and s not in KID_BLOCKLIST and capitalised[s] <= 3 * lower_mid[s]
+        }
         # rare rhymes (oăn, uơ, uych…) hardly occur in short sentences: well-formed dictionary syllables fill the gap
         rare = sorted(s for s in dictionary if s not in syllables and s not in KID_BLOCKLIST and self.valid(s))
 
@@ -80,14 +110,23 @@ class Command(BaseCommand):
                 continue
             short.append({"id": sid, "text": vietnamese.normalize(text), "syllables": len(sy)})
 
-        CORPUS.write_text(json.dumps({
-            "source": "Tatoeba (người bản xứ tiếng Việt, CC BY 2.0 FR) – đối chiếu từ điển Hồ Ngọc Đức (Viet74K)",
-            "syllables": syllables,
-            "rare": rare,
-            "sentences": short,
-        }, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
-        self.stdout.write(f"Tiếng hợp lệ: {len(syllables)} (≥{min_count} lần) · tiếng hiếm từ từ điển: {len(rare)}"
-                          f" · bỏ {len(bad)} dạng không chuẩn")
+        CORPUS.write_text(
+            json.dumps(
+                {
+                    "source": "Tatoeba (người bản xứ tiếng Việt, CC BY 2.0 FR) – đối chiếu từ điển Hồ Ngọc Đức (Viet74K)",
+                    "syllables": syllables,
+                    "rare": rare,
+                    "sentences": short,
+                },
+                ensure_ascii=False,
+                separators=(",", ":"),
+            ),
+            encoding="utf-8",
+        )
+        self.stdout.write(
+            f"Tiếng hợp lệ: {len(syllables)} (≥{min_count} lần) · tiếng hiếm từ từ điển: {len(rare)}"
+            f" · bỏ {len(bad)} dạng không chuẩn"
+        )
         self.stdout.write(self.style.SUCCESS(f"Câu ngắn nghe – viết: {len(short)} → {CORPUS}"))
 
     def dictionary(self) -> set[str]:

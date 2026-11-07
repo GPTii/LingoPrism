@@ -10,6 +10,7 @@ reference configuration.
     mutation    Gaussian, σ = 10 % of the gene range, rate 0.15 per gene      elitism  2 best kept
 The result is evaluated on held-out cards (never used during the search) against the default FSRS weights.
 """
+
 import random
 import time
 
@@ -41,8 +42,9 @@ def run(train, population=30, generations=30, seed=0, log=print) -> dict:
     t0 = time.time()
     for gen in range(generations):
         order = sorted(range(len(pop)), key=lambda i: -scores[i])
-        history.append({"generation": gen, "best": round(-scores[order[0]], 5),
-                        "mean": round(-sum(scores) / len(scores), 5)})
+        history.append(
+            {"generation": gen, "best": round(-scores[order[0]], 5), "mean": round(-sum(scores) / len(scores), 5)}
+        )
         elite = [pop[i] for i in order[:2]]
         children = [list(e) for e in elite]
 
@@ -67,6 +69,12 @@ def run(train, population=30, generations=30, seed=0, log=print) -> dict:
         if gen % 5 == 0:
             log(f"  thế hệ {gen}: log-loss tốt nhất {history[-1]['best']:.4f} ({time.time() - t0:.0f}s)")
     best = max(range(len(pop)), key=lambda i: scores[i])
-    history.append({"generation": generations, "best": round(-scores[best], 5), "mean": round(-sum(scores) / len(scores), 5)})
-    return {"weights": [round(x, 4) for x in pop[best]], "history": history,
-            "population": population, "generations": generations}
+    history.append(
+        {"generation": generations, "best": round(-scores[best], 5), "mean": round(-sum(scores) / len(scores), 5)}
+    )
+    return {
+        "weights": [round(x, 4) for x in pop[best]],
+        "history": history,
+        "population": population,
+        "generations": generations,
+    }

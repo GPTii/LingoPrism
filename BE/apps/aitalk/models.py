@@ -14,10 +14,14 @@ class PhotoDialogue(models.Model):
     language = models.CharField(max_length=8, help_text="en | zh-Hans | zh-Hant | vi")
     words = models.JSONField(default=list, help_text="Các từ đã kiểm duyệt đưa cho AI")
     title_vi = models.CharField(max_length=200, blank=True)
-    lines = models.JSONField(default=list, help_text='[{"speaker": "A", "text": "...", "reading": "...", "translation": "..."}]')
+    lines = models.JSONField(
+        default=list, help_text='[{"speaker": "A", "text": "...", "reading": "...", "translation": "..."}]'
+    )
     model_name = models.CharField(max_length=60)
     created_at = models.DateTimeField(default=timezone.now)
 
     class Meta:
         ordering = ["-created_at"]
-        constraints = [models.UniqueConstraint(fields=["detection", "language"], name="one_dialogue_per_photo_language")]
+        constraints = [
+            models.UniqueConstraint(fields=["detection", "language"], name="one_dialogue_per_photo_language")
+        ]

@@ -31,8 +31,10 @@ def media(settings, tmp_path):
 @pytest.fixture
 def klass():
     """Lan creates a group and adds Minh and Hoa – the three-person class of the feature request."""
-    lan, minh, hoa = (User.objects.create_user(f"{n}@example.com", "Strong!Pass123", display_name=n.title())
-                      for n in ("lan", "minh", "hoa"))
+    lan, minh, hoa = (
+        User.objects.create_user(f"{n}@example.com", "Strong!Pass123", display_name=n.title())
+        for n in ("lan", "minh", "hoa")
+    )
     g = client_for(lan).post("/api/v1/groups/", {"name": "Lớp tiếng Trung", "is_private": True}, format="json").data
     group = Group.objects.get(pk=g["id"])
     for u in (minh, hoa):
@@ -41,8 +43,12 @@ def klass():
 
 
 QUESTIONS = [
-    {"kind": "mcq", "prompt": "苹果 nghĩa là?", "options": [{"text": "quả táo", "correct": True}, {"text": "quả cam"}],
-     "points": 2},
+    {
+        "kind": "mcq",
+        "prompt": "苹果 nghĩa là?",
+        "options": [{"text": "quả táo", "correct": True}, {"text": "quả cam"}],
+        "points": 2,
+    },
     {"kind": "fill", "prompt": "Viết pinyin của 你好", "accepted_answers": ["nǐ hǎo", "ni hao"], "points": 1},
     {"kind": "essay", "prompt": "Giới thiệu bản thân bằng 3 câu", "points": 3},
 ]
@@ -67,9 +73,17 @@ def test_leader_gives_marks_and_returns_work(klass):
     detail = cm.get(f"/api/v1/assignments/{aid}/").data
     assert "correct" not in detail["questions"][0]["options"][0] and "accepted_answers" not in detail["questions"][1]
     q = [x["id"] for x in detail["questions"]]
-    sub = cm.post(f"/api/v1/assignments/{aid}/submit/", {"answers": [
-        {"question": q[0], "selected_option": 0}, {"question": q[1], "text": "  Ni  Hao "},
-        {"question": q[2], "text": "我叫明。我是越南人。我喜欢学习。"}]}, format="json").data["my_submission"]
+    sub = cm.post(
+        f"/api/v1/assignments/{aid}/submit/",
+        {
+            "answers": [
+                {"question": q[0], "selected_option": 0},
+                {"question": q[1], "text": "  Ni  Hao "},
+                {"question": q[2], "text": "我叫明。我是越南人。我喜欢学习。"},
+            ]
+        },
+        format="json",
+    ).data["my_submission"]
     assert sub["status"] == "submitted" and sub["score"] is None  # the essay waits for a leader
     assert [a["is_correct"] for a in sub["answers"]] == [True, True, None]
     assert lan.notifications.filter(kind="assignment").count() == 1
@@ -77,9 +91,11 @@ def test_leader_gives_marks_and_returns_work(klass):
     rows = client_for(lan).get(f"/api/v1/assignments/{aid}/submissions/").data
     assert {r["user"]["display_name"]: bool(r["submission"]) for r in rows} == {"Minh": True, "Hoa": False}
     essay = next(a for a in sub["answers"] if a["question"] == q[2])
-    graded = client_for(lan).post(f"/api/v1/assignments/{aid}/submissions/{sub['id']}/grade/",
-                                  {"answers": [{"answer": essay["id"], "score": 2.5, "feedback": "Tốt"}],
-                                   "feedback": "Cố gắng thêm"}, format="json")
+    graded = client_for(lan).post(
+        f"/api/v1/assignments/{aid}/submissions/{sub['id']}/grade/",
+        {"answers": [{"answer": essay["id"], "score": 2.5, "feedback": "Tốt"}], "feedback": "Cố gắng thêm"},
+        format="json",
+    )
     assert graded.status_code == 200, graded.data
     assert graded.data["status"] == "graded" and float(graded.data["score"]) == 5.5
     assert minh.notifications.filter(title="Bài tập đã được chấm").exists()
@@ -87,8 +103,16 @@ def test_leader_gives_marks_and_returns_work(klass):
     after = cm.get(f"/api/v1/assignments/{aid}/").data
     assert after["questions"][0]["options"][0]["correct"] is True  # answers shown once marked
     assert cm.post(f"/api/v1/assignments/{aid}/submit/", {"answers": []}, format="json").status_code == 400
-    assert client_for(lan).post(f"/api/v1/assignments/{aid}/submissions/{sub['id']}/grade/",
-                                {"answers": [{"answer": essay["id"], "score": 9}]}, format="json").status_code == 400
+    assert (
+        client_for(lan)
+        .post(
+            f"/api/v1/assignments/{aid}/submissions/{sub['id']}/grade/",
+            {"answers": [{"answer": essay["id"], "score": 9}]},
+            format="json",
+        )
+        .status_code
+        == 400
+    )
     book = client_for(lan).get(f"/api/v1/assignments/gradebook/?group={group.id}").data
     assert [r["average"] for r in book["rows"]] == [91.7, None]
     assert len(client_for(hoa).get(f"/api/v1/assignments/gradebook/?group={group.id}").data["rows"]) == 1
@@ -106,37 +130,65 @@ def test_only_leaders_give_work_and_only_members_do_it(klass):
 
 def test_auto_marked_work_is_final_and_late_work_is_flagged_or_refused(klass):
     group, lan, minh, hoa = klass
-    aid = make(lan, group, questions=QUESTIONS[:2], due_at=(timezone.now() - timedelta(hours=1)).isoformat(),
-               allow_late=True).data["id"]
+    aid = make(
+        lan, group, questions=QUESTIONS[:2], due_at=(timezone.now() - timedelta(hours=1)).isoformat(), allow_late=True
+    ).data["id"]
     client_for(lan).post(f"/api/v1/assignments/{aid}/publish/")
     q = [x["id"] for x in client_for(minh).get(f"/api/v1/assignments/{aid}/").data["questions"]]
-    sub = client_for(minh).post(f"/api/v1/assignments/{aid}/submit/", {"answers": [
-        {"question": q[0], "selected_option": 1}, {"question": q[1], "text": "ni hao"}]}, format="json").data["my_submission"]
+    sub = (
+        client_for(minh)
+        .post(
+            f"/api/v1/assignments/{aid}/submit/",
+            {"answers": [{"question": q[0], "selected_option": 1}, {"question": q[1], "text": "ni hao"}]},
+            format="json",
+        )
+        .data["my_submission"]
+    )
     assert sub["status"] == "graded" and sub["late"] and float(sub["score"]) == 1 and sub["graded_at"]
-    assert client_for(minh).post(f"/api/v1/assignments/{aid}/submit/", {"answers": []}, format="json").status_code == 400
+    assert (
+        client_for(minh).post(f"/api/v1/assignments/{aid}/submit/", {"answers": []}, format="json").status_code == 400
+    )
     Assignment.objects.filter(pk=aid).update(allow_late=False)
     assert client_for(hoa).post(f"/api/v1/assignments/{aid}/submit/", {"answers": []}, format="json").status_code == 400
 
 
 def test_a_worksheet_handed_in_as_a_file(klass):
     group, lan, minh, hoa = klass
-    aid = client_for(lan).post("/api/v1/assignments/", {"group": group.id, "title": "Phiếu bài tập", "points": 10},
-                               format="json").data["id"]
-    up = client_for(lan).post(f"/api/v1/assignments/{aid}/attachment/",
-                              {"file": SimpleUploadedFile("phieu.pdf", b"%PDF-1.4", "application/pdf")})
+    aid = (
+        client_for(lan)
+        .post("/api/v1/assignments/", {"group": group.id, "title": "Phiếu bài tập", "points": 10}, format="json")
+        .data["id"]
+    )
+    up = client_for(lan).post(
+        f"/api/v1/assignments/{aid}/attachment/",
+        {"file": SimpleUploadedFile("phieu.pdf", b"%PDF-1.4", "application/pdf")},
+    )
     assert up.status_code == 200 and up.data["attachment_name"] == "phieu.pdf"
-    assert client_for(lan).post(f"/api/v1/assignments/{aid}/attachment/",
-                                {"file": SimpleUploadedFile("x.exe", b"MZ")}).status_code == 400
+    assert (
+        client_for(lan)
+        .post(f"/api/v1/assignments/{aid}/attachment/", {"file": SimpleUploadedFile("x.exe", b"MZ")})
+        .status_code
+        == 400
+    )
     client_for(lan).post(f"/api/v1/assignments/{aid}/publish/")
-    res = client_for(minh).post(f"/api/v1/assignments/{aid}/submit/",
-                                {"text": "Em nộp bài ạ", "file": SimpleUploadedFile("bai.jpg", b"\xff\xd8", "image/jpeg")})
+    res = client_for(minh).post(
+        f"/api/v1/assignments/{aid}/submit/",
+        {"text": "Em nộp bài ạ", "file": SimpleUploadedFile("bai.jpg", b"\xff\xd8", "image/jpeg")},
+    )
     sub = res.data["my_submission"]
     assert sub["status"] == "submitted" and sub["attachment_name"] == "bai.jpg" and sub["attachment"].startswith("http")
     assert "bai" not in sub["attachment"].rsplit("/", 1)[1]  # stored under a random name
-    assert client_for(lan).post(f"/api/v1/assignments/{aid}/submissions/{sub['id']}/grade/", {"feedback": "?"},
-                                format="json").status_code == 400  # needs a score
-    done = client_for(lan).post(f"/api/v1/assignments/{aid}/submissions/{sub['id']}/grade/", {"score": 8},
-                                format="json").data
+    assert (
+        client_for(lan)
+        .post(f"/api/v1/assignments/{aid}/submissions/{sub['id']}/grade/", {"feedback": "?"}, format="json")
+        .status_code
+        == 400
+    )  # needs a score
+    done = (
+        client_for(lan)
+        .post(f"/api/v1/assignments/{aid}/submissions/{sub['id']}/grade/", {"score": 8}, format="json")
+        .data
+    )
     assert done["status"] == "graded" and done["percent"] == 80.0
 
 
@@ -181,25 +233,43 @@ def test_exercise_file_becomes_draft_questions(klass, settings, monkeypatch):
 
     def fake(prompt, **kw):
         sent.update(prompt=prompt, parts=kw.get("parts"))
-        return json.dumps({"title": "Unit 1", "questions": [
-            {"kind": "mcq", "prompt": "Choose", "options": [{"text": "a", "correct": True}, {"text": "b", "correct": True}]},
-            {"kind": "fill", "prompt": "I ___ a student", "accepted_answers": ["am"], "points": 2},
-            {"kind": "weird", "prompt": "Write about your family"}]}), "gemini-test"
+        return json.dumps(
+            {
+                "title": "Unit 1",
+                "questions": [
+                    {
+                        "kind": "mcq",
+                        "prompt": "Choose",
+                        "options": [{"text": "a", "correct": True}, {"text": "b", "correct": True}],
+                    },
+                    {"kind": "fill", "prompt": "I ___ a student", "accepted_answers": ["am"], "points": 2},
+                    {"kind": "weird", "prompt": "Write about your family"},
+                ],
+            }
+        ), "gemini-test"
 
     monkeypatch.setattr(generator, "_gemini", fake)
     buf = io.BytesIO()
     with zipfile.ZipFile(buf, "w") as z:
-        z.writestr("word/document.xml", '<w:document><w:body><w:p><w:r><w:t>1. I ___ a student</w:t></w:r></w:p>'
-                                        '</w:body></w:document>')
-    res = client_for(lan).post("/api/v1/assignments/import/", {"group": group.id, "file": SimpleUploadedFile(
-        "unit1.docx", buf.getvalue())})
+        z.writestr(
+            "word/document.xml",
+            "<w:document><w:body><w:p><w:r><w:t>1. I ___ a student</w:t></w:r></w:p></w:body></w:document>",
+        )
+    res = client_for(lan).post(
+        "/api/v1/assignments/import/", {"group": group.id, "file": SimpleUploadedFile("unit1.docx", buf.getvalue())}
+    )
     assert res.status_code == 200, res.data
     assert "I ___ a student" in sent["prompt"] and sent["parts"] is None  # Word: its text is sent
     qs = res.data["questions"]
     assert [q["kind"] for q in qs] == ["mcq", "fill", "essay"]
     assert not any(o["correct"] for o in qs[0]["options"])  # two "right" choices: the leader decides
-    pdf = client_for(lan).post("/api/v1/assignments/import/", {"group": group.id, "file": SimpleUploadedFile(
-        "de.pdf", b"%PDF-1.4")})
+    pdf = client_for(lan).post(
+        "/api/v1/assignments/import/", {"group": group.id, "file": SimpleUploadedFile("de.pdf", b"%PDF-1.4")}
+    )
     assert pdf.status_code == 200 and sent["parts"][0]["inline_data"]["mime_type"] == "application/pdf"
-    assert client_for(minh).post("/api/v1/assignments/import/", {"group": group.id, "file": SimpleUploadedFile(
-        "x.txt", b"hi")}).status_code == 403
+    assert (
+        client_for(minh)
+        .post("/api/v1/assignments/import/", {"group": group.id, "file": SimpleUploadedFile("x.txt", b"hi")})
+        .status_code
+        == 403
+    )

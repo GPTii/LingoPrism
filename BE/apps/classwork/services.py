@@ -1,4 +1,5 @@
 """Who may do what with a group's assignments, automatic marking, hand-in and marking by a leader."""
+
 import unicodedata
 from decimal import Decimal
 
@@ -12,8 +13,25 @@ from apps.notifications.services import notify
 from .models import Assignment, AssignmentAnswer, AssignmentQuestion, AssignmentSubmission
 
 MAX_FILE_MB = 10
-FILE_TYPES = {".pdf", ".doc", ".docx", ".ppt", ".pptx", ".xls", ".xlsx", ".txt", ".jpg", ".jpeg", ".png", ".webp",
-              ".heic", ".mp3", ".m4a", ".wav", ".zip"}
+FILE_TYPES = {
+    ".pdf",
+    ".doc",
+    ".docx",
+    ".ppt",
+    ".pptx",
+    ".xls",
+    ".xlsx",
+    ".txt",
+    ".jpg",
+    ".jpeg",
+    ".png",
+    ".webp",
+    ".heic",
+    ".mp3",
+    ".m4a",
+    ".wav",
+    ".zip",
+}
 
 
 class ClassworkError(Exception):
@@ -77,7 +95,9 @@ def submit(user, assignment: Assignment, answers: dict[int, dict], files: dict, 
     if not membership(user, assignment.group_id):
         raise ClassworkError("Bạn không ở trong nhóm này")
     if assignment.status != Assignment.Status.PUBLISHED:
-        raise ClassworkError("Bài tập đã đóng" if assignment.status == Assignment.Status.CLOSED else "Bài tập chưa được giao")
+        raise ClassworkError(
+            "Bài tập đã đóng" if assignment.status == Assignment.Status.CLOSED else "Bài tập chưa được giao"
+        )
     now = timezone.now()
     late = bool(assignment.due_at and now > assignment.due_at)
     if late and not assignment.allow_late:
@@ -108,9 +128,13 @@ def submit(user, assignment: Assignment, answers: dict[int, dict], files: dict, 
             sub.graded_at = now  # only auto-marked questions: final, or the answers could be found by trying again
         sub.save()
     for m in assignment.group.members.filter(role=GroupMember.Role.LEADER, status="active").exclude(user=user):
-        notify(m.user, Notification.Kind.ASSIGNMENT, f"{user.display_name} đã nộp bài",
-               f"{assignment.title}{' (nộp muộn)' if late else ''}",
-               data={"route": route(assignment, submission=sub.id)})
+        notify(
+            m.user,
+            Notification.Kind.ASSIGNMENT,
+            f"{user.display_name} đã nộp bài",
+            f"{assignment.title}{' (nộp muộn)' if late else ''}",
+            data={"route": route(assignment, submission=sub.id)},
+        )
     return sub
 
 
@@ -140,9 +164,13 @@ def grade(leader, sub: AssignmentSubmission, marks: list[dict], score=None, feed
             raise ClassworkError("Còn câu chưa chấm")
         sub.graded_by, sub.graded_at = leader, timezone.now()
         sub.save()
-    notify(sub.user, Notification.Kind.ASSIGNMENT, "Bài tập đã được chấm",
-           f"{sub.assignment.title}: {sub.score:g}/{sub.max_score:g} điểm",
-           data={"route": route(sub.assignment)})
+    notify(
+        sub.user,
+        Notification.Kind.ASSIGNMENT,
+        "Bài tập đã được chấm",
+        f"{sub.assignment.title}: {sub.score:g}/{sub.max_score:g} điểm",
+        data={"route": route(sub.assignment)},
+    )
     return sub
 
 
@@ -159,9 +187,16 @@ def publish(assignment: Assignment):
     assignment.status, assignment.published_at = Assignment.Status.PUBLISHED, timezone.now()
     assignment.save(update_fields=["status", "published_at", "updated_at"])
     due = f" – hạn {timezone.localtime(assignment.due_at):%H:%M %d/%m}" if assignment.due_at else ""
-    for m in assignment.group.members.filter(status="active").exclude(role=GroupMember.Role.LEADER).select_related("user"):
-        notify(m.user, Notification.Kind.ASSIGNMENT, f"Bài tập mới trong {assignment.group.name}",
-               f"{assignment.title}{due}", data={"route": route(assignment)})
+    for m in (
+        assignment.group.members.filter(status="active").exclude(role=GroupMember.Role.LEADER).select_related("user")
+    ):
+        notify(
+            m.user,
+            Notification.Kind.ASSIGNMENT,
+            f"Bài tập mới trong {assignment.group.name}",
+            f"{assignment.title}{due}",
+            data={"route": route(assignment)},
+        )
 
 
 def route(assignment: Assignment, submission: int | None = None) -> str:

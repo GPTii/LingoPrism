@@ -1,5 +1,6 @@
 """The three WebSockets (ws/events/, ws/groups/<id>/, ws/support/<id>/) through the real ASGI app: who may connect,
 flooding, oversized frames, and that one learner's events never reach another."""
+
 import json
 
 import pytest
@@ -21,8 +22,9 @@ def token(user):
 
 
 def learner(n, **extra):
-    return User.objects.create_user(email=f"ws{n}@example.com", password="Strong!Pass123", display_name=f"WS {n}",
-                                    birth_date="1990-01-01", **extra)
+    return User.objects.create_user(
+        email=f"ws{n}@example.com", password="Strong!Pass123", display_name=f"WS {n}", birth_date="1990-01-01", **extra
+    )
 
 
 async def _connect(path):
@@ -149,6 +151,7 @@ def test_events_reach_only_their_owner():
         await ca.receive_json_from()  # "connected"
         await cb.receive_json_from()
         from channels.db import database_sync_to_async
+
         await database_sync_to_async(notify)(a, "system", "chỉ cho A")
         got = await ca.receive_json_from(timeout=5)
         b_silent = await cb.receive_nothing(timeout=1)

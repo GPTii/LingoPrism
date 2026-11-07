@@ -3,6 +3,7 @@ Claude (Anthropic API) when ANTHROPIC_API_KEY is set; off when neither is.
 
 The model only writes the sentences and their meaning; the reading of Chinese lines (pinyin) is computed
 here with pypinyin, and every word comes from the verified vocabulary – the model never adds words to it."""
+
 import json
 import logging
 import re
@@ -82,8 +83,8 @@ def _reading(text: str, language: str) -> str:
         syl = [p[0].replace("v", "ü") for p in pinyin(run, style=Style.TONE3, neutral_tone_with_five=True)]
         i = 0
         while i < len(run):
-            n = next((n for n in (4, 3, 2) if side + run[i:i + n] in neutral), 1)
-            for k, tone in enumerate(neutral.get(side + run[i:i + n], ())):
+            n = next((n for n in (4, 3, 2) if side + run[i : i + n] in neutral), 1)
+            for k, tone in enumerate(neutral.get(side + run[i : i + n], ())):
                 if tone == 5:
                     syl[i + k] = syl[i + k][:-1] + "5"
             i += n
@@ -110,18 +111,29 @@ def generate(words: list[dict], language: str, level: int) -> dict:
     except ValueError as e:
         raise AiUnavailable("Không tạo được hội thoại lúc này.") from e
     lines = [
-        {"speaker": ln["speaker"], "text": ln["text"].strip(), "reading": _reading(ln["text"], language),
-         "translation": ln["translation"].strip()}
-        for ln in data.get("lines", []) if ln.get("text", "").strip()
+        {
+            "speaker": ln["speaker"],
+            "text": ln["text"].strip(),
+            "reading": _reading(ln["text"], language),
+            "translation": ln["translation"].strip(),
+        }
+        for ln in data.get("lines", [])
+        if ln.get("text", "").strip()
     ][:8]
     if not lines:
         raise AiUnavailable("Không tạo được hội thoại cho ảnh này.")
     return {"title_vi": data.get("title_vi", "")[:200], "lines": lines, "model": model}
 
 
-def _gemini(prompt: str, system: str = SYSTEM, schema: dict = SCHEMA,
-            fail: str = "Không tạo được hội thoại lúc này.", model: str = "", timeout: int = 60,
-            parts: list | None = None) -> tuple[str, str]:
+def _gemini(
+    prompt: str,
+    system: str = SYSTEM,
+    schema: dict = SCHEMA,
+    fail: str = "Không tạo được hội thoại lúc này.",
+    model: str = "",
+    timeout: int = 60,
+    parts: list | None = None,
+) -> tuple[str, str]:
     """parts: files sent with the prompt, e.g. [{"inline_data": {"mime_type": "application/pdf", "data": base64}}]."""
     import requests
 
@@ -133,8 +145,11 @@ def _gemini(prompt: str, system: str = SYSTEM, schema: dict = SCHEMA,
             json={
                 "systemInstruction": {"parts": [{"text": system}]},
                 "contents": [{"role": "user", "parts": [*(parts or []), {"text": prompt}]}],
-                "generationConfig": {"responseMimeType": "application/json", "responseJsonSchema": schema,
-                                     "maxOutputTokens": 4000},
+                "generationConfig": {
+                    "responseMimeType": "application/json",
+                    "responseJsonSchema": schema,
+                    "maxOutputTokens": 4000,
+                },
             },
             timeout=timeout,
         )
@@ -153,8 +168,9 @@ def _gemini(prompt: str, system: str = SYSTEM, schema: dict = SCHEMA,
     return text, body.get("modelVersion") or model
 
 
-def _claude(prompt: str, system: str = SYSTEM, schema: dict = SCHEMA,
-            fail: str = "Không tạo được hội thoại lúc này.") -> tuple[str, str]:
+def _claude(
+    prompt: str, system: str = SYSTEM, schema: dict = SCHEMA, fail: str = "Không tạo được hội thoại lúc này."
+) -> tuple[str, str]:
     import anthropic
 
     client = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY, timeout=60.0, max_retries=1)

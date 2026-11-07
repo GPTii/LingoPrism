@@ -13,6 +13,7 @@ Setups:
 
 Writes AI/report/yolo/word_photos.json and prints the table used in AI/report/yolo/ensemble_upgrade.md.
 """
+
 import json
 import os
 import sys
@@ -63,16 +64,19 @@ def main():
                 out[name][set_name], per_photo = R._score(det, photos, set(coco.classes))
                 out[name][set_name + "_per_photo"] = per_photo
         print(name, {k: v for k, v in out[name].items() if not k.endswith("_per_photo")}, flush=True)
-    (ROOT / "AI" / "report" / "yolo" / "word_photos.json").write_text(json.dumps(out, ensure_ascii=False, indent=1),
-                                                                    encoding="utf-8")
+    (ROOT / "AI" / "report" / "yolo" / "word_photos.json").write_text(
+        json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8"
+    )
     print("\n| Bộ ảnh | Cấu hình | Số ảnh | Top-1 | Top-1 lớp ngoài COCO | Tìm thấy | Precision | Box sai | ms/ảnh |")
     print("|---|---|---|---|---|---|---|---|---|")
     for set_name in ("word_photos", "own_photos"):
         for name in SETUPS:
             r = out[name].get(set_name)
             if r:
-                print(f"| {set_name} | {name} | {r['photos']} | {r['top1']:.0%} | {r['top1_new_classes'] or 0:.0%} | "
-                      f"{r['found']:.0%} | {r['precision']:.0%} | {r['wrong_boxes']} | {r['ms_per_image']} |")
+                print(
+                    f"| {set_name} | {name} | {r['photos']} | {r['top1']:.0%} | {r['top1_new_classes'] or 0:.0%} | "
+                    f"{r['found']:.0%} | {r['precision']:.0%} | {r['wrong_boxes']} | {r['ms_per_image']} |"
+                )
 
 
 if __name__ == "__main__":

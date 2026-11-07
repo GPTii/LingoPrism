@@ -11,7 +11,9 @@ class Command(BaseCommand):
 
     def handle(self, *args, levels, **opts):
         if not WIKTIONARY.exists():
-            self.stderr.write("Thiếu dữ liệu Wiktionary – tải: https://kaikki.org/dictionary/Vietnamese/"
-                              "kaikki.org-dictionary-Vietnamese.jsonl.gz → seed/sources/wiktionary/vi.jsonl.gz")
+            self.stderr.write(
+                "Thiếu dữ liệu Wiktionary – tải: https://kaikki.org/dictionary/Vietnamese/"
+                "kaikki.org-dictionary-Vietnamese.jsonl.gz → seed/sources/wiktionary/vi.jsonl.gz"
+            )
             return
         self.stdout.write(self.style.SUCCESS(f"Đã thêm {suggest(tuple(levels))} từ vào hàng chờ duyệt"))

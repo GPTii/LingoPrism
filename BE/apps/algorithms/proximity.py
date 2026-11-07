@@ -8,6 +8,7 @@ Query (lat, lng, r):
 Cost: O(cells + candidates) instead of O(N) for a scan of all POIs.
 Geofencing then checks d ≤ the POI's own radius.  The PostgreSQL cube/earthdistance query stays as baseline.
 """
+
 import math
 import threading
 import time

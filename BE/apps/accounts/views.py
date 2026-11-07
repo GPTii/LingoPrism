@@ -7,7 +7,7 @@ from django.db import transaction
 from django.db.models import ProtectedError, Q
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema
-from rest_framework import generics, mixins, status, viewsets
+from rest_framework import generics, status, viewsets
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -72,7 +72,9 @@ class LoginView(APIView):
     def post(self, request):
         ser = s.LoginSerializer(data=request.data)
         if not ser.is_valid():
-            security_log.warning("login failed email=%s ip=%s", str(request.data.get("email", ""))[:120], _client_ip(request))
+            security_log.warning(
+                "login failed email=%s ip=%s", str(request.data.get("email", ""))[:120], _client_ip(request)
+            )
             raise ValidationError(ser.errors)
         user = ser.validated_data["user"]
         user.last_login = timezone.now()
@@ -105,17 +107,23 @@ class GoogleLoginView(APIView):
             return Response({"detail": "Google token không hợp lệ", "errors": {}}, status=400)
 
         with transaction.atomic():
-            link = AuthProvider.objects.select_related("user").filter(
-                provider=AuthProvider.Provider.GOOGLE, provider_uid=info["sub"]
-            ).first()
+            link = (
+                AuthProvider.objects.select_related("user")
+                .filter(provider=AuthProvider.Provider.GOOGLE, provider_uid=info["sub"])
+                .first()
+            )
             if link:
                 user = link.user
             else:
                 user = User.objects.filter(email=info["email"].lower()).first()
                 if user is None:
                     # the Google button sits under "continuing means accepting the Terms and the Privacy policy"
-                    user = User.objects.create_user(email=info["email"], display_name=info.get("name", ""),
-                                                    terms_version=settings.LEGAL_VERSION, terms_accepted_at=timezone.now())
+                    user = User.objects.create_user(
+                        email=info["email"],
+                        display_name=info.get("name", ""),
+                        terms_version=settings.LEGAL_VERSION,
+                        terms_accepted_at=timezone.now(),
+                    )
                     UserGoal.objects.create(user=user)
                 AuthProvider.objects.create(user=user, provider=AuthProvider.Provider.GOOGLE, provider_uid=info["sub"])
             if not user.email_verified:  # Google vouches for the address (email_verified above)
@@ -141,6 +149,7 @@ class GoogleConfigView(APIView):
 @extend_schema(tags=["auth"])
 class LogoutView(APIView):
     serializer_class = s.LogoutSerializer
+
     @extend_schema(request=s.LogoutSerializer, responses={205: None})
     def post(self, request):
         ser = s.LogoutSerializer(data=request.data)
@@ -184,9 +193,7 @@ class VerifyResetCodeView(APIView):
         ser = s.VerifyResetCodeSerializer(data=request.data)
         ser.is_valid(raise_exception=True)
         reset = (
-            PasswordResetCode.objects.filter(
-                user__email=ser.validated_data["email"].lower(), used_at__isnull=True
-            )
+            PasswordResetCode.objects.filter(user__email=ser.validated_data["email"].lower(), used_at__isnull=True)
             .order_by("-created_at")
             .first()
         )
@@ -213,9 +220,11 @@ class ResetPasswordView(APIView):
     def post(self, request):
         ser = s.ResetPasswordSerializer(data=request.data)
         ser.is_valid(raise_exception=True)
-        reset = PasswordResetCode.objects.filter(
-            reset_token=ser.validated_data["reset_token"], used_at__isnull=True
-        ).select_related("user").first()
+        reset = (
+            PasswordResetCode.objects.filter(reset_token=ser.validated_data["reset_token"], used_at__isnull=True)
+            .select_related("user")
+            .first()
+        )
         if reset is None or reset.is_expired:
             return Response({"detail": "Phiên đặt lại mật khẩu đã hết hạn", "errors": {}}, status=400)
         reset.user.set_password(ser.validated_data["new_password"])
@@ -229,6 +238,7 @@ class ResetPasswordView(APIView):
 @extend_schema(tags=["auth"])
 class ChangePasswordView(APIView):
     serializer_class = s.ChangePasswordSerializer
+
     @extend_schema(request=s.ChangePasswordSerializer)
     def post(self, request):
         ser = s.ChangePasswordSerializer(data=request.data, context={"request": request})
@@ -339,11 +349,20 @@ class VerifyEmailView(APIView):
         if not user.email_verified:
             ser = s.CodeSerializer(data=request.data)
             ser.is_valid(raise_exception=True)
-            record = EmailVerificationCode.objects.filter(user=user, used_at__isnull=True).order_by("-created_at").first()
-            if not _check_code(request, record, ser.validated_data["code"], EmailVerificationCode.MAX_ATTEMPTS,
-                               record is not None and record.is_expired):
-                return Response({"detail": "Mã không đúng hoặc đã hết hạn. Bấm “Gửi lại mã” để nhận mã mới.", "errors": {}},
-                                status=400)
+            record = (
+                EmailVerificationCode.objects.filter(user=user, used_at__isnull=True).order_by("-created_at").first()
+            )
+            if not _check_code(
+                request,
+                record,
+                ser.validated_data["code"],
+                EmailVerificationCode.MAX_ATTEMPTS,
+                record is not None and record.is_expired,
+            ):
+                return Response(
+                    {"detail": "Mã không đúng hoặc đã hết hạn. Bấm “Gửi lại mã” để nhận mã mới.", "errors": {}},
+                    status=400,
+                )
             record.used_at = timezone.now()
             record.save(update_fields=["used_at"])
             user.email_verified = True
@@ -391,5 +410,7 @@ class DeleteAccountView(APIView):
             with transaction.atomic():
                 user.delete()
         except ProtectedError:
-            return Response({"detail": "Không xoá được tài khoản lúc này, hãy liên hệ hỗ trợ.", "errors": {}}, status=409)
+            return Response(
+                {"detail": "Không xoá được tài khoản lúc này, hãy liên hệ hỗ trợ.", "errors": {}}, status=409
+            )
         return Response(status=status.HTTP_204_NO_CONTENT)

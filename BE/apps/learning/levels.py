@@ -5,6 +5,7 @@ frequency otherwise). A learner starts at level 1; level n+1 opens when UNLOCK_P
 been started (learning or mastered), or right away by passing a short test on level n (PASS_SCORE of TEST_SIZE).
 New words come from the learner's current level first; sentence practice uses only words up to that level.
 """
+
 import random
 
 from django.core import signing
@@ -53,26 +54,47 @@ def _state(user, learn) -> LearnerLevel:
 
 def progress(user, target) -> dict:
     state = _state(user, target.learn)
-    started_ids = set(PersonalWord.objects.filter(user=user, language=target.learn, status__in=STARTED)
-                      .values_list("word_id", flat=True))
-    mastered_ids = set(PersonalWord.objects.filter(user=user, language=target.learn,
-                                                   status=PersonalWord.Status.MASTERED).values_list("word_id", flat=True))
+    started_ids = set(
+        PersonalWord.objects.filter(user=user, language=target.learn, status__in=STARTED).values_list(
+            "word_id", flat=True
+        )
+    )
+    mastered_ids = set(
+        PersonalWord.objects.filter(user=user, language=target.learn, status=PersonalWord.Status.MASTERED).values_list(
+            "word_id", flat=True
+        )
+    )
     rows, unlocked_prev = [], True
     for n, name, desc in LEVELS:
         ids = set(level_words(user, target, n).values_list("id", flat=True))
         started = len(ids & started_ids)
         percent = round(100 * started / len(ids)) if ids else 100
         unlocked = n == 1 or n <= state.passed_test or getattr(user, "is_staff_role", False) or unlocked_prev
-        rows.append({"level": n, "name": name, "description": desc, "total": len(ids), "started": started,
-                     "mastered": len(ids & mastered_ids), "percent": percent, "unlocked": unlocked,
-                     "needed": max(0, -(-len(ids) * UNLOCK_PERCENT // 100) - started)})
+        rows.append(
+            {
+                "level": n,
+                "name": name,
+                "description": desc,
+                "total": len(ids),
+                "started": started,
+                "mastered": len(ids & mastered_ids),
+                "percent": percent,
+                "unlocked": unlocked,
+                "needed": max(0, -(-len(ids) * UNLOCK_PERCENT // 100) - started),
+            }
+        )
         unlocked_prev = unlocked and percent >= UNLOCK_PERCENT
     top = max(r["level"] for r in rows if r["unlocked"])
     current = min(state.current, top)
     for r in rows:
         r["current"] = r["level"] == current
-    return {"language": target.learn, "current": current, "unlock_percent": UNLOCK_PERCENT,
-            "test": {"size": TEST_SIZE, "pass": PASS_SCORE}, "levels": rows}
+    return {
+        "language": target.learn,
+        "current": current,
+        "unlock_percent": UNLOCK_PERCENT,
+        "test": {"size": TEST_SIZE, "pass": PASS_SCORE},
+        "levels": rows,
+    }
 
 
 def current_level(user, target) -> int:
@@ -94,12 +116,17 @@ def advance_if_done(user, target) -> int | None:
 
 # ------------------------------------------------------------------ test to skip a level
 
+
 def build_test(user, target, level: int) -> dict | None:
     words = list(level_words(user, target, level).order_by("?")[:TEST_SIZE])
     if len(words) < 4:
         return None
-    vi = {t.word_id: t.text for t in WordTranslation.objects.filter(
-        word__in=level_words(user, target, level), language_id="vi", status=ReviewStatus.VERIFIED)}
+    vi = {
+        t.word_id: t.text
+        for t in WordTranslation.objects.filter(
+            word__in=level_words(user, target, level), language_id="vi", status=ReviewStatus.VERIFIED
+        )
+    }
     questions, answers = [], []
     for w in words:
         tr = next((t for t in w.visible_translations if t.language_id == target.code), None)
@@ -135,11 +162,17 @@ def grade_test(user, target, level: int, token: str, given: list) -> dict:
         state.passed_test = max(state.passed_test, level + 1)
         state.current = max(state.current, level + 1)
         state.save(update_fields=["passed_test", "current", "updated_at"])
-    return {"score": score, "total": len(answers), "passed": passed, "answers": answers,
-            "unlocked": level + 1 if passed and level < MAX_LEVEL else None}
+    return {
+        "score": score,
+        "total": len(answers),
+        "passed": passed,
+        "answers": answers,
+        "unlocked": level + 1 if passed and level < MAX_LEVEL else None,
+    }
 
 
 # ------------------------------------------------------------------ API
+
 
 class CurrentSerializer(serializers.Serializer):
     level = serializers.IntegerField(min_value=1, max_value=MAX_LEVEL)
@@ -164,8 +197,10 @@ class LevelsView(APIView):
         p = progress(request.user, target)
         n = ser.validated_data["level"]
         if not next(r for r in p["levels"] if r["level"] == n)["unlocked"]:
-            return Response({"detail": f"Cấp {n} chưa mở – học thêm cấp {n - 1} hoặc làm bài kiểm tra vượt cấp"},
-                            status=status.HTTP_403_FORBIDDEN)
+            return Response(
+                {"detail": f"Cấp {n} chưa mở – học thêm cấp {n - 1} hoặc làm bài kiểm tra vượt cấp"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
         state = _state(request.user, target.learn)
         state.current = n
         state.save(update_fields=["current", "updated_at"])
@@ -188,8 +223,9 @@ class LevelTestView(APIView):
         ser = TestAnswerSerializer(data=request.data)
         ser.is_valid(raise_exception=True)
         try:
-            result = grade_test(request.user, resolve_target(request), n, ser.validated_data["token"],
-                                ser.validated_data["answers"])
+            result = grade_test(
+                request.user, resolve_target(request), n, ser.validated_data["token"], ser.validated_data["answers"]
+            )
         except signing.BadSignature:
             return Response({"detail": "Bài kiểm tra không hợp lệ hoặc đã hết hạn"}, status=400)
         return Response(result | {"progress": progress(request.user, resolve_target(request))})

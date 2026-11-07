@@ -1,4 +1,4 @@
-""""It is something else": the learner types the object's name in Vietnamese and gets the word in the language they
+""" "It is something else": the learner types the object's name in Vietnamese and gets the word in the language they
 learn – from the checked dictionary only (no machine translation: a wrong word would be taught).
 
 "cái ly", "ly", "Ly" and "ly" without accents ("ly", "coc") all find the dictionary's words. Ranking:
@@ -9,6 +9,7 @@ learn – from the checked dictionary only (no machine translation: a wrong word
   4  part of the name, when nothing was typed with accents
 Words the detector knows (yolo_label) come first among equals: a correction to them also teaches the detector.
 """
+
 import re
 import unicodedata
 
@@ -17,8 +18,30 @@ from django.core.cache import cache
 from apps.vocab.models import ReviewStatus, Word, WordTranslation
 from apps.vocab.services import words_for_target
 
-CLASSIFIERS = {"cái", "con", "chiếc", "quả", "trái", "cây", "tờ", "cuốn", "quyển", "tấm", "đôi", "bộ", "chú", "bông",
-               "củ", "bức", "ngôi", "căn", "toà", "tòa", "lọ", "hũ"}
+CLASSIFIERS = {
+    "cái",
+    "con",
+    "chiếc",
+    "quả",
+    "trái",
+    "cây",
+    "tờ",
+    "cuốn",
+    "quyển",
+    "tấm",
+    "đôi",
+    "bộ",
+    "chú",
+    "bông",
+    "củ",
+    "bức",
+    "ngôi",
+    "căn",
+    "toà",
+    "tòa",
+    "lọ",
+    "hũ",
+}
 LIMIT = 6
 _CACHE_KEY = "detection:lookup:vi:v1"
 
@@ -52,8 +75,8 @@ def _index() -> list[tuple[int, str, str, bool, bool]]:
     if rows is None:
         rows = []
         for wid, text, variants, yolo, pos in WordTranslation.objects.filter(
-                language_id="vi", status=ReviewStatus.VERIFIED).values_list(
-                "word_id", "text", "accepted_variants", "word__yolo_label", "word__part_of_speech"):
+            language_id="vi", status=ReviewStatus.VERIFIED
+        ).values_list("word_id", "text", "accepted_variants", "word__yolo_label", "word__part_of_speech"):
             for name in {text, *(variants or [])}:
                 n = core(norm(name))
                 if n:

@@ -10,14 +10,30 @@ from .models import AuditLog
 class AuditLogSerializer(serializers.ModelSerializer):
     class Meta:
         model = AuditLog
-        fields = ["id", "actor", "actor_email", "actor_role", "method", "path", "resource", "object_id",
-                  "status_code", "fields", "ip", "created_at"]
+        fields = [
+            "id",
+            "actor",
+            "actor_email",
+            "actor_role",
+            "method",
+            "path",
+            "resource",
+            "object_id",
+            "status_code",
+            "fields",
+            "ip",
+            "created_at",
+        ]
 
 
-@extend_schema(tags=["admin"], parameters=[
-    OpenApiParameter("q", str, description="Tìm theo email hoặc đường dẫn"),
-    OpenApiParameter("method", str), OpenApiParameter("resource", str),
-])
+@extend_schema(
+    tags=["admin"],
+    parameters=[
+        OpenApiParameter("q", str, description="Tìm theo email hoặc đường dẫn"),
+        OpenApiParameter("method", str),
+        OpenApiParameter("resource", str),
+    ],
+)
 class AuditLogViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     """Nhật ký thao tác của admin / staff – chỉ admin xem được."""
 

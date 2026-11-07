@@ -45,7 +45,13 @@ def test_only_staff_edit_pois(pois):
     learner = User.objects.create_user("l@example.com", "Strong!Pass123")
     c = APIClient()
     c.force_authenticate(learner)
-    assert c.post("/api/v1/pois/", {"name": "X", "category": "park", "lat": 10, "lng": 106}, format="json").status_code == 403
+    assert (
+        c.post("/api/v1/pois/", {"name": "X", "category": "park", "lat": 10, "lng": 106}, format="json").status_code
+        == 403
+    )
     staff = User.objects.create_user("s@example.com", "Strong!Pass123", role="staff")
     c.force_authenticate(staff)
-    assert c.post("/api/v1/pois/", {"name": "X", "category": "park", "lat": 10, "lng": 106}, format="json").status_code == 201
+    assert (
+        c.post("/api/v1/pois/", {"name": "X", "category": "park", "lat": 10, "lng": 106}, format="json").status_code
+        == 201
+    )

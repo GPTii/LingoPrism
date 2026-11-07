@@ -4,6 +4,7 @@ Distractors come from a `DistractorProvider` so Phase 5 can swap the random base
 Smart Distractor Generation without changing the API. Regional variants / synonyms of the
 answer are never used as wrong options (docs/PLAN.md §3b).
 """
+
 import random
 
 from apps.vocab.models import ReviewStatus, Word, WordTranslation
@@ -65,7 +66,9 @@ def _questions_vi(word: Word, tr, provider: DistractorProvider) -> list[dict]:
     accepted = [tr.text] + [v for v in tr.accepted_variants if v]
     payload = translation_payload(tr)
     questions = [{"type": "flashcard", "front": payload, "back": word.emoji}]
-    others = [t.text for t in _texts(provider.pick(word, Target("vi", "vi", ""), 3), "vi").values() if t.text != tr.text][:3]
+    others = [
+        t.text for t in _texts(provider.pick(word, Target("vi", "vi", ""), 3), "vi").values() if t.text != tr.text
+    ][:3]
     if (word.emoji or word.image) and len(others) >= 2:
         opts = others + [tr.text]
         random.shuffle(opts)
@@ -101,7 +104,9 @@ def build_questions(word: Word, target: Target, by_lang: dict, provider: Distrac
     if len(meaning_opts) >= 2 and meaning:
         opts = meaning_opts + [meaning]
         random.shuffle(opts)
-        questions.append({"type": "choose_meaning", "prompt": translation_payload(tr), "options": opts, "answer": meaning})
+        questions.append(
+            {"type": "choose_meaning", "prompt": translation_payload(tr), "options": opts, "answer": meaning}
+        )
     questions.append({"type": "type_target", "prompt": meaning, "accepted": accepted, "answer": tr.text})
     questions.append({"type": "listen_type", "audio": translation_payload(tr), "accepted": accepted, "answer": tr.text})
 

@@ -16,6 +16,7 @@ many objects, or a drawing, cannot be matched fairly).
 Output: AI/testset/images/*.jpg (long side 640 px) + AI/testset/annotations.json
     {"classes": [...], "images": [{"file", "source", "evaluable": [...], "boxes": [{"label", "bbox": [x1,y1,x2,y2]}]}]}
 """
+
 import argparse
 import json
 from collections import Counter
@@ -43,11 +44,12 @@ def main():
     ap.add_argument("--max-side", type=int, default=640)
     args = ap.parse_args()
 
+    import sys
+
     import fiftyone.utils.openimages as fouo
     import fiftyone.zoo as foz
     from PIL import Image
 
-    import sys
     sys.path.insert(0, str(Path(__file__).parent))
     from export_pretrained_oiv7 import EXTRA
 
@@ -79,23 +81,41 @@ def main():
 
     print("== COCO-2017 validation ==")
     for coco_name in coco_map:
-        ds = foz.load_zoo_dataset("coco-2017", split="validation", label_types=["detections"], classes=[coco_name],
-                                  max_samples=args.per_class, shuffle=True, seed=args.seed,
-                                  dataset_name=f"lp-test-coco-{coco_name}")
+        ds = foz.load_zoo_dataset(
+            "coco-2017",
+            split="validation",
+            label_types=["detections"],
+            classes=[coco_name],
+            max_samples=args.per_class,
+            shuffle=True,
+            seed=args.seed,
+            dataset_name=f"lp-test-coco-{coco_name}",
+        )
         for s in ds.iter_samples():
             src = s.ground_truth.detections if s.ground_truth else []
             if any(_flag(d, "iscrowd") for d in src):
                 dropped["coco crowd"] += 1
                 continue
-            add(s, "coco", [{"label": coco_map[d.label], "bbox": _xyxy(d)} for d in src if d.label in coco_map],
-                coco_evaluable)
+            add(
+                s,
+                "coco",
+                [{"label": coco_map[d.label], "bbox": _xyxy(d)} for d in src if d.label in coco_map],
+                coco_evaluable,
+            )
         ds.delete()
 
     print("== Open Images V7 validation ==")
     for oi_name in oi_map:
-        ds = foz.load_zoo_dataset("open-images-v7", split="validation", label_types=["detections", "classifications"],
-                                  classes=[oi_name], max_samples=args.per_class, shuffle=True, seed=args.seed,
-                                  dataset_name=f"lp-test-oi-{oi_name}")
+        ds = foz.load_zoo_dataset(
+            "open-images-v7",
+            split="validation",
+            label_types=["detections", "classifications"],
+            classes=[oi_name],
+            max_samples=args.per_class,
+            shuffle=True,
+            seed=args.seed,
+            dataset_name=f"lp-test-oi-{oi_name}",
+        )
         for s in ds.iter_samples():
             src = s.detections.detections if s.detections else []  # several label types: one field per type
             ours = [d for d in src if d.label in oi_map]
@@ -111,11 +131,14 @@ def main():
             add(s, "oi", [{"label": oi_map[d.label], "bbox": _xyxy(d)} for d in ours], evaluable)
         ds.delete()
 
-    (OUT / "annotations.json").write_text(json.dumps({"classes": labels, "images": images}, ensure_ascii=False),
-                                          encoding="utf-8")
+    (OUT / "annotations.json").write_text(
+        json.dumps({"classes": labels, "images": images}, ensure_ascii=False), encoding="utf-8"
+    )
     counts = Counter(b["label"] for im in images for b in im["boxes"])
-    print(f"{len(images)} ảnh ({sum(im['source'] == 'coco' for im in images)} COCO, "
-          f"{sum(im['source'] == 'oi' for im in images)} Open Images), {sum(counts.values())} box. Đã bỏ: {dict(dropped)}")
+    print(
+        f"{len(images)} ảnh ({sum(im['source'] == 'coco' for im in images)} COCO, "
+        f"{sum(im['source'] == 'oi' for im in images)} Open Images), {sum(counts.values())} box. Đã bỏ: {dict(dropped)}"
+    )
     for lab in labels:
         print(f"  {lab:15} {counts.get(lab, 0):5} box")
 

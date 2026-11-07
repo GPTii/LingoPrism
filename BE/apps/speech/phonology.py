@@ -11,6 +11,7 @@ so espeak-ng gives the expected phones in exactly its conventions:
 
 espeak-ng: the system library (Docker: apt install espeak-ng) or the espeakng-loader wheel (Windows development).
 """
+
 import re
 import threading
 import unicodedata
@@ -18,8 +19,13 @@ from dataclasses import dataclass, field
 
 TONE_CHARS = "123456ɜ"
 VI_TONES = {"": "ngang", "2": "huyền", "ɜ": "sắc", "4": "hỏi", "5": "ngã", "6": "nặng"}
-ZH_TONE_NAMES = {1: "thanh 1 (ngang cao)", 2: "thanh 2 (lên)", 3: "thanh 3 (xuống rồi lên)", 4: "thanh 4 (xuống)",
-                 5: "thanh nhẹ"}
+ZH_TONE_NAMES = {
+    1: "thanh 1 (ngang cao)",
+    2: "thanh 2 (lên)",
+    3: "thanh 3 (xuống rồi lên)",
+    4: "thanh 4 (xuống)",
+    5: "thanh nhẹ",
+}
 VOWEL_CHARS = set("aɑæɐəɚɜɛeiɪoɔʊuʌyøœɯɤɨɵɒäɝʉ")
 
 _lock = threading.RLock()  # _phonemize holds it and calls _backend
@@ -45,8 +51,9 @@ def _backend(language: str):
                 except ImportError:
                     pass
                 voice = {"en": "en-us", "zh": "cmn", "vi": "vi"}[language]
-                _backends[language] = EspeakBackend(voice, preserve_punctuation=False, with_stress=False,
-                                                    language_switch="keep-flags")
+                _backends[language] = EspeakBackend(
+                    voice, preserve_punctuation=False, with_stress=False, language_switch="keep-flags"
+                )
             except Exception as e:  # noqa: BLE001 - no espeak-ng: speaking practice is off, the rest of the app runs
                 raise PhonemizerUnavailable(str(e)) from e
         return _backends[language]
@@ -105,11 +112,35 @@ class Unit:
 
 # --- pinyin --------------------------------------------------------------------------------------------------------
 
-_TONE_MARKS = {"ā": ("a", 1), "á": ("a", 2), "ǎ": ("a", 3), "à": ("a", 4), "ē": ("e", 1), "é": ("e", 2), "ě": ("e", 3),
-               "è": ("e", 4), "ī": ("i", 1), "í": ("i", 2), "ǐ": ("i", 3), "ì": ("i", 4), "ō": ("o", 1), "ó": ("o", 2),
-               "ǒ": ("o", 3), "ò": ("o", 4), "ū": ("u", 1), "ú": ("u", 2), "ǔ": ("u", 3), "ù": ("u", 4),
-               "ǖ": ("ü", 1), "ǘ": ("ü", 2), "ǚ": ("ü", 3), "ǜ": ("ü", 4), "ń": ("n", 2), "ň": ("n", 3),
-               "ǹ": ("n", 4)}
+_TONE_MARKS = {
+    "ā": ("a", 1),
+    "á": ("a", 2),
+    "ǎ": ("a", 3),
+    "à": ("a", 4),
+    "ē": ("e", 1),
+    "é": ("e", 2),
+    "ě": ("e", 3),
+    "è": ("e", 4),
+    "ī": ("i", 1),
+    "í": ("i", 2),
+    "ǐ": ("i", 3),
+    "ì": ("i", 4),
+    "ō": ("o", 1),
+    "ó": ("o", 2),
+    "ǒ": ("o", 3),
+    "ò": ("o", 4),
+    "ū": ("u", 1),
+    "ú": ("u", 2),
+    "ǔ": ("u", 3),
+    "ù": ("u", 4),
+    "ǖ": ("ü", 1),
+    "ǘ": ("ü", 2),
+    "ǚ": ("ü", 3),
+    "ǜ": ("ü", 4),
+    "ń": ("n", 2),
+    "ň": ("n", 3),
+    "ǹ": ("n", 4),
+}
 
 
 def numbered(syllable: str) -> tuple[str, int]:
@@ -137,7 +168,7 @@ def zh_units(chars: str, pinyin: list[str]) -> list[Unit]:
     han = [c for c in chars if _is_han(c)]
     sylls = [numbered(p) for p in pinyin if p.strip()]
     if len(han) != len(sylls):
-        han = han[:len(sylls)] + [""] * max(0, len(sylls) - len(han))
+        han = han[: len(sylls)] + [""] * max(0, len(sylls) - len(han))
     words = _phonemize([f"{s.replace('ü', 'v')}{t}" for s, t in sylls], "zh")
     fallback = [i for i, w in enumerate(words) if not w or any("(" in p for ph in w for p in ph)]
     if fallback:  # a syllable espeak cannot read as pinyin: its character (the verified tone is kept anyway)
@@ -169,7 +200,9 @@ def en_units(text: str) -> list[Unit]:
         return [Unit(w, p, None, " ".join(p)) for w, p in zip(words, phon)]
     # numbers, contractions… split differently: one word at a time
     per = _phonemize(words, "en")
-    return [Unit(w, [p for ph in pp for p in ph], None, " ".join(p for ph in pp for p in ph)) for w, pp in zip(words, per)]
+    return [
+        Unit(w, [p for ph in pp for p in ph], None, " ".join(p for ph in pp for p in ph)) for w, pp in zip(words, per)
+    ]
 
 
 def expected_units(text: str, language: str, pinyin: list[str] | None = None) -> list[Unit]:

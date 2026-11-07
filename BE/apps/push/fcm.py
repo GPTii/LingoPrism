@@ -3,6 +3,7 @@ signs a short-lived token from the service-account file, `requests` posts the me
 
 Off until FIREBASE_CREDENTIALS_FILE points to the project's service-account JSON (a secret: it lives
 on the server next to .env, never in git)."""
+
 import json
 import logging
 import threading
@@ -51,11 +52,17 @@ def send(token: str, title: str, body: str, data: dict | None = None) -> str:
             "android": {"priority": "high", "notification": {"channel_id": "lingoprism_default"}},
         }
     }
-    res = requests.post(f"https://fcm.googleapis.com/v1/projects/{project}/messages:send",
-                        json=message, headers={"Authorization": f"Bearer {access}"}, timeout=10)
+    res = requests.post(
+        f"https://fcm.googleapis.com/v1/projects/{project}/messages:send",
+        json=message,
+        headers={"Authorization": f"Bearer {access}"},
+        timeout=10,
+    )
     if res.ok:
         return "ok"
-    if res.status_code in (404, 400) and ("UNREGISTERED" in res.text or "registration-token-not-registered" in res.text):
+    if res.status_code in (404, 400) and (
+        "UNREGISTERED" in res.text or "registration-token-not-registered" in res.text
+    ):
         return "gone"
     log.warning("FCM %s: %s", res.status_code, res.text[:300])
     return "error"

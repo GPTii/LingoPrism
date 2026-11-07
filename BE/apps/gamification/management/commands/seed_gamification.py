@@ -1,10 +1,9 @@
 from django.core.management.base import BaseCommand
 from django.db.models import F
 
+from apps.core import brand
 from apps.gamification.models import Badge, Item, LeagueTier, Outfit, UserInventory
 from apps.gamification.sync import sync_catalog
-
-from apps.core import brand
 
 TIERS = brand.TIERS  # 10 tiers, lowest first – icons assets/brand/rank/rank_1..10.png
 OLD_TIER_CODES = brand.OLD_TIER_CODES
@@ -19,7 +18,8 @@ class Command(BaseCommand):
                 LeagueTier.objects.filter(code=old).update(code=new)
         LeagueTier.objects.update(order=F("order") + 1000)  # "order" is unique: free the slots before renumbering
         for order, (code, name) in enumerate(TIERS):
-            LeagueTier.objects.update_or_create(code=code, defaults={
-                "name": name, "order": order, "icon": brand.rank(order + 1)})
+            LeagueTier.objects.update_or_create(
+                code=code, defaults={"name": name, "order": order, "icon": brand.rank(order + 1)}
+            )
         items, badges = sync_catalog(Item, Badge, UserInventory, Outfit)
         self.stdout.write(self.style.SUCCESS(f"{len(TIERS)} hạng, {items} vật phẩm, {badges} huy hiệu"))

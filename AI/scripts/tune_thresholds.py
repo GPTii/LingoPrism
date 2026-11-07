@@ -8,6 +8,7 @@ others produce confident false alarms. For each class the threshold maximising F
 0.10–0.60). mAP does not change (it uses every confidence); precision / recall / F1 at the served threshold do.
 Uses the cached predictions of eval_testset.py (run it first).
 """
+
 import argparse
 import json
 import random
@@ -18,6 +19,7 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import eval_testset as ev  # noqa: E402
+
 from apps.detection.inference import EnsembleDetector  # noqa: E402
 
 GRID = np.round(np.arange(0.10, 0.61, 0.05), 2)
@@ -60,7 +62,7 @@ def main():
     scope = set(model_classes) & set(classes)
     idx = list(range(len(images)))
     random.Random(2026).shuffle(idx)
-    tune, hold = sorted(idx[: len(idx) // 2]), sorted(idx[len(idx) // 2:])
+    tune, hold = sorted(idx[: len(idx) // 2]), sorted(idx[len(idx) // 2 :])
     sub = lambda ix, p: ([images[i] for i in ix], [p[i] for i in ix])  # noqa: E731
 
     # per class: F1 of that class on the tuning half for every threshold
@@ -88,8 +90,10 @@ def main():
         card_path = Path(args.card)
         card = json.loads(card_path.read_text(encoding="utf-8"))
         card["thresholds"] = thresholds
-        card["thresholds_note"] = (f"Ngưỡng tin cậy từng lớp chọn theo F1 trên {len(tune)} ảnh của tập test, kiểm tra trên "
-                                   f"{len(hold)} ảnh còn lại: F1 {before['f1']:.3f} → {after['f1']:.3f}.")
+        card["thresholds_note"] = (
+            f"Ngưỡng tin cậy từng lớp chọn theo F1 trên {len(tune)} ảnh của tập test, kiểm tra trên "
+            f"{len(hold)} ảnh còn lại: F1 {before['f1']:.3f} → {after['f1']:.3f}."
+        )
         card_path.write_text(json.dumps(card, ensure_ascii=False, indent=1), encoding="utf-8")
         print("Đã ghi vào", card_path)
 

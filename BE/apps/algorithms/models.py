@@ -25,7 +25,9 @@ class AlgorithmConfig(models.Model):
     review_priority = models.CharField(max_length=4, choices=Priority.choices, default=Priority.VIP)
     distractor = models.CharField(max_length=6, choices=Distractor.choices, default=Distractor.SMART)
     proximity = models.CharField(max_length=8, choices=Proximity.choices, default=Proximity.GRID)
-    fsrs_weights = models.JSONField(default=list, blank=True, help_text="Trống = tham số mặc định FSRS-4.5; GA có thể ghi đè")
+    fsrs_weights = models.JSONField(
+        default=list, blank=True, help_text="Trống = tham số mặc định FSRS-4.5; GA có thể ghi đè"
+    )
     vip_weights = models.JSONField(default=dict, blank=True)
     desired_retention = models.FloatField(default=0.9)
     updated_at = models.DateTimeField(auto_now=True)

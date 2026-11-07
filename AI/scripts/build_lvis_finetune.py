@@ -24,6 +24,7 @@ The annotation files (LVIS 1.1 GB, COCO 450 MB) are streamed from their zips wit
 Writes into --out next to the Open Images part: images/{train,val}/coco_<id>.jpg, labels, and updates summary.json
 ("builder": 3, "lvis": {...}).
 """
+
 import argparse
 import hashlib
 import heapq
@@ -33,7 +34,7 @@ import random
 import sys
 import urllib.request
 import zipfile
-from collections import Counter, defaultdict
+from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
@@ -55,23 +56,86 @@ COCO_MEMBER = {"train": "annotations/instances_train2017.json", "val": "annotati
 # Left out on purpose: window / door / mango / tree / flower (no LVIS category of the same thing: "doorknob",
 # "flower_arrangement" are other objects), flowerpot (a pot, not a potted plant).
 LVIS_MAP = {
-    "helmet": ["helmet"], "pig": ["hog"], "duck": ["duck"], "rabbit": ["rabbit"], "tiger": ["tiger"], "lion": ["lion"],
-    "monkey": ["monkey"], "butterfly": ["butterfly"], "pen": ["pen"], "glasses": ["spectacles"], "hat": ["hat"],
-    "watch": ["watch"], "chopsticks": ["chopstick"], "strawberry": ["strawberry"], "watermelon": ["watermelon"],
-    "pineapple": ["pineapple"], "tomato": ["tomato"], "egg": ["egg"], "bread": ["bread"], "lamp": ["lamp"],
-    "pillow": ["pillow"], "mushroom": ["mushroom"], "pumpkin": ["pumpkin"], "grape": ["grape"], "lemon": ["lemon"],
-    "pear": ["pear"], "peach": ["peach"], "potato": ["potato"], "cucumber": ["cucumber"], "cookie": ["cookie"],
-    "hamburger": ["hamburger"], "salad": ["salad"], "shrimp": ["prawn"], "fish": ["fish"], "goat": ["goat"],
-    "deer": ["deer"], "owl": ["owl"], "penguin": ["penguin"], "panda": ["giant_panda"], "taxi": ["cab_(taxi)"],
-    "helicopter": ["helicopter"], "flag": ["flag"], "shirt": ["shirt"], "skirt": ["skirt"], "dress": ["dress"],
-    "coat": ["coat"], "jacket": ["jacket"], "scarf": ["scarf"], "belt": ["belt"], "desk": ["desk"],
-    "drawer": ["drawer"], "curtain": ["curtain"], "mirror": ["mirror"], "towel": ["towel"], "plate": ["plate"],
-    "kettle": ["kettle"], "candle": ["candle"], "fan": ["fan"], "box": ["box"], "balloon": ["balloon"],
-    "doll": ["doll"], "ladder": ["ladder"], "calculator": ["calculator"], "camera": ["camera"], "printer": ["printer"],
-    "guitar": ["guitar"], "piano": ["piano"], "violin": ["violin"], "pants": ["trousers"], "jeans": ["jean"],
-    "shoes": ["shoe"], "boots": ["boot"], "sandals": ["sandal_(type_of_shoe)", "flip-flop_(sandal)"],
-    "socks": ["sock"], "gloves": ["glove"], "bookshelf": ["bookcase"], "headphones": ["earphone"],
-    "chicken": ["chicken_(animal)"], "crab": ["crab_(animal)"], "drum": ["drum_(musical_instrument)"],
+    "helmet": ["helmet"],
+    "pig": ["hog"],
+    "duck": ["duck"],
+    "rabbit": ["rabbit"],
+    "tiger": ["tiger"],
+    "lion": ["lion"],
+    "monkey": ["monkey"],
+    "butterfly": ["butterfly"],
+    "pen": ["pen"],
+    "glasses": ["spectacles"],
+    "hat": ["hat"],
+    "watch": ["watch"],
+    "chopsticks": ["chopstick"],
+    "strawberry": ["strawberry"],
+    "watermelon": ["watermelon"],
+    "pineapple": ["pineapple"],
+    "tomato": ["tomato"],
+    "egg": ["egg"],
+    "bread": ["bread"],
+    "lamp": ["lamp"],
+    "pillow": ["pillow"],
+    "mushroom": ["mushroom"],
+    "pumpkin": ["pumpkin"],
+    "grape": ["grape"],
+    "lemon": ["lemon"],
+    "pear": ["pear"],
+    "peach": ["peach"],
+    "potato": ["potato"],
+    "cucumber": ["cucumber"],
+    "cookie": ["cookie"],
+    "hamburger": ["hamburger"],
+    "salad": ["salad"],
+    "shrimp": ["prawn"],
+    "fish": ["fish"],
+    "goat": ["goat"],
+    "deer": ["deer"],
+    "owl": ["owl"],
+    "penguin": ["penguin"],
+    "panda": ["giant_panda"],
+    "taxi": ["cab_(taxi)"],
+    "helicopter": ["helicopter"],
+    "flag": ["flag"],
+    "shirt": ["shirt"],
+    "skirt": ["skirt"],
+    "dress": ["dress"],
+    "coat": ["coat"],
+    "jacket": ["jacket"],
+    "scarf": ["scarf"],
+    "belt": ["belt"],
+    "desk": ["desk"],
+    "drawer": ["drawer"],
+    "curtain": ["curtain"],
+    "mirror": ["mirror"],
+    "towel": ["towel"],
+    "plate": ["plate"],
+    "kettle": ["kettle"],
+    "candle": ["candle"],
+    "fan": ["fan"],
+    "box": ["box"],
+    "balloon": ["balloon"],
+    "doll": ["doll"],
+    "ladder": ["ladder"],
+    "calculator": ["calculator"],
+    "camera": ["camera"],
+    "printer": ["printer"],
+    "guitar": ["guitar"],
+    "piano": ["piano"],
+    "violin": ["violin"],
+    "pants": ["trousers"],
+    "jeans": ["jean"],
+    "shoes": ["shoe"],
+    "boots": ["boot"],
+    "sandals": ["sandal_(type_of_shoe)", "flip-flop_(sandal)"],
+    "socks": ["sock"],
+    "gloves": ["glove"],
+    "bookshelf": ["bookcase"],
+    "headphones": ["earphone"],
+    "chicken": ["chicken_(animal)"],
+    "crab": ["crab_(animal)"],
+    "drum": ["drum_(musical_instrument)"],
 }
 
 
@@ -135,7 +199,9 @@ def main():
     cls_of = {lab: idx[0] for lab, idx in groups.items()}  # the label's first Open Images class, as served
     weak = weak_labels(args.threshold, groups)
     split = "val" if args.check else "train"
-    lvis_zip = _download(URLS["lvis_val" if args.check else "lvis"], work / ("lvis_v1_val.zip" if args.check else "lvis_v1_train.zip"))
+    lvis_zip = _download(
+        URLS["lvis_val" if args.check else "lvis"], work / ("lvis_v1_val.zip" if args.check else "lvis_v1_train.zip")
+    )
     coco_zip = _download(URLS["coco"], work / "annotations_trainval2017.zip")
 
     # test images never come in, whatever split the annotations say
@@ -148,11 +214,16 @@ def main():
     unknown = sorted(set(lvis_name_to_label) - set(lvis_names.values()))
     assert not unknown, f"LVIS_MAP có tên không có trong LVIS: {unknown}"
     lvis_cat = {i: lvis_name_to_label[n] for i, n in lvis_names.items() if n in lvis_name_to_label}
-    coco_cat = {c["id"]: c["name"] for c in _items(coco_zip, COCO_MEMBER[split], "categories.item") if c["name"] in cls_of}
+    coco_cat = {
+        c["id"]: c["name"] for c in _items(coco_zip, COCO_MEMBER[split], "categories.item") if c["name"] in cls_of
+    }
     lvis_labels, coco_labels = set(lvis_cat.values()) - set(coco_cat.values()), set(coco_cat.values())
     targets = [lab for lab in weak if lab in lvis_labels or lab in coco_labels]
-    print(f"   LVIS: {len(lvis_cat)} lớp → {len(lvis_labels)} nhãn; COCO: {len(coco_labels)} nhãn; "
-          f"nhãn yếu có ảnh mới: {', '.join(targets)}", flush=True)
+    print(
+        f"   LVIS: {len(lvis_cat)} lớp → {len(lvis_labels)} nhãn; COCO: {len(coco_labels)} nhãn; "
+        f"nhãn yếu có ảnh mới: {', '.join(targets)}",
+        flush=True,
+    )
 
     print("Lượt 2/4: ảnh LVIS...", flush=True)
     images = {}
@@ -191,8 +262,10 @@ def main():
 
     print(f"Lượt 4/4: tải và thu nhỏ {len(picked)} ảnh COCO...", flush=True)
     with ThreadPoolExecutor(args.workers) as pool:
-        futures = {i: pool.submit(_fetch, images[i][2], out / "images" / part_of[i] / f"coco_{i}.jpg", args.max_side)
-                   for i in picked}
+        futures = {
+            i: pool.submit(_fetch, images[i][2], out / "images" / part_of[i] / f"coco_{i}.jpg", args.max_side)
+            for i in picked
+        }
         ok = {}
         for k, (i, f) in enumerate(futures.items(), 1):
             ok[i] = f.result()
@@ -216,17 +289,30 @@ def main():
         kept += 1
 
     if not (out / "data.yaml").exists():  # this part alone (a local check)
-        (out / "data.yaml").write_text(yaml.safe_dump(
-            {"path": str(out.resolve()), "train": "images/train", "val": "images/val", "names": dict(names)},
-            allow_unicode=True, sort_keys=False), encoding="utf-8")
+        (out / "data.yaml").write_text(
+            yaml.safe_dump(
+                {"path": str(out.resolve()), "train": "images/train", "val": "images/val", "names": dict(names)},
+                allow_unicode=True,
+                sort_keys=False,
+            ),
+            encoding="utf-8",
+        )
     summary_file = out / "summary.json"
-    summary = json.loads(summary_file.read_text(encoding="utf-8")) if summary_file.exists() else \
-        {"base": args.base, "weak": weak, "replay": [lab for lab in groups if lab not in weak], "images": 0}
+    summary = (
+        json.loads(summary_file.read_text(encoding="utf-8"))
+        if summary_file.exists()
+        else {"base": args.base, "weak": weak, "replay": [lab for lab in groups if lab not in weak], "images": 0}
+    )
     summary["builder"] = 3
     summary["images_open_images"] = summary.get("images_open_images", summary["images"])
     summary["images"] = summary["images_open_images"] + kept
-    summary["lvis"] = {"split": split, "per_label_quota": args.per_label, "images": kept, "targets": targets,
-                       "per_label": {lab: per_label[lab] for lab in sorted(per_label, key=lambda l: -per_label[l]["images"])}}
+    summary["lvis"] = {
+        "split": split,
+        "per_label_quota": args.per_label,
+        "images": kept,
+        "targets": targets,
+        "per_label": {lab: per_label[lab] for lab in sorted(per_label, key=lambda l: -per_label[l]["images"])},
+    }
     summary_file.write_text(json.dumps(summary, indent=1, ensure_ascii=False), encoding="utf-8")
     weak_counts = ", ".join(f"{lab} {per_label[lab]['images']}" for lab in targets)
     print(f"→ {out}: +{kept} ảnh COCO/LVIS (ảnh mỗi nhãn yếu: {weak_counts}); tổng {summary['images']} ảnh")

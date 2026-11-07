@@ -269,7 +269,9 @@ class Outfit(models.Model):
     name = models.CharField(max_length=60)
     slot = models.CharField(max_length=10, choices=Slot.choices)
     image = models.CharField(max_length=200)
-    cost_gems = models.PositiveIntegerField(null=True, blank=True, help_text="Trống: không bán, chỉ mở khoá bằng huy hiệu")
+    cost_gems = models.PositiveIntegerField(
+        null=True, blank=True, help_text="Trống: không bán, chỉ mở khoá bằng huy hiệu"
+    )
     badge_code = models.SlugField(blank=True, help_text="Huy hiệu mở khoá món này")
     event = models.SlugField(blank=True, help_text="Dịp lễ duy nhất được bán (catalog.EVENTS)")
     order = models.PositiveSmallIntegerField(default=0)

@@ -1,4 +1,5 @@
 """Phone recogniser: wav2vec2 XLSR-53 espeak (ONNX INT8), loaded once per process (the Celery worker in production)."""
+
 import json
 import threading
 from dataclasses import dataclass
@@ -54,7 +55,7 @@ class Recogniser:
             while j + 1 < len(ids) and ids[j + 1] == ids[i]:
                 j += 1
             if int(ids[i]) not in self.ignore:
-                out.append(Heard(self.vocab[int(ids[i])], i, j, float(post[i:j + 1, ids[i]].mean())))
+                out.append(Heard(self.vocab[int(ids[i])], i, j, float(post[i : j + 1, ids[i]].mean())))
             i = j + 1
         return out
 
@@ -72,5 +73,7 @@ def get() -> Recogniser:
 
 
 def available() -> bool:
-    return Path(getattr(settings, "SPEECH_MODEL_PATH", "")).exists() and \
-        Path(getattr(settings, "SPEECH_VOCAB_PATH", "")).exists()
+    return (
+        Path(getattr(settings, "SPEECH_MODEL_PATH", "")).exists()
+        and Path(getattr(settings, "SPEECH_VOCAB_PATH", "")).exists()
+    )

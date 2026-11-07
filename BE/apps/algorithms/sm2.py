@@ -8,6 +8,7 @@
 SM-2 has no forgetting curve; for log-loss comparisons the recall probability is taken as R(t) = 0.9^(t / I)
 (the item is scheduled when R reaches 90 %), the usual convention in spaced-repetition benchmarks.
 """
+
 from datetime import datetime, timedelta
 
 from apps.learning.scheduling import CardState, Scheduler

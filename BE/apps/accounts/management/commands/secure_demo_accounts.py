@@ -9,8 +9,10 @@ from .seed_demo_users import DEMO_PASSWORD
 
 
 class Command(BaseCommand):
-    help = ("Đổi mật khẩu ngẫu nhiên cho mọi tài khoản demo (@lingoprism.local) còn dùng mật khẩu chung công khai "
-            "trong repo, và thu hồi mọi phiên đăng nhập của chúng. Chạy ở mỗi lần deploy production.")
+    help = (
+        "Đổi mật khẩu ngẫu nhiên cho mọi tài khoản demo (@lingoprism.local) còn dùng mật khẩu chung công khai "
+        "trong repo, và thu hồi mọi phiên đăng nhập của chúng. Chạy ở mỗi lần deploy production."
+    )
 
     def handle(self, *args, **opts):
         for user in User.objects.filter(email__endswith="@lingoprism.local").order_by("id"):

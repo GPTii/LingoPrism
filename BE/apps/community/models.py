@@ -94,7 +94,9 @@ class PostReport(TimeStampedModel):
     reason = models.CharField(max_length=14, choices=Reason.choices)
     details = models.CharField(max_length=500, blank=True)
     status = models.CharField(max_length=9, choices=Status.choices, default=Status.PENDING, db_index=True)
-    handled_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
+    handled_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
 
     class Meta:
         unique_together = [("post", "reporter")]
@@ -118,8 +120,12 @@ class FriendRequest(models.Model):
         PENDING = "pending", "Chờ trả lời"
         ACCEPTED = "accepted", "Đã là bạn bè"
 
-    from_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="friend_requests_sent")
-    to_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="friend_requests_received")
+    from_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="friend_requests_sent"
+    )
+    to_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="friend_requests_received"
+    )
     message = models.CharField(max_length=200, blank=True)
     status = models.CharField(max_length=8, choices=Status.choices, default=Status.PENDING, db_index=True)
     created_at = models.DateTimeField(default=timezone.now)
@@ -133,7 +139,8 @@ class FriendRequest(models.Model):
 def friendship(a_id: int, b_id: int):
     """The request linking two people, whichever of them sent it (or None)."""
     return FriendRequest.objects.filter(
-        models.Q(from_user_id=a_id, to_user_id=b_id) | models.Q(from_user_id=b_id, to_user_id=a_id)).first()
+        models.Q(from_user_id=a_id, to_user_id=b_id) | models.Q(from_user_id=b_id, to_user_id=a_id)
+    ).first()
 
 
 def are_friends(a_id: int, b_id: int) -> bool:
@@ -142,8 +149,9 @@ def are_friends(a_id: int, b_id: int) -> bool:
 
 
 def friend_ids(user_id: int) -> set[int]:
-    rows = FriendRequest.objects.filter(models.Q(from_user_id=user_id) | models.Q(to_user_id=user_id),
-                                        status=FriendRequest.Status.ACCEPTED).values_list("from_user_id", "to_user_id")
+    rows = FriendRequest.objects.filter(
+        models.Q(from_user_id=user_id) | models.Q(to_user_id=user_id), status=FriendRequest.Status.ACCEPTED
+    ).values_list("from_user_id", "to_user_id")
     return {b if a == user_id else a for a, b in rows}
 
 
@@ -183,19 +191,25 @@ class UserReport(TimeStampedModel):
     thread = models.ForeignKey("chat.DirectThread", null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
     evidence = models.JSONField(default=list, blank=True)  # [{sender, content, created_at}] at report time
     status = models.CharField(max_length=9, choices=Status.choices, default=Status.PENDING, db_index=True)
-    handled_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
+    handled_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
 
     class Meta:
         ordering = ["-created_at"]
 
 
 def blocked_between(a_id: int, b_id: int) -> bool:
-    return UserBlock.objects.filter(models.Q(blocker_id=a_id, blocked_id=b_id) | models.Q(blocker_id=b_id, blocked_id=a_id)).exists()
+    return UserBlock.objects.filter(
+        models.Q(blocker_id=a_id, blocked_id=b_id) | models.Q(blocker_id=b_id, blocked_id=a_id)
+    ).exists()
 
 
 def hidden_user_ids(user_id: int) -> set[int]:
     """People whose content `user_id` must not see: the ones they blocked and the ones who blocked them."""
-    rows = UserBlock.objects.filter(models.Q(blocker_id=user_id) | models.Q(blocked_id=user_id)).values_list("blocker_id", "blocked_id")
+    rows = UserBlock.objects.filter(models.Q(blocker_id=user_id) | models.Q(blocked_id=user_id)).values_list(
+        "blocker_id", "blocked_id"
+    )
     return {b if a == user_id else a for a, b in rows}
 
 
@@ -208,8 +222,10 @@ class Group(TimeStampedModel):
     description = models.CharField(max_length=300, blank=True)
     icon = models.CharField(max_length=200, blank=True)
     require_approval = models.BooleanField(default=False)
-    is_private = models.BooleanField(default=False, help_text="Nhóm riêng (lớp học): không hiện trong danh sách, "
-                                                              "chỉ vào được khi trưởng nhóm thêm / mời")
+    is_private = models.BooleanField(
+        default=False,
+        help_text="Nhóm riêng (lớp học): không hiện trong danh sách, chỉ vào được khi trưởng nhóm thêm / mời",
+    )
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="created_groups")
     status = models.CharField(max_length=6, choices=Status.choices, default=Status.ACTIVE)
 

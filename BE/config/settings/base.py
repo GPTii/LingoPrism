@@ -1,4 +1,5 @@
 """Base settings shared by every environment."""
+
 from datetime import timedelta
 from pathlib import Path
 
@@ -96,14 +97,20 @@ DATABASES = {
 # A query running away is killed instead of holding the DB.
 DATABASES["default"]["CONN_MAX_AGE"] = env.int("DB_CONN_MAX_AGE", default=0)
 DATABASES["default"]["CONN_HEALTH_CHECKS"] = True
-DATABASES["default"].setdefault("OPTIONS", {})["options"] = f"-c statement_timeout={env.int('DB_STATEMENT_TIMEOUT_MS', default=15000)}"
+DATABASES["default"].setdefault("OPTIONS", {})["options"] = (
+    f"-c statement_timeout={env.int('DB_STATEMENT_TIMEOUT_MS', default=15000)}"
+)
 DATABASES["default"]["OPTIONS"]["connect_timeout"] = 5  # a database that is down answers fast, not after minutes
 # ...but a crowd (200 learners opening the app together) still needs one connection per request in flight, past
 # max_connections (100). One pool per process: at most DB_POOL_MAX connections, a request beyond that waits for a
 # free one (up to 10 s: longer only holds threads while the database is down) instead of failing.
 # Requires CONN_MAX_AGE = 0. DB_POOL_MAX=0 turns it off.
 if env.int("DB_POOL_MAX", default=40):
-    DATABASES["default"]["OPTIONS"]["pool"] = {"min_size": 2, "max_size": env.int("DB_POOL_MAX", default=40), "timeout": 10}
+    DATABASES["default"]["OPTIONS"]["pool"] = {
+        "min_size": 2,
+        "max_size": env.int("DB_POOL_MAX", default=40),
+        "timeout": 10,
+    }
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 AUTH_USER_MODEL = "accounts.User"

@@ -47,7 +47,10 @@ def test_post_like_comment_report(users):
     feed = cb.get("/api/v1/posts/").data["results"]
     assert feed[0]["like_count"] == 1 and feed[0]["comment_count"] == 1 and feed[0]["liked"] is True
     assert a.notifications.filter(kind__in=["like", "comment"]).count() == 2
-    assert cb.post(f"/api/v1/posts/{pid}/report/", {"reason": "other", "details": "ngắn"}, format="json").status_code == 400
+    assert (
+        cb.post(f"/api/v1/posts/{pid}/report/", {"reason": "other", "details": "ngắn"}, format="json").status_code
+        == 400
+    )
     assert cb.post(f"/api/v1/posts/{pid}/report/", {"reason": "spam"}, format="json").status_code == 201
     assert cb.delete(f"/api/v1/posts/{pid}/").status_code == 403
 
@@ -91,7 +94,11 @@ def test_group_chat_websocket(users):
         assert (await ca.connect())[0] and (await cb.connect())[0]
         await ca.send_json_to({"action": "send", "content": "xin chào", "client_id": "m1"})
         got = await cb.receive_json_from(timeout=3)
-        assert got["event"] == "message" and got["payload"]["content"] == "xin chào" and got["payload"]["client_id"] == "m1"
+        assert (
+            got["event"] == "message"
+            and got["payload"]["content"] == "xin chào"
+            and got["payload"]["client_id"] == "m1"
+        )
         await ca.disconnect()
         await cb.disconnect()
         outsider = await database_sync_to_async(User.objects.create_user)("x@example.com", "Strong!Pass123")
@@ -136,7 +143,9 @@ def test_follow_suggestions(users):
     a.active_language = "zh"
     a.save()
     fan = User.objects.create_user("fan@example.com", "Strong!Pass123", display_name="Fan", active_language="en")
-    same = User.objects.create_user("same@example.com", "Strong!Pass123", display_name="Cùng tiếng Trung", active_language="zh")
+    same = User.objects.create_user(
+        "same@example.com", "Strong!Pass123", display_name="Cùng tiếng Trung", active_language="zh"
+    )
     blocked = User.objects.create_user("x@example.com", "Strong!Pass123", active_language="zh")
     staff = User.objects.create_user("t@example.com", "Strong!Pass123", role="staff", active_language="zh")
     UserFollow.objects.create(follower=a, following=b)  # already followed
@@ -151,6 +160,7 @@ def test_follow_suggestions(users):
 
 
 # ---- user IDs, friends, saved posts, answering requests from notifications
+
 
 def test_every_user_has_a_distinct_8_digit_id(users):
     a, b, kid = users
@@ -174,7 +184,9 @@ def test_find_by_id_or_name_never_finds_children(users):
 def test_friend_request_notify_accept_then_message(users):
     a, b, kid = users
     ca, cb = client_for(a), client_for(b)
-    res = ca.post(f"/api/v1/community/users/{b.id}/friend/", {"message": "Chào bạn, mình cũng học tiếng Trung"}, format="json")
+    res = ca.post(
+        f"/api/v1/community/users/{b.id}/friend/", {"message": "Chào bạn, mình cũng học tiếng Trung"}, format="json"
+    )
     assert res.data["friend_status"] == "outgoing"
     rid = res.data["friend_request_id"]
     # b is told, with the hello, and can answer from the notification
@@ -235,7 +247,10 @@ def test_group_request_with_intro_answered_from_notification(users):
     a, b, kid = users
     ca, cb = client_for(a), client_for(b)
     gid = ca.post("/api/v1/groups/", {"name": "HSK 3", "require_approval": True}, format="json").data["id"]
-    assert cb.post(f"/api/v1/groups/{gid}/join/", {"message": "Mình học HSK 2 rồi"}, format="json").data["status"] == "pending"
+    assert (
+        cb.post(f"/api/v1/groups/{gid}/join/", {"message": "Mình học HSK 2 rồi"}, format="json").data["status"]
+        == "pending"
+    )
     n = ca.get("/api/v1/notifications/").data["results"][0]
     assert n["kind"] == "group_request" and n["body"] == "Mình học HSK 2 rồi" and n["action_state"] == "pending"
     mid = n["data"]["member_id"]

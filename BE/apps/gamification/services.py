@@ -1,5 +1,6 @@
 """Gamification rules (ported from SnapLingua): XP with boosts and a daily cap, streaks with
 streak-freeze, daily / monthly quests, weekly leagues, shop and badges."""
+
 from datetime import date, datetime, time, timedelta
 
 from django.db import transaction
@@ -12,8 +13,19 @@ from apps.notifications.services import notify, push_event
 
 from . import catalog, mascot
 from .models import (
-    ActiveBoost, Badge, DailyProgress, DailyQuest, Item, LeagueCycle, LeagueMember, LeagueTier, MonthlyQuest,
-    UserBadge, UserInventory, UserStats, XpTransaction,
+    ActiveBoost,
+    Badge,
+    DailyProgress,
+    DailyQuest,
+    Item,
+    LeagueCycle,
+    LeagueMember,
+    LeagueTier,
+    MonthlyQuest,
+    UserBadge,
+    UserInventory,
+    UserStats,
+    XpTransaction,
 )
 
 DAILY_XP_CAP = 500
@@ -34,7 +46,8 @@ def progress_for(user, day: date | None = None) -> DailyProgress:
     day = day or today()
     goal = getattr(user, "goal", None)
     return DailyProgress.objects.get_or_create(
-        user=user, date=day,
+        user=user,
+        date=day,
         defaults={
             "new_target": goal.daily_new_target if goal else 10,
             "review_target": goal.daily_review_target if goal else 20,
@@ -43,6 +56,7 @@ def progress_for(user, day: date | None = None) -> DailyProgress:
 
 
 # ------------------------------------------------------------------ streak
+
 
 @transaction.atomic
 def mark_activity(user, day: date | None = None) -> UserStats:
@@ -64,8 +78,13 @@ def mark_activity(user, day: date | None = None) -> UserStats:
         missed.save(update_fields=["freeze_used"])
         stats.freezes_used += 1
         stats.current_streak += 2
-        notify(user, Notification.Kind.SYSTEM, "Đá băng đã giữ chuỗi streak của bạn! 🧊",
-               f"Chuỗi hiện tại: {stats.current_streak} ngày.", image=brand.STREAK_FREEZE)
+        notify(
+            user,
+            Notification.Kind.SYSTEM,
+            "Đá băng đã giữ chuỗi streak của bạn! 🧊",
+            f"Chuỗi hiện tại: {stats.current_streak} ngày.",
+            image=brand.STREAK_FREEZE,
+        )
     else:
         if last is not None and stats.current_streak > 1:  # kept for a few days: "Hồi chuỗi" can join it back
             stats.lost_streak, stats.lost_streak_on = stats.current_streak, day
@@ -125,6 +144,7 @@ def current_streak(user) -> int:
 
 # ------------------------------------------------------------------ XP
 
+
 def active_multiplier(user) -> float:
     boosts = ActiveBoost.objects.filter(user=user, expires_at__gt=timezone.now()).values_list("multiplier", flat=True)
     return max(boosts, default=1.0)
@@ -137,8 +157,15 @@ def award_xp(user, source: str, base: int, source_id: str = "", note: str = "") 
     multiplier = active_multiplier(user)
     progress = DailyProgress.objects.select_for_update().get(pk=progress_for(user).pk)
     amount = min(round(base * multiplier), max(DAILY_XP_CAP - progress.xp, 0))
-    XpTransaction.objects.create(user=user, source=source, source_id=str(source_id), base_amount=base,
-                                 multiplier=multiplier, amount=amount, note=note)
+    XpTransaction.objects.create(
+        user=user,
+        source=source,
+        source_id=str(source_id),
+        base_amount=base,
+        multiplier=multiplier,
+        amount=amount,
+        note=note,
+    )
     if amount <= 0:
         return 0
     progress.xp += amount
@@ -151,15 +178,21 @@ def award_xp(user, source: str, base: int, source_id: str = "", note: str = "") 
     LeagueMember.objects.filter(pk=member.pk).update(weekly_xp=F("weekly_xp") + amount)
     for m in XP_MILESTONES:
         if before < m <= stats.lifetime_xp:
-            notify(user, Notification.Kind.XP_MILESTONE, f"Bạn đã đạt {m} XP!",
-                   f"Tổng kinh nghiệm hiện tại: {stats.lifetime_xp} XP.", image=brand.XP,
-                   data={"route": "/profile"})
+            notify(
+                user,
+                Notification.Kind.XP_MILESTONE,
+                f"Bạn đã đạt {m} XP!",
+                f"Tổng kinh nghiệm hiện tại: {stats.lifetime_xp} XP.",
+                image=brand.XP,
+                data={"route": "/profile"},
+            )
     check_badges(user, stats)
     push_event(user.id, "xp", {"amount": amount, "lifetime_xp": stats.lifetime_xp, "today_xp": progress.xp})
     return amount
 
 
 # ------------------------------------------------------------------ badges
+
 
 def badge_values(stats: UserStats) -> dict:
     return {
@@ -201,10 +234,17 @@ def check_badges(user, stats: UserStats | None = None):
         outfits = mascot.grant_for_badge(user, badge.code)
         if outfits:
             gems += f" Mở khoá cho Prismo: {', '.join(outfits)}."
-        notify(user, Notification.Kind.ACHIEVEMENT, f"Huy hiệu mới: {badge.name}",
-               f"{badge.description}.{gems}", image=badge.icon,
-               data={"route": "/achievements", "badge": badge.code, "gems": badge.reward_gems})
-        push_event(user.id, "badge", {"code": badge.code, "name": badge.name, "gems": badge.reward_gems, "icon": badge.icon})
+        notify(
+            user,
+            Notification.Kind.ACHIEVEMENT,
+            f"Huy hiệu mới: {badge.name}",
+            f"{badge.description}.{gems}",
+            image=badge.icon,
+            data={"route": "/achievements", "badge": badge.code, "gems": badge.reward_gems},
+        )
+        push_event(
+            user.id, "badge", {"code": badge.code, "name": badge.name, "gems": badge.reward_gems, "icon": badge.icon}
+        )
 
 
 def bump_stat(user, field: str, by: int = 1, **more: int):
@@ -215,6 +255,7 @@ def bump_stat(user, field: str, by: int = 1, **more: int):
 
 
 # ------------------------------------------------------------------ quests
+
 
 def ensure_quests(user, day: date | None = None) -> list[DailyQuest]:
     day = day or today()
@@ -268,8 +309,9 @@ def claim_quest(user, quest: DailyQuest) -> tuple[int, int]:
     gems = 0
     if not DailyQuest.objects.filter(user=user, date=quest.date, reward_claimed=False).exists():
         gems = DailyQuest.ALL_DONE_GEMS
-    type(user).objects.filter(pk=user.pk).update(scales_balance=F("scales_balance") + DailyQuest.REWARD_SCALES,
-                                                 gems_balance=F("gems_balance") + gems)
+    type(user).objects.filter(pk=user.pk).update(
+        scales_balance=F("scales_balance") + DailyQuest.REWARD_SCALES, gems_balance=F("gems_balance") + gems
+    )
     return DailyQuest.REWARD_SCALES, gems
 
 
@@ -287,6 +329,7 @@ def claim_monthly(user) -> int:
 
 # ------------------------------------------------------------------ leagues
 
+
 def week_bounds(now: datetime | None = None) -> tuple[datetime, datetime]:
     now = timezone.localtime(now or timezone.now())
     monday = (now - timedelta(days=now.weekday())).date()
@@ -295,7 +338,12 @@ def week_bounds(now: datetime | None = None) -> tuple[datetime, datetime]:
 
 
 def _user_tier(user) -> LeagueTier:
-    last = LeagueMember.objects.filter(user=user, cycle__status=LeagueCycle.Status.CLOSED).select_related("cycle__tier").order_by("-cycle__start_at").first()
+    last = (
+        LeagueMember.objects.filter(user=user, cycle__status=LeagueCycle.Status.CLOSED)
+        .select_related("cycle__tier")
+        .order_by("-cycle__start_at")
+        .first()
+    )
     tiers = list(LeagueTier.objects.order_by("order"))
     if not tiers:
         tiers = [LeagueTier.objects.create(code=brand.TIERS[0][0], name=brand.TIERS[0][1], order=0, icon=brand.rank(1))]
@@ -316,7 +364,9 @@ def join_current_league(user) -> LeagueMember:
         return existing
     tier = _user_tier(user)
     cycle = None
-    for c in LeagueCycle.objects.filter(tier=tier, start_at=start, status=LeagueCycle.Status.ACTIVE).order_by("group_index"):
+    for c in LeagueCycle.objects.filter(tier=tier, start_at=start, status=LeagueCycle.Status.ACTIVE).order_by(
+        "group_index"
+    ):
         if c.members.count() < LEAGUE_GROUP_SIZE:
             cycle = c
             break
@@ -338,7 +388,11 @@ def close_cycle(cycle: LeagueCycle):
         m.rank = rank
         if rank <= cycle.tier.promote_top and m.weekly_xp > 0 and not is_top:
             m.result = "promoted"
-        elif rank > n - cycle.tier.demote_bottom and n > cycle.tier.promote_top + cycle.tier.demote_bottom and not is_bottom:
+        elif (
+            rank > n - cycle.tier.demote_bottom
+            and n > cycle.tier.promote_top + cycle.tier.demote_bottom
+            and not is_bottom
+        ):
             m.result = "demoted"
         else:
             m.result = "stayed"
@@ -355,14 +409,19 @@ def close_cycle(cycle: LeagueCycle):
                 stats.best_league = next_place
                 stats.save(update_fields=["best_league"])
                 check_badges(m.user, stats)
-            notify(m.user, Notification.Kind.LEAGUE, "Bạn vừa thăng hạng mới!",
-                   f"Hạng {rank} tuần qua tại {cycle.tier.name}. Thưởng {gems} ngọc!",
-                   data={"route": "/community/leaderboard"})
+            notify(
+                m.user,
+                Notification.Kind.LEAGUE,
+                "Bạn vừa thăng hạng mới!",
+                f"Hạng {rank} tuần qua tại {cycle.tier.name}. Thưởng {gems} ngọc!",
+                data={"route": "/community/leaderboard"},
+            )
     cycle.status = LeagueCycle.Status.CLOSED
     cycle.save(update_fields=["status"])
 
 
 # ------------------------------------------------------------------ shop
+
 
 class ShopError(Exception):
     pass
@@ -431,13 +490,18 @@ def use_item(user, item: Item) -> ActiveBoost:
         raise ShopError("Bạn không có vật phẩm này")
     multiplier, duration = BOOSTS[item.effect]
     now = timezone.now()
-    return ActiveBoost.objects.create(user=user, item=item, multiplier=multiplier, started_at=now, expires_at=now + duration)
+    return ActiveBoost.objects.create(
+        user=user, item=item, multiplier=multiplier, started_at=now, expires_at=now + duration
+    )
 
 
 def owned_stickers(user) -> list[str]:
     """Sticker codes the user can send: every sticker of the packs they own (and the single stickers sold before)."""
-    owned = set(UserInventory.objects.filter(user=user, item__effect=Item.Effect.STICKER, quantity__gt=0)
-                .values_list("item__code", flat=True))
+    owned = set(
+        UserInventory.objects.filter(user=user, item__effect=Item.Effect.STICKER, quantity__gt=0).values_list(
+            "item__code", flat=True
+        )
+    )
     codes = [code for p in catalog.STICKER_PACKS if p["code"] in owned for code, _ in p["stickers"]]
     return codes + [c for c in catalog.LEGACY_STICKERS if c in owned and c not in codes]
 

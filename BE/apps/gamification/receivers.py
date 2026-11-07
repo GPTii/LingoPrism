@@ -21,8 +21,13 @@ def on_session_finished(sender, session, **kwargs):
     progress.save(update_fields=["new_learned", "reviews_done"])
     if session.completed_count:
         services.mark_activity(user)
-    services.award_xp(user, session.kind if session.kind in XpTransaction.Source.values else "learn",
-                      session.xp_earned, source_id=str(session.id), note=f"Phiên {session.get_kind_display().lower()}")
+    services.award_xp(
+        user,
+        session.kind if session.kind in XpTransaction.Source.values else "learn",
+        session.xp_earned,
+        source_id=str(session.id),
+        note=f"Phiên {session.get_kind_display().lower()}",
+    )
     services.progress_quest(user, DailyQuest.Kind.REACH_LEARN_GOAL, absolute=progress.new_learned)
     services.progress_quest(user, DailyQuest.Kind.REACH_REVIEW_GOAL, absolute=progress.reviews_done)
     # first-try correct answers earn scales (SnapLingua: +1 Vảy per word)

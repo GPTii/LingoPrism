@@ -5,6 +5,7 @@ Everything is read from the Django models, so the document always matches the co
     cd BE && .venv/Scripts/python ../docs/database/build_db_docs.py   # README.md + erd/*.mmd
     C:/lpvenv/Scripts/python docs/database/render_erd.py              # erd/*.mmd -> erd/*.png (needs playwright)
 """
+
 import os
 import sys
 from collections import defaultdict
@@ -50,14 +51,38 @@ CORE = {
 
 # the core ERD in two readable halves (20 tables in one detailed diagram is ~3.5 times wider than high)
 CORE_PARTS = {
-    "a": ("Từ vựng – học tập – kiểm tra",
-          ["vocab_language", "vocab_topic", "vocab_word", "vocab_topicword", "vocab_wordtranslation",
-           "vocab_examplesentence", "learning_personalword", "learning_studysession", "learning_reviewlog",
-           "quizzes_question", "quizzes_exam", "quizzes_submission"], ["accounts_user"]),
-    "b": ("Người dùng – nhận diện ảnh – gamification",
-          ["accounts_user", "detection_modelversion", "detection_photo", "detection_detection",
-           "detection_detectionitem", "gamification_xptransaction", "gamification_badge", "gamification_userbadge"],
-          ["vocab_word"]),
+    "a": (
+        "Từ vựng – học tập – kiểm tra",
+        [
+            "vocab_language",
+            "vocab_topic",
+            "vocab_word",
+            "vocab_topicword",
+            "vocab_wordtranslation",
+            "vocab_examplesentence",
+            "learning_personalword",
+            "learning_studysession",
+            "learning_reviewlog",
+            "quizzes_question",
+            "quizzes_exam",
+            "quizzes_submission",
+        ],
+        ["accounts_user"],
+    ),
+    "b": (
+        "Người dùng – nhận diện ảnh – gamification",
+        [
+            "accounts_user",
+            "detection_modelversion",
+            "detection_photo",
+            "detection_detection",
+            "detection_detectionitem",
+            "gamification_xptransaction",
+            "gamification_badge",
+            "gamification_userbadge",
+        ],
+        ["vocab_word"],
+    ),
 }
 assert sorted(t for _, ts, _ in CORE_PARTS.values() for t in ts) == sorted(CORE)
 
@@ -81,7 +106,7 @@ TABLE_VI = {
     "accounts_user": "Tài khoản: học viên, giáo viên (staff), quản trị; ngôn ngữ đang học, hồ sơ, số dư vảy / ngọc.",
     "vocab_language": "Danh mục ngôn ngữ: vi, en, zh-Hans (giản thể – đại lục), zh-Hant (phồn thể – Đài Loan).",
     "vocab_topic": "Chủ đề từ vựng (động vật, đồ ăn…). Chủ đề hệ thống hoặc do học viên tự tạo.",
-    "vocab_word": "Khái niệm từ vựng độc lập ngôn ngữ (VD \"cat\"), gắn với nhãn lớp YOLO để nhận diện ảnh.",
+    "vocab_word": 'Khái niệm từ vựng độc lập ngôn ngữ (VD "cat"), gắn với nhãn lớp YOLO để nhận diện ảnh.',
     "vocab_topicword": "Bảng nối nhiều – nhiều giữa chủ đề và từ.",
     "vocab_wordtranslation": "Cách viết của một từ trong một ngôn ngữ: phiên âm, pinyin/zhuyin, trạng thái kiểm duyệt.",
     "vocab_examplesentence": "Câu ví dụ có nguồn (Tatoeba / thủ công), đã tách từ để làm bài sắp xếp câu.",
@@ -156,87 +181,232 @@ TABLE_VI = {
 }
 
 GENERIC = {
-    "id": "Khóa chính", "created_at": "Thời điểm tạo", "updated_at": "Thời điểm cập nhật",
-    "user_id": "Người dùng", "word_id": "Từ vựng", "topic_id": "Chủ đề", "order": "Thứ tự hiển thị",
-    "language_id": "Ngôn ngữ", "language": "Mã ngôn ngữ đang học (vi, en, zh)", "status": "Trạng thái",
-    "created_by_id": "Người tạo", "audience": "Đối tượng (tất cả / trẻ em / người lớn)",
+    "id": "Khóa chính",
+    "created_at": "Thời điểm tạo",
+    "updated_at": "Thời điểm cập nhật",
+    "user_id": "Người dùng",
+    "word_id": "Từ vựng",
+    "topic_id": "Chủ đề",
+    "order": "Thứ tự hiển thị",
+    "language_id": "Ngôn ngữ",
+    "language": "Mã ngôn ngữ đang học (vi, en, zh)",
+    "status": "Trạng thái",
+    "created_by_id": "Người tạo",
+    "audience": "Đối tượng (tất cả / trẻ em / người lớn)",
 }
 COL_VI = {
     "accounts_user": {
-        "password": "Mật khẩu đã băm (PBKDF2)", "last_login": "Lần đăng nhập cuối", "is_superuser": "Có mọi quyền",
-        "email": "Email đăng nhập", "display_name": "Tên hiển thị", "avatar": "Ảnh đại diện tải lên",
-        "avatar_preset": "Ảnh đại diện có sẵn trong app", "bio": "Giới thiệu ngắn", "role": "Vai trò",
-        "learner_type": "Loại học viên (trẻ em / người lớn)", "learning_languages": "Các ngôn ngữ đang học, VD [\"en\", \"zh\"]",
-        "active_language": "Ngôn ngữ đang học hiện tại", "zh_script": "Chữ Hán đang học: giản thể / phồn thể",
-        "show_zhuyin": "Hiện chú âm (zhuyin)", "birth_date": "Ngày sinh", "gender": "Giới tính",
-        "purpose": "Mục đích học", "daily_minutes": "Số phút học mỗi ngày", "onboarding_completed": "Đã qua màn hình làm quen",
-        "timezone": "Múi giờ", "scales_balance": "Số dư vảy (tiền trong app)", "gems_balance": "Số dư ngọc",
-        "is_staff": "Được vào trang Django Admin", "is_active": "Tài khoản còn hoạt động",
+        "password": "Mật khẩu đã băm (PBKDF2)",
+        "last_login": "Lần đăng nhập cuối",
+        "is_superuser": "Có mọi quyền",
+        "email": "Email đăng nhập",
+        "display_name": "Tên hiển thị",
+        "avatar": "Ảnh đại diện tải lên",
+        "avatar_preset": "Ảnh đại diện có sẵn trong app",
+        "bio": "Giới thiệu ngắn",
+        "role": "Vai trò",
+        "learner_type": "Loại học viên (trẻ em / người lớn)",
+        "learning_languages": 'Các ngôn ngữ đang học, VD ["en", "zh"]',
+        "active_language": "Ngôn ngữ đang học hiện tại",
+        "zh_script": "Chữ Hán đang học: giản thể / phồn thể",
+        "show_zhuyin": "Hiện chú âm (zhuyin)",
+        "birth_date": "Ngày sinh",
+        "gender": "Giới tính",
+        "purpose": "Mục đích học",
+        "daily_minutes": "Số phút học mỗi ngày",
+        "onboarding_completed": "Đã qua màn hình làm quen",
+        "timezone": "Múi giờ",
+        "scales_balance": "Số dư vảy (tiền trong app)",
+        "gems_balance": "Số dư ngọc",
+        "is_staff": "Được vào trang Django Admin",
+        "is_active": "Tài khoản còn hoạt động",
     },
-    "vocab_language": {"code": "Mã ngôn ngữ (BCP 47), khóa chính", "name": "Tên tiếng Việt", "native_name": "Tên bản ngữ",
-                       "tts_locale": "Giọng đọc (vi-VN, en-US, zh-CN, zh-TW)"},
-    "vocab_topic": {"slug": "Mã định danh", "name_vi": "Tên tiếng Việt", "name_en": "Tên tiếng Anh",
-                    "name_zh_hans": "Tên giản thể", "name_zh_hant": "Tên phồn thể", "icon": "Biểu tượng (emoji)",
-                    "image": "Ảnh bìa", "owner_id": "Người tạo; trống = chủ đề hệ thống", "visibility": "Phạm vi hiển thị"},
-    "vocab_word": {"slug": "Mã định danh khái niệm", "image": "Ảnh minh họa tải lên", "image_url": "Ảnh minh họa (URL)",
-                   "image_credit": "Tác giả · giấy phép ảnh", "image_source": "Trang gốc của ảnh (Wikimedia Commons)",
-                   "levels": "Cấp độ 1–4 theo từng ngôn ngữ, VD {\"en\": 1, \"zh\": 2}", "emoji": "Emoji minh họa cho trẻ em",
-                   "yolo_label": "Nhãn lớp YOLO tương ứng (nối kết quả nhận diện với từ)", "part_of_speech": "Từ loại",
-                   "difficulty": "Độ khó 1–5"},
+    "vocab_language": {
+        "code": "Mã ngôn ngữ (BCP 47), khóa chính",
+        "name": "Tên tiếng Việt",
+        "native_name": "Tên bản ngữ",
+        "tts_locale": "Giọng đọc (vi-VN, en-US, zh-CN, zh-TW)",
+    },
+    "vocab_topic": {
+        "slug": "Mã định danh",
+        "name_vi": "Tên tiếng Việt",
+        "name_en": "Tên tiếng Anh",
+        "name_zh_hans": "Tên giản thể",
+        "name_zh_hant": "Tên phồn thể",
+        "icon": "Biểu tượng (emoji)",
+        "image": "Ảnh bìa",
+        "owner_id": "Người tạo; trống = chủ đề hệ thống",
+        "visibility": "Phạm vi hiển thị",
+    },
+    "vocab_word": {
+        "slug": "Mã định danh khái niệm",
+        "image": "Ảnh minh họa tải lên",
+        "image_url": "Ảnh minh họa (URL)",
+        "image_credit": "Tác giả · giấy phép ảnh",
+        "image_source": "Trang gốc của ảnh (Wikimedia Commons)",
+        "levels": 'Cấp độ 1–4 theo từng ngôn ngữ, VD {"en": 1, "zh": 2}',
+        "emoji": "Emoji minh họa cho trẻ em",
+        "yolo_label": "Nhãn lớp YOLO tương ứng (nối kết quả nhận diện với từ)",
+        "part_of_speech": "Từ loại",
+        "difficulty": "Độ khó 1–5",
+    },
     "vocab_topicword": {},
     "vocab_wordtranslation": {
-        "text": "Từ viết trong ngôn ngữ đó", "ipa": "Phiên âm IPA (tiếng Anh – giọng Mỹ)", "pinyin": "Pinyin có dấu thanh",
-        "pinyin_numbered": "Pinyin đánh số thanh, VD ma3", "zhuyin": "Chú âm phù hiệu", "measure_word": "Lượng từ (隻 / 只)",
-        "accepted_variants": "Các dạng viết khác được chấp nhận khi chấm", "regional_difference": "Giản / phồn khác từ theo vùng (土豆 / 馬鈴薯)",
-        "meaning_vi": "Nghĩa tiếng Việt", "meaning_en": "Nghĩa tiếng Anh", "level": "Cấp HSK / TOCFL / CEFR",
-        "audio": "File phát âm", "sources": "Dữ liệu đối chiếu từ các nguồn (CC-CEDICT, MOE…)",
-        "issues": "Lỗi do bộ kiểm tra tự động phát hiện", "verified_method": "Cách duyệt: tự động / thủ công",
-        "verified_at": "Thời điểm duyệt", "verified_by_id": "Người duyệt"},
+        "text": "Từ viết trong ngôn ngữ đó",
+        "ipa": "Phiên âm IPA (tiếng Anh – giọng Mỹ)",
+        "pinyin": "Pinyin có dấu thanh",
+        "pinyin_numbered": "Pinyin đánh số thanh, VD ma3",
+        "zhuyin": "Chú âm phù hiệu",
+        "measure_word": "Lượng từ (隻 / 只)",
+        "accepted_variants": "Các dạng viết khác được chấp nhận khi chấm",
+        "regional_difference": "Giản / phồn khác từ theo vùng (土豆 / 馬鈴薯)",
+        "meaning_vi": "Nghĩa tiếng Việt",
+        "meaning_en": "Nghĩa tiếng Anh",
+        "level": "Cấp HSK / TOCFL / CEFR",
+        "audio": "File phát âm",
+        "sources": "Dữ liệu đối chiếu từ các nguồn (CC-CEDICT, MOE…)",
+        "issues": "Lỗi do bộ kiểm tra tự động phát hiện",
+        "verified_method": "Cách duyệt: tự động / thủ công",
+        "verified_at": "Thời điểm duyệt",
+        "verified_by_id": "Người duyệt",
+    },
     "vocab_examplesentence": {
-        "text": "Câu ví dụ", "transliteration": "Phiên âm của câu (pinyin)", "translation_vi": "Bản dịch tiếng Việt",
-        "translation_en": "Bản dịch tiếng Anh", "source": "Nguồn (tatoeba / thủ công)", "source_id": "Mã câu ở nguồn",
-        "license": "Giấy phép", "tokens": "Câu đã tách từ (kèm pinyin / zhuyin)", "target_tokens": "Vị trí các token là từ vựng đang học",
-        "checks": "Lỗi / cảnh báo của bộ kiểm tra tự động"},
+        "text": "Câu ví dụ",
+        "transliteration": "Phiên âm của câu (pinyin)",
+        "translation_vi": "Bản dịch tiếng Việt",
+        "translation_en": "Bản dịch tiếng Anh",
+        "source": "Nguồn (tatoeba / thủ công)",
+        "source_id": "Mã câu ở nguồn",
+        "license": "Giấy phép",
+        "tokens": "Câu đã tách từ (kèm pinyin / zhuyin)",
+        "target_tokens": "Vị trí các token là từ vựng đang học",
+        "checks": "Lỗi / cảnh báo của bộ kiểm tra tự động",
+    },
     "learning_personalword": {
-        "status": "Trạng thái học (mới / đang học / đã thuộc…)", "source": "Từ được thêm từ đâu (chủ đề, ảnh, bài đăng…)",
-        "source_ref": "Mã đối tượng nguồn (VD id ảnh nhận diện)", "stage": "Giai đoạn ghi nhớ", "ease": "Hệ số dễ (SM-2)",
-        "interval_days": "Khoảng cách ôn hiện tại (ngày)", "repetitions": "Số lần nhớ đúng liên tiếp", "lapses": "Số lần quên",
-        "wrong_streak": "Số lần sai liên tiếp", "fsrs_difficulty": "Độ khó D của FSRS (1–10)", "fsrs_stability": "Độ ổn định S của FSRS (ngày)",
-        "due_at": "Thời điểm đến hạn ôn", "first_learned_at": "Lần học đầu tiên", "last_reviewed_at": "Lần ôn gần nhất"},
+        "status": "Trạng thái học (mới / đang học / đã thuộc…)",
+        "source": "Từ được thêm từ đâu (chủ đề, ảnh, bài đăng…)",
+        "source_ref": "Mã đối tượng nguồn (VD id ảnh nhận diện)",
+        "stage": "Giai đoạn ghi nhớ",
+        "ease": "Hệ số dễ (SM-2)",
+        "interval_days": "Khoảng cách ôn hiện tại (ngày)",
+        "repetitions": "Số lần nhớ đúng liên tiếp",
+        "lapses": "Số lần quên",
+        "wrong_streak": "Số lần sai liên tiếp",
+        "fsrs_difficulty": "Độ khó D của FSRS (1–10)",
+        "fsrs_stability": "Độ ổn định S của FSRS (ngày)",
+        "due_at": "Thời điểm đến hạn ôn",
+        "first_learned_at": "Lần học đầu tiên",
+        "last_reviewed_at": "Lần ôn gần nhất",
+    },
     "learning_studysession": {
-        "script": "Chữ Hán của phiên (giản / phồn)", "kind": "Loại phiên (học mới / ôn tập…)", "scheduler": "Thuật toán lập lịch dùng (SM-2 / FSRS)",
-        "planned_count": "Số từ dự kiến", "completed_count": "Số từ đã làm", "correct_first_try": "Số từ đúng ngay lần đầu",
-        "xp_earned": "XP nhận được", "started_at": "Bắt đầu", "ended_at": "Kết thúc"},
+        "script": "Chữ Hán của phiên (giản / phồn)",
+        "kind": "Loại phiên (học mới / ôn tập…)",
+        "scheduler": "Thuật toán lập lịch dùng (SM-2 / FSRS)",
+        "planned_count": "Số từ dự kiến",
+        "completed_count": "Số từ đã làm",
+        "correct_first_try": "Số từ đúng ngay lần đầu",
+        "xp_earned": "XP nhận được",
+        "started_at": "Bắt đầu",
+        "ended_at": "Kết thúc",
+    },
     "learning_reviewlog": {
-        "personal_word_id": "Từ của học viên được ôn", "session_id": "Phiên học", "script": "Chữ Hán (giản / phồn)",
-        "question_type": "Dạng câu hỏi", "correct": "Trả lời đúng", "first_try": "Đúng ngay lần đầu", "rating": "Điểm 0–5 (chất lượng SM-2)",
-        "response_ms": "Thời gian trả lời (ms)", "answer": "Câu trả lời", "scheduler": "Thuật toán lập lịch",
-        "state_before": "Trạng thái nhớ trước khi trả lời", "state_after": "Trạng thái nhớ sau khi trả lời",
-        "elapsed_days": "Số ngày kể từ lần ôn trước"},
-    "quizzes_question": {"kind": "Dạng câu hỏi", "language_id": "Ngôn ngữ của câu hỏi", "word_id": "Từ vựng liên quan",
-                         "prompt": "Đề bài", "image_url": "Ảnh minh họa", "options": "Các lựa chọn trắc nghiệm (JSON)",
-                         "accepted_answers": "Đáp án đúng cho câu điền từ", "explanation": "Giải thích", "difficulty": "Độ khó"},
-    "quizzes_exam": {"title": "Tên đề", "description": "Mô tả", "time_limit_minutes": "Thời gian làm bài (phút)",
-                     "pass_percent": "Tỉ lệ điểm đạt (%)", "is_published": "Đã công bố"},
-    "quizzes_submission": {"exam_id": "Đề kiểm tra", "started_at": "Bắt đầu làm", "submitted_at": "Nộp bài", "score": "Điểm",
-                           "max_score": "Điểm tối đa", "feedback": "Nhận xét của giáo viên", "graded_by_id": "Người chấm",
-                           "graded_at": "Thời điểm chấm"},
-    "detection_modelversion": {"name": "Tên phiên bản", "file": "Đường dẫn file ONNX trên server", "classes": "Danh sách nhãn theo thứ tự lớp",
-                               "input_size": "Kích thước ảnh đầu vào (px)", "precision": "Precision trên tập test", "recall": "Recall trên tập test",
-                               "map50": "mAP@0.5", "map50_95": "mAP@0.5:0.95", "notes": "Ghi chú cách đo", "is_active": "Model đang dùng"},
-    "detection_photo": {"image": "File ảnh", "width": "Chiều rộng (px)", "height": "Chiều cao (px)", "source": "Nguồn (camera / thư viện ảnh)"},
-    "detection_detection": {"photo_id": "Ảnh", "model_version_id": "Phiên bản model", "model_name": "Tên model đã chạy",
-                            "device": "Nơi chạy (server / điện thoại)", "inference_ms": "Thời gian suy luận (ms)",
-                            "confirmed": "Học viên đã xác nhận kết quả"},
-    "detection_detectionitem": {"detection_id": "Lần nhận diện", "label": "Nhãn model trả về", "confidence": "Độ tin cậy 0–1",
-                                "bbox": "Khung [x1, y1, x2, y2] chuẩn hóa 0–1", "top_k": "Các nhãn thay thế và độ tin cậy",
-                                "word_id": "Từ vựng ứng với nhãn", "selected": "Học viên chọn lưu từ này", "feedback": "Phản hồi đúng / sai",
-                                "corrected_label": "Nhãn đúng do học viên chọn", "learned_from_id": "Đã tự sửa nhãn theo bộ nhớ sửa lỗi"},
-    "gamification_xptransaction": {"source": "Nguồn XP (học, ôn, nhiệm vụ…)", "source_id": "Mã đối tượng nguồn",
-                                   "base_amount": "XP gốc", "multiplier": "Hệ số nhân (boost)", "amount": "XP thực nhận (sau boost, giới hạn ngày)",
-                                   "note": "Ghi chú"},
-    "gamification_badge": {"code": "Mã huy hiệu", "name": "Tên", "description": "Mô tả", "icon": "Ảnh huy hiệu", "sticker": "Sticker thưởng kèm",
-                           "condition": "Loại điều kiện", "threshold": "Ngưỡng cần đạt"},
+        "personal_word_id": "Từ của học viên được ôn",
+        "session_id": "Phiên học",
+        "script": "Chữ Hán (giản / phồn)",
+        "question_type": "Dạng câu hỏi",
+        "correct": "Trả lời đúng",
+        "first_try": "Đúng ngay lần đầu",
+        "rating": "Điểm 0–5 (chất lượng SM-2)",
+        "response_ms": "Thời gian trả lời (ms)",
+        "answer": "Câu trả lời",
+        "scheduler": "Thuật toán lập lịch",
+        "state_before": "Trạng thái nhớ trước khi trả lời",
+        "state_after": "Trạng thái nhớ sau khi trả lời",
+        "elapsed_days": "Số ngày kể từ lần ôn trước",
+    },
+    "quizzes_question": {
+        "kind": "Dạng câu hỏi",
+        "language_id": "Ngôn ngữ của câu hỏi",
+        "word_id": "Từ vựng liên quan",
+        "prompt": "Đề bài",
+        "image_url": "Ảnh minh họa",
+        "options": "Các lựa chọn trắc nghiệm (JSON)",
+        "accepted_answers": "Đáp án đúng cho câu điền từ",
+        "explanation": "Giải thích",
+        "difficulty": "Độ khó",
+    },
+    "quizzes_exam": {
+        "title": "Tên đề",
+        "description": "Mô tả",
+        "time_limit_minutes": "Thời gian làm bài (phút)",
+        "pass_percent": "Tỉ lệ điểm đạt (%)",
+        "is_published": "Đã công bố",
+    },
+    "quizzes_submission": {
+        "exam_id": "Đề kiểm tra",
+        "started_at": "Bắt đầu làm",
+        "submitted_at": "Nộp bài",
+        "score": "Điểm",
+        "max_score": "Điểm tối đa",
+        "feedback": "Nhận xét của giáo viên",
+        "graded_by_id": "Người chấm",
+        "graded_at": "Thời điểm chấm",
+    },
+    "detection_modelversion": {
+        "name": "Tên phiên bản",
+        "file": "Đường dẫn file ONNX trên server",
+        "classes": "Danh sách nhãn theo thứ tự lớp",
+        "input_size": "Kích thước ảnh đầu vào (px)",
+        "precision": "Precision trên tập test",
+        "recall": "Recall trên tập test",
+        "map50": "mAP@0.5",
+        "map50_95": "mAP@0.5:0.95",
+        "notes": "Ghi chú cách đo",
+        "is_active": "Model đang dùng",
+    },
+    "detection_photo": {
+        "image": "File ảnh",
+        "width": "Chiều rộng (px)",
+        "height": "Chiều cao (px)",
+        "source": "Nguồn (camera / thư viện ảnh)",
+    },
+    "detection_detection": {
+        "photo_id": "Ảnh",
+        "model_version_id": "Phiên bản model",
+        "model_name": "Tên model đã chạy",
+        "device": "Nơi chạy (server / điện thoại)",
+        "inference_ms": "Thời gian suy luận (ms)",
+        "confirmed": "Học viên đã xác nhận kết quả",
+    },
+    "detection_detectionitem": {
+        "detection_id": "Lần nhận diện",
+        "label": "Nhãn model trả về",
+        "confidence": "Độ tin cậy 0–1",
+        "bbox": "Khung [x1, y1, x2, y2] chuẩn hóa 0–1",
+        "top_k": "Các nhãn thay thế và độ tin cậy",
+        "word_id": "Từ vựng ứng với nhãn",
+        "selected": "Học viên chọn lưu từ này",
+        "feedback": "Phản hồi đúng / sai",
+        "corrected_label": "Nhãn đúng do học viên chọn",
+        "learned_from_id": "Đã tự sửa nhãn theo bộ nhớ sửa lỗi",
+    },
+    "gamification_xptransaction": {
+        "source": "Nguồn XP (học, ôn, nhiệm vụ…)",
+        "source_id": "Mã đối tượng nguồn",
+        "base_amount": "XP gốc",
+        "multiplier": "Hệ số nhân (boost)",
+        "amount": "XP thực nhận (sau boost, giới hạn ngày)",
+        "note": "Ghi chú",
+    },
+    "gamification_badge": {
+        "code": "Mã huy hiệu",
+        "name": "Tên",
+        "description": "Mô tả",
+        "icon": "Ảnh huy hiệu",
+        "sticker": "Sticker thưởng kèm",
+        "condition": "Loại điều kiện",
+        "threshold": "Ngưỡng cần đạt",
+    },
     "gamification_userbadge": {"badge_id": "Huy hiệu", "awarded_at": "Thời điểm đạt"},
 }
 
@@ -247,9 +417,20 @@ models_by_table = {m._meta.db_table: m for m in apps.get_models(include_auto_cre
 
 def short_type(f):
     t = (f.db_type(connection) or "").lower()
-    for a, b in (("bigint", "bigint"), ("integer", "int"), ("smallint", "smallint"), ("double", "float"),
-                 ("numeric", "numeric"), ("varchar", "varchar"), ("text", "text"), ("jsonb", "jsonb"),
-                 ("timestamp", "timestamptz"), ("date", "date"), ("boolean", "bool"), ("uuid", "uuid")):
+    for a, b in (
+        ("bigint", "bigint"),
+        ("integer", "int"),
+        ("smallint", "smallint"),
+        ("double", "float"),
+        ("numeric", "numeric"),
+        ("varchar", "varchar"),
+        ("text", "text"),
+        ("jsonb", "jsonb"),
+        ("timestamp", "timestamptz"),
+        ("date", "date"),
+        ("boolean", "bool"),
+        ("uuid", "uuid"),
+    ):
         if t.startswith(a):
             return b
     return t.split("(")[0].replace(" ", "_") or "?"
@@ -302,7 +483,7 @@ def mermaid(tables, attrs_for, stubs=(), names_only=False):
     names_only: boxes without columns (the one-page overview)."""
     lines = ["erDiagram"]
     drawn = list(tables) + [s for s in stubs if s not in tables]
-    for t in ([] if names_only else drawn):
+    for t in [] if names_only else drawn:
         m = models_by_table[t]
         lines.append(f"  {t} {{")
         for f in m._meta.fields:
@@ -327,6 +508,7 @@ def mermaid(tables, attrs_for, stubs=(), names_only=False):
 
 # ------------------------------------------------------------------ build
 
+
 def main():
     erd = OUT / "erd"
     erd.mkdir(exist_ok=True)
@@ -348,28 +530,51 @@ def main():
         by_module[module_of(t)].append(t)
     for key, _title, _apps in MODULES:
         tables = by_module[key]
-        stubs = sorted({f.related_model._meta.db_table for t in tables for f in models_by_table[t]._meta.fields
-                        if f.is_relation and f.column not in AUDIT_FK} - set(tables))
-        few = lambda t: CORE.get(t) or [f.column for f in models_by_table[t]._meta.fields  # noqa: E731
-                         if not f.is_relation and f.column not in ("id", "created_at", "updated_at")][:6]
+        stubs = sorted(
+            {
+                f.related_model._meta.db_table
+                for t in tables
+                for f in models_by_table[t]._meta.fields
+                if f.is_relation and f.column not in AUDIT_FK
+            }
+            - set(tables)
+        )
+        few = (
+            lambda t: CORE.get(t)
+            or [
+                f.column
+                for f in models_by_table[t]._meta.fields  # noqa: E731
+                if not f.is_relation and f.column not in ("id", "created_at", "updated_at")
+            ][:6]
+        )
         (erd / f"erd_{key}.mmd").write_text(mermaid(tables, few, stubs), encoding="utf-8")
 
     md = []
     w = md.append
     w("# Cơ sở dữ liệu LingoPrism\n")
-    w("> Sinh tự động từ các model Django bằng `docs/database/build_db_docs.py`. Không sửa tay: sửa model rồi chạy lại.\n")
+    w(
+        "> Sinh tự động từ các model Django bằng `docs/database/build_db_docs.py`. Không sửa tay: sửa model rồi chạy lại.\n"
+    )
     w("## 1. Cách tổ chức\n")
-    w("Hệ quản trị: **PostgreSQL 16** (extension `cube` + `earthdistance` cho truy vấn khoảng cách). "
-      "Thiết kế theo hai nguyên tắc:\n")
-    w("- **Chuẩn hóa 3NF**: mỗi bảng mô tả một thực thể, quan hệ nhiều – nhiều tách thành bảng nối "
-      "(`vocab_topicword`, `gamification_userbadge`…). Cột JSONB chỉ dùng cho dữ liệu không truy vấn theo từng phần tử "
-      "(khung ảnh, danh sách phương án, trạng thái thuật toán).")
-    w("- **Chia module theo nghiệp vụ** (bounded context – Domain-Driven Design, kiến trúc *modular monolith*): "
-      "mỗi app Django sở hữu các bảng của mình, tên bảng có tiền tố module (`vocab_`, `learning_`…), module khác truy cập "
-      "qua API / service của module đó.\n")
-    w(f"Tổng **{len(all_tables)} bảng** = **{len(CORE)} bảng lõi** (nghiệp vụ chính, ERD mục 2) + "
-      f"**{len(domain) - len(CORE)} bảng phụ trợ** (phụ lục A) + **{len(framework)} bảng của Django / thư viện** "
-      f"(phụ lục B, không tự thiết kế).\n")
+    w(
+        "Hệ quản trị: **PostgreSQL 16** (extension `cube` + `earthdistance` cho truy vấn khoảng cách). "
+        "Thiết kế theo hai nguyên tắc:\n"
+    )
+    w(
+        "- **Chuẩn hóa 3NF**: mỗi bảng mô tả một thực thể, quan hệ nhiều – nhiều tách thành bảng nối "
+        "(`vocab_topicword`, `gamification_userbadge`…). Cột JSONB chỉ dùng cho dữ liệu không truy vấn theo từng phần tử "
+        "(khung ảnh, danh sách phương án, trạng thái thuật toán)."
+    )
+    w(
+        "- **Chia module theo nghiệp vụ** (bounded context – Domain-Driven Design, kiến trúc *modular monolith*): "
+        "mỗi app Django sở hữu các bảng của mình, tên bảng có tiền tố module (`vocab_`, `learning_`…), module khác truy cập "
+        "qua API / service của module đó.\n"
+    )
+    w(
+        f"Tổng **{len(all_tables)} bảng** = **{len(CORE)} bảng lõi** (nghiệp vụ chính, ERD mục 2) + "
+        f"**{len(domain) - len(CORE)} bảng phụ trợ** (phụ lục A) + **{len(framework)} bảng của Django / thư viện** "
+        f"(phụ lục B, không tự thiết kế).\n"
+    )
     w("| Module | Bảng lõi | Bảng phụ trợ | Tổng |")
     w("|---|---|---|---|")
     for key, title, _ in MODULES:
@@ -383,18 +588,28 @@ def main():
     for i, (key, (title, _, stubs)) in enumerate(CORE_PARTS.items(), 1):
         w(f"**Hình {i} – ERD {title}** (bảng `{'`, `'.join(stubs)}` thuộc hình còn lại, chỉ vẽ khóa):\n")
         w(f"![ERD {title}](erd/erd_core_{key}.png)\n")
-    w("Ký hiệu crow's foot: `||` đúng một, `|o` không hoặc một, `o{` không hoặc nhiều. Để sơ đồ dễ đọc, các khóa ngoại "
-      "\"người tạo / người duyệt\" (`created_by_id`, `verified_by_id`, `graded_by_id`…) không vẽ, nhưng có trong từ điển "
-      "dữ liệu. Sơ đồ chỉ vẽ khóa và các cột chính; đầy đủ ở mục 3.\n")
+    w(
+        "Ký hiệu crow's foot: `||` đúng một, `|o` không hoặc một, `o{` không hoặc nhiều. Để sơ đồ dễ đọc, các khóa ngoại "
+        '"người tạo / người duyệt" (`created_by_id`, `verified_by_id`, `graded_by_id`…) không vẽ, nhưng có trong từ điển '
+        "dữ liệu. Sơ đồ chỉ vẽ khóa và các cột chính; đầy đủ ở mục 3.\n"
+    )
     w("Luồng dữ liệu chính:\n")
-    w("1. **Từ vựng**: `vocab_word` là khái niệm độc lập ngôn ngữ; mỗi ngôn ngữ một dòng `vocab_wordtranslation` "
-      "(giản thể và phồn thể là hai ngôn ngữ riêng); `vocab_topicword` xếp từ vào chủ đề.")
-    w("2. **Nhận diện ảnh → học**: `detection_photo` → `detection_detection` → các `detection_detectionitem`; "
-      "nhãn (`label`) khớp `vocab_word.yolo_label` nên học viên lưu được từ vào `learning_personalword`.")
-    w("3. **Ôn tập ngắt quãng**: mỗi câu trả lời ghi một `learning_reviewlog` (trạng thái trước / sau) và cập nhật "
-      "trạng thái SM-2 / FSRS trong `learning_personalword` (`due_at` = lần ôn tiếp theo).")
+    w(
+        "1. **Từ vựng**: `vocab_word` là khái niệm độc lập ngôn ngữ; mỗi ngôn ngữ một dòng `vocab_wordtranslation` "
+        "(giản thể và phồn thể là hai ngôn ngữ riêng); `vocab_topicword` xếp từ vào chủ đề."
+    )
+    w(
+        "2. **Nhận diện ảnh → học**: `detection_photo` → `detection_detection` → các `detection_detectionitem`; "
+        "nhãn (`label`) khớp `vocab_word.yolo_label` nên học viên lưu được từ vào `learning_personalword`."
+    )
+    w(
+        "3. **Ôn tập ngắt quãng**: mỗi câu trả lời ghi một `learning_reviewlog` (trạng thái trước / sau) và cập nhật "
+        "trạng thái SM-2 / FSRS trong `learning_personalword` (`due_at` = lần ôn tiếp theo)."
+    )
     w("4. **Kiểm tra**: giáo viên soạn `quizzes_exam` từ `quizzes_question`; học viên nộp `quizzes_submission`.")
-    w("5. **Động lực**: mỗi hoạt động ghi `gamification_xptransaction`; đạt điều kiện thì thêm `gamification_userbadge`.\n")
+    w(
+        "5. **Động lực**: mỗi hoạt động ghi `gamification_xptransaction`; đạt điều kiện thì thêm `gamification_userbadge`.\n"
+    )
 
     w("## 3. Từ điển dữ liệu (bảng lõi)\n")
     for i, t in enumerate(CORE, 1):
@@ -418,8 +633,14 @@ def main():
         w("| Bảng | Vai trò | Khóa ngoại |")
         w("|---|---|---|")
         for t in ts:
-            fks = ", ".join(f"`{f.column}` → {f.related_model._meta.db_table}" for f in models_by_table[t]._meta.fields
-                            if f.is_relation) or "–"
+            fks = (
+                ", ".join(
+                    f"`{f.column}` → {f.related_model._meta.db_table}"
+                    for f in models_by_table[t]._meta.fields
+                    if f.is_relation
+                )
+                or "–"
+            )
             mark = " *(lõi)*" if t in CORE else ""
             w(f"| `{t}`{mark} | {TABLE_VI.get(t, '')} | {fks} |")
         w("")
@@ -432,17 +653,27 @@ def main():
         w(f"| `{t}` | {TABLE_VI.get(t, '')} |")
     w("")
     w("## Tài liệu tham khảo\n")
-    w("- E. Evans, *Domain-Driven Design: Tackling Complexity in the Heart of Software*, Addison-Wesley, 2003 – bounded context.")
-    w("- M. Jovanović, [Defining Module Boundaries With Bounded Contexts](https://milanjovanovic.tech/blog/module-boundaries-bounded-contexts); "
-      "[Modular Monolith Data Isolation](https://milanjovanovic.tech/blog/modular-monolith-data-isolation).")
-    w("- D. & A. Greenfeld, *Two Scoops of Django*, ch. 4 \"Fundamentals of Django App Design\".")
-    w("- E. F. Codd, \"Further Normalization of the Data Base Relational Model\", 1971 – dạng chuẩn 3NF.")
-    w("- [PostgreSQL Documentation](https://www.postgresql.org/docs/16/) – kiểu dữ liệu, JSONB, chỉ mục GiST, earthdistance.\n")
+    w(
+        "- E. Evans, *Domain-Driven Design: Tackling Complexity in the Heart of Software*, Addison-Wesley, 2003 – bounded context."
+    )
+    w(
+        "- M. Jovanović, [Defining Module Boundaries With Bounded Contexts](https://milanjovanovic.tech/blog/module-boundaries-bounded-contexts); "
+        "[Modular Monolith Data Isolation](https://milanjovanovic.tech/blog/modular-monolith-data-isolation)."
+    )
+    w('- D. & A. Greenfeld, *Two Scoops of Django*, ch. 4 "Fundamentals of Django App Design".')
+    w('- E. F. Codd, "Further Normalization of the Data Base Relational Model", 1971 – dạng chuẩn 3NF.')
+    w(
+        "- [PostgreSQL Documentation](https://www.postgresql.org/docs/16/) – kiểu dữ liệu, JSONB, chỉ mục GiST, earthdistance.\n"
+    )
     w("## Sinh lại\n")
-    w("```bash\ncd BE && .venv/Scripts/python ../docs/database/build_db_docs.py\n"
-      "C:/lpvenv/Scripts/python docs/database/render_erd.py   # cần playwright + Edge / Chromium\n```")
+    w(
+        "```bash\ncd BE && .venv/Scripts/python ../docs/database/build_db_docs.py\n"
+        "C:/lpvenv/Scripts/python docs/database/render_erd.py   # cần playwright + Edge / Chromium\n```"
+    )
     (OUT / "README.md").write_text("\n".join(md) + "\n", encoding="utf-8")
-    print(f"{len(all_tables)} bảng: {len(CORE)} lõi, {len(domain) - len(CORE)} phụ trợ, {len(framework)} framework → {OUT}")
+    print(
+        f"{len(all_tables)} bảng: {len(CORE)} lõi, {len(domain) - len(CORE)} phụ trợ, {len(framework)} framework → {OUT}"
+    )
 
 
 if __name__ == "__main__":

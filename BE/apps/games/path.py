@@ -9,6 +9,7 @@ order (a round needs the previous stop passed). Two tracks:
   reading – Vietnamese in kid mode: the reading course (apps.literacy). Each round is one lesson (long rhyme lessons
             are split into rounds of at most 3 rhymes) and opens once that lesson was passed.
 """
+
 import math
 from dataclasses import dataclass, field
 
@@ -47,7 +48,9 @@ class Stop:
 
 
 def track_of(user, learn: str) -> str:
-    return GameNode.Track.READING if learn == "vi" and getattr(user, "learner_type", "") == "kid" else GameNode.Track.WORDS
+    return (
+        GameNode.Track.READING if learn == "vi" and getattr(user, "learner_type", "") == "kid" else GameNode.Track.WORDS
+    )
 
 
 def _reading_rounds(lessons) -> list[tuple[int, list, str]]:
@@ -61,7 +64,7 @@ def _reading_rounds(lessons) -> list[tuple[int, list, str]]:
         parts = math.ceil(len(units) / MAX_RHYMES)
         size = math.ceil(len(units) / parts)
         for i in range(0, len(units), size):
-            chunk = units[i:i + size]
+            chunk = units[i : i + size]
             out.append((n, chunk, "Vần " + ", ".join(u.code for u in chunk)))
     return out
 
@@ -80,8 +83,10 @@ def _with_chests(level: int, rounds: list[Stop]) -> list[Stop]:
 def stops(track: str, level: int) -> list[Stop]:
     if track == GameNode.Track.READING:
         lessons = READING_LEVELS[level - 1][1]
-        rounds = [Stop(f"L{level}-r{i}", level, "round", i, title, n, [f"{u.kind}:{u.code}" for u in units])
-                  for i, (n, units, title) in enumerate(_reading_rounds(lessons), start=1)]
+        rounds = [
+            Stop(f"L{level}-r{i}", level, "round", i, title, n, [f"{u.kind}:{u.code}" for u in units])
+            for i, (n, units, title) in enumerate(_reading_rounds(lessons), start=1)
+        ]
     else:
         rounds = [Stop(f"L{level}-r{i}", level, "round", i, f"Vòng {i}") for i in range(1, ROUNDS + 1)]
     return _with_chests(level, rounds)
@@ -99,11 +104,15 @@ def find_stop(track: str, node: str) -> Stop | None:
 
 # ------------------------------------------------------------------ what the learner has learned
 
+
 def learned_words(user, target, level: int) -> tuple[list[int], int]:
     """Words of this level the learner has started in the Học section, in the order they were added."""
     ids = set(level_words(user, target, level).values_list("id", flat=True))
-    started = (PersonalWord.objects.filter(user=user, language=target.learn, status__in=STARTED, word_id__in=ids)
-               .order_by("created_at", "id").values_list("word_id", flat=True))
+    started = (
+        PersonalWord.objects.filter(user=user, language=target.learn, status__in=STARTED, word_id__in=ids)
+        .order_by("created_at", "id")
+        .values_list("word_id", flat=True)
+    )
     return list(started), len(ids)
 
 
@@ -116,14 +125,17 @@ def round_words(user, target, stop: Stop) -> list[int]:
     if stop.kind == "boss":
         return learned
     size = batch_size(total)
-    return learned[(stop.index - 1) * size: stop.index * size]
+    return learned[(stop.index - 1) * size : stop.index * size]
 
 
 def passed_lessons(user) -> set[int]:
-    return set(LiteracyProgress.objects.filter(user=user, best_percent__gte=LESSON_PASS).values_list("lesson", flat=True))
+    return set(
+        LiteracyProgress.objects.filter(user=user, best_percent__gte=LESSON_PASS).values_list("lesson", flat=True)
+    )
 
 
 # ------------------------------------------------------------------ the map with its state
+
 
 def game_map(user, target) -> dict:
     track = track_of(user, target.learn)
@@ -153,16 +165,38 @@ def game_map(user, target) -> dict:
             status = "done" if done else "locked" if lock else "open"
             if status == "open" and current is None:
                 current = stop.id
-            nodes.append({"id": stop.id, "kind": stop.kind, "index": stop.index, "title": stop.title,
-                          "lesson": stop.lesson or None, "status": status, "stars": result.stars if result else 0,
-                          "lock": lock})
+            nodes.append(
+                {
+                    "id": stop.id,
+                    "kind": stop.kind,
+                    "index": stop.index,
+                    "title": stop.title,
+                    "lesson": stop.lesson or None,
+                    "status": status,
+                    "stars": result.stars if result else 0,
+                    "lock": lock,
+                }
+            )
             previous_done = done or staff
         first_lock = nodes[0]["lock"]
-        levels.append({"level": n, "name": name, "description": desc, "nodes": nodes,
-                       "unlocked": not (first_lock and first_lock["reason"] == "previous"),
-                       "done": sum(1 for x in nodes if x["status"] == "done"), "total": len(nodes)})
-    return {"language": target.learn, "track": track, "current": current, "pass_percent": PASS_PERCENT,
-            "levels": levels}
+        levels.append(
+            {
+                "level": n,
+                "name": name,
+                "description": desc,
+                "nodes": nodes,
+                "unlocked": not (first_lock and first_lock["reason"] == "previous"),
+                "done": sum(1 for x in nodes if x["status"] == "done"),
+                "total": len(nodes),
+            }
+        )
+    return {
+        "language": target.learn,
+        "track": track,
+        "current": current,
+        "pass_percent": PASS_PERCENT,
+        "levels": levels,
+    }
 
 
 def stop_state(user, target, node: str):
@@ -176,6 +210,7 @@ def stop_state(user, target, node: str):
 
 
 # ------------------------------------------------------------------ friends on the map
+
 
 def stop_order(track: str) -> list[str]:
     """Every stop of the track, first to last (the same for every learner of that track)."""
@@ -205,13 +240,23 @@ def friends_on_map(user, target, request=None) -> list[dict]:
     for uid, node in rows.values_list("user_id", "node"):
         if node in place:
             furthest[uid] = max(furthest.get(uid, -1), place[node])
-    people = (User.objects.filter(id__in=furthest, is_active=True, status=User.Status.ACTIVE)
-              .exclude(learner_type=User.LearnerType.KID))
+    people = User.objects.filter(id__in=furthest, is_active=True, status=User.Status.ACTIVE).exclude(
+        learner_type=User.LearnerType.KID
+    )
     out = []
     for u in people:
         at = furthest[u.id]
-        out.append({"id": u.id, "display_name": u.display_name, "avatar": u.avatar_url(request), "mascot": look(u),
-                    "node": order[min(at + 1, len(order) - 1)], "finished": at == len(order) - 1, "_at": at})
+        out.append(
+            {
+                "id": u.id,
+                "display_name": u.display_name,
+                "avatar": u.avatar_url(request),
+                "mascot": look(u),
+                "node": order[min(at + 1, len(order) - 1)],
+                "finished": at == len(order) - 1,
+                "_at": at,
+            }
+        )
     out.sort(key=lambda f: (-f["_at"], f["display_name"].lower()))
     for f in out:
         del f["_at"]

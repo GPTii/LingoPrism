@@ -3,11 +3,17 @@
 All conversions are deterministic table lookups so they can be used to cross-check
 readings coming from different dictionaries.
 """
+
 import re
 import unicodedata
 
 TONE_MARKS = {
-    "a": "āáǎà", "e": "ēéěè", "i": "īíǐì", "o": "ōóǒò", "u": "ūúǔù", "ü": "ǖǘǚǜ",
+    "a": "āáǎà",
+    "e": "ēéěè",
+    "i": "īíǐì",
+    "o": "ōóǒò",
+    "u": "ūúǔù",
+    "ü": "ǖǘǚǜ",
 }
 _MARKED = {m: (base, i + 1) for base, marks in TONE_MARKS.items() for i, m in enumerate(marks)}
 
@@ -21,14 +27,14 @@ def _place_tone(syllable: str, tone: int) -> str:
     for vowel in ("a", "e"):
         if vowel in syllable:
             i = syllable.index(vowel)
-            return syllable[:i] + TONE_MARKS[vowel][tone - 1] + syllable[i + 1:]
+            return syllable[:i] + TONE_MARKS[vowel][tone - 1] + syllable[i + 1 :]
     if "ou" in syllable:
         i = syllable.index("o")
-        return syllable[:i] + TONE_MARKS["o"][tone - 1] + syllable[i + 1:]
+        return syllable[:i] + TONE_MARKS["o"][tone - 1] + syllable[i + 1 :]
     for i in range(len(syllable) - 1, -1, -1):
         ch = syllable[i]
         if ch in TONE_MARKS:
-            return syllable[:i] + TONE_MARKS[ch][tone - 1] + syllable[i + 1:]
+            return syllable[:i] + TONE_MARKS[ch][tone - 1] + syllable[i + 1 :]
     return syllable
 
 
@@ -82,26 +88,94 @@ def comparable(text: str) -> str:
 # ---------------------------------------------------------------- Zhuyin
 
 INITIALS = {
-    "zh": "ㄓ", "ch": "ㄔ", "sh": "ㄕ", "b": "ㄅ", "p": "ㄆ", "m": "ㄇ", "f": "ㄈ", "d": "ㄉ", "t": "ㄊ",
-    "n": "ㄋ", "l": "ㄌ", "g": "ㄍ", "k": "ㄎ", "h": "ㄏ", "j": "ㄐ", "q": "ㄑ", "x": "ㄒ", "r": "ㄖ",
-    "z": "ㄗ", "c": "ㄘ", "s": "ㄙ",
+    "zh": "ㄓ",
+    "ch": "ㄔ",
+    "sh": "ㄕ",
+    "b": "ㄅ",
+    "p": "ㄆ",
+    "m": "ㄇ",
+    "f": "ㄈ",
+    "d": "ㄉ",
+    "t": "ㄊ",
+    "n": "ㄋ",
+    "l": "ㄌ",
+    "g": "ㄍ",
+    "k": "ㄎ",
+    "h": "ㄏ",
+    "j": "ㄐ",
+    "q": "ㄑ",
+    "x": "ㄒ",
+    "r": "ㄖ",
+    "z": "ㄗ",
+    "c": "ㄘ",
+    "s": "ㄙ",
 }
 FINALS = {
-    "a": "ㄚ", "o": "ㄛ", "e": "ㄜ", "ê": "ㄝ", "ai": "ㄞ", "ei": "ㄟ", "ao": "ㄠ", "ou": "ㄡ", "an": "ㄢ",
-    "en": "ㄣ", "ang": "ㄤ", "eng": "ㄥ", "er": "ㄦ", "ong": "ㄨㄥ",
-    "i": "ㄧ", "ia": "ㄧㄚ", "ie": "ㄧㄝ", "iao": "ㄧㄠ", "iu": "ㄧㄡ", "ian": "ㄧㄢ", "in": "ㄧㄣ",
-    "iang": "ㄧㄤ", "ing": "ㄧㄥ", "iong": "ㄩㄥ", "io": "ㄧㄛ",
-    "u": "ㄨ", "ua": "ㄨㄚ", "uo": "ㄨㄛ", "uai": "ㄨㄞ", "ui": "ㄨㄟ", "uan": "ㄨㄢ", "un": "ㄨㄣ",
-    "uang": "ㄨㄤ", "ueng": "ㄨㄥ",
-    "ü": "ㄩ", "üe": "ㄩㄝ", "üan": "ㄩㄢ", "ün": "ㄩㄣ",
+    "a": "ㄚ",
+    "o": "ㄛ",
+    "e": "ㄜ",
+    "ê": "ㄝ",
+    "ai": "ㄞ",
+    "ei": "ㄟ",
+    "ao": "ㄠ",
+    "ou": "ㄡ",
+    "an": "ㄢ",
+    "en": "ㄣ",
+    "ang": "ㄤ",
+    "eng": "ㄥ",
+    "er": "ㄦ",
+    "ong": "ㄨㄥ",
+    "i": "ㄧ",
+    "ia": "ㄧㄚ",
+    "ie": "ㄧㄝ",
+    "iao": "ㄧㄠ",
+    "iu": "ㄧㄡ",
+    "ian": "ㄧㄢ",
+    "in": "ㄧㄣ",
+    "iang": "ㄧㄤ",
+    "ing": "ㄧㄥ",
+    "iong": "ㄩㄥ",
+    "io": "ㄧㄛ",
+    "u": "ㄨ",
+    "ua": "ㄨㄚ",
+    "uo": "ㄨㄛ",
+    "uai": "ㄨㄞ",
+    "ui": "ㄨㄟ",
+    "uan": "ㄨㄢ",
+    "un": "ㄨㄣ",
+    "uang": "ㄨㄤ",
+    "ueng": "ㄨㄥ",
+    "ü": "ㄩ",
+    "üe": "ㄩㄝ",
+    "üan": "ㄩㄢ",
+    "ün": "ㄩㄣ",
 }
 # y-/w- spellings rewritten to their underlying finals
 YW = {
-    "yi": "i", "ya": "ia", "ye": "ie", "yao": "iao", "you": "iu", "yan": "ian", "yin": "in",
-    "yang": "iang", "ying": "ing", "yong": "iong", "yo": "io",
-    "wu": "u", "wa": "ua", "wo": "uo", "wai": "uai", "wei": "ui", "wan": "uan", "wen": "un",
-    "wang": "uang", "weng": "ueng",
-    "yu": "ü", "yue": "üe", "yuan": "üan", "yun": "ün",
+    "yi": "i",
+    "ya": "ia",
+    "ye": "ie",
+    "yao": "iao",
+    "you": "iu",
+    "yan": "ian",
+    "yin": "in",
+    "yang": "iang",
+    "ying": "ing",
+    "yong": "iong",
+    "yo": "io",
+    "wu": "u",
+    "wa": "ua",
+    "wo": "uo",
+    "wai": "uai",
+    "wei": "ui",
+    "wan": "uan",
+    "wen": "un",
+    "wang": "uang",
+    "weng": "ueng",
+    "yu": "ü",
+    "yue": "üe",
+    "yuan": "üan",
+    "yun": "ün",
 }
 TONE_SUFFIX = {1: "", 2: "ˊ", 3: "ˇ", 4: "ˋ", 5: ""}
 
@@ -120,7 +194,7 @@ def _syllable_to_zhuyin(base: str) -> str | None:
         initial = next((i for i in ("zh", "ch", "sh") if base.startswith(i)), base[:1])
         if initial not in INITIALS:
             return None
-        final = base[len(initial):]
+        final = base[len(initial) :]
         if initial in ("j", "q", "x") and final.startswith("u"):
             final = "ü" + final[1:]
         if final not in FINALS:

@@ -17,5 +17,9 @@ def push_new_notification(sender, instance: Notification, created: bool, **kwarg
     pref = NotificationSetting.objects.filter(user_id=instance.user_id).first()
     if pref and (not pref.push_enabled or (instance.kind in SOCIAL and not pref.social_enabled)):
         return
-    fcm.send_to_user_async(instance.user_id, instance.title, instance.body,
-                           {**(instance.data or {}), "notification_id": instance.id, "kind": instance.kind})
+    fcm.send_to_user_async(
+        instance.user_id,
+        instance.title,
+        instance.body,
+        {**(instance.data or {}), "notification_id": instance.id, "kind": instance.kind},
+    )

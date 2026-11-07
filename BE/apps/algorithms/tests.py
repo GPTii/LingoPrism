@@ -1,4 +1,5 @@
 """Golden tests for the self-implemented algorithms (values computed by hand from the published formulas)."""
+
 import math
 import random
 from datetime import datetime
@@ -83,7 +84,7 @@ def test_ga_beats_default_weights_on_simulated_history():
     for _ in range(150):  # learners who forget faster than FSRS assumes
         mem = simulate.TrueMemory(1.0, 1.6)
         mem.first()
-        h, t = [(0.0, True, 4)], 0.0
+        h, _t = [(0.0, True, 4)], 0.0
         for gap in (1, 3, 7, 14):
             ok = mem.review(gap, rng)
             h.append((float(gap), ok, 4 if ok else 1))
@@ -108,8 +109,9 @@ def test_vip_puts_confusable_and_forgotten_words_first():
 def test_word2vec_learns_co_occurrence():
     rng = random.Random(0)
     animals, food = ["cat", "dog", "horse"], ["rice", "bread", "soup"]
-    sents = [[rng.choice(animals), "runs", "in", "the", "field"] for _ in range(1500)] + \
-            [[rng.choice(food), "is", "on", "the", "table"] for _ in range(1500)]
+    sents = [[rng.choice(animals), "runs", "in", "the", "field"] for _ in range(1500)] + [
+        [rng.choice(food), "is", "on", "the", "table"] for _ in range(1500)
+    ]
     index, vecs = word2vec.train(sents, dim=16, window=2, min_count=1, epochs=4, batch=256, log=lambda *_: None)
     unit = vecs / np.linalg.norm(vecs, axis=1, keepdims=True)
     sim = lambda a, b: float(unit[index[a]] @ unit[index[b]])
@@ -152,9 +154,15 @@ def test_hybrid_vip_keeps_due_order_but_moves_confusable_words_earlier(monkeypat
 
     now = datetime(2026, 1, 10)
     word = lambda label: SimpleNamespace(yolo_label=label)
-    pw = lambda days_overdue, label: SimpleNamespace(due_at=now - timedelta(days=days_overdue), last_reviewed_at=None,
-                                                     fsrs_stability=0, interval_days=1, lapses=0, repetitions=1,
-                                                     word=word(label))
+    pw = lambda days_overdue, label: SimpleNamespace(
+        due_at=now - timedelta(days=days_overdue),
+        last_reviewed_at=None,
+        fsrs_stability=0,
+        interval_days=1,
+        lapses=0,
+        repetitions=1,
+        word=word(label),
+    )
     old, confusable, plain = pw(5, ""), pw(1.5, "spoon"), pw(2, "")
     profile = {"spoon": {"mean_conf": 0.2, "score": 1.0}}
     w = dict(vip.DEFAULT_WEIGHTS)

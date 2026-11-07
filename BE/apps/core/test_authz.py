@@ -7,6 +7,7 @@ being listed here):
   and A's data is unchanged (BOLA / IDOR, OWASP API1);
 * junk in the body and the query string of every route, as a learner and as an admin: never a 500.
 """
+
 import re
 
 import pytest
@@ -19,23 +20,61 @@ from apps.accounts.models import User
 pytestmark = pytest.mark.django_db
 
 PUBLIC = {  # reachable signed out, on purpose
-    "api/v1/health/", "api/v1/auth/register/", "api/v1/auth/login/", "api/v1/auth/google/",
-    "api/v1/auth/google/config/", "api/v1/auth/refresh/", "api/v1/auth/logout/", "api/v1/auth/password/forgot/",
-    "api/v1/auth/password/verify/", "api/v1/auth/password/reset/", "api/v1/languages/", "api/v1/releases/",
+    "api/v1/health/",
+    "api/v1/auth/register/",
+    "api/v1/auth/login/",
+    "api/v1/auth/google/",
+    "api/v1/auth/google/config/",
+    "api/v1/auth/refresh/",
+    "api/v1/auth/logout/",
+    "api/v1/auth/password/forgot/",
+    "api/v1/auth/password/verify/",
+    "api/v1/auth/password/reset/",
+    "api/v1/languages/",
+    "api/v1/releases/",
 }
 STAFF_ONLY = re.compile(r"^api/v1/(admin/|pois/stats/)")
 SKIP_FOR_ADMIN = re.compile(r"^api/v1/admin/(algorithms/run/|league-tiers/close-week/|broadcast/)")  # slow / fan-out
-PARAMS = {"pk": "999999", "n": "1", "kind": "vip", "decision": "accept", "req_id": "999999", "member_id": "999999",
-          "comment_id": "999999", "user_id": "999999", "group_id": "999999"}
-JUNK_BODY = {"id": "x", "pk": [], "code": {"a": 1}, "email": 123, "password": None, "total": "abc", "answer": None,
-             "message": {"a": 1}, "page": -1, "lat": "abc", "lng": "abc", "items": "x", "session": 5, "word": "x",
-             "language": "xx", "decision": 1, "is_active": "maybe", "date": "not-a-date"}
-JUNK_QUERY = ("?page=abc&page_size=-1&before=abc&after=abc&lat=abc&lng=abc&radius=abc&q=%00%27%22&limit=abc&offset=abc"
-              "&language=xx&date=not-a-date&ordering=nonexistent_field&category=999")
+PARAMS = {
+    "pk": "999999",
+    "n": "1",
+    "kind": "vip",
+    "decision": "accept",
+    "req_id": "999999",
+    "member_id": "999999",
+    "comment_id": "999999",
+    "user_id": "999999",
+    "group_id": "999999",
+}
+JUNK_BODY = {
+    "id": "x",
+    "pk": [],
+    "code": {"a": 1},
+    "email": 123,
+    "password": None,
+    "total": "abc",
+    "answer": None,
+    "message": {"a": 1},
+    "page": -1,
+    "lat": "abc",
+    "lng": "abc",
+    "items": "x",
+    "session": 5,
+    "word": "x",
+    "language": "xx",
+    "decision": 1,
+    "is_active": "maybe",
+    "date": "not-a-date",
+}
+JUNK_QUERY = (
+    "?page=abc&page_size=-1&before=abc&after=abc&lat=abc&lng=abc&radius=abc&q=%00%27%22&limit=abc&offset=abc"
+    "&language=xx&date=not-a-date&ordering=nonexistent_field&category=999"
+)
 
 
 def routes():
     """(path, methods) for every api/v1 route, with path parameters filled in."""
+
     def walk(patterns, prefix=""):
         for p in patterns:
             if isinstance(p, URLResolver):
@@ -71,8 +110,12 @@ def call(client, method, path, junk=False):
 
 @pytest.fixture
 def learners():
-    a = User.objects.create_user(email="a@example.com", password="Strong!Pass123", display_name="A", birth_date="1990-01-01")
-    b = User.objects.create_user(email="b@example.com", password="Strong!Pass123", display_name="B", birth_date="1990-01-01")
+    a = User.objects.create_user(
+        email="a@example.com", password="Strong!Pass123", display_name="A", birth_date="1990-01-01"
+    )
+    b = User.objects.create_user(
+        email="b@example.com", password="Strong!Pass123", display_name="B", birth_date="1990-01-01"
+    )
     return a, b
 
 
@@ -127,31 +170,50 @@ def make_things(a):
     det = Detection.objects.create(user=a, photo=photo, model_name="m", device="server")
     sess = StudySession.objects.create(user=a, language="en", kind="learn")
     note = Notification.objects.create(user=a, kind="system", title="secret")
-    lang, _ = Language.objects.get_or_create(code="en", defaults={"name": "English", "native_name": "English", "tts_locale": "en-US"})
+    lang, _ = Language.objects.get_or_create(
+        code="en", defaults={"name": "English", "native_name": "English", "tts_locale": "en-US"}
+    )
     sub = Submission.objects.create(user=a, exam=Exam.objects.create(title="t", language=lang))
     support = SupportConversation.objects.create(learner=a)
     third = User.objects.create_user(email="c@example.com", password="Strong!Pass123", birth_date="1990-01-01")
     thread = DirectThread.objects.create(user_a=a, user_b=third)
-    DirectMessage.objects.create(thread=thread, sender=a, **({"text": "secret"} if hasattr(DirectMessage, "text") else {}))
+    DirectMessage.objects.create(
+        thread=thread, sender=a, **({"text": "secret"} if hasattr(DirectMessage, "text") else {})
+    )
     group = Group.objects.create(name="private", created_by=a, require_approval=True)
     GroupMember.objects.create(group=group, user=a, role="leader", status="active")
     GroupMessage.objects.create(group=group, user=a, **({"text": "secret"} if hasattr(GroupMessage, "text") else {}))
     post = Post.objects.create(user=a, image="posts/a.jpg", visibility="followers")
-    comment = PostComment.objects.create(post=post, user=a, **({"text": "mine"} if hasattr(PostComment, "text") else {}))
+    comment = PostComment.objects.create(
+        post=post, user=a, **({"text": "mine"} if hasattr(PostComment, "text") else {})
+    )
 
     attempts = [
-        ("get", f"detections/{det.id}/"), ("post", f"detections/{det.id}/confirm/"), ("post", f"detections/{det.id}/dialogue/"),
-        ("get", f"sessions/{sess.id}/"), ("post", f"sessions/{sess.id}/answer/"), ("post", f"sessions/{sess.id}/finish/"),
+        ("get", f"detections/{det.id}/"),
+        ("post", f"detections/{det.id}/confirm/"),
+        ("post", f"detections/{det.id}/dialogue/"),
+        ("get", f"sessions/{sess.id}/"),
+        ("post", f"sessions/{sess.id}/answer/"),
+        ("post", f"sessions/{sess.id}/finish/"),
         ("post", f"notifications/{note.id}/read/"),
-        ("get", f"submissions/{sub.id}/"), ("post", f"submissions/{sub.id}/submit/"),
-        ("get", f"support/conversations/{support.id}/"), ("get", f"support/conversations/{support.id}/messages/"),
-        ("post", f"support/conversations/{support.id}/messages/"), ("post", f"support/conversations/{support.id}/close/"),
-        ("get", f"messages/threads/{thread.id}/"), ("get", f"messages/threads/{thread.id}/messages/"),
-        ("post", f"messages/threads/{thread.id}/messages/"), ("post", f"messages/threads/{thread.id}/read/"),
-        ("get", f"groups/{group.id}/messages/"), ("post", f"groups/{group.id}/messages/"),
-        ("patch", f"groups/{group.id}/"), ("delete", f"groups/{group.id}/"),
+        ("get", f"submissions/{sub.id}/"),
+        ("post", f"submissions/{sub.id}/submit/"),
+        ("get", f"support/conversations/{support.id}/"),
+        ("get", f"support/conversations/{support.id}/messages/"),
+        ("post", f"support/conversations/{support.id}/messages/"),
+        ("post", f"support/conversations/{support.id}/close/"),
+        ("get", f"messages/threads/{thread.id}/"),
+        ("get", f"messages/threads/{thread.id}/messages/"),
+        ("post", f"messages/threads/{thread.id}/messages/"),
+        ("post", f"messages/threads/{thread.id}/read/"),
+        ("get", f"groups/{group.id}/messages/"),
+        ("post", f"groups/{group.id}/messages/"),
+        ("patch", f"groups/{group.id}/"),
+        ("delete", f"groups/{group.id}/"),
         ("post", f"groups/{group.id}/members/{GroupMember.objects.get(user=a).id}/remove/"),
-        ("get", f"posts/{post.id}/"), ("delete", f"posts/{post.id}/"), ("get", f"posts/{post.id}/comments/"),
+        ("get", f"posts/{post.id}/"),
+        ("delete", f"posts/{post.id}/"),
+        ("get", f"posts/{post.id}/comments/"),
         ("delete", f"posts/{post.id}/comments/{comment.id}/"),
     ]
     return attempts, dict(group=group, post=post, comment=comment, note=note)
@@ -168,20 +230,32 @@ def test_no_learner_can_reach_another_learners_things(learners):
     leaked = []
     for method, path in attempts:
         body = {"text": "hi", "answer": "x", "label": "cat", "name": "hacked", "content": "hi"}
-        res = getattr(client, method)("/api/v1/" + path, body, format="json") if method != "get" else client.get("/api/v1/" + path)
+        res = (
+            getattr(client, method)("/api/v1/" + path, body, format="json")
+            if method != "get"
+            else client.get("/api/v1/" + path)
+        )
         if res.status_code < 400:
             leaked.append(f"{method.upper()} /api/v1/{path} -> {res.status_code}")
     assert not leaked, "learner B reached learner A's data:\n" + "\n".join(leaked)
     group.refresh_from_db()
-    assert group.name == "private" and Post.objects.filter(pk=post.pk).exists() and PostComment.objects.filter(pk=comment.pk).exists()
-    assert GroupMember.objects.filter(group=group, user=a).exists() and Notification.objects.get(pk=note.pk).read_at is None
+    assert (
+        group.name == "private"
+        and Post.objects.filter(pk=post.pk).exists()
+        and PostComment.objects.filter(pk=comment.pk).exists()
+    )
+    assert (
+        GroupMember.objects.filter(group=group, user=a).exists()
+        and Notification.objects.get(pk=note.pk).read_at is None
+    )
 
 
 @pytest.mark.parametrize("who", ["learner", "admin"])
 def test_junk_input_never_breaks_a_route(learners, who):
     if who == "admin":
-        user = User.objects.create_user(email="admin@example.com", password="Strong!Pass123", role="admin",
-                                        is_staff=True, is_superuser=True)
+        user = User.objects.create_user(
+            email="admin@example.com", password="Strong!Pass123", role="admin", is_staff=True, is_superuser=True
+        )
     else:
         user = learners[0]
     client = as_user(user)

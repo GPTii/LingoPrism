@@ -159,7 +159,10 @@ def test_friends_leaderboard_is_this_weeks_xp_of_people_you_follow(user):
     c = APIClient()
     c.force_authenticate(user)
     rows = c.get("/api/v1/leaderboard/", {"scope": "friends"}).data["members"]
-    assert [(r["display_name"], r["xp"], r["is_me"]) for r in rows] == [("Bạn", 50, False), (user.display_name, 20, True)]
+    assert [(r["display_name"], r["xp"], r["is_me"]) for r in rows] == [
+        ("Bạn", 50, False),
+        (user.display_name, 20, True),
+    ]
 
 
 def test_badge_gives_gems_once(user):
@@ -201,7 +204,9 @@ def test_legacy_sticker_owner_gets_the_pack(user):
     from apps.gamification.models import Badge
     from apps.gamification.sync import sync_catalog
 
-    legacy = Item.objects.create(code="sticker_ok", name="Sticker OK", description="", image="", effect="sticker", cost_gems=2)
+    legacy = Item.objects.create(
+        code="sticker_ok", name="Sticker OK", description="", image="", effect="sticker", cost_gems=2
+    )
     UserInventory.objects.create(user=user, item=legacy, quantity=1)
     sync_catalog(Item, Badge, UserInventory)
     assert services.owns_sticker(user, "great") and not Item.objects.get(code="sticker_ok").active

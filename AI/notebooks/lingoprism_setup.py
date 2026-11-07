@@ -3,6 +3,7 @@
 The notebooks run the *same* code as the server (BE/apps/algorithms) – nothing is copied – so a result found here is
 exactly what the admin page "Thuật toán AI" shows. Kernel: "LingoPrism (BE venv)" (BE/.venv with ipykernel).
 """
+
 import os
 import sys
 from pathlib import Path
@@ -22,9 +23,17 @@ def init():
     django.setup()
     import matplotlib.pyplot as plt
 
-    plt.rcParams.update({"figure.dpi": 110, "figure.figsize": (8, 4.2), "axes.grid": True, "grid.alpha": 0.3,
-                         "font.family": ["DejaVu Sans", "Microsoft YaHei"], "axes.spines.top": False,
-                         "axes.spines.right": False})
+    plt.rcParams.update(
+        {
+            "figure.dpi": 110,
+            "figure.figsize": (8, 4.2),
+            "axes.grid": True,
+            "grid.alpha": 0.3,
+            "font.family": ["DejaVu Sans", "Microsoft YaHei"],
+            "axes.spines.top": False,
+            "axes.spines.right": False,
+        }
+    )
     FIGURES.mkdir(parents=True, exist_ok=True)
     print("Django OK –", os.environ["DJANGO_SETTINGS_MODULE"], "| hình lưu ở", FIGURES)
 

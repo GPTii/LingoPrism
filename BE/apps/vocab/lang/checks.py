@@ -4,6 +4,7 @@ Each builder returns a dict with the fields of a WordTranslation plus:
   errors   – blocking problems → status "flagged" (hidden from learners)
   warnings – informational (shown in the admin review queue, do not block)
 """
+
 import re
 import unicodedata
 
@@ -41,8 +42,17 @@ def _relevant(entries, terms):
     return [e for e in entries if gloss_matches(e.glosses, terms)]
 
 
-_WEAK = ("(literary)", "(old)", "(archaic)", "variant of", "used in", "old variant", "(dialect)", "surname",
-         "(bound form)")
+_WEAK = (
+    "(literary)",
+    "(old)",
+    "(archaic)",
+    "variant of",
+    "used in",
+    "old variant",
+    "(dialect)",
+    "surname",
+    "(bound form)",
+)
 
 
 def _entry_score(entry, terms) -> tuple:
@@ -83,6 +93,7 @@ def _same_ignoring_neutral(a: str, b: str) -> bool:
 
 
 # ---------------------------------------------------------------- zh-Hans (mainland)
+
 
 def build_zh_hans(text: str, en_terms: list[str], is_noun: bool, prefer_trad: str = "") -> dict:
     ced, hsk_ = sources.cedict(), sources.hsk()
@@ -129,7 +140,11 @@ def build_zh_hans(text: str, en_terms: list[str], is_noun: bool, prefer_trad: st
 
     if len(py.syllables(numbered)) != len(text):
         out["errors"].append(f"zh-Hans: số âm tiết pinyin ({numbered}) khác số chữ")
-    if hsk_numeric and numbered not in hsk_numeric and not any(_same_ignoring_neutral(numbered, h) for h in hsk_numeric):
+    if (
+        hsk_numeric
+        and numbered not in hsk_numeric
+        and not any(_same_ignoring_neutral(numbered, h) for h in hsk_numeric)
+    ):
         out["errors"].append(f"zh-Hans: pinyin CC-CEDICT ({numbered}) khác HSK ({', '.join(sorted(hsk_numeric))})")
     pp = _pypinyin(text)
     out["sources"]["pypinyin"] = pp
@@ -159,6 +174,7 @@ def build_zh_hans(text: str, en_terms: list[str], is_noun: bool, prefer_trad: st
 
 
 # ---------------------------------------------------------------- zh-Hant (Taiwan)
+
 
 def _moe_reading(raw: str) -> str:
     raw = raw.split("（")[0].split("(")[0]
@@ -250,7 +266,9 @@ def _finish_hant(out, text, matching, is_noun, numbered, marked, zhuyin, en_term
         pinyin_numbered=numbered,
         zhuyin=zhuyin,
         measure_word=measure,
-        meaning_en=(next((g for g in entry.glosses if gloss_matches([g], en_terms)), entry.glosses[0])[:255] if entry else ""),
+        meaning_en=(
+            next((g for g in entry.glosses if gloss_matches([g], en_terms)), entry.glosses[0])[:255] if entry else ""
+        ),
         cedict_simplified=entry.simplified if entry else "",
     )
     return out
@@ -260,7 +278,9 @@ def _hant_by_characters(text, matching, ced_readings, is_noun, out, allow_networ
     """Compound not listed in the MOE dictionary: every character must exist in it with the
     reading CC-CEDICT gives for that position (cross-check of glyph + pronunciation per character)."""
     if not matching or len(ced_readings) != 1:
-        out["errors"].append("zh-Hant: không có trong từ điển Bộ Giáo dục Đài Loan (moedict) và không đủ dữ liệu để kiểm tra từng chữ")
+        out["errors"].append(
+            "zh-Hant: không có trong từ điển Bộ Giáo dục Đài Loan (moedict) và không đủ dữ liệu để kiểm tra từng chữ"
+        )
         return out
     numbered = next(iter(ced_readings))
     syls = py.syllables(numbered)
@@ -270,7 +290,9 @@ def _hant_by_characters(text, matching, ced_readings, is_noun, out, allow_networ
     zh_parts, chars_info = [], []
     for ch, syl in zip(text, syls):
         info = sources.moedict().lookup(ch, allow_network=allow_network)
-        readings = [py.marked_to_numbered(_moe_reading(h.get("pinyin", ""))) for h in (info or {}).get("heteronyms", [])]
+        readings = [
+            py.marked_to_numbered(_moe_reading(h.get("pinyin", ""))) for h in (info or {}).get("heteronyms", [])
+        ]
         chars_info.append({"char": ch, "moe_readings": readings})
         if not info:
             out["errors"].append(f"zh-Hant: chữ '{ch}' không có trong từ điển Bộ GD Đài Loan")
@@ -283,7 +305,9 @@ def _hant_by_characters(text, matching, ced_readings, is_noun, out, allow_networ
     if out["errors"]:
         return out
     out["warnings"].append("zh-Hant: từ ghép chưa có trong từ điển Bộ GD – đã đối chiếu từng chữ (mặt chữ + cách đọc)")
-    return _finish_hant(out, text, matching, is_noun, numbered, py.numbered_to_marked(numbered), " ".join(zh_parts), en_terms)
+    return _finish_hant(
+        out, text, matching, is_noun, numbered, py.numbered_to_marked(numbered), " ".join(zh_parts), en_terms
+    )
 
 
 def check_hans_hant_pair(hans: dict, hant: dict) -> bool:
@@ -293,7 +317,9 @@ def check_hans_hant_pair(hans: dict, hant: dict) -> bool:
         return False
     if expected_trad == hant["text"]:
         if hant.get("cedict_simplified") and hant["cedict_simplified"] != hans["text"]:
-            hant["errors"].append(f"zh-Hant: dạng giản thể của '{hant['text']}' là '{hant['cedict_simplified']}', không phải '{hans['text']}'")
+            hant["errors"].append(
+                f"zh-Hant: dạng giản thể của '{hant['text']}' là '{hant['cedict_simplified']}', không phải '{hans['text']}'"
+            )
         return False
     # Different words: allowed only as a deliberate regional difference (e.g. 土豆 / 馬鈴薯),
     # both sides already verified independently against their own sources.
@@ -304,6 +330,7 @@ def check_hans_hant_pair(hans: dict, hant: dict) -> bool:
 
 
 # ---------------------------------------------------------------- English & Vietnamese
+
 
 def build_en(text: str) -> dict:
     text = " ".join(text.strip().lower().split())

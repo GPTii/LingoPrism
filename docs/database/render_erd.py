@@ -5,6 +5,7 @@
 
 ELK layout (layered, orthogonal edges): the default dagre layout spreads 20 tables over one very wide row.
 """
+
 import json
 from pathlib import Path
 

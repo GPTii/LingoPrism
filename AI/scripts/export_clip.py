@@ -10,6 +10,7 @@ on 2 billion image-text pairs, tells them apart better, but only on a box big en
     python AI/scripts/export_clip.py                       # labels of AI/runs/oiv7-pretrained/model_card.json
     -> BE/models/clip-mobileclip2-s2.onnx
 """
+
 import argparse
 import json
 from pathlib import Path
@@ -17,8 +18,16 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 TEMPLATES = ["a photo of a {}.", "a close-up photo of a {}.", "a photo of the {}, a type of object."]
 # the label alone is ambiguous or not what a person would write
-NAMES = {"mouse": "computer mouse", "mouse animal": "mouse, the animal", "tv": "television", "glasses": "eyeglasses",
-         "remote": "remote control", "hair drier": "hair dryer", "sports ball": "ball", "cell phone": "mobile phone"}
+NAMES = {
+    "mouse": "computer mouse",
+    "mouse animal": "mouse, the animal",
+    "tv": "television",
+    "glasses": "eyeglasses",
+    "remote": "remote control",
+    "hair drier": "hair dryer",
+    "sports ball": "ball",
+    "cell phone": "mobile phone",
+}
 
 
 def main():
@@ -64,12 +73,22 @@ def main():
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
     with torch.no_grad():
-        torch.onnx.export(Checker().eval(), torch.zeros(1, 3, size, size), str(out), input_names=["crops"],
-                          output_names=["probs"], dynamic_axes={"crops": {0: "n"}, "probs": {0: "n"}},
-                          opset_version=17, dynamo=False)
+        torch.onnx.export(
+            Checker().eval(),
+            torch.zeros(1, 3, size, size),
+            str(out),
+            input_names=["crops"],
+            output_names=["probs"],
+            dynamic_axes={"crops": {0: "n"}, "probs": {0: "n"}},
+            opset_version=17,
+            dynamo=False,
+        )
     m = onnx.load(str(out))
-    for k, v in {"names": str(dict(enumerate(labels))), "imgsz": str(size),
-                 "description": f"{args.model} ({args.pretrained}) zero-shot over the LingoPrism labels"}.items():
+    for k, v in {
+        "names": str(dict(enumerate(labels))),
+        "imgsz": str(size),
+        "description": f"{args.model} ({args.pretrained}) zero-shot over the LingoPrism labels",
+    }.items():
         e = m.metadata_props.add()
         e.key, e.value = k, v
     onnx.save(m, str(out))

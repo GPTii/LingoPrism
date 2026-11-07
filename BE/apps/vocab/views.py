@@ -103,7 +103,9 @@ class TopicViewSet(BulkDeleteMixin, viewsets.ModelViewSet):
     def words(self, request, pk=None):
         topic = self.get_object()
         target = resolve_target(request)
-        qs = words_for_target(Word.objects.filter(topics=topic).order_by("topicword__order", "id"), request.user, target)
+        qs = words_for_target(
+            Word.objects.filter(topics=topic).order_by("topicword__order", "id"), request.user, target
+        )
         return _paginated_cards(self, qs, target)
 
     @action(detail=True, methods=["post"])
@@ -118,7 +120,9 @@ class TopicViewSet(BulkDeleteMixin, viewsets.ModelViewSet):
         with transaction.atomic():
             for w in words:
                 _, was_created = PersonalWord.objects.get_or_create(
-                    user=request.user, word=w, language=target.learn,
+                    user=request.user,
+                    word=w,
+                    language=target.learn,
                     defaults={"source": PersonalWord.Source.TOPIC, "topic": topic},
                 )
                 created += was_created
@@ -139,17 +143,24 @@ class TopicViewSet(BulkDeleteMixin, viewsets.ModelViewSet):
             return Response(status=204)
         target = resolve_target(request)
         if not words_for_target(Word.objects.filter(id=word.id), request.user, target).exists():
-            return Response({"detail": "Từ này chưa có bản dịch đã kiểm tra cho ngôn ngữ đang học", "errors": {}}, status=400)
+            return Response(
+                {"detail": "Từ này chưa có bản dịch đã kiểm tra cho ngôn ngữ đang học", "errors": {}}, status=400
+            )
         last = TopicWord.objects.filter(topic=topic).order_by("-order").values_list("order", flat=True).first() or 0
         _, added = TopicWord.objects.get_or_create(topic=topic, word=word, defaults={"order": last + 1})
-        PersonalWord.objects.get_or_create(user=request.user, word=word, language=target.learn,
-                                           defaults={"source": PersonalWord.Source.MANUAL, "topic": topic})
+        PersonalWord.objects.get_or_create(
+            user=request.user,
+            word=word,
+            language=target.learn,
+            defaults={"source": PersonalWord.Source.MANUAL, "topic": topic},
+        )
         return Response({"added": added}, status=201 if added else 200)
 
 
 @extend_schema(tags=["vocab"], parameters=LANG_PARAMS)
 class WordViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     serializer_class = s.LanguageSerializer  # responses are word cards built in services.card()
+
     def get_queryset(self):
         if getattr(self, "swagger_fake_view", False):
             return Word.objects.none()
@@ -203,7 +214,12 @@ class ErrorReportViewSet(ActionThrottleMixin, mixins.CreateModelMixin, mixins.Li
         report = serializer.save(user=self.request.user)
         tr = report.translation
         if tr and tr.status == ReviewStatus.VERIFIED and tr.verified_method != "manual":
-            open_reports = ErrorReport.objects.filter(translation=tr, status=ErrorReport.Status.OPEN).values("user").distinct().count()
+            open_reports = (
+                ErrorReport.objects.filter(translation=tr, status=ErrorReport.Status.OPEN)
+                .values("user")
+                .distinct()
+                .count()
+            )
             if open_reports >= self.FLAG_THRESHOLD:
                 tr.issues = tr.issues + [{"level": "error", "message": f"{open_reports} học viên báo lỗi"}]
                 tr.mark(ReviewStatus.FLAGGED)
@@ -224,7 +240,9 @@ class AdminTopicViewSet(BulkDeleteMixin, viewsets.ModelViewSet):
         return Topic.objects.filter(owner__isnull=True).annotate(word_count=Count("words", distinct=True))
 
     def perform_create(self, serializer):
-        serializer.save(slug=slugify(self.request.data.get("slug") or serializer.validated_data.get("name_en") or "topic"))
+        serializer.save(
+            slug=slugify(self.request.data.get("slug") or serializer.validated_data.get("name_en") or "topic")
+        )
 
 
 @extend_schema(tags=["admin-vocab"])
@@ -235,8 +253,12 @@ class AdminWordViewSet(BulkDeleteMixin, viewsets.ModelViewSet):
     filterset_fields = ["audience", "part_of_speech", "topics"]
 
     def get_queryset(self):
-        qs = Word.objects.filter(created_by__isnull=True).prefetch_related("translations", "topics").annotate(
-            flagged_count=Count("translations", filter=Q(translations__status=ReviewStatus.FLAGGED), distinct=True)
+        qs = (
+            Word.objects.filter(created_by__isnull=True)
+            .prefetch_related("translations", "topics")
+            .annotate(
+                flagged_count=Count("translations", filter=Q(translations__status=ReviewStatus.FLAGGED), distinct=True)
+            )
         )
         if self.request.query_params.get("flagged") == "1":
             qs = qs.filter(flagged_count__gt=0)
@@ -254,8 +276,13 @@ class AdminWordViewSet(BulkDeleteMixin, viewsets.ModelViewSet):
 
 
 @extend_schema(tags=["admin-vocab"])
-class AdminTranslationViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.CreateModelMixin,
-                              mixins.UpdateModelMixin, viewsets.GenericViewSet):
+class AdminTranslationViewSet(
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.CreateModelMixin,
+    mixins.UpdateModelMixin,
+    viewsets.GenericViewSet,
+):
     """Review queue: flagged items, manual verification, re-running the automated checks."""
 
     serializer_class = s.AdminTranslationSerializer
@@ -336,8 +363,10 @@ class AdminExampleViewSet(BulkDeleteMixin, viewsets.ModelViewSet):
         ex = serializer.save()
         if ex.status != before:
             # keep who overrode the automatic checks, for the audit trail
-            ex.checks = {**ex.checks, "manual": {"by": self.request.user.email, "status": ex.status,
-                                                 "at": timezone.now().isoformat()}}
+            ex.checks = {
+                **ex.checks,
+                "manual": {"by": self.request.user.email, "status": ex.status, "at": timezone.now().isoformat()},
+            }
             ex.save(update_fields=["checks"])
 
 
@@ -362,10 +391,11 @@ class AdminVocabStatsView(viewsets.ViewSet):
         stats = {}
         for r in rows:
             stats.setdefault(r["language_id"], {})[r["status"]] = r["n"]
-        return Response({
-            "words": Word.objects.filter(created_by__isnull=True).count(),
-            "topics": Topic.objects.filter(owner__isnull=True).count(),
-            "translations": stats,
-            "open_reports": ErrorReport.objects.filter(status=ErrorReport.Status.OPEN).count(),
-        })
-
+        return Response(
+            {
+                "words": Word.objects.filter(created_by__isnull=True).count(),
+                "topics": Topic.objects.filter(owner__isnull=True).count(),
+                "translations": stats,
+                "open_reports": ErrorReport.objects.filter(status=ErrorReport.Status.OPEN).count(),
+            }
+        )

@@ -11,6 +11,7 @@ PyTorch weights.
     python AI/scripts/weight_average_onnx.py BE/models/yolov8m-oiv7-lingoprism.onnx \
         AI/runs/oiv7m-ft-v6/yolov8m-oiv7-ft-lingoprism.onnx --alpha 0.5 --out AI/runs/soup/ft6-a50.onnx
 """
+
 import argparse
 from pathlib import Path
 
@@ -29,8 +30,9 @@ def main():
 
     base, ft = onnx.load(args.base), onnx.load(args.finetuned)
     assert [n.op_type for n in base.graph.node] == [n.op_type for n in ft.graph.node], "hai model khác cấu trúc"
-    assert {p.key: p.value for p in base.metadata_props}.get("names") == \
-        {p.key: p.value for p in ft.metadata_props}.get("names"), "hai model khác danh sách nhãn"
+    assert {p.key: p.value for p in base.metadata_props}.get("names") == {
+        p.key: p.value for p in ft.metadata_props
+    }.get("names"), "hai model khác danh sách nhãn"
     weights = {i.name: numpy_helper.to_array(i) for i in ft.graph.initializer}
     changed = 0
     for init in base.graph.initializer:
@@ -43,7 +45,9 @@ def main():
         changed += 1
     meta = {p.key: p for p in base.metadata_props}
     if "description" in meta:
-        meta["description"].value += f" | weight average: {1 - args.alpha:.2f} base + {args.alpha:.2f} {Path(args.finetuned).parent.name}"
+        meta[
+            "description"
+        ].value += f" | weight average: {1 - args.alpha:.2f} base + {args.alpha:.2f} {Path(args.finetuned).parent.name}"
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
     onnx.save(base, out)

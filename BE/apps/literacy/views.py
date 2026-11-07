@@ -41,12 +41,17 @@ class LessonListView(APIView):
         for lesson in cur.LESSONS:
             p = progress.get(lesson["n"])
             done = bool(p and p.best_percent >= PASS_PERCENT)
-            out.append({
-                "n": lesson["n"], "title": lesson["title"], "review": bool(lesson.get("review")),
-                "units": [u.payload() for u in lesson["units"]],
-                "status": "done" if done else "open" if lesson["n"] <= unlocked else "locked",
-                "stars": p.stars if p else 0, "best_percent": p.best_percent if p else 0,
-            })
+            out.append(
+                {
+                    "n": lesson["n"],
+                    "title": lesson["title"],
+                    "review": bool(lesson.get("review")),
+                    "units": [u.payload() for u in lesson["units"]],
+                    "status": "done" if done else "open" if lesson["n"] <= unlocked else "locked",
+                    "stars": p.stars if p else 0,
+                    "best_percent": p.best_percent if p else 0,
+                }
+            )
         return Response({"lessons": out, "pass_percent": PASS_PERCENT})
 
 
@@ -84,14 +89,22 @@ class CheckView(APIView):
         correct, extra = ex.check(data, answer)
         first = not LiteracyAttempt.objects.filter(user=request.user, session=data["s"], index=data["i"]).exists()
         LiteracyAttempt.objects.create(
-            user=request.user, session=data["s"], lesson=data["l"], unit=data["u"], exercise=data["t"], index=data["i"],
-            correct=correct, expected=str(data["a"])[:200], answer=str(answer)[:200],
+            user=request.user,
+            session=data["s"],
+            lesson=data["l"],
+            unit=data["u"],
+            exercise=data["t"],
+            index=data["i"],
+            correct=correct,
+            expected=str(data["a"])[:200],
+            answer=str(answer)[:200],
             response_ms=ser.validated_data.get("response_ms"),
         )
         xp = 0
         if correct and first:
-            xp = award_xp(request.user, XpTransaction.Source.LEARN, XP_PER_CORRECT,
-                          source_id=f"literacy:{data['s']}:{data['i']}")
+            xp = award_xp(
+                request.user, XpTransaction.Source.LEARN, XP_PER_CORRECT, source_id=f"literacy:{data['s']}:{data['i']}"
+            )
         return Response({"correct": correct, "xp": xp, **extra})
 
 
@@ -123,6 +136,14 @@ class FinishView(APIView):
             p.completed_at = timezone.now()
         p.save()
         mark_activity(request.user)
-        return Response({"correct_first_try": correct, "total": total, "percent": percent, "stars": _stars(percent),
-                         "passed": percent >= PASS_PERCENT, "best_percent": p.best_percent,
-                         "next_unlocked": percent >= PASS_PERCENT and n < len(cur.LESSONS)})
+        return Response(
+            {
+                "correct_first_try": correct,
+                "total": total,
+                "percent": percent,
+                "stars": _stars(percent),
+                "passed": percent >= PASS_PERCENT,
+                "best_percent": p.best_percent,
+                "next_unlocked": percent >= PASS_PERCENT and n < len(cur.LESSONS),
+            }
+        )

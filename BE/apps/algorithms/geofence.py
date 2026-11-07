@@ -14,6 +14,7 @@ The server side is the same test as services.containing(): grid index (proximity
 The app's old policy (the baseline) is compared with denser ones; the server's own share (one containing() call) is timed separately.
 Network time of a real phone is not included.
 """
+
 import math
 import random
 import statistics
@@ -103,18 +104,30 @@ def simulate(pois, passes=120, seed=0) -> dict:
                     detected += 1
                     delays.append(max(0, found - entry))
             n_in = sum(1 for k in range(passes) if k % 4 != 3)
-            rows.append({
-                "policy": policy, "mode": mode, "speed_ms": speed, "passes": n_in,
-                "detected_rate": round(detected / n_in, 3),
-                "delay_mean_s": round(statistics.mean(delays), 1) if delays else None,
-                "delay_p50_s": round(statistics.median(delays), 1) if delays else None,
-                "delay_p95_s": round(sorted(delays)[int(0.95 * (len(delays) - 1))], 1) if delays else None,
-                "false_rate": round(false_hits / (passes - n_in), 3),
-                "checks_per_hour": round(checks / seconds * 3600, 1),
-            })
-    return {"rows": rows, "policies": {k: {"distance_filter_m": v[0], "min_interval_s": v[1]} for k, v in POLICIES.items()},
-            "baseline": BASELINE, "current": CURRENT, "speeds_ms": SPEEDS, "gps_sigma_m": GPS_SIGMA_M, "passes_per_cell": passes,
-            "grace_s": GRACE_S}
+            rows.append(
+                {
+                    "policy": policy,
+                    "mode": mode,
+                    "speed_ms": speed,
+                    "passes": n_in,
+                    "detected_rate": round(detected / n_in, 3),
+                    "delay_mean_s": round(statistics.mean(delays), 1) if delays else None,
+                    "delay_p50_s": round(statistics.median(delays), 1) if delays else None,
+                    "delay_p95_s": round(sorted(delays)[int(0.95 * (len(delays) - 1))], 1) if delays else None,
+                    "false_rate": round(false_hits / (passes - n_in), 3),
+                    "checks_per_hour": round(checks / seconds * 3600, 1),
+                }
+            )
+    return {
+        "rows": rows,
+        "policies": {k: {"distance_filter_m": v[0], "min_interval_s": v[1]} for k, v in POLICIES.items()},
+        "baseline": BASELINE,
+        "current": CURRENT,
+        "speeds_ms": SPEEDS,
+        "gps_sigma_m": GPS_SIGMA_M,
+        "passes_per_cell": passes,
+        "grace_s": GRACE_S,
+    }
 
 
 def server_check_ms(pois, queries=300, seed=1) -> dict:
@@ -133,5 +146,9 @@ def server_check_ms(pois, queries=300, seed=1) -> dict:
         containing(lat, lng)
         ms.append((time.perf_counter() - s) * 1000)
     ms.sort()
-    return {"queries": queries, "mean_ms": round(statistics.mean(ms), 3), "p95_ms": round(ms[int(0.95 * (len(ms) - 1))], 3),
-            "max_ms": round(ms[-1], 3)}
+    return {
+        "queries": queries,
+        "mean_ms": round(statistics.mean(ms), 3),
+        "p95_ms": round(ms[int(0.95 * (len(ms) - 1))], 3),
+        "max_ms": round(ms[-1], 3),
+    }

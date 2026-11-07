@@ -8,6 +8,7 @@ measured mAP50 0.705 -> 0.698 for the server's ensemble (AI/report/yolo/ghi_chu.
 (after the last convolution: boxes, class scores) stays in float. Activation ranges are calibrated on 96 images of
 AI/testset (only ranges are learnt, no labels). The "names" metadata are copied, so inference.Detector reads it as before.
 """
+
 import argparse
 import json
 import random
@@ -57,15 +58,23 @@ def main():
     pre = dst.with_suffix(".pre.onnx")
     if m0.opset_import[0].version < 13:  # per-channel DequantizeLinear needs opset 13
         from onnx import version_converter
+
         m0 = version_converter.convert_version(m0, 13)
     onnx.save(m0, str(pre))
     quant_pre_process(str(pre), str(pre), skip_symbolic_shape=True)
     nodes = [n for n in onnx.load(str(pre)).graph.node]
     last_conv = max(i for i, n in enumerate(nodes) if n.op_type == "Conv")
-    quantize_static(str(pre), str(dst), Reader(), quant_format=QuantFormat.QDQ, per_channel=True,
-                    weight_type=QuantType.QInt8, activation_type=QuantType.QUInt8,
-                    op_types_to_quantize=["Conv", "MatMul", "Mul", "Add"],
-                    nodes_to_exclude=[n.name for n in nodes[last_conv + 1:]])
+    quantize_static(
+        str(pre),
+        str(dst),
+        Reader(),
+        quant_format=QuantFormat.QDQ,
+        per_channel=True,
+        weight_type=QuantType.QInt8,
+        activation_type=QuantType.QUInt8,
+        op_types_to_quantize=["Conv", "MatMul", "Mul", "Add"],
+        nodes_to_exclude=[n.name for n in nodes[last_conv + 1 :]],
+    )
     pre.unlink()
     m = onnx.load(str(dst))
     for p in onnx.load(str(src), load_external_data=False).metadata_props:

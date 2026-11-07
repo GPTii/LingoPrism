@@ -10,7 +10,9 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.response import Response
 
+from apps.chat.services import can_message
 from apps.core.permissions import IsStaffRole, require_verified_email
+from apps.core.throttles import ActionThrottleMixin
 from apps.gamification import services as game
 from apps.gamification.mascot import look
 from apps.gamification.models import DailyQuest
@@ -19,12 +21,25 @@ from apps.notifications.models import Notification
 from apps.notifications.services import notify
 from apps.vocab.models import Word
 from apps.vocab.services import card, personal_map, resolve_target, words_for_target
-from apps.chat.services import can_message
-from apps.core.throttles import ActionThrottleMixin
 
 from .models import (
-    FriendRequest, Group, GroupMember, Post, PostBookmark, PostComment, PostLike, PostReport, PostWord, UserBlock,
-    UserFollow, UserReport, are_friends, blocked_between, friend_ids, friendship, hidden_user_ids,
+    FriendRequest,
+    Group,
+    GroupMember,
+    Post,
+    PostBookmark,
+    PostComment,
+    PostLike,
+    PostReport,
+    PostWord,
+    UserBlock,
+    UserFollow,
+    UserReport,
+    are_friends,
+    blocked_between,
+    friend_ids,
+    friendship,
+    hidden_user_ids,
 )
 
 User = get_user_model()
@@ -40,8 +55,13 @@ class NotKid(permissions.BasePermission):
 
 
 def author(request, user):
-    return {"id": user.id, "public_id": user.public_id, "display_name": user.display_name, "avatar": user.avatar_url(request),
-            "mascot": look(user)}
+    return {
+        "id": user.id,
+        "public_id": user.public_id,
+        "display_name": user.display_name,
+        "avatar": user.avatar_url(request),
+        "mascot": look(user),
+    }
 
 
 def no_kids(request):
@@ -64,9 +84,14 @@ def person(request, user):
     """A learner in a list (search, friends, requests): who they are and where I stand with them."""
     me = request.user
     state, fr = friend_status(me, user)
-    return {**author(request, user), "bio": user.bio, "active_language": user.active_language,
-            "friend_status": state, "friend_request_id": fr.id if fr else None,
-            "is_following": UserFollow.objects.filter(follower=me, following=user).exists()}
+    return {
+        **author(request, user),
+        "bio": user.bio,
+        "active_language": user.active_language,
+        "friend_status": state,
+        "friend_request_id": fr.id if fr else None,
+        "is_following": UserFollow.objects.filter(follower=me, following=user).exists(),
+    }
 
 
 def accept_friend(request, fr):
@@ -74,8 +99,13 @@ def accept_friend(request, fr):
     fr.save(update_fields=["status", "responded_at"])
     me = request.user
     count_friends(fr.from_user, fr.to_user)
-    notify(fr.from_user, Notification.Kind.FRIEND_ACCEPT, f"{me.display_name} đã đồng ý kết bạn với bạn",
-           "Giờ hai bạn có thể nhắn tin cho nhau.", data={"route": f"/community/users/{me.id}", "user_id": me.id})
+    notify(
+        fr.from_user,
+        Notification.Kind.FRIEND_ACCEPT,
+        f"{me.display_name} đã đồng ý kết bạn với bạn",
+        "Giờ hai bạn có thể nhắn tin cho nhau.",
+        data={"route": f"/community/users/{me.id}", "user_id": me.id},
+    )
     return {"friend_status": "friends", "friend_request_id": fr.id}
 
 
@@ -90,6 +120,7 @@ def count_friends(*users):
 
 # ------------------------------------------------------------------ posts
 
+
 class PostSerializer(serializers.ModelSerializer):
     author = serializers.SerializerMethodField()
     like_count = serializers.IntegerField(read_only=True, default=0)
@@ -101,8 +132,24 @@ class PostSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ["id", "author", "image", "caption", "topic_label", "visibility", "status", "save_count",
-                  "like_count", "comment_count", "liked", "saved", "words", "word_ids", "detection", "created_at"]
+        fields = [
+            "id",
+            "author",
+            "image",
+            "caption",
+            "topic_label",
+            "visibility",
+            "status",
+            "save_count",
+            "like_count",
+            "comment_count",
+            "liked",
+            "saved",
+            "words",
+            "word_ids",
+            "detection",
+            "created_at",
+        ]
         read_only_fields = ["id", "author", "status", "save_count", "created_at"]
 
     def get_author(self, obj):
@@ -150,7 +197,9 @@ class CommentSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         if attrs.get("kind", "text") == "text" and not attrs.get("content", "").strip():
             raise serializers.ValidationError("Bình luận không được để trống.")
-        if attrs.get("kind") == "sticker" and not game.owns_sticker(self.context["request"].user, attrs.get("sticker", "")):
+        if attrs.get("kind") == "sticker" and not game.owns_sticker(
+            self.context["request"].user, attrs.get("sticker", "")
+        ):
             raise serializers.ValidationError("Bạn chưa sở hữu sticker này")
         return attrs
 
@@ -168,8 +217,14 @@ class ReportSerializer(serializers.ModelSerializer):
 
 
 @extend_schema(tags=["community"])
-class PostViewSet(ActionThrottleMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.CreateModelMixin,
-                  mixins.DestroyModelMixin, viewsets.GenericViewSet):
+class PostViewSet(
+    ActionThrottleMixin,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.CreateModelMixin,
+    mixins.DestroyModelMixin,
+    viewsets.GenericViewSet,
+):
     throttle_scopes = {"create": "upload", "report": "report"}
     serializer_class = PostSerializer
     permission_classes = [permissions.IsAuthenticated, NotKid]
@@ -180,14 +235,18 @@ class PostViewSet(ActionThrottleMixin, mixins.ListModelMixin, mixins.RetrieveMod
             return Post.objects.none()
         user = self.request.user
         following = UserFollow.objects.filter(follower=user).values("following_id")
-        qs = Post.objects.filter(status=Post.Status.ACTIVE).filter(
-            Q(visibility=Post.Visibility.PUBLIC) | Q(user=user) | Q(user_id__in=following)
-        ).select_related("user__mascot").annotate(
-            like_count=Count("likes", distinct=True),
-            comment_count=Count("comments", filter=Q(comments__hidden=False), distinct=True),
-            liked=Exists(PostLike.objects.filter(post=OuterRef("pk"), user=user)),
-            saved=Exists(PostBookmark.objects.filter(post=OuterRef("pk"), user=user)),
-        ).exclude(user_id__in=hidden_user_ids(user.id))
+        qs = (
+            Post.objects.filter(status=Post.Status.ACTIVE)
+            .filter(Q(visibility=Post.Visibility.PUBLIC) | Q(user=user) | Q(user_id__in=following))
+            .select_related("user__mascot")
+            .annotate(
+                like_count=Count("likes", distinct=True),
+                comment_count=Count("comments", filter=Q(comments__hidden=False), distinct=True),
+                liked=Exists(PostLike.objects.filter(post=OuterRef("pk"), user=user)),
+                saved=Exists(PostBookmark.objects.filter(post=OuterRef("pk"), user=user)),
+            )
+            .exclude(user_id__in=hidden_user_ids(user.id))
+        )
         params = self.request.query_params
         if params.get("user"):
             qs = qs.filter(user_id=params["user"])
@@ -219,8 +278,12 @@ class PostViewSet(ActionThrottleMixin, mixins.ListModelMixin, mixins.RetrieveMod
             game.progress_quest(request.user, DailyQuest.Kind.ENGAGE_COMMUNITY)
             game.bump_stat(request.user, "cheers")
             if post.user_id != request.user.id:
-                notify(post.user, Notification.Kind.LIKE, f"{request.user.display_name} đã thả tim bài viết của bạn",
-                       data={"route": f"/community/posts/{post.id}"})
+                notify(
+                    post.user,
+                    Notification.Kind.LIKE,
+                    f"{request.user.display_name} đã thả tim bài viết của bạn",
+                    data={"route": f"/community/posts/{post.id}"},
+                )
         return Response({"liked": True})
 
     @action(detail=True, methods=["get", "post"], serializer_class=CommentSerializer)
@@ -236,8 +299,13 @@ class PostViewSet(ActionThrottleMixin, mixins.ListModelMixin, mixins.RetrieveMod
         game.progress_quest(request.user, DailyQuest.Kind.ENGAGE_COMMUNITY)
         game.bump_stat(request.user, "cheers")
         if post.user_id != request.user.id:
-            notify(post.user, Notification.Kind.COMMENT, f"{request.user.display_name} đã bình luận bài viết của bạn",
-                   comment.content[:120], data={"route": f"/community/posts/{post.id}"})
+            notify(
+                post.user,
+                Notification.Kind.COMMENT,
+                f"{request.user.display_name} đã bình luận bài viết của bạn",
+                comment.content[:120],
+                data={"route": f"/community/posts/{post.id}"},
+            )
         return Response(CommentSerializer(comment, context={"request": request}).data, status=status.HTTP_201_CREATED)
 
     @action(detail=True, methods=["post", "delete"])
@@ -279,8 +347,11 @@ class PostViewSet(ActionThrottleMixin, mixins.ListModelMixin, mixins.RetrieveMod
         with transaction.atomic():
             for w in words:
                 _, created = PersonalWord.objects.get_or_create(
-                    user=request.user, word=w, language=target.learn,
-                    defaults={"source": PersonalWord.Source.COMMUNITY, "source_ref": str(post.id)})
+                    user=request.user,
+                    word=w,
+                    language=target.learn,
+                    defaults={"source": PersonalWord.Source.COMMUNITY, "source_ref": str(post.id)},
+                )
                 added += created
             if added:
                 Post.objects.filter(pk=post.pk).update(save_count=post.save_count + 1)
@@ -288,6 +359,7 @@ class PostViewSet(ActionThrottleMixin, mixins.ListModelMixin, mixins.RetrieveMod
 
 
 # ------------------------------------------------------------------ users / follows
+
 
 class UserReportSerializer(serializers.ModelSerializer):
     block = serializers.BooleanField(default=False, write_only=True)
@@ -323,22 +395,29 @@ class CommunityUserViewSet(ActionThrottleMixin, viewsets.GenericViewSet):
         stats = game.stats_for(user)
         state, fr = friend_status(request.user, user)
         recent = Post.objects.filter(user=user, status=Post.Status.ACTIVE).order_by("-created_at")[:12]
-        return Response({
-            **author(request, user), "bio": user.bio,
-            "friend_status": state, "friend_request_id": fr.id if fr else None,
-            "friend_message": fr.message if fr and state == "incoming" else "",
-            "friends": len(friend_ids(user.id)),
-            "followers": UserFollow.objects.filter(following=user).count(),
-            "following": UserFollow.objects.filter(follower=user).count(),
-            "posts": Post.objects.filter(user=user, status=Post.Status.ACTIVE).count(),
-            "is_following": UserFollow.objects.filter(follower=request.user, following=user).exists(),
-            "can_message": can_message(request.user, user),
-            "blocked": UserBlock.objects.filter(blocker=request.user, blocked=user).exists(),
-            "lifetime_xp": stats.lifetime_xp, "streak": game.current_streak(user),
-            "recent_posts": [{"id": p.id, "image": request.build_absolute_uri(p.image.url)} for p in recent],
-            "groups": [{"id": m.group_id, "name": m.group.name} for m in
-                       GroupMember.objects.filter(user=user, status="active").select_related("group")[:10]],
-        })
+        return Response(
+            {
+                **author(request, user),
+                "bio": user.bio,
+                "friend_status": state,
+                "friend_request_id": fr.id if fr else None,
+                "friend_message": fr.message if fr and state == "incoming" else "",
+                "friends": len(friend_ids(user.id)),
+                "followers": UserFollow.objects.filter(following=user).count(),
+                "following": UserFollow.objects.filter(follower=user).count(),
+                "posts": Post.objects.filter(user=user, status=Post.Status.ACTIVE).count(),
+                "is_following": UserFollow.objects.filter(follower=request.user, following=user).exists(),
+                "can_message": can_message(request.user, user),
+                "blocked": UserBlock.objects.filter(blocker=request.user, blocked=user).exists(),
+                "lifetime_xp": stats.lifetime_xp,
+                "streak": game.current_streak(user),
+                "recent_posts": [{"id": p.id, "image": request.build_absolute_uri(p.image.url)} for p in recent],
+                "groups": [
+                    {"id": m.group_id, "name": m.group.name}
+                    for m in GroupMember.objects.filter(user=user, status="active").select_related("group")[:10]
+                ],
+            }
+        )
 
     @action(detail=True, methods=["post", "delete"])
     def follow(self, request, pk=None):
@@ -352,10 +431,13 @@ class CommunityUserViewSet(ActionThrottleMixin, viewsets.GenericViewSet):
             return Response({"detail": "Bạn không thể theo dõi người này.", "errors": {}}, status=400)
         _, created = UserFollow.objects.get_or_create(follower=request.user, following=target)
         if created:
-            notify(target, Notification.Kind.FOLLOW, f"{request.user.display_name} đã theo dõi bạn",
-                   data={"route": f"/community/users/{request.user.id}"})
+            notify(
+                target,
+                Notification.Kind.FOLLOW,
+                f"{request.user.display_name} đã theo dõi bạn",
+                data={"route": f"/community/users/{request.user.id}"},
+            )
         return Response({"following": True})
-
 
     # ---- finding people, friends
 
@@ -366,8 +448,11 @@ class CommunityUserViewSet(ActionThrottleMixin, viewsets.GenericViewSet):
         q = request.query_params.get("q", "").strip().lstrip("#")
         if len(q) < 2:
             return Response([])
-        qs = (User.objects.filter(is_active=True, status=User.Status.ACTIVE, role=User.Role.LEARNER)
-              .exclude(learner_type="kid").exclude(id__in={request.user.id, *hidden_user_ids(request.user.id)}))
+        qs = (
+            User.objects.filter(is_active=True, status=User.Status.ACTIVE, role=User.Role.LEARNER)
+            .exclude(learner_type="kid")
+            .exclude(id__in={request.user.id, *hidden_user_ids(request.user.id)})
+        )
         qs = qs.filter(public_id=q) if q.isdigit() and len(q) == 8 else qs.filter(display_name__icontains=q)
         return Response([person(request, u) for u in qs.order_by("display_name")[:20]])
 
@@ -395,9 +480,21 @@ class CommunityUserViewSet(ActionThrottleMixin, viewsets.GenericViewSet):
             if state == "incoming":
                 return Response(accept_friend(request, fr))
             if state == "none":
-                fr = FriendRequest.objects.create(from_user=me, to_user=target, message=str(request.data.get("message", ""))[:200])
-                notify(target, Notification.Kind.FRIEND_REQUEST, f"{me.display_name} muốn kết bạn với bạn", fr.message,
-                       data={"route": "/friends?tab=incoming", "action": "friend_request", "request_id": fr.id, "user_id": me.id})
+                fr = FriendRequest.objects.create(
+                    from_user=me, to_user=target, message=str(request.data.get("message", ""))[:200]
+                )
+                notify(
+                    target,
+                    Notification.Kind.FRIEND_REQUEST,
+                    f"{me.display_name} muốn kết bạn với bạn",
+                    fr.message,
+                    data={
+                        "route": "/friends?tab=incoming",
+                        "action": "friend_request",
+                        "request_id": fr.id,
+                        "user_id": me.id,
+                    },
+                )
                 state = "outgoing"
         return Response({"friend_status": state, "friend_request_id": fr.id})
 
@@ -406,8 +503,11 @@ class CommunityUserViewSet(ActionThrottleMixin, viewsets.GenericViewSet):
         """My friends, newest first."""
         no_kids(request)
         me = request.user
-        rows = (FriendRequest.objects.filter(Q(from_user=me) | Q(to_user=me), status=FriendRequest.Status.ACCEPTED)
-                .select_related("from_user", "to_user").order_by("-responded_at"))
+        rows = (
+            FriendRequest.objects.filter(Q(from_user=me) | Q(to_user=me), status=FriendRequest.Status.ACCEPTED)
+            .select_related("from_user", "to_user")
+            .order_by("-responded_at")
+        )
         hidden = hidden_user_ids(me.id)
         out = []
         for fr in rows:
@@ -422,10 +522,20 @@ class CommunityUserViewSet(ActionThrottleMixin, viewsets.GenericViewSet):
         no_kids(request)
         me = request.user
         incoming = request.query_params.get("box", "incoming") != "outgoing"
-        qs = (FriendRequest.objects.filter(status=FriendRequest.Status.PENDING, **({"to_user": me} if incoming else {"from_user": me}))
-              .select_related("from_user", "to_user"))
-        return Response([{"id": fr.id, "message": fr.message, "created_at": fr.created_at,
-                          "user": person(request, fr.from_user if incoming else fr.to_user)} for fr in qs])
+        qs = FriendRequest.objects.filter(
+            status=FriendRequest.Status.PENDING, **({"to_user": me} if incoming else {"from_user": me})
+        ).select_related("from_user", "to_user")
+        return Response(
+            [
+                {
+                    "id": fr.id,
+                    "message": fr.message,
+                    "created_at": fr.created_at,
+                    "user": person(request, fr.from_user if incoming else fr.to_user),
+                }
+                for fr in qs
+            ]
+        )
 
     @action(detail=False, methods=["post"], url_path=r"friend-requests/(?P<req_id>\d+)/(?P<decision>accept|decline)")
     def answer_friend_request(self, request, req_id=None, decision=None):
@@ -444,15 +554,32 @@ class CommunityUserViewSet(ActionThrottleMixin, viewsets.GenericViewSet):
         me = request.user
         if me.learner_type == "kid":  # children are never shown strangers to follow
             return Response([])
-        skip = {me.id, *UserFollow.objects.filter(follower=me).values_list("following_id", flat=True), *hidden_user_ids(me.id)}
-        qs = (User.objects.filter(is_active=True, role=User.Role.LEARNER).exclude(learner_type="kid").exclude(id__in=skip)
-              .select_related("stats")
-              .annotate(follows_me=Exists(UserFollow.objects.filter(follower=OuterRef("pk"), following=me)))
-              .order_by("-follows_me", F("stats__last_active_date").desc(nulls_last=True), "-stats__lifetime_xp"))
+        skip = {
+            me.id,
+            *UserFollow.objects.filter(follower=me).values_list("following_id", flat=True),
+            *hidden_user_ids(me.id),
+        }
+        qs = (
+            User.objects.filter(is_active=True, role=User.Role.LEARNER)
+            .exclude(learner_type="kid")
+            .exclude(id__in=skip)
+            .select_related("stats")
+            .annotate(follows_me=Exists(UserFollow.objects.filter(follower=OuterRef("pk"), following=me)))
+            .order_by("-follows_me", F("stats__last_active_date").desc(nulls_last=True), "-stats__lifetime_xp")
+        )
         same = list(qs.filter(active_language=me.active_language)[:8])
-        people = same + list(qs.exclude(active_language=me.active_language)[:8 - len(same)]) if len(same) < 8 else same
-        return Response([{**author(request, u), "active_language": u.active_language, "follows_me": u.follows_me,
-                          "lifetime_xp": getattr(getattr(u, "stats", None), "lifetime_xp", 0)} for u in people])
+        people = same + list(qs.exclude(active_language=me.active_language)[: 8 - len(same)]) if len(same) < 8 else same
+        return Response(
+            [
+                {
+                    **author(request, u),
+                    "active_language": u.active_language,
+                    "follows_me": u.follows_me,
+                    "lifetime_xp": getattr(getattr(u, "stats", None), "lifetime_xp", 0),
+                }
+                for u in people
+            ]
+        )
 
     @action(detail=True, methods=["post", "delete"])
     def block(self, request, pk=None):
@@ -479,23 +606,41 @@ class CommunityUserViewSet(ActionThrottleMixin, viewsets.GenericViewSet):
         ser.is_valid(raise_exception=True)
         data = ser.validated_data
         if UserReport.objects.filter(reporter=request.user, reported=target, status=UserReport.Status.PENDING).exists():
-            return Response({"detail": "Bạn đã báo cáo người này, đội ngũ kiểm duyệt đang xem xét.", "errors": {}}, status=400)
+            return Response(
+                {"detail": "Bạn đã báo cáo người này, đội ngũ kiểm duyệt đang xem xét.", "errors": {}}, status=400
+            )
         thread, evidence = None, []
         if data.get("thread"):
             a, b = sorted([request.user.id, target.id])
             thread = get_object_or_404(DirectThread, pk=data["thread"], user_a_id=a, user_b_id=b)
             last = list(thread.messages.select_related("sender").order_by("-created_at", "-id")[:30])
-            evidence = [{"sender": m.sender.display_name, "sender_id": m.sender_id, "content": m.content,
-                         "created_at": m.created_at.isoformat()} for m in reversed(last)]
-        UserReport.objects.create(reporter=request.user, reported=target, reason=data["reason"],
-                                  details=data.get("details", ""), thread=thread, evidence=evidence)
+            evidence = [
+                {
+                    "sender": m.sender.display_name,
+                    "sender_id": m.sender_id,
+                    "content": m.content,
+                    "created_at": m.created_at.isoformat(),
+                }
+                for m in reversed(last)
+            ]
+        UserReport.objects.create(
+            reporter=request.user,
+            reported=target,
+            reason=data["reason"],
+            details=data.get("details", ""),
+            thread=thread,
+            evidence=evidence,
+        )
         if data.get("block"):
             block_user(request.user, target)
-        return Response({"detail": "Đã gửi báo cáo. Đội ngũ kiểm duyệt sẽ xem xét sớm nhất.",
-                         "blocked": bool(data.get("block"))}, status=201)
+        return Response(
+            {"detail": "Đã gửi báo cáo. Đội ngũ kiểm duyệt sẽ xem xét sớm nhất.", "blocked": bool(data.get("block"))},
+            status=201,
+        )
 
 
 # ------------------------------------------------------------------ groups
+
 
 class GroupSerializer(serializers.ModelSerializer):
     member_count = serializers.IntegerField(read_only=True, default=0)
@@ -504,8 +649,19 @@ class GroupSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Group
-        fields = ["id", "name", "description", "icon", "require_approval", "is_private", "member_count", "my_status",
-                  "my_role", "created_by", "created_at"]
+        fields = [
+            "id",
+            "name",
+            "description",
+            "icon",
+            "require_approval",
+            "is_private",
+            "member_count",
+            "my_status",
+            "my_role",
+            "created_by",
+            "created_at",
+        ]
         read_only_fields = ["id", "created_by", "created_at"]
 
     def _membership(self, obj):
@@ -546,8 +702,15 @@ class MemberSerializer(serializers.ModelSerializer):
 
 
 @extend_schema(tags=["groups"])
-class GroupViewSet(ActionThrottleMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.CreateModelMixin,
-                   mixins.UpdateModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet):
+class GroupViewSet(
+    ActionThrottleMixin,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.CreateModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+    viewsets.GenericViewSet,
+):
     throttle_scopes = {"create": "upload"}
     serializer_class = GroupSerializer
     permission_classes = [permissions.IsAuthenticated, NotKid]
@@ -556,9 +719,11 @@ class GroupViewSet(ActionThrottleMixin, mixins.ListModelMixin, mixins.RetrieveMo
     def get_queryset(self):
         if getattr(self, "swagger_fake_view", False):
             return Group.objects.none()
-        qs = Group.objects.filter(status=Group.Status.ACTIVE).annotate(
-            member_count=Count("members", filter=Q(members__status="active"), distinct=True)
-        ).prefetch_related("members")
+        qs = (
+            Group.objects.filter(status=Group.Status.ACTIVE)
+            .annotate(member_count=Count("members", filter=Q(members__status="active"), distinct=True))
+            .prefetch_related("members")
+        )
         if self.request.query_params.get("mine") == "1":
             qs = qs.filter(members__user=self.request.user, members__status="active")
         elif not self.request.user.is_staff_role:
@@ -567,7 +732,10 @@ class GroupViewSet(ActionThrottleMixin, mixins.ListModelMixin, mixins.RetrieveMo
         return qs.distinct().order_by("-created_at")
 
     def _leader(self, group):
-        if not GroupMember.objects.filter(group=group, user=self.request.user, role="leader").exists() and not self.request.user.is_staff_role:
+        if (
+            not GroupMember.objects.filter(group=group, user=self.request.user, role="leader").exists()
+            and not self.request.user.is_staff_role
+        ):
             raise PermissionDenied("Chỉ trưởng nhóm mới có quyền này.")
 
     def perform_create(self, serializer):
@@ -591,24 +759,44 @@ class GroupViewSet(ActionThrottleMixin, mixins.ListModelMixin, mixins.RetrieveMo
             invite.status, invite.joined_at = GroupMember.Status.ACTIVE, timezone.now()
             invite.save(update_fields=["status", "joined_at"])
             for leader in group.members.filter(role="leader").select_related("user"):
-                notify(leader.user, Notification.Kind.GROUP, f"{request.user.display_name} đã vào nhóm {group.name}",
-                       data={"route": f"/community/groups/{group.id}", "user_id": request.user.id})
+                notify(
+                    leader.user,
+                    Notification.Kind.GROUP,
+                    f"{request.user.display_name} đã vào nhóm {group.name}",
+                    data={"route": f"/community/groups/{group.id}", "user_id": request.user.id},
+                )
             return Response({"status": invite.status})
         if group.is_private:
             raise PermissionDenied("Nhóm riêng: chỉ vào được khi trưởng nhóm thêm bạn.")
         status_value = "pending" if group.require_approval else "active"
         m, created = GroupMember.objects.get_or_create(
-            group=group, user=request.user,
-            defaults={"status": status_value, "request_message": request.data.get("message", "")[:200]})
+            group=group,
+            user=request.user,
+            defaults={"status": status_value, "request_message": request.data.get("message", "")[:200]},
+        )
         if created:
             for leader in group.members.filter(role="leader").select_related("user"):
                 if status_value == "pending":
-                    notify(leader.user, Notification.Kind.GROUP_REQUEST, f"{request.user.display_name} xin vào nhóm {group.name}",
-                           m.request_message, data={"route": f"/community/groups/{group.id}", "action": "group_request",
-                                                    "group_id": group.id, "member_id": m.id, "user_id": request.user.id})
+                    notify(
+                        leader.user,
+                        Notification.Kind.GROUP_REQUEST,
+                        f"{request.user.display_name} xin vào nhóm {group.name}",
+                        m.request_message,
+                        data={
+                            "route": f"/community/groups/{group.id}",
+                            "action": "group_request",
+                            "group_id": group.id,
+                            "member_id": m.id,
+                            "user_id": request.user.id,
+                        },
+                    )
                 else:
-                    notify(leader.user, Notification.Kind.GROUP, f"{request.user.display_name} đã tham gia nhóm {group.name}",
-                           data={"route": f"/community/groups/{group.id}", "user_id": request.user.id})
+                    notify(
+                        leader.user,
+                        Notification.Kind.GROUP,
+                        f"{request.user.display_name} đã tham gia nhóm {group.name}",
+                        data={"route": f"/community/groups/{group.id}", "user_id": request.user.id},
+                    )
         return Response({"status": m.status})
 
     @action(detail=True, methods=["post"])
@@ -637,8 +825,13 @@ class GroupViewSet(ActionThrottleMixin, mixins.ListModelMixin, mixins.RetrieveMo
         self._leader(group)
         key = str(request.data.get("user", "")).strip()
         User = get_user_model()
-        target = (User.objects.filter(public_id=key).first() if len(key) == 8 and key.isdigit()
-                  else User.objects.filter(pk=key).first() if key.isdigit() else None)
+        target = (
+            User.objects.filter(public_id=key).first()
+            if len(key) == 8 and key.isdigit()
+            else User.objects.filter(pk=key).first()
+            if key.isdigit()
+            else None
+        )
         if target is None or not target.is_active or target.status == User.Status.LOCKED:
             return Response({"detail": "Không tìm thấy người dùng với ID này", "errors": {}}, status=404)
         if target.id == request.user.id:
@@ -655,17 +848,28 @@ class GroupViewSet(ActionThrottleMixin, mixins.ListModelMixin, mixins.RetrieveMo
             m = m or GroupMember(group=group, user=target)
             m.status, m.joined_at = GroupMember.Status.ACTIVE, timezone.now()
             m.save()
-            notify(target, Notification.Kind.GROUP, f"{request.user.display_name} đã thêm bạn vào nhóm {group.name}",
-                   data={"route": f"/community/groups/{group.id}"})
+            notify(
+                target,
+                Notification.Kind.GROUP,
+                f"{request.user.display_name} đã thêm bạn vào nhóm {group.name}",
+                data={"route": f"/community/groups/{group.id}"},
+            )
         else:
             m = m or GroupMember.objects.create(group=group, user=target, status=GroupMember.Status.INVITED)
-            notify(target, Notification.Kind.GROUP, f"{request.user.display_name} mời bạn vào nhóm {group.name}",
-                   "Mở nhóm để nhận lời mời.", data={"route": f"/community/groups/{group.id}", "action": "group_invite",
-                                                     "group_id": group.id})
+            notify(
+                target,
+                Notification.Kind.GROUP,
+                f"{request.user.display_name} mời bạn vào nhóm {group.name}",
+                "Mở nhóm để nhận lời mời.",
+                data={"route": f"/community/groups/{group.id}", "action": "group_invite", "group_id": group.id},
+            )
         return Response(MemberSerializer(m, context={"request": request}).data, status=201)
 
-    @action(detail=True, methods=["post"],
-            url_path=r"members/(?P<member_id>\d+)/(?P<decision>approve|reject|remove|promote|demote)")
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path=r"members/(?P<member_id>\d+)/(?P<decision>approve|reject|remove|promote|demote)",
+    )
     def moderate(self, request, pk=None, member_id=None, decision=None):
         group = self.get_object()
         self._leader(group)
@@ -677,26 +881,41 @@ class GroupViewSet(ActionThrottleMixin, mixins.ListModelMixin, mixins.RetrieveMo
             m.role = GroupMember.Role.LEADER if decision == "promote" else GroupMember.Role.MEMBER
             m.save(update_fields=["role"])
             if decision == "promote":
-                notify(m.user, Notification.Kind.GROUP, f"Bạn là trưởng nhóm {group.name}",
-                       "Bạn có thể giao và chấm bài tập trong nhóm.", data={"route": f"/community/groups/{group.id}"})
+                notify(
+                    m.user,
+                    Notification.Kind.GROUP,
+                    f"Bạn là trưởng nhóm {group.name}",
+                    "Bạn có thể giao và chấm bài tập trong nhóm.",
+                    data={"route": f"/community/groups/{group.id}"},
+                )
             return Response({"ok": True, "role": m.role})
         if decision == "approve":
             if m.status != "active":
                 m.status = "active"
                 m.save(update_fields=["status"])
-                notify(m.user, Notification.Kind.GROUP, f"Bạn đã được duyệt vào nhóm {group.name}",
-                       data={"route": f"/community/groups/{group.id}"})
+                notify(
+                    m.user,
+                    Notification.Kind.GROUP,
+                    f"Bạn đã được duyệt vào nhóm {group.name}",
+                    data={"route": f"/community/groups/{group.id}"},
+                )
         else:
             if m.role == "leader":
                 return Response({"detail": "Không thể xoá trưởng nhóm.", "errors": {}}, status=400)
             if decision == "reject" and m.status == "pending":
-                notify(m.user, Notification.Kind.GROUP, f"Yêu cầu vào nhóm {group.name} chưa được duyệt",
-                       "Bạn có thể tìm nhóm khác hoặc xin lại sau.", data={"route": "/community?tab=groups"})
+                notify(
+                    m.user,
+                    Notification.Kind.GROUP,
+                    f"Yêu cầu vào nhóm {group.name} chưa được duyệt",
+                    "Bạn có thể tìm nhóm khác hoặc xin lại sau.",
+                    data={"route": "/community?tab=groups"},
+                )
             m.delete()
         return Response({"ok": True, "status": "active" if decision == "approve" else "removed"})
 
 
 # ------------------------------------------------------------------ moderation (staff)
+
 
 class AdminReportSerializer(serializers.ModelSerializer):
     reporter_email = serializers.CharField(source="reporter.email", read_only=True)
@@ -707,8 +926,19 @@ class AdminReportSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PostReport
-        fields = ["id", "post", "post_caption", "post_image", "post_author", "post_status", "reporter_email",
-                  "reason", "details", "status", "created_at"]
+        fields = [
+            "id",
+            "post",
+            "post_caption",
+            "post_image",
+            "post_author",
+            "post_status",
+            "reporter_email",
+            "reason",
+            "details",
+            "status",
+            "created_at",
+        ]
         read_only_fields = fields
 
 
@@ -725,7 +955,9 @@ class AdminPostReportViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
         hide = request.data.get("hide_post", True)
         if hide:
             Post.objects.filter(pk=report.post_id).update(status=Post.Status.HIDDEN)
-            PostReport.objects.filter(post_id=report.post_id, status="pending").update(status="resolved", handled_by=request.user)
+            PostReport.objects.filter(post_id=report.post_id, status="pending").update(
+                status="resolved", handled_by=request.user
+            )
         else:
             report.status, report.handled_by = PostReport.Status.DISMISSED, request.user
             report.save(update_fields=["status", "handled_by"])
@@ -742,8 +974,22 @@ class AdminUserReportSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserReport
-        fields = ["id", "reporter", "reporter_name", "reporter_email", "reported", "reported_name", "reported_email",
-                  "reported_status", "reports_against", "reason", "details", "evidence", "status", "created_at"]
+        fields = [
+            "id",
+            "reporter",
+            "reporter_name",
+            "reporter_email",
+            "reported",
+            "reported_name",
+            "reported_email",
+            "reported_status",
+            "reports_against",
+            "reason",
+            "details",
+            "evidence",
+            "status",
+            "created_at",
+        ]
         read_only_fields = fields
 
     def get_reports_against(self, obj):
@@ -776,8 +1022,12 @@ class AdminUserReportViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
             report.save(update_fields=["status", "handled_by"])
             handled = [report]
         for r in {r.reporter_id: r for r in handled}.values():
-            notify(r.reporter, Notification.Kind.SYSTEM, "Báo cáo của bạn đã được xem xét",
-                   "Cảm ơn bạn đã giúp cộng đồng LingoPrism an toàn hơn.")
+            notify(
+                r.reporter,
+                Notification.Kind.SYSTEM,
+                "Báo cáo của bạn đã được xem xét",
+                "Cảm ơn bạn đã giúp cộng đồng LingoPrism an toàn hơn.",
+            )
         return Response({"ok": True})
 
 
@@ -788,9 +1038,11 @@ class AdminPostViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     filterset_fields = ["status"]
 
     def get_queryset(self):
-        return Post.objects.select_related("user").annotate(
-            like_count=Count("likes", distinct=True), comment_count=Count("comments", distinct=True)
-        ).order_by("-created_at")
+        return (
+            Post.objects.select_related("user")
+            .annotate(like_count=Count("likes", distinct=True), comment_count=Count("comments", distinct=True))
+            .order_by("-created_at")
+        )
 
     @action(detail=True, methods=["post"])
     def visibility(self, request, pk=None):

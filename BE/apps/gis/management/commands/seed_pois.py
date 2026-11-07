@@ -5,7 +5,15 @@ from apps.vocab.models import Topic
 
 # Toạ độ gần đúng (WGS84) – có thể kéo thả chỉnh lại trên trang WebGIS của Admin.
 POIS = [
-    ("Trường ĐH Tài nguyên và Môi trường TP.HCM", "school", 10.7957, 106.6660, 200, "236B Lê Văn Sỹ, Tân Bình", ["education", "people"]),
+    (
+        "Trường ĐH Tài nguyên và Môi trường TP.HCM",
+        "school",
+        10.7957,
+        106.6660,
+        200,
+        "236B Lê Văn Sỹ, Tân Bình",
+        ["education", "people"],
+    ),
     ("Chợ Bến Thành", "market", 10.7725, 106.6980, 150, "Lê Lợi, Quận 1", ["food", "fruits-vegetables", "clothing"]),
     ("Chợ Bình Tây (Chợ Lớn)", "market", 10.7496, 106.6510, 150, "Tháp Mười, Quận 6", ["food", "fruits-vegetables"]),
     ("Chợ Tân Định", "market", 10.7900, 106.6900, 120, "Hai Bà Trưng, Quận 1", ["food", "fruits-vegetables"]),
@@ -28,8 +36,24 @@ POIS = [
     ("Chùa Vĩnh Nghiêm", "religious", 10.7901, 106.6827, 120, "Nam Kỳ Khởi Nghĩa, Quận 3", ["places"]),
     ("Landmark 81", "landmark", 10.7950, 106.7218, 200, "Điện Biên Phủ, Bình Thạnh", ["places", "technology"]),
     ("Bitexco Financial Tower", "landmark", 10.7716, 106.7044, 120, "Hải Triều, Quận 1", ["places"]),
-    ("AEON Mall Tân Phú", "supermarket", 10.8018, 106.6178, 300, "Tân Thắng, Tân Phú", ["food", "clothing", "technology"]),
-    ("Co.opmart Cống Quỳnh", "supermarket", 10.7680, 106.6890, 120, "Cống Quỳnh, Quận 1", ["food", "fruits-vegetables", "home"]),
+    (
+        "AEON Mall Tân Phú",
+        "supermarket",
+        10.8018,
+        106.6178,
+        300,
+        "Tân Thắng, Tân Phú",
+        ["food", "clothing", "technology"],
+    ),
+    (
+        "Co.opmart Cống Quỳnh",
+        "supermarket",
+        10.7680,
+        106.6890,
+        120,
+        "Cống Quỳnh, Quận 1",
+        ["food", "fruits-vegetables", "home"],
+    ),
     ("Công viên Văn hóa Đầm Sen", "park", 10.7680, 106.6380, 400, "Hòa Bình, Quận 11", ["nature", "sports", "animals"]),
     ("Khu du lịch Suối Tiên", "park", 10.8660, 106.8030, 500, "Xa lộ Hà Nội, TP. Thủ Đức", ["nature", "animals"]),
     ("Sân vận động Thống Nhất", "stadium", 10.7615, 106.6640, 200, "Đào Duy Từ, Quận 10", ["sports"]),
@@ -43,7 +67,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, **opts):
         for name, cat, lat, lng, radius, address, topics in POIS:
-            poi, _ = Poi.objects.update_or_create(name=name, defaults={
-                "category": cat, "lat": lat, "lng": lng, "radius_m": radius, "address": address})
+            poi, _ = Poi.objects.update_or_create(
+                name=name, defaults={"category": cat, "lat": lat, "lng": lng, "radius_m": radius, "address": address}
+            )
             poi.topics.set(Topic.objects.filter(slug__in=topics))
         self.stdout.write(self.style.SUCCESS(f"{len(POIS)} POI"))

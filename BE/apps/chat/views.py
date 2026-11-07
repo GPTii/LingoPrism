@@ -41,8 +41,15 @@ class GroupMessagesView(APIView):
         ser.is_valid(raise_exception=True)
         d = ser.validated_data
         try:
-            m = services.send_group_message(request.user, group_id, d["kind"], d.get("content", ""), d.get("sticker", ""),
-                                            d.get("badge", ""), d.get("client_id", ""))
+            m = services.send_group_message(
+                request.user,
+                group_id,
+                d["kind"],
+                d.get("content", ""),
+                d.get("sticker", ""),
+                d.get("badge", ""),
+                d.get("client_id", ""),
+            )
         except services.ChatError as e:
             return Response({"detail": str(e), "errors": {}}, status=400)
         return Response(services.group_message_payload(m), status=201)
@@ -67,8 +74,18 @@ class ConversationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = SupportConversation
-        fields = ["id", "subject", "status", "learner", "staff", "staff_name", "unread", "last_message",
-                  "created_at", "last_message_at"]
+        fields = [
+            "id",
+            "subject",
+            "status",
+            "learner",
+            "staff",
+            "staff_name",
+            "unread",
+            "last_message",
+            "created_at",
+            "last_message_at",
+        ]
         read_only_fields = ["id", "status", "learner", "staff", "staff_name", "created_at", "last_message_at"]
 
     def get_learner(self, obj):
@@ -85,8 +102,9 @@ class SendSupportSerializer(serializers.Serializer):
 
 
 @extend_schema(tags=["chat"])
-class SupportConversationViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.CreateModelMixin,
-                                 viewsets.GenericViewSet):
+class SupportConversationViewSet(
+    mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.CreateModelMixin, viewsets.GenericViewSet
+):
     """Learners see their own conversations; staff see all (support inbox)."""
 
     serializer_class = ConversationSerializer
@@ -97,14 +115,17 @@ class SupportConversationViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixi
             return SupportConversation.objects.none()
         user = self.request.user
         qs = SupportConversation.objects.select_related("learner", "staff").annotate(
-            unread=Count("messages", filter=Q(messages__read_at__isnull=True) & ~Q(messages__sender=user)))
+            unread=Count("messages", filter=Q(messages__read_at__isnull=True) & ~Q(messages__sender=user))
+        )
         qs = qs.order_by("-last_message_at")
         return qs if user.is_staff_role else qs.filter(learner=user)
 
     def create(self, request, *args, **kwargs):
         conv = SupportConversation.objects.filter(learner=request.user, status="open").first()
         if conv is None:
-            conv = SupportConversation.objects.create(learner=request.user, subject=request.data.get("subject") or "Hỗ trợ học tập")
+            conv = SupportConversation.objects.create(
+                learner=request.user, subject=request.data.get("subject") or "Hỗ trợ học tập"
+            )
         if request.data.get("content"):
             services.send_support_message(request.user, conv, request.data["content"])
         return Response(ConversationSerializer(self.get_queryset().get(pk=conv.pk)).data, status=201)
@@ -120,7 +141,9 @@ class SupportConversationViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixi
         ser = SendSupportSerializer(data=request.data)
         ser.is_valid(raise_exception=True)
         try:
-            m = services.send_support_message(request.user, conv, ser.validated_data["content"], ser.validated_data.get("client_id", ""))
+            m = services.send_support_message(
+                request.user, conv, ser.validated_data["content"], ser.validated_data.get("client_id", "")
+            )
         except services.ChatError as e:
             return Response({"detail": str(e), "errors": {}}, status=400)
         return Response(services.support_message_payload(m), status=201)
@@ -134,6 +157,7 @@ class SupportConversationViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixi
 
 
 # ------------------------------------------------------------------ private messages
+
 
 def _person(request, user):
     return {"id": user.id, "display_name": user.display_name, "avatar": user.avatar_url(request), "mascot": look(user)}
@@ -154,7 +178,9 @@ class OpenThreadSerializer(serializers.Serializer):
 
 
 @extend_schema(tags=["chat"])
-class DirectThreadViewSet(ActionThrottleMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+class DirectThreadViewSet(
+    ActionThrottleMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet
+):
     """Private messages between two learners who follow each other (see services.can_message)."""
 
     serializer_class = serializers.Serializer
@@ -165,17 +191,24 @@ class DirectThreadViewSet(ActionThrottleMixin, mixins.ListModelMixin, mixins.Ret
         if getattr(self, "swagger_fake_view", False):
             return DirectThread.objects.none()
         user = self.request.user
-        return (DirectThread.objects.filter(Q(user_a=user) | Q(user_b=user)).select_related("user_a", "user_b")
-                .annotate(unread=Count("messages", filter=Q(messages__read_at__isnull=True) & ~Q(messages__sender=user)))
-                .order_by("-last_message_at"))
+        return (
+            DirectThread.objects.filter(Q(user_a=user) | Q(user_b=user))
+            .select_related("user_a", "user_b")
+            .annotate(unread=Count("messages", filter=Q(messages__read_at__isnull=True) & ~Q(messages__sender=user)))
+            .order_by("-last_message_at")
+        )
 
     def _row(self, t):
         other = t.other(self.request.user)
         last = t.messages.order_by("-id").first()
-        return {"id": t.id, "other": _person(self.request, other), "unread": getattr(t, "unread", 0),
-                "can_message": services.can_message(self.request.user, other),
-                "last_message": services.direct_message_payload(last) if last else None,
-                "last_message_at": t.last_message_at.isoformat()}
+        return {
+            "id": t.id,
+            "other": _person(self.request, other),
+            "unread": getattr(t, "unread", 0),
+            "can_message": services.can_message(self.request.user, other),
+            "last_message": services.direct_message_payload(last) if last else None,
+            "last_message_at": t.last_message_at.isoformat(),
+        }
 
     def list(self, request):
         return Response([self._row(t) for t in self.get_queryset() if t.messages.exists()])
@@ -195,8 +228,11 @@ class DirectThreadViewSet(ActionThrottleMixin, mixins.ListModelMixin, mixins.Ret
         thread = services.thread_with(request.user, other)
         return Response(self._row(self.get_queryset().get(pk=thread.pk)), status=201)
 
-    @extend_schema(request=SendDirectSerializer, responses={200: dict},
-                   parameters=[OpenApiParameter("before", int, description="older than this message id")])
+    @extend_schema(
+        request=SendDirectSerializer,
+        responses={200: dict},
+        parameters=[OpenApiParameter("before", int, description="older than this message id")],
+    )
     @action(detail=True, methods=["get", "post"])
     def messages(self, request, pk=None):
         thread = self.get_object()
@@ -206,13 +242,16 @@ class DirectThreadViewSet(ActionThrottleMixin, mixins.ListModelMixin, mixins.Ret
                 qs = qs.filter(id__lt=before)
             msgs = list(qs[:50])[::-1]
             services.mark_direct_read(request.user, thread)
-            return Response({"results": [services.direct_message_payload(m) for m in msgs], "has_more": len(msgs) == 50})
+            return Response(
+                {"results": [services.direct_message_payload(m) for m in msgs], "has_more": len(msgs) == 50}
+            )
         ser = SendDirectSerializer(data=request.data)
         ser.is_valid(raise_exception=True)
         try:
             d = ser.validated_data
-            m = services.send_direct_message(request.user, thread, d.get("content", ""), d.get("client_id", ""),
-                                             d.get("sticker", ""))
+            m = services.send_direct_message(
+                request.user, thread, d.get("content", ""), d.get("client_id", ""), d.get("sticker", "")
+            )
         except services.ChatError as e:
             return Response({"detail": str(e), "errors": {}}, status=400)
         return Response(services.direct_message_payload(m), status=201)
@@ -224,7 +263,9 @@ class DirectThreadViewSet(ActionThrottleMixin, mixins.ListModelMixin, mixins.Ret
         ser = HeartSerializer(data=request.data)
         ser.is_valid(raise_exception=True)
         try:
-            return Response(services.heart_direct_message(request.user, self.get_object(), ser.validated_data["message"]))
+            return Response(
+                services.heart_direct_message(request.user, self.get_object(), ser.validated_data["message"])
+            )
         except services.ChatError as e:
             return Response({"detail": str(e), "errors": {}}, status=400)
 

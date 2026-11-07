@@ -11,6 +11,7 @@ Each simulated day a learner meets `new_per_day` new words and has a review budg
 *which* due cards get reviewed (by due date, or by VIP). Outcome: the true recall probability of every word
 at the end, overall and for the most visually confusable words.
 """
+
 import math
 import random
 from dataclasses import dataclass, field
@@ -45,7 +46,7 @@ class TrueMemory:
         p = self.p(t)
         ok = rng.random() < p
         if ok:
-            self.s = min(3650, self.s * (2.5 + 3 * (1 - p)) * math.sqrt(self.ability) / self.difficulty ** 0.3)
+            self.s = min(3650, self.s * (2.5 + 3 * (1 - p)) * math.sqrt(self.ability) / self.difficulty**0.3)
         else:
             self.s = max(0.5, 0.4 * self.s)
         return ok
@@ -70,11 +71,27 @@ def vip_components(card: Card, now: float) -> dict:
         r, diff = retrievability(t, s.stability), (s.difficulty - 1) / 9
     else:
         r, diff = recall_probability(t, s.interval_days or 1), min(1.0, s.lapses / max(s.repetitions, 1))
-    return {"forget": 1 - r, "difficulty": diff, "confidence": 1 - card.word["conf"], "confusion": card.word["confusion"]}
+    return {
+        "forget": 1 - r,
+        "difficulty": diff,
+        "confidence": 1 - card.word["conf"],
+        "confusion": card.word["confusion"],
+    }
 
 
-def run(words: list[dict], scheduler="sm2", priority="due", weights=None, vip_weights=None, learners=12,
-        days=60, new_per_day=8, budget=25, seed=0, retention=0.9) -> dict:
+def run(
+    words: list[dict],
+    scheduler="sm2",
+    priority="due",
+    weights=None,
+    vip_weights=None,
+    learners=12,
+    days=60,
+    new_per_day=8,
+    budget=25,
+    seed=0,
+    retention=0.9,
+) -> dict:
     """words: [{"slug", "level", "confusion", "conf"}]; returns mean final true recall, overall and for confusable words."""
     rng = random.Random(seed)
     sched = make_scheduler(scheduler, weights, retention)
@@ -85,7 +102,7 @@ def run(words: list[dict], scheduler="sm2", priority="due", weights=None, vip_we
         rng.shuffle(order)
         cards: list[Card] = []
         for day in range(days):
-            for w in order[day * new_per_day:(day + 1) * new_per_day]:  # learn new words
+            for w in order[day * new_per_day : (day + 1) * new_per_day]:  # learn new words
                 c = Card(w, TrueMemory(ability, word_difficulty(w["level"], w["confusion"])))
                 c.mem.first()
                 c.state, due = sched.review(CardState(), True, 4, T0 + timedelta(days=day), elapsed_days=0)
@@ -112,6 +129,11 @@ def run(words: list[dict], scheduler="sm2", priority="due", weights=None, vip_we
             if c.word["confusion"] >= 0.3:
                 finals_conf.append(p)
     mean = lambda xs: round(sum(xs) / len(xs), 4) if xs else None
-    return {"scheduler": scheduler, "priority": priority, "recall_all": mean(finals),
-            "recall_confusable": mean(finals_conf), "n_confusable": len(finals_conf) // max(learners, 1),
-            "reviews_per_learner": round(reviews / learners, 1)}
+    return {
+        "scheduler": scheduler,
+        "priority": priority,
+        "recall_all": mean(finals),
+        "recall_confusable": mean(finals_conf),
+        "n_confusable": len(finals_conf) // max(learners, 1),
+        "reviews_per_learner": round(reviews / learners, 1),
+    }

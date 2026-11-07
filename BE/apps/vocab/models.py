@@ -41,7 +41,11 @@ class Topic(TimeStampedModel):
     image = models.ImageField(upload_to="topics/", blank=True, null=True)
     audience = models.CharField(max_length=5, choices=Audience.choices, default=Audience.ALL)
     owner = models.ForeignKey(
-        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.CASCADE, related_name="topics",
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name="topics",
         help_text="Trống = chủ đề hệ thống",
     )
     visibility = models.CharField(max_length=7, choices=Visibility.choices, default=Visibility.PUBLIC)
@@ -72,11 +76,18 @@ class Word(TimeStampedModel):
     slug = models.SlugField(max_length=80, unique=True)
     image = models.ImageField(upload_to="words/", blank=True, null=True)
     image_url = models.URLField(blank=True)
-    image_credit = models.CharField(max_length=300, blank=True, help_text="Tác giả · giấy phép của ảnh (seed/concepts/images.csv)")
-    levels = models.JSONField(default=dict, blank=True,
-                              help_text='Cấp độ 1–4 theo ngôn ngữ học, VD {"en": 1, "zh": 2, "vi": 1} – seed/concepts/levels.csv')
+    image_credit = models.CharField(
+        max_length=300, blank=True, help_text="Tác giả · giấy phép của ảnh (seed/concepts/images.csv)"
+    )
+    levels = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text='Cấp độ 1–4 theo ngôn ngữ học, VD {"en": 1, "zh": 2, "vi": 1} – seed/concepts/levels.csv',
+    )
     image_source = models.URLField(max_length=500, blank=True, help_text="Trang gốc của ảnh trên Wikimedia Commons")
-    emoji = models.CharField(max_length=16, blank=True, help_text="Hình minh họa (emoji Unicode) cho trẻ em – seed/concepts/emoji.csv")
+    emoji = models.CharField(
+        max_length=16, blank=True, help_text="Hình minh họa (emoji Unicode) cho trẻ em – seed/concepts/emoji.csv"
+    )
     yolo_label = models.CharField(max_length=60, blank=True, db_index=True, help_text="Tên lớp YOLOv10 tương ứng")
     part_of_speech = models.CharField(max_length=6, choices=PartOfSpeech.choices, default=PartOfSpeech.NOUN)
     difficulty = models.PositiveSmallIntegerField(default=1, help_text="1 (dễ) – 5 (khó)")
@@ -92,7 +103,9 @@ class Word(TimeStampedModel):
 
     def save(self, *args, **kwargs):
         # every word sits on the 4-level path; a word added by hand starts at the level of its difficulty
-        self.levels = {lang: (self.levels or {}).get(lang) or min(max(self.difficulty, 1), 4) for lang in ("en", "zh", "vi")}
+        self.levels = {
+            lang: (self.levels or {}).get(lang) or min(max(self.difficulty, 1), 4) for lang in ("en", "zh", "vi")
+        }
         if kwargs.get("update_fields") is not None and "levels" not in kwargs["update_fields"]:
             kwargs["update_fields"] = [*kwargs["update_fields"], "levels"]
         super().save(*args, **kwargs)
@@ -127,7 +140,9 @@ class WordTranslation(TimeStampedModel):
     zhuyin = models.CharField(max_length=120, blank=True)
     measure_word = models.CharField(max_length=20, blank=True, help_text="Lượng từ, VD 隻 / 只")
     accepted_variants = models.JSONField(default=list, blank=True, help_text="Dạng viết khác được chấp nhận khi chấm")
-    regional_difference = models.BooleanField(default=False, help_text="Từ giản/phồn khác nhau theo vùng (VD 土豆/馬鈴薯)")
+    regional_difference = models.BooleanField(
+        default=False, help_text="Từ giản/phồn khác nhau theo vùng (VD 土豆/馬鈴薯)"
+    )
     meaning_vi = models.CharField(max_length=255, blank=True)
     meaning_en = models.CharField(max_length=255, blank=True)
     level = models.CharField(max_length=20, blank=True, help_text="HSK / TOCFL / CEFR")
@@ -165,15 +180,23 @@ class ExampleSentence(TimeStampedModel):
     source_id = models.CharField(max_length=40, blank=True)
     license = models.CharField(max_length=40, blank=True)
     status = models.CharField(max_length=8, choices=ReviewStatus.choices, default=ReviewStatus.DRAFT, db_index=True)
-    tokens = models.JSONField(default=list, blank=True,
-                              help_text='Từ đã tách: [{"t": "我们", "p": "wǒ men", "z": "ㄨㄛˇ ˙ㄇㄣ"}, {"t": "。", "x": 1}]')
+    tokens = models.JSONField(
+        default=list,
+        blank=True,
+        help_text='Từ đã tách: [{"t": "我们", "p": "wǒ men", "z": "ㄨㄛˇ ˙ㄇㄣ"}, {"t": "。", "x": 1}]',
+    )
     target_tokens = models.JSONField(default=list, blank=True, help_text="Vị trí các token là từ vựng `word`")
     checks = models.JSONField(default=dict, blank=True, help_text="errors / warnings của bộ kiểm tra tự động")
 
     class Meta:
         ordering = ["id"]
-        constraints = [models.UniqueConstraint(fields=["word", "language", "source", "source_id"],
-                                               condition=~models.Q(source_id=""), name="uniq_example_source")]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["word", "language", "source", "source_id"],
+                condition=~models.Q(source_id=""),
+                name="uniq_example_source",
+            )
+        ]
 
     def __str__(self):
         return self.text
@@ -236,7 +259,9 @@ class WordCandidate(TimeStampedModel):
     checks = models.JSONField(default=dict, blank=True, help_text="Kết quả kiểm tra nguồn lần gần nhất")
     note = models.CharField(max_length=300, blank=True)
     word = models.ForeignKey(Word, null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
-    reviewed_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
+    reviewed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
     reviewed_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:

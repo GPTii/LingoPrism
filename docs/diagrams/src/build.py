@@ -5,6 +5,7 @@ PNG next to it, and writes the index (docs/diagrams/README.md) and one Markdown 
     python docs/diagrams/src/build.py            # .mmd + PNG + README
     python docs/diagrams/src/build.py --no-png   # .mmd + README only
 """
+
 import json
 import re
 import sys
@@ -49,7 +50,7 @@ def quote_labels(code: str) -> str:
     (A[x (y)] is a Mermaid syntax error, A["x (y)"] is not). Cylinders A[(…)] and quoted labels stay as they are."""
     if "flowchart" not in code:
         return code
-    code = re.sub(r'\b([A-Za-z]\w*)\[(?![\"(])([^\[\]]*?)\]', r'\1["\2"]', code)
+    code = re.sub(r"\b([A-Za-z]\w*)\[(?![\"(])([^\[\]]*?)\]", r'\1["\2"]', code)
     code = re.sub(r'\b([A-Za-z]\w*)\{(?!")([^{}]*?)\}', r'\1{"\2"}', code)
     return re.sub(r'\(\[(?!")([^\]]*?)\]\)', r'(["\1"])', code)
 
@@ -92,11 +93,16 @@ def write_index(diagrams):
         rows[kind].append(f"| {title_of(code)} | [`{base}.mmd`]({kind}/{base}.mmd) | [PNG]({kind}/{base}.png) |")
     parts = [README_HEAD]
     for kind, label in KINDS.items():
-        parts.append(f"## {label} ({len(rows[kind])} sơ đồ)\n\n| Sơ đồ | Mã Mermaid | Ảnh |\n|---|---|---|\n" + "\n".join(rows[kind]))
+        parts.append(
+            f"## {label} ({len(rows[kind])} sơ đồ)\n\n| Sơ đồ | Mã Mermaid | Ảnh |\n|---|---|---|\n"
+            + "\n".join(rows[kind])
+        )
     (OUT / "README.md").write_text("\n\n".join(parts) + "\n", encoding="utf-8")
 
-    blocks = ["# Toàn bộ mã Mermaid\n\nMỗi khối dưới đây dán thẳng được vào draw.io "
-              "(Sắp xếp → Chèn → Nâng cao → Mermaid) hoặc mermaid.live."]
+    blocks = [
+        "# Toàn bộ mã Mermaid\n\nMỗi khối dưới đây dán thẳng được vào draw.io "
+        "(Sắp xếp → Chèn → Nâng cao → Mermaid) hoặc mermaid.live."
+    ]
     for kind, label in KINDS.items():
         blocks.append(f"## {label}")
         for name, code in diagrams.items():

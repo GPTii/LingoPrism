@@ -121,7 +121,11 @@ class DeviceViewSet(viewsets.GenericViewSet):
         ser.is_valid(raise_exception=True)
         DeviceToken.objects.update_or_create(
             token=ser.validated_data["token"],
-            defaults={"user": request.user, "platform": ser.validated_data["platform"], "last_active_at": timezone.now()},
+            defaults={
+                "user": request.user,
+                "platform": ser.validated_data["platform"],
+                "last_active_at": timezone.now(),
+            },
         )
         return Response({"registered": True}, status=201)
 

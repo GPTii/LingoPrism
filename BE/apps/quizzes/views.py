@@ -25,6 +25,7 @@ def normalize(text: str, chinese: bool) -> str:
 
 # ------------------------------------------------------------------ serializers
 
+
 class QuestionPublicSerializer(serializers.ModelSerializer):
     """What a learner sees while taking an exam (no correct answers)."""
 
@@ -45,8 +46,20 @@ class ExamListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Exam
-        fields = ["id", "title", "description", "language", "topic", "topic_name", "audience", "time_limit_minutes",
-                  "pass_percent", "question_count", "my_best", "created_at"]
+        fields = [
+            "id",
+            "title",
+            "description",
+            "language",
+            "topic",
+            "topic_name",
+            "audience",
+            "time_limit_minutes",
+            "pass_percent",
+            "question_count",
+            "my_best",
+            "created_at",
+        ]
 
     def get_my_best(self, obj):
         user = self.context["request"].user
@@ -67,10 +80,14 @@ class AnswerResultSerializer(serializers.ModelSerializer):
     def get_question(self, obj):
         q = obj.exam_question.question
         return {
-            "id": q.id, "kind": q.kind, "prompt": q.prompt, "image_url": q.image_url,
+            "id": q.id,
+            "kind": q.kind,
+            "prompt": q.prompt,
+            "image_url": q.image_url,
             "options": [o["text"] for o in q.options],
             "correct_option": next((i for i, o in enumerate(q.options) if o.get("correct")), None),
-            "accepted_answers": q.accepted_answers, "explanation": q.explanation,
+            "accepted_answers": q.accepted_answers,
+            "explanation": q.explanation,
             "points": obj.exam_question.points,
         }
 
@@ -84,8 +101,22 @@ class SubmissionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Submission
-        fields = ["id", "exam", "exam_title", "user_email", "status", "started_at", "submitted_at", "score", "max_score",
-                  "percent", "passed", "feedback", "graded_at", "answers"]
+        fields = [
+            "id",
+            "exam",
+            "exam_title",
+            "user_email",
+            "status",
+            "started_at",
+            "submitted_at",
+            "score",
+            "max_score",
+            "percent",
+            "passed",
+            "feedback",
+            "graded_at",
+            "answers",
+        ]
 
     def get_passed(self, obj):
         return obj.status == Submission.Status.GRADED and obj.percent >= obj.exam.pass_percent
@@ -117,6 +148,7 @@ class GradeSerializer(serializers.Serializer):
 
 # ------------------------------------------------------------------ learner
 
+
 def _recompute(sub: Submission):
     answers = list(sub.answers.select_related("exam_question"))
     sub.max_score = sum((a.exam_question.points for a in answers), Decimal("0"))
@@ -133,7 +165,11 @@ class ExamViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.Gen
         if getattr(self, "swagger_fake_view", False):
             return Exam.objects.none()
         user = self.request.user
-        qs = Exam.objects.filter(is_published=True).annotate(question_count=Count("exam_questions")).prefetch_related("submissions")
+        qs = (
+            Exam.objects.filter(is_published=True)
+            .annotate(question_count=Count("exam_questions"))
+            .prefetch_related("submissions")
+        )
         lang = self.request.query_params.get("language")
         if lang:
             qs = qs.filter(language_id=lang)
@@ -153,11 +189,16 @@ class ExamViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.Gen
         sub = Submission.objects.filter(user=request.user, exam=exam, status=Submission.Status.IN_PROGRESS).first()
         sub = sub or Submission.objects.create(user=request.user, exam=exam)
         eqs = exam.exam_questions.select_related("question")
-        return Response({
-            "submission": sub.id, "started_at": sub.started_at, "time_limit_minutes": exam.time_limit_minutes,
-            "title": exam.title, "language": exam.language_id,
-            "questions": [{"points": eq.points, **QuestionPublicSerializer(eq.question).data} for eq in eqs],
-        })
+        return Response(
+            {
+                "submission": sub.id,
+                "started_at": sub.started_at,
+                "time_limit_minutes": exam.time_limit_minutes,
+                "title": exam.title,
+                "language": exam.language_id,
+                "questions": [{"points": eq.points, **QuestionPublicSerializer(eq.question).data} for eq in eqs],
+            }
+        )
 
 
 @extend_schema(tags=["exams"])
@@ -182,7 +223,9 @@ class SubmissionViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewse
         with transaction.atomic():
             for eq in sub.exam.exam_questions.select_related("question"):
                 q, a = eq.question, given.get(eq.question_id, {})
-                ans = Answer(submission=sub, exam_question=eq, selected_option=a.get("selected_option"), text=a.get("text", ""))
+                ans = Answer(
+                    submission=sub, exam_question=eq, selected_option=a.get("selected_option"), text=a.get("text", "")
+                )
                 if q.kind == Question.Kind.MCQ:
                     correct_idx = next((i for i, o in enumerate(q.options) if o.get("correct")), None)
                     ans.is_correct = ans.selected_option is not None and ans.selected_option == correct_idx
@@ -208,11 +251,24 @@ class SubmissionViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewse
 
 # ------------------------------------------------------------------ staff
 
+
 class AdminQuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Question
-        fields = ["id", "kind", "language", "topic", "word", "prompt", "image_url", "options", "accepted_answers",
-                  "explanation", "difficulty", "created_at"]
+        fields = [
+            "id",
+            "kind",
+            "language",
+            "topic",
+            "word",
+            "prompt",
+            "image_url",
+            "options",
+            "accepted_answers",
+            "explanation",
+            "difficulty",
+            "created_at",
+        ]
 
     def validate(self, attrs):
         kind = attrs.get("kind", getattr(self.instance, "kind", None))
@@ -220,7 +276,9 @@ class AdminQuestionSerializer(serializers.ModelSerializer):
             opts = attrs.get("options", getattr(self.instance, "options", []))
             if len(opts) < 2 or sum(1 for o in opts if o.get("correct")) != 1:
                 raise serializers.ValidationError("Câu trắc nghiệm cần ít nhất 2 phương án và đúng 1 đáp án đúng")
-        if kind == Question.Kind.FILL and not attrs.get("accepted_answers", getattr(self.instance, "accepted_answers", [])):
+        if kind == Question.Kind.FILL and not attrs.get(
+            "accepted_answers", getattr(self.instance, "accepted_answers", [])
+        ):
             raise serializers.ValidationError("Câu điền từ cần ít nhất 1 đáp án")
         return attrs
 
@@ -232,12 +290,33 @@ class AdminExamSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Exam
-        fields = ["id", "title", "description", "language", "topic", "audience", "time_limit_minutes", "pass_percent",
-                  "is_published", "question_ids", "questions", "submission_count", "created_at"]
+        fields = [
+            "id",
+            "title",
+            "description",
+            "language",
+            "topic",
+            "audience",
+            "time_limit_minutes",
+            "pass_percent",
+            "is_published",
+            "question_ids",
+            "questions",
+            "submission_count",
+            "created_at",
+        ]
 
     def get_questions(self, obj):
-        return [{"id": eq.question_id, "points": eq.points, "order": eq.order, "kind": eq.question.kind,
-                 "prompt": eq.question.prompt} for eq in obj.exam_questions.select_related("question")]
+        return [
+            {
+                "id": eq.question_id,
+                "points": eq.points,
+                "order": eq.order,
+                "kind": eq.question.kind,
+                "prompt": eq.question.prompt,
+            }
+            for eq in obj.exam_questions.select_related("question")
+        ]
 
     def _set_questions(self, exam, ids):
         ExamQuestion.objects.filter(exam=exam).delete()
@@ -284,7 +363,9 @@ class AdminExamViewSet(BulkDeleteMixin, viewsets.ModelViewSet):
     search_fields = ["title"]
 
     def get_queryset(self):
-        return Exam.objects.annotate(submission_count=Count("submissions", filter=~Q(submissions__status="in_progress")))
+        return Exam.objects.annotate(
+            submission_count=Count("submissions", filter=~Q(submissions__status="in_progress"))
+        )
 
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
@@ -326,6 +407,11 @@ class AdminSubmissionViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, v
                 sub.graded_by, sub.graded_at = request.user, timezone.now()
             sub.save()
         if sub.status == Submission.Status.GRADED:
-            notify(sub.user, Notification.Kind.EXAM, "Bài kiểm tra đã được chấm",
-                   f"{sub.exam.title}: {sub.score}/{sub.max_score} điểm", data={"route": f"/exams/results/{sub.id}"})
+            notify(
+                sub.user,
+                Notification.Kind.EXAM,
+                "Bài kiểm tra đã được chấm",
+                f"{sub.exam.title}: {sub.score}/{sub.max_score} điểm",
+                data={"route": f"/exams/results/{sub.id}"},
+            )
         return Response(SubmissionSerializer(sub).data)

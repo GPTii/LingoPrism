@@ -15,7 +15,13 @@ LANGUAGES = [
     ("zh-Hant", "Tiếng Trung phồn thể (Đài Loan)", "繁體中文", "zh-TW", 4),
 ]
 TRANSLATION_FIELDS = [
-    "ipa", "pinyin", "pinyin_numbered", "zhuyin", "measure_word", "level", "meaning_en",
+    "ipa",
+    "pinyin",
+    "pinyin_numbered",
+    "zhuyin",
+    "measure_word",
+    "level",
+    "meaning_en",
 ]
 
 
@@ -71,20 +77,31 @@ class Command(BaseCommand):
         ced = sources.cedict()
         with open(path, encoding="utf-8") as fh:
             for row in csv.DictReader(fh):
-                for field, banned, label in (("name_zh_hans", ced.traditional_only, "phồn thể"),
-                                             ("name_zh_hant", ced.simplified_only, "giản thể")):
+                for field, banned, label in (
+                    ("name_zh_hans", ced.traditional_only, "phồn thể"),
+                    ("name_zh_hant", ced.simplified_only, "giản thể"),
+                ):
                     bad = [ch for ch in row[field] if ch in banned]
                     in_dict = row[field] in (ced.by_simp if field == "name_zh_hans" else ced.by_trad)
                     if bad or not in_dict:
-                        self.stdout.write(self.style.ERROR(
-                            f"Chủ đề {row['slug']}: '{row[field]}' " + (f"lẫn chữ {label}" if bad else "không có trong CC-CEDICT")))
+                        self.stdout.write(
+                            self.style.ERROR(
+                                f"Chủ đề {row['slug']}: '{row[field]}' "
+                                + (f"lẫn chữ {label}" if bad else "không có trong CC-CEDICT")
+                            )
+                        )
                 Topic.objects.update_or_create(
                     slug=row["slug"],
                     defaults={
-                        "order": int(row["order"]), "icon": row["icon"], "audience": row["audience"],
-                        "name_vi": row["name_vi"], "name_en": row["name_en"],
-                        "name_zh_hans": row["name_zh_hans"], "name_zh_hant": row["name_zh_hant"],
-                        "owner": None, "visibility": Topic.Visibility.PUBLIC,
+                        "order": int(row["order"]),
+                        "icon": row["icon"],
+                        "audience": row["audience"],
+                        "name_vi": row["name_vi"],
+                        "name_en": row["name_en"],
+                        "name_zh_hans": row["name_zh_hans"],
+                        "name_zh_hant": row["name_zh_hant"],
+                        "owner": None,
+                        "visibility": Topic.Visibility.PUBLIC,
                     },
                 )
 
@@ -103,7 +120,9 @@ class Command(BaseCommand):
         word, _ = Word.objects.update_or_create(
             slug=row["slug"],
             defaults={
-                "yolo_label": row["yolo_label"], "part_of_speech": row["pos"], "audience": row["audience"],
+                "yolo_label": row["yolo_label"],
+                "part_of_speech": row["pos"],
+                "audience": row["audience"],
                 "difficulty": int(row["difficulty"] or 1),
             },
         )
@@ -128,8 +147,13 @@ class Command(BaseCommand):
         issues = [{"level": "error", "message": m} for m in data["errors"]]
         issues += [{"level": "warning", "message": m} for m in data["warnings"]]
         tr = WordTranslation.objects.filter(word=word, language_id=code).first()
-        if tr and tr.text == data["text"] and (
-            tr.status == ReviewStatus.REJECTED or (tr.status == ReviewStatus.VERIFIED and tr.verified_method == "manual")
+        if (
+            tr
+            and tr.text == data["text"]
+            and (
+                tr.status == ReviewStatus.REJECTED
+                or (tr.status == ReviewStatus.VERIFIED and tr.verified_method == "manual")
+            )
         ):
             tr.issues, tr.sources = issues, data["sources"]
             tr.save(update_fields=["issues", "sources", "updated_at"])
@@ -184,8 +208,12 @@ class Command(BaseCommand):
                 continue
             credit = " · ".join(x for x in (row["author"], row["license"]) if x)
             name = f"seed_{word.slug}.jpg"
-            fresh = (word.image and word.image.name == f"words/{name}" and word.image.storage.exists(word.image.name)
-                     and word.image.size == src.stat().st_size)
+            fresh = (
+                word.image
+                and word.image.name == f"words/{name}"
+                and word.image.storage.exists(word.image.name)
+                and word.image.size == src.stat().st_size
+            )
             if not fresh:
                 if word.image:
                     word.image.delete(save=False)

@@ -12,6 +12,7 @@
 Result: ``seed/concepts/levels.csv`` (committed, with the evidence: frequency per million sentences and HSK band).
 A row can be overridden by hand in the ``override_*`` columns with a ``note``; ``build_vocab`` loads the levels.
 """
+
 import csv
 import re
 from collections import Counter
@@ -23,8 +24,20 @@ from apps.vocab.lang import sources, vietnamese
 from apps.vocab.management.commands import import_tatoeba as tat
 
 LEVELS = 4
-FIELDS = ["slug", "en", "zh", "vi", "en_per_m", "zh_per_m", "zh_hsk", "vi_per_m", "override_en", "override_zh",
-          "override_vi", "note"]
+FIELDS = [
+    "slug",
+    "en",
+    "zh",
+    "vi",
+    "en_per_m",
+    "zh_per_m",
+    "zh_hsk",
+    "vi_per_m",
+    "override_en",
+    "override_zh",
+    "override_vi",
+    "note",
+]
 CLASSIFIERS = {"con", "cái", "quả", "chiếc", "quyển", "cuốn", "cây", "bông", "tờ", "đôi", "bộ", "hòn", "ngôi", "màu"}
 _LATIN = re.compile(r"[a-zà-ỹđ']+", re.I)
 
@@ -32,7 +45,7 @@ _LATIN = re.compile(r"[a-zà-ỹđ']+", re.I)
 def ngrams(tokens, n_max):
     for n in range(1, n_max + 1):
         for i in range(len(tokens) - n + 1):
-            yield " ".join(tokens[i:i + n])
+            yield " ".join(tokens[i : i + n])
 
 
 def quartile_levels(freq: dict[str, float]) -> dict[str, int]:
@@ -70,15 +83,25 @@ class Command(BaseCommand):
         self.stdout.write("Đếm tần suất…")
         en_f = self._latin_freq(loader, "eng", natives["eng"], {w["en"].lower() for w in words}, 3, lambda s: s.lower())
         vi_forms = {w["slug"]: self._vi_forms(w["vi"]) for w in words}
-        vi_f = self._latin_freq(loader, "vie", None, {f for fs in vi_forms.values() for f in fs}, 6,
-                                lambda s: vietnamese.normalize(s).lower())
+        vi_f = self._latin_freq(
+            loader,
+            "vie",
+            None,
+            {f for fs in vi_forms.values() for f in fs},
+            6,
+            lambda s: vietnamese.normalize(s).lower(),
+        )
         zh_f = self._zh_freq(loader, natives["cmn"], {w["zh_hans"] for w in words} | {w["zh_hant"] for w in words})
 
         hsk = sources.hsk()
         en_per = {w["slug"]: en_f.get(w["en"].lower(), 0) for w in words}
         vi_per = {s: max(vi_f.get(f, 0) for f in fs) for s, fs in vi_forms.items()}
-        zh_per = {w["slug"]: zh_f.get(w["zh_hans"], 0) + zh_f.get(w["zh_hant"], 0) if w["zh_hans"] != w["zh_hant"]
-                  else zh_f.get(w["zh_hans"], 0) for w in words}
+        zh_per = {
+            w["slug"]: zh_f.get(w["zh_hans"], 0) + zh_f.get(w["zh_hant"], 0)
+            if w["zh_hans"] != w["zh_hant"]
+            else zh_f.get(w["zh_hans"], 0)
+            for w in words
+        }
         en_lv, zh_freq_lv = quartile_levels(en_per), quartile_levels(zh_per)
         seen_vi = quartile_levels({s: f for s, f in vi_per.items() if f > 0})
         vi_lv = {s: seen_vi.get(s, en_lv[s]) for s in vi_per}
@@ -88,13 +111,19 @@ class Command(BaseCommand):
             s = w["slug"]
             band = hsk.level(w["zh_hans"]) or ""
             old = overrides.get(s, {})
-            rows.append({
-                "slug": s, "en": en_lv[s], "vi": vi_lv[s],
-                "zh": lv if (lv := hsk_level(band)) and lv <= 3 else max(2, zh_freq_lv[s]),
-                "en_per_m": f"{en_per[s]:.1f}", "zh_per_m": f"{zh_per[s]:.1f}", "zh_hsk": band,
-                "vi_per_m": f"{vi_per[s]:.1f}",
-                **{k: old.get(k, "") for k in ("override_en", "override_zh", "override_vi", "note")},
-            })
+            rows.append(
+                {
+                    "slug": s,
+                    "en": en_lv[s],
+                    "vi": vi_lv[s],
+                    "zh": lv if (lv := hsk_level(band)) and lv <= 3 else max(2, zh_freq_lv[s]),
+                    "en_per_m": f"{en_per[s]:.1f}",
+                    "zh_per_m": f"{zh_per[s]:.1f}",
+                    "zh_hsk": band,
+                    "vi_per_m": f"{vi_per[s]:.1f}",
+                    **{k: old.get(k, "") for k in ("override_en", "override_zh", "override_vi", "note")},
+                }
+            )
         with open(path, "w", encoding="utf-8", newline="") as fh:
             out = csv.DictWriter(fh, fieldnames=FIELDS, lineterminator="\n")
             out.writeheader()
@@ -123,7 +152,9 @@ class Command(BaseCommand):
             for g in seen:
                 if g in wanted:
                     counts[g] += 1
-                elif lang == "eng" and (g.endswith("s") and (g[:-1] in wanted or g.endswith("es") and g[:-2] in wanted)):
+                elif lang == "eng" and (
+                    g.endswith("s") and (g[:-1] in wanted or g.endswith("es") and g[:-2] in wanted)
+                ):
                     counts[g[:-2] if g.endswith("es") and g[:-2] in wanted else g[:-1]] += 1
         return {k: v * 1e6 / max(total, 1) for k, v in counts.items()}
 

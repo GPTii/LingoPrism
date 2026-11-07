@@ -71,15 +71,28 @@ class DetectionItem(models.Model):
     selected = models.BooleanField(default=False)
     feedback = models.CharField(max_length=7, choices=Feedback.choices, default=Feedback.UNKNOWN)
     corrected_label = models.CharField(max_length=80, blank=True, help_text="Nhãn đúng do người dùng chọn khi sai")
-    corrected_word = models.ForeignKey(Word, null=True, blank=True, on_delete=models.SET_NULL, related_name="+",
-                                       help_text="Từ người dùng chọn sau khi gõ tên tiếng Việt")
+    corrected_word = models.ForeignKey(
+        Word,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        help_text="Từ người dùng chọn sau khi gõ tên tiếng Việt",
+    )
     corrected_text = models.CharField(max_length=80, blank=True, help_text="Tên tiếng Việt người dùng gõ")
     manual = models.BooleanField(default=False, help_text="Đồ vật model bỏ sót, người dùng tự thêm (không có khung)")
 
     class Meta:
         ordering = ["-confidence"]
-    learned_from = models.ForeignKey("CorrectionMemory", null=True, blank=True, on_delete=models.SET_NULL,
-                                     related_name="applied", help_text="Nhãn đã được sửa tự động theo báo lỗi trước đó")
+
+    learned_from = models.ForeignKey(
+        "CorrectionMemory",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="applied",
+        help_text="Nhãn đã được sửa tự động theo báo lỗi trước đó",
+    )
 
 
 class CorrectionMemory(models.Model):
@@ -103,8 +116,9 @@ class CorrectionMemory(models.Model):
     crop = models.ImageField(upload_to="corrections/%Y/%m/", null=True, blank=True)
     status = models.CharField(max_length=8, choices=Status.choices, default=Status.PENDING, db_index=True)
     disputes = models.PositiveIntegerField(default=0, help_text="Số lần người khác báo lần sửa tự động này là sai")
-    reviewed_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL,
-                                    related_name="+")
+    reviewed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
     reviewed_at = models.DateTimeField(null=True, blank=True)
     exported_at = models.DateTimeField(null=True, blank=True, help_text="Đã xuất làm dữ liệu train")
     created_at = models.DateTimeField(default=timezone.now)

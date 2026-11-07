@@ -10,30 +10,36 @@ from apps.vocab.models import Language, ReviewStatus, Topic, TopicWord, Word, Wo
 # ------------------------------------------------------------------ pure functions
 
 
-@pytest.mark.parametrize("numbered, marked", [
-    ("ma3 ling2 shu3", "mǎ líng shǔ"),
-    ("lu:4 se4", "lǜ sè"),
-    ("tou2 fa5", "tóu fa"),
-    ("xiong2 mao1", "xióng māo"),
-    ("gou3", "gǒu"),
-    ("liu2", "liú"),
-    ("gui4", "guì"),
-])
+@pytest.mark.parametrize(
+    "numbered, marked",
+    [
+        ("ma3 ling2 shu3", "mǎ líng shǔ"),
+        ("lu:4 se4", "lǜ sè"),
+        ("tou2 fa5", "tóu fa"),
+        ("xiong2 mao1", "xióng māo"),
+        ("gou3", "gǒu"),
+        ("liu2", "liú"),
+        ("gui4", "guì"),
+    ],
+)
 def test_numbered_to_marked(numbered, marked):
     assert py.numbered_to_marked(numbered) == marked
     assert py.marked_to_numbered(marked) == numbered.replace("u:", "ü")
 
 
-@pytest.mark.parametrize("numbered, zhuyin", [
-    ("ma3 ling2 shu3", "ㄇㄚˇ ㄌㄧㄥˊ ㄕㄨˇ"),
-    ("tou2 fa5", "ㄊㄡˊ ˙ㄈㄚ"),
-    ("zhi1 zhu1", "ㄓ ㄓㄨ"),
-    ("ju2 se4", "ㄐㄩˊ ㄙㄜˋ"),
-    ("yu3", "ㄩˇ"),
-    ("xiong2", "ㄒㄩㄥˊ"),
-    ("wei2 bo1 lu2", "ㄨㄟˊ ㄅㄛ ㄌㄨˊ"),
-    ("le4 se4", "ㄌㄜˋ ㄙㄜˋ"),
-])
+@pytest.mark.parametrize(
+    "numbered, zhuyin",
+    [
+        ("ma3 ling2 shu3", "ㄇㄚˇ ㄌㄧㄥˊ ㄕㄨˇ"),
+        ("tou2 fa5", "ㄊㄡˊ ˙ㄈㄚ"),
+        ("zhi1 zhu1", "ㄓ ㄓㄨ"),
+        ("ju2 se4", "ㄐㄩˊ ㄙㄜˋ"),
+        ("yu3", "ㄩˇ"),
+        ("xiong2", "ㄒㄩㄥˊ"),
+        ("wei2 bo1 lu2", "ㄨㄟˊ ㄅㄛ ㄌㄨˊ"),
+        ("le4 se4", "ㄌㄜˋ ㄙㄜˋ"),
+    ],
+)
 def test_zhuyin(numbered, zhuyin):
     assert py.numbered_to_zhuyin(numbered) == zhuyin
 
@@ -44,10 +50,21 @@ def test_ipa():
     assert arpabet_to_ipa("T R AE1 F IH0 K | L AY1 T".split()) == "ˈtræfɪk laɪt"
 
 
-@pytest.mark.parametrize("raw, expected", [
-    ("hoà", "hòa"), ("thuỷ", "thủy"), ("khoẻ", "khỏe"), ("hoàn", "hoàn"), ("người", "người"),
-    ("quý", "quý"), ("giỏ", "giỏ"), ("xoài", "xoài"), ("chuối", "chuối"), ("của", "của"),
-])
+@pytest.mark.parametrize(
+    "raw, expected",
+    [
+        ("hoà", "hòa"),
+        ("thuỷ", "thủy"),
+        ("khoẻ", "khỏe"),
+        ("hoàn", "hoàn"),
+        ("người", "người"),
+        ("quý", "quý"),
+        ("giỏ", "giỏ"),
+        ("xoài", "xoài"),
+        ("chuối", "chuối"),
+        ("của", "của"),
+    ],
+)
 def test_vietnamese_tone_placement(raw, expected):
     assert vietnamese.normalize(raw) == expected
 
@@ -58,13 +75,16 @@ needs_sources = pytest.mark.skipif(not sources.sources_available(), reason="ch�
 
 
 @needs_sources
-@pytest.mark.parametrize("hans, hant, en, regional", [
-    ("头发", "頭髮", ["hair"], False),
-    ("面条", "麵條", ["noodles"], False),
-    ("猫", "貓", ["cat"], False),
-    ("土豆", "馬鈴薯", ["potato"], True),
-    ("出租车", "計程車", ["taxi"], True),
-])
+@pytest.mark.parametrize(
+    "hans, hant, en, regional",
+    [
+        ("头发", "頭髮", ["hair"], False),
+        ("面条", "麵條", ["noodles"], False),
+        ("猫", "貓", ["cat"], False),
+        ("土豆", "馬鈴薯", ["potato"], True),
+        ("出租车", "計程車", ["taxi"], True),
+    ],
+)
 def test_golden_pairs_verify(hans, hant, en, regional):
     from apps.vocab.lang import checks
 
@@ -169,7 +189,9 @@ def test_error_reports_flag_after_threshold(vocab, db):
         u = User.objects.create_user(f"u{i}@example.com", "Strong!Pass123")
         c = APIClient()
         c.force_authenticate(u)
-        res = c.post("/api/v1/reports/", {"word": tr.word_id, "translation": tr.id, "reason": "wrong_character"}, format="json")
+        res = c.post(
+            "/api/v1/reports/", {"word": tr.word_id, "translation": tr.id, "reason": "wrong_character"}, format="json"
+        )
         assert res.status_code == 201
     tr.refresh_from_db()
     assert tr.status == ReviewStatus.FLAGGED
@@ -189,7 +211,6 @@ def test_admin_translation_verify(vocab, db):
 # ---------------------------------------------------------------- example sentences (Tatoeba)
 
 
-
 @needs_sources
 def test_sentence_segmentation_and_pinyin():
     from apps.vocab.lang import sentences as sl
@@ -204,11 +225,14 @@ def test_sentence_segmentation_and_pinyin():
 
 
 @needs_sources
-@pytest.mark.parametrize("text,script", [
-    ("你在圣誕節去教堂嗎？", "hant"),  # 圣 is the simplified form of 聖
-    ("他看着我。", "hant"),            # Taiwan writes 著
-    ("我們去學校。", "hans"),
-])
+@pytest.mark.parametrize(
+    "text,script",
+    [
+        ("你在圣誕節去教堂嗎？", "hant"),  # 圣 is the simplified form of 聖
+        ("他看着我。", "hant"),  # Taiwan writes 著
+        ("我們去學校。", "hans"),
+    ],
+)
 def test_sentence_mixed_script_is_flagged(text, script):
     from apps.vocab.lang import sentences as sl
 
@@ -268,8 +292,15 @@ def test_candidate_queue_needs_review_and_checks(db, tmp_path, monkeypatch):
         Language.objects.get_or_create(code=code, defaults={"name": code, "native_name": code, "tts_locale": code})
     Topic.objects.create(slug="time", name_vi="Thời gian")
     staff = User.objects.create_user("t@example.com", "Strong!Pass123", role="staff")
-    c = WordCandidate.objects.create(zh_hans="半夜", zh_hant="半夜", pinyin="bàn yè", hsk_level=2,
-                                     glosses=["midnight", "in the middle of the night"], en="midnight", vi="")
+    c = WordCandidate.objects.create(
+        zh_hans="半夜",
+        zh_hant="半夜",
+        pinyin="bàn yè",
+        hsk_level=2,
+        glosses=["midnight", "in the middle of the night"],
+        en="midnight",
+        vi="",
+    )
     client = APIClient()
     client.force_authenticate(staff)
     res = client.post(f"/api/v1/admin/candidates/{c.id}/approve/")
@@ -281,7 +312,11 @@ def test_candidate_queue_needs_review_and_checks(db, tmp_path, monkeypatch):
     assert res.status_code == 200 and res.data["status"] == "approved"
     word = Word.objects.get(slug="midnight")
     assert set(word.translations.values_list("language_id", "status")) == {
-        ("vi", "verified"), ("en", "verified"), ("zh-Hans", "verified"), ("zh-Hant", "verified")}
+        ("vi", "verified"),
+        ("en", "verified"),
+        ("zh-Hans", "verified"),
+        ("zh-Hant", "verified"),
+    }
     assert word.levels["zh"] == 2 and "半夜" in (tmp_path / "approved.csv").read_text(encoding="utf-8")
 
 
@@ -289,19 +324,20 @@ def test_own_topic_add_and_remove_words_even_if_already_saved(vocab, learner):
     user, client = learner
     cat = Word.objects.get(slug="cat")
     client.post("/api/v1/my-words/", {"word": cat.id, "source": "manual"}, format="json")  # already in my library
-    mine = client.post("/api/v1/topics/", {"name_vi": "Thú cưng", "icon": "🐱", "visibility": "private"}, format="json").data
-    assert client.post(f"/api/v1/topics/{mine["id"]}/words/{cat.id}/").data == {"added": True}
-    assert [c["slug"] for c in client.get(f"/api/v1/topics/{mine["id"]}/words/").data["results"]] == ["cat"]
+    mine = client.post(
+        "/api/v1/topics/", {"name_vi": "Thú cưng", "icon": "🐱", "visibility": "private"}, format="json"
+    ).data
+    assert client.post(f"/api/v1/topics/{mine['id']}/words/{cat.id}/").data == {"added": True}
+    assert [c["slug"] for c in client.get(f"/api/v1/topics/{mine['id']}/words/").data["results"]] == ["cat"]
     assert [c["slug"] for c in client.get("/api/v1/my-words/", {"topic": mine["id"]}).data["results"]] == ["cat"]
     assert next(t for t in client.get("/api/v1/topics/").data["results"] if t["id"] == mine["id"])["word_count"] == 1
     # someone else cannot change my topic; a word without a checked translation is refused
     other = User.objects.create_user("o@example.com", "Strong!Pass123")
     co = APIClient()
     co.force_authenticate(other)
-    assert co.post(f"/api/v1/topics/{mine["id"]}/words/{cat.id}/").status_code in (403, 404)
+    assert co.post(f"/api/v1/topics/{mine['id']}/words/{cat.id}/").status_code in (403, 404)
     dog = Word.objects.get(slug="dog")  # its zh-Hant is flagged
-    assert client.post(f"/api/v1/topics/{mine["id"]}/words/{dog.id}/").status_code == 400
-    assert client.delete(f"/api/v1/topics/{mine["id"]}/words/{cat.id}/").status_code == 204
-    assert client.get(f"/api/v1/topics/{mine["id"]}/words/").data["results"] == []
+    assert client.post(f"/api/v1/topics/{mine['id']}/words/{dog.id}/").status_code == 400
+    assert client.delete(f"/api/v1/topics/{mine['id']}/words/{cat.id}/").status_code == 204
+    assert client.get(f"/api/v1/topics/{mine['id']}/words/").data["results"] == []
     assert client.get("/api/v1/my-words/").data["count"] == 1  # still in my library
-

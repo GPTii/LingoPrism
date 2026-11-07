@@ -1,5 +1,6 @@
 """Group assignments API (/assignments/). Leaders of a group (its creator, members it promoted) create, give and mark
 assignments; members do them. Children's accounts are not in study groups at all (community.views.NotKid)."""
+
 import json
 from decimal import Decimal
 
@@ -41,8 +42,11 @@ class QuestionSerializer(serializers.ModelSerializer):
             d["options"] = [{"text": str(o["text"]).strip()[:500], "correct": bool(o.get("correct"))} for o in opts]
         else:
             d["options"] = []
-        d["accepted_answers"] = ([str(x).strip()[:200] for x in d.get("accepted_answers") or [] if str(x).strip()]
-                                 if d["kind"] == "fill" else [])
+        d["accepted_answers"] = (
+            [str(x).strip()[:200] for x in d.get("accepted_answers") or [] if str(x).strip()]
+            if d["kind"] == "fill"
+            else []
+        )
         return d
 
 
@@ -52,8 +56,17 @@ class AssignmentWriteSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Assignment
-        fields = ["group", "title", "instructions", "due_at", "points", "allow_late", "show_answers", "ai_generated",
-                  "questions"]
+        fields = [
+            "group",
+            "title",
+            "instructions",
+            "due_at",
+            "points",
+            "allow_late",
+            "show_answers",
+            "ai_generated",
+            "questions",
+        ]
 
     def validate_points(self, v):
         if v <= 0:
@@ -63,11 +76,21 @@ class AssignmentWriteSerializer(serializers.ModelSerializer):
 
 def _replace_questions(assignment, questions):
     assignment.questions.all().delete()
-    AssignmentQuestion.objects.bulk_create([
-        AssignmentQuestion(assignment=assignment, order=i, kind=q["kind"], prompt=q["prompt"].strip()[:5000],
-                           options=q.get("options", []), accepted_answers=q.get("accepted_answers", []),
-                           points=q.get("points") or Decimal("1"), explanation=q.get("explanation", "")[:2000])
-        for i, q in enumerate(questions)])
+    AssignmentQuestion.objects.bulk_create(
+        [
+            AssignmentQuestion(
+                assignment=assignment,
+                order=i,
+                kind=q["kind"],
+                prompt=q["prompt"].strip()[:5000],
+                options=q.get("options", []),
+                accepted_answers=q.get("accepted_answers", []),
+                points=q.get("points") or Decimal("1"),
+                explanation=q.get("explanation", "")[:2000],
+            )
+            for i, q in enumerate(questions)
+        ]
+    )
 
 
 @extend_schema(tags=["classwork"])
@@ -99,10 +122,21 @@ class AssignmentViewSet(ActionThrottleMixin, viewsets.GenericViewSet):
     # ---------------------------------------------------------------- payloads
 
     def _summary(self, a: Assignment, leader: bool, mine: AssignmentSubmission | None, counts: dict | None) -> dict:
-        d = {"id": a.id, "group": a.group_id, "group_name": a.group.name, "title": a.title, "status": a.status,
-             "due_at": a.due_at, "published_at": a.published_at, "created_at": a.created_at,
-             "question_count": len(a.questions.all()), "max_score": a.max_score, "has_attachment": bool(a.attachment),
-             "ai_generated": a.ai_generated, "is_leader": leader}
+        d = {
+            "id": a.id,
+            "group": a.group_id,
+            "group_name": a.group.name,
+            "title": a.title,
+            "status": a.status,
+            "due_at": a.due_at,
+            "published_at": a.published_at,
+            "created_at": a.created_at,
+            "question_count": len(a.questions.all()),
+            "max_score": a.max_score,
+            "has_attachment": bool(a.attachment),
+            "ai_generated": a.ai_generated,
+            "is_leader": leader,
+        }
         if leader and counts is not None:
             d["counts"] = counts
         d["my_submission"] = self._sub_brief(mine) if mine else None
@@ -110,8 +144,16 @@ class AssignmentViewSet(ActionThrottleMixin, viewsets.GenericViewSet):
 
     @staticmethod
     def _sub_brief(s: AssignmentSubmission) -> dict:
-        return {"id": s.id, "status": s.status, "score": s.score, "max_score": s.max_score, "percent": s.percent,
-                "late": s.late, "submitted_at": s.submitted_at, "graded_at": s.graded_at}
+        return {
+            "id": s.id,
+            "status": s.status,
+            "score": s.score,
+            "max_score": s.max_score,
+            "percent": s.percent,
+            "late": s.late,
+            "submitted_at": s.submitted_at,
+            "graded_at": s.graded_at,
+        }
 
     def _detail(self, a: Assignment) -> dict:
         request, u = self.request, self.request.user
@@ -119,26 +161,54 @@ class AssignmentViewSet(ActionThrottleMixin, viewsets.GenericViewSet):
         mine = AssignmentSubmission.objects.filter(assignment=a, user=u).prefetch_related("answers").first()
         reveal = leader or (mine is not None and mine.graded_at is not None and a.show_answers)
         d = self._summary(a, leader, mine, None)
-        d.update(instructions=a.instructions, points=a.points, allow_late=a.allow_late, show_answers=a.show_answers,
-                 attachment=_url(request, a.attachment), attachment_name=a.attachment_name,
-                 created_by=author(request, a.created_by) if a.created_by else None)
+        d.update(
+            instructions=a.instructions,
+            points=a.points,
+            allow_late=a.allow_late,
+            show_answers=a.show_answers,
+            attachment=_url(request, a.attachment),
+            attachment_name=a.attachment_name,
+            created_by=author(request, a.created_by) if a.created_by else None,
+        )
         d["questions"] = [
-            {"id": q.id, "order": q.order, "kind": q.kind, "prompt": q.prompt, "points": q.points,
-             "options": q.options if reveal else [{"text": o["text"]} for o in q.options],
-             **({"accepted_answers": q.accepted_answers, "explanation": q.explanation} if reveal else {})}
-            for q in a.questions.all()]
+            {
+                "id": q.id,
+                "order": q.order,
+                "kind": q.kind,
+                "prompt": q.prompt,
+                "points": q.points,
+                "options": q.options if reveal else [{"text": o["text"]} for o in q.options],
+                **({"accepted_answers": q.accepted_answers, "explanation": q.explanation} if reveal else {}),
+            }
+            for q in a.questions.all()
+        ]
         if mine:
             d["my_submission"] = self._submission(mine, with_user=False)
         return d
 
     def _submission(self, s: AssignmentSubmission, with_user=True) -> dict:
         request = self.request
-        d = {**self._sub_brief(s), "text": s.text, "attachment": _url(request, s.attachment),
-             "attachment_name": s.attachment_name, "feedback": s.feedback,
-             "answers": [{"id": x.id, "question": x.question_id, "selected_option": x.selected_option, "text": x.text,
-                          "attachment": _url(request, x.attachment), "attachment_name": x.attachment_name,
-                          "is_correct": x.is_correct, "score": x.score, "feedback": x.feedback}
-                         for x in s.answers.all()]}
+        d = {
+            **self._sub_brief(s),
+            "text": s.text,
+            "attachment": _url(request, s.attachment),
+            "attachment_name": s.attachment_name,
+            "feedback": s.feedback,
+            "answers": [
+                {
+                    "id": x.id,
+                    "question": x.question_id,
+                    "selected_option": x.selected_option,
+                    "text": x.text,
+                    "attachment": _url(request, x.attachment),
+                    "attachment_name": x.attachment_name,
+                    "is_correct": x.is_correct,
+                    "score": x.score,
+                    "feedback": x.feedback,
+                }
+                for x in s.answers.all()
+            ],
+        }
         if with_user:
             d["user"] = author(request, s.user)
         return d
@@ -152,15 +222,29 @@ class AssignmentViewSet(ActionThrottleMixin, viewsets.GenericViewSet):
         led = set(GroupMember.objects.filter(user=u, role="leader", status="active").values_list("group_id", flat=True))
         counts = {}
         led_items = [a.id for a in items if a.group_id in led or u.is_staff_role]
-        for row in (AssignmentSubmission.objects.filter(assignment_id__in=led_items).values("assignment_id")
-                    .annotate(submitted=Count("id"), graded=Count("id", filter=Q(graded_at__isnull=False)))):
+        for row in (
+            AssignmentSubmission.objects.filter(assignment_id__in=led_items)
+            .values("assignment_id")
+            .annotate(submitted=Count("id"), graded=Count("id", filter=Q(graded_at__isnull=False)))
+        ):
             counts[row["assignment_id"]] = {"submitted": row["submitted"], "graded": row["graded"]}
-        members = dict(GroupMember.objects.filter(group_id__in={a.group_id for a in items}, status="active",
-                                                  role="member").values("group_id").annotate(n=Count("id"))
-                       .values_list("group_id", "n"))
-        return Response([self._summary(a, a.id in led_items, mine.get(a.id),
-                                       {**counts.get(a.id, {"submitted": 0, "graded": 0}),
-                                        "members": members.get(a.group_id, 0)}) for a in items])
+        members = dict(
+            GroupMember.objects.filter(group_id__in={a.group_id for a in items}, status="active", role="member")
+            .values("group_id")
+            .annotate(n=Count("id"))
+            .values_list("group_id", "n")
+        )
+        return Response(
+            [
+                self._summary(
+                    a,
+                    a.id in led_items,
+                    mine.get(a.id),
+                    {**counts.get(a.id, {"submitted": 0, "graded": 0}), "members": members.get(a.group_id, 0)},
+                )
+                for a in items
+            ]
+        )
 
     def retrieve(self, request, pk=None):
         return Response(self._detail(self._assignment(pk)))
@@ -198,7 +282,11 @@ class AssignmentViewSet(ActionThrottleMixin, viewsets.GenericViewSet):
         self._assignment(pk, leader=True).delete()
         return Response(status=204)
 
-    @extend_schema(request={"multipart/form-data": {"type": "object", "properties": {"file": {"type": "string", "format": "binary"}}}})
+    @extend_schema(
+        request={
+            "multipart/form-data": {"type": "object", "properties": {"file": {"type": "string", "format": "binary"}}}
+        }
+    )
     @action(detail=True, methods=["post", "delete"])
     def attachment(self, request, pk=None):
         a = self._assignment(pk, leader=True)
@@ -244,8 +332,14 @@ class AssignmentViewSet(ActionThrottleMixin, viewsets.GenericViewSet):
             a.save(update_fields=["status", "updated_at"])
         return Response(self._detail(a))
 
-    @extend_schema(request={"multipart/form-data": {"type": "object", "properties": {
-        "file": {"type": "string", "format": "binary"}, "group": {"type": "integer"}}}})
+    @extend_schema(
+        request={
+            "multipart/form-data": {
+                "type": "object",
+                "properties": {"file": {"type": "string", "format": "binary"}, "group": {"type": "integer"}},
+            }
+        }
+    )
     @action(detail=False, methods=["post"], url_path="import")
     def import_file(self, request):
         """An exercise file → draft questions (not saved) for the leader to check in the editor."""
@@ -281,8 +375,10 @@ class AssignmentViewSet(ActionThrottleMixin, viewsets.GenericViewSet):
         answers = {}
         for x in raw if isinstance(raw, list) else []:
             try:
-                answers[int(x["question"])] = {"selected_option": None if x.get("selected_option") in (None, "")
-                                               else int(x["selected_option"]), "text": x.get("text", "")}
+                answers[int(x["question"])] = {
+                    "selected_option": None if x.get("selected_option") in (None, "") else int(x["selected_option"]),
+                    "text": x.get("text", ""),
+                }
             except (KeyError, TypeError, ValueError):
                 return Response({"detail": "Câu trả lời không hợp lệ", "errors": {}}, status=400)
         files = {}
@@ -323,8 +419,13 @@ class AssignmentViewSet(ActionThrottleMixin, viewsets.GenericViewSet):
         a = self._assignment(pk, leader=True)
         s = get_object_or_404(a.submissions, pk=sid)
         try:
-            services.grade(request.user, s, request.data.get("answers") or [], request.data.get("score"),
-                           str(request.data.get("feedback") or ""))
+            services.grade(
+                request.user,
+                s,
+                request.data.get("answers") or [],
+                request.data.get("score"),
+                str(request.data.get("feedback") or ""),
+            )
         except (services.ClassworkError, ValueError, ArithmeticError) as e:
             return Response({"detail": str(e) or "Điểm không hợp lệ", "errors": {}}, status=400)
         s.refresh_from_db()
@@ -337,8 +438,12 @@ class AssignmentViewSet(ActionThrottleMixin, viewsets.GenericViewSet):
         if not group or not services.membership(request.user, int(group)) and not request.user.is_staff_role:
             raise PermissionDenied("Bạn không ở trong nhóm này.")
         leader = services.is_leader(request.user, int(group))
-        items = list(Assignment.objects.filter(group_id=group).exclude(status=Assignment.Status.DRAFT)
-                     .prefetch_related("questions").order_by("published_at"))
+        items = list(
+            Assignment.objects.filter(group_id=group)
+            .exclude(status=Assignment.Status.DRAFT)
+            .prefetch_related("questions")
+            .order_by("published_at")
+        )
         members = GroupMember.objects.filter(group_id=group, status="active").select_related("user__mascot")
         if not leader:
             members = members.filter(user=request.user)
@@ -347,7 +452,19 @@ class AssignmentViewSet(ActionThrottleMixin, viewsets.GenericViewSet):
         for m in members.exclude(role="leader") if leader else members:
             cells = [self._sub_brief(subs[(a.id, m.user_id)]) if (a.id, m.user_id) in subs else None for a in items]
             done = [c for c in cells if c and c["percent"] is not None]
-            rows.append({"user": author(request, m.user), "cells": cells,
-                         "average": round(sum(c["percent"] for c in done) / len(done), 1) if done else None})
-        return Response({"assignments": [{"id": a.id, "title": a.title, "due_at": a.due_at, "max_score": a.max_score}
-                                         for a in items], "rows": rows, "is_leader": leader})
+            rows.append(
+                {
+                    "user": author(request, m.user),
+                    "cells": cells,
+                    "average": round(sum(c["percent"] for c in done) / len(done), 1) if done else None,
+                }
+            )
+        return Response(
+            {
+                "assignments": [
+                    {"id": a.id, "title": a.title, "due_at": a.due_at, "max_score": a.max_score} for a in items
+                ],
+                "rows": rows,
+                "is_leader": leader,
+            }
+        )

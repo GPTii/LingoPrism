@@ -4,9 +4,10 @@ Order follows the usual progression of Tiếng Việt 1: single letters with the
 (ch, gh, ngh…), then rhymes (vần). A syllable is *readable* at lesson n when its initial, rhyme and tone have all
 been taught in lessons 1..n – exercises only ever use readable, real syllables (seed/cache/vi_corpus.json).
 """
+
 import json
 from dataclasses import dataclass
-from functools import lru_cache
+from functools import cache, lru_cache
 
 from apps.vocab.lang import vi_phonics as ph
 from apps.vocab.lang.sources import CACHE_DIR
@@ -48,8 +49,13 @@ class Unit:
         return s.onset == self.code
 
     def payload(self) -> dict:
-        return {"kind": self.kind, "code": self.code, "label": self.label, "sound": self.sound,
-                "symbol": ph.TONE_SYMBOL.get(self.code, "") if self.kind == "thanh" else ""}
+        return {
+            "kind": self.kind,
+            "code": self.code,
+            "label": self.label,
+            "sound": self.sound,
+            "symbol": ph.TONE_SYMBOL.get(self.code, "") if self.kind == "thanh" else "",
+        }
 
 
 def _am(*codes):
@@ -109,7 +115,10 @@ LESSONS: list[dict] = [
     {"title": "Vần iê, yê", "units": _van("iên", "iêt", "iêng", "iêc", "iêm", "iêp", "iêu", "yên", "yêu")},
     {"title": "Vần uô", "units": _van("uôn", "uông", "uôt", "uôc", "uôi", "uôm")},
     {"title": "Vần ươ", "units": _van("ươn", "ương", "ươt", "ươc", "ươi", "ươu", "ươm")},
-    {"title": "Vần oa, oe", "units": _van("oa", "oe", "oai", "oay", "oan", "oăn", "oat", "oăt", "oang", "oăng", "oanh", "oach")},
+    {
+        "title": "Vần oa, oe",
+        "units": _van("oa", "oe", "oai", "oay", "oan", "oăn", "oat", "oăt", "oang", "oăng", "oanh", "oach"),
+    },
     {"title": "Vần uê, uy", "units": _van("uê", "uy", "uơ", "uya", "uân", "uât", "uyên", "uyêt", "uynh", "uych")},
     {"title": "Ôn tập: nghe – viết câu", "units": [], "review": True},
 ]
@@ -132,7 +141,7 @@ class Taught:
         return s.rhyme in self.rhymes or (len(s.rhyme) == 1 and s.rhyme in self.vowels)
 
 
-@lru_cache(maxsize=None)
+@cache
 def taught_until(n: int) -> Taught:
     t = Taught(set(), set(), set(), set())
     for lesson in LESSONS[:n]:
@@ -165,7 +174,7 @@ def corpus() -> dict:
     return data
 
 
-@lru_cache(maxsize=None)
+@cache
 def readable_syllables(n: int) -> list[tuple[ph.Syllable, int]]:
     """Real syllables readable at lesson n, most frequent first (dictionary-only rare ones last, count 0)."""
     t = taught_until(n)

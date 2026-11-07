@@ -8,6 +8,7 @@ Trained on English sentences of Tatoeba; each vocabulary *concept* gets the vect
     vectors are updated by mini-batch SGD with a linearly decaying learning rate;
     frequent words are sub-sampled with p_keep = (√(f/t) + 1) · t / f.
 """
+
 import re
 import time
 from collections import Counter
@@ -22,8 +23,20 @@ def tokenize(text: str) -> list[str]:
     return TOKEN.findall(text.lower())
 
 
-def train(sentences, dim=64, window=4, negative=5, min_count=5, max_vocab=30000, epochs=3, batch=4096,
-          lr0=0.025, sample=1e-3, seed=0, log=print) -> tuple[dict, np.ndarray]:
+def train(
+    sentences,
+    dim=64,
+    window=4,
+    negative=5,
+    min_count=5,
+    max_vocab=30000,
+    epochs=3,
+    batch=4096,
+    lr0=0.025,
+    sample=1e-3,
+    seed=0,
+    log=print,
+) -> tuple[dict, np.ndarray]:
     rng = np.random.default_rng(seed)
     counts = Counter(t for s in sentences for t in s)
     vocab = [w for w, c in counts.most_common(max_vocab) if c >= min_count]
@@ -31,7 +44,7 @@ def train(sentences, dim=64, window=4, negative=5, min_count=5, max_vocab=30000,
     freq = np.array([counts[w] for w in vocab], dtype=np.float64)
     total = freq.sum()
     keep = np.minimum(1.0, (np.sqrt(freq / total / sample) + 1) * sample * total / freq)
-    noise = freq ** 0.75
+    noise = freq**0.75
     noise /= noise.sum()
     # the whole corpus as one flat array of word ids + the sentence each token belongs to (low memory)
     ids, sid = [], []
@@ -69,11 +82,11 @@ def train(sentences, dim=64, window=4, negative=5, min_count=5, max_vocab=30000,
         tok_all, sen_all = ids[kept], sid[kept]
         loss_sum, steps, n_pairs = 0.0, 0, 0
         for start in range(0, len(tok_all), chunk):
-            c_all, o_all = chunk_pairs(tok_all[start:start + chunk], sen_all[start:start + chunk])
+            c_all, o_all = chunk_pairs(tok_all[start : start + chunk], sen_all[start : start + chunk])
             n_pairs += len(c_all)
             for k in range(0, len(c_all), batch):
                 lr = lr0 * max(1e-4, 1 - step / est_total)
-                c, o = c_all[k:k + batch], o_all[k:k + batch]
+                c, o = c_all[k : k + batch], o_all[k : k + batch]
                 neg = table[rng.integers(0, len(table), size=(len(c), negative))]
                 targets = np.concatenate([o[:, None], neg], axis=1)  # (B, 1+k)
                 labels = np.zeros(targets.shape, dtype=np.float32)
@@ -88,13 +101,16 @@ def train(sentences, dim=64, window=4, negative=5, min_count=5, max_vocab=30000,
                 np.add.at(w_out, targets.ravel(), (g[..., None] * v[:, None, :]).reshape(-1, v.shape[1]))
                 steps += 1
                 step += 1
-        log(f"  epoch {epoch + 1}/{epochs}: {n_pairs:,} cặp, loss {loss_sum / max(steps, 1):.3f}, {time.time() - t0:.0f}s")
+        log(
+            f"  epoch {epoch + 1}/{epochs}: {n_pairs:,} cặp, loss {loss_sum / max(steps, 1):.3f}, {time.time() - t0:.0f}s"
+        )
     return index, w_in
 
 
 def phrase_vector(text: str, index: dict, vectors: np.ndarray) -> np.ndarray | None:
-    ids = [index[t] for t in tokenize(text) if t in index and t not in STOP] or \
-          [index[t] for t in tokenize(text) if t in index]
+    ids = [index[t] for t in tokenize(text) if t in index and t not in STOP] or [
+        index[t] for t in tokenize(text) if t in index
+    ]
     if not ids:
         return None
     v = vectors[ids].mean(0)

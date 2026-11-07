@@ -6,6 +6,7 @@ Client → server:  {"action": "send", "content": "...", "kind": "text|sticker|b
 Server → client:  {"event": "message" | "read" | "typing" | "error", "payload": {...}}
 Every message carries the client's `client_id` back so the sender can measure latency and de-duplicate.
 """
+
 import time
 
 from channels.db import database_sync_to_async
@@ -13,7 +14,6 @@ from channels.generic.websocket import AsyncJsonWebsocketConsumer
 
 from . import services
 from .models import SupportConversation
-
 
 # per connection: a short burst is fine, a script flooding the room is not (token bucket)
 BURST, PER_SECOND = 8, 1.0
@@ -73,15 +73,27 @@ class GroupChatConsumer(_BaseChatConsumer):
     async def receive_json(self, content, **kwargs):
         action = content.get("action")
         if action == "typing":
-            await self.channel_layer.group_send(self.channel_group, {
-                "type": "chat.event", "event": "typing", "payload": {"user": self.user.id, "display_name": self.user.display_name}})
+            await self.channel_layer.group_send(
+                self.channel_group,
+                {
+                    "type": "chat.event",
+                    "event": "typing",
+                    "payload": {"user": self.user.id, "display_name": self.user.display_name},
+                },
+            )
             return
         if action != "send":
             return
         try:
             await database_sync_to_async(services.send_group_message)(
-                self.user, self.group_id, kind=content.get("kind", "text"), content=content.get("content", ""),
-                sticker=content.get("sticker", ""), badge_code=content.get("badge", ""), client_id=content.get("client_id", ""))
+                self.user,
+                self.group_id,
+                kind=content.get("kind", "text"),
+                content=content.get("content", ""),
+                sticker=content.get("sticker", ""),
+                badge_code=content.get("badge", ""),
+                client_id=content.get("client_id", ""),
+            )
         except services.ChatError as e:
             await self._error(str(e))
 
@@ -106,11 +118,13 @@ class SupportChatConsumer(_BaseChatConsumer):
         try:
             if action == "send":
                 await database_sync_to_async(services.send_support_message)(
-                    self.user, self.conv, content.get("content", ""), content.get("client_id", ""))
+                    self.user, self.conv, content.get("content", ""), content.get("client_id", "")
+                )
             elif action == "read":
                 await database_sync_to_async(services.mark_support_read)(self.user, self.conv)
             elif action == "typing":
-                await self.channel_layer.group_send(self.channel_group, {
-                    "type": "chat.event", "event": "typing", "payload": {"user": self.user.id}})
+                await self.channel_layer.group_send(
+                    self.channel_group, {"type": "chat.event", "event": "typing", "payload": {"user": self.user.id}}
+                )
         except services.ChatError as e:
             await self._error(str(e))

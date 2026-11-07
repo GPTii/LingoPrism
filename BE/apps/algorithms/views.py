@@ -9,24 +9,47 @@ from apps.core.permissions import IsStaffRole
 from . import benchmark, experiments, vision, yolo_report
 from .models import AlgorithmConfig
 
-RUNNERS = {"benchmark": lambda: benchmark.run(apply=False), "benchmark_apply": lambda: benchmark.run(apply=True),
-           "yolo": yolo_report.run, "vision": lambda: vision.build(), "srs": experiments.srs, "ga": experiments.run_ga, "vip": experiments.vip,
-           "distractor": experiments.distractor, "proximity": experiments.proximity, "geofence": experiments.geofence,
-           "realtime": experiments.realtime}
+RUNNERS = {
+    "benchmark": lambda: benchmark.run(apply=False),
+    "benchmark_apply": lambda: benchmark.run(apply=True),
+    "yolo": yolo_report.run,
+    "vision": lambda: vision.build(),
+    "srs": experiments.srs,
+    "ga": experiments.run_ga,
+    "vip": experiments.vip,
+    "distractor": experiments.distractor,
+    "proximity": experiments.proximity,
+    "geofence": experiments.geofence,
+    "realtime": experiments.realtime,
+}
 
 
 class ConfigSerializer(serializers.ModelSerializer):
     class Meta:
         model = AlgorithmConfig
-        fields = ["scheduler", "review_priority", "distractor", "proximity", "desired_retention", "fsrs_weights",
-                  "vip_weights", "updated_at"]
+        fields = [
+            "scheduler",
+            "review_priority",
+            "distractor",
+            "proximity",
+            "desired_retention",
+            "fsrs_weights",
+            "vip_weights",
+            "updated_at",
+        ]
         read_only_fields = ["updated_at"]
 
 
 def _choices():
-    return {f: [{"value": v, "label": l} for v, l in getattr(AlgorithmConfig, c).choices]
-            for f, c in (("scheduler", "Scheduler"), ("review_priority", "Priority"), ("distractor", "Distractor"),
-                         ("proximity", "Proximity"))}
+    return {
+        f: [{"value": v, "label": l} for v, l in getattr(AlgorithmConfig, c).choices]
+        for f, c in (
+            ("scheduler", "Scheduler"),
+            ("review_priority", "Priority"),
+            ("distractor", "Distractor"),
+            ("proximity", "Proximity"),
+        )
+    }
 
 
 @extend_schema(tags=["admin-algorithms"])
@@ -36,8 +59,13 @@ class AlgorithmsView(APIView):
     permission_classes = [IsStaffRole]
 
     def get(self, request):
-        return Response({"config": ConfigSerializer(AlgorithmConfig.get()).data, "choices": _choices(),
-                         "experiments": experiments.latest()})
+        return Response(
+            {
+                "config": ConfigSerializer(AlgorithmConfig.get()).data,
+                "choices": _choices(),
+                "experiments": experiments.latest(),
+            }
+        )
 
     def patch(self, request):
         ser = ConfigSerializer(AlgorithmConfig.get(), data=request.data, partial=True)
@@ -77,14 +105,29 @@ class VipPreviewView(APIView):
         if user_id:
             qs = qs.filter(user_id=user_id)
         pws = list(qs.order_by("due_at")[:300])
-        vi = dict(WordTranslation.objects.filter(language_id="vi", word_id__in=[p.word_id for p in pws])
-                  .values_list("word_id", "text"))
+        vi = dict(
+            WordTranslation.objects.filter(language_id="vi", word_id__in=[p.word_id for p in pws]).values_list(
+                "word_id", "text"
+            )
+        )
         ranked = rank(pws, AlgorithmConfig.get().vip_weights or None)
         due_order = {p.id: i + 1 for i, p in enumerate(pws)}
-        return Response({"results": [
-            {"word": vi.get(pw.word_id, pw.word.slug), "yolo_label": pw.word.yolo_label, "user": pw.user.display_name,
-             "vip_rank": i + 1, "due_rank": due_order[pw.id], "score": s, "components": {k: round(v, 3) for k, v in c.items()}}
-            for i, (pw, s, c) in enumerate(ranked[:40])]})
+        return Response(
+            {
+                "results": [
+                    {
+                        "word": vi.get(pw.word_id, pw.word.slug),
+                        "yolo_label": pw.word.yolo_label,
+                        "user": pw.user.display_name,
+                        "vip_rank": i + 1,
+                        "due_rank": due_order[pw.id],
+                        "score": s,
+                        "components": {k: round(v, 3) for k, v in c.items()},
+                    }
+                    for i, (pw, s, c) in enumerate(ranked[:40])
+                ]
+            }
+        )
 
 
 @extend_schema(tags=["admin-algorithms"])
@@ -103,14 +146,18 @@ class DistractorPreviewView(APIView):
         q = (request.query_params.get("q") or "").strip()
         lang = request.query_params.get("lang", "en")
         code = {"zh": "zh-Hans"}.get(lang, lang)
-        word = (Word.objects.filter(slug=q).first()
-                or Word.objects.filter(translations__text__iexact=q).first())
+        word = Word.objects.filter(slug=q).first() or Word.objects.filter(translations__text__iexact=q).first()
         if not word:
             return Response({"detail": "Không tìm thấy từ"}, status=404)
         target = Target(lang if lang in ("vi", "en", "zh") else "en", code, "hans" if lang == "zh" else "")
         text = dict(WordTranslation.objects.filter(language_id=code).values_list("word_id", "text"))
         vi = dict(WordTranslation.objects.filter(language_id="vi").values_list("word_id", "text"))
         fmt = lambda w: {"text": text.get(w.id, w.slug), "vi": vi.get(w.id, "")}
-        return Response({"word": fmt(word), "random": [fmt(w) for w in RandomSameTopicDistractors().pick(word, target, 3)],
-                         "smart": [fmt(w) | {"score": s} for w, s in rank_candidates(word, code, 3)],
-                         "smart_used": [fmt(w) for w in SmartDistractors().pick(word, target, 3)]})
+        return Response(
+            {
+                "word": fmt(word),
+                "random": [fmt(w) for w in RandomSameTopicDistractors().pick(word, target, 3)],
+                "smart": [fmt(w) | {"score": s} for w, s in rank_candidates(word, code, 3)],
+                "smart_used": [fmt(w) for w in SmartDistractors().pick(word, target, 3)],
+            }
+        )

@@ -11,6 +11,7 @@ way the server reads it. Run on a GPU (Google Colab: AI/notebooks/finetune_oiv7_
     like the model the server runs now -> <project>/<name>/export/yolov8m-oiv7-ft-lingoprism.onnx + model_card.json.
 The final verdict is the project's own test set on the developer machine (eval_testset.py, see the notebook).
 """
+
 import argparse
 import json
 import shutil
@@ -23,8 +24,12 @@ HERE = Path(__file__).resolve().parent
 
 def metrics(res) -> dict:
     b = res.box
-    return {"precision": round(float(b.mp), 4), "recall": round(float(b.mr), 4), "map50": round(float(b.map50), 4),
-            "map50_95": round(float(b.map), 4)}
+    return {
+        "precision": round(float(b.mp), 4),
+        "recall": round(float(b.mr), 4),
+        "map50": round(float(b.map50), 4),
+        "map50_95": round(float(b.map), 4),
+    }
 
 
 def main():
@@ -49,8 +54,13 @@ def main():
     run = Path(args.project) / args.name
     report = run / "report"
     report.mkdir(parents=True, exist_ok=True)
-    common = {"data": args.data, "imgsz": args.imgsz, "batch": args.batch, "workers": args.workers,
-              "device": args.device}
+    common = {
+        "data": args.data,
+        "imgsz": args.imgsz,
+        "batch": args.batch,
+        "workers": args.workers,
+        "device": args.device,
+    }
 
     before_file = report / "val_before.json"
     if not before_file.exists():  # the base model on the same held-out images
@@ -63,9 +73,22 @@ def main():
             YOLO(str(last)).train(resume=True)
         else:
             YOLO(args.base).train(
-                **common, epochs=args.epochs, time=args.hours, patience=args.patience, freeze=args.freeze,
-                optimizer="SGD", lr0=args.lr0, lrf=0.1, momentum=0.9, warmup_epochs=1, cos_lr=True, close_mosaic=5,
-                project=args.project, name=args.name, exist_ok=True)
+                **common,
+                epochs=args.epochs,
+                time=args.hours,
+                patience=args.patience,
+                freeze=args.freeze,
+                optimizer="SGD",
+                lr0=args.lr0,
+                lrf=0.1,
+                momentum=0.9,
+                warmup_epochs=1,
+                cos_lr=True,
+                close_mosaic=5,
+                project=args.project,
+                name=args.name,
+                exist_ok=True,
+            )
         done.write_text("ok", encoding="utf-8")
 
     best = run / "weights" / "best.pt"
@@ -77,10 +100,26 @@ def main():
     weights = run / "export" / "yolov8m-oiv7-ft.pt"
     weights.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy(best, weights)
-    subprocess.run([sys.executable, str(HERE / "export_pretrained_oiv7.py"), "--weights", str(weights),
-                    "--imgsz", str(args.imgsz), "--out", str(weights.parent)], check=True)
-    summary = {"base": args.base, "data": args.data, "val_before": before, "val_after": after,
-               "settings": {k: getattr(args, k) for k in ("epochs", "hours", "freeze", "lr0", "batch", "imgsz")}}
+    subprocess.run(
+        [
+            sys.executable,
+            str(HERE / "export_pretrained_oiv7.py"),
+            "--weights",
+            str(weights),
+            "--imgsz",
+            str(args.imgsz),
+            "--out",
+            str(weights.parent),
+        ],
+        check=True,
+    )
+    summary = {
+        "base": args.base,
+        "data": args.data,
+        "val_before": before,
+        "val_after": after,
+        "settings": {k: getattr(args, k) for k in ("epochs", "hours", "freeze", "lr0", "batch", "imgsz")},
+    }
     (report / "finetune_summary.json").write_text(json.dumps(summary, indent=1, ensure_ascii=False), encoding="utf-8")
     print("→", weights.parent / "yolov8m-oiv7-ft-lingoprism.onnx")
 

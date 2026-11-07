@@ -60,8 +60,16 @@ class PersonalWord(TimeStampedModel):
 
     @property
     def state(self) -> CardState:
-        return CardState(self.stage, self.ease, self.interval_days, self.repetitions, self.lapses, self.wrong_streak,
-                         self.fsrs_difficulty, self.fsrs_stability)
+        return CardState(
+            self.stage,
+            self.ease,
+            self.interval_days,
+            self.repetitions,
+            self.lapses,
+            self.wrong_streak,
+            self.fsrs_difficulty,
+            self.fsrs_stability,
+        )
 
     def apply_state(self, state: CardState, due_at):
         self.stage, self.ease, self.interval_days = state.stage, state.ease, state.interval_days
@@ -155,7 +163,9 @@ class LearnerLevel(TimeStampedModel):
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="levels")
     language = models.CharField(max_length=5, choices=LearningLanguage.choices)
-    current = models.PositiveSmallIntegerField(default=1, help_text="Cấp đang học (người học tự chọn trong các cấp đã mở)")
+    current = models.PositiveSmallIntegerField(
+        default=1, help_text="Cấp đang học (người học tự chọn trong các cấp đã mở)"
+    )
     passed_test = models.PositiveSmallIntegerField(default=1, help_text="Cấp cao nhất đã mở nhờ bài kiểm tra vượt cấp")
 
     class Meta:

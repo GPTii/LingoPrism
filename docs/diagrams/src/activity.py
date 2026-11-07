@@ -13,7 +13,9 @@ def act(title, body):
 
 DIAGRAMS = {}
 
-DIAGRAMS["activity/A01_dang_ky"] = act("A01 – Đăng ký và xác minh email", """
+DIAGRAMS["activity/A01_dang_ky"] = act(
+    "A01 – Đăng ký và xác minh email",
+    """
     S --> A[Nhập email, mật khẩu, tên, tick đồng ý điều khoản]
     A --> B{Hợp lệ?<br/>email chưa dùng, mật khẩu đủ mạnh,<br/>đã đồng ý điều khoản}:::dec
     B -- Không --> B1[Hiện lỗi từng ô]:::err --> A
@@ -26,9 +28,12 @@ DIAGRAMS["activity/A01_dang_ky"] = act("A01 – Đăng ký và xác minh email",
     I -- Sai --> I1{Sai lần thứ 5?}:::dec
     I1 -- Chưa --> H
     I1 -- Rồi --> J[Mã bị huỷ, bấm Gửi lại mã]:::err --> D
-    I -- Đúng --> K[email_verified = true<br/>mở chat, đăng bài]:::sys --> E""")
+    I -- Đúng --> K[email_verified = true<br/>mở chat, đăng bài]:::sys --> E""",
+)
 
-DIAGRAMS["activity/A02_dang_nhap"] = act("A02 – Đăng nhập (mật khẩu hoặc Google)", """
+DIAGRAMS["activity/A02_dang_nhap"] = act(
+    "A02 – Đăng nhập (mật khẩu hoặc Google)",
+    """
     S --> A{Cách đăng nhập}:::dec
     A -- Email / mật khẩu --> B[Nhập email, mật khẩu]
     B --> C{Quá giới hạn thử?<br/>theo IP và theo email}:::dec
@@ -46,9 +51,12 @@ DIAGRAMS["activity/A02_dang_nhap"] = act("A02 – Đăng nhập (mật khẩu ho
     L --> M[Client lưu token, mở WebSocket /ws/events/,<br/>bật geofence + thông báo đẩy trên app]
     M --> N{Hồ sơ thiếu ảnh / ngày sinh / giới tính?}:::dec
     N -- Có --> N1[Hỏi bổ sung một lần, có Để sau] --> E
-    N -- Không --> E""")
+    N -- Không --> E""",
+)
 
-DIAGRAMS["activity/A03_quen_mat_khau"] = act("A03 – Quên và đặt lại mật khẩu", """
+DIAGRAMS["activity/A03_quen_mat_khau"] = act(
+    "A03 – Quên và đặt lại mật khẩu",
+    """
     S --> A[Nhập email]
     A --> B[Máy chủ luôn trả lời giống nhau<br/>dù email có tồn tại hay không]:::sys
     B --> C{Email tồn tại?}:::dec
@@ -59,9 +67,12 @@ DIAGRAMS["activity/A03_quen_mat_khau"] = act("A03 – Quên và đặt lại m�
     G -- Có --> H[Nhập mật khẩu mới]
     H --> I{Đủ mạnh?}:::dec
     I -- Không --> H
-    I -- Có --> J[Lưu mật khẩu, thu hồi mọi refresh token cũ]:::sys --> K[Đăng nhập lại] --> E""")
+    I -- Có --> J[Lưu mật khẩu, thu hồi mọi refresh token cũ]:::sys --> K[Đăng nhập lại] --> E""",
+)
 
-DIAGRAMS["activity/A04_tu_vung"] = act("A04 – Duyệt chủ đề và lưu từ", """
+DIAGRAMS["activity/A04_tu_vung"] = act(
+    "A04 – Duyệt chủ đề và lưu từ",
+    """
     S --> A[Chọn ngôn ngữ đang học<br/>Anh / Trung giản thể / Trung phồn thể / Việt]
     A --> B[Lấy danh sách chủ đề hệ thống + chủ đề của mình]:::sys
     B --> C[Mở một chủ đề]
@@ -73,9 +84,12 @@ DIAGRAMS["activity/A04_tu_vung"] = act("A04 – Duyệt chủ đề và lưu t�
     G -- Lưu từ --> J{Từ đã có trong thư viện?}:::dec
     J -- Có --> K[Giữ nguyên] --> E
     J -- Chưa --> L[Tạo PersonalWord status = new,<br/>chờ vào phiên học]:::sys --> E
-    G -- Lưu cả chủ đề --> L""")
+    G -- Lưu cả chủ đề --> L""",
+)
 
-DIAGRAMS["activity/A05_phien_hoc"] = act("A05 – Phiên học từ mới / ôn tập (SRS + VIP + Smart Distractor)", """
+DIAGRAMS["activity/A05_phien_hoc"] = act(
+    "A05 – Phiên học từ mới / ôn tập (SRS + VIP + Smart Distractor)",
+    """
     S --> A{Loại phiên}:::dec
     A -- Học mới --> B[Lấy từ status new theo cấp độ / chủ đề,<br/>thiếu thì bổ sung từ lộ trình]:::sys
     A -- Ôn tập --> C[Lấy từ đến hạn due_at ≤ bây giờ]:::sys
@@ -96,9 +110,12 @@ DIAGRAMS["activity/A05_phien_hoc"] = act("A05 – Phiên học từ mới / ôn 
     N --> O[Cộng XP có hệ số tăng tốc, trần XP ngày,<br/>chuỗi ngày, nhiệm vụ, vảy, huy hiệu, giải tuần]:::sys
     O --> P{Đủ % để mở cấp tiếp?}:::dec
     P -- Có --> P1[Lên cấp] --> Q
-    P -- Không --> Q[Hiện kết quả + từ cần luyện thêm] --> E""")
+    P -- Không --> Q[Hiện kết quả + từ cần luyện thêm] --> E""",
+)
 
-DIAGRAMS["activity/A06_luyen_cau"] = act("A06 – Luyện câu", """
+DIAGRAMS["activity/A06_luyen_cau"] = act(
+    "A06 – Luyện câu",
+    """
     S --> A[Yêu cầu một bài luyện câu]
     A --> B[Chọn câu ví dụ đã kiểm duyệt (Tatoeba)<br/>chứa từ học viên đang học]:::sys
     B --> C{Có câu phù hợp?}:::dec
@@ -111,9 +128,12 @@ DIAGRAMS["activity/A06_luyen_cau"] = act("A06 – Luyện câu", """
     H -- Sai --> I2[Hiện đáp án đúng + bản dịch] --> J
     J{Còn bài?}:::dec
     J -- Còn --> F
-    J -- Hết --> E""")
+    J -- Hết --> E""",
+)
 
-DIAGRAMS["activity/A07_phat_am"] = act("A07 – Luyện phát âm", """
+DIAGRAMS["activity/A07_phat_am"] = act(
+    "A07 – Luyện phát âm",
+    """
     S --> A[Lấy tối đa 10 từ trong thư viện có giọng đọc]
     A --> B{Thiết bị nhận dạng được giọng nói?}:::dec
     B -- Không --> B1[Hướng dẫn dùng Chrome / Edge / app] --> E
@@ -126,9 +146,12 @@ DIAGRAMS["activity/A07_phat_am"] = act("A07 – Luyện phát âm", """
     I -- Có --> D
     I -- Không --> J{Còn từ?}:::dec
     J -- Còn --> C
-    J -- Hết --> K[Điểm trung bình của lượt] --> E""")
+    J -- Hết --> K[Điểm trung bình của lượt] --> E""",
+)
 
-DIAGRAMS["activity/A08_doc_viet"] = act("A08 – Học đọc – viết tiếng Việt (trẻ em)", """
+DIAGRAMS["activity/A08_doc_viet"] = act(
+    "A08 – Học đọc – viết tiếng Việt (trẻ em)",
+    """
     S --> A[Mở lộ trình bài học đọc – viết]
     A --> B[Máy chủ tính bài cao nhất được mở<br/>(giáo viên mở được tất cả)]:::sys
     B --> C[Chọn một bài đã mở]
@@ -142,9 +165,12 @@ DIAGRAMS["activity/A08_doc_viet"] = act("A08 – Học đọc – viết tiếng
     I -- Hết --> J[POST /literacy/lessons/n/finish]:::sys
     J --> K{Đạt ≥ 60%?}:::dec
     K -- Có --> K1[Lưu tiến độ, cộng XP, mở bài tiếp theo]:::sys --> E
-    K -- Không --> K2[Lưu điểm tốt nhất, học lại]:::sys --> E""")
+    K -- Không --> K2[Lưu điểm tốt nhất, học lại]:::sys --> E""",
+)
 
-DIAGRAMS["activity/A09_vuot_cap"] = act("A09 – Kiểm tra vượt cấp độ", """
+DIAGRAMS["activity/A09_vuot_cap"] = act(
+    "A09 – Kiểm tra vượt cấp độ",
+    """
     S --> A[Chọn cấp muốn vượt]
     A --> B[GET /levels/n/test: 10 câu + token ký số]:::sys
     B --> C[Làm 10 câu]
@@ -153,9 +179,12 @@ DIAGRAMS["activity/A09_vuot_cap"] = act("A09 – Kiểm tra vượt cấp độ"
     F -- Không --> F1[Báo đề hết hạn] --> E
     F -- Có --> G{Đúng ≥ 8 câu?}:::dec
     G -- Có --> H[Mở cấp tiếp theo, chuyển sang cấp đó]:::sys --> E
-    G -- Không --> I[Giữ cấp hiện tại, gợi ý ôn thêm] --> E""")
+    G -- Không --> I[Giữ cấp hiện tại, gợi ý ôn thêm] --> E""",
+)
 
-DIAGRAMS["activity/A10_bai_kiem_tra"] = act("A10 – Làm bài kiểm tra và chấm tự luận", """
+DIAGRAMS["activity/A10_bai_kiem_tra"] = act(
+    "A10 – Làm bài kiểm tra và chấm tự luận",
+    """
     S --> A[Học viên chọn đề]
     A --> B[POST /exams/id/start: tạo Submission in_progress]:::sys
     B --> C[Làm bài: trắc nghiệm, điền từ, tự luận]
@@ -172,9 +201,12 @@ DIAGRAMS["activity/A10_bai_kiem_tra"] = act("A10 – Làm bài kiểm tra và ch
     L -- Không --> K
     L -- Có --> M[Tính lại tổng, trạng thái graded]:::sys
     M --> N[Thông báo cho học viên: Bài đã được chấm]:::sys --> R
-    R[Học viên xem kết quả, đáp án, nhận xét] --> E""")
+    R[Học viên xem kết quả, đáp án, nhận xét] --> E""",
+)
 
-DIAGRAMS["activity/A11_nhan_dien"] = act("A11 – Chụp ảnh nhận diện và lưu từ", """
+DIAGRAMS["activity/A11_nhan_dien"] = act(
+    "A11 – Chụp ảnh nhận diện và lưu từ",
+    """
     S --> A[Chụp hoặc chọn ảnh]
     A --> B{Có mạng?}:::dec
     B -- Không --> C[Nhận diện bằng TFLite trên máy]
@@ -195,9 +227,12 @@ DIAGRAMS["activity/A11_nhan_dien"] = act("A11 – Chụp ảnh nhận diện và
     O2 --> P[Nhiệm vụ Lưu từ, hồ sơ nhầm lẫn thị giác cho VIP]:::sys
     P --> Q{Tạo hội thoại AI từ ảnh?}:::dec
     Q -- Có --> Q1[Xem A12] --> E
-    Q -- Không --> E""")
+    Q -- Không --> E""",
+)
 
-DIAGRAMS["activity/A12_hoi_thoai_ai"] = act("A12 – Hội thoại AI từ ảnh", """
+DIAGRAMS["activity/A12_hoi_thoai_ai"] = act(
+    "A12 – Hội thoại AI từ ảnh",
+    """
     S --> A[Bấm Tạo hội thoại với các từ này]
     A --> B{Máy chủ đã bật AI?}:::dec
     B -- Không --> B1[Ẩn nút] --> E
@@ -210,9 +245,12 @@ DIAGRAMS["activity/A12_hoi_thoai_ai"] = act("A12 – Hội thoại AI từ ảnh
     G --> H{AI trả JSON hợp lệ?}:::dec
     H -- Không --> H1[Báo AI đang bận / thử lại]:::err --> E
     H -- Có --> I[Máy chủ tự tính pinyin (pypinyin + CC-CEDICT)]:::sys
-    I --> J[Lưu PhotoDialogue]:::sys --> K[Hiện hội thoại, nhãn AI tạo, nghe từng câu] --> E""")
+    I --> J[Lưu PhotoDialogue]:::sys --> K[Hiện hội thoại, nhãn AI tạo, nghe từng câu] --> E""",
+)
 
-DIAGRAMS["activity/A13_dich"] = act("A13 – Dịch văn bản / giọng nói (trang Dịch và trong chat)", """
+DIAGRAMS["activity/A13_dich"] = act(
+    "A13 – Dịch văn bản / giọng nói (trang Dịch và trong chat)",
+    """
     S --> A{Nhập bằng}:::dec
     A -- Gõ --> C[Văn bản ≤ 500 ký tự]
     A -- Nói --> B[Nhận dạng giọng nói trên thiết bị<br/>theo ngôn ngữ đã chọn] --> C
@@ -226,9 +264,12 @@ DIAGRAMS["activity/A13_dich"] = act("A13 – Dịch văn bản / giọng nói (t
     H -- Đúng --> I[Tính pinyin, tìm từ đã kiểm duyệt trong câu]:::sys
     I --> J{Đang ở đâu?}:::dec
     J -- Trang Dịch --> K[Hiện bản dịch máy, nghe, chép,<br/>Lưu từ đã kiểm duyệt] --> E
-    J -- Ô chat --> L[Thay chữ trong ô bằng bản dịch,<br/>hiện pinyin + Hoàn tác] --> M[Gửi tin như bình thường] --> E""")
+    J -- Ô chat --> L[Thay chữ trong ô bằng bản dịch,<br/>hiện pinyin + Hoàn tác] --> M[Gửi tin như bình thường] --> E""",
+)
 
-DIAGRAMS["activity/A14_vi_tri"] = act("A14 – Học theo vị trí: bản đồ và geofence", """
+DIAGRAMS["activity/A14_vi_tri"] = act(
+    "A14 – Học theo vị trí: bản đồ và geofence",
+    """
     S --> A{Cách dùng}:::dec
     A -- Mở bản đồ --> B[Lấy vị trí hiện tại, chọn bán kính]
     B --> C[GET /pois-nearby: chỉ mục lưới + Haversine]:::sys
@@ -247,9 +288,12 @@ DIAGRAMS["activity/A14_vi_tri"] = act("A14 – Học theo vị trí: bản đồ
     N --> O[Banner trong app + thông báo đẩy]
     O --> P{Học viên bấm?}:::dec
     P -- Có --> F
-    P -- Không --> G""")
+    P -- Không --> G""",
+)
 
-DIAGRAMS["activity/A15_tro_choi"] = act("A15 – Trò chơi", """
+DIAGRAMS["activity/A15_tro_choi"] = act(
+    "A15 – Trò chơi",
+    """
     S --> A[Mở bản đồ trò chơi của ngôn ngữ đang học]
     A --> B[Máy chủ dựng bản đồ: các màn, màn trùm, rương,<br/>vị trí bạn bè]:::sys
     B --> C{Chọn}:::dec
@@ -269,9 +313,12 @@ DIAGRAMS["activity/A15_tro_choi"] = act("A15 – Trò chơi", """
     K -- Không --> L[Lưu sao tốt nhất, nhiệm vụ Thắng màn]:::sys
     L --> M{Qua màn?}:::dec
     M -- Có --> M1[Gợi ý màn tiếp theo] --> E
-    M -- Không --> M2[Hiện câu sai để ôn] --> E""")
+    M -- Không --> M2[Hiện câu sai để ôn] --> E""",
+)
 
-DIAGRAMS["activity/A16_nhiem_vu_cua_hang"] = act("A16 – Nhiệm vụ, huy hiệu, cửa hàng và giải đấu tuần", """
+DIAGRAMS["activity/A16_nhiem_vu_cua_hang"] = act(
+    "A16 – Nhiệm vụ, huy hiệu, cửa hàng và giải đấu tuần",
+    """
     S --> A[Học, chơi, lưu từ, làm bài…]
     A --> B[Cộng tiến độ nhiệm vụ ngày / tháng, kiểm tra huy hiệu]:::sys
     B --> C{Nhiệm vụ đạt?}:::dec
@@ -286,9 +333,12 @@ DIAGRAMS["activity/A16_nhiem_vu_cua_hang"] = act("A16 – Nhiệm vụ, huy hi�
     J -- Đóng băng chuỗi --> J2[Tự dùng khi lỡ đúng một ngày, giữ chuỗi]:::sys --> K
     J -- Sticker / đồ Prismo --> J3[Dùng trong chat / thay đồ]:::sys --> K
     F -- Không --> K[XP vào giải đấu tuần theo hạng]
-    K --> L[Cuối tuần: đóng giải, lên / xuống hạng, thưởng]:::sys --> E""")
+    K --> L[Cuối tuần: đóng giải, lên / xuống hạng, thưởng]:::sys --> E""",
+)
 
-DIAGRAMS["activity/A17_bai_viet"] = act("A17 – Cộng đồng: đăng bài, bình luận, lưu từ trong bài", """
+DIAGRAMS["activity/A17_bai_viet"] = act(
+    "A17 – Cộng đồng: đăng bài, bình luận, lưu từ trong bài",
+    """
     S --> A[Xem bảng tin]
     A --> B{Thao tác}:::dec
     B -- Đăng bài --> C{Email đã xác minh, không quá giới hạn tải lên?}:::dec
@@ -298,9 +348,12 @@ DIAGRAMS["activity/A17_bai_viet"] = act("A17 – Cộng đồng: đăng bài, b�
     B -- Bình luận --> G[Lưu bình luận, thông báo chủ bài]:::sys --> A
     B -- Lưu từ trong bài --> H[Thêm các từ đã kiểm duyệt vào thư viện]:::sys --> A
     B -- Báo cáo bài --> I[Tạo PostReport cho kiểm duyệt]:::sys --> A
-    B -- Thoát --> E""")
+    B -- Thoát --> E""",
+)
 
-DIAGRAMS["activity/A18_ban_be_bao_cao"] = act("A18 – Bạn bè, theo dõi, chặn và báo cáo người dùng", """
+DIAGRAMS["activity/A18_ban_be_bao_cao"] = act(
+    "A18 – Bạn bè, theo dõi, chặn và báo cáo người dùng",
+    """
     S --> A{Là tài khoản trẻ em?}:::dec
     A -- Có --> A1[Không dùng được tính năng xã hội] --> E
     A -- Không --> B[Tìm bằng tên hoặc ID 8 số / gợi ý]
@@ -316,9 +369,12 @@ DIAGRAMS["activity/A18_ban_be_bao_cao"] = act("A18 – Bạn bè, theo dõi, ch�
     I -- Không --> J[Tạo UserReport, kèm 30 tin nhắn cuối làm bằng chứng]:::sys
     J --> K{Chặn luôn?}:::dec
     K -- Có --> H
-    K -- Không --> E""")
+    K -- Không --> E""",
+)
 
-DIAGRAMS["activity/A19_chat_nhom"] = act("A19 – Nhóm học và chat nhóm realtime", """
+DIAGRAMS["activity/A19_chat_nhom"] = act(
+    "A19 – Nhóm học và chat nhóm realtime",
+    """
     S --> A[Chọn nhóm, bấm Tham gia]
     A --> B{Nhóm cần duyệt?}:::dec
     B -- Có --> C[Thành viên pending, báo trưởng nhóm]:::sys
@@ -339,9 +395,12 @@ DIAGRAMS["activity/A19_chat_nhom"] = act("A19 – Nhóm học và chat nhóm rea
     M --> N{⋯ trên một tin}:::dec
     N -- Thả tim --> N1[Bật / tắt tim, phát sự kiện heart]:::sys --> I
     N -- Dịch --> N2[Dịch sang tiếng Việt, chỉ mình thấy] --> I
-    N -- Không --> E""")
+    N -- Không --> E""",
+)
 
-DIAGRAMS["activity/A20_tin_nhan_rieng"] = act("A20 – Tin nhắn riêng", """
+DIAGRAMS["activity/A20_tin_nhan_rieng"] = act(
+    "A20 – Tin nhắn riêng",
+    """
     S --> A[Mở hội thoại với một người]
     A --> B{Cả hai người lớn, không chặn nhau,<br/>là bạn bè hoặc theo dõi nhau?}:::dec
     B -- Không --> B1[Không nhắn được, chỉ xem lịch sử]:::err --> E
@@ -358,9 +417,12 @@ DIAGRAMS["activity/A20_tin_nhan_rieng"] = act("A20 – Tin nhắn riêng", """
     K -- Thả tim --> K1[dm_heart tới hai người]:::sys --> D
     K -- Dịch --> K2[Bản dịch máy dưới tin] --> D
     K -- Báo cáo --> K3[Xem A18] --> E
-    K -- Thoát --> E""")
+    K -- Thoát --> E""",
+)
 
-DIAGRAMS["activity/A21_ho_tro"] = act("A21 – Hỏi giáo viên (chat hỗ trợ)", """
+DIAGRAMS["activity/A21_ho_tro"] = act(
+    "A21 – Hỏi giáo viên (chat hỗ trợ)",
+    """
     S --> A[Học viên mở Hỏi giáo viên]
     A --> B[Tạo / mở SupportConversation]:::sys
     B --> C[Gửi câu hỏi qua /ws/support/id]
@@ -373,9 +435,12 @@ DIAGRAMS["activity/A21_ho_tro"] = act("A21 – Hỏi giáo viên (chat hỗ tr�
     I --> J[Thông báo học viên, đánh dấu đã nhận / đã đọc]:::sys
     J --> K{Xong?}:::dec
     K -- Chưa --> C
-    K -- Rồi --> L[Giáo viên đóng hội thoại]:::sys --> E""")
+    K -- Rồi --> L[Giáo viên đóng hội thoại]:::sys --> E""",
+)
 
-DIAGRAMS["activity/A22_thong_bao"] = act("A22 – Thông báo", """
+DIAGRAMS["activity/A22_thong_bao"] = act(
+    "A22 – Thông báo",
+    """
     S --> A[Một sự kiện: tin nhắn, chấm bài, lời mời, gần POI,<br/>mốc XP, thông báo hàng loạt…]
     A --> B[notify: tạo Notification]:::sys
     B --> C[push_event tới /ws/events của người nhận]:::sys
@@ -388,9 +453,12 @@ DIAGRAMS["activity/A22_thong_bao"] = act("A22 – Thông báo", """
     G & H --> I{Bấm vào?}:::dec
     I -- Có --> J[DeepLink: mở màn hình theo data.route]
     I -- Không --> K[Còn trong mục Thông báo]
-    J & K --> E""")
+    J & K --> E""",
+)
 
-DIAGRAMS["activity/A23_kiem_duyet_ngon_ngu"] = act("A23 – Quản trị: kiểm duyệt dữ liệu ngôn ngữ và duyệt từ mới", """
+DIAGRAMS["activity/A23_kiem_duyet_ngon_ngu"] = act(
+    "A23 – Quản trị: kiểm duyệt dữ liệu ngôn ngữ và duyệt từ mới",
+    """
     S --> A{Hàng chờ}:::dec
     A -- Bản dịch bị gắn cờ --> B[Xem lỗi do bộ kiểm tra tự động tìm<br/>(CC-CEDICT, HSK, moedict, TOCFL, CMUdict)]
     B --> C{Quyết định}:::dec
@@ -404,9 +472,12 @@ DIAGRAMS["activity/A23_kiem_duyet_ngon_ngu"] = act("A23 – Quản trị: kiểm
     G -- Có --> D
     G -- Không --> H{Duyệt?}:::dec
     H -- Bỏ qua --> H1[status = rejected] --> E
-    H -- Duyệt --> I[Tạo Word + bản dịch đã kiểm, ghi CSV đã duyệt]:::sys --> E""")
+    H -- Duyệt --> I[Tạo Word + bản dịch đã kiểm, ghi CSV đã duyệt]:::sys --> E""",
+)
 
-DIAGRAMS["activity/A24_webgis"] = act("A24 – Quản trị: quản lý POI (WebGIS)", """
+DIAGRAMS["activity/A24_webgis"] = act(
+    "A24 – Quản trị: quản lý POI (WebGIS)",
+    """
     S --> A[Mở bản đồ quản lý POI]
     A --> B{Thao tác}:::dec
     B -- Thêm --> C[Bấm lên bản đồ để đặt ghim]
@@ -417,9 +488,12 @@ DIAGRAMS["activity/A24_webgis"] = act("A24 – Quản trị: quản lý POI (Web
     H -- Không --> F
     H -- Có --> I[Lưu POI]:::sys
     I --> J[Làm mới chỉ mục lưới Proximity]:::sys --> E
-    B -- Xoá / xoá nhiều --> K[Xoá POI]:::sys --> J""")
+    B -- Xoá / xoá nhiều --> K[Xoá POI]:::sys --> J""",
+)
 
-DIAGRAMS["activity/A25_kiem_duyet_bao_cao"] = act("A25 – Quản trị: xử lý báo cáo và khoá tài khoản", """
+DIAGRAMS["activity/A25_kiem_duyet_bao_cao"] = act(
+    "A25 – Quản trị: xử lý báo cáo và khoá tài khoản",
+    """
     S --> A{Loại báo cáo}:::dec
     A -- Bài viết --> B[Xem bài và lý do]
     B --> C{Quyết định}:::dec
@@ -431,9 +505,12 @@ DIAGRAMS["activity/A25_kiem_duyet_bao_cao"] = act("A25 – Quản trị: xử l�
     G -- Không --> G1[Không khoá được giáo viên / quản trị từ đây]:::err --> E
     G -- Có --> H[status = locked: không đăng nhập được,<br/>đóng mọi báo cáo đang chờ về người này]:::sys --> N
     F -- Không --> I[Bỏ qua báo cáo này]:::sys --> N
-    N[Thông báo người báo cáo: đã xem xét (không nói cách xử lý)]:::sys --> O[Ghi audit log] --> E""")
+    N[Thông báo người báo cáo: đã xem xét (không nói cách xử lý)]:::sys --> O[Ghi audit log] --> E""",
+)
 
-DIAGRAMS["activity/A26_thuat_toan"] = act("A26 – Quản trị: thuật toán và thực nghiệm", """
+DIAGRAMS["activity/A26_thuat_toan"] = act(
+    "A26 – Quản trị: thuật toán và thực nghiệm",
+    """
     S --> A[Mở Thuật toán AI & thực nghiệm]
     A --> B[Xem cấu hình đang dùng + kết quả mới nhất]:::sys
     B --> C{Thao tác}:::dec
@@ -450,9 +527,12 @@ DIAGRAMS["activity/A26_thuat_toan"] = act("A26 – Quản trị: thuật toán v
     K -- Có --> I1
     K -- Không --> B
     C -- Xem trước --> L[Thứ tự VIP của một học viên /<br/>đáp án nhiễu của một từ] --> B
-    C -- Thoát --> E""")
+    C -- Thoát --> E""",
+)
 
-DIAGRAMS["activity/A27_quan_ly_nhan_dien"] = act("A27 – Quản trị: phản hồi nhận diện và phiên bản model", """
+DIAGRAMS["activity/A27_quan_ly_nhan_dien"] = act(
+    "A27 – Quản trị: phản hồi nhận diện và phiên bản model",
+    """
     S --> A{Thao tác}:::dec
     A -- Phản hồi sai của học viên --> B[Xem ảnh, nhãn model, nhãn học viên sửa]
     B --> C{Quyết định}:::dec
@@ -462,9 +542,12 @@ DIAGRAMS["activity/A27_quan_ly_nhan_dien"] = act("A27 – Quản trị: phản h
     F -- Có --> G[Xuất phản hồi đã duyệt thành dữ liệu train YOLO]:::sys --> E
     F -- Không --> E
     A -- Phiên bản model --> H[Đăng ký / bật phiên bản (tên, chỉ số mAP)]:::sys --> E
-    A -- Ảnh & thống kê --> I[Xem độ tin trung bình, lớp hay sai, xoá ảnh]:::sys --> E""")
+    A -- Ảnh & thống kê --> I[Xem độ tin trung bình, lớp hay sai, xoá ảnh]:::sys --> E""",
+)
 
-DIAGRAMS["activity/A28_quan_tri_chung"] = act("A28 – Quản trị: người dùng, đề thi, game hoá, thông báo hàng loạt, nhật ký", """
+DIAGRAMS["activity/A28_quan_tri_chung"] = act(
+    "A28 – Quản trị: người dùng, đề thi, game hoá, thông báo hàng loạt, nhật ký",
+    """
     S --> A{Chức năng}:::dec
     A -- Người dùng --> B[Tìm, tạo, sửa vai trò / trạng thái, xoá] --> L
     A -- Câu hỏi & đề --> C[Tạo câu hỏi, ghép đề, đặt điểm từng câu] --> L
@@ -473,4 +556,5 @@ DIAGRAMS["activity/A28_quan_tri_chung"] = act("A28 – Quản trị: người d�
     F --> G[notify từng người → realtime + đẩy]:::sys --> L
     A -- Bảng điều khiển --> H[Số người dùng, hoạt động, nhận diện, nội dung] --> E
     A -- Nhật ký --> I[Xem audit log, lọc theo người / thao tác] --> E
-    L[Ghi audit log thao tác quản trị]:::sys --> E""")
+    L[Ghi audit log thao tác quản trị]:::sys --> E""",
+)

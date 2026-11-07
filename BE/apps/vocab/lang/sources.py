@@ -4,6 +4,7 @@ Raw downloads live in BE/seed/sources/ (gitignored, fetched by `manage.py fetch_
 Per-word Taiwan MOE dictionary lookups are cached in BE/seed/cache/moedict.json (committed)
 so seeding is reproducible offline.
 """
+
 import gzip
 import json
 import re
@@ -31,6 +32,7 @@ USER_AGENT = "LingoPrism/1.0 (graduation project; vocabulary verification)"
 
 
 # ------------------------------------------------------------------ CC-CEDICT
+
 
 @dataclass
 class CedictEntry:
@@ -91,6 +93,7 @@ class Cedict:
 
 # ------------------------------------------------------------------ HSK
 
+
 class Hsk:
     def __init__(self, path: Path):
         data = json.loads(path.read_text(encoding="utf-8"))
@@ -115,6 +118,7 @@ class Hsk:
 
 
 # ------------------------------------------------------------------ CMUdict
+
 
 class CmuDict:
     def __init__(self, path: Path):
@@ -145,6 +149,7 @@ class CmuDict:
 
 
 # ------------------------------------------------------------------ Taiwan MOE dictionary (moedict)
+
 
 class MoeDict:
     """Lookups against https://www.moedict.tw (教育部重編國語辭典修訂本, CC BY-ND 3.0 TW), cached on disk."""
@@ -192,6 +197,7 @@ class MoeDict:
 
 
 # ------------------------------------------------------------------ accessors
+
 
 def _require(name: str) -> Path:
     path = SOURCES_DIR / name

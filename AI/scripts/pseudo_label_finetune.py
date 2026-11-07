@@ -18,6 +18,7 @@ The Open Images replay photos are left as they are (the base model learnt from e
 The human labels are kept in <DS>/labels_human/ so a rerun (another --conf) starts again from them; <DS>/pseudo.json
 records what was added. Ultralytics' label caches are removed.
 """
+
 import argparse
 import json
 import shutil
@@ -35,7 +36,9 @@ from build_oiv7_finetune import label_groups  # noqa: E402
 def coco_names() -> set[str]:
     import ultralytics
 
-    data = yaml.safe_load((Path(ultralytics.__file__).parent / "cfg" / "datasets" / "coco.yaml").read_text(encoding="utf-8"))
+    data = yaml.safe_load(
+        (Path(ultralytics.__file__).parent / "cfg" / "datasets" / "coco.yaml").read_text(encoding="utf-8")
+    )
     return set(data["names"].values())
 
 
@@ -72,8 +75,11 @@ def main():
     coco = coco_names() & set(groups)
     lvis = set(LVIS_MAP) & set(groups) - coco
     never = {i for lab in coco for i in groups[lab]}  # COCO classes: exhaustive human boxes
-    print(f"Nhãn COCO (không gán thêm): {len(coco)}; nhãn LVIS (gán khi chưa có box người): {len(lvis)}; "
-          f"lớp Open Images được gán: {len(names) - len(never)}", flush=True)
+    print(
+        f"Nhãn COCO (không gán thêm): {len(coco)}; nhãn LVIS (gán khi chưa có box người): {len(lvis)}; "
+        f"lớp Open Images được gán: {len(names) - len(never)}",
+        flush=True,
+    )
 
     files = []
     for part in ("train", "val"):
@@ -83,7 +89,7 @@ def main():
         files = files[: args.limit]
     added, images_with = Counter(), 0
     for k in range(0, len(files), args.batch):
-        chunk = files[k: k + args.batch]
+        chunk = files[k : k + args.batch]
         results = model.predict([str(f) for _, f in chunk], conf=args.conf, imgsz=args.imgsz, verbose=False)
         for (part, img), res in zip(chunk, results):
             label = ds / "labels" / part / f"{img.stem}.txt"
@@ -117,8 +123,14 @@ def main():
 
     for cache in (ds / "labels").glob("*.cache"):
         cache.unlink()
-    info = {"conf": args.conf, "teacher": args.base, "images": len(files), "images_with_pseudo": images_with,
-            "boxes": sum(added.values()), "per_class": dict(added.most_common())}
+    info = {
+        "conf": args.conf,
+        "teacher": args.base,
+        "images": len(files),
+        "images_with_pseudo": images_with,
+        "boxes": sum(added.values()),
+        "per_class": dict(added.most_common()),
+    }
     if not args.limit:
         marker.write_text(json.dumps(info, indent=1, ensure_ascii=False), encoding="utf-8")
     top = ", ".join(f"{n} {v}" for n, v in added.most_common(25))

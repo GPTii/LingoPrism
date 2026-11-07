@@ -4,6 +4,7 @@ No teacher role: the group's leaders (its creator and the members it promotes) g
 members do it. An assignment is either questions (multiple choice, fill-in, written answer, file to hand in), or only
 instructions + an attached file (a worksheet), answered with text and / or a file.
 """
+
 import uuid
 from pathlib import Path
 
@@ -33,8 +34,12 @@ class Assignment(TimeStampedModel):
     attachment_name = models.CharField(max_length=200, blank=True)
     due_at = models.DateTimeField(null=True, blank=True)
     status = models.CharField(max_length=9, choices=Status.choices, default=Status.DRAFT, db_index=True)
-    points = models.DecimalField(max_digits=6, decimal_places=2, default=10,
-                                 help_text="Điểm tối đa khi bài không có câu hỏi (chỉ nộp bài làm / file)")
+    points = models.DecimalField(
+        max_digits=6,
+        decimal_places=2,
+        default=10,
+        help_text="Điểm tối đa khi bài không có câu hỏi (chỉ nộp bài làm / file)",
+    )
     allow_late = models.BooleanField(default=True, help_text="Cho nộp sau hạn (đánh dấu nộp muộn)")
     show_answers = models.BooleanField(default=True, help_text="Cho xem đáp án đúng sau khi đã chấm")
     ai_generated = models.BooleanField(default=False, help_text="Câu hỏi do AI tách từ file")
@@ -92,8 +97,9 @@ class AssignmentSubmission(models.Model):
     score = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
     max_score = models.DecimalField(max_digits=6, decimal_places=2, default=0)
     feedback = models.TextField(blank=True)
-    graded_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL,
-                                  related_name="+")
+    graded_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
     graded_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
@@ -102,7 +108,11 @@ class AssignmentSubmission(models.Model):
 
     @property
     def percent(self):
-        return round(float(self.score) / float(self.max_score) * 100, 1) if self.max_score and self.score is not None else None
+        return (
+            round(float(self.score) / float(self.max_score) * 100, 1)
+            if self.max_score and self.score is not None
+            else None
+        )
 
 
 class AssignmentAnswer(models.Model):

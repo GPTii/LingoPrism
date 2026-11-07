@@ -5,11 +5,12 @@ pinyin comes from Tatoeba's transcription and is aligned one syllable per Han ch
 `verified` when its pinyin was reviewed by a Tatoeba member or agrees with an independent reading (pypinyin),
 and – for zh-Hant – no word has a different Taiwan reading in CC-CEDICT.
 """
+
 import re
-from collections import Counter
-from functools import lru_cache
 import unicodedata
+from collections import Counter
 from dataclasses import dataclass, field
+from functools import lru_cache
 
 from . import pinyin as py
 from . import sources
@@ -23,7 +24,9 @@ SANDHI_CHARS = set("一不")
 
 @dataclass
 class ZhSentence:
-    tokens: list[dict] = field(default_factory=list)  # {"t": text, "p": marked pinyin, "z": zhuyin} or {"t": punct, "x": 1}
+    tokens: list[dict] = field(
+        default_factory=list
+    )  # {"t": text, "p": marked pinyin, "z": zhuyin} or {"t": punct, "x": 1}
     numbered: str = ""
     errors: list[str] = field(default_factory=list)
     warnings: list[str] = field(default_factory=list)
@@ -55,7 +58,7 @@ def segment_zh(text: str, script: str) -> list[str]:
             i = j
             continue
         for size in range(min(MAX_WORD, len(text) - i), 0, -1):
-            piece = text[i:i + size]
+            piece = text[i : i + size]
             if size == 1 or piece in lexicon:
                 out.append(piece)
                 i += size
@@ -143,7 +146,7 @@ def build_zh(text: str, script: str, transcription: str, reviewed: bool) -> ZhSe
         if n == 0:
             out.tokens.append({"t": piece, "x": 1} if not piece.strip() or not piece[0].isalnum() else {"t": piece})
             continue
-        numbered = " ".join(syls[k:k + n])
+        numbered = " ".join(syls[k : k + n])
         k += n
         tok = {"t": piece, "p": py.numbered_to_marked(numbered)}
         if script == "hant":
@@ -162,7 +165,7 @@ def tokens_latin(text: str, lang: str) -> list[dict]:
     out, pos = [], 0
     text = unicodedata.normalize("NFC", text)
     for m in rx.finditer(text):
-        gap = text[pos:m.start()].strip()
+        gap = text[pos : m.start()].strip()
         if gap:
             out.append({"t": gap, "x": 1})
         out.append({"t": m.group(0)})
@@ -183,8 +186,8 @@ def word_spans(tokens: list[dict], target: str, lang: str) -> list[int]:
     if not parts:
         return []
     for start in range(len(words) - len(parts) + 1):
-        if [w.lower() for _, w in words[start:start + len(parts)]] == parts:
-            return [i for i, _ in words[start:start + len(parts)]]
+        if [w.lower() for _, w in words[start : start + len(parts)]] == parts:
+            return [i for i, _ in words[start : start + len(parts)]]
     return []
 
 

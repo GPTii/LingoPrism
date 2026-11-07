@@ -21,16 +21,27 @@ def learner(db):
         TopicWord.objects.create(topic=topic, word=w, order=i)
         WordTranslation.objects.create(word=w, language_id="vi", text=vi, status=ReviewStatus.VERIFIED)
         WordTranslation.objects.create(word=w, language_id="en", text=en, status=ReviewStatus.VERIFIED)
-        pws.append(PersonalWord.objects.create(user=user, word=w, language="en", topic=topic,
-                                               status="mastered" if i == 0 else "learning"))
+        pws.append(
+            PersonalWord.objects.create(
+                user=user, word=w, language="en", topic=topic, status="mastered" if i == 0 else "learning"
+            )
+        )
     client = APIClient()
     client.force_authenticate(user)
     return user, client, pws
 
 
 def log(user, pw, correct, qtype="choose_target", days_ago=0, first_try=True):
-    ReviewLog.objects.create(user=user, personal_word=pw, language="en", question_type=qtype, correct=correct,
-                             first_try=first_try, scheduler="sm2", created_at=timezone.now() - timedelta(days=days_ago))
+    ReviewLog.objects.create(
+        user=user,
+        personal_word=pw,
+        language="en",
+        question_type=qtype,
+        correct=correct,
+        first_try=first_try,
+        scheduler="sm2",
+        created_at=timezone.now() - timedelta(days=days_ago),
+    )
 
 
 def test_stats_counts_words_accuracy_and_days(learner):
@@ -54,7 +65,7 @@ def test_stats_counts_words_accuracy_and_days(learner):
 
 
 def test_stats_window_and_privacy(learner):
-    user, client, (cat, *_ ) = learner
+    user, client, (cat, *_) = learner
     log(user, cat, True, days_ago=40)
     assert client.get("/api/v1/stats/learning/?days=90").data["answers"] == 1
     assert len(client.get("/api/v1/stats/learning/?days=3").data["daily"]) == 7  # at least a week

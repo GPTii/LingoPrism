@@ -29,8 +29,16 @@ class SupportConversation(models.Model):
         OPEN = "open", "Đang mở"
         CLOSED = "closed", "Đã đóng"
 
-    learner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="support_conversations")
-    staff = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="assigned_conversations")
+    learner = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="support_conversations"
+    )
+    staff = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="assigned_conversations",
+    )
     subject = models.CharField(max_length=120, default="Hỗ trợ học tập")
     status = models.CharField(max_length=6, choices=Status.choices, default=Status.OPEN, db_index=True)
     created_at = models.DateTimeField(default=timezone.now)

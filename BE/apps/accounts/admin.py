@@ -13,10 +13,26 @@ class UserAdmin(BaseUserAdmin):
     fieldsets = (
         (None, {"fields": ("email", "password")}),
         ("Hồ sơ", {"fields": ("display_name", "avatar", "bio", "birth_date", "gender")}),
-        ("Học tập", {"fields": ("learner_type", "learning_languages", "active_language", "zh_script", "show_zhuyin",
-                                "purpose", "daily_minutes", "onboarding_completed")}),
+        (
+            "Học tập",
+            {
+                "fields": (
+                    "learner_type",
+                    "learning_languages",
+                    "active_language",
+                    "zh_script",
+                    "show_zhuyin",
+                    "purpose",
+                    "daily_minutes",
+                    "onboarding_completed",
+                )
+            },
+        ),
         ("Ví", {"fields": ("scales_balance", "gems_balance")}),
-        ("Quyền", {"fields": ("role", "status", "is_active", "is_staff", "is_superuser", "groups", "user_permissions")}),
+        (
+            "Quyền",
+            {"fields": ("role", "status", "is_active", "is_staff", "is_superuser", "groups", "user_permissions")},
+        ),
     )
     add_fieldsets = ((None, {"classes": ("wide",), "fields": ("email", "password1", "password2", "role")}),)
 

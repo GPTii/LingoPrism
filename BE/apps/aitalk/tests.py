@@ -24,14 +24,19 @@ def photo(db, settings):
         w = Word.objects.create(slug=slug, yolo_label=slug)
         WordTranslation.objects.create(word=w, language_id="vi", text=vi, status=ReviewStatus.VERIFIED)
         WordTranslation.objects.create(word=w, language_id="zh-Hans", text=hans, status=ReviewStatus.VERIFIED)
-    WordTranslation.objects.create(word=Word.objects.create(slug="dog", yolo_label="dog"), language_id="zh-Hans",
-                                   text="狗", status=ReviewStatus.DRAFT)  # not verified: never given to the AI
+    WordTranslation.objects.create(
+        word=Word.objects.create(slug="dog", yolo_label="dog"),
+        language_id="zh-Hans",
+        text="狗",
+        status=ReviewStatus.DRAFT,
+    )  # not verified: never given to the AI
     user = User.objects.create_user("t@example.com", "Strong!Pass123", active_language="zh", zh_script="hans")
     det = Detection.objects.create(user=user, model_name="test", device="server")
     DetectionItem.objects.create(detection=det, label="apple", confidence=0.9, selected=True)
     DetectionItem.objects.create(detection=det, label="dog", confidence=0.8, selected=True)
-    DetectionItem.objects.create(detection=det, label="car", confidence=0.7, selected=True, feedback="wrong",
-                                 corrected_label="cup")
+    DetectionItem.objects.create(
+        detection=det, label="car", confidence=0.7, selected=True, feedback="wrong", corrected_label="cup"
+    )
     c = APIClient()
     c.force_authenticate(user)
     return user, c, det
@@ -41,18 +46,25 @@ def photo(db, settings):
 def claude(monkeypatch):
     """Stands in for the Anthropic client; records the request."""
     calls = []
-    answer = {"title_vi": "Ở bếp", "lines": [
-        {"speaker": "A", "text": "这个苹果很好吃。", "translation": "Quả táo này rất ngon."},
-        {"speaker": "B", "text": "给我一个杯子。", "translation": "Đưa tôi một cái cốc."},
-    ]}
+    answer = {
+        "title_vi": "Ở bếp",
+        "lines": [
+            {"speaker": "A", "text": "这个苹果很好吃。", "translation": "Quả táo này rất ngon."},
+            {"speaker": "B", "text": "给我一个杯子。", "translation": "Đưa tôi một cái cốc."},
+        ],
+    }
 
     class Messages:
         def create(self, **kw):
             calls.append(kw)
-            return SimpleNamespace(stop_reason="end_turn", model=kw["model"],
-                                   content=[SimpleNamespace(type="text", text=json.dumps(answer, ensure_ascii=False))])
+            return SimpleNamespace(
+                stop_reason="end_turn",
+                model=kw["model"],
+                content=[SimpleNamespace(type="text", text=json.dumps(answer, ensure_ascii=False))],
+            )
 
     import anthropic
+
     monkeypatch.setattr(anthropic, "Anthropic", lambda **kw: SimpleNamespace(beta=SimpleNamespace(messages=Messages())))
     return calls
 
@@ -104,14 +116,28 @@ def test_gemini_is_used_first_when_its_key_is_set(photo, settings, monkeypatch):
     settings.GEMINI_API_KEY = "g-key"
     settings.GEMINI_MODEL = "gemini-flash-latest"
     sent = []
-    answer = {"title_vi": "Ở bếp", "lines": [{"speaker": "A", "text": "给我一个杯子。", "translation": "Đưa tôi một cái cốc."}]}
+    answer = {
+        "title_vi": "Ở bếp",
+        "lines": [{"speaker": "A", "text": "给我一个杯子。", "translation": "Đưa tôi một cái cốc."}],
+    }
 
     def post(url, headers, json, timeout):
         sent.append((url, headers, json))
-        return SimpleNamespace(status_code=200, json=lambda: {"modelVersion": "gemini-x", "candidates": [
-            {"finishReason": "STOP", "content": {"parts": [{"text": __import__("json").dumps(answer, ensure_ascii=False)}]}}]})
+        return SimpleNamespace(
+            status_code=200,
+            json=lambda: {
+                "modelVersion": "gemini-x",
+                "candidates": [
+                    {
+                        "finishReason": "STOP",
+                        "content": {"parts": [{"text": __import__("json").dumps(answer, ensure_ascii=False)}]},
+                    }
+                ],
+            },
+        )
 
     import requests
+
     monkeypatch.setattr(requests, "post", post)
     res = c.post(f"/api/v1/detections/{det.id}/dialogue/")
     assert res.status_code == 200, res.data

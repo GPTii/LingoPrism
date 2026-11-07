@@ -11,6 +11,7 @@
                  so the options are hard but not all the same thing.
 Words without a vector fall back to the random same-topic baseline.
 """
+
 from functools import lru_cache
 
 import numpy as np
@@ -48,15 +49,25 @@ def rank_candidates(word: Word, code: str, k: int = 3, pool: list[Word] | None =
     v = vec.get(word.slug)
     if v is None:
         return []
-    pool = pool if pool is not None else list(
-        Word.objects.filter(translations__language_id=code, translations__status=ReviewStatus.VERIFIED)
-        .exclude(id=word.id).prefetch_related("topics").distinct())
+    pool = (
+        pool
+        if pool is not None
+        else list(
+            Word.objects.filter(translations__language_id=code, translations__status=ReviewStatus.VERIFIED)
+            .exclude(id=word.id)
+            .prefetch_related("topics")
+            .distinct()
+        )
+    )
     target, vi = _texts(code), _texts("vi")
-    en = {t.word_id: t for t in WordTranslation.objects.filter(language_id="en", word_id__in=[word.id] + [w.id for w in pool])}
+    en = {
+        t.word_id: t
+        for t in WordTranslation.objects.filter(language_id="en", word_id__in=[word.id] + [w.id for w in pool])
+    }
     answer_text, answer_vi = target.get(word.id, ""), vi.get(word.id, "")
     answer_aliases = set((en[word.id].accepted_variants or []) + [en[word.id].text]) if word.id in en else set()
     topics = set(word.topics.values_list("id", flat=True))
-    lvl = (word.levels or {})
+    lvl = word.levels or {}
     scored = []
     for c in pool:
         cv = vec.get(c.slug)
@@ -64,9 +75,13 @@ def rank_candidates(word: Word, code: str, k: int = 3, pool: list[Word] | None =
             continue
         cos = float(np.dot(v, cv))
         text = target[c.id]
-        if (cos >= SYNONYM_COS or text == answer_text or (answer_text and (answer_text in text or text in answer_text))
-                or (answer_vi and vi.get(c.id) == answer_vi)
-                or (c.id in en and en[c.id].text in answer_aliases)):
+        if (
+            cos >= SYNONYM_COS
+            or text == answer_text
+            or (answer_text and (answer_text in text or text in answer_text))
+            or (answer_vi and vi.get(c.id) == answer_vi)
+            or (c.id in en and en[c.id].text in answer_aliases)
+        ):
             continue
         same_topic = bool(topics & {t.id for t in c.topics.all()})
         same_pos = c.part_of_speech == word.part_of_speech
@@ -91,5 +106,7 @@ class SmartDistractors(DistractorProvider):
         chosen = rank_candidates(word, target.code, k)
         if len(chosen) < k:
             extra = RandomSameTopicDistractors().pick(word, target, k)
-            return [c for c, _ in chosen] + [w for w in extra if w.id not in {c.id for c, _ in chosen}][: k - len(chosen)]
+            return [c for c, _ in chosen] + [w for w in extra if w.id not in {c.id for c, _ in chosen}][
+                : k - len(chosen)
+            ]
         return [c for c, _ in chosen]

@@ -11,16 +11,51 @@ Memory model DSR:
 
 The 17 weights default to the FSRS-4.5 values; the Genetic Algorithm (ga.py) can fit them to our review history.
 """
+
 import math
 from datetime import datetime, timedelta
 
 from apps.learning.scheduling import CardState, Scheduler
 
-DEFAULT_W = [0.4872, 1.4003, 3.7145, 13.8206, 5.1618, 1.2298, 0.8975, 0.031, 1.6474, 0.1367, 1.0461,
-             2.1072, 0.0793, 0.3246, 1.587, 0.2272, 2.8755]
+DEFAULT_W = [
+    0.4872,
+    1.4003,
+    3.7145,
+    13.8206,
+    5.1618,
+    1.2298,
+    0.8975,
+    0.031,
+    1.6474,
+    0.1367,
+    1.0461,
+    2.1072,
+    0.0793,
+    0.3246,
+    1.587,
+    0.2272,
+    2.8755,
+]
 # search bounds used by the GA (same order as the weights)
-BOUNDS = [(0.1, 5), (0.1, 10), (0.5, 20), (1, 60), (1, 10), (0.1, 4), (0.1, 4), (0, 0.5), (0, 3), (0, 0.8),
-          (0.01, 4), (0.1, 5), (0.01, 0.5), (0.01, 0.9), (0.01, 4), (0, 1), (1, 6)]
+BOUNDS = [
+    (0.1, 5),
+    (0.1, 10),
+    (0.5, 20),
+    (1, 60),
+    (1, 10),
+    (0.1, 4),
+    (0.1, 4),
+    (0, 0.5),
+    (0, 3),
+    (0, 0.8),
+    (0.01, 4),
+    (0.1, 5),
+    (0.01, 0.5),
+    (0.01, 0.9),
+    (0.01, 4),
+    (0, 1),
+    (1, 6),
+]
 F, C = 19 / 81, -0.5
 
 

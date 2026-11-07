@@ -1,4 +1,5 @@
 """Sentry gets the error and where it happened, nothing about the learner (apps/core/error_tracking.py)."""
+
 import json
 
 import pytest
@@ -48,8 +49,11 @@ def test_a_server_error_reaches_sentry_without_personal_data(sentry):
     client.force_authenticate(user)
     response = client.post(
         "/broken/?token=eyJsecret",
-        {"password": "hunter2", "message": "Bé Na, nhà em ở ngõ 5", "parent": "parent.na@gmail.com"}, format="json",
-        HTTP_COOKIE="sessionid=abc", HTTP_X_FORWARDED_FOR="1.2.3.4", HTTP_USER_AGENT="LingoPrism-test",
+        {"password": "hunter2", "message": "Bé Na, nhà em ở ngõ 5", "parent": "parent.na@gmail.com"},
+        format="json",
+        HTTP_COOKIE="sessionid=abc",
+        HTTP_X_FORWARDED_FOR="1.2.3.4",
+        HTTP_USER_AGENT="LingoPrism-test",
     )
     assert response.status_code == 500
     sentry_sdk.flush()
@@ -64,7 +68,16 @@ def test_a_server_error_reaches_sentry_without_personal_data(sentry):
     assert set(event.get("request", {}).get("headers", {})) <= error_tracking.KEEP_HEADERS
 
     sent = json.dumps(event, ensure_ascii=False)
-    for private in ("eyJsecret", "hunter2", "ngõ 5", "sessionid", "1.2.3.4", "kid@example.com", "parent.na",
-                    "Bé Na", '"Na"'):
+    for private in (
+        "eyJsecret",
+        "hunter2",
+        "ngõ 5",
+        "sessionid",
+        "1.2.3.4",
+        "kid@example.com",
+        "parent.na",
+        "Bé Na",
+        '"Na"',
+    ):
         assert private not in sent, private
     assert "user" not in event

@@ -4,6 +4,7 @@ The questions come back as a draft for the group leader to check and edit before
 copies the exercises it reads, it does not invent new ones. PDF and images go to Gemini as they are (it reads them,
 handwriting and scans included); Word and text files are sent as their text. Nothing is stored here.
 """
+
 import base64
 import json
 import re
@@ -30,10 +31,14 @@ SCHEMA = {
                 "properties": {
                     "kind": {"type": "string", "enum": ["mcq", "fill", "essay"]},
                     "prompt": {"type": "string"},
-                    "options": {"type": "array", "items": {
-                        "type": "object",
-                        "properties": {"text": {"type": "string"}, "correct": {"type": "boolean"}},
-                        "required": ["text", "correct"]}},
+                    "options": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {"text": {"type": "string"}, "correct": {"type": "boolean"}},
+                            "required": ["text", "correct"],
+                        },
+                    },
                     "accepted_answers": {"type": "array", "items": {"type": "string"}},
                     "points": {"type": "number"},
                     "explanation": {"type": "string"},
@@ -55,8 +60,14 @@ SYSTEM = (
     "`points`: from the document if given, else 1. `title`: the sheet's title if it has one."
 )
 
-MIME = {".pdf": "application/pdf", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png",
-        ".webp": "image/webp", ".heic": "image/heic"}
+MIME = {
+    ".pdf": "application/pdf",
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".png": "image/png",
+    ".webp": "image/webp",
+    ".heic": "image/heic",
+}
 
 
 def _docx_text(raw: bytes) -> str:
@@ -96,8 +107,15 @@ def read_questions(upload) -> dict:
         try:
             out, model = generator._gemini(prompt, system=SYSTEM, schema=SCHEMA, fail=FAIL, timeout=120, parts=parts)
         except AiUnavailable:  # the big model is often overloaded on the free tier: the small one reads well too
-            out, model = generator._gemini(prompt, system=SYSTEM, schema=SCHEMA, fail=FAIL, timeout=120, parts=parts,
-                                           model=settings.GEMINI_TRANSLATE_MODEL)
+            out, model = generator._gemini(
+                prompt,
+                system=SYSTEM,
+                schema=SCHEMA,
+                fail=FAIL,
+                timeout=120,
+                parts=parts,
+                model=settings.GEMINI_TRANSLATE_MODEL,
+            )
     else:
         out, model = generator._claude(prompt, system=SYSTEM, schema=SCHEMA, fail=FAIL)
     try:
@@ -110,8 +128,11 @@ def read_questions(upload) -> dict:
         prompt_text = str(q.get("prompt") or "").strip()
         if not prompt_text:
             continue
-        options = [{"text": str(o.get("text", "")).strip(), "correct": bool(o.get("correct"))}
-                   for o in (q.get("options") or []) if str(o.get("text", "")).strip()]
+        options = [
+            {"text": str(o.get("text", "")).strip(), "correct": bool(o.get("correct"))}
+            for o in (q.get("options") or [])
+            if str(o.get("text", "")).strip()
+        ]
         if kind == "mcq" and (len(options) < 2 or sum(o["correct"] for o in options) != 1):
             # no clear key: keep the choices, let the leader tick the right one
             for o in options:
@@ -121,9 +142,16 @@ def read_questions(upload) -> dict:
             points = max(0.25, min(float(q.get("points") or 1), 100))
         except (TypeError, ValueError):
             points = 1
-        questions.append({"kind": kind, "prompt": prompt_text, "options": options if kind == "mcq" else [],
-                          "accepted_answers": accepted if kind == "fill" else [], "points": points,
-                          "explanation": str(q.get("explanation") or "").strip()})
+        questions.append(
+            {
+                "kind": kind,
+                "prompt": prompt_text,
+                "options": options if kind == "mcq" else [],
+                "accepted_answers": accepted if kind == "fill" else [],
+                "points": points,
+                "explanation": str(q.get("explanation") or "").strip(),
+            }
+        )
     if not questions:
         raise AiUnavailable(FAIL)
     return {"title": str(data.get("title") or "").strip()[:150], "questions": questions, "model": model}

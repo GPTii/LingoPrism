@@ -13,10 +13,12 @@ class PronunciationAttempt(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="pronunciation_attempts")
     language = models.CharField(max_length=8, help_text="en | vi | zh-Hans | zh-Hant")
     kind = models.CharField(max_length=8, choices=Kind.choices)
-    translation = models.ForeignKey("vocab.WordTranslation", null=True, blank=True, on_delete=models.SET_NULL,
-                                    related_name="pronunciation_attempts")
-    sentence = models.ForeignKey("vocab.ExampleSentence", null=True, blank=True, on_delete=models.SET_NULL,
-                                 related_name="pronunciation_attempts")
+    translation = models.ForeignKey(
+        "vocab.WordTranslation", null=True, blank=True, on_delete=models.SET_NULL, related_name="pronunciation_attempts"
+    )
+    sentence = models.ForeignKey(
+        "vocab.ExampleSentence", null=True, blank=True, on_delete=models.SET_NULL, related_name="pronunciation_attempts"
+    )
     text = models.CharField(max_length=300)
     score = models.PositiveSmallIntegerField()
     phone_score = models.PositiveSmallIntegerField()

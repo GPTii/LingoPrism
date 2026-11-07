@@ -29,27 +29,50 @@ def setup(db):
 
 def test_log_on_device_and_confirm(setup):
     user, c, cat = setup
-    res = c.post("/api/v1/detections/log/", {"model_name": "yolov10n-tflite", "inference_ms": 85, "items": [
-        {"label": "cat", "confidence": 0.91, "bbox": [0.1, 0.1, 0.5, 0.6]},
-        {"label": "dog", "confidence": 0.33, "bbox": [0.5, 0.5, 0.9, 0.9],
-         "top_k": [{"label": "dog", "confidence": 0.33}, {"label": "cat", "confidence": 0.30}]},
-    ]}, format="json")
+    res = c.post(
+        "/api/v1/detections/log/",
+        {
+            "model_name": "yolov10n-tflite",
+            "inference_ms": 85,
+            "items": [
+                {"label": "cat", "confidence": 0.91, "bbox": [0.1, 0.1, 0.5, 0.6]},
+                {
+                    "label": "dog",
+                    "confidence": 0.33,
+                    "bbox": [0.5, 0.5, 0.9, 0.9],
+                    "top_k": [{"label": "dog", "confidence": 0.33}, {"label": "cat", "confidence": 0.30}],
+                },
+            ],
+        },
+        format="json",
+    )
     assert res.status_code == 201
     items = {i["label"]: i for i in res.data["items"]}
     assert items["cat"]["card"]["target"]["text"] == "cat" and items["dog"]["card"] is None
-    res = c.post(f"/api/v1/detections/{res.data['id']}/confirm/", {"items": [
-        {"id": items["cat"]["id"], "selected": True, "feedback": "correct"},
-        {"id": items["dog"]["id"], "selected": False, "feedback": "wrong", "corrected_label": "cat"},
-    ]}, format="json")
+    res = c.post(
+        f"/api/v1/detections/{res.data['id']}/confirm/",
+        {
+            "items": [
+                {"id": items["cat"]["id"], "selected": True, "feedback": "correct"},
+                {"id": items["dog"]["id"], "selected": False, "feedback": "wrong", "corrected_label": "cat"},
+            ]
+        },
+        format="json",
+    )
     assert res.data["saved"] == 1
     assert PersonalWord.objects.get(user=user, word=cat).source == "camera"
     # photo history: newest first, filtered by whether words were saved from the photo
-    c.post("/api/v1/detections/log/", {"model_name": "m", "items": [{"label": "cat", "confidence": 0.9, "bbox": [0, 0, 1, 1]}]}, format="json")
+    c.post(
+        "/api/v1/detections/log/",
+        {"model_name": "m", "items": [{"label": "cat", "confidence": 0.9, "bbox": [0, 0, 1, 1]}]},
+        format="json",
+    )
     assert len(c.get("/api/v1/detections/").data["results"]) == 2
     saved = c.get("/api/v1/detections/?confirmed=1").data["results"]
     assert [d["confirmed"] for d in saved] == [True] and saved[0]["items"][1]["corrected_label"] == "cat"
     assert [d["confirmed"] for d in c.get("/api/v1/detections/?confirmed=0").data["results"]] == [False]
     from apps.gamification.models import UserStats
+
     assert UserStats.objects.get(user=user).detections == 1
 
     staff = User.objects.create_user("s@example.com", "Strong!Pass123", role="staff")
@@ -63,22 +86,43 @@ def test_unsure_detection_offers_alternatives_and_saves_the_picked_word(setup):
     user, c, cat = setup
     pig = Word.objects.create(slug="pig", yolo_label="pig")
     WordTranslation.objects.create(word=pig, language_id="en", text="pig", status=ReviewStatus.VERIFIED)
-    res = c.post("/api/v1/detections/log/", {"model_name": "t", "items": [
-        {"label": "cat", "confidence": 0.44, "bbox": [0.1, 0.1, 0.5, 0.6],
-         "top_k": [{"label": "cat", "confidence": 0.44}, {"label": "pig", "confidence": 0.31},
-                   {"label": "cow", "confidence": 0.2}]},  # cow: no verified word -> not offered
-    ]}, format="json")
+    res = c.post(
+        "/api/v1/detections/log/",
+        {
+            "model_name": "t",
+            "items": [
+                {
+                    "label": "cat",
+                    "confidence": 0.44,
+                    "bbox": [0.1, 0.1, 0.5, 0.6],
+                    "top_k": [
+                        {"label": "cat", "confidence": 0.44},
+                        {"label": "pig", "confidence": 0.31},
+                        {"label": "cow", "confidence": 0.2},
+                    ],
+                },  # cow: no verified word -> not offered
+            ],
+        },
+        format="json",
+    )
     item = res.data["items"][0]
     assert item["uncertain"] is True
     assert [(a["label"], a["card"]["target"]["text"]) for a in item["alternatives"]] == [("pig", "pig")]
-    res = c.post(f"/api/v1/detections/{res.data['id']}/confirm/", {"items": [
-        {"id": item["id"], "selected": True, "feedback": "unknown", "corrected_label": "pig"},
-    ]}, format="json")
+    res = c.post(
+        f"/api/v1/detections/{res.data['id']}/confirm/",
+        {
+            "items": [
+                {"id": item["id"], "selected": True, "feedback": "unknown", "corrected_label": "pig"},
+            ]
+        },
+        format="json",
+    )
     assert res.data["saved"] == 1
     assert PersonalWord.objects.filter(user=user, word=pig).exists()
     assert not PersonalWord.objects.filter(user=user, word=cat).exists()
     saved = res.data["items"][0]
     assert saved["feedback"] == "wrong" and saved["corrected_card"]["target"]["text"] == "pig"
+
 
 class _FakeDetector:
     def __init__(self, classes, boxes):
@@ -166,9 +210,14 @@ _ROOT = Path(__file__).resolve().parents[3]
 _CLASSES = _ROOT / "AI" / "classes.yaml"
 _WORDS = _ROOT / "BE" / "seed" / "concepts" / "words.csv"
 # objects whose English name has several senses: the word must be the sense the detector means
-_SENSES = {"mouse": ("chuột máy tính", "鼠标", "滑鼠"), "glasses": ("kính mắt", "眼镜", "眼鏡"),
-           "watch": ("đồng hồ đeo tay", "手表", "手錶"), "keyboard": ("bàn phím", "键盘", "鍵盤"),
-           "orange": ("quả cam", "橙子", "柳橙"), "cell phone": ("điện thoại di động", "手机", "手機")}
+_SENSES = {
+    "mouse": ("chuột máy tính", "鼠标", "滑鼠"),
+    "glasses": ("kính mắt", "眼镜", "眼鏡"),
+    "watch": ("đồng hồ đeo tay", "手表", "手錶"),
+    "keyboard": ("bàn phím", "键盘", "鍵盤"),
+    "orange": ("quả cam", "橙子", "柳橙"),
+    "cell phone": ("điện thoại di động", "手机", "手機"),
+}
 
 
 @pytest.mark.skipif(not _CLASSES.exists(), reason="AI/classes.yaml không có trong image này")
@@ -192,6 +241,7 @@ def test_every_detector_class_has_a_word_in_every_language():
 
 
 # ------------------------------------------------------------------ error reports -> correction memory
+
 
 def _photo(color):
     import io
@@ -239,8 +289,11 @@ def _detect(client, color=(200, 120, 120)):
 
 
 def _report(client, det, **item):
-    return client.post(f"/api/v1/detections/{det['id']}/confirm/", {"items": [
-        {"id": det["items"][0]["id"], "selected": True, "feedback": "wrong", **item}]}, format="json").data
+    return client.post(
+        f"/api/v1/detections/{det['id']}/confirm/",
+        {"items": [{"id": det["items"][0]["id"], "selected": True, "feedback": "wrong", **item}]},
+        format="json",
+    ).data
 
 
 def test_error_report_fixes_the_same_mistake_for_the_reporter_at_once(memory_env):
@@ -336,8 +389,11 @@ def test_log_on_device_with_the_photo(setup, tmp_path, settings):
     Image.new("RGB", (400, 300), "orange").save(buf, "JPEG", exif=exif)
     photo = SimpleUploadedFile("IMG_0001.jpg", buf.getvalue(), content_type="image/jpeg")
     items = [{"label": "cat", "confidence": 0.88, "bbox": [0.1, 0.1, 0.6, 0.7]}]
-    res = c.post("/api/v1/detections/log/", {"model_name": "yolov8s-oiv7-tflite", "inference_ms": "120",
-                                             "items": json.dumps(items), "image": photo}, format="multipart")
+    res = c.post(
+        "/api/v1/detections/log/",
+        {"model_name": "yolov8s-oiv7-tflite", "inference_ms": "120", "items": json.dumps(items), "image": photo},
+        format="multipart",
+    )
     assert res.status_code == 201, res.data
     assert res.data["image"] and res.data["items"][0]["card"]["target"]["text"] == "cat"
     det = Detection.objects.get(pk=res.data["id"])
@@ -346,12 +402,20 @@ def test_log_on_device_with_the_photo(setup, tmp_path, settings):
         assert not saved.getexif().get_ifd(0x8825)  # GPS gone
     assert "IMG_0001" not in det.photo.image.name  # random name
 
-    bad = c.post("/api/v1/detections/log/", {"model_name": "m", "items": "not json", "image": SimpleUploadedFile(
-        "a.jpg", buf.getvalue(), content_type="image/jpeg")}, format="multipart")
+    bad = c.post(
+        "/api/v1/detections/log/",
+        {
+            "model_name": "m",
+            "items": "not json",
+            "image": SimpleUploadedFile("a.jpg", buf.getvalue(), content_type="image/jpeg"),
+        },
+        format="multipart",
+    )
     assert bad.status_code == 400
 
 
 # ---------------------------------------------------------------- "it is something else": typed in Vietnamese
+
 
 @pytest.fixture
 def cup_env(setup):
@@ -363,6 +427,7 @@ def cup_env(setup):
     WordTranslation.objects.create(word=jar, language_id="vi", text="cái lọ", status=ReviewStatus.VERIFIED)
     WordTranslation.objects.create(word=jar, language_id="en", text="jar", status=ReviewStatus.VERIFIED)
     from django.core.cache import cache
+
     cache.clear()
     return user, c, cat, cup, jar
 
@@ -373,23 +438,40 @@ def test_lookup_finds_the_word_from_its_vietnamese_name(cup_env):
         res = c.get("/api/v1/detections/lookup/", {"q": q}).data
         assert res and res[0]["word_id"] == cup.id and res[0]["card"]["target"]["text"] == "cup", q
     assert c.get("/api/v1/detections/lookup/", {"q": "lọ"}).data[0] == {
-        **c.get("/api/v1/detections/lookup/", {"q": "lọ"}).data[0], "label": "jar", "detector_knows": False}
+        **c.get("/api/v1/detections/lookup/", {"q": "lọ"}).data[0],
+        "label": "jar",
+        "detector_knows": False,
+    }
     assert c.get("/api/v1/detections/lookup/", {"q": "máy bay"}).data == []
 
 
 def test_a_typed_name_corrects_the_detector_and_saves_the_word(cup_env):
     user, c, cat, cup, jar = cup_env
-    res = c.post("/api/v1/detections/log/", {"model_name": "t", "items": [
-        {"label": "cat", "confidence": 0.8, "bbox": [0.1, 0.1, 0.5, 0.6]},
-        {"label": "cat", "confidence": 0.7, "bbox": [0.5, 0.1, 0.9, 0.6]},
-        {"label": "cat", "confidence": 0.6, "bbox": [0.2, 0.6, 0.4, 0.9]},
-    ]}, format="json")
+    res = c.post(
+        "/api/v1/detections/log/",
+        {
+            "model_name": "t",
+            "items": [
+                {"label": "cat", "confidence": 0.8, "bbox": [0.1, 0.1, 0.5, 0.6]},
+                {"label": "cat", "confidence": 0.7, "bbox": [0.5, 0.1, 0.9, 0.6]},
+                {"label": "cat", "confidence": 0.6, "bbox": [0.2, 0.6, 0.4, 0.9]},
+            ],
+        },
+        format="json",
+    )
     a, b, d = res.data["items"]
-    res = c.post(f"/api/v1/detections/{res.data['id']}/confirm/", {"items": [
-        {"id": a["id"], "selected": True, "feedback": "wrong", "corrected_word": cup.id, "typed": "cái ly"},
-        {"id": b["id"], "selected": True, "feedback": "wrong", "corrected_word": jar.id, "typed": "lọ"},
-        {"id": d["id"], "selected": True, "feedback": "wrong", "typed": "cái gáo dừa"},  # not in the dictionary
-    ], "added": [{"word": cup.id, "typed": "cốc"}, {"typed": "cái bình hoa"}]}, format="json")
+    res = c.post(
+        f"/api/v1/detections/{res.data['id']}/confirm/",
+        {
+            "items": [
+                {"id": a["id"], "selected": True, "feedback": "wrong", "corrected_word": cup.id, "typed": "cái ly"},
+                {"id": b["id"], "selected": True, "feedback": "wrong", "corrected_word": jar.id, "typed": "lọ"},
+                {"id": d["id"], "selected": True, "feedback": "wrong", "typed": "cái gáo dừa"},  # not in the dictionary
+            ],
+            "added": [{"word": cup.id, "typed": "cốc"}, {"typed": "cái bình hoa"}],
+        },
+        format="json",
+    )
     assert res.status_code == 200, res.data
     assert res.data["saved"] == 2  # cup and jar (the added cup is the same word)
     items = {i["id"]: i for i in res.data["items"]}
@@ -412,9 +494,18 @@ def test_a_picked_word_must_exist_in_the_language_learned(cup_env):
     user, c, cat, cup, jar = cup_env
     vi_only = Word.objects.create(slug="vi-only")
     WordTranslation.objects.create(word=vi_only, language_id="vi", text="cái nơm", status=ReviewStatus.VERIFIED)
-    res = c.post("/api/v1/detections/log/", {"model_name": "t", "items": [
-        {"label": "cat", "confidence": 0.8, "bbox": [0.1, 0.1, 0.5, 0.6]}]}, format="json")
-    bad = c.post(f"/api/v1/detections/{res.data['id']}/confirm/", {"items": [
-        {"id": res.data["items"][0]["id"], "selected": True, "feedback": "wrong", "corrected_word": vi_only.id}]},
-        format="json")
+    res = c.post(
+        "/api/v1/detections/log/",
+        {"model_name": "t", "items": [{"label": "cat", "confidence": 0.8, "bbox": [0.1, 0.1, 0.5, 0.6]}]},
+        format="json",
+    )
+    bad = c.post(
+        f"/api/v1/detections/{res.data['id']}/confirm/",
+        {
+            "items": [
+                {"id": res.data["items"][0]["id"], "selected": True, "feedback": "wrong", "corrected_word": vi_only.id}
+            ]
+        },
+        format="json",
+    )
     assert bad.status_code == 400

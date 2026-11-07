@@ -1,4 +1,5 @@
 """The two measurements of thesis §4.5 that are not algorithms of their own: geofence trigger delay and realtime."""
+
 import pytest
 
 from . import geofence, realtime
@@ -6,7 +7,12 @@ from . import geofence, realtime
 
 def test_denser_geofence_checks_find_fast_passes_the_old_policy_misses():
     # four POIs of 150 m around Hồ Gươm, like the seeded ones
-    pois = [(1, 21.0288, 105.8525, 150), (2, 21.0245, 105.8412, 150), (3, 21.0368, 105.8342, 200), (4, 21.0170, 105.8500, 100)]
+    pois = [
+        (1, 21.0288, 105.8525, 150),
+        (2, 21.0245, 105.8412, 150),
+        (3, 21.0368, 105.8342, 200),
+        (4, 21.0170, 105.8500, 100),
+    ]
     rows = {(r["policy"], r["mode"]): r for r in geofence.simulate(pois, passes=60, seed=3)["rows"]}
     old, new = rows[(geofence.BASELINE, "xe máy")], rows[(geofence.CURRENT, "xe máy")]
     assert old["detected_rate"] < 0.5 and new["detected_rate"] >= 0.9
@@ -22,7 +28,7 @@ def test_realtime_measurement_delivers_everything_once_in_order_and_cleans_up():
 
     out = realtime.run()
     g = out["group"]
-    assert g["deliveries"] == g["deliveries_expected"] == realtime.GROUP_MEMBERS ** 2 * realtime.PER_MEMBER
+    assert g["deliveries"] == g["deliveries_expected"] == realtime.GROUP_MEMBERS**2 * realtime.PER_MEMBER
     assert g["missing"] == g["duplicates"] == 0 and g["same_order_everywhere"] and not g["resend_creates_new"]
     assert out["dm"]["to_recipient"]["received"] == realtime.DMS and out["dm"]["to_recipient"]["in_order"]
     assert out["flood"]["accepted"] == out["flood"]["burst_allowed"] and out["flood"]["refused"] > 0

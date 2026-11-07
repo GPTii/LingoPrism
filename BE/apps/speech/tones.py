@@ -4,6 +4,7 @@ Each syllable's F0 is turned into semitones around the speaker's median and clas
 rising (2), low / falling-rising (3), falling (4). Rule based and marked experimental in the app; a neutral-tone
 syllable and one with too little voiced sound are not judged.
 """
+
 import numpy as np
 
 SR = 16000
@@ -20,7 +21,7 @@ def f0(audio: np.ndarray, threshold: float = 0.25, fallback: float = 0.45) -> np
         return np.zeros(0)
     idx = np.arange(WIN)[None, :] + (np.arange(n) * HOP)[:, None]
     frames = audio[idx]
-    energy = np.sqrt((frames ** 2).mean(axis=1))
+    energy = np.sqrt((frames**2).mean(axis=1))
     d = np.zeros((n, tau_max + 1))
     for tau in range(1, tau_max + 1):
         shifted = audio[idx + tau]
@@ -122,7 +123,7 @@ def syllable_tones(audio: np.ndarray, spans: list[tuple[float, float] | None], l
             broken = bool((~keep).any())
             seg = seg[keep]
         if len(seg) >= 8:  # the edges belong to the neighbouring consonants / syllables (coarticulation)
-            seg = seg[len(seg) // 10: len(seg) - len(seg) // 5]
+            seg = seg[len(seg) // 10 : len(seg) - len(seg) // 5]
         if language == "vi":
             out.append(classify_vi(seg, len(said) == 1, broken, len(seg) / 100))
         else:
@@ -140,8 +141,13 @@ def judge_zh(expected: int, heard: int, following: int | None) -> str:
     return "wrong"
 
 
-VI_CLOSE = {frozenset({"hỏi", "ngã"}), frozenset({"sắc", "ngã"}), frozenset({"nặng", "huyền"}),
-            frozenset({"ngang", "huyền"}), frozenset({"nặng", "ngang"})}  # southern nặng: short, barely falling
+VI_CLOSE = {
+    frozenset({"hỏi", "ngã"}),
+    frozenset({"sắc", "ngã"}),
+    frozenset({"nặng", "huyền"}),
+    frozenset({"ngang", "huyền"}),
+    frozenset({"nặng", "ngang"}),
+}  # southern nặng: short, barely falling
 
 
 def judge_vi(expected: str, heard: str) -> str:

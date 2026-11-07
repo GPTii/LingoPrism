@@ -4,6 +4,7 @@ Defaults in settings.REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"]; a view opts into 
 `throttle_scope = "login"` etc. The client IP comes from X-Forwarded-For only for NUM_PROXIES trusted proxies
 (nginx), otherwise every user would share nginx's IP and one abuser would block everybody.
 """
+
 import hashlib
 
 from rest_framework.throttling import SimpleRateThrottle

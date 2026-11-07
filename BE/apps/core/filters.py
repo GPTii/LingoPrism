@@ -30,4 +30,3 @@ class CreatedDateFilter(BaseFilterBackend):
         if end:
             queryset = queryset.filter(**{f"{field}__date__lte": end})
         return queryset
-

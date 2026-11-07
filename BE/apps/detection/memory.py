@@ -11,6 +11,7 @@ Who it applies to
      approved it. Learners who mark an automatic fix as wrong count as disputes; DISPUTE_LIMIT rejects it.
 Approved reports are exported as YOLO training data (AdminCorrectionViewSet.export) for the next training run.
 """
+
 import io
 import threading
 from pathlib import Path
@@ -68,8 +69,9 @@ def embed(crops: list[Image.Image]) -> np.ndarray:
     session = _embedder()
     if session is None or not crops:
         return np.zeros((0, 0), dtype=np.float32)
-    batch = np.stack([np.asarray(c.convert("RGB").resize((_SIZE, _SIZE), Image.BILINEAR), dtype=np.float32) / 255.0
-                      for c in crops]).transpose(0, 3, 1, 2)
+    batch = np.stack(
+        [np.asarray(c.convert("RGB").resize((_SIZE, _SIZE), Image.BILINEAR), dtype=np.float32) / 255.0 for c in crops]
+    ).transpose(0, 3, 1, 2)
     return session.run(None, {session.get_inputs()[0].name: batch})[0].astype(np.float32)
 
 
@@ -77,8 +79,11 @@ def _active(user, labels):
     from .models import CorrectionMemory
 
     qs = CorrectionMemory.objects.filter(wrong_label__in=labels).exclude(status=CorrectionMemory.Status.REJECTED)
-    return list(qs.filter(Q(status=CorrectionMemory.Status.APPROVED) | Q(user=user)).only(
-        "id", "wrong_label", "correct_label", "embedding"))
+    return list(
+        qs.filter(Q(status=CorrectionMemory.Status.APPROVED) | Q(user=user)).only(
+            "id", "wrong_label", "correct_label", "embedding"
+        )
+    )
 
 
 def apply(user, image: Image.Image, boxes: list) -> list:
@@ -107,7 +112,8 @@ def apply(user, image: Image.Image, boxes: list) -> list:
         if not best.correct_label:  # reported as "not an object": do not show it again
             continue
         b.top_k = [{"label": best.correct_label, "confidence": round(score, 4)}] + [
-            t for t in b.top_k if t["label"] != best.correct_label][:2]
+            t for t in b.top_k if t["label"] != best.correct_label
+        ][:2]
         b.label, b.memory_id = best.correct_label, best.id
         out.append(b)
     return out
@@ -131,10 +137,16 @@ def remember(item, user) -> bool:
     wrong = item.label
     if item.learned_from_id:  # the automatic fix was wrong: the model's own answer is the one to remember
         wrong = item.learned_from.wrong_label
-    memory, _ = CorrectionMemory.objects.update_or_create(item=item, defaults={
-        "user": user, "wrong_label": wrong, "correct_label": item.corrected_label,
-        "embedding": vector.tobytes(), "status": CorrectionMemory.Status.PENDING,
-    })
+    memory, _ = CorrectionMemory.objects.update_or_create(
+        item=item,
+        defaults={
+            "user": user,
+            "wrong_label": wrong,
+            "correct_label": item.corrected_label,
+            "embedding": vector.tobytes(),
+            "status": CorrectionMemory.Status.PENDING,
+        },
+    )
     memory.crop.save(f"{item.id}.jpg", ContentFile(buf.getvalue()), save=True)
     _consensus(memory.wrong_label, memory.correct_label)
     return True
@@ -144,8 +156,9 @@ def _consensus(wrong: str, correct: str):
     """Approve a mistake for everyone once enough different learners reported it."""
     from .models import CorrectionMemory
 
-    same = CorrectionMemory.objects.filter(wrong_label=wrong, correct_label=correct,
-                                           status=CorrectionMemory.Status.PENDING, reviewed_by__isnull=True)
+    same = CorrectionMemory.objects.filter(
+        wrong_label=wrong, correct_label=correct, status=CorrectionMemory.Status.PENDING, reviewed_by__isnull=True
+    )
     if same.values("user").distinct().count() >= CONSENSUS_USERS:
         same.update(status=CorrectionMemory.Status.APPROVED, reviewed_at=timezone.now())
 

@@ -43,17 +43,51 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
-            "id", "public_id", "email", "display_name", "avatar", "avatar_preset", "bio", "role", "status",
-            "learner_type", "learning_languages", "active_language", "zh_script", "show_zhuyin",
-            "birth_date", "gender", "purpose", "daily_minutes", "onboarding_completed", "timezone",
-            "scales_balance", "gems_balance", "goal", "mascot", "created_at",
-            "email_verified", "has_password",
+            "id",
+            "public_id",
+            "email",
+            "display_name",
+            "avatar",
+            "avatar_preset",
+            "bio",
+            "role",
+            "status",
+            "learner_type",
+            "learning_languages",
+            "active_language",
+            "zh_script",
+            "show_zhuyin",
+            "birth_date",
+            "gender",
+            "purpose",
+            "daily_minutes",
+            "onboarding_completed",
+            "timezone",
+            "scales_balance",
+            "gems_balance",
+            "goal",
+            "mascot",
+            "created_at",
+            "email_verified",
+            "has_password",
         ]
-        read_only_fields = ["id", "public_id", "email", "role", "status", "scales_balance", "gems_balance", "created_at",
-                            "email_verified"]
+        read_only_fields = [
+            "id",
+            "public_id",
+            "email",
+            "role",
+            "status",
+            "scales_balance",
+            "gems_balance",
+            "created_at",
+            "email_verified",
+        ]
 
-    has_password = serializers.BooleanField(source="has_usable_password", read_only=True,
-                                            help_text="False for Google-only accounts (deleting asks for a typed word)")
+    has_password = serializers.BooleanField(
+        source="has_usable_password",
+        read_only=True,
+        help_text="False for Google-only accounts (deleting asks for a typed word)",
+    )
 
     def validate_learning_languages(self, value):
         bad = [v for v in value if v not in LANGUAGE_CHOICES]
@@ -88,7 +122,9 @@ class RegisterSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
     display_name = serializers.CharField(max_length=80, required=False, allow_blank=True)
-    accept_terms = serializers.BooleanField(help_text="Đã đọc và đồng ý Điều khoản sử dụng và Chính sách quyền riêng tư")
+    accept_terms = serializers.BooleanField(
+        help_text="Đã đọc và đồng ý Điều khoản sử dụng và Chính sách quyền riêng tư"
+    )
 
     def validate_accept_terms(self, value):
         if not value:
@@ -177,15 +213,32 @@ class ChangePasswordSerializer(serializers.Serializer):
 class AdminUserSerializer(serializers.ModelSerializer):
     """Used by the admin web to create, edit and delete accounts."""
 
-    password = serializers.CharField(write_only=True, required=False, allow_blank=True, min_length=8,
-                                     help_text="Bắt buộc khi tạo; để trống khi sửa nếu không đổi mật khẩu")
+    password = serializers.CharField(
+        write_only=True,
+        required=False,
+        allow_blank=True,
+        min_length=8,
+        help_text="Bắt buộc khi tạo; để trống khi sửa nếu không đổi mật khẩu",
+    )
 
     class Meta:
         model = User
         fields = [
-            "id", "email", "password", "display_name", "avatar", "role", "status", "learner_type",
-            "learning_languages", "active_language", "zh_script", "scales_balance", "gems_balance",
-            "last_login", "created_at",
+            "id",
+            "email",
+            "password",
+            "display_name",
+            "avatar",
+            "role",
+            "status",
+            "learner_type",
+            "learning_languages",
+            "active_language",
+            "zh_script",
+            "scales_balance",
+            "gems_balance",
+            "last_login",
+            "created_at",
         ]
         read_only_fields = ["id", "avatar", "last_login", "created_at"]
 

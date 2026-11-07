@@ -1,4 +1,5 @@
 """Bulk delete (ticked rows) and the date filters shared by every list."""
+
 from datetime import timedelta
 
 import pytest
@@ -28,13 +29,16 @@ def learner(n):
 
 def test_admin_bulk_deletes_users_but_never_itself(admin):
     a, b = learner(1), learner(2)
-    res = as_user(admin).post("/api/v1/admin/users/bulk-delete/", {"ids": [a.id, b.id, admin.id, 999999]}, format="json")
+    res = as_user(admin).post(
+        "/api/v1/admin/users/bulk-delete/", {"ids": [a.id, b.id, admin.id, 999999]}, format="json"
+    )
     assert res.status_code == 200
     assert res.data["deleted"] == 2 and res.data["not_found"] == 1
     assert res.data["skipped"] == [{"id": admin.id, "reason": "Không thể xóa tài khoản đang đăng nhập"}]
     assert list(User.objects.values_list("id", flat=True)) == [admin.id]
 
     from apps.audit.models import AuditLog
+
     log = AuditLog.objects.get(path="/api/v1/admin/users/bulk-delete/")
     assert log.object_id.startswith("4 mục:")
 
@@ -62,7 +66,9 @@ def test_learner_bulk_deletes_only_own_notifications():
     a, b = learner(1), learner(2)
     mine = [Notification.objects.create(user=a, kind="system", title=str(i)) for i in range(3)]
     theirs = Notification.objects.create(user=b, kind="system", title="x")
-    res = as_user(a).post("/api/v1/notifications/bulk-delete/", {"ids": [mine[0].id, mine[1].id, theirs.id]}, format="json")
+    res = as_user(a).post(
+        "/api/v1/notifications/bulk-delete/", {"ids": [mine[0].id, mine[1].id, theirs.id]}, format="json"
+    )
     assert res.data == {"deleted": 2, "skipped": [], "not_found": 1}
     assert Notification.objects.filter(pk=theirs.pk).exists() and Notification.objects.filter(user=a).count() == 1
     assert as_user(a).delete(f"/api/v1/notifications/{mine[2].id}/").status_code == 204
@@ -108,7 +114,9 @@ def test_exams_with_results_and_questions_in_use_are_kept(admin):
     from apps.quizzes.models import Exam, ExamQuestion, Question, Submission
     from apps.vocab.models import Language
 
-    lang, _ = Language.objects.get_or_create(code="en", defaults={"name": "English", "native_name": "English", "tts_locale": "en-US"})
+    lang, _ = Language.objects.get_or_create(
+        code="en", defaults={"name": "English", "native_name": "English", "tts_locale": "en-US"}
+    )
     used = Exam.objects.create(title="used", language=lang)
     empty = Exam.objects.create(title="empty", language=lang)
     Submission.objects.create(user=learner(1), exam=used, status="submitted")
@@ -133,6 +141,6 @@ def test_created_date_filter_and_inactive_users(admin):
     emails = lambda q: sorted(u["email"] for u in client.get(f"/api/v1/admin/users/?{q}").data["results"])  # noqa: E731
     assert emails(f"created_to={since}") == ["l1@example.com"]
     assert "l1@example.com" not in emails(f"created_from={since}")
-    assert emails(f"created_from=not-a-date&role=learner") == ["l1@example.com", "l2@example.com"]
+    assert emails("created_from=not-a-date&role=learner") == ["l1@example.com", "l2@example.com"]
     assert "l2@example.com" not in emails(f"inactive_since={timezone.localdate().isoformat()}")
     assert emails("never_logged_in=1&role=learner") == ["l1@example.com"]

@@ -3,6 +3,7 @@
 Pieces come three ways (catalog.OUTFITS): bought with ngọc, unlocked by a badge (never sold), or sold only during a
 festival (catalog.EVENTS). A piece once owned is kept for good.
 """
+
 from datetime import date
 
 from django.db import transaction
@@ -58,7 +59,12 @@ def how_to_get(outfit: Outfit, day: date) -> str:
 
 
 def for_sale(outfit: Outfit, day: date) -> bool:
-    return bool(outfit.active and outfit.cost_gems and not outfit.badge_code and (not outfit.event or event_open(outfit.event, day)))
+    return bool(
+        outfit.active
+        and outfit.cost_gems
+        and not outfit.badge_code
+        and (not outfit.event or event_open(outfit.event, day))
+    )
 
 
 def mascot_for(user) -> Mascot:

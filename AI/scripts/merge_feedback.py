@@ -10,6 +10,7 @@ class for) would leave its object unboxed – learnt as background – so its ph
 appends the new names to data.yaml (then train with the larger head). missed/ + missed.csv in the zip are photos of
 objects the detector did not find at all: box them by hand first; they are not merged here.
 """
+
 import argparse
 import zipfile
 from pathlib import Path
@@ -21,7 +22,9 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--zip", required=True)
     ap.add_argument("--data", required=True)
-    ap.add_argument("--repeat", type=int, default=3, help="chép mỗi ảnh báo lỗi N lần: ít ảnh nhưng là ca khó, cần trọng số")
+    ap.add_argument(
+        "--repeat", type=int, default=3, help="chép mỗi ảnh báo lỗi N lần: ít ảnh nhưng là ca khó, cần trọng số"
+    )
     ap.add_argument("--add-classes", action="store_true", help="thêm lớp mới (tên người dùng gõ) vào data.yaml")
     args = ap.parse_args()
 
@@ -62,8 +65,10 @@ def main():
         print(f"Thêm {len(added)} lớp mới vào {args.data}: {', '.join(added)}")
     for cache in (root / "labels").glob("*.cache"):
         cache.unlink()
-    print(f"Đã gộp {merged} ảnh báo lỗi (x{args.repeat}) vào {images}"
-          + (f", bỏ {skipped} ảnh có lớp chưa có trong data.yaml (thêm bằng --add-classes)" if skipped else ""))
+    print(
+        f"Đã gộp {merged} ảnh báo lỗi (x{args.repeat}) vào {images}"
+        + (f", bỏ {skipped} ảnh có lớp chưa có trong data.yaml (thêm bằng --add-classes)" if skipped else "")
+    )
 
 
 if __name__ == "__main__":

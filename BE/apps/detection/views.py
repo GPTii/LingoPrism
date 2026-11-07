@@ -14,11 +14,11 @@ from rest_framework.views import APIView
 
 from apps.core.bulk import BulkDeleteMixin
 from apps.core.permissions import IsStaffRole
+from apps.core.throttles import ActionThrottleMixin
 from apps.gamification import services as game
 from apps.learning.models import PersonalWord
 from apps.vocab.models import Topic, Word
 from apps.vocab.services import card, personal_map, resolve_target, words_for_target
-from apps.core.throttles import ActionThrottleMixin
 
 from . import lookup, memory
 from .inference import Box, DetectorUnavailable, get_detector
@@ -31,8 +31,12 @@ OFTEN_WRONG_MIN_FEEDBACK, OFTEN_WRONG_RATE = 5, 0.3
 
 
 def _often_wrong(labels) -> set[str]:
-    rows = DetectionItem.objects.filter(label__in=labels).exclude(feedback="unknown").values("label").annotate(
-        n=Count("id"), wrong=Count("id", filter=Q(feedback="wrong")))
+    rows = (
+        DetectionItem.objects.filter(label__in=labels)
+        .exclude(feedback="unknown")
+        .values("label")
+        .annotate(n=Count("id"), wrong=Count("id", filter=Q(feedback="wrong")))
+    )
     return {r["label"] for r in rows if r["n"] >= OFTEN_WRONG_MIN_FEEDBACK and r["wrong"] / r["n"] >= OFTEN_WRONG_RATE}
 
 
@@ -61,24 +65,45 @@ def _items_payload(request, detection: Detection):
         for t in it.top_k or []:
             aw = words.get(t["label"])
             if t["label"] != it.label and aw and t["label"] not in {a["label"] for a in alternatives}:
-                alternatives.append({"label": t["label"], "confidence": t["confidence"],
-                                     "card": card(aw, target, personal.get(aw.id), request)})
+                alternatives.append(
+                    {
+                        "label": t["label"],
+                        "confidence": t["confidence"],
+                        "card": card(aw, target, personal.get(aw.id), request),
+                    }
+                )
         cw = words.get(it.corrected_label) if it.corrected_label else None
-        out.append({
-            "id": it.id, "label": it.label, "confidence": round(it.confidence, 4), "bbox": it.bbox, "top_k": it.top_k,
-            "selected": it.selected, "feedback": it.feedback, "corrected_label": it.corrected_label,
-            "corrected_text": it.corrected_text, "manual": it.manual,
-            "uncertain": (it.confidence < UNSURE_BELOW and bool(alternatives)) or it.label in often_wrong,
-            "learned": it.learned_from_id is not None,  # relabelled from an earlier learner's error report
-            "not_object": it.feedback == "wrong" and not it.corrected_label and hasattr(it, "report"),
-            "card": card(w, target, personal.get(w.id), request) if w else None,
-            "alternatives": alternatives,
-            "corrected_card": card(cw, target, personal.get(cw.id), request) if cw else None,
-        })
+        out.append(
+            {
+                "id": it.id,
+                "label": it.label,
+                "confidence": round(it.confidence, 4),
+                "bbox": it.bbox,
+                "top_k": it.top_k,
+                "selected": it.selected,
+                "feedback": it.feedback,
+                "corrected_label": it.corrected_label,
+                "corrected_text": it.corrected_text,
+                "manual": it.manual,
+                "uncertain": (it.confidence < UNSURE_BELOW and bool(alternatives)) or it.label in often_wrong,
+                "learned": it.learned_from_id is not None,  # relabelled from an earlier learner's error report
+                "not_object": it.feedback == "wrong" and not it.corrected_label and hasattr(it, "report"),
+                "card": card(w, target, personal.get(w.id), request) if w else None,
+                "alternatives": alternatives,
+                "corrected_card": card(cw, target, personal.get(cw.id), request) if cw else None,
+            }
+        )
     return {
-        "id": detection.id, "model": detection.model_name, "device": detection.device, "inference_ms": detection.inference_ms,
-        "image": request.build_absolute_uri(detection.photo.image.url) if detection.photo and detection.photo.image else None,
-        "created_at": detection.created_at, "confirmed": detection.confirmed, "items": out,
+        "id": detection.id,
+        "model": detection.model_name,
+        "device": detection.device,
+        "inference_ms": detection.inference_ms,
+        "image": request.build_absolute_uri(detection.photo.image.url)
+        if detection.photo and detection.photo.image
+        else None,
+        "created_at": detection.created_at,
+        "confirmed": detection.confirmed,
+        "items": out,
     }
 
 
@@ -117,16 +142,30 @@ class DetectView(APIView):
         boxes = memory.apply(request.user, img, boxes)
         upload.seek(0)
         with transaction.atomic():
-            photo = Photo.objects.create(user=request.user, image=upload, width=img.width, height=img.height,
-                                         source=ser.validated_data["source"])
-            det = Detection.objects.create(user=request.user, photo=photo, model_name=detector.name,
-                                           model_version=ModelVersion.objects.filter(is_active=True).first(),
-                                           device=Detection.Device.SERVER, inference_ms=ms)
-            DetectionItem.objects.bulk_create([
-                DetectionItem(detection=det, label=b.label, confidence=b.confidence, bbox=b.bbox, top_k=b.top_k,
-                              learned_from_id=b.memory_id)
-                for b in boxes
-            ])
+            photo = Photo.objects.create(
+                user=request.user, image=upload, width=img.width, height=img.height, source=ser.validated_data["source"]
+            )
+            det = Detection.objects.create(
+                user=request.user,
+                photo=photo,
+                model_name=detector.name,
+                model_version=ModelVersion.objects.filter(is_active=True).first(),
+                device=Detection.Device.SERVER,
+                inference_ms=ms,
+            )
+            DetectionItem.objects.bulk_create(
+                [
+                    DetectionItem(
+                        detection=det,
+                        label=b.label,
+                        confidence=b.confidence,
+                        bbox=b.bbox,
+                        top_k=b.top_k,
+                        learned_from_id=b.memory_id,
+                    )
+                    for b in boxes
+                ]
+            )
             _link_words(det)
         return Response(_items_payload(request, det))
 
@@ -149,8 +188,12 @@ class ConfirmItemSerializer(serializers.Serializer):
     selected = serializers.BooleanField(default=False)
     feedback = serializers.ChoiceField(choices=DetectionItem.Feedback.choices, default="unknown")
     corrected_label = serializers.CharField(required=False, allow_blank=True, max_length=80)
-    corrected_word = serializers.PrimaryKeyRelatedField(queryset=Word.objects.all(), required=False, allow_null=True,
-                                                        help_text="Từ chọn sau khi gõ tên tiếng Việt (GET lookup)")
+    corrected_word = serializers.PrimaryKeyRelatedField(
+        queryset=Word.objects.all(),
+        required=False,
+        allow_null=True,
+        help_text="Từ chọn sau khi gõ tên tiếng Việt (GET lookup)",
+    )
     typed = serializers.CharField(required=False, allow_blank=True, max_length=80, help_text="Tên tiếng Việt đã gõ")
     not_object = serializers.BooleanField(default=False, help_text="Báo lỗi: chỗ này không phải đồ vật nào")
 
@@ -163,8 +206,9 @@ class AddedItemSerializer(serializers.Serializer):
 
 class ConfirmSerializer(serializers.Serializer):
     items = ConfirmItemSerializer(many=True)
-    added = AddedItemSerializer(many=True, required=False, max_length=5,
-                                help_text="Đồ vật model bỏ sót: người dùng gõ tên tiếng Việt")
+    added = AddedItemSerializer(
+        many=True, required=False, max_length=5, help_text="Đồ vật model bỏ sót: người dùng gõ tên tiếng Việt"
+    )
     topic = serializers.PrimaryKeyRelatedField(queryset=Topic.objects.all(), required=False, allow_null=True)
 
 
@@ -179,8 +223,14 @@ def delete_detection(det: Detection) -> None:
 
 
 @extend_schema(tags=["detection"])
-class DetectionViewSet(ActionThrottleMixin, BulkDeleteMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin,
-                       mixins.DestroyModelMixin, viewsets.GenericViewSet):
+class DetectionViewSet(
+    ActionThrottleMixin,
+    BulkDeleteMixin,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.DestroyModelMixin,
+    viewsets.GenericViewSet,
+):
     throttle_scopes = {"log": "detect"}
     serializer_class = LogDetectionSerializer
     parser_classes = [JSONParser, MultiPartParser, FormParser]
@@ -209,17 +259,32 @@ class DetectionViewSet(ActionThrottleMixin, BulkDeleteMixin, mixins.ListModelMix
     def labels(self, request):
         """Every object the detector knows, with its word card – the list for "it is something else"."""
         target = resolve_target(request)
-        words = words_for_target(Word.objects.exclude(yolo_label="").exclude(yolo_label__isnull=True), request.user, target)
-        return Response(sorted(({"label": w.yolo_label, "card": card(w, target, None, request)} for w in words),
-                               key=lambda r: r["card"].get("meaning_vi") or r["label"]))
+        words = words_for_target(
+            Word.objects.exclude(yolo_label="").exclude(yolo_label__isnull=True), request.user, target
+        )
+        return Response(
+            sorted(
+                ({"label": w.yolo_label, "card": card(w, target, None, request)} for w in words),
+                key=lambda r: r["card"].get("meaning_vi") or r["label"],
+            )
+        )
 
     @action(detail=False, methods=["get"])
     def lookup(self, request):
         """?q=<Vietnamese name> -> the words of the checked dictionary it may be, in the language being learned."""
         target = resolve_target(request)
         words = lookup.find(request.user, target, request.query_params.get("q", "")[:80])
-        return Response([{"word_id": w.id, "label": lookup.label_of(w), "detector_knows": bool(w.yolo_label),
-                          "card": card(w, target, None, request)} for w in words])
+        return Response(
+            [
+                {
+                    "word_id": w.id,
+                    "label": lookup.label_of(w),
+                    "detector_knows": bool(w.yolo_label),
+                    "card": card(w, target, None, request),
+                }
+                for w in words
+            ]
+        )
 
     @extend_schema(request=LogDetectionSerializer)
     @action(detail=False, methods=["post"])
@@ -233,8 +298,11 @@ class DetectionViewSet(ActionThrottleMixin, BulkDeleteMixin, mixins.ListModelMix
             if upload.size > MAX_UPLOAD_MB * 1024 * 1024:
                 return Response({"detail": f"Ảnh tối đa {MAX_UPLOAD_MB} MB", "errors": {}}, status=400)
             try:
-                data = {"model_name": data.get("model_name"), "items": json.loads(data.get("items") or "[]"),
-                        **({"inference_ms": data["inference_ms"]} if data.get("inference_ms") else {})}
+                data = {
+                    "model_name": data.get("model_name"),
+                    "items": json.loads(data.get("items") or "[]"),
+                    **({"inference_ms": data["inference_ms"]} if data.get("inference_ms") else {}),
+                }
             except ValueError:
                 return Response({"detail": "items phải là JSON", "errors": {}}, status=400)
         ser = LogDetectionSerializer(data=data)
@@ -242,20 +310,42 @@ class DetectionViewSet(ActionThrottleMixin, BulkDeleteMixin, mixins.ListModelMix
         d = ser.validated_data
         with transaction.atomic():
             photo = None
-            boxes = [Box(i["label"], i["confidence"], i["bbox"],
-                         i.get("top_k") or [{"label": i["label"], "confidence": i["confidence"]}]) for i in d["items"]]
+            boxes = [
+                Box(
+                    i["label"],
+                    i["confidence"],
+                    i["bbox"],
+                    i.get("top_k") or [{"label": i["label"], "confidence": i["confidence"]}],
+                )
+                for i in d["items"]
+            ]
             if request.FILES.get("image"):
                 img = Image.open(request.FILES["image"])
                 boxes = memory.apply(request.user, img, boxes)
                 request.FILES["image"].seek(0)
-                photo = Photo.objects.create(user=request.user, image=request.FILES["image"], width=img.width, height=img.height)
-            det = Detection.objects.create(user=request.user, photo=photo, model_name=d["model_name"],
-                                           device=Detection.Device.ON_DEVICE, inference_ms=d.get("inference_ms"))
-            DetectionItem.objects.bulk_create([
-                DetectionItem(detection=det, label=b.label, confidence=b.confidence, bbox=b.bbox, top_k=b.top_k,
-                              learned_from_id=b.memory_id)
-                for b in boxes
-            ])
+                photo = Photo.objects.create(
+                    user=request.user, image=request.FILES["image"], width=img.width, height=img.height
+                )
+            det = Detection.objects.create(
+                user=request.user,
+                photo=photo,
+                model_name=d["model_name"],
+                device=Detection.Device.ON_DEVICE,
+                inference_ms=d.get("inference_ms"),
+            )
+            DetectionItem.objects.bulk_create(
+                [
+                    DetectionItem(
+                        detection=det,
+                        label=b.label,
+                        confidence=b.confidence,
+                        bbox=b.bbox,
+                        top_k=b.top_k,
+                        learned_from_id=b.memory_id,
+                    )
+                    for b in boxes
+                ]
+            )
             _link_words(det)
         return Response(_items_payload(request, det), status=201)
 
@@ -273,7 +363,9 @@ class DetectionViewSet(ActionThrottleMixin, BulkDeleteMixin, mixins.ListModelMix
         word_by_label = {label: w.id for label, w in words_by_label(corrected).items()}
         picked = {c["corrected_word"].id for c in ser.validated_data["items"] if c.get("corrected_word")}
         picked |= {a["word"].id for a in ser.validated_data.get("added", []) if a.get("word")}
-        visible = set(words_for_target(Word.objects.filter(id__in=picked), request.user, target).values_list("id", flat=True))
+        visible = set(
+            words_for_target(Word.objects.filter(id__in=picked), request.user, target).values_list("id", flat=True)
+        )
         if picked - visible:
             return Response({"detail": "Từ đã chọn không có trong ngôn ngữ bạn đang học", "errors": {}}, status=400)
         with transaction.atomic():
@@ -302,25 +394,48 @@ class DetectionViewSet(ActionThrottleMixin, BulkDeleteMixin, mixins.ListModelMix
                     reported += memory.remember(it, request.user)
                     if it.learned_from_id and not was_wrong:
                         memory.dispute(it.learned_from)
-                word_id = word_by_label.get(it.corrected_label) if it.corrected_label else (
-                    it.word_id if it.feedback != "wrong" else None)
+                word_id = (
+                    word_by_label.get(it.corrected_label)
+                    if it.corrected_label
+                    else (it.word_id if it.feedback != "wrong" else None)
+                )
                 if it.selected and word_id:
                     _, created = PersonalWord.objects.get_or_create(
-                        user=request.user, word_id=word_id, language=target.learn,
-                        defaults={"source": PersonalWord.Source.CAMERA, "source_ref": str(det.id),
-                                  "topic": ser.validated_data.get("topic")})
+                        user=request.user,
+                        word_id=word_id,
+                        language=target.learn,
+                        defaults={
+                            "source": PersonalWord.Source.CAMERA,
+                            "source_ref": str(det.id),
+                            "topic": ser.validated_data.get("topic"),
+                        },
+                    )
                     saved += created
             for a in ser.validated_data.get("added", []):  # objects the detector missed (no box)
                 w = a.get("word")
                 it = DetectionItem.objects.create(
-                    detection=det, label=lookup.label_of(w) if w else "", confidence=1.0, bbox=[], top_k=[], word=w,
-                    manual=True, selected=bool(w) and a["selected"], feedback=DetectionItem.Feedback.CORRECT,
-                    corrected_text=a["typed"])
+                    detection=det,
+                    label=lookup.label_of(w) if w else "",
+                    confidence=1.0,
+                    bbox=[],
+                    top_k=[],
+                    word=w,
+                    manual=True,
+                    selected=bool(w) and a["selected"],
+                    feedback=DetectionItem.Feedback.CORRECT,
+                    corrected_text=a["typed"],
+                )
                 if it.selected:
                     _, created = PersonalWord.objects.get_or_create(
-                        user=request.user, word=w, language=target.learn,
-                        defaults={"source": PersonalWord.Source.CAMERA, "source_ref": str(det.id),
-                                  "topic": ser.validated_data.get("topic")})
+                        user=request.user,
+                        word=w,
+                        language=target.learn,
+                        defaults={
+                            "source": PersonalWord.Source.CAMERA,
+                            "source_ref": str(det.id),
+                            "topic": ser.validated_data.get("topic"),
+                        },
+                    )
                     saved += created
             if ser.validated_data.get("added"):
                 det = self.get_queryset().get(pk=det.pk)  # the prefetched items do not have the added ones
@@ -335,6 +450,7 @@ class DetectionViewSet(ActionThrottleMixin, BulkDeleteMixin, mixins.ListModelMix
 
 
 # ------------------------------------------------------------------ admin
+
 
 class ModelVersionSerializer(serializers.ModelSerializer):
     class Meta:
@@ -374,47 +490,96 @@ class AdminDetectionViewSet(BulkDeleteMixin, mixins.ListModelMixin, mixins.Destr
 
     def list(self, request, *args, **kwargs):
         page = self.paginate_queryset(self.filter_queryset(self.get_queryset()))
-        return self.get_paginated_response([
-            {"id": d.id, "user": d.user.email, "model": d.model_name, "device": d.device, "inference_ms": d.inference_ms,
-             "image": request.build_absolute_uri(d.photo.image.url) if d.photo and d.photo.image else None,
-             "created_at": d.created_at,
-             "items": [{"label": i.label, "confidence": round(i.confidence, 3), "feedback": i.feedback,
-                        "corrected_label": i.corrected_label} for i in d.items.all()]}
-            for d in page
-        ])
+        return self.get_paginated_response(
+            [
+                {
+                    "id": d.id,
+                    "user": d.user.email,
+                    "model": d.model_name,
+                    "device": d.device,
+                    "inference_ms": d.inference_ms,
+                    "image": request.build_absolute_uri(d.photo.image.url) if d.photo and d.photo.image else None,
+                    "created_at": d.created_at,
+                    "items": [
+                        {
+                            "label": i.label,
+                            "confidence": round(i.confidence, 3),
+                            "feedback": i.feedback,
+                            "corrected_label": i.corrected_label,
+                        }
+                        for i in d.items.all()
+                    ],
+                }
+                for d in page
+            ]
+        )
 
     @action(detail=False, methods=["get"])
     def stats(self, request):
         """Per-label statistics + confusion pairs (detected label → label corrected by the user). Input for VIP."""
-        per_label = DetectionItem.objects.values("label").annotate(
-            count=Count("id"), avg_confidence=Avg("confidence"),
-            wrong=Count("id", filter=Q(feedback="wrong")), correct=Count("id", filter=Q(feedback="correct")),
-        ).order_by("-count")
-        confusion = DetectionItem.objects.filter(feedback="wrong").exclude(corrected_label="").values(
-            "label", "corrected_label").annotate(count=Count("id")).order_by("-count")[:50]
+        per_label = (
+            DetectionItem.objects.values("label")
+            .annotate(
+                count=Count("id"),
+                avg_confidence=Avg("confidence"),
+                wrong=Count("id", filter=Q(feedback="wrong")),
+                correct=Count("id", filter=Q(feedback="correct")),
+            )
+            .order_by("-count")
+        )
+        confusion = (
+            DetectionItem.objects.filter(feedback="wrong")
+            .exclude(corrected_label="")
+            .values("label", "corrected_label")
+            .annotate(count=Count("id"))
+            .order_by("-count")[:50]
+        )
         by_device = Detection.objects.values("device").annotate(count=Count("id"), avg_ms=Avg("inference_ms"))
         # names learners typed that the dictionary does not have: words to add next
-        missing = DetectionItem.objects.filter(corrected_word__isnull=True).exclude(corrected_text="").values(
-            "corrected_text").annotate(count=Count("id")).order_by("-count")[:50]
+        missing = (
+            DetectionItem.objects.filter(corrected_word__isnull=True)
+            .exclude(corrected_text="")
+            .values("corrected_text")
+            .annotate(count=Count("id"))
+            .order_by("-count")[:50]
+        )
         # objects the detector has no class for yet (learners typed their name): classes for the next training
-        new_classes = DetectionItem.objects.filter(corrected_word__isnull=False, corrected_word__yolo_label="").values(
-            "corrected_word__slug").annotate(count=Count("id")).order_by("-count")[:50]
-        return Response({"per_label": list(per_label), "confusion": list(confusion), "by_device": list(by_device),
-                         "missing_words": [{"text": r["corrected_text"], "count": r["count"]} for r in missing],
-                         "new_classes": [{"label": r["corrected_word__slug"], "count": r["count"]} for r in new_classes]})
+        new_classes = (
+            DetectionItem.objects.filter(corrected_word__isnull=False, corrected_word__yolo_label="")
+            .values("corrected_word__slug")
+            .annotate(count=Count("id"))
+            .order_by("-count")[:50]
+        )
+        return Response(
+            {
+                "per_label": list(per_label),
+                "confusion": list(confusion),
+                "by_device": list(by_device),
+                "missing_words": [{"text": r["corrected_text"], "count": r["count"]} for r in missing],
+                "new_classes": [{"label": r["corrected_word__slug"], "count": r["count"]} for r in new_classes],
+            }
+        )
 
 
 # ------------------------------------------------------------------ admin: error reports
 
+
 def _report_row(request, m: CorrectionMemory, same: dict):
     return {
-        "id": m.id, "user": m.user.email, "wrong_label": m.wrong_label, "correct_label": m.correct_label,
-        "status": m.status, "disputes": m.disputes, "applied": m.applied.count(),
+        "id": m.id,
+        "user": m.user.email,
+        "wrong_label": m.wrong_label,
+        "correct_label": m.correct_label,
+        "status": m.status,
+        "disputes": m.disputes,
+        "applied": m.applied.count(),
         "same_reports": same.get((m.wrong_label, m.correct_label), 1),
         "crop": request.build_absolute_uri(m.crop.url) if m.crop else None,
         "photo": request.build_absolute_uri(m.item.detection.photo.image.url)
-        if m.item.detection.photo and m.item.detection.photo.image else None,
-        "reviewed_by": m.reviewed_by.email if m.reviewed_by else None, "exported_at": m.exported_at,
+        if m.item.detection.photo and m.item.detection.photo.image
+        else None,
+        "reviewed_by": m.reviewed_by.email if m.reviewed_by else None,
+        "exported_at": m.exported_at,
         "created_at": m.created_at,
     }
 
@@ -426,13 +591,18 @@ class AdminCorrectionViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     serializer_class = ModelVersionSerializer
     permission_classes = [IsStaffRole]
     queryset = CorrectionMemory.objects.select_related("user", "reviewed_by", "item__detection__photo").order_by(
-        "-created_at")
+        "-created_at"
+    )
     filterset_fields = ["status", "wrong_label", "correct_label"]
 
     def list(self, request, *args, **kwargs):
         page = self.paginate_queryset(self.filter_queryset(self.get_queryset()))
-        same = {(r["wrong_label"], r["correct_label"]): r["n"] for r in CorrectionMemory.objects.exclude(
-            status="rejected").values("wrong_label", "correct_label").annotate(n=Count("user", distinct=True))}
+        same = {
+            (r["wrong_label"], r["correct_label"]): r["n"]
+            for r in CorrectionMemory.objects.exclude(status="rejected")
+            .values("wrong_label", "correct_label")
+            .annotate(n=Count("user", distinct=True))
+        }
         return self.get_paginated_response([_report_row(request, m, same) for m in page])
 
     def _review(self, request, status):
@@ -452,13 +622,17 @@ class AdminCorrectionViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     @action(detail=False, methods=["get"])
     def summary(self, request):
         qs = CorrectionMemory.objects
-        return Response({
-            "pending": qs.filter(status="pending").count(), "approved": qs.filter(status="approved").count(),
-            "rejected": qs.filter(status="rejected").count(),
-            "approved_not_exported": qs.filter(status="approved", exported_at__isnull=True).count(),
-            "applied": DetectionItem.objects.filter(learned_from__isnull=False).count(),
-            "memory_enabled": memory.available(), "consensus_users": memory.CONSENSUS_USERS,
-        })
+        return Response(
+            {
+                "pending": qs.filter(status="pending").count(),
+                "approved": qs.filter(status="approved").count(),
+                "rejected": qs.filter(status="rejected").count(),
+                "approved_not_exported": qs.filter(status="approved", exported_at__isnull=True).count(),
+                "applied": DetectionItem.objects.filter(learned_from__isnull=False).count(),
+                "memory_enabled": memory.available(),
+                "consensus_users": memory.CONSENSUS_USERS,
+            }
+        )
 
     @action(detail=False, methods=["get"])
     def export(self, request):

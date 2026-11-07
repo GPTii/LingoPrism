@@ -18,6 +18,7 @@ Label clean-up (v3):
     Open Images yolov8x-oiv7) add their confident boxes (>= 0.5) for the missing objects, on the train split only;
     val/test keep the human labels so the reported metrics stay honest. Needs a GPU (~20–30 min on a T4).
 """
+
 import argparse
 import random
 from collections import Counter
@@ -35,6 +36,7 @@ def load_classes():
 
 def _shrink_one(path, max_side):
     from PIL import Image
+
     with Image.open(path) as im:
         if max(im.size) <= max_side:
             return 0
@@ -47,9 +49,10 @@ def _shrink_one(path, max_side):
 
 def shrink_images(out, max_side=640):
     """Downscale every image so its long side is <= max_side (idempotent, fast on a 2nd run)."""
+    import os
     from concurrent.futures import ProcessPoolExecutor
     from functools import partial
-    import os
+
     paths = [p for p in Path(out, "images").rglob("*") if p.suffix.lower() in (".jpg", ".jpeg", ".png")]
     with ProcessPoolExecutor(max_workers=os.cpu_count()) as ex:
         n = sum(ex.map(partial(_shrink_one, max_side=max_side), paths, chunksize=64))
@@ -70,9 +73,8 @@ def _iou_xywh(a, b):
 
 def pseudo_label(out, classes, conf=0.5, split="train", coco_teacher="yolo11x.pt", oi_teacher="yolov8x-oiv7.pt"):
     """Add confident teacher boxes for objects the source dataset left unlabeled (see module docstring)."""
-    from ultralytics import YOLO
-
     from export_pretrained_oiv7 import EXTRA
+    from ultralytics import YOLO
 
     labels = [c["label"] for c in classes]
     index = {lab: i for i, lab in enumerate(labels)}
@@ -150,8 +152,14 @@ def main():
 
     print("== COCO-2017 ==")
     coco = foz.load_zoo_dataset(
-        "coco-2017", split="train", label_types=["detections"], classes=list(coco_map),
-        max_samples=args.per_class * len(coco_map), shuffle=True, seed=args.seed, dataset_name="lp-coco",
+        "coco-2017",
+        split="train",
+        label_types=["detections"],
+        classes=list(coco_map),
+        max_samples=args.per_class * len(coco_map),
+        shuffle=True,
+        seed=args.seed,
+        dataset_name="lp-coco",
     )
     dropped = Counter()
     for s in coco.iter_samples(progress=True):
@@ -167,8 +175,14 @@ def main():
 
     print("== Open Images V7 ==")
     oi = foz.load_zoo_dataset(
-        "open-images-v7", split="train", label_types=["detections"], classes=list(oi_map),
-        max_samples=args.per_class * len(oi_map), shuffle=True, seed=args.seed, dataset_name="lp-oi",
+        "open-images-v7",
+        split="train",
+        label_types=["detections"],
+        classes=list(oi_map),
+        max_samples=args.per_class * len(oi_map),
+        shuffle=True,
+        seed=args.seed,
+        dataset_name="lp-oi",
     )
     for s in oi.iter_samples(progress=True):
         src = s.ground_truth.detections if s.ground_truth else []
@@ -186,16 +200,29 @@ def main():
     ids = merged.values("id")
     random.Random(args.seed).shuffle(ids)
     n = len(ids)
-    splits = {"train": ids[: int(n * 0.7)], "val": ids[int(n * 0.7): int(n * 0.9)], "test": ids[int(n * 0.9):]}
+    splits = {"train": ids[: int(n * 0.7)], "val": ids[int(n * 0.7) : int(n * 0.9)], "test": ids[int(n * 0.9) :]}
     out = Path(args.out)
     for split, split_ids in splits.items():
         merged.select(split_ids).export(
-            export_dir=str(out), dataset_type=fo.types.YOLOv5Dataset, label_field="gt", split=split, classes=labels,
+            export_dir=str(out),
+            dataset_type=fo.types.YOLOv5Dataset,
+            label_field="gt",
+            split=split,
+            classes=labels,
         )
-    (out / "data.yaml").write_text(yaml.safe_dump({
-        "path": str(out), "train": "images/train", "val": "images/val", "test": "images/test",
-        "names": {i: n for i, n in enumerate(labels)},
-    }, allow_unicode=True), encoding="utf-8")
+    (out / "data.yaml").write_text(
+        yaml.safe_dump(
+            {
+                "path": str(out),
+                "train": "images/train",
+                "val": "images/val",
+                "test": "images/test",
+                "names": {i: n for i, n in enumerate(labels)},
+            },
+            allow_unicode=True,
+        ),
+        encoding="utf-8",
+    )
     shrink_images(out, args.max_side)
     print("Đã lọc:", dict(dropped))
     if args.pseudo_label:

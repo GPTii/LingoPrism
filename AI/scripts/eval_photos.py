@@ -11,6 +11,7 @@ top-1  : the most confident box is an expected object (photo of a single object)
 recall : share of the expected objects found anywhere in the photo (photo of several objects)
 wrong  : boxes whose label is not in the photo (false alarms shown to the learner)
 """
+
 import argparse
 import re
 import sys
@@ -54,8 +55,11 @@ def main():
     ap.add_argument("-v", "--verbose", action="store_true", help="in kết quả từng ảnh")
     args = ap.parse_args()
 
-    photos = [(p, expected(p)) for p in sorted(Path(args.folder).rglob("*"))
-              if p.suffix.lower() in (".jpg", ".jpeg", ".png", ".webp")]
+    photos = [
+        (p, expected(p))
+        for p in sorted(Path(args.folder).rglob("*"))
+        if p.suffix.lower() in (".jpg", ".jpeg", ".png", ".webp")
+    ]
     photos = [(p, e) for p, e in photos if e]
     print(f"{len(photos)} ảnh có đáp án\n")
     print(f"{'model':28} {'top-1':>7} {'recall':>7} {'wrong':>6} {'ms/ảnh':>7}")

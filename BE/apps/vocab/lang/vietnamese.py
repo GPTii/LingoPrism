@@ -1,12 +1,19 @@
 """Vietnamese text normalization: NFC + one consistent tone-mark placement ("kiểu cũ": hòa, thủy, khỏe)."""
+
 import re
 import unicodedata
 
 TONES = {
-    "̀": "huyền", "́": "sắc", "̃": "ngã", "̉": "hỏi", "̣": "nặng",
+    "̀": "huyền",
+    "́": "sắc",
+    "̃": "ngã",
+    "̉": "hỏi",
+    "̣": "nặng",
 }
 _TONE_RE = re.compile("[" + "".join(TONES) + "]")
-VALID_LETTERS = re.compile(r"^[a-zàáảãạăằắẳẵặâầấẩẫậbcdđeèéẻẽẹêềếểễệghiìíỉĩịklmnoòóỏõọôồốổỗộơờớởỡợpqrstuùúủũụưừứửữựvxyỳýỷỹỵ]+$")
+VALID_LETTERS = re.compile(
+    r"^[a-zàáảãạăằắẳẵặâầấẩẫậbcdđeèéẻẽẹêềếểễệghiìíỉĩịklmnoòóỏõọôồốổỗộơờớởỡợpqrstuùúủũụưừứửữựvxyỳýỷỹỵ]+$"
+)
 
 
 def _split_tone(syllable: str) -> tuple[str, str | None]:
@@ -47,7 +54,7 @@ def _apply_tone(base: str, tone: str | None) -> str:
         else:
             target = idx[1]  # hoàn, thuyền
     ch = unicodedata.normalize("NFD", base[target])
-    return unicodedata.normalize("NFC", base[:target] + ch + tone + base[target + 1:])
+    return unicodedata.normalize("NFC", base[:target] + ch + tone + base[target + 1 :])
 
 
 def normalize(text: str) -> str:

@@ -13,7 +13,9 @@ class Question(TimeStampedModel):
         ESSAY = "essay", "Tự luận"
 
     kind = models.CharField(max_length=5, choices=Kind.choices)
-    language = models.ForeignKey(Language, on_delete=models.PROTECT, help_text="Ngôn ngữ của câu hỏi (vi, en, zh-Hans, zh-Hant)")
+    language = models.ForeignKey(
+        Language, on_delete=models.PROTECT, help_text="Ngôn ngữ của câu hỏi (vi, en, zh-Hans, zh-Hant)"
+    )
     topic = models.ForeignKey(Topic, null=True, blank=True, on_delete=models.SET_NULL)
     word = models.ForeignKey(Word, null=True, blank=True, on_delete=models.SET_NULL)
     prompt = models.TextField()
@@ -72,7 +74,9 @@ class Submission(models.Model):
     score = models.DecimalField(max_digits=6, decimal_places=2, default=0)
     max_score = models.DecimalField(max_digits=6, decimal_places=2, default=0)
     feedback = models.TextField(blank=True)
-    graded_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="graded_submissions")
+    graded_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="graded_submissions"
+    )
     graded_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:

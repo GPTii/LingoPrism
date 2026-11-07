@@ -11,7 +11,7 @@ ID = re.compile(r"^\d+$")
 
 
 def _resource_and_id(path: str) -> tuple[str, str]:
-    parts = [p for p in path[len(API_PREFIX):].strip("/").split("/") if p]
+    parts = [p for p in path[len(API_PREFIX) :].strip("/").split("/") if p]
     ids = [p for p in parts if ID.match(p)]
     names = [p for p in parts if not ID.match(p)]
     return "/".join(names[:2])[:60], (ids[0] if ids else "")
@@ -45,7 +45,9 @@ class AuditLogMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        fields = _field_names(request) if request.method in WRITE_METHODS and request.path.startswith(API_PREFIX) else None
+        fields = (
+            _field_names(request) if request.method in WRITE_METHODS and request.path.startswith(API_PREFIX) else None
+        )
         response = self.get_response(request)
         if fields is None or SKIP.match(request.path) or response.status_code >= 400:
             return response
@@ -58,9 +60,16 @@ class AuditLogMiddleware:
         forwarded = request.META.get("HTTP_X_FORWARDED_FOR", "").split(",")[0].strip()
         try:
             AuditLog.objects.create(
-                actor=user, actor_email=user.email, actor_role=user.role, method=request.method,
-                path=request.path[:300], resource=resource, object_id=object_id, status_code=response.status_code,
-                fields=fields, ip=forwarded or request.META.get("REMOTE_ADDR") or None,
+                actor=user,
+                actor_email=user.email,
+                actor_role=user.role,
+                method=request.method,
+                path=request.path[:300],
+                resource=resource,
+                object_id=object_id,
+                status_code=response.status_code,
+                fields=fields,
+                ip=forwarded or request.META.get("REMOTE_ADDR") or None,
             )
         except Exception:  # logging must never break the action itself
             pass

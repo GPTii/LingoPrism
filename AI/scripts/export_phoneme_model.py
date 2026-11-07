@@ -10,6 +10,7 @@ the phones that were *said*, not the nearest real word as a speech-to-text engin
 Writes <out>/phoneme-xlsr53-int8.onnx (input "audio" float32 [1, samples] 16 kHz, output "logits" [1, frames, vocab],
 one frame = 20 ms) and <out>/phoneme-vocab.json (id -> IPA token).
 """
+
 import argparse
 import json
 from pathlib import Path
@@ -24,8 +25,8 @@ def main():
     args = ap.parse_args()
 
     import torch
-    from onnxruntime.quantization import QuantType, quantize_dynamic
     from huggingface_hub import hf_hub_download
+    from onnxruntime.quantization import QuantType, quantize_dynamic
     from transformers import Wav2Vec2ForCTC
 
     out = Path(args.out)
@@ -34,8 +35,12 @@ def main():
     # the vocabulary file directly: the phoneme tokenizer class would also want the phonemizer / espeak backend
     tokens = json.loads(Path(hf_hub_download(args.model, "vocab.json")).read_text(encoding="utf-8"))
     vocab = {i: t for t, i in tokens.items()}
-    (out / "phoneme-vocab.json").write_text(json.dumps({"model": args.model, "pad": model.config.pad_token_id,
-                                                       "vocab": vocab}, ensure_ascii=False, indent=0), encoding="utf-8")
+    (out / "phoneme-vocab.json").write_text(
+        json.dumps(
+            {"model": args.model, "pad": model.config.pad_token_id, "vocab": vocab}, ensure_ascii=False, indent=0
+        ),
+        encoding="utf-8",
+    )
 
     class Wrapped(torch.nn.Module):
         def __init__(self, m):
@@ -47,8 +52,16 @@ def main():
             return self.m(audio).logits
 
     fp32 = out / "phoneme-xlsr53.onnx"
-    torch.onnx.export(Wrapped(model), torch.zeros(1, 32000), str(fp32), input_names=["audio"], output_names=["logits"],
-                      dynamic_axes={"audio": {1: "samples"}, "logits": {1: "frames"}}, opset_version=14, dynamo=False)
+    torch.onnx.export(
+        Wrapped(model),
+        torch.zeros(1, 32000),
+        str(fp32),
+        input_names=["audio"],
+        output_names=["logits"],
+        dynamic_axes={"audio": {1: "samples"}, "logits": {1: "frames"}},
+        opset_version=14,
+        dynamo=False,
+    )
     int8 = out / "phoneme-xlsr53-int8.onnx"
     quantize_dynamic(str(fp32), str(int8), weight_type=QuantType.QInt8)
     fp32.unlink()

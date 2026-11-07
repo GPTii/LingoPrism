@@ -12,6 +12,7 @@ Sources, best first:
      the share of confidence going to boxes of *other* classes overlapping the object, or a miss;
   3. in both cases, learners' corrections in the app (DetectionItem.feedback = wrong / corrected_label) are added.
 """
+
 import json
 from collections import defaultdict
 from pathlib import Path
@@ -86,9 +87,12 @@ def from_photos() -> dict:
             if not conf:
                 conf["background"] = 1.0
             mean_conf = 0.0
-        out[word.yolo_label] = {"mean_conf": round(mean_conf, 4),
-                                "confusion": {k: round(v, 4) for k, v in conf.items()},
-                                "score": round(min(1.0, sum(conf.values()) if own else 1.0), 4), "samples": 1}
+        out[word.yolo_label] = {
+            "mean_conf": round(mean_conf, 4),
+            "confusion": {k: round(v, 4) for k, v in conf.items()},
+            "score": round(min(1.0, sum(conf.values()) if own else 1.0), 4),
+            "samples": 1,
+        }
     return out
 
 

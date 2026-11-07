@@ -1,4 +1,5 @@
 """Game map: learning opens the rounds, rounds use only learned material, a failed round sends back to learning."""
+
 import pytest
 from rest_framework.test import APIClient
 
@@ -11,8 +12,18 @@ from apps.vocab.models import Language, ReviewStatus, Word, WordTranslation
 from . import content
 from .path import ROUNDS, find_stop, stops
 
-ANIMALS = [("mèo", "cat"), ("chó", "dog"), ("gà", "chicken"), ("vịt", "duck"), ("cá", "fish"), ("bò", "cow"),
-           ("ngựa", "horse"), ("chim", "bird"), ("lợn", "pig"), ("dê", "goat")]
+ANIMALS = [
+    ("mèo", "cat"),
+    ("chó", "dog"),
+    ("gà", "chicken"),
+    ("vịt", "duck"),
+    ("cá", "fish"),
+    ("bò", "cow"),
+    ("ngựa", "horse"),
+    ("chim", "bird"),
+    ("lợn", "pig"),
+    ("dê", "goat"),
+]
 
 
 @pytest.fixture
@@ -24,7 +35,9 @@ def words(db):
         for vi, en in ANIMALS:
             w = Word.objects.create(slug=f"{en}-{i}", levels={"en": 1}, emoji="🐾")
             WordTranslation.objects.create(word=w, language_id="vi", text=f"{vi} {i}", status=ReviewStatus.VERIFIED)
-            WordTranslation.objects.create(word=w, language_id="en", text=f"{en}{'x' * i}", status=ReviewStatus.VERIFIED)
+            WordTranslation.objects.create(
+                word=w, language_id="en", text=f"{en}{'x' * i}", status=ReviewStatus.VERIFIED
+            )
             out.append(w)
     return out
 
@@ -44,8 +57,9 @@ def play(client, node, ok=True):
     r = client.get(f"/api/v1/games/rounds/{node}/")
     assert r.status_code == 200, r.data
     results = [[ok] * len(g["items"]) for g in r.data["games"]]
-    return r.data, client.post(f"/api/v1/games/rounds/{node}/finish/", {"token": r.data["token"], "results": results},
-                               format="json")
+    return r.data, client.post(
+        f"/api/v1/games/rounds/{node}/finish/", {"token": r.data["token"], "results": results}, format="json"
+    )
 
 
 def node(data, node_id):
@@ -55,7 +69,12 @@ def node(data, node_id):
 def test_the_map_has_4_levels_of_rounds_chests_and_a_boss(words):
     user = User.objects.create_user("p@example.com", "Strong!Pass123", active_language="en")
     data = client_for(user).get("/api/v1/games/map/").data
-    assert data["track"] == "words" and [lv["name"] for lv in data["levels"]] == ["Nhập môn", "Sơ cấp", "Trung cấp", "Nâng cao"]
+    assert data["track"] == "words" and [lv["name"] for lv in data["levels"]] == [
+        "Nhập môn",
+        "Sơ cấp",
+        "Trung cấp",
+        "Nâng cao",
+    ]
     kinds = [x["kind"] for x in data["levels"][0]["nodes"]]
     assert kinds.count("round") == ROUNDS and kinds.count("chest") == 3 and kinds[-1] == "boss"
     assert kinds[4] == "chest"  # after the 4th round
@@ -96,8 +115,11 @@ def test_passing_rewards_once_and_failing_sends_back_to_the_words(words):
     assert review["kind"] == "words" and set(review["word_ids"]) <= {words[2].id, words[3].id}
     # "Ôn lại những từ này": a practice session of exactly those words
     # the app sends empty fields as null
-    s = c.post("/api/v1/sessions/", {"kind": "review", "topic": None, "size": None, "word_ids": review["word_ids"]},
-               format="json")
+    s = c.post(
+        "/api/v1/sessions/",
+        {"kind": "review", "topic": None, "size": None, "word_ids": review["word_ids"]},
+        format="json",
+    )
     assert s.status_code == 201 and s.data["kind"] == StudySession.Kind.PRACTICE
     assert {i["card"]["id"] for i in s.data["items"]} == set(review["word_ids"])
     assert node(c.get("/api/v1/games/map/").data, "L1-r3")["status"] == "locked"
@@ -135,6 +157,7 @@ def test_results_must_come_from_this_learner_and_round(words):
 
 
 # ---------------------------------------------------------------- reading track (Vietnamese, kid mode)
+
 
 @pytest.mark.django_db
 def test_a_child_learning_vietnamese_plays_the_reading_course():
@@ -179,10 +202,11 @@ def test_boss_needs_every_round_of_its_level(words):
 
 # ---------------------------------------------------------------- rewards and helpers
 
+
 def test_winning_rounds_counts_for_the_daily_quest_and_the_game_badges(words):
-    from apps.gamification.models import Badge, DailyQuest, UserBadge, UserStats
+    from apps.gamification.models import Badge, DailyQuest, Item, UserBadge, UserStats
     from apps.gamification.sync import sync_catalog
-    from apps.gamification.models import Item
+
     sync_catalog(Item, Badge)
     user = User.objects.create_user("p@example.com", "Strong!Pass123", active_language="en")
     c = client_for(user)

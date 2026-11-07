@@ -1,0 +1,33 @@
+# Python tooling for BE/ (Django) and AI/ (scripts). Run from the repo root:
+#   ruff format .        – formatting
+#   ruff check . --fix   – lint (imports sorted, pyflakes, pycodestyle, pyupgrade, bugbear)
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+extend-exclude = ["private", "**/migrations/*", "MOBILE", "FE", "BE/seed/sources"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B"]
+ignore = [
+  "E501",   # long lines: the formatter wraps code; long comments / strings stay readable
+  "B008",   # function calls in defaults (DRF / Django idioms)
+  "B904",   # raise ... from err inside except: not required everywhere
+  "UP031",  # %-formatting in a few logging calls
+  "E402",   # scripts put BE/ on sys.path / call django.setup() before importing apps
+  "E731",   # small named lambdas used as local helpers
+  "E741",   # short names (l, I) in maths-heavy scripts
+  "B905",   # zip() without strict=: the sequences are built together
+  "B007",   # unused names in tuple unpacking of loops (kept for readability)
+]
+
+[tool.ruff.lint.per-file-ignores]
+# closures that read loop variables, reviewed: they are called in the same iteration, never later
+"BE/apps/algorithms/ga.py" = ["B023"]
+"BE/apps/algorithms/benchmark.py" = ["B023"]
+"AI/scripts/eval_testset.py" = ["B023"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["apps", "config"]
+
+[tool.ruff.format]
+quote-style = "double"

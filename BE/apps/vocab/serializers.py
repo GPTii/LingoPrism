@@ -18,8 +18,21 @@ class TopicSerializer(serializers.ModelSerializer):
     class Meta:
         model = Topic
         fields = [
-            "id", "slug", "name_vi", "name_en", "name_zh_hans", "name_zh_hant", "icon", "image",
-            "audience", "visibility", "is_system", "word_count", "learned_count", "saved_count", "created_at",
+            "id",
+            "slug",
+            "name_vi",
+            "name_en",
+            "name_zh_hans",
+            "name_zh_hant",
+            "icon",
+            "image",
+            "audience",
+            "visibility",
+            "is_system",
+            "word_count",
+            "learned_count",
+            "saved_count",
+            "created_at",
         ]
         read_only_fields = ["id", "slug", "created_at"]
 
@@ -45,24 +58,68 @@ class ErrorReportSerializer(serializers.ModelSerializer):
 
 # ------------------------------------------------------------------ admin
 
+
 class AdminTranslationSerializer(serializers.ModelSerializer):
     word_slug = serializers.CharField(source="word.slug", read_only=True)
 
     class Meta:
         model = WordTranslation
         fields = [
-            "id", "word", "word_slug", "language", "text", "ipa", "pinyin", "pinyin_numbered", "zhuyin",
-            "measure_word", "accepted_variants", "regional_difference", "meaning_vi", "meaning_en", "level",
-            "status", "issues", "sources", "verified_method", "verified_at", "verified_by", "updated_at",
+            "id",
+            "word",
+            "word_slug",
+            "language",
+            "text",
+            "ipa",
+            "pinyin",
+            "pinyin_numbered",
+            "zhuyin",
+            "measure_word",
+            "accepted_variants",
+            "regional_difference",
+            "meaning_vi",
+            "meaning_en",
+            "level",
+            "status",
+            "issues",
+            "sources",
+            "verified_method",
+            "verified_at",
+            "verified_by",
+            "updated_at",
         ]
-        read_only_fields = ["id", "word_slug", "issues", "sources", "verified_method", "verified_at", "verified_by", "updated_at"]
+        read_only_fields = [
+            "id",
+            "word_slug",
+            "issues",
+            "sources",
+            "verified_method",
+            "verified_at",
+            "verified_by",
+            "updated_at",
+        ]
 
 
 class AdminExampleSerializer(serializers.ModelSerializer):
     class Meta:
         model = ExampleSentence
-        fields = ["id", "word", "word_slug", "language", "text", "transliteration", "translation_vi", "translation_en",
-                  "source", "source_id", "license", "status", "tokens", "target_tokens", "checks"]
+        fields = [
+            "id",
+            "word",
+            "word_slug",
+            "language",
+            "text",
+            "transliteration",
+            "translation_vi",
+            "translation_en",
+            "source",
+            "source_id",
+            "license",
+            "status",
+            "tokens",
+            "target_tokens",
+            "checks",
+        ]
         read_only_fields = ["checks"]
 
     word_slug = serializers.CharField(source="word.slug", read_only=True)
@@ -75,8 +132,20 @@ class AdminWordSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Word
-        fields = ["id", "slug", "image", "image_url", "yolo_label", "part_of_speech", "difficulty", "audience",
-                  "topics", "translations", "flagged_count", "created_at"]
+        fields = [
+            "id",
+            "slug",
+            "image",
+            "image_url",
+            "yolo_label",
+            "part_of_speech",
+            "difficulty",
+            "audience",
+            "topics",
+            "translations",
+            "flagged_count",
+            "created_at",
+        ]
         read_only_fields = ["id", "created_at"]
 
     def create(self, validated):
@@ -100,7 +169,32 @@ class AdminErrorReportSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ErrorReport
-        fields = ["id", "user_email", "word", "word_slug", "translation", "translation_text", "example",
-                  "reason", "details", "status", "handled_by", "handled_at", "created_at"]
-        read_only_fields = ["id", "user_email", "word", "word_slug", "translation", "translation_text", "example",
-                            "reason", "details", "handled_by", "handled_at", "created_at"]
+        fields = [
+            "id",
+            "user_email",
+            "word",
+            "word_slug",
+            "translation",
+            "translation_text",
+            "example",
+            "reason",
+            "details",
+            "status",
+            "handled_by",
+            "handled_at",
+            "created_at",
+        ]
+        read_only_fields = [
+            "id",
+            "user_email",
+            "word",
+            "word_slug",
+            "translation",
+            "translation_text",
+            "example",
+            "reason",
+            "details",
+            "handled_by",
+            "handled_at",
+            "created_at",
+        ]

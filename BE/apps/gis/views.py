@@ -22,8 +22,21 @@ class PoiSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Poi
-        fields = ["id", "name", "category", "category_label", "lat", "lng", "radius_m", "address", "description",
-                  "topics", "topics_detail", "is_active", "distance_m"]
+        fields = [
+            "id",
+            "name",
+            "category",
+            "category_label",
+            "lat",
+            "lng",
+            "radius_m",
+            "address",
+            "description",
+            "topics",
+            "topics_detail",
+            "is_active",
+            "distance_m",
+        ]
 
     def get_topics_detail(self, obj):
         return [{"id": t.id, "slug": t.slug, "name_vi": t.name_vi, "icon": t.icon} for t in obj.topics.all()]
@@ -41,9 +54,15 @@ class PointSerializer(serializers.Serializer):
 
 
 class NearbyView(APIView):
-    @extend_schema(tags=["gis"], parameters=[
-        OpenApiParameter("lat", float, required=True), OpenApiParameter("lng", float, required=True),
-        OpenApiParameter("radius", int, description="mét (mặc định 1000, tối đa 20000)")], responses={200: dict})
+    @extend_schema(
+        tags=["gis"],
+        parameters=[
+            OpenApiParameter("lat", float, required=True),
+            OpenApiParameter("lng", float, required=True),
+            OpenApiParameter("radius", int, description="mét (mặc định 1000, tối đa 20000)"),
+        ],
+        responses={200: dict},
+    )
     def get(self, request):
         ser = PointSerializer(data=request.query_params)
         ser.is_valid(raise_exception=True)
@@ -65,7 +84,9 @@ class GeofenceCheckView(APIView):
     def post(self, request):
         ser = PointSerializer(data=request.data)
         ser.is_valid(raise_exception=True)
-        return Response({"entered": services.check_geofence(request.user, ser.validated_data["lat"], ser.validated_data["lng"])})
+        return Response(
+            {"entered": services.check_geofence(request.user, ser.validated_data["lat"], ser.validated_data["lng"])}
+        )
 
 
 @extend_schema(tags=["gis"])
@@ -93,5 +114,9 @@ class PoiViewSet(BulkDeleteMixin, viewsets.ModelViewSet):
 
     @action(detail=False, methods=["get"], permission_classes=[IsStaffRole])
     def stats(self, request):
-        rows = Poi.objects.annotate(visits=Count("events")).order_by("-visits").values("id", "name", "category", "visits")[:20]
+        rows = (
+            Poi.objects.annotate(visits=Count("events"))
+            .order_by("-visits")
+            .values("id", "name", "category", "visits")[:20]
+        )
         return Response(list(rows))

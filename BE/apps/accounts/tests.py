@@ -11,7 +11,9 @@ def client():
 
 
 def register(client, email="a@example.com", password="Strong!Pass123"):
-    return client.post("/api/v1/auth/register/", {"email": email, "password": password, "accept_terms": True}, format="json")
+    return client.post(
+        "/api/v1/auth/register/", {"email": email, "password": password, "accept_terms": True}, format="json"
+    )
 
 
 def test_register_login_me(client):
@@ -58,14 +60,20 @@ def test_forgot_password_flow(client):
     client.post("/api/v1/auth/password/forgot/", {"email": "a@example.com"}, format="json")
     code = mail.outbox[-1].body.split(": ")[1][:6]
 
-    res = client.post("/api/v1/auth/password/verify/", {"email": "a@example.com", "code": "000000" if code != "000000" else "111111"}, format="json")
+    res = client.post(
+        "/api/v1/auth/password/verify/",
+        {"email": "a@example.com", "code": "000000" if code != "000000" else "111111"},
+        format="json",
+    )
     assert res.status_code == 400
 
     res = client.post("/api/v1/auth/password/verify/", {"email": "a@example.com", "code": code}, format="json")
     assert res.status_code == 200
     token = res.data["reset_token"]
 
-    res = client.post("/api/v1/auth/password/reset/", {"reset_token": token, "new_password": "Another!Pass456"}, format="json")
+    res = client.post(
+        "/api/v1/auth/password/reset/", {"reset_token": token, "new_password": "Another!Pass456"}, format="json"
+    )
     assert res.status_code == 200
     res = client.post("/api/v1/auth/login/", {"email": "a@example.com", "password": "Another!Pass456"}, format="json")
     assert res.status_code == 200
@@ -83,20 +91,34 @@ def test_admin_user_crud(client):
     admin = User.objects.create_superuser("root@example.com", "Strong!Pass123")
     client.force_authenticate(admin)
 
-    res = client.post("/api/v1/admin/users/", {
-        "email": "New@Example.com", "password": "Strong!Pass123", "display_name": "Lan",
-        "role": "staff", "active_language": "zh", "zh_script": "hant",
-    }, format="json")
+    res = client.post(
+        "/api/v1/admin/users/",
+        {
+            "email": "New@Example.com",
+            "password": "Strong!Pass123",
+            "display_name": "Lan",
+            "role": "staff",
+            "active_language": "zh",
+            "zh_script": "hant",
+        },
+        format="json",
+    )
     assert res.status_code == 201, res.data
     uid = res.data["id"]
     assert res.data["email"] == "new@example.com" and "password" not in res.data
     assert res.data["learning_languages"] == ["zh"]
     assert client.post("/api/v1/admin/users/", {"email": "x@example.com"}, format="json").status_code == 400
 
-    res = client.patch(f"/api/v1/admin/users/{uid}/", {"display_name": "Lan 2", "password": "Another!Pass456"}, format="json")
+    res = client.patch(
+        f"/api/v1/admin/users/{uid}/", {"display_name": "Lan 2", "password": "Another!Pass456"}, format="json"
+    )
     assert res.status_code == 200 and res.data["display_name"] == "Lan 2"
-    assert APIClient().post("/api/v1/auth/login/", {"email": "new@example.com", "password": "Another!Pass456"},
-                            format="json").status_code == 200
+    assert (
+        APIClient()
+        .post("/api/v1/auth/login/", {"email": "new@example.com", "password": "Another!Pass456"}, format="json")
+        .status_code
+        == 200
+    )
 
     assert client.patch(f"/api/v1/admin/users/{admin.id}/", {"role": "learner"}, format="json").status_code == 400
     assert client.delete(f"/api/v1/admin/users/{admin.id}/").status_code == 400
@@ -118,7 +140,13 @@ def test_google_login_accepts_only_our_audiences(client, settings, monkeypatch):
     from google.oauth2 import id_token as google_id_token
 
     settings.GOOGLE_CLIENT_IDS = ["123-web.apps.googleusercontent.com"]
-    info = {"aud": "999-other.apps.googleusercontent.com", "sub": "g-1", "email": "g@example.com", "email_verified": True, "name": "G"}
+    info = {
+        "aud": "999-other.apps.googleusercontent.com",
+        "sub": "g-1",
+        "email": "g@example.com",
+        "email_verified": True,
+        "name": "G",
+    }
     monkeypatch.setattr(google_id_token, "verify_oauth2_token", lambda token, req: info)
     assert client.post("/api/v1/auth/google/", {"id_token": "x"}, format="json").status_code == 400
 
@@ -127,7 +155,10 @@ def test_google_login_accepts_only_our_audiences(client, settings, monkeypatch):
     assert res.status_code == 200
     assert res.data["user"]["email"] == "g@example.com"
     # the same Google account signs in to the same user next time
-    assert client.post("/api/v1/auth/google/", {"id_token": "x"}, format="json").data["user"]["id"] == res.data["user"]["id"]
+    assert (
+        client.post("/api/v1/auth/google/", {"id_token": "x"}, format="json").data["user"]["id"]
+        == res.data["user"]["id"]
+    )
 
 
 def test_secure_demo_accounts_replaces_the_public_demo_password():

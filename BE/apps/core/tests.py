@@ -1,4 +1,5 @@
 """Protections against abuse once the app is public (rate limits, sessions, uploaded images)."""
+
 import io
 
 import pytest
@@ -32,11 +33,21 @@ def test_password_guessing_one_account_from_many_ips_is_rate_limited():
 
 def test_password_reset_logs_out_every_session():
     c = APIClient()
-    res = c.post("/api/v1/auth/register/", {"email": "a@example.com", "password": "Strong!Pass123", "accept_terms": True}, format="json")
+    res = c.post(
+        "/api/v1/auth/register/",
+        {"email": "a@example.com", "password": "Strong!Pass123", "accept_terms": True},
+        format="json",
+    )
     refresh = res.data["tokens"]["refresh"]
     c.credentials(HTTP_AUTHORIZATION=f"Bearer {res.data['tokens']['access']}")
-    assert c.post("/api/v1/auth/password/change/", {"old_password": "Strong!Pass123",
-                                                    "new_password": "Another!Pass456"}, format="json").status_code == 200
+    assert (
+        c.post(
+            "/api/v1/auth/password/change/",
+            {"old_password": "Strong!Pass123", "new_password": "Another!Pass456"},
+            format="json",
+        ).status_code
+        == 200
+    )
     # the refresh token issued before the change no longer works (a stolen session does not survive)
     assert APIClient().post("/api/v1/auth/refresh/", {"refresh": refresh}, format="json").status_code == 401
 
@@ -81,7 +92,9 @@ def test_redis_down_is_a_cache_miss_not_an_error():
     from apps.core.cache import ResilientRedisCache
 
     ResilientRedisCache._down_until = 0.0
-    cache = ResilientRedisCache("redis://127.0.0.1:6390/0", {"OPTIONS": {"socket_connect_timeout": 1, "socket_timeout": 1}})
+    cache = ResilientRedisCache(
+        "redis://127.0.0.1:6390/0", {"OPTIONS": {"socket_connect_timeout": 1, "socket_timeout": 1}}
+    )
     assert cache.get("k", "fallback") == "fallback"
     start = time.monotonic()
     assert cache.add("k", 1) is False and cache.get_many(["a", "b"]) == {} and cache.incr("n") == 1

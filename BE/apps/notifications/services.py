@@ -25,8 +25,17 @@ def push_event(user_id: int, event: str, payload: dict):
 
 def notify(user, kind: str, title: str, body: str = "", data: dict | None = None, image: str = "") -> Notification:
     n = Notification.objects.create(user=user, kind=kind, title=title, body=body, data=data or {}, image=image)
-    push_event(user.id, "notification", {
-        "id": n.id, "kind": n.kind, "title": n.title, "body": n.body, "image": n.image, "data": n.data,
-        "created_at": n.created_at.isoformat(),
-    })
+    push_event(
+        user.id,
+        "notification",
+        {
+            "id": n.id,
+            "kind": n.kind,
+            "title": n.title,
+            "body": n.body,
+            "image": n.image,
+            "data": n.data,
+            "created_at": n.created_at.isoformat(),
+        },
+    )
     return n
