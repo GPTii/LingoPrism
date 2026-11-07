@@ -16,10 +16,15 @@ import { useThemeMode, type ThemeMode } from '../theme/store'
 import SideNav, { navGroups, type NavLeaf } from '../components/SideNav'
 import ErrorBoundary from '../components/ErrorBoundary'
 import TranslateBubble from '../components/TranslateBubble'
+import SideRail from '../components/SideRail'
 import { VerifyEmailBanner, WhatsNew } from '../components/AccountGates'
 import { vocabApi } from '../api/vocab'
 import { ProfilePrompt } from '../components/ProfileSetup'
 import { UserAvatar } from '../components/ui'
+
+/** Learning pages that get the right-hand rail on wide screens (not lessons, games being played, the camera, chats,
+ * the community, the profile or Thành tích – which shows the quests itself). */
+const RAIL_PAGES = ['/', '/tro-choi', '/vocab', '/sentences', '/speak', '/doc-viet', '/exams', '/camera/history']
 
 const THEMES: { mode: ThemeMode; label: string; icon: React.ReactNode }[] = [
   { mode: 'light', label: 'Sáng', icon: <SunOutlined /> },
@@ -112,6 +117,7 @@ export default function LearnerLayout() {
   const location = useLocation()
   useEffect(() => setSheet(null), [location.pathname])
   const focus = location.pathname.startsWith('/learn') // during a lesson: no tab bar on the phone
+  const railOn = RAIL_PAGES.includes(location.pathname) || location.pathname.startsWith('/vocab/topics/')
   const isActive = (to: string) => (to === '/' ? location.pathname === '/' : location.pathname.startsWith(to))
 
   const menu = [
@@ -193,7 +199,11 @@ export default function LearnerLayout() {
               <VerifyEmailBanner />
               <WhatsNew />
               <ProfilePrompt />
-              <div key={location.pathname} className="animate-page"><ErrorBoundary><Suspense fallback={null}><Outlet /></Suspense></ErrorBoundary></div>
+              {/* the right-hand rail (quests, streak, league) beside the learning pages, on wide screens */}
+              <div className="flex gap-8 items-start">
+                <div key={location.pathname} className="animate-page flex-1 min-w-0"><ErrorBoundary><Suspense fallback={null}><Outlet /></Suspense></ErrorBoundary></div>
+                {railOn && <SideRail />}
+              </div>
               {!focus && <TranslateBubble />}
             </div>
           </main>

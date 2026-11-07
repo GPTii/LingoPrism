@@ -128,7 +128,7 @@ export default function HomePage() {
       <div className="grid lg:grid-cols-5 gap-5 md:gap-6">
         {/* camera: the heart of LingoPrism */}
         <button type="button" onClick={() => navigate('/camera')}
-          className="lift lp-card lg:col-span-3 p-6 sm:p-8 text-left cursor-pointer flex flex-col justify-between gap-8 group min-h-56">
+          className="lift lp-card lg:col-span-3 xl:col-span-5 p-6 sm:p-8 text-left cursor-pointer flex flex-col justify-between gap-8 group min-h-56">
           <AppIcon name="camera" size={64} className="transition-transform duration-200 group-hover:-rotate-6 group-hover:scale-105" />
           <span>
             <span className="block text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-[-0.02em]">Chụp một đồ vật</span>
@@ -139,7 +139,8 @@ export default function HomePage() {
           </span>
         </button>
 
-        <section className="lp-card lg:col-span-2 p-6">
+        {/* on wide screens the rail beside the page has the quests */}
+        <section className="lp-card lg:col-span-2 p-6 xl:hidden">
           <div className="flex items-center justify-between mb-5">
             <h2 className="text-lg font-bold text-slate-900 m-0">Nhiệm vụ hôm nay</h2>
             <Link to="/achievements" className="text-sm font-semibold">Xem tất cả</Link>
