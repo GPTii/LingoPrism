@@ -5,8 +5,7 @@ import '../controllers/home_controller.dart';
 import 'learning_tab_view.dart';
 import '../../review/views/review_view.dart';
 import '../../camera_detection/controllers/camera_detection_controller.dart';
-import '../../community/controllers/community_controller.dart';
-import '../../community/views/community_view.dart';
+import 'learn_hub_view.dart';
 import '../../profile/controllers/profile_controller.dart';
 import '../../profile/views/profile_view.dart';
 import 'package:lingoprism/app/core/theme/app_colors.dart';
@@ -27,12 +26,9 @@ class HomeView extends GetView<HomeController> {
           case 0:
             return const LearningTabView();
           case 1:
-            return const ReviewView();
+            return const LearnHubView();
           case 2:
-            if (!Get.isRegistered<CommunityController>()) {
-              Get.lazyPut(() => CommunityController());
-            }
-            return const CommunityView();
+            return const ReviewView(); // the word library ("Từ vựng")
           case 3:
             if (!Get.isRegistered<ProfileController>()) {
               Get.lazyPut(() => ProfileController());
@@ -55,11 +51,13 @@ class HomeView extends GetView<HomeController> {
               padding: EdgeInsets.zero,
               child: Row(
                 children: [
-                  _buildNavItem(icon: 'home', label: 'Trang chủ', index: 0),
-                  _buildNavItem(icon: 'review', label: 'Ôn tập', index: 1),
+                  // most used first: today, every way to study, [camera], the word library, the learner's own corner
+                  // (achievements, shop, friends, messages, community live under "Tôi")
+                  _buildNavItem(icon: 'home', label: 'Hôm nay', index: 0),
+                  _buildNavItem(icon: 'learn', label: 'Học', index: 1),
                   SizedBox(width: 64.w), // room for the camera button
-                  _buildNavItem(icon: 'community', label: 'Cộng đồng', index: 2),
-                  _buildNavItem(icon: 'profile', label: 'Hồ sơ', index: 3),
+                  _buildNavItem(icon: 'vocab', label: 'Từ vựng', index: 2),
+                  _buildNavItem(icon: 'profile', label: 'Tôi', index: 3),
                 ],
               ),
             ),

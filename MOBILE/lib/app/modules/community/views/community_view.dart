@@ -62,6 +62,9 @@ class CommunityView extends GetView<CommunityController> {
               children: [
                 SizedBox(height: 12.h),
                 Row(children: [
+                  // opened from "Tôi" (no longer a tab): a way back
+                  if (Navigator.of(context).canPop())
+                    IconButton(tooltip: 'Quay lại', onPressed: Get.back, icon: const Icon(Icons.arrow_back_rounded)),
                   Expanded(child: _buildTabBar()),
                   if (AuthService.to.currentUser?.isKid != true)
                     IconButton(

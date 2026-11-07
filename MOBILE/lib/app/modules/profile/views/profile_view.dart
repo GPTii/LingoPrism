@@ -103,13 +103,23 @@ class ProfileView extends GetView<ProfileController> {
                 if (AuthService.to.currentUser?.isKid != true) ...[
                   SizedBox(height: 16.h),
                   const MyIdCard(),
-                  SizedBox(height: 10.h),
-                  Row(children: [
-                    Expanded(child: _ProfileShortcut(icon: 'community', label: 'Bạn bè', onTap: () => Get.toNamed(Routes.friends))),
-                    SizedBox(width: 10.w),
-                    Expanded(child: _ProfileShortcut(icon: 'bookmark', label: 'Bài đã lưu', onTap: () => Get.toNamed(Routes.savedPosts))),
-                  ]),
                 ],
+                // "Tôi": the learner's own corner – people, rewards, help (no longer tabs of their own)
+                _ShortcutGroup('Kết nối', [
+                  if (AuthService.to.currentUser?.isKid != true) ...[
+                    _ProfileShortcut(icon: 'community', label: 'Bạn bè', onTap: () => Get.toNamed(Routes.friends)),
+                    _ProfileShortcut(icon: 'mail', label: 'Tin nhắn', onTap: () => Get.toNamed(Routes.messages)),
+                  ],
+                  _ProfileShortcut(icon: 'news', label: 'Cộng đồng', onTap: () => Get.toNamed(Routes.community)),
+                  if (AuthService.to.currentUser?.isKid != true)
+                    _ProfileShortcut(icon: 'bookmark', label: 'Bài đã lưu', onTap: () => Get.toNamed(Routes.savedPosts)),
+                ]),
+                _ShortcutGroup('Phần thưởng & hỗ trợ', [
+                  _ProfileShortcut(icon: 'bag', label: 'Cửa hàng', onTap: () => Get.toNamed(Routes.shop)),
+                  _ProfileShortcut(icon: 'chart', label: 'Thống kê', onTap: () => Get.toNamed(Routes.stats)),
+                  _ProfileShortcut(icon: 'cap', label: 'Hỏi giáo viên', onTap: () => Get.toNamed(Routes.supportChat)),
+                  _ProfileShortcut(icon: 'bell', label: 'Thông báo', onTap: () => Get.toNamed(Routes.notification)),
+                ]),
                 SizedBox(height: 12.h),
                 const MyPrismoCard(),
                 SizedBox(height: 12.h),
@@ -786,6 +796,34 @@ class ProfileErrorBanner extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// A titled two-column grid of shortcuts on the profile ("Tôi") tab.
+class _ShortcutGroup extends StatelessWidget {
+  const _ShortcutGroup(this.title, this.items);
+  final String title;
+  final List<Widget> items;
+
+  @override
+  Widget build(BuildContext context) {
+    if (items.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: EdgeInsets.only(top: 16.h),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text(title, style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+        SizedBox(height: 8.h),
+        for (var i = 0; i < items.length; i += 2)
+          Padding(
+            padding: EdgeInsets.only(bottom: 10.h),
+            child: Row(children: [
+              Expanded(child: items[i]),
+              SizedBox(width: 10.w),
+              Expanded(child: i + 1 < items.length ? items[i + 1] : const SizedBox()),
+            ]),
+          ),
+      ]),
     );
   }
 }

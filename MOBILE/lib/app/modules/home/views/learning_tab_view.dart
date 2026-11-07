@@ -15,7 +15,6 @@ import '../../../data/services/game_service.dart';
 import '../../../data/models/api/game.dart';
 import '../../../data/models/api/user.dart';
 import '../controllers/learning_tab_controller.dart';
-import '../controllers/home_controller.dart';
 import '../../levels/levels_module.dart';
 import '../../../core/widgets/prismo.dart';
 import '../../../core/widgets/app_icon.dart';
@@ -318,33 +317,16 @@ class LearningTabView extends GetView<HomeStatsController> {
           ),
         );
     final learningVietnamese = Get.find<AuthService>().currentUser?.activeLanguage == 'vi';
-    return Column(children: [
-      Row(children: [
-        if (learningVietnamese)
-          item('pencil', 'Học đọc – viết', Routes.literacyMap)
-        else
-          item('tiles', 'Luyện câu', Routes.sentencePractice),
-        SizedBox(width: 8.w),
-        item('mic', 'Luyện phát âm', Routes.speakPractice),
-        SizedBox(width: 8.w),
-        item('chat', 'Dịch', Routes.translate),
-      ]),
-      SizedBox(height: 8.h),
-      Row(children: [
-        item('exam', 'Bài kiểm tra', Routes.examList),
-        SizedBox(width: 8.w),
-        item('pin', 'Học theo vị trí', Routes.poiMap),
-        SizedBox(width: 8.w),
-        item('cap', 'Hỏi giáo viên', Routes.supportChat),
-      ]),
-      SizedBox(height: 8.h),
-      Row(children: [
-        item('chart', 'Thống kê', Routes.stats),
-        SizedBox(width: 8.w),
-        const Expanded(child: SizedBox()),
-        SizedBox(width: 8.w),
-        const Expanded(child: SizedBox()),
-      ]),
+    // the three most used practice tools; everything else: tab "Học" (and "Tôi" for stats, teacher, community)
+    return Row(children: [
+      item('mic', 'Luyện phát âm', Routes.speakPractice),
+      SizedBox(width: 8.w),
+      if (learningVietnamese)
+        item('pencil', 'Học đọc – viết', Routes.literacyMap)
+      else
+        item('tiles', 'Luyện câu', Routes.sentencePractice),
+      SizedBox(width: 8.w),
+      item('exam', 'Bài kiểm tra', Routes.examList),
     ]);
   }
 
@@ -766,10 +748,10 @@ class LearningTabView extends GetView<HomeStatsController> {
       case 'reach_learn_goal':
         return _handleNewLearningTap;
       case 'reach_review_goal':
-        return () => HomeController.to.changeTab(1);
+        return _handleReviewTap;
       case 'post_community_image':
       case 'engage_community':
-        return () => HomeController.to.changeTab(2);
+        return () => Get.toNamed(Routes.community); // the community lives under "Tôi" now, not in a tab
       case 'win_games':
         return () => Get.toNamed(Routes.games);
     }
