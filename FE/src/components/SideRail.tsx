@@ -10,8 +10,12 @@ import { QuestGo } from './QuestGo'
 
 /** what each daily quest is about (gamification DailyQuest.Kind) */
 const QUEST_ICON: Record<string, AppIconName> = {
-  save_words: 'camera', reach_learn_goal: 'sparkle', reach_review_goal: 'review', win_games: 'game',
-  post_community_image: 'photo', engage_community: 'community',
+  save_words: 'camera',
+  reach_learn_goal: 'sparkle',
+  reach_review_goal: 'review',
+  win_games: 'game',
+  post_community_image: 'photo',
+  engage_community: 'community',
 }
 
 const rank = (q: DailyQuest) => (q.completed && !q.reward_claimed ? 0 : !q.completed ? 1 : 2)
@@ -21,7 +25,11 @@ function Card({ title, link, children }: { title: string; link?: { to: string; l
     <section className="lp-card p-4">
       <div className="flex items-center justify-between mb-3">
         <h2 className="m-0 text-base font-extrabold text-slate-900">{title}</h2>
-        {link && <Link to={link.to} className="text-xs font-bold uppercase tracking-wide">{link.label}</Link>}
+        {link && (
+          <Link to={link.to} className="text-xs font-bold uppercase tracking-wide">
+            {link.label}
+          </Link>
+        )}
       </div>
       {children}
     </section>
@@ -48,14 +56,26 @@ function Quest({ q }: { q: DailyQuest }) {
         <div className={`text-sm font-bold leading-snug ${q.reward_claimed ? 'text-slate-400' : 'text-slate-800'}`}>{q.title}</div>
         <div className="flex items-center gap-2">
           <div className="relative flex-1">
-            <Progress percent={pct} showInfo={false} size={['100%', 14]} strokeColor={q.completed ? '#10c79a' : '#ffc800'} className="!m-0" />
-            <span className="num absolute inset-0 grid place-items-center text-[10px] font-bold text-slate-600">{Math.min(q.progress, q.target)} / {q.target}</span>
+            <Progress
+              percent={pct}
+              showInfo={false}
+              size={['100%', 14]}
+              strokeColor={q.completed ? '#10c79a' : '#ffc800'}
+              className="!m-0"
+            />
+            <span className="num absolute inset-0 grid place-items-center text-[10px] font-bold text-slate-600">
+              {Math.min(q.progress, q.target)} / {q.target}
+            </span>
           </div>
           {/* the reward: a chest that opens when the quest is done */}
           {q.completed && !q.reward_claimed ? (
-            <Button size="small" type="primary" loading={claim.isPending} onClick={() => claim.mutate()} className="!px-2">Nhận</Button>
+            <Button size="small" type="primary" loading={claim.isPending} onClick={() => claim.mutate()} className="!px-2">
+              Nhận
+            </Button>
           ) : (
-            <span title={`${q.reward_scales} vảy`} className={q.reward_claimed ? 'opacity-40' : ''}><AppIcon name="chest" size={26} /></span>
+            <span title={`${q.reward_scales} vảy`} className={q.reward_claimed ? 'opacity-40' : ''}>
+              <AppIcon name="chest" size={26} />
+            </span>
           )}
         </div>
       </div>
@@ -81,23 +101,35 @@ export default function SideRail() {
       <Card title="Hôm nay">
         <div className="grid grid-cols-3 gap-2 text-center">
           <div className="rounded-xl bg-slate-50 py-2">
-            <div className="flex justify-center"><StreakIcon active={!!g?.studied_today} size={26} /></div>
+            <div className="flex justify-center">
+              <StreakIcon active={!!g?.studied_today} size={26} />
+            </div>
             <div className="num font-extrabold text-slate-800">{g?.streak ?? 0}</div>
             <div className="text-[11px] text-slate-500">ngày liên tiếp</div>
           </div>
           <div className="rounded-xl bg-slate-50 py-2">
-            <div className="flex justify-center"><AppIcon name="sparkle" size={26} /></div>
+            <div className="flex justify-center">
+              <AppIcon name="sparkle" size={26} />
+            </div>
             <div className="num font-extrabold text-slate-800">{g?.today_xp ?? 0}</div>
             <div className="text-[11px] text-slate-500">XP hôm nay</div>
           </div>
           <div className="rounded-xl bg-slate-50 py-2">
-            <div className="flex justify-center gap-1"><ScaleIcon size={22} /><GemIcon size={22} /></div>
-            <div className="num font-extrabold text-slate-800">{g?.scales ?? 0} · {g?.gems ?? 0}</div>
+            <div className="flex justify-center gap-1">
+              <ScaleIcon size={22} />
+              <GemIcon size={22} />
+            </div>
+            <div className="num font-extrabold text-slate-800">
+              {g?.scales ?? 0} · {g?.gems ?? 0}
+            </div>
             <div className="text-[11px] text-slate-500">vảy · ngọc</div>
           </div>
         </div>
         {g && !g.studied_today && (
-          <Link to="/learn?kind=learn" className="mt-3 block text-center rounded-xl bg-amber-50 text-amber-700 text-sm font-semibold py-2 !no-underline">
+          <Link
+            to="/learn?kind=learn"
+            className="mt-3 block text-center rounded-xl bg-amber-50 text-amber-700 text-sm font-semibold py-2 !no-underline"
+          >
             Học một bài để giữ chuỗi {g.streak > 0 ? `${g.streak} ngày` : 'ngày học'}!
           </Link>
         )}
@@ -120,10 +152,16 @@ export default function SideRail() {
       </Card>
 
       <Card title="Nhiệm vụ hằng ngày" link={{ to: '/achievements#quests', label: 'Xem tất cả' }}>
-        {quests.isLoading ? <Skeleton active paragraph={{ rows: 3 }} title={false} /> : (
+        {quests.isLoading ? (
+          <Skeleton active paragraph={{ rows: 3 }} title={false} />
+        ) : (
           <ul className="m-0 p-0 list-none flex flex-col gap-4">
             {/* a reward to collect first, then what is left to do, the collected ones last */}
-            {[...(quests.data?.quests ?? [])].sort((a, b) => rank(a) - rank(b)).map((q) => <Quest key={q.id} q={q} />)}
+            {[...(quests.data?.quests ?? [])]
+              .sort((a, b) => rank(a) - rank(b))
+              .map((q) => (
+                <Quest key={q.id} q={q} />
+              ))}
             {!quests.data?.quests.length && <li className="text-sm text-slate-500">Học một bài để mở nhiệm vụ hôm nay.</li>}
           </ul>
         )}
@@ -135,10 +173,17 @@ export default function SideRail() {
             <AppIcon name="calendar" size={40} />
             <div className="flex-1">
               <div className="text-sm font-semibold text-slate-700">Hoàn thành {monthly.target} nhiệm vụ trong tháng</div>
-              <Progress percent={Math.round((Math.min(monthly.completed_count, monthly.target) / Math.max(monthly.target, 1)) * 100)}
-                format={() => `${monthly.completed_count}/${monthly.target}`} size="small" strokeColor="#a78bfa" />
+              <Progress
+                percent={Math.round((Math.min(monthly.completed_count, monthly.target) / Math.max(monthly.target, 1)) * 100)}
+                format={() => `${monthly.completed_count}/${monthly.target}`}
+                size="small"
+                strokeColor="#a78bfa"
+              />
             </div>
-            <span className="num inline-flex items-center gap-1 text-sm font-bold text-slate-600"><GemIcon size={16} />{monthly.reward_gems}</span>
+            <span className="num inline-flex items-center gap-1 text-sm font-bold text-slate-600">
+              <GemIcon size={16} />
+              {monthly.reward_gems}
+            </span>
           </div>
         </Card>
       )}

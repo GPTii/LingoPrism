@@ -34,38 +34,69 @@ export default function StatsPage() {
   const s = q.data
   const ink = dark ? '#9aa8bb' : '#556273'
   // two series → two named colours and a legend; wrong answers in the coral beam, right ones in mint
-  const chart = s?.daily.flatMap((d) => [
-    { date: dayjs(d.date).format('DD/MM'), kind: 'Đúng', value: d.correct },
-    { date: dayjs(d.date).format('DD/MM'), kind: 'Sai', value: d.answers - d.correct },
-  ]) ?? []
+  const chart =
+    s?.daily.flatMap((d) => [
+      { date: dayjs(d.date).format('DD/MM'), kind: 'Đúng', value: d.correct },
+      { date: dayjs(d.date).format('DD/MM'), kind: 'Sai', value: d.answers - d.correct },
+    ]) ?? []
 
   return (
     <div className="max-w-6xl mx-auto flex flex-col gap-6">
-      <PageHeader title="Thống kê học tập" description="Bạn đã trả lời bao nhiêu, đúng bao nhiêu, mạnh ở chủ đề nào và từ nào còn hay sai."
-        actions={<Segmented size="large" value={days} onChange={(v) => setDays(v as number)}
-          options={[{ value: 7, label: '7 ngày' }, { value: 30, label: '30 ngày' }, { value: 90, label: '90 ngày' }]} />} />
+      <PageHeader
+        title="Thống kê học tập"
+        description="Bạn đã trả lời bao nhiêu, đúng bao nhiêu, mạnh ở chủ đề nào và từ nào còn hay sai."
+        actions={
+          <Segmented
+            size="large"
+            value={days}
+            onChange={(v) => setDays(v as number)}
+            options={[
+              { value: 7, label: '7 ngày' },
+              { value: 30, label: '30 ngày' },
+              { value: 90, label: '90 ngày' },
+            ]}
+          />
+        }
+      />
 
-      {q.isLoading || !s ? <Skeleton active /> : s.answers === 0 && s.words.total === 0 ? (
+      {q.isLoading || !s ? (
+        <Skeleton active />
+      ) : s.answers === 0 && s.words.total === 0 ? (
         <div className="lp-card">
-          <EmptyState art={<Prismo mood="wow" size={90} />} title="Chưa có số liệu"
+          <EmptyState
+            art={<Prismo mood="wow" size={90} />}
+            title="Chưa có số liệu"
             description="Học vài từ mới, số liệu của bạn sẽ hiện ở đây."
-            action={<Link to="/learn?kind=learn"><Button type="primary">Học từ mới</Button></Link>} />
+            action={
+              <Link to="/learn?kind=learn">
+                <Button type="primary">Học từ mới</Button>
+              </Link>
+            }
+          />
         </div>
       ) : (
         <>
           <Section>
-            <Facts items={[
-              { label: 'từ trong thư viện', value: s.words.total },
-              { label: 'từ đã thuộc', value: s.words.mastered },
-              { label: `câu trả lời · ${days} ngày`, value: s.answers.toLocaleString('vi-VN') },
-              { label: 'trả lời đúng', value: pct(s.accuracy) },
-              { label: 'đúng ngay lần đầu', value: pct(s.first_try_accuracy) },
-              { label: 'ngày có học', value: s.active_days, hint: `/ ${days}` },
-            ]} />
+            <Facts
+              items={[
+                { label: 'từ trong thư viện', value: s.words.total },
+                { label: 'từ đã thuộc', value: s.words.mastered },
+                { label: `câu trả lời · ${days} ngày`, value: s.answers.toLocaleString('vi-VN') },
+                { label: 'trả lời đúng', value: pct(s.accuracy) },
+                { label: 'đúng ngay lần đầu', value: pct(s.first_try_accuracy) },
+                { label: 'ngày có học', value: s.active_days, hint: `/ ${days}` },
+              ]}
+            />
           </Section>
 
           <Section title="Câu trả lời mỗi ngày">
-            <Column data={chart} xField="date" yField="value" colorField="kind" stack height={260}
+            <Column
+              data={chart}
+              xField="date"
+              yField="value"
+              colorField="kind"
+              stack
+              height={260}
               theme={dark ? 'classicDark' : 'classic'}
               scale={{ color: { domain: ['Đúng', 'Sai'], range: ['#10c79a', '#ff6b81'] } }}
               style={{ radiusTopLeft: 3, radiusTopRight: 3, maxWidth: 18 }}
@@ -73,7 +104,8 @@ export default function StatsPage() {
                 x: { labelFill: ink, line: false, tick: false, labelAutoHide: true },
                 y: { labelFill: ink, grid: true, gridStroke: dark ? '#243043' : '#e3e8ef', gridLineDash: [0, 0], gridStrokeOpacity: 1 },
               }}
-              legend={{ color: { position: 'top', itemLabelFill: ink } }} />
+              legend={{ color: { position: 'top', itemLabelFill: ink } }}
+            />
           </Section>
 
           <div className="grid lg:grid-cols-2 gap-6">
@@ -90,42 +122,70 @@ export default function StatsPage() {
                     </li>
                   ))}
                 </ul>
-              ) : <p className="m-0 text-slate-500">Chưa có câu trả lời trong {days} ngày qua.</p>}
+              ) : (
+                <p className="m-0 text-slate-500">Chưa có câu trả lời trong {days} ngày qua.</p>
+              )}
             </Section>
 
             <Section title="Theo chủ đề">
               {s.by_topic.length ? (
-                <ShowMore items={s.by_topic} limit={6} label="Xem tất cả chủ đề">{(shown) => (
-                <ul className="m-0 p-0 list-none flex flex-col gap-3">
-                  {shown.map((t) => (
-                    <li key={t.id}>
-                      <Link to={`/vocab/topics/${t.id}`} className="flex justify-between text-sm mb-1 !text-slate-700">
-                        <span className="font-medium">{t.icon} {t.name}</span>
-                        <span className="num text-slate-500">thuộc {t.mastered}/{t.words} · đúng {pct(t.accuracy)}</span>
-                      </Link>
-                      <Meter value={t.words ? t.mastered / t.words : 0} color="#10c79a" />
-                    </li>
-                  ))}
-                </ul>
-                )}</ShowMore>
-              ) : <p className="m-0 text-slate-500">Lưu từ theo chủ đề để xem tiến độ từng chủ đề.</p>}
+                <ShowMore items={s.by_topic} limit={6} label="Xem tất cả chủ đề">
+                  {(shown) => (
+                    <ul className="m-0 p-0 list-none flex flex-col gap-3">
+                      {shown.map((t) => (
+                        <li key={t.id}>
+                          <Link to={`/vocab/topics/${t.id}`} className="flex justify-between text-sm mb-1 !text-slate-700">
+                            <span className="font-medium">
+                              {t.icon} {t.name}
+                            </span>
+                            <span className="num text-slate-500">
+                              thuộc {t.mastered}/{t.words} · đúng {pct(t.accuracy)}
+                            </span>
+                          </Link>
+                          <Meter value={t.words ? t.mastered / t.words : 0} color="#10c79a" />
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </ShowMore>
+              ) : (
+                <p className="m-0 text-slate-500">Lưu từ theo chủ đề để xem tiến độ từng chủ đề.</p>
+              )}
             </Section>
           </div>
 
-          <Section title="Từ hay sai" extra={s.hardest.length > 0 && <Link to="/learn?kind=review"><Button type="primary">Ôn các từ này</Button></Link>}>
+          <Section
+            title="Từ hay sai"
+            extra={
+              s.hardest.length > 0 && (
+                <Link to="/learn?kind=review">
+                  <Button type="primary">Ôn các từ này</Button>
+                </Link>
+              )
+            }
+          >
             {s.hardest.length ? (
-              <ShowMore items={s.hardest} limit={8} label="Xem tất cả từ hay sai">{(shown) => (
-              <ul className="m-0 p-0 list-none grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                {shown.map((h) => h.card.target && (
-                  <li key={h.card.id} className="rounded-xl bg-slate-50 p-4 flex flex-col items-center text-center gap-1">
-                    <TargetWord target={h.card.target} size="md" showReading={false} />
-                    <div className="text-slate-600">{h.card.meaning_vi}</div>
-                    <div className="num text-sm font-semibold text-[#e0445e]">sai {h.wrong}/{h.answers} lần</div>
-                  </li>
-                ))}
-              </ul>
-              )}</ShowMore>
-            ) : <p className="m-0 text-slate-500">Chưa có từ nào bạn hay sai. Giỏi lắm!</p>}
+              <ShowMore items={s.hardest} limit={8} label="Xem tất cả từ hay sai">
+                {(shown) => (
+                  <ul className="m-0 p-0 list-none grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                    {shown.map(
+                      (h) =>
+                        h.card.target && (
+                          <li key={h.card.id} className="rounded-xl bg-slate-50 p-4 flex flex-col items-center text-center gap-1">
+                            <TargetWord target={h.card.target} size="md" showReading={false} />
+                            <div className="text-slate-600">{h.card.meaning_vi}</div>
+                            <div className="num text-sm font-semibold text-[#e0445e]">
+                              sai {h.wrong}/{h.answers} lần
+                            </div>
+                          </li>
+                        ),
+                    )}
+                  </ul>
+                )}
+              </ShowMore>
+            ) : (
+              <p className="m-0 text-slate-500">Chưa có từ nào bạn hay sai. Giỏi lắm!</p>
+            )}
           </Section>
         </>
       )}

@@ -13,13 +13,19 @@ const LANG: Record<string, string> = { en: 'Tiếng Anh', vi: 'Tiếng Việt', 
 function DailyColumns({ data, label, dark }: { data: { date: string; value: number }[]; label: string; dark: boolean }) {
   const ink = dark ? '#9aa8bb' : '#556273'
   return (
-    <Column data={data} xField="date" yField="value" height={240} theme={dark ? 'classicDark' : 'classic'}
+    <Column
+      data={data}
+      xField="date"
+      yField="value"
+      height={240}
+      theme={dark ? 'classicDark' : 'classic'}
       style={{ fill: dark ? '#3fa9f5' : '#1899f0', radiusTopLeft: 4, radiusTopRight: 4, maxWidth: 22 }}
       axis={{
         x: { labelFill: ink, line: false, tick: false },
         y: { labelFill: ink, grid: true, gridStroke: dark ? '#222c3d' : '#e3e8ef', gridLineDash: [0, 0], gridStrokeOpacity: 1 },
       }}
-      tooltip={{ title: (d: { date: string }) => d.date, items: [{ channel: 'y', name: label }] }} />
+      tooltip={{ title: (d: { date: string }) => d.date, items: [{ channel: 'y', name: label }] }}
+    />
   )
 }
 
@@ -31,7 +37,10 @@ export default function DashboardPage() {
   const detections = data.detection.per_day.map((d) => ({ date: d.date.slice(5), value: d.count }))
   const byLang = data.users.by_language.map((r) => ({
     key: `${r.active_language}-${r.zh_script}`,
-    language: r.active_language === 'zh' ? `${LANG.zh} ${r.zh_script === 'hant' ? '(phồn thể)' : '(giản thể)'}` : LANG[r.active_language] ?? r.active_language,
+    language:
+      r.active_language === 'zh'
+        ? `${LANG.zh} ${r.zh_script === 'hant' ? '(phồn thể)' : '(giản thể)'}`
+        : (LANG[r.active_language] ?? r.active_language),
     n: r.n,
   }))
   const todo = [
@@ -48,11 +57,23 @@ export default function DashboardPage() {
       <h1 className="text-2xl font-extrabold text-slate-800 m-0">Tổng quan</h1>
 
       {/* what needs a person now comes first */}
-      <Card title="Việc cần xử lý" extra={!open.length && <span className="text-emerald-600 font-semibold"><CheckCircleFilled /> Không còn việc tồn</span>}>
+      <Card
+        title="Việc cần xử lý"
+        extra={
+          !open.length && (
+            <span className="text-emerald-600 font-semibold">
+              <CheckCircleFilled /> Không còn việc tồn
+            </span>
+          )
+        }
+      >
         <ul className="m-0 p-0 list-none grid sm:grid-cols-2 xl:grid-cols-4 gap-2">
           {todo.map((t) => (
             <li key={t.label}>
-              <Link to={t.to} className={`group flex items-center gap-3 rounded-xl px-4 py-3 transition-colors ${t.value ? 'bg-amber-50 hover:bg-amber-100' : 'bg-slate-50 hover:bg-slate-100'}`}>
+              <Link
+                to={t.to}
+                className={`group flex items-center gap-3 rounded-xl px-4 py-3 transition-colors ${t.value ? 'bg-amber-50 hover:bg-amber-100' : 'bg-slate-50 hover:bg-slate-100'}`}
+              >
                 <span className={`num text-2xl font-bold ${t.value ? 'text-amber-700' : 'text-slate-400'}`}>{t.value}</span>
                 <span className="flex-1 text-sm font-medium text-slate-700">{t.label}</span>
                 <ArrowRightOutlined className="text-slate-400 transition-transform group-hover:translate-x-0.5" />
@@ -63,31 +84,57 @@ export default function DashboardPage() {
       </Card>
 
       <Card>
-        <Facts items={[
-          { label: 'người dùng', value: data.users.total.toLocaleString('vi-VN') },
-          { label: 'học viên', value: data.users.learners.toLocaleString('vi-VN') },
-          { label: 'trẻ em', value: data.users.kids.toLocaleString('vi-VN') },
-          { label: 'mới trong 7 ngày', value: data.users.new_7d.toLocaleString('vi-VN') },
-          { label: 'học hôm nay', value: data.users.active_today.toLocaleString('vi-VN') },
-          { label: 'câu trả lời hôm nay', value: data.learning.answers_today.toLocaleString('vi-VN') },
-        ]} />
+        <Facts
+          items={[
+            { label: 'người dùng', value: data.users.total.toLocaleString('vi-VN') },
+            { label: 'học viên', value: data.users.learners.toLocaleString('vi-VN') },
+            { label: 'trẻ em', value: data.users.kids.toLocaleString('vi-VN') },
+            { label: 'mới trong 7 ngày', value: data.users.new_7d.toLocaleString('vi-VN') },
+            { label: 'học hôm nay', value: data.users.active_today.toLocaleString('vi-VN') },
+            { label: 'câu trả lời hôm nay', value: data.learning.answers_today.toLocaleString('vi-VN') },
+          ]}
+        />
       </Card>
 
       <Row gutter={[16, 16]}>
-        <Col xs={24} lg={12}><Card title="Phiên học mỗi ngày · 14 ngày qua"><DailyColumns data={sessions} label="Phiên học" dark={dark} /></Card></Col>
-        <Col xs={24} lg={12}><Card title="Lượt nhận diện ảnh mỗi ngày · 14 ngày qua"><DailyColumns data={detections} label="Lượt nhận diện" dark={dark} /></Card></Col>
+        <Col xs={24} lg={12}>
+          <Card title="Phiên học mỗi ngày · 14 ngày qua">
+            <DailyColumns data={sessions} label="Phiên học" dark={dark} />
+          </Card>
+        </Col>
+        <Col xs={24} lg={12}>
+          <Card title="Lượt nhận diện ảnh mỗi ngày · 14 ngày qua">
+            <DailyColumns data={detections} label="Lượt nhận diện" dark={dark} />
+          </Card>
+        </Col>
       </Row>
       <Row gutter={[16, 16]}>
         <Col xs={24} lg={12}>
           <Card title="Học viên theo ngôn ngữ đang học">
-            <Table size="small" pagination={false} rowKey="key" dataSource={byLang}
-              columns={[{ title: 'Ngôn ngữ', dataIndex: 'language' }, { title: 'Số học viên', dataIndex: 'n', align: 'right' }]} />
+            <Table
+              size="small"
+              pagination={false}
+              rowKey="key"
+              dataSource={byLang}
+              columns={[
+                { title: 'Ngôn ngữ', dataIndex: 'language' },
+                { title: 'Số học viên', dataIndex: 'n', align: 'right' },
+              ]}
+            />
           </Card>
         </Col>
         <Col xs={24} lg={12}>
           <Card title="Đồ vật được nhận diện nhiều nhất">
-            <Table size="small" pagination={false} rowKey="label" dataSource={data.detection.top_labels}
-              columns={[{ title: 'Nhãn', dataIndex: 'label' }, { title: 'Số lần', dataIndex: 'n', align: 'right' }]} />
+            <Table
+              size="small"
+              pagination={false}
+              rowKey="label"
+              dataSource={data.detection.top_labels}
+              columns={[
+                { title: 'Nhãn', dataIndex: 'label' },
+                { title: 'Số lần', dataIndex: 'n', align: 'right' },
+              ]}
+            />
           </Card>
         </Col>
       </Row>

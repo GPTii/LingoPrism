@@ -18,7 +18,10 @@ export function navGroups(counts: { due?: number; unread?: number; quests?: numb
   return [
     { key: 'home', label: 'Hôm nay', icon: 'home', to: '/' },
     {
-      key: 'learn', label: 'Học', icon: 'learn', children: [
+      key: 'learn',
+      label: 'Học',
+      icon: 'learn',
+      children: [
         { to: '/learn?kind=learn', label: 'Học từ mới', icon: 'sparkle' },
         { to: '/learn?kind=review', label: 'Ôn từ đến hạn', icon: 'review', count: counts.due },
         { to: '/speak', label: 'Luyện phát âm', icon: 'mic' },
@@ -30,7 +33,10 @@ export function navGroups(counts: { due?: number; unread?: number; quests?: numb
     { key: 'snap', label: 'Chụp ảnh học từ', icon: 'camera', to: '/camera', featured: true },
     { key: 'games', label: 'Trò chơi', icon: 'game', to: '/tro-choi' },
     {
-      key: 'vocab', label: 'Từ vựng', icon: 'vocab', children: [
+      key: 'vocab',
+      label: 'Từ vựng',
+      icon: 'vocab',
+      children: [
         { to: '/vocab', label: 'Chủ đề', icon: 'shapes' },
         { to: '/vocab?tab=library', label: 'Từ của tôi', icon: 'bookmark' },
         { to: '/camera/history', label: 'Lịch sử ảnh', icon: 'photo' },
@@ -38,7 +44,10 @@ export function navGroups(counts: { due?: number; unread?: number; quests?: numb
       ],
     },
     {
-      key: 'me', label: 'Tôi', icon: 'profile', children: meLinks(counts),
+      key: 'me',
+      label: 'Tôi',
+      icon: 'profile',
+      children: meLinks(counts),
     },
   ]
 }
@@ -88,7 +97,10 @@ export function useActiveLink(groups: NavGroup[]) {
     for (const g of groups) {
       for (const to of g.to ? [g.to] : (g.children ?? []).map((c) => c.to)) {
         const sc = score(to, where)
-        if (sc > top) { top = sc; best = to }
+        if (sc > top) {
+          top = sc
+          best = to
+        }
       }
     }
     return best
@@ -96,12 +108,27 @@ export function useActiveLink(groups: NavGroup[]) {
 }
 
 const Count = ({ n }: { n?: number }) =>
-  n ? <span className="num ml-auto min-w-5 h-5 px-1.5 rounded-full bg-brand-600 text-white text-[11px] font-bold grid place-items-center">{n > 99 ? '99+' : n}</span> : null
+  n ? (
+    <span className="num ml-auto min-w-5 h-5 px-1.5 rounded-full bg-brand-600 text-white text-[11px] font-bold grid place-items-center">
+      {n > 99 ? '99+' : n}
+    </span>
+  ) : null
 
 const read = <T,>(key: string, fallback: T): T => {
-  try { const v = localStorage.getItem(key); return v ? JSON.parse(v) as T : fallback } catch { return fallback }
+  try {
+    const v = localStorage.getItem(key)
+    return v ? (JSON.parse(v) as T) : fallback
+  } catch {
+    return fallback
+  }
 }
-const write = (key: string, v: unknown) => { try { localStorage.setItem(key, JSON.stringify(v)) } catch { /* storage blocked */ } }
+const write = (key: string, v: unknown) => {
+  try {
+    localStorage.setItem(key, JSON.stringify(v))
+  } catch {
+    /* storage blocked */
+  }
+}
 
 function Leaves({ items, active, onPick }: { items: NavLeaf[]; active: string | null; onPick?: () => void }) {
   return (
@@ -110,9 +137,16 @@ function Leaves({ items, active, onPick }: { items: NavLeaf[]; active: string | 
         const on = c.to === active
         return (
           <li key={c.to}>
-            <NavLink to={c.to} onClick={onPick} aria-current={on ? 'page' : undefined}
+            <NavLink
+              to={c.to}
+              onClick={onPick}
+              aria-current={on ? 'page' : undefined}
               className={`flex items-center gap-2.5 rounded-xl h-10 pl-2 pr-2 text-sm font-semibold border-2 transition-colors ${
-                on ? 'text-brand-700 bg-brand-50 border-brand-200' : 'text-slate-500 border-transparent hover:text-slate-900 hover:bg-slate-100'}`}>
+                on
+                  ? 'text-brand-700 bg-brand-50 border-brand-200'
+                  : 'text-slate-500 border-transparent hover:text-slate-900 hover:bg-slate-100'
+              }`}
+            >
               <AppIcon name={c.icon} size={22} />
               <span className="truncate">{c.label}</span>
               <Count n={c.count} />
@@ -148,30 +182,50 @@ export default function SideNav({ groups, footer }: { groups: NavGroup[]; footer
   if (collapsed) {
     return (
       <aside className="hidden md:flex w-[76px] shrink-0 flex-col items-center border-r border-slate-200 py-4 sticky top-0 h-screen overflow-y-auto z-10">
-        <NavLink to="/" aria-label="LingoPrism – trang chủ" className="mb-5"><LogoMark size={38} /></NavLink>
+        <NavLink to="/" aria-label="LingoPrism – trang chủ" className="mb-5">
+          <LogoMark size={38} />
+        </NavLink>
         <nav className="flex flex-col items-center gap-1.5" aria-label="Mục chính">
           {groups.map((g) => {
             const on = g.key === activeGroup
             const icon = g.featured ? (
-              <span className={`h-12 w-12 rounded-xl grid place-items-center prism-bg text-white text-xl shadow-md ${on ? 'ring-2 ring-brand-300' : ''}`}>
+              <span
+                className={`h-12 w-12 rounded-xl grid place-items-center prism-bg text-white text-xl shadow-md ${on ? 'ring-2 ring-brand-300' : ''}`}
+              >
                 <CameraFilled />
               </span>
             ) : (
-              <span className={`relative h-12 w-12 rounded-xl grid place-items-center border-2 transition-colors ${
-                on ? 'bg-brand-50 border-brand-200' : 'border-transparent hover:bg-slate-100'}`}>
+              <span
+                className={`relative h-12 w-12 rounded-xl grid place-items-center border-2 transition-colors ${
+                  on ? 'bg-brand-50 border-brand-200' : 'border-transparent hover:bg-slate-100'
+                }`}
+              >
                 <AppIcon name={g.icon} size={30} />
                 {total(g) > 0 && <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-[#ff6b81]" />}
               </span>
             )
             return g.to ? (
               <Tooltip key={g.key} title={g.label} placement="right">
-                <NavLink to={g.to} aria-label={g.label} aria-current={on ? 'page' : undefined}>{icon}</NavLink>
+                <NavLink to={g.to} aria-label={g.label} aria-current={on ? 'page' : undefined}>
+                  {icon}
+                </NavLink>
               </Tooltip>
             ) : (
-              <Popover key={g.key} placement="rightTop" arrow={false} trigger={['hover', 'click']}
+              <Popover
+                key={g.key}
+                placement="rightTop"
+                arrow={false}
+                trigger={['hover', 'click']}
                 title={<span className="font-bold">{g.label}</span>}
-                content={<div className="w-56 -mx-1"><Leaves items={g.children!} active={active} /></div>}>
-                <button type="button" aria-label={g.label} className="cursor-pointer">{icon}</button>
+                content={
+                  <div className="w-56 -mx-1">
+                    <Leaves items={g.children!} active={active} />
+                  </div>
+                }
+              >
+                <button type="button" aria-label={g.label} className="cursor-pointer">
+                  {icon}
+                </button>
               </Popover>
             )
           })}
@@ -179,8 +233,14 @@ export default function SideNav({ groups, footer }: { groups: NavGroup[]; footer
         <div className="mt-auto pt-4 flex flex-col items-center gap-2">
           {footer?.(true)}
           <Tooltip title="Mở rộng menu" placement="right">
-            <button type="button" onClick={() => setCollapsed(false)} aria-label="Mở rộng menu"
-              className="h-10 w-10 rounded-xl grid place-items-center text-lg text-slate-500 hover:bg-slate-100 cursor-pointer"><MenuUnfoldOutlined /></button>
+            <button
+              type="button"
+              onClick={() => setCollapsed(false)}
+              aria-label="Mở rộng menu"
+              className="h-10 w-10 rounded-xl grid place-items-center text-lg text-slate-500 hover:bg-slate-100 cursor-pointer"
+            >
+              <MenuUnfoldOutlined />
+            </button>
           </Tooltip>
         </div>
       </aside>
@@ -190,46 +250,79 @@ export default function SideNav({ groups, footer }: { groups: NavGroup[]; footer
   return (
     <aside className="hidden md:flex w-64 shrink-0 flex-col border-r border-slate-200 px-3 py-4 sticky top-0 h-screen overflow-y-auto z-10">
       <div className="flex items-center justify-between px-2 mb-5">
-        <NavLink to="/" aria-label="LingoPrism – trang chủ"><Logo size={34} /></NavLink>
+        <NavLink to="/" aria-label="LingoPrism – trang chủ">
+          <Logo size={34} />
+        </NavLink>
         <Tooltip title="Thu gọn menu" placement="right">
-          <button type="button" onClick={() => setCollapsed(true)} aria-label="Thu gọn menu"
-            className="h-9 w-9 rounded-lg grid place-items-center text-slate-500 hover:bg-slate-100 cursor-pointer"><MenuFoldOutlined /></button>
+          <button
+            type="button"
+            onClick={() => setCollapsed(true)}
+            aria-label="Thu gọn menu"
+            className="h-9 w-9 rounded-lg grid place-items-center text-slate-500 hover:bg-slate-100 cursor-pointer"
+          >
+            <MenuFoldOutlined />
+          </button>
         </Tooltip>
       </div>
       <nav className="flex flex-col gap-0.5" aria-label="Mục chính">
         {groups.map((g) => {
           const on = g.key === activeGroup
-          if (g.to && g.featured) { // the camera: the main action of the app, always one click away
+          if (g.to && g.featured) {
+            // the camera: the main action of the app, always one click away
             return (
-              <NavLink key={g.key} to={g.to} aria-current={g.to === active ? 'page' : undefined}
+              <NavLink
+                key={g.key}
+                to={g.to}
+                aria-current={g.to === active ? 'page' : undefined}
                 className={`my-1.5 flex items-center gap-3 rounded-xl h-12 px-2.5 font-bold !text-white prism-bg shadow-md transition-transform hover:-translate-y-0.5 ${
-                  on ? 'ring-2 ring-brand-300 ring-offset-2 ring-offset-[var(--page-bg)]' : ''}`}>
-                <span className="h-8 w-8 rounded-lg bg-white/20 grid place-items-center"><CameraFilled /></span>{g.label}
+                  on ? 'ring-2 ring-brand-300 ring-offset-2 ring-offset-[var(--page-bg)]' : ''
+                }`}
+              >
+                <span className="h-8 w-8 rounded-lg bg-white/20 grid place-items-center">
+                  <CameraFilled />
+                </span>
+                {g.label}
               </NavLink>
             )
           }
           if (g.to) {
             return (
-              <NavLink key={g.key} to={g.to} aria-current={g.to === active ? 'page' : undefined}
+              <NavLink
+                key={g.key}
+                to={g.to}
+                aria-current={g.to === active ? 'page' : undefined}
                 className={`flex items-center gap-3 rounded-xl h-12 px-2.5 font-bold border-2 transition-colors ${
-                  on ? 'text-brand-700 bg-brand-50 border-brand-200' : 'text-slate-600 border-transparent hover:bg-slate-100 hover:text-slate-900'}`}>
-                <AppIcon name={g.icon} size={30} />{g.label}
+                  on
+                    ? 'text-brand-700 bg-brand-50 border-brand-200'
+                    : 'text-slate-600 border-transparent hover:bg-slate-100 hover:text-slate-900'
+                }`}
+              >
+                <AppIcon name={g.icon} size={30} />
+                {g.label}
               </NavLink>
             )
           }
           const isOpen = open.includes(g.key)
           return (
             <div key={g.key} className={g.key === 'me' ? 'mt-2 pt-2 border-t border-slate-200' : undefined}>
-              <button type="button" onClick={() => toggle(g.key)} aria-expanded={isOpen}
+              <button
+                type="button"
+                onClick={() => toggle(g.key)}
+                aria-expanded={isOpen}
                 className={`w-full flex items-center gap-3 rounded-xl h-12 px-2.5 font-bold border-2 border-transparent cursor-pointer transition-colors ${
-                  on ? 'text-slate-900' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'}`}>
+                  on ? 'text-slate-900' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                }`}
+              >
                 <AppIcon name={g.icon} size={30} />
                 <span className="flex-1 text-left">{g.label}</span>
                 {!isOpen && total(g) > 0 && <Count n={total(g)} />}
                 <DownOutlined className={`text-[10px] text-slate-400 transition-transform duration-200 ${isOpen ? '' : '-rotate-90'}`} />
               </button>
               {/* folds open with its own height: grid rows 0fr → 1fr */}
-              <div className="grid transition-[grid-template-rows] duration-200 ease-out" style={{ gridTemplateRows: isOpen ? '1fr' : '0fr' }}>
+              <div
+                className="grid transition-[grid-template-rows] duration-200 ease-out"
+                style={{ gridTemplateRows: isOpen ? '1fr' : '0fr' }}
+              >
                 <div className="overflow-hidden" inert={!isOpen}>
                   <div className="ml-[26px] pl-2 border-l-2 border-slate-200 my-1">
                     <Leaves items={g.children!} active={active} />

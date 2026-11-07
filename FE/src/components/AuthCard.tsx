@@ -17,7 +17,11 @@ export default function AuthCard({ title, subtitle, children }: { title: string;
         <div className="flex flex-col gap-8 max-w-md">
           <Prismo mood="happy" size={150} />
           <div>
-            <h2 className="text-[2.75rem] font-extrabold leading-[1.08] m-0 text-white">Một lần chụp.<br />Ba thứ tiếng.</h2>
+            <h2 className="text-[2.75rem] font-extrabold leading-[1.08] m-0 text-white">
+              Một lần chụp.
+              <br />
+              Ba thứ tiếng.
+            </h2>
             <p className="text-lg text-white/75 mt-4 mb-0">
               Chụp đồ vật quanh bạn và học ngay tên của nó bằng ba thứ tiếng. Mỗi ngày vài phút, lịch ôn tự nhắc đúng lúc sắp quên.
             </p>
@@ -37,14 +41,22 @@ export default function AuthCard({ title, subtitle, children }: { title: string;
       </aside>
       <main className="flex items-center justify-center p-4 sm:p-8">
         <div className="w-full max-w-[420px] animate-rise">
-          <div className="lg:hidden mb-8"><Logo /></div>
+          <div className="lg:hidden mb-8">
+            <Logo />
+          </div>
           <h1 className="text-3xl font-extrabold text-slate-800 m-0">{title}</h1>
           {subtitle ? <p className="text-slate-500 mt-2 mb-7">{subtitle}</p> : <div className="mb-6" />}
           {children}
           <nav className="mt-8 flex justify-center gap-4 text-sm text-slate-500" aria-label="Chính sách">
-            <Link to="/privacy" className="text-slate-500">Quyền riêng tư</Link>
-            <Link to="/terms" className="text-slate-500">Điều khoản</Link>
-            <Link to="/releases" className="text-slate-500">Có gì mới</Link>
+            <Link to="/privacy" className="text-slate-500">
+              Quyền riêng tư
+            </Link>
+            <Link to="/terms" className="text-slate-500">
+              Điều khoản
+            </Link>
+            <Link to="/releases" className="text-slate-500">
+              Có gì mới
+            </Link>
           </nav>
         </div>
       </main>
@@ -56,8 +68,15 @@ export default function AuthCard({ title, subtitle, children }: { title: string;
 export function GoogleTermsNote() {
   return (
     <p className="text-xs text-slate-500 text-center mt-2 mb-0">
-      Tiếp tục với Google nghĩa là bạn đồng ý <Link to="/terms" target="_blank">Điều khoản</Link> và{' '}
-      <Link to="/privacy" target="_blank">Chính sách quyền riêng tư</Link>.
+      Tiếp tục với Google nghĩa là bạn đồng ý{' '}
+      <Link to="/terms" target="_blank">
+        Điều khoản
+      </Link>{' '}
+      và{' '}
+      <Link to="/privacy" target="_blank">
+        Chính sách quyền riêng tư
+      </Link>
+      .
     </p>
   )
 }

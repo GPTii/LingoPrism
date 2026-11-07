@@ -133,12 +133,14 @@ export interface Wardrobe {
 
 export const gameApi = {
   summary: () => api.get<GameSummary>('/gamification/summary/').then((r) => r.data),
-  progress: (start?: string, end?: string) => api.get<DayProgress[]>('/gamification/progress/', { params: { start, end } }).then((r) => r.data),
+  progress: (start?: string, end?: string) =>
+    api.get<DayProgress[]>('/gamification/progress/', { params: { start, end } }).then((r) => r.data),
   quests: () => api.get<{ quests: DailyQuest[]; monthly: MonthlyQuest }>('/quests/today/').then((r) => r.data),
   claim: (id: number) => api.post<{ scales: number; gems: number }>(`/quests/${id}/claim/`).then((r) => r.data),
   claimMonthly: () => api.post<{ gems: number }>('/quests/monthly/claim/').then((r) => r.data),
   badges: () => api.get<Badge[]>('/badges/').then((r) => r.data),
-  leaderboard: (scope: 'league' | 'friends' | 'global' = 'league') => api.get<Leaderboard>('/leaderboard/', { params: { scope } }).then((r) => r.data),
+  leaderboard: (scope: 'league' | 'friends' | 'global' = 'league') =>
+    api.get<Leaderboard>('/leaderboard/', { params: { scope } }).then((r) => r.data),
   shop: () => api.get<ShopItem[]>('/shop/items/').then((r) => r.data),
   buy: (id: number) => api.post<{ scales: number; gems: number }>(`/shop/items/${id}/buy/`).then((r) => r.data),
   use: (id: number) => api.post<{ multiplier: number; expires_at: string }>(`/shop/items/${id}/use/`).then((r) => r.data),
@@ -159,7 +161,15 @@ export interface AppNotification {
   title: string
   body: string
   image: string
-  data: { route?: string; action?: 'friend_request' | 'group_request'; request_id?: number; group_id?: number; member_id?: number; user_id?: number; [k: string]: unknown }
+  data: {
+    route?: string
+    action?: 'friend_request' | 'group_request'
+    request_id?: number
+    group_id?: number
+    member_id?: number
+    user_id?: number
+    [k: string]: unknown
+  }
   read: boolean
   /** a request answered right from the notification: still pending, already accepted, or gone (declined / cancelled) */
   action_state: 'pending' | 'accepted' | 'gone' | null
@@ -328,7 +338,9 @@ export const communityApi = {
     api.get<FriendRequestItem[]>('/community/users/friend-requests/', { params: { box } }).then((r) => r.data),
   /** send a request (with a hello) – or accept theirs if they already asked */
   addFriend: (userId: number, message = '') =>
-    api.post<{ friend_status: FriendStatus; friend_request_id: number }>(`/community/users/${userId}/friend/`, { message }).then((r) => r.data),
+    api
+      .post<{ friend_status: FriendStatus; friend_request_id: number }>(`/community/users/${userId}/friend/`, { message })
+      .then((r) => r.data),
   /** cancel my request, decline theirs, or unfriend */
   removeFriend: (userId: number) => api.delete(`/community/users/${userId}/friend/`),
   answerFriend: (requestId: number, decision: 'accept' | 'decline') =>
@@ -338,12 +350,16 @@ export const communityApi = {
   profile: (userId: number) => api.get<CommunityProfile>(`/community/users/${userId}/profile/`).then((r) => r.data),
   follow: (userId: number, follow: boolean) =>
     follow ? api.post(`/community/users/${userId}/follow/`) : api.delete(`/community/users/${userId}/follow/`),
-  suggestions: () => api.get<(Author & { active_language: string; follows_me: boolean; lifetime_xp: number })[]>('/community/users/suggestions/').then((r) => r.data),
+  suggestions: () =>
+    api
+      .get<(Author & { active_language: string; follows_me: boolean; lifetime_xp: number })[]>('/community/users/suggestions/')
+      .then((r) => r.data),
   block: (userId: number, block: boolean) =>
     block ? api.post(`/community/users/${userId}/block/`) : api.delete(`/community/users/${userId}/block/`),
   reportUser: (userId: number, data: { reason: string; details: string; block: boolean; thread?: number }) =>
     api.post<{ detail: string; blocked: boolean }>(`/community/users/${userId}/report/`, data).then((r) => r.data),
-  groups: (params?: Record<string, unknown>) => api.get<Paginated<StudyGroup>>('/groups/', { params: { page_size: 100, ...params } }).then((r) => r.data.results),
+  groups: (params?: Record<string, unknown>) =>
+    api.get<Paginated<StudyGroup>>('/groups/', { params: { page_size: 100, ...params } }).then((r) => r.data.results),
   createGroup: (data: Partial<StudyGroup>) => api.post<StudyGroup>('/groups/', data).then((r) => r.data),
   join: (id: number, message = '') => api.post<{ status: string }>(`/groups/${id}/join/`, { message }).then((r) => r.data),
   leave: (id: number) => api.post(`/groups/${id}/leave/`),
@@ -479,7 +495,16 @@ export interface ExamQuestion {
 
 export interface AnswerResult {
   id: number
-  question: { id: number; kind: string; prompt: string; options: string[]; correct_option: number | null; accepted_answers: string[]; explanation: string; points: string }
+  question: {
+    id: number
+    kind: string
+    prompt: string
+    options: string[]
+    correct_option: number | null
+    accepted_answers: string[]
+    explanation: string
+    points: string
+  }
   selected_option: number | null
   text: string
   is_correct: boolean | null
@@ -643,10 +668,19 @@ export const classworkApi = {
   reopen: (id: number) => api.post<Assignment>(`/assignments/${id}/reopen/`).then((r) => r.data),
   /** an exercise file -> draft questions (AI, not saved) */
   importFile: (group: number, file: File) =>
-    api.post<{ title: string; questions: AssignmentQuestion[]; model: string }>('/assignments/import/',
-      fileForm({ group: String(group), file }), { timeout: 180000 }).then((r) => r.data),
-  submit: (id: number, answers: { question: number; selected_option?: number | null; text?: string }[],
-    files: Record<string, File>, text = '') => {
+    api
+      .post<{
+        title: string
+        questions: AssignmentQuestion[]
+        model: string
+      }>('/assignments/import/', fileForm({ group: String(group), file }), { timeout: 180000 })
+      .then((r) => r.data),
+  submit: (
+    id: number,
+    answers: { question: number; selected_option?: number | null; text?: string }[],
+    files: Record<string, File>,
+    text = '',
+  ) => {
     const f = fileForm({ answers: JSON.stringify(answers), text })
     Object.entries(files).forEach(([k, v]) => f.append(k, v))
     return api.post<Assignment>(`/assignments/${id}/submit/`, f).then((r) => r.data)
@@ -654,8 +688,11 @@ export const classworkApi = {
   submissions: (id: number) =>
     api.get<{ user: Author; submission: HandInBrief | null }[]>(`/assignments/${id}/submissions/`).then((r) => r.data),
   submission: (id: number, sid: number) => api.get<HandIn>(`/assignments/${id}/submissions/${sid}/`).then((r) => r.data),
-  grade: (id: number, sid: number, d: { answers?: { answer: number; score: number; feedback?: string }[]; score?: number; feedback?: string }) =>
-    api.post<HandIn>(`/assignments/${id}/submissions/${sid}/grade/`, d).then((r) => r.data),
+  grade: (
+    id: number,
+    sid: number,
+    d: { answers?: { answer: number; score: number; feedback?: string }[]; score?: number; feedback?: string },
+  ) => api.post<HandIn>(`/assignments/${id}/submissions/${sid}/grade/`, d).then((r) => r.data),
   gradebook: (group: number) => api.get<Gradebook>('/assignments/gradebook/', { params: { group } }).then((r) => r.data),
 }
 
@@ -673,10 +710,13 @@ export const learnApi = {
     api.post('/my-words/', { word: w.word_id, source: 'manual' }, { params: { lang: w.lang, script: w.script || undefined } }),
   /** the dialogue already written for a photo, or null */
   dialogue: (id: number) =>
-    api.get<PhotoDialogue>(`/detections/${id}/dialogue/`).then((r) => r.data).catch((e) => {
-      if (e?.response?.status === 404) return null
-      throw e
-    }),
+    api
+      .get<PhotoDialogue>(`/detections/${id}/dialogue/`)
+      .then((r) => r.data)
+      .catch((e) => {
+        if (e?.response?.status === 404) return null
+        throw e
+      }),
   makeDialogue: (id: number) => api.post<PhotoDialogue>(`/detections/${id}/dialogue/`).then((r) => r.data),
   detect: (image: File) => {
     const form = new FormData()
@@ -692,9 +732,19 @@ export const learnApi = {
   nearby: (lat: number, lng: number, radius = 3000) =>
     api.get<{ results: Poi[]; query_ms: number }>('/pois-nearby/', { params: { lat, lng, radius } }).then((r) => r.data),
   pois: () => api.get<Poi[]>('/pois/').then((r) => r.data),
-  exams: (language?: string) => api.get<Paginated<ExamInfo>>('/exams/', { params: { language, page_size: 100 } }).then((r) => r.data.results),
+  exams: (language?: string) =>
+    api.get<Paginated<ExamInfo>>('/exams/', { params: { language, page_size: 100 } }).then((r) => r.data.results),
   startExam: (id: number) =>
-    api.post<{ submission: number; title: string; language: string; time_limit_minutes: number | null; started_at: string; questions: ExamQuestion[] }>(`/exams/${id}/start/`).then((r) => r.data),
+    api
+      .post<{
+        submission: number
+        title: string
+        language: string
+        time_limit_minutes: number | null
+        started_at: string
+        questions: ExamQuestion[]
+      }>(`/exams/${id}/start/`)
+      .then((r) => r.data),
   submit: (submission: number, answers: { question: number; selected_option?: number | null; text?: string }[]) =>
     api.post<Submission>(`/submissions/${submission}/submit/`, { answers }).then((r) => r.data),
   result: (id: number) => api.get<Submission>(`/submissions/${id}/`).then((r) => r.data),
@@ -737,7 +787,9 @@ export const messagesApi = {
   thread: (id: number) => api.get<DirectThread>(`/messages/threads/${id}/`).then((r) => r.data),
   open: (userId: number) => api.post<DirectThread>('/messages/threads/', { user: userId }).then((r) => r.data),
   list: (id: number, before?: number) =>
-    api.get<{ results: DirectMessage[]; has_more: boolean }>(`/messages/threads/${id}/messages/`, { params: { before } }).then((r) => r.data),
+    api
+      .get<{ results: DirectMessage[]; has_more: boolean }>(`/messages/threads/${id}/messages/`, { params: { before } })
+      .then((r) => r.data),
   send: (id: number, content: string, client_id: string) =>
     api.post<DirectMessage>(`/messages/threads/${id}/messages/`, { content, client_id }).then((r) => r.data),
   sendSticker: (id: number, sticker: string, client_id: string) =>

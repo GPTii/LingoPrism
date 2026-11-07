@@ -12,7 +12,9 @@ interface GoogleId {
   renderButton: (el: HTMLElement, o: Record<string, unknown>) => void
 }
 declare global {
-  interface Window { google?: { accounts: { id: GoogleId } } }
+  interface Window {
+    google?: { accounts: { id: GoogleId } }
+  }
 }
 
 let script: Promise<void> | null = null
@@ -23,7 +25,10 @@ function loadGis(): Promise<void> {
     s.src = 'https://accounts.google.com/gsi/client'
     s.async = true
     s.onload = () => resolve()
-    s.onerror = () => { script = null; reject(new Error('gis')) }
+    s.onerror = () => {
+      script = null
+      reject(new Error('gis'))
+    }
     document.head.appendChild(s)
   })
   return script
@@ -48,35 +53,47 @@ export default function GoogleButton({ text = 'continue_with' }: { text?: 'signi
   useEffect(() => {
     if (!clientId || !ref.current) return
     let cancelled = false
-    loadGis().then(() => {
-      if (cancelled || !ref.current || !window.google) return
-      window.google.accounts.id.initialize({
-        client_id: clientId,
-        context: text === 'signup_with' ? 'signup' : 'signin',
-        callback: async ({ credential }) => {
-          try {
-            const { user, tokens } = await authApi.google(credential)
-            setSession(user, tokens)
-            const from = (location.state as { from?: string } | null)?.from
-            navigate(from ?? (isStaffRole(user) ? '/admin' : '/'), { replace: true })
-          } catch (e) {
-            message.error(errorMessage(e))
-          }
-        },
+    loadGis()
+      .then(() => {
+        if (cancelled || !ref.current || !window.google) return
+        window.google.accounts.id.initialize({
+          client_id: clientId,
+          context: text === 'signup_with' ? 'signup' : 'signin',
+          callback: async ({ credential }) => {
+            try {
+              const { user, tokens } = await authApi.google(credential)
+              setSession(user, tokens)
+              const from = (location.state as { from?: string } | null)?.from
+              navigate(from ?? (isStaffRole(user) ? '/admin' : '/'), { replace: true })
+            } catch (e) {
+              message.error(errorMessage(e))
+            }
+          },
+        })
+        window.google.accounts.id.renderButton(ref.current, {
+          type: 'standard',
+          theme: dark ? 'filled_black' : 'outline',
+          size: 'large',
+          shape: 'pill',
+          text,
+          logo_alignment: 'center',
+          width: Math.min(ref.current.offsetWidth || 400, 400),
+          locale: 'vi',
+        })
       })
-      window.google.accounts.id.renderButton(ref.current, {
-        type: 'standard', theme: dark ? 'filled_black' : 'outline', size: 'large', shape: 'pill',
-        text, logo_alignment: 'center', width: Math.min(ref.current.offsetWidth || 400, 400), locale: 'vi',
-      })
-    }).catch(() => setFailed(true))
-    return () => { cancelled = true }
+      .catch(() => setFailed(true))
+    return () => {
+      cancelled = true
+    }
   }, [clientId, dark, text]) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!clientId || failed) return null
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center gap-3 text-sm text-slate-500">
-        <span className="h-px flex-1 bg-slate-200" />hoặc<span className="h-px flex-1 bg-slate-200" />
+        <span className="h-px flex-1 bg-slate-200" />
+        hoặc
+        <span className="h-px flex-1 bg-slate-200" />
       </div>
       <div ref={ref} className="flex justify-center min-h-10" />
     </div>

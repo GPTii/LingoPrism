@@ -23,7 +23,9 @@ export default class ErrorBoundary extends Component<{ children: ReactNode }, { 
         <p className="text-slate-500 m-0">Phần còn lại của ứng dụng vẫn dùng được. Thử tải lại trang, nếu vẫn lỗi hãy báo cho giáo viên.</p>
         <div className="flex gap-3 mt-2">
           <Button onClick={() => window.location.reload()}>Tải lại trang</Button>
-          <Button type="primary" href="/">Về trang chủ</Button>
+          <Button type="primary" href="/">
+            Về trang chủ
+          </Button>
         </div>
       </div>
     )

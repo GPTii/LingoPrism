@@ -17,7 +17,12 @@ export default function LevelPath() {
   const lang = user?.active_language ?? 'en'
   const q = useQuery({ queryKey: ['levels', lang, user?.zh_script], queryFn: levelsApi.progress })
 
-  if (q.isLoading || !q.data) return <div className="lp-card p-6"><Skeleton active /></div>
+  if (q.isLoading || !q.data)
+    return (
+      <div className="lp-card p-6">
+        <Skeleton active />
+      </div>
+    )
   const p = q.data
 
   const choose = async (level: number) => {
@@ -52,26 +57,38 @@ export default function LevelPath() {
           const done = r.percent >= 100
           return (
             <div key={r.level} className="relative flex flex-col items-center text-center gap-2">
-              <div className="relative h-16 w-16 rounded-full grid place-items-center text-2xl font-bold text-white"
+              <div
+                className="relative h-16 w-16 rounded-full grid place-items-center text-2xl font-bold text-white"
                 style={{
                   background: r.unlocked ? color : 'var(--color-slate-200)',
                   boxShadow: r.current ? `0 0 0 6px ${color}33` : undefined,
                   color: r.unlocked ? '#fff' : 'var(--color-slate-400)',
-                }}>
+                }}
+              >
                 {!r.unlocked ? <LockFilled /> : done ? <CheckOutlined /> : r.current ? <StarFilled /> : r.level}
               </div>
-              <div className="w-full rounded-xl bg-slate-50 p-3 flex flex-col gap-1.5 flex-1"
-                style={r.current ? { boxShadow: `inset 0 0 0 1.5px ${color}` } : undefined}>
+              <div
+                className="w-full rounded-xl bg-slate-50 p-3 flex flex-col gap-1.5 flex-1"
+                style={r.current ? { boxShadow: `inset 0 0 0 1.5px ${color}` } : undefined}
+              >
                 <div className="font-bold" style={{ color: r.unlocked ? color : 'var(--color-slate-400)' }}>
                   Cấp {r.level} · {r.name}
                 </div>
                 {lang === 'zh' && <div className="text-xs font-bold text-slate-400">{ZH_HINT[r.level - 1]}</div>}
                 <div className="text-xs text-slate-500 font-semibold min-h-8">{r.description}</div>
                 <Progress percent={r.percent} size="small" strokeColor={color} showInfo={false} />
-                <div className="num text-xs font-semibold text-slate-500">{r.started}/{r.total} từ · {r.mastered} đã thuộc</div>
-                {r.unlocked && !r.current && <Button size="small" onClick={() => choose(r.level)}>Học cấp này</Button>}
+                <div className="num text-xs font-semibold text-slate-500">
+                  {r.started}/{r.total} từ · {r.mastered} đã thuộc
+                </div>
+                {r.unlocked && !r.current && (
+                  <Button size="small" onClick={() => choose(r.level)}>
+                    Học cấp này
+                  </Button>
+                )}
                 {r.unlocked && next && !next.unlocked && (
-                  <Tooltip title={`Còn ${r.needed} từ nữa là mở cấp ${r.level + 1}. Đã biết rồi? Làm bài ${p.test.size} câu, đúng từ ${p.test.pass} câu là qua.`}>
+                  <Tooltip
+                    title={`Còn ${r.needed} từ nữa là mở cấp ${r.level + 1}. Đã biết rồi? Làm bài ${p.test.size} câu, đúng từ ${p.test.pass} câu là qua.`}
+                  >
                     <Button size="small" type="dashed" icon={<ThunderboltOutlined />} onClick={() => navigate(`/levels/${r.level}/test`)}>
                       Kiểm tra vượt cấp
                     </Button>

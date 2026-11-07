@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "format": "prettier --write src",
+    "format:check": "prettier --check src"
   },
   "dependencies": {
     "@ant-design/icons": "^6.3.4",
@@ -32,6 +34,7 @@
     "@types/react-dom": "^19.2.7",
     "@vitejs/plugin-react": "^4.7.0",
     "oxlint": "^1.81.0",
+    "prettier": "3.6.2",
     "tailwindcss": "^4.3.3",
     "typescript": "~6.0.2",
     "vite": "^6.4.4"

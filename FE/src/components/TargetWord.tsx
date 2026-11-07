@@ -9,7 +9,15 @@ export function langTag(language: string): string {
   return language
 }
 
-export default function TargetWord({ target, size = 'lg', showReading = true }: { target: TargetText; size?: 'md' | 'lg' | 'xl'; showReading?: boolean }) {
+export default function TargetWord({
+  target,
+  size = 'lg',
+  showReading = true,
+}: {
+  target: TargetText
+  size?: 'md' | 'lg' | 'xl'
+  showReading?: boolean
+}) {
   const showZhuyin = useAuth((s) => s.user?.show_zhuyin)
   const isZh = target.language.startsWith('zh')
   const textSize = { md: 'text-2xl', lg: 'text-4xl', xl: 'text-6xl' }[size]
@@ -21,7 +29,10 @@ export default function TargetWord({ target, size = 'lg', showReading = true }: 
         </span>
         <button
           type="button"
-          onClick={(e) => { e.stopPropagation(); speak(target.text, target.tts_locale) }}
+          onClick={(e) => {
+            e.stopPropagation()
+            speak(target.text, target.tts_locale)
+          }}
           className="text-brand-600 hover:text-brand-700 text-xl cursor-pointer"
           title="Nghe phát âm"
           aria-label="Nghe phát âm"

@@ -10,7 +10,12 @@ import { PrismoAvatar } from './brand/Brand'
  * rather than a grid of look-alike tiles.
  */
 
-export function PageHeader({ title, description, back, actions }: {
+export function PageHeader({
+  title,
+  description,
+  back,
+  actions,
+}: {
   title: ReactNode
   description?: ReactNode
   back?: { to: string; label: string }
@@ -19,7 +24,10 @@ export function PageHeader({ title, description, back, actions }: {
   return (
     <header className="flex flex-col gap-3">
       {back && (
-        <Link to={back.to} className="inline-flex items-center gap-1.5 self-start text-sm font-semibold !text-slate-500 hover:!text-slate-800">
+        <Link
+          to={back.to}
+          className="inline-flex items-center gap-1.5 self-start text-sm font-semibold !text-slate-500 hover:!text-slate-800"
+        >
           <ArrowLeftOutlined className="text-xs" /> {back.label}
         </Link>
       )}
@@ -34,7 +42,14 @@ export function PageHeader({ title, description, back, actions }: {
   )
 }
 
-export function Section({ id, title, extra, children, className = '', bodyClassName = '' }: {
+export function Section({
+  id,
+  title,
+  extra,
+  children,
+  className = '',
+  bodyClassName = '',
+}: {
   id?: string
   title?: ReactNode
   extra?: ReactNode
@@ -56,7 +71,10 @@ export function Section({ id, title, extra, children, className = '', bodyClassN
 }
 
 /** Numbers that belong together, read left to right: big value, small label, optional icon. */
-export function Facts({ items, className = '' }: {
+export function Facts({
+  items,
+  className = '',
+}: {
   items: { label: string; value: ReactNode; icon?: ReactNode; hint?: ReactNode }[]
   className?: string
 }) {
@@ -66,7 +84,9 @@ export function Facts({ items, className = '' }: {
         <div key={f.label} className="flex flex-col min-w-0">
           <dt className="order-last text-sm text-slate-500">{f.label}</dt>
           <dd className="m-0 num flex items-center gap-1.5 text-2xl font-bold text-slate-800 leading-tight">
-            {f.icon}{f.value}{f.hint && <span className="text-sm font-medium text-slate-400">{f.hint}</span>}
+            {f.icon}
+            {f.value}
+            {f.hint && <span className="text-sm font-medium text-slate-400">{f.hint}</span>}
           </dd>
         </div>
       ))}
@@ -75,7 +95,12 @@ export function Facts({ items, className = '' }: {
 }
 
 /** Empty / error state that always says what to do next. */
-export function EmptyState({ title, description, action, art }: {
+export function EmptyState({
+  title,
+  description,
+  action,
+  art,
+}: {
   title: ReactNode
   description?: ReactNode
   action?: ReactNode
@@ -95,7 +120,11 @@ export function EmptyState({ title, description, action, art }: {
  * A person: their photo, or their own Prismo dressed as they left it (also when they chose Prismo over the photo).
  * Preset avatars ("assets/…") are mobile app artwork, so the web shows their Prismo for them.
  */
-export function UserAvatar({ src, size = 36, mascot }: {
+export function UserAvatar({
+  src,
+  size = 36,
+  mascot,
+}: {
   name?: string | null
   src?: string | null
   size?: number
@@ -103,7 +132,14 @@ export function UserAvatar({ src, size = 36, mascot }: {
 }) {
   const photo = src && !src.startsWith('assets/') && !mascot?.as_avatar ? src : null
   return photo ? (
-    <img src={photo} alt="" width={size} height={size} className="rounded-full object-cover shrink-0 bg-slate-100" style={{ width: size, height: size }} />
+    <img
+      src={photo}
+      alt=""
+      width={size}
+      height={size}
+      className="rounded-full object-cover shrink-0 bg-slate-100"
+      style={{ width: size, height: size }}
+    />
   ) : (
     <PrismoAvatar look={mascot} size={size} />
   )
@@ -124,7 +160,13 @@ export function useShowMore<T>(items: readonly T[] | undefined, limit: number, l
   }
 }
 
-export function MoreToggle({ open, count, label = 'Xem tất cả', onClick, className = '' }: {
+export function MoreToggle({
+  open,
+  count,
+  label = 'Xem tất cả',
+  onClick,
+  className = '',
+}: {
   open: boolean
   count?: number
   label?: string
@@ -132,20 +174,43 @@ export function MoreToggle({ open, count, label = 'Xem tất cả', onClick, cla
   className?: string
 }) {
   return (
-    <button type="button" onClick={onClick} aria-expanded={open}
-      className={`mt-3 mx-auto flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-semibold text-brand-600 hover:bg-brand-50 bg-transparent border-0 cursor-pointer ${className}`}>
-      {open ? <>Thu gọn <UpOutlined className="text-xs" /></> : <>{label}{count != null && ` (${count})`} <DownOutlined className="text-xs" /></>}
+    <button
+      type="button"
+      onClick={onClick}
+      aria-expanded={open}
+      className={`mt-3 mx-auto flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-semibold text-brand-600 hover:bg-brand-50 bg-transparent border-0 cursor-pointer ${className}`}
+    >
+      {open ? (
+        <>
+          Thu gọn <UpOutlined className="text-xs" />
+        </>
+      ) : (
+        <>
+          {label}
+          {count != null && ` (${count})`} <DownOutlined className="text-xs" />
+        </>
+      )}
     </button>
   )
 }
 
 /** The same, for lists rendered inside conditionals: `<ShowMore items={x} limit={6}>{(shown) => <ul>…</ul>}</ShowMore>`. */
-export function ShowMore<T>({ items, limit, label, children }: {
+export function ShowMore<T>({
+  items,
+  limit,
+  label,
+  children,
+}: {
   items: readonly T[] | undefined
   limit: number
   label?: string
   children: (shown: readonly T[]) => ReactNode
 }) {
   const { shown, toggle } = useShowMore(items, limit, label)
-  return <>{children(shown)}{toggle}</>
+  return (
+    <>
+      {children(shown)}
+      {toggle}
+    </>
+  )
 }

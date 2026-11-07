@@ -3,10 +3,23 @@ import type { Paginated } from './types'
 import type { Poi, Submission, SupportConversation } from './app'
 
 export interface DashboardData {
-  users: { total: number; learners: number; kids: number; new_7d: number; active_today: number; by_language: { active_language: string; zh_script: string; n: number }[] }
+  users: {
+    total: number
+    learners: number
+    kids: number
+    new_7d: number
+    active_today: number
+    by_language: { active_language: string; zh_script: string; n: number }[]
+  }
   learning: { sessions_per_day: { date: string; count: number }[]; answers_today: number }
   detection: { per_day: { date: string; count: number }[]; top_labels: { label: string; n: number }[] }
-  content: { translations: { language_id: string; status: string; n: number }[]; open_error_reports: number; pending_post_reports: number; pending_user_reports: number; posts_7d: number }
+  content: {
+    translations: { language_id: string; status: string; n: number }[]
+    open_error_reports: number
+    pending_post_reports: number
+    pending_user_reports: number
+    posts_7d: number
+  }
   exams: { waiting_for_grading: number }
   support: { open_conversations: number }
 }
@@ -138,7 +151,8 @@ export const adminApi = {
   questions: (params?: Record<string, unknown>) => api.get<Paginated<AdminQuestion>>('/admin/questions/', { params }).then((r) => r.data),
   createQuestion: (data: Partial<AdminQuestion>) => api.post<AdminQuestion>('/admin/questions/', data).then((r) => r.data),
   exams: (params?: Record<string, unknown>) => api.get<Paginated<AdminExam>>('/admin/exams/', { params }).then((r) => r.data),
-  updateExam: (id: number, data: Partial<AdminExam> & { question_ids?: number[] }) => api.patch<AdminExam>(`/admin/exams/${id}/`, data).then((r) => r.data),
+  updateExam: (id: number, data: Partial<AdminExam> & { question_ids?: number[] }) =>
+    api.patch<AdminExam>(`/admin/exams/${id}/`, data).then((r) => r.data),
   createExam: (data: Partial<AdminExam> & { question_ids?: number[] }) => api.post<AdminExam>('/admin/exams/', data).then((r) => r.data),
   submissions: (params?: Record<string, unknown>) => api.get<Paginated<Submission>>('/admin/submissions/', { params }).then((r) => r.data),
   grade: (id: number, grades: { answer: number; score: string; feedback?: string }[], feedback: string) =>
@@ -156,9 +170,11 @@ export const adminApi = {
     api.get<Paginated<UserReport>>('/admin/user-reports/', { params: { status, ...params } }).then((r) => r.data),
   resolveUserReport: (id: number, lock: boolean) => api.post(`/admin/user-reports/${id}/resolve/`, { lock }),
   // notifications
-  broadcast: (data: { title: string; body: string; role: string; learner_type: string }) => api.post<{ sent: number }>('/admin/broadcast/', data).then((r) => r.data),
+  broadcast: (data: { title: string; body: string; role: string; learner_type: string }) =>
+    api.post<{ sent: number }>('/admin/broadcast/', data).then((r) => r.data),
   // support
-  conversations: (status?: string) => api.get<Paginated<SupportConversation>>('/support/conversations/', { params: { status } }).then((r) => r.data.results),
+  conversations: (status?: string) =>
+    api.get<Paginated<SupportConversation>>('/support/conversations/', { params: { status } }).then((r) => r.data.results),
   // detections
   detections: (params: Record<string, unknown>) => api.get<Paginated<DetectionLog>>('/admin/detections/', { params }).then((r) => r.data),
   detectionStats: () => api.get<DetectionStats>('/admin/detections/stats/').then((r) => r.data),

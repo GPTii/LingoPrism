@@ -47,7 +47,9 @@ export default function ForgotPasswordPage() {
           <Form.Item name="email" label="Email" rules={[{ required: true, type: 'email', message: 'Email không hợp lệ' }]}>
             <Input size="large" />
           </Form.Item>
-          <Button type="primary" htmlType="submit" size="large" block loading={loading}>Gửi mã xác minh</Button>
+          <Button type="primary" htmlType="submit" size="large" block loading={loading}>
+            Gửi mã xác minh
+          </Button>
         </Form>
       )}
       {step === 1 && (
@@ -64,7 +66,9 @@ export default function ForgotPasswordPage() {
           <Form.Item name="code" label={`Mã 6 số đã gửi tới ${email}`} rules={[{ required: true, len: 6, message: 'Nhập đủ 6 số' }]}>
             <Input.OTP length={6} size="large" />
           </Form.Item>
-          <Button type="primary" htmlType="submit" size="large" block loading={loading}>Xác minh</Button>
+          <Button type="primary" htmlType="submit" size="large" block loading={loading}>
+            Xác minh
+          </Button>
         </Form>
       )}
       {step === 2 && (
@@ -81,10 +85,14 @@ export default function ForgotPasswordPage() {
           <Form.Item name="password" label="Mật khẩu mới" rules={[{ required: true, min: 8, message: 'Tối thiểu 8 ký tự' }]}>
             <Input.Password size="large" />
           </Form.Item>
-          <Button type="primary" htmlType="submit" size="large" block loading={loading}>Đặt lại mật khẩu</Button>
+          <Button type="primary" htmlType="submit" size="large" block loading={loading}>
+            Đặt lại mật khẩu
+          </Button>
         </Form>
       )}
-      <p className="text-center mt-6"><Link to="/login">Quay lại đăng nhập</Link></p>
+      <p className="text-center mt-6">
+        <Link to="/login">Quay lại đăng nhập</Link>
+      </p>
     </AuthCard>
   )
 }

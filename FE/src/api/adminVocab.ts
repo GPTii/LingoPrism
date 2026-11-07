@@ -76,11 +76,21 @@ export interface AdminExample {
 export const adminVocabApi = {
   examples: (params: Record<string, unknown>) => api.get<Paginated<AdminExample>>('/admin/examples/', { params }).then((r) => r.data),
   setExampleStatus: (id: number, status: ReviewStatus) => api.patch<AdminExample>(`/admin/examples/${id}/`, { status }).then((r) => r.data),
-  stats: () => api.get<{ words: number; topics: number; translations: Record<string, Record<string, number>>; open_reports: number }>('/admin/vocab-stats/').then((r) => r.data),
+  stats: () =>
+    api
+      .get<{
+        words: number
+        topics: number
+        translations: Record<string, Record<string, number>>
+        open_reports: number
+      }>('/admin/vocab-stats/')
+      .then((r) => r.data),
   words: (params: Record<string, unknown>) => api.get<Paginated<AdminWord>>('/admin/words/', { params }).then((r) => r.data),
   updateWord: (id: number, data: Partial<AdminWord>) => api.patch<AdminWord>(`/admin/words/${id}/`, data).then((r) => r.data),
-  translations: (params: Record<string, unknown>) => api.get<Paginated<AdminTranslation>>('/admin/translations/', { params }).then((r) => r.data),
-  updateTranslation: (id: number, data: Partial<AdminTranslation>) => api.patch<AdminTranslation>(`/admin/translations/${id}/`, data).then((r) => r.data),
+  translations: (params: Record<string, unknown>) =>
+    api.get<Paginated<AdminTranslation>>('/admin/translations/', { params }).then((r) => r.data),
+  updateTranslation: (id: number, data: Partial<AdminTranslation>) =>
+    api.patch<AdminTranslation>(`/admin/translations/${id}/`, data).then((r) => r.data),
   verify: (id: number) => api.post<AdminTranslation>(`/admin/translations/${id}/verify/`).then((r) => r.data),
   reject: (id: number) => api.post<AdminTranslation>(`/admin/translations/${id}/reject/`).then((r) => r.data),
   recheck: (id: number) => api.post<AdminTranslation>(`/admin/translations/${id}/recheck/`).then((r) => r.data),

@@ -19,7 +19,9 @@ export function LogoMark({ size = 36, className = '' }: { size?: number; classNa
       <rect width="160" height="160" rx="40" fill="#1899f0" />
       <g transform="translate(4.8 4.8) scale(0.94)">
         <g strokeWidth="7" strokeLinecap="round">
-          <path d="M131 95 L152 84" stroke="#ffb020" /><path d="M134 104 L157 104" stroke="#10c79a" /><path d="M131 113 L152 124" stroke="#ff6b81" />
+          <path d="M131 95 L152 84" stroke="#ffb020" />
+          <path d="M134 104 L157 104" stroke="#10c79a" />
+          <path d="M131 113 L152 124" stroke="#ff6b81" />
         </g>
         <path d={tri} transform="translate(0 7)" fill="#0f78c8" stroke="#0f78c8" strokeWidth="22" strokeLinejoin="round" />
         <path d={tri} fill="#5cc6ff" stroke="#5cc6ff" strokeWidth="22" strokeLinejoin="round" />
@@ -63,7 +65,12 @@ export const outfitUrl = (code: string) => `/outfits/${code}.svg`
  * Prismo – the LingoPrism mascot. By default it wears what the signed-in learner dressed it in
  * (`look="mine"`); pass another learner's look, or null for the plain mascot.
  */
-export function Prismo({ mood = 'happy', size = 120, className = '', look = 'mine' }: {
+export function Prismo({
+  mood = 'happy',
+  size = 120,
+  className = '',
+  look = 'mine',
+}: {
   mood?: Mood
   size?: number
   className?: string
@@ -83,16 +90,31 @@ export function Prismo({ mood = 'happy', size = 120, className = '', look = 'min
   // and the hat (or what it holds) reaches outside that room
   const k = size / 160
   return (
-    <svg width={180 * k} height={180 * k} viewBox={FRAME} className={className} role="img" aria-label="Prismo"
-      style={{ margin: `${-24 * k}px ${-10 * k}px ${-6 * k}px ${-10 * k}px`, overflow: 'visible' }}>
+    <svg
+      width={180 * k}
+      height={180 * k}
+      viewBox={FRAME}
+      className={className}
+      role="img"
+      aria-label="Prismo"
+      style={{ margin: `${-24 * k}px ${-10 * k}px ${-6 * k}px ${-10 * k}px`, overflow: 'visible' }}
+    >
       <PrismoBody mood={mood} />
-      {front.map((slot) => <image key={slot} href={outfitUrl(wear![slot])} x="-10" y="-24" width="180" height="180" />)}
+      {front.map((slot) => (
+        <image key={slot} href={outfitUrl(wear![slot])} x="-10" y="-24" width="180" height="180" />
+      ))}
     </svg>
   )
 }
 
 /** Someone's Prismo as their picture: the whole frame, background included, in a circle (or a rounded square). */
-export function PrismoAvatar({ look, size = 36, mood = 'happy', square = false, className = '' }: {
+export function PrismoAvatar({
+  look,
+  size = 36,
+  mood = 'happy',
+  square = false,
+  className = '',
+}: {
   look?: MascotLook | null
   size?: number
   mood?: Mood
@@ -100,14 +122,22 @@ export function PrismoAvatar({ look, size = 36, mood = 'happy', square = false, 
   className?: string
 }) {
   return (
-    <svg width={size} height={size} viewBox={FRAME} className={`shrink-0 ${square ? 'rounded-[22%]' : 'rounded-full'} ${className}`}
-      role="img" aria-label={look?.name || 'Prismo'} style={{ width: size, height: size, overflow: 'hidden' }}>
+    <svg
+      width={size}
+      height={size}
+      viewBox={FRAME}
+      className={`shrink-0 ${square ? 'rounded-[22%]' : 'rounded-full'} ${className}`}
+      role="img"
+      aria-label={look?.name || 'Prismo'}
+      style={{ width: size, height: size, overflow: 'hidden' }}
+    >
       <rect x="-10" y="-24" width="180" height="180" fill="#dff1ff" />
       {look?.background && <image href={outfitUrl(look.background)} x="-10" y="-24" width="180" height="180" />}
       <PrismoBody mood={mood} />
-      {look && FRONT.filter((slot) => look[slot]).map((slot) => (
-        <image key={slot} href={outfitUrl(look[slot])} x="-10" y="-24" width="180" height="180" />
-      ))}
+      {look &&
+        FRONT.filter((slot) => look[slot]).map((slot) => (
+          <image key={slot} href={outfitUrl(look[slot])} x="-10" y="-24" width="180" height="180" />
+        ))}
     </svg>
   )
 }
@@ -175,8 +205,16 @@ function PrismoBody({ mood }: { mood: Mood }) {
       {eye(96)}
       {mouth}
       {mood === 'sad' && <path d="M101 97 q4 7 0 9 q-4 -2 0 -9 Z" fill="#7dd3fc" />}
-      {mood === 'sleepy' && <text x="112" y="58" fontSize="20" fontWeight="800" fill="#3dabf4" fontFamily="Be Vietnam Pro, sans-serif">z</text>}
-      {mood === 'think' && <text x="114" y="60" fontSize="26" fontWeight="800" fill="#ffb020" fontFamily="Be Vietnam Pro, sans-serif">?</text>}
+      {mood === 'sleepy' && (
+        <text x="112" y="58" fontSize="20" fontWeight="800" fill="#3dabf4" fontFamily="Be Vietnam Pro, sans-serif">
+          z
+        </text>
+      )}
+      {mood === 'think' && (
+        <text x="114" y="60" fontSize="26" fontWeight="800" fill="#ffb020" fontFamily="Be Vietnam Pro, sans-serif">
+          ?
+        </text>
+      )}
       {mood === 'celebrate' && (
         <g fill="#ffb020">
           <path d="M26 40 l3 7 7 3 -7 3 -3 7 -3 -7 -7 -3 7 -3 Z" />
@@ -199,10 +237,14 @@ export function StreakIcon({ size = 22, active = true, className = '' }: IconPro
           <stop offset="1" stopColor={active ? '#ff5a3c' : '#95a1b3'} />
         </linearGradient>
       </defs>
-      <path d="M12 2.5C13.2 6 17.5 8 17.5 13.2C17.5 17.4 15 20.5 12 20.5C9 20.5 6.5 17.4 6.5 13.6C6.5 10.8 8 9.3 9 8.2C9.2 10 10 11 11 11.3C10.6 8 11 5 12 2.5Z"
-        fill={`url(#${id}f)`} />
-      <path d="M12 12C13.4 13.4 14.6 14.6 14.6 16.4C14.6 18 13.4 19.2 12 19.2C10.6 19.2 9.4 18 9.4 16.6C9.4 15 10.6 14 12 12Z"
-        fill={active ? '#ffe08a' : '#e3e8ef'} />
+      <path
+        d="M12 2.5C13.2 6 17.5 8 17.5 13.2C17.5 17.4 15 20.5 12 20.5C9 20.5 6.5 17.4 6.5 13.6C6.5 10.8 8 9.3 9 8.2C9.2 10 10 11 11 11.3C10.6 8 11 5 12 2.5Z"
+        fill={`url(#${id}f)`}
+      />
+      <path
+        d="M12 12C13.4 13.4 14.6 14.6 14.6 16.4C14.6 18 13.4 19.2 12 19.2C10.6 19.2 9.4 18 9.4 16.6C9.4 15 10.6 14 12 12Z"
+        fill={active ? '#ffe08a' : '#e3e8ef'}
+      />
     </svg>
   )
 }
@@ -243,8 +285,13 @@ export function ScaleIcon({ size = 22, className = '' }: IconProps) {
 export function XpIcon({ size = 22, className = '' }: IconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" className={className} aria-hidden>
-      <path d="M12 2.2 L14.7 8.4 L21.4 9 L16.3 13.4 L17.9 20 L12 16.5 L6.1 20 L7.7 13.4 L2.6 9 L9.3 8.4 Z"
-        fill="#ffb020" stroke="#f08a00" strokeWidth="1" strokeLinejoin="round" />
+      <path
+        d="M12 2.2 L14.7 8.4 L21.4 9 L16.3 13.4 L17.9 20 L12 16.5 L6.1 20 L7.7 13.4 L2.6 9 L9.3 8.4 Z"
+        fill="#ffb020"
+        stroke="#f08a00"
+        strokeWidth="1"
+        strokeLinejoin="round"
+      />
       <path d="M12.8 7.5 L10.3 12.4 L12.4 12.4 L11.3 16.4 L14.2 11.3 L12.1 11.3 Z" fill="#fff" />
     </svg>
   )
@@ -260,9 +307,12 @@ export const LANG_BEAM = { en: '#ffb020', zh: '#ff6b81', vi: '#10c79a' } as cons
 export function LangGlyph({ lang, script = 'hans', size = 22 }: { lang: 'en' | 'zh' | 'vi'; script?: 'hans' | 'hant'; size?: number }) {
   const text = lang === 'zh' ? (script === 'hant' ? '繁' : '简') : lang.toUpperCase()
   return (
-    <span aria-hidden lang={lang === 'zh' ? (script === 'hant' ? 'zh-Hant' : 'zh-Hans') : undefined}
+    <span
+      aria-hidden
+      lang={lang === 'zh' ? (script === 'hant' ? 'zh-Hant' : 'zh-Hans') : undefined}
       className="inline-grid place-items-center shrink-0 rounded-md font-bold text-[#15233b]"
-      style={{ width: size, height: size, background: LANG_BEAM[lang], fontSize: size * (lang === 'zh' ? 0.6 : 0.45), lineHeight: 1 }}>
+      style={{ width: size, height: size, background: LANG_BEAM[lang], fontSize: size * (lang === 'zh' ? 0.6 : 0.45), lineHeight: 1 }}
+    >
       {text}
     </span>
   )

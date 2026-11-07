@@ -14,7 +14,9 @@ const queryClient = new QueryClient({
 
 // installable web app + opens on a poor connection (production only: the dev server must stay uncached)
 if (import.meta.env.PROD && 'serviceWorker' in navigator) {
-  window.addEventListener('load', () => { navigator.serviceWorker.register('/sw.js').catch(() => undefined) })
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => undefined)
+  })
 }
 
 createRoot(document.getElementById('root')!).render(

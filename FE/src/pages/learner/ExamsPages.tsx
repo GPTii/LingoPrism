@@ -17,7 +17,9 @@ export function ExamListPage() {
   return (
     <div className="max-w-4xl mx-auto flex flex-col gap-6">
       <PageHeader title="Bài kiểm tra" description="Đề do giáo viên soạn cho ngôn ngữ bạn đang học. Phần tự luận sẽ được giáo viên chấm." />
-      {exams.isLoading ? <Skeleton active /> : exams.data?.length ? (
+      {exams.isLoading ? (
+        <Skeleton active />
+      ) : exams.data?.length ? (
         <ul className="m-0 p-0 list-none flex flex-col gap-3">
           {exams.data.map((e) => {
             const best = e.my_best
@@ -30,10 +32,16 @@ export function ExamListPage() {
                     {e.description && <div className="text-slate-500 text-sm mt-0.5">{e.description}</div>}
                     <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-sm text-slate-500">
                       <span className="num">{e.question_count} câu</span>
-                      {e.time_limit_minutes && <span className="num"><ClockCircleOutlined /> {e.time_limit_minutes} phút</span>}
+                      {e.time_limit_minutes && (
+                        <span className="num">
+                          <ClockCircleOutlined /> {e.time_limit_minutes} phút
+                        </span>
+                      )}
                       <span className="num">Đạt từ {e.pass_percent}%</span>
                       {best && (
-                        <span className={`font-semibold ${best.status === 'submitted' ? 'text-amber-700' : passed ? 'text-emerald-600' : 'text-red-600'}`}>
+                        <span
+                          className={`font-semibold ${best.status === 'submitted' ? 'text-amber-700' : passed ? 'text-emerald-600' : 'text-red-600'}`}
+                        >
                           {best.status === 'submitted' ? 'Đang chờ chấm' : `Tốt nhất ${Math.round(best.percent)}%`}
                         </span>
                       )}
@@ -48,9 +56,16 @@ export function ExamListPage() {
         </ul>
       ) : (
         <div className="lp-card">
-          <EmptyState art={<Prismo mood="sleepy" size={96} />} title="Chưa có bài kiểm tra"
+          <EmptyState
+            art={<Prismo mood="sleepy" size={96} />}
+            title="Chưa có bài kiểm tra"
             description="Giáo viên chưa đăng đề cho ngôn ngữ bạn đang học. Trong lúc chờ, hãy ôn lại từ vựng."
-            action={<Link to="/learn?kind=review"><Button type="primary">Ôn tập từ vựng</Button></Link>} />
+            action={
+              <Link to="/learn?kind=review">
+                <Button type="primary">Ôn tập từ vựng</Button>
+              </Link>
+            }
+          />
         </div>
       )}
     </div>
@@ -75,7 +90,10 @@ export function ExamTakePage() {
       submitted.current = true
       setSubmitting(true)
       try {
-        const r = await learnApi.submit(data.submission, data.questions.map((q) => ({ question: q.id, ...answers[q.id] })))
+        const r = await learnApi.submit(
+          data.submission,
+          data.questions.map((q) => ({ question: q.id, ...answers[q.id] })),
+        )
         navigate(`/exams/results/${r.id}`, { replace: true })
       } catch (e) {
         submitted.current = false
@@ -86,7 +104,13 @@ export function ExamTakePage() {
     }
     const unanswered = data.questions.filter((q) => answers[q.id] === undefined).length
     if (!auto && unanswered) {
-      modal.confirm({ title: 'Nộp bài khi còn câu trống?', content: `Còn ${unanswered} câu chưa trả lời. Câu trống được tính 0 điểm.`, okText: 'Nộp bài', cancelText: 'Làm tiếp', onOk: go })
+      modal.confirm({
+        title: 'Nộp bài khi còn câu trống?',
+        content: `Còn ${unanswered} câu chưa trả lời. Câu trống được tính 0 điểm.`,
+        okText: 'Nộp bài',
+        cancelText: 'Làm tiếp',
+        onOk: go,
+      })
     } else go()
   }
 
@@ -109,8 +133,16 @@ export function ExamTakePage() {
   if (!data) {
     return (
       <div className="lp-card max-w-xl mx-auto">
-        <EmptyState art={<Prismo mood="sad" size={96} />} title="Không mở được bài kiểm tra" description={errorMessage(started.error)}
-          action={<Link to="/exams"><Button>Về danh sách đề</Button></Link>} />
+        <EmptyState
+          art={<Prismo mood="sad" size={96} />}
+          title="Không mở được bài kiểm tra"
+          description={errorMessage(started.error)}
+          action={
+            <Link to="/exams">
+              <Button>Về danh sách đề</Button>
+            </Link>
+          }
+        />
       </div>
     )
   }
@@ -122,11 +154,17 @@ export function ExamTakePage() {
         <div className="max-w-3xl mx-auto flex flex-wrap items-center justify-between gap-2">
           <h1 className="text-xl font-bold text-slate-800 m-0">{data.title}</h1>
           <div className="flex items-center gap-4 text-sm">
-            <span className="num text-slate-500">Đã làm {done}/{data.questions.length}</span>
+            <span className="num text-slate-500">
+              Đã làm {done}/{data.questions.length}
+            </span>
             {left !== null && (
-              <span className={`num inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 font-bold ${left < 60 ? 'bg-red-50 text-red-700' : 'bg-slate-100 text-slate-700'}`}
-                role="timer" aria-label="Thời gian còn lại">
-                <HourglassOutlined />{String(Math.floor(left / 60)).padStart(2, '0')}:{String(left % 60).padStart(2, '0')}
+              <span
+                className={`num inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 font-bold ${left < 60 ? 'bg-red-50 text-red-700' : 'bg-slate-100 text-slate-700'}`}
+                role="timer"
+                aria-label="Thời gian còn lại"
+              >
+                <HourglassOutlined />
+                {String(Math.floor(left / 60)).padStart(2, '0')}:{String(left % 60).padStart(2, '0')}
               </span>
             )}
           </div>
@@ -135,21 +173,42 @@ export function ExamTakePage() {
       <ol className="m-0 p-0 list-none flex flex-col gap-3">
         {data.questions.map((q, i) => (
           <li key={q.id} className="lp-card p-5">
-            <div className="text-sm text-slate-500">Câu {i + 1} · {q.points} điểm</div>
-            <div lang={tag} className="font-semibold text-lg text-slate-800 my-2">{q.prompt}</div>
+            <div className="text-sm text-slate-500">
+              Câu {i + 1} · {q.points} điểm
+            </div>
+            <div lang={tag} className="font-semibold text-lg text-slate-800 my-2">
+              {q.prompt}
+            </div>
             {q.kind === 'mcq' ? (
-              <Radio.Group value={answers[q.id]?.selected_option} onChange={(e) => setAnswers({ ...answers, [q.id]: { selected_option: e.target.value } })} className="!flex !flex-col gap-2">
-                {q.options.map((o, j) => <Radio key={j} value={j}><span lang={tag} className="text-base">{o}</span></Radio>)}
+              <Radio.Group
+                value={answers[q.id]?.selected_option}
+                onChange={(e) => setAnswers({ ...answers, [q.id]: { selected_option: e.target.value } })}
+                className="!flex !flex-col gap-2"
+              >
+                {q.options.map((o, j) => (
+                  <Radio key={j} value={j}>
+                    <span lang={tag} className="text-base">
+                      {o}
+                    </span>
+                  </Radio>
+                ))}
               </Radio.Group>
             ) : (
-              <Input.TextArea lang={tag} rows={q.kind === 'essay' ? 5 : 1} value={answers[q.id]?.text} aria-label={`Câu trả lời câu ${i + 1}`}
+              <Input.TextArea
+                lang={tag}
+                rows={q.kind === 'essay' ? 5 : 1}
+                value={answers[q.id]?.text}
+                aria-label={`Câu trả lời câu ${i + 1}`}
                 onChange={(e) => setAnswers({ ...answers, [q.id]: { text: e.target.value } })}
-                placeholder={q.kind === 'essay' ? 'Viết câu trả lời…' : 'Nhập đáp án'} />
+                placeholder={q.kind === 'essay' ? 'Viết câu trả lời…' : 'Nhập đáp án'}
+              />
             )}
           </li>
         ))}
       </ol>
-      <Button type="primary" size="large" loading={submitting} onClick={() => submit()}>Nộp bài</Button>
+      <Button type="primary" size="large" loading={submitting} onClick={() => submit()}>
+        Nộp bài
+      </Button>
     </div>
   )
 }
@@ -165,40 +224,76 @@ export function ExamResultPage() {
       <section className="ink-bg text-white rounded-3xl p-6 sm:p-8 flex items-center gap-5 animate-rise">
         <Prismo mood={waiting ? 'think' : r.passed ? 'celebrate' : 'sad'} size={96} className="shrink-0" />
         <div className="min-w-0">
-          <div className="num text-4xl font-extrabold">{Number(r.score).toFixed(1)}<span className="text-white/60 text-2xl font-bold"> / {Number(r.max_score).toFixed(1)} điểm</span></div>
+          <div className="num text-4xl font-extrabold">
+            {Number(r.score).toFixed(1)}
+            <span className="text-white/60 text-2xl font-bold"> / {Number(r.max_score).toFixed(1)} điểm</span>
+          </div>
           <p className="text-white/80 mt-1 mb-0">
-            {waiting ? 'Phần tự luận đang chờ giáo viên chấm. Điểm sẽ cập nhật khi chấm xong.' : r.passed ? 'Bạn đã đạt bài kiểm tra.' : 'Chưa đạt lần này. Xem lại các câu sai bên dưới rồi làm lại nhé.'}
+            {waiting
+              ? 'Phần tự luận đang chờ giáo viên chấm. Điểm sẽ cập nhật khi chấm xong.'
+              : r.passed
+                ? 'Bạn đã đạt bài kiểm tra.'
+                : 'Chưa đạt lần này. Xem lại các câu sai bên dưới rồi làm lại nhé.'}
           </p>
         </div>
       </section>
-      {r.feedback && <Section title="Nhận xét của giáo viên"><p className="m-0 text-slate-700">{r.feedback}</p></Section>}
-      <ShowMore items={r.answers} limit={10} label="Xem tất cả câu">{(shown) => (
-      <ol className="m-0 p-0 list-none flex flex-col gap-3">
-        {shown.map((a, i) => {
-          const yours = a.question.kind === 'mcq' ? (a.selected_option != null ? a.question.options[a.selected_option] : '(bỏ trống)') : a.text || '(bỏ trống)'
-          const state = a.is_correct == null
-            ? { icon: <HourglassOutlined className="text-amber-600" />, label: 'Chờ chấm' }
-            : a.is_correct ? { icon: <CheckCircleFilled className="text-emerald-500" />, label: 'Đúng' } : { icon: <CloseCircleFilled className="text-red-500" />, label: 'Sai' }
-          return (
-            <li key={a.id} className="lp-card p-5 flex gap-3">
-              <span className="text-xl leading-7" aria-label={state.label}>{state.icon}</span>
-              <div className="flex-1 min-w-0 flex flex-col gap-1">
-                <div className="font-semibold text-slate-800">Câu {i + 1}: {a.question.prompt}</div>
-                <div className="text-slate-700">Bạn trả lời: {yours}</div>
-                {a.is_correct === false && a.question.kind !== 'essay' && (
-                  <div className="text-emerald-700">Đáp án: {a.question.kind === 'mcq' && a.question.correct_option != null ? a.question.options[a.question.correct_option] : a.question.accepted_answers.join(' / ')}</div>
-                )}
-                {a.question.explanation && <div className="text-slate-500 text-sm">{a.question.explanation}</div>}
-                {a.is_correct != null && <div className="num text-sm text-slate-500">Điểm: {a.score} / {a.question.points}</div>}
-                {a.feedback && <div className="text-sm text-slate-600">Giáo viên nhận xét: {a.feedback}</div>}
-              </div>
-            </li>
-          )
-        })}
-      </ol>
-      )}</ShowMore>
+      {r.feedback && (
+        <Section title="Nhận xét của giáo viên">
+          <p className="m-0 text-slate-700">{r.feedback}</p>
+        </Section>
+      )}
+      <ShowMore items={r.answers} limit={10} label="Xem tất cả câu">
+        {(shown) => (
+          <ol className="m-0 p-0 list-none flex flex-col gap-3">
+            {shown.map((a, i) => {
+              const yours =
+                a.question.kind === 'mcq'
+                  ? a.selected_option != null
+                    ? a.question.options[a.selected_option]
+                    : '(bỏ trống)'
+                  : a.text || '(bỏ trống)'
+              const state =
+                a.is_correct == null
+                  ? { icon: <HourglassOutlined className="text-amber-600" />, label: 'Chờ chấm' }
+                  : a.is_correct
+                    ? { icon: <CheckCircleFilled className="text-emerald-500" />, label: 'Đúng' }
+                    : { icon: <CloseCircleFilled className="text-red-500" />, label: 'Sai' }
+              return (
+                <li key={a.id} className="lp-card p-5 flex gap-3">
+                  <span className="text-xl leading-7" aria-label={state.label}>
+                    {state.icon}
+                  </span>
+                  <div className="flex-1 min-w-0 flex flex-col gap-1">
+                    <div className="font-semibold text-slate-800">
+                      Câu {i + 1}: {a.question.prompt}
+                    </div>
+                    <div className="text-slate-700">Bạn trả lời: {yours}</div>
+                    {a.is_correct === false && a.question.kind !== 'essay' && (
+                      <div className="text-emerald-700">
+                        Đáp án:{' '}
+                        {a.question.kind === 'mcq' && a.question.correct_option != null
+                          ? a.question.options[a.question.correct_option]
+                          : a.question.accepted_answers.join(' / ')}
+                      </div>
+                    )}
+                    {a.question.explanation && <div className="text-slate-500 text-sm">{a.question.explanation}</div>}
+                    {a.is_correct != null && (
+                      <div className="num text-sm text-slate-500">
+                        Điểm: {a.score} / {a.question.points}
+                      </div>
+                    )}
+                    {a.feedback && <div className="text-sm text-slate-600">Giáo viên nhận xét: {a.feedback}</div>}
+                  </div>
+                </li>
+              )
+            })}
+          </ol>
+        )}
+      </ShowMore>
       <div className="flex flex-wrap gap-3">
-        <Link to="/exams"><Button size="large">Về danh sách đề</Button></Link>
+        <Link to="/exams">
+          <Button size="large">Về danh sách đề</Button>
+        </Link>
       </div>
     </div>
   )

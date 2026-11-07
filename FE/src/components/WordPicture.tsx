@@ -17,12 +17,16 @@ export default function WordPicture({ image, emoji, credit, source, alt = '', he
   if (image && !broken) {
     return (
       <figure className={`relative m-0 ${height} flex items-center justify-center`}>
-        <img src={image} alt={alt} loading="lazy" onError={() => setBroken(true)}
-          className="h-full max-w-full object-contain rounded-xl" />
+        <img src={image} alt={alt} loading="lazy" onError={() => setBroken(true)} className="h-full max-w-full object-contain rounded-xl" />
         {credit && (
           <Tooltip title={`Ảnh: ${credit} – Wikimedia Commons`}>
-            <a href={source || undefined} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}
-              className="absolute bottom-1 right-1 rounded-full bg-black/40 text-white text-[10px] leading-none px-1.5 py-1 no-underline">
+            <a
+              href={source || undefined}
+              target="_blank"
+              rel="noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="absolute bottom-1 right-1 rounded-full bg-black/40 text-white text-[10px] leading-none px-1.5 py-1 no-underline"
+            >
               ©
             </a>
           </Tooltip>

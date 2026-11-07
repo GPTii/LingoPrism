@@ -45,10 +45,20 @@ function ThemeSwitch({ full = false }: { full?: boolean }) {
     return (
       <div role="radiogroup" aria-label="Giao diện" className="grid grid-cols-2 gap-1 rounded-xl bg-slate-100 p-1">
         {THEMES.map((t) => (
-          <button key={t.mode} type="button" role="radio" aria-checked={mode === t.mode} onClick={() => setMode(t.mode)}
+          <button
+            key={t.mode}
+            type="button"
+            role="radio"
+            aria-checked={mode === t.mode}
+            onClick={() => setMode(t.mode)}
             className={`h-9 rounded-lg inline-flex items-center justify-center gap-2 text-sm font-semibold cursor-pointer transition-colors ${
-              mode === t.mode ? 'bg-[var(--surface)] text-slate-900 shadow-[0_1px_2px_rgb(0_0_0/0.12)]' : 'text-slate-500 hover:text-slate-800'}`}>
-            {t.icon}{t.label}
+              mode === t.mode
+                ? 'bg-[var(--surface)] text-slate-900 shadow-[0_1px_2px_rgb(0_0_0/0.12)]'
+                : 'text-slate-500 hover:text-slate-800'
+            }`}
+          >
+            {t.icon}
+            {t.label}
           </button>
         ))}
       </div>
@@ -57,8 +67,12 @@ function ThemeSwitch({ full = false }: { full?: boolean }) {
   const other = THEMES.find((t) => t.mode !== mode)!
   return (
     <Tooltip title={`Chuyển sang giao diện ${other.label.toLowerCase()}`}>
-      <button type="button" onClick={toggle} aria-label={`Chuyển sang giao diện ${other.label.toLowerCase()}`}
-        className="h-10 w-10 rounded-xl grid place-items-center text-lg text-slate-600 hover:bg-slate-100 cursor-pointer transition">
+      <button
+        type="button"
+        onClick={toggle}
+        aria-label={`Chuyển sang giao diện ${other.label.toLowerCase()}`}
+        className="h-10 w-10 rounded-xl grid place-items-center text-lg text-slate-600 hover:bg-slate-100 cursor-pointer transition"
+      >
         {other.icon}
       </button>
     </Tooltip>
@@ -68,8 +82,11 @@ function ThemeSwitch({ full = false }: { full?: boolean }) {
 function Stat({ icon, value, title, className = '' }: { icon: React.ReactNode; value: number; title: string; className?: string }) {
   return (
     <Tooltip title={title}>
-      <span className={`num items-center gap-1 rounded-lg pl-1 pr-2 py-1 font-bold text-slate-700 hover:bg-slate-100 transition ${className}`}>
-        {icon}{value}
+      <span
+        className={`num items-center gap-1 rounded-lg pl-1 pr-2 py-1 font-bold text-slate-700 hover:bg-slate-100 transition ${className}`}
+      >
+        {icon}
+        {value}
       </span>
     </Tooltip>
   )
@@ -89,7 +106,11 @@ export default function LearnerLayout() {
   const quests = useQuery({ queryKey: ['quests'], queryFn: gameApi.quests, enabled: !!user })
   const isKid = user?.learner_type === 'kid'
   const dmThreads = useQuery({ queryKey: ['dm-threads'], queryFn: messagesApi.threads, enabled: !!user && !isKid })
-  const friendRequests = useQuery({ queryKey: ['friend-requests', 'incoming'], queryFn: () => communityApi.friendRequests('incoming'), enabled: !!user && !isKid })
+  const friendRequests = useQuery({
+    queryKey: ['friend-requests', 'incoming'],
+    queryFn: () => communityApi.friendRequests('incoming'),
+    enabled: !!user && !isKid,
+  })
   const groups = navGroups({
     due: library.data?.due,
     unread,
@@ -100,7 +121,9 @@ export default function LearnerLayout() {
 
   useEffect(() => {
     const onNoVoice = (e: Event) =>
-      message.warning(`Trình duyệt chưa có giọng đọc ${(e as CustomEvent).detail}. Hãy cài thêm giọng đọc trong cài đặt hệ điều hành hoặc dùng Chrome/Edge.`)
+      message.warning(
+        `Trình duyệt chưa có giọng đọc ${(e as CustomEvent).detail}. Hãy cài thêm giọng đọc trong cài đặt hệ điều hành hoặc dùng Chrome/Edge.`,
+      )
     window.addEventListener('lingoprism:no-voice', onNoVoice)
     return () => window.removeEventListener('lingoprism:no-voice', onNoVoice)
   }, [message])
@@ -122,8 +145,15 @@ export default function LearnerLayout() {
 
   const menu = [
     ...(groups.find((g) => g.key === 'me')?.children ?? []).map((c) => ({
-      key: c.to, icon: <AppIcon name={c.icon} size={20} />, onClick: () => navigate(c.to),
-      label: <span className="flex items-center gap-3 justify-between min-w-44">{c.label}{c.count ? <Badge count={c.count} size="small" /> : null}</span>,
+      key: c.to,
+      icon: <AppIcon name={c.icon} size={20} />,
+      onClick: () => navigate(c.to),
+      label: (
+        <span className="flex items-center gap-3 justify-between min-w-44">
+          {c.label}
+          {c.count ? <Badge count={c.count} size="small" /> : null}
+        </span>
+      ),
     })),
     ...(isStaffRole(user) ? [{ key: 'admin', icon: <SettingOutlined />, label: 'Trang quản trị', onClick: () => navigate('/admin') }] : []),
     { type: 'divider' as const },
@@ -141,7 +171,8 @@ export default function LearnerLayout() {
   const sumCounts = (items: NavLeaf[]) => items.reduce((n, c) => n + (c.count ?? 0), 0)
   const learnCount = sumCounts(learnSheet)
   const meCount = sumCounts(meGroup)
-  const activeIn = (items: NavLeaf[]) => items.some((c) => c.to.split(/[?#]/)[0] !== '/' && location.pathname.startsWith(c.to.split(/[?#]/)[0]))
+  const activeIn = (items: NavLeaf[]) =>
+    items.some((c) => c.to.split(/[?#]/)[0] !== '/' && location.pathname.startsWith(c.to.split(/[?#]/)[0]))
   const learnActive = activeIn(learnSheet) || location.pathname === '/review'
   const meActive = activeIn(meGroup)
 
@@ -149,13 +180,20 @@ export default function LearnerLayout() {
   if (user && !user.onboarding_completed && !isStaffRole(user)) return <Navigate to="/welcome" replace />
 
   return (
-    <ConfigProvider theme={{ token: { borderRadius: 10, controlHeightLG: 48, fontSizeLG: 16 }, components: { Card: { borderRadiusLG: 16, headerFontSize: 17 } } }}>
+    <ConfigProvider
+      theme={{
+        token: { borderRadius: 10, controlHeightLG: 48, fontSizeLG: 16 },
+        components: { Card: { borderRadiusLG: 16, headerFontSize: 17 } },
+      }}
+    >
       <div className="learner min-h-screen flex relative">
         <SideNav groups={groups} footer={(collapsed) => <ThemeSwitch full={!collapsed} />} />
 
         <div className="flex-1 flex flex-col min-w-0 relative z-[1]">
           <header className="h-14 md:h-16 flex items-center justify-between gap-2 px-3 md:px-8 bg-[var(--page-bg)] sticky top-0 z-20">
-            <NavLink to="/" className="md:hidden shrink-0"><Logo compact={!screens.sm} size={32} /></NavLink>
+            <NavLink to="/" className="md:hidden shrink-0">
+              <Logo compact={!screens.sm} size={32} />
+            </NavLink>
             <div className="flex-1" />
             <div className="flex items-center gap-1.5 sm:gap-2.5 text-sm">
               <Select
@@ -167,27 +205,60 @@ export default function LearnerLayout() {
                 aria-label="Ngôn ngữ đang học"
                 labelRender={(o) => {
                   const item = LANGUAGES.find((l) => l.value === o.value)
-                  return item ? <span className="inline-flex items-center gap-2 font-semibold">{item.glyph}{screens.sm && item.label}</span> : o.label
+                  return item ? (
+                    <span className="inline-flex items-center gap-2 font-semibold">
+                      {item.glyph}
+                      {screens.sm && item.label}
+                    </span>
+                  ) : (
+                    o.label
+                  )
                 }}
                 optionRender={(o) => {
                   const item = LANGUAGES.find((l) => l.value === o.value)!
-                  return <span className="inline-flex items-center gap-2">{item.glyph}{item.label}</span>
+                  return (
+                    <span className="inline-flex items-center gap-2">
+                      {item.glyph}
+                      {item.label}
+                    </span>
+                  )
                 }}
                 options={LANGUAGES.map((l) => ({ value: l.value, label: l.label }))}
               />
-              <Stat className="inline-flex" icon={<StreakIcon active={!!game.data?.studied_today} />} value={streak}
-                title={game.data?.studied_today ? `Chuỗi ${streak} ngày – hôm nay bạn đã học!` : 'Học một bài hôm nay để giữ chuỗi ngày học'} />
-              <Stat className="hidden sm:inline-flex" icon={<ScaleIcon />} value={game.data?.scales ?? user?.scales_balance ?? 0} title="Vảy – kiếm được khi học" />
+              <Stat
+                className="inline-flex"
+                icon={<StreakIcon active={!!game.data?.studied_today} />}
+                value={streak}
+                title={
+                  game.data?.studied_today ? `Chuỗi ${streak} ngày – hôm nay bạn đã học!` : 'Học một bài hôm nay để giữ chuỗi ngày học'
+                }
+              />
+              <Stat
+                className="hidden sm:inline-flex"
+                icon={<ScaleIcon />}
+                value={game.data?.scales ?? user?.scales_balance ?? 0}
+                title="Vảy – kiếm được khi học"
+              />
               <Stat className="hidden sm:inline-flex" icon={<GemIcon />} value={game.data?.gems ?? user?.gems_balance ?? 0} title="Ngọc" />
-              <span className="md:hidden"><ThemeSwitch /></span>
+              <span className="md:hidden">
+                <ThemeSwitch />
+              </span>
               <Badge count={unread} size="small" offset={[-4, 4]}>
-                <button type="button" onClick={() => navigate('/notifications')} aria-label="Thông báo"
-                  className="h-10 w-10 rounded-xl grid place-items-center hover:bg-slate-100 cursor-pointer transition">
+                <button
+                  type="button"
+                  onClick={() => navigate('/notifications')}
+                  aria-label="Thông báo"
+                  className="h-10 w-10 rounded-xl grid place-items-center hover:bg-slate-100 cursor-pointer transition"
+                >
                   <AppIcon name="bell" size={26} />
                 </button>
               </Badge>
               <Dropdown menu={{ items: menu }} placement="bottomRight" trigger={['click']}>
-                <button type="button" aria-label="Tài khoản" className="flex items-center gap-2 cursor-pointer rounded-full hover:bg-slate-100 p-0.5 lg:pr-3 transition">
+                <button
+                  type="button"
+                  aria-label="Tài khoản"
+                  className="flex items-center gap-2 cursor-pointer rounded-full hover:bg-slate-100 p-0.5 lg:pr-3 transition"
+                >
                   <UserAvatar name={user?.display_name} src={user?.avatar} mascot={user?.mascot} size={32} />
                   <span className="hidden lg:inline font-semibold text-slate-700 max-w-40 truncate">{user?.display_name}</span>
                 </button>
@@ -201,7 +272,13 @@ export default function LearnerLayout() {
               <ProfilePrompt />
               {/* the right-hand rail (quests, streak, league) beside the learning pages, on wide screens */}
               <div className="flex gap-8 items-start">
-                <div key={location.pathname} className="animate-page flex-1 min-w-0"><ErrorBoundary><Suspense fallback={null}><Outlet /></Suspense></ErrorBoundary></div>
+                <div key={location.pathname} className="animate-page flex-1 min-w-0">
+                  <ErrorBoundary>
+                    <Suspense fallback={null}>
+                      <Outlet />
+                    </Suspense>
+                  </ErrorBoundary>
+                </div>
                 {railOn && <SideRail />}
               </div>
               {!focus && <TranslateBubble />}
@@ -209,28 +286,64 @@ export default function LearnerLayout() {
           </main>
 
           {/* phone: Hôm nay · Học · [camera, raised: the heart of the app] · Từ vựng · Tôi */}
-          {!focus && <nav aria-label="Mục chính" className="md:hidden fixed bottom-0 inset-x-0 z-30 bg-[var(--surface)] border-t border-slate-200 grid grid-cols-5 items-end pt-1.5"
-            style={{ paddingBottom: 'max(0.4rem, env(safe-area-inset-bottom))' }}>
-            <TabLink to="/" icon="home" label="Hôm nay" on={isActive('/')} />
-            <TabButton icon="learn" label="Học" on={sheet === 'learn' || learnActive} count={learnCount} onClick={() => setSheet('learn')} />
-            <NavLink to="/camera" aria-label="Chụp ảnh học từ" className="flex flex-col items-center -mt-7">
-              <span className="h-14 w-14 rounded-2xl prism-bg grid place-items-center text-white text-2xl ring-4 ring-[var(--page-bg)] active:scale-95 transition-transform">
-                <CameraFilled />
-              </span>
-              <span className={`text-[11px] font-semibold mt-0.5 ${isActive('/camera') ? 'text-brand-700' : 'text-slate-500'}`}>Chụp ảnh</span>
-            </NavLink>
-            <TabLink to="/vocab" icon="vocab" label="Từ vựng" on={isActive('/vocab')} />
-            <TabButton icon="profile" label="Tôi" on={sheet === 'me' || meActive} count={meCount} onClick={() => setSheet('me')} />
-          </nav>}
-          <Drawer open={!!sheet} onClose={() => setSheet(null)} placement="bottom" size="auto"
-            title={sheet === 'me' ? <span className="flex items-center gap-2"><UserAvatar name={user?.display_name} src={user?.avatar} mascot={user?.mascot} size={28} />{user?.display_name}</span> : 'Học'}
-            styles={{ body: { paddingBottom: 'max(16px, env(safe-area-inset-bottom))' } }}>
+          {!focus && (
+            <nav
+              aria-label="Mục chính"
+              className="md:hidden fixed bottom-0 inset-x-0 z-30 bg-[var(--surface)] border-t border-slate-200 grid grid-cols-5 items-end pt-1.5"
+              style={{ paddingBottom: 'max(0.4rem, env(safe-area-inset-bottom))' }}
+            >
+              <TabLink to="/" icon="home" label="Hôm nay" on={isActive('/')} />
+              <TabButton
+                icon="learn"
+                label="Học"
+                on={sheet === 'learn' || learnActive}
+                count={learnCount}
+                onClick={() => setSheet('learn')}
+              />
+              <NavLink to="/camera" aria-label="Chụp ảnh học từ" className="flex flex-col items-center -mt-7">
+                <span className="h-14 w-14 rounded-2xl prism-bg grid place-items-center text-white text-2xl ring-4 ring-[var(--page-bg)] active:scale-95 transition-transform">
+                  <CameraFilled />
+                </span>
+                <span className={`text-[11px] font-semibold mt-0.5 ${isActive('/camera') ? 'text-brand-700' : 'text-slate-500'}`}>
+                  Chụp ảnh
+                </span>
+              </NavLink>
+              <TabLink to="/vocab" icon="vocab" label="Từ vựng" on={isActive('/vocab')} />
+              <TabButton icon="profile" label="Tôi" on={sheet === 'me' || meActive} count={meCount} onClick={() => setSheet('me')} />
+            </nav>
+          )}
+          <Drawer
+            open={!!sheet}
+            onClose={() => setSheet(null)}
+            placement="bottom"
+            size="auto"
+            title={
+              sheet === 'me' ? (
+                <span className="flex items-center gap-2">
+                  <UserAvatar name={user?.display_name} src={user?.avatar} mascot={user?.mascot} size={28} />
+                  {user?.display_name}
+                </span>
+              ) : (
+                'Học'
+              )
+            }
+            styles={{ body: { paddingBottom: 'max(16px, env(safe-area-inset-bottom))' } }}
+          >
             <nav aria-label={sheet === 'me' ? 'Tôi' : 'Học'} className="grid grid-cols-3 gap-2">
               {(sheet === 'me' ? meGroup : learnSheet).map((c) => (
-                <NavLink key={c.to} to={c.to} onClick={() => setSheet(null)}
-                  className="relative rounded-2xl bg-slate-100 px-1 py-3 flex flex-col items-center gap-1 text-center text-xs font-semibold !text-slate-700 active:scale-95 transition-transform">
-                  <AppIcon name={c.icon} size={30} />{c.label}
-                  {c.count ? <span className="num absolute top-1.5 right-1.5 rounded-full bg-brand-600 text-white text-[10px] font-bold px-1.5">{c.count > 99 ? '99+' : c.count}</span> : null}
+                <NavLink
+                  key={c.to}
+                  to={c.to}
+                  onClick={() => setSheet(null)}
+                  className="relative rounded-2xl bg-slate-100 px-1 py-3 flex flex-col items-center gap-1 text-center text-xs font-semibold !text-slate-700 active:scale-95 transition-transform"
+                >
+                  <AppIcon name={c.icon} size={30} />
+                  {c.label}
+                  {c.count ? (
+                    <span className="num absolute top-1.5 right-1.5 rounded-full bg-brand-600 text-white text-[10px] font-bold px-1.5">
+                      {c.count > 99 ? '99+' : c.count}
+                    </span>
+                  ) : null}
                 </NavLink>
               ))}
             </nav>
@@ -238,7 +351,13 @@ export default function LearnerLayout() {
               <>
                 <div className="mt-5 text-sm font-semibold text-slate-500 mb-2">Giao diện</div>
                 <ThemeSwitch full />
-                <button type="button" onClick={logout} className="mt-4 w-full h-11 rounded-xl text-red-600 font-semibold bg-red-50 cursor-pointer">Đăng xuất</button>
+                <button
+                  type="button"
+                  onClick={logout}
+                  className="mt-4 w-full h-11 rounded-xl text-red-600 font-semibold bg-red-50 cursor-pointer"
+                >
+                  Đăng xuất
+                </button>
               </>
             )}
           </Drawer>
@@ -250,21 +369,44 @@ export default function LearnerLayout() {
 
 function TabLink({ to, icon, label, on }: { to: string; icon: AppIconName; label: string; on: boolean }) {
   return (
-    <NavLink to={to} className={`flex flex-col items-center gap-0.5 min-h-12 text-[11px] font-semibold ${on ? 'text-brand-700' : 'text-slate-500'}`}>
+    <NavLink
+      to={to}
+      className={`flex flex-col items-center gap-0.5 min-h-12 text-[11px] font-semibold ${on ? 'text-brand-700' : 'text-slate-500'}`}
+    >
       <span className={`px-3.5 py-0.5 rounded-xl border-2 transition-colors ${on ? 'bg-brand-50 border-brand-200' : 'border-transparent'}`}>
-        <AppIcon name={icon} size={28} /></span>
+        <AppIcon name={icon} size={28} />
+      </span>
       {label}
     </NavLink>
   )
 }
 
-function TabButton({ icon, label, on, count, onClick }: { icon: AppIconName; label: string; on: boolean; count: number; onClick: () => void }) {
+function TabButton({
+  icon,
+  label,
+  on,
+  count,
+  onClick,
+}: {
+  icon: AppIconName
+  label: string
+  on: boolean
+  count: number
+  onClick: () => void
+}) {
   return (
-    <button type="button" onClick={onClick} aria-haspopup="dialog"
-      className={`flex flex-col items-center gap-0.5 min-h-12 text-[11px] font-semibold cursor-pointer ${on ? 'text-brand-700' : 'text-slate-500'}`}>
+    <button
+      type="button"
+      onClick={onClick}
+      aria-haspopup="dialog"
+      className={`flex flex-col items-center gap-0.5 min-h-12 text-[11px] font-semibold cursor-pointer ${on ? 'text-brand-700' : 'text-slate-500'}`}
+    >
       <Badge count={count} size="small" offset={[-6, 4]}>
-        <span className={`block px-3.5 py-0.5 rounded-xl border-2 transition-colors ${on ? 'bg-brand-50 border-brand-200' : 'border-transparent'}`}>
-          <AppIcon name={icon} size={28} /></span>
+        <span
+          className={`block px-3.5 py-0.5 rounded-xl border-2 transition-colors ${on ? 'bg-brand-50 border-brand-200' : 'border-transparent'}`}
+        >
+          <AppIcon name={icon} size={28} />
+        </span>
       </Badge>
       {label}
     </button>

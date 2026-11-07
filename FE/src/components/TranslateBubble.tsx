@@ -1,6 +1,14 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { App, Button, Input, Segmented, Select, Tooltip } from 'antd'
-import { AudioOutlined, CloseOutlined, CopyOutlined, ExpandOutlined, SoundOutlined, SwapOutlined, TranslationOutlined } from '@ant-design/icons'
+import {
+  AudioOutlined,
+  CloseOutlined,
+  CopyOutlined,
+  ExpandOutlined,
+  SoundOutlined,
+  SwapOutlined,
+  TranslationOutlined,
+} from '@ant-design/icons'
 import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { learnApi, type TranslateLang } from '../api/app'
@@ -32,7 +40,9 @@ function loadPos(view = viewKind()): { x: number; y: number } {
   try {
     const p = JSON.parse(localStorage.getItem(`${POS_KEY}-${view}`) ?? '')
     if (typeof p?.x === 'number' && typeof p?.y === 'number') return p
-  } catch { /* first visit or storage blocked */ }
+  } catch {
+    /* first visit or storage blocked */
+  }
   return { x: 20, y: 96 } // from the right / bottom edge: above the phone tab bar
 }
 
@@ -62,12 +72,17 @@ export default function TranslateBubble() {
   const offline = offlineSupport()
 
   useEffect(() => () => stopRef.current?.(), [])
-  useEffect(() => { // phone <-> wide (rotation, resized window): that size's own spot
+  useEffect(() => {
+    // phone <-> wide (rotation, resized window): that size's own spot
     const onResize = () => setView(viewKind())
     window.addEventListener('resize', onResize)
     return () => window.removeEventListener('resize', onResize)
   }, [])
-  useEffect(() => { const p = loadPos(view); posRef.current = p; setPos(p) }, [view])
+  useEffect(() => {
+    const p = loadPos(view)
+    posRef.current = p
+    setPos(p)
+  }, [view])
 
   const run = useMutation<Result, Error, { text: string; source: TranslateLang; target: TranslateLang }>({
     mutationFn: async ({ text: t, source: s, target: g }) => {
@@ -90,18 +105,33 @@ export default function TranslateBubble() {
 
   if (!user || location.pathname.startsWith('/dich')) return null
 
-  const translate = (t = text, s = source, g = target) => { if (t.trim()) run.mutate({ text: t.trim(), source: s, target: g }) }
+  const translate = (t = text, s = source, g = target) => {
+    if (t.trim()) run.mutate({ text: t.trim(), source: s, target: g })
+  }
   const pick = (side: 'source' | 'target', v: TranslateLang) => {
     const other = side === 'source' ? target : source
     const fix = v === other || (isZh(v) && isZh(other)) ? (v === 'vi' ? learning : 'vi') : other
-    if (side === 'source') { setSource(v); setTarget(fix) } else { setTarget(v); setSource(fix) }
+    if (side === 'source') {
+      setSource(v)
+      setTarget(fix)
+    } else {
+      setTarget(v)
+      setSource(fix)
+    }
   }
   const swap = () => {
-    setSource(target); setTarget(source)
-    if (run.data) { setText(run.data.text); translate(run.data.text, target, source) }
+    setSource(target)
+    setTarget(source)
+    if (run.data) {
+      setText(run.data.text)
+      translate(run.data.text, target, source)
+    }
   }
   const talk = async () => {
-    if (listening) { stopRef.current?.(); return }
+    if (listening) {
+      stopRef.current?.()
+      return
+    }
     const { result, stop } = listen(locale(source), 12000)
     stopRef.current = stop
     setListening(true)
@@ -118,7 +148,11 @@ export default function TranslateBubble() {
 
   // drag the bubble (pointer events: mouse and touch); a tap without moving opens the panel
   const onDown = (e: React.PointerEvent) => {
-    try { (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId) } catch { /* pointer already gone */ }
+    try {
+      ;(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId)
+    } catch {
+      /* pointer already gone */
+    }
     drag.current = { dx: window.innerWidth - e.clientX - pos.x, dy: window.innerHeight - e.clientY - pos.y, moved: false }
   }
   const onMove = (e: React.PointerEvent) => {
@@ -127,78 +161,165 @@ export default function TranslateBubble() {
     const x = Math.min(Math.max(8, window.innerWidth - e.clientX - d.dx), window.innerWidth - SIZE - 8)
     const y = Math.min(Math.max(8, window.innerHeight - e.clientY - d.dy), window.innerHeight - SIZE - 8)
     if (Math.abs(x - posRef.current.x) + Math.abs(y - posRef.current.y) > 4) d.moved = true
-    if (d.moved) { posRef.current = { x, y }; setPos({ x, y }) }
+    if (d.moved) {
+      posRef.current = { x, y }
+      setPos({ x, y })
+    }
   }
   const onUp = () => {
     const d = drag.current
     drag.current = null
     if (!d) return
     if (d.moved) {
-      try { localStorage.setItem(`${POS_KEY}-${view}`, JSON.stringify(posRef.current)) } catch { /* storage blocked */ }
+      try {
+        localStorage.setItem(`${POS_KEY}-${view}`, JSON.stringify(posRef.current))
+      } catch {
+        /* storage blocked */
+      }
     } else {
       setOpen((o) => !o)
     }
   }
 
   const out = run.data
-  const at = { x: Math.min(Math.max(8, pos.x), Math.max(8, window.innerWidth - SIZE - 8)), y: Math.min(Math.max(8, pos.y), Math.max(8, window.innerHeight - SIZE - 8)) }
+  const at = {
+    x: Math.min(Math.max(8, pos.x), Math.max(8, window.innerWidth - SIZE - 8)),
+    y: Math.min(Math.max(8, pos.y), Math.max(8, window.innerHeight - SIZE - 8)),
+  }
   const panelRight = Math.min(at.x, Math.max(8, window.innerWidth - 380))
   const panelBottom = at.y + SIZE + 12 > window.innerHeight - 420 ? 8 : at.y + SIZE + 12
-  const options = (other: TranslateLang) => LANGS.map((l) => ({ value: l.value, label: l.label, disabled: l.value === other || (isZh(l.value) && isZh(other)) }))
+  const options = (other: TranslateLang) =>
+    LANGS.map((l) => ({ value: l.value, label: l.label, disabled: l.value === other || (isZh(l.value) && isZh(other)) }))
 
   return (
     <>
       {open && (
-        <section aria-label="Dịch nhanh" style={{ right: panelRight, bottom: panelBottom }}
-          className="fixed z-50 w-[min(360px,calc(100vw-16px))] lp-card p-4 flex flex-col gap-3 shadow-2xl animate-rise">
+        <section
+          aria-label="Dịch nhanh"
+          style={{ right: panelRight, bottom: panelBottom }}
+          className="fixed z-50 w-[min(360px,calc(100vw-16px))] lp-card p-4 flex flex-col gap-3 shadow-2xl animate-rise"
+        >
           <div className="flex items-center gap-2">
             <TranslationOutlined className="text-brand-600 text-lg" />
             <strong className="flex-1">Dịch nhanh</strong>
-            <Tooltip title="Mở trang Dịch đầy đủ"><Link to="/dich" onClick={() => setOpen(false)}><Button type="text" size="small" icon={<ExpandOutlined />} aria-label="Mở trang Dịch" /></Link></Tooltip>
+            <Tooltip title="Mở trang Dịch đầy đủ">
+              <Link to="/dich" onClick={() => setOpen(false)}>
+                <Button type="text" size="small" icon={<ExpandOutlined />} aria-label="Mở trang Dịch" />
+              </Link>
+            </Tooltip>
             <Button type="text" size="small" icon={<CloseOutlined />} onClick={() => setOpen(false)} aria-label="Đóng" />
           </div>
-          <Segmented size="small" block value={mode} onChange={(v) => setMode(v as Mode)}
-            options={[{ label: 'Tự động', value: 'auto' }, { label: 'Online (AI)', value: 'online' }, { label: 'Offline', value: 'offline', disabled: !offline }]} />
+          <Segmented
+            size="small"
+            block
+            value={mode}
+            onChange={(v) => setMode(v as Mode)}
+            options={[
+              { label: 'Tự động', value: 'auto' },
+              { label: 'Online (AI)', value: 'online' },
+              { label: 'Offline', value: 'offline', disabled: !offline },
+            ]}
+          />
           <div className="flex items-center gap-1">
-            <Select<TranslateLang> size="small" value={source} onChange={(v) => pick('source', v)} options={options(target)} className="flex-1" aria-label="Dịch từ" />
+            <Select<TranslateLang>
+              size="small"
+              value={source}
+              onChange={(v) => pick('source', v)}
+              options={options(target)}
+              className="flex-1"
+              aria-label="Dịch từ"
+            />
             <Button size="small" type="text" icon={<SwapOutlined />} onClick={swap} aria-label="Đổi chiều" />
-            <Select<TranslateLang> size="small" value={target} onChange={(v) => pick('target', v)} options={options(source)} className="flex-1" aria-label="Dịch sang" />
+            <Select<TranslateLang>
+              size="small"
+              value={target}
+              onChange={(v) => pick('target', v)}
+              options={options(source)}
+              className="flex-1"
+              aria-label="Dịch sang"
+            />
           </div>
-          <Input.TextArea value={text} onChange={(e) => setText(e.target.value)} maxLength={500} autoSize={{ minRows: 2, maxRows: 5 }}
-            lang={langTag(source)} placeholder={listening ? 'Đang nghe…' : 'Nhập hoặc bấm mic để nói'} autoFocus
-            onPressEnter={(e) => { if (!e.shiftKey) { e.preventDefault(); translate() } }} />
+          <Input.TextArea
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            maxLength={500}
+            autoSize={{ minRows: 2, maxRows: 5 }}
+            lang={langTag(source)}
+            placeholder={listening ? 'Đang nghe…' : 'Nhập hoặc bấm mic để nói'}
+            autoFocus
+            onPressEnter={(e) => {
+              if (!e.shiftKey) {
+                e.preventDefault()
+                translate()
+              }
+            }}
+          />
           <div className="flex items-center gap-2">
             {canRecognise() && (
-              <Button shape="circle" type={listening ? 'primary' : 'default'} danger={listening} icon={<AudioOutlined />} onClick={talk} aria-label="Nói" />
+              <Button
+                shape="circle"
+                type={listening ? 'primary' : 'default'}
+                danger={listening}
+                icon={<AudioOutlined />}
+                onClick={talk}
+                aria-label="Nói"
+              />
             )}
-            <span className="flex-1 text-xs text-slate-400">{progress != null ? `Đang tải gói dịch offline… ${Math.round(progress * 100)}%` : ''}</span>
-            <Button type="primary" loading={run.isPending} disabled={!text.trim()} onClick={() => translate()}>Dịch</Button>
+            <span className="flex-1 text-xs text-slate-400">
+              {progress != null ? `Đang tải gói dịch offline… ${Math.round(progress * 100)}%` : ''}
+            </span>
+            <Button type="primary" loading={run.isPending} disabled={!text.trim()} onClick={() => translate()}>
+              Dịch
+            </Button>
           </div>
           {(out || run.isError) && (
             <div className="rounded-xl bg-slate-50 p-3 flex flex-col gap-1" aria-live="polite">
-              {run.isError ? <span className="text-red-600 text-sm">{run.error.message}</span> : out && (
-                <>
-                  <div lang={langTag(out.target)} className="text-base text-slate-900 whitespace-pre-wrap">{out.text}</div>
-                  {out.reading && <div className="text-xs text-slate-500">{out.reading}</div>}
-                  <div className="flex items-center gap-1">
-                    <Button type="text" size="small" icon={<SoundOutlined />} onClick={() => speak(out.text, locale(out.target))} aria-label="Nghe bản dịch" />
-                    <Button type="text" size="small" icon={<CopyOutlined />} aria-label="Chép"
-                      onClick={() => navigator.clipboard?.writeText(out.text).then(() => message.success('Đã chép'))} />
-                    <span className="flex-1" />
-                    <span className="rounded-md bg-slate-200/70 px-2 py-0.5 text-[11px] font-semibold text-slate-600">
-                      {out.via === 'online' ? 'Dịch online (AI)' : 'Dịch offline trên máy'}
-                    </span>
-                  </div>
-                </>
+              {run.isError ? (
+                <span className="text-red-600 text-sm">{run.error.message}</span>
+              ) : (
+                out && (
+                  <>
+                    <div lang={langTag(out.target)} className="text-base text-slate-900 whitespace-pre-wrap">
+                      {out.text}
+                    </div>
+                    {out.reading && <div className="text-xs text-slate-500">{out.reading}</div>}
+                    <div className="flex items-center gap-1">
+                      <Button
+                        type="text"
+                        size="small"
+                        icon={<SoundOutlined />}
+                        onClick={() => speak(out.text, locale(out.target))}
+                        aria-label="Nghe bản dịch"
+                      />
+                      <Button
+                        type="text"
+                        size="small"
+                        icon={<CopyOutlined />}
+                        aria-label="Chép"
+                        onClick={() => navigator.clipboard?.writeText(out.text).then(() => message.success('Đã chép'))}
+                      />
+                      <span className="flex-1" />
+                      <span className="rounded-md bg-slate-200/70 px-2 py-0.5 text-[11px] font-semibold text-slate-600">
+                        {out.via === 'online' ? 'Dịch online (AI)' : 'Dịch offline trên máy'}
+                      </span>
+                    </div>
+                  </>
+                )
               )}
             </div>
           )}
         </section>
       )}
-      <button type="button" aria-label="Dịch nhanh" title="Dịch nhanh (kéo để di chuyển)"
-        onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp}
+      <button
+        type="button"
+        aria-label="Dịch nhanh"
+        title="Dịch nhanh (kéo để di chuyển)"
+        onPointerDown={onDown}
+        onPointerMove={onMove}
+        onPointerUp={onUp}
         style={{ right: at.x, bottom: at.y, width: SIZE, height: SIZE, touchAction: 'none' }}
-        className="fixed z-50 rounded-full bg-brand-600 hover:bg-brand-700 text-white shadow-xl flex items-center justify-center cursor-grab active:cursor-grabbing select-none">
+        className="fixed z-50 rounded-full bg-brand-600 hover:bg-brand-700 text-white shadow-xl flex items-center justify-center cursor-grab active:cursor-grabbing select-none"
+      >
         {open ? <CloseOutlined className="text-xl" /> : <TranslationOutlined className="text-2xl" />}
       </button>
     </>

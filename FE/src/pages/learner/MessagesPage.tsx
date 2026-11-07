@@ -18,15 +18,20 @@ const when = (iso: string) => (dayjs(iso).isSame(dayjs(), 'day') ? dayjs(iso).fo
 function ThreadList({ threads, active }: { threads: DirectThread[]; active?: number }) {
   if (!threads.length)
     return (
-      <EmptyState art={<Prismo mood="happy" size={80} />} title="Chưa có cuộc trò chuyện"
-        description="Hai bạn theo dõi nhau là nhắn tin được. Mở hồ sơ một bạn học trong Cộng đồng và bấm “Nhắn tin”." />
+      <EmptyState
+        art={<Prismo mood="happy" size={80} />}
+        title="Chưa có cuộc trò chuyện"
+        description="Hai bạn theo dõi nhau là nhắn tin được. Mở hồ sơ một bạn học trong Cộng đồng và bấm “Nhắn tin”."
+      />
     )
   return (
     <ul className="flex flex-col">
       {threads.map((t) => (
         <li key={t.id}>
-          <Link to={`/messages/${t.id}`}
-            className={`flex items-center gap-3 rounded-xl px-3 py-2.5 ${t.id === active ? 'bg-brand-50' : 'hover:bg-slate-50'}`}>
+          <Link
+            to={`/messages/${t.id}`}
+            className={`flex items-center gap-3 rounded-xl px-3 py-2.5 ${t.id === active ? 'bg-brand-50' : 'hover:bg-slate-50'}`}
+          >
             <UserAvatar name={t.other.display_name} src={t.other.avatar} mascot={t.other.mascot} size={40} />
             <span className="min-w-0 flex-1">
               <span className="flex items-baseline justify-between gap-2">
@@ -34,8 +39,12 @@ function ThreadList({ threads, active }: { threads: DirectThread[]; active?: num
                 {t.last_message && <span className="num text-xs text-slate-500 shrink-0">{when(t.last_message.created_at)}</span>}
               </span>
               <span className="flex items-center justify-between gap-2">
-                <span className={`truncate text-sm ${t.unread ? 'text-slate-800' : 'text-slate-500'}`}>{t.last_message?.sticker ? 'Sticker' : t.last_message?.content}</span>
-                {t.unread > 0 && <span className="num shrink-0 rounded-full bg-brand-600 px-1.5 text-xs font-bold text-white">{t.unread}</span>}
+                <span className={`truncate text-sm ${t.unread ? 'text-slate-800' : 'text-slate-500'}`}>
+                  {t.last_message?.sticker ? 'Sticker' : t.last_message?.content}
+                </span>
+                {t.unread > 0 && (
+                  <span className="num shrink-0 rounded-full bg-brand-600 px-1.5 text-xs font-bold text-white">{t.unread}</span>
+                )}
               </span>
             </span>
           </Link>
@@ -57,11 +66,14 @@ function Conversation({ id }: { id: number }) {
 
   useEffect(() => {
     setMessages(null)
-    messagesApi.list(id).then((r) => {
-      setMessages(r.results)
-      setHasMore(r.has_more)
-      queryClient.invalidateQueries({ queryKey: ['dm-threads'] }) // opening it marked them read
-    }).catch((e) => message.error(errorMessage(e)))
+    messagesApi
+      .list(id)
+      .then((r) => {
+        setMessages(r.results)
+        setHasMore(r.has_more)
+        queryClient.invalidateQueries({ queryKey: ['dm-threads'] }) // opening it marked them read
+      })
+      .catch((e) => message.error(errorMessage(e)))
   }, [id, message, queryClient])
 
   // realtime: new messages (also the ones I sent from another tab) and "seen"
@@ -89,7 +101,9 @@ function Conversation({ id }: { id: number }) {
     return () => window.removeEventListener('lingoprism:dm', on)
   }, [id, me?.id])
 
-  useEffect(() => { bottom.current?.scrollIntoView({ block: 'end' }) }, [messages?.length])
+  useEffect(() => {
+    bottom.current?.scrollIntoView({ block: 'end' })
+  }, [messages?.length])
 
   const older = async () => {
     if (!messages?.length) return
@@ -104,7 +118,10 @@ function Conversation({ id }: { id: number }) {
     if ((!content && !sticker) || !me) return
     if (!sticker) setText('')
     const client_id = `${me.id}-${Date.now()}`
-    setMessages((l) => [...(l ?? []), { id: -Date.now(), thread: id, sender: me.id, content, sticker, client_id, read_at: null, created_at: new Date().toISOString() }])
+    setMessages((l) => [
+      ...(l ?? []),
+      { id: -Date.now(), thread: id, sender: me.id, content, sticker, client_id, read_at: null, created_at: new Date().toISOString() },
+    ])
     try {
       const m = sticker ? await messagesApi.sendSticker(id, sticker, client_id) : await messagesApi.send(id, content, client_id)
       setMessages((l) => l?.map((x) => (x.client_id === client_id ? m : x)) ?? l)
@@ -133,37 +150,64 @@ function Conversation({ id }: { id: number }) {
             <UserAvatar name={t.other.display_name} src={t.other.avatar} mascot={t.other.mascot} size={36} />
             <span className="truncate font-bold text-slate-800">{t.other.display_name}</span>
           </Link>
-        ) : <Skeleton.Input active size="small" />}
+        ) : (
+          <Skeleton.Input active size="small" />
+        )}
         {t && (
           <span className="ml-auto">
-            <ReportUserButton compact userId={t.other.id} name={t.other.display_name} threadId={t.id}
-              onDone={() => { queryClient.invalidateQueries({ queryKey: ['dm-threads'] }); thread.refetch() }} />
+            <ReportUserButton
+              compact
+              userId={t.other.id}
+              name={t.other.display_name}
+              threadId={t.id}
+              onDone={() => {
+                queryClient.invalidateQueries({ queryKey: ['dm-threads'] })
+                thread.refetch()
+              }}
+            />
           </span>
         )}
       </div>
       <div className="flex-1 overflow-y-auto flex flex-col gap-2 p-4" aria-live="polite">
         {messages === null && <Skeleton active />}
-        {hasMore && <Button size="small" className="self-center" onClick={older}>Tin cũ hơn</Button>}
+        {hasMore && (
+          <Button size="small" className="self-center" onClick={older}>
+            Tin cũ hơn
+          </Button>
+        )}
         {messages?.length === 0 && (
-          <div className="m-auto text-center text-slate-500 max-w-[36ch]">Gửi lời chào đầu tiên. Thử viết một câu bằng ngôn ngữ hai bạn đang học!</div>
+          <div className="m-auto text-center text-slate-500 max-w-[36ch]">
+            Gửi lời chào đầu tiên. Thử viết một câu bằng ngôn ngữ hai bạn đang học!
+          </div>
         )}
         {messages?.map((m, i) => {
           const mine = m.sender === me?.id
           const lastMine = mine && !messages.slice(i + 1).some((x) => x.sender === me?.id)
           return (
             <div key={m.id} className={`flex flex-col ${mine ? 'items-end' : 'items-start'}`}>
-              <MessageActions text={m.sticker ? '' : m.content} hearts={m.hearts} meId={me?.id} mine={mine}
-                onHeart={m.id > 0 && t?.can_message ? () => heart(m.id) : undefined}>
+              <MessageActions
+                text={m.sticker ? '' : m.content}
+                hearts={m.hearts}
+                meId={me?.id}
+                mine={mine}
+                onHeart={m.id > 0 && t?.can_message ? () => heart(m.id) : undefined}
+              >
                 {m.sticker ? (
-                  <div title={dayjs(m.created_at).format('HH:mm DD/MM/YYYY')}><StickerImage code={m.sticker} size={120} /></div>
+                  <div title={dayjs(m.created_at).format('HH:mm DD/MM/YYYY')}>
+                    <StickerImage code={m.sticker} size={120} />
+                  </div>
                 ) : (
-                  <div title={dayjs(m.created_at).format('HH:mm DD/MM/YYYY')}
-                    className={`whitespace-pre-wrap break-words rounded-2xl px-3 py-2 ${mine ? 'bg-brand-600 text-white rounded-br-md' : 'bg-slate-100 text-slate-800 rounded-bl-md'}`}>
+                  <div
+                    title={dayjs(m.created_at).format('HH:mm DD/MM/YYYY')}
+                    className={`whitespace-pre-wrap break-words rounded-2xl px-3 py-2 ${mine ? 'bg-brand-600 text-white rounded-br-md' : 'bg-slate-100 text-slate-800 rounded-bl-md'}`}
+                  >
                     {m.content}
                   </div>
                 )}
               </MessageActions>
-              {lastMine && <span className="text-[11px] text-slate-500 mt-0.5">{m.id < 0 ? 'Đang gửi…' : m.read_at ? 'Đã xem' : 'Đã gửi'}</span>}
+              {lastMine && (
+                <span className="text-[11px] text-slate-500 mt-0.5">{m.id < 0 ? 'Đang gửi…' : m.read_at ? 'Đã xem' : 'Đã gửi'}</span>
+              )}
             </div>
           )
         })}
@@ -176,8 +220,15 @@ function Conversation({ id }: { id: number }) {
           <div className="flex flex-col gap-2">
             <ChatVoiceTools text={text} setText={setText} />
             <div className="flex gap-2">
-              <Input.Search placeholder="Nhập tin nhắn…" enterButton="Gửi" aria-label="Tin nhắn" maxLength={1000}
-                value={text} onChange={(e) => setText(e.target.value)} onSearch={() => send()} />
+              <Input.Search
+                placeholder="Nhập tin nhắn…"
+                enterButton="Gửi"
+                aria-label="Tin nhắn"
+                maxLength={1000}
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                onSearch={() => send()}
+              />
               <StickerPicker onPick={send} />
             </div>
           </div>
@@ -197,22 +248,30 @@ export default function MessagesPage() {
   if (isKid)
     return (
       <div className="max-w-3xl mx-auto lp-card p-6">
-        <EmptyState art={<Prismo mood="think" size={80} />} title="Tin nhắn dành cho người lớn"
-          description="Bạn vẫn có thể hỏi giáo viên trong mục Hỏi giáo viên." />
+        <EmptyState
+          art={<Prismo mood="think" size={80} />}
+          title="Tin nhắn dành cho người lớn"
+          description="Bạn vẫn có thể hỏi giáo viên trong mục Hỏi giáo viên."
+        />
       </div>
     )
   return (
     <div className="max-w-5xl mx-auto flex flex-col gap-6">
-      <PageHeader title="Tin nhắn" back={active && !wide ? { to: '/messages', label: 'Tất cả tin nhắn' } : undefined}
-        description="Nhắn riêng với bạn học đã theo dõi nhau." />
+      <PageHeader
+        title="Tin nhắn"
+        back={active && !wide ? { to: '/messages', label: 'Tất cả tin nhắn' } : undefined}
+        description="Nhắn riêng với bạn học đã theo dõi nhau."
+      />
       <div className="grid grid-cols-1 gap-4 md:grid-cols-[300px_minmax(0,1fr)]">
         {(wide || !active) && (
           <div className="lp-card p-2 md:h-[min(640px,calc(100dvh-200px))] md:overflow-y-auto">
             {threads.isLoading ? <Skeleton active avatar className="p-3" /> : <ThreadList threads={threads.data ?? []} active={active} />}
           </div>
         )}
-        {active ? <Conversation id={active} /> : wide && (
-          <div className="lp-card grid place-items-center p-6 text-slate-500">Chọn một cuộc trò chuyện</div>
+        {active ? (
+          <Conversation id={active} />
+        ) : (
+          wide && <div className="lp-card grid place-items-center p-6 text-slate-500">Chọn một cuộc trò chuyện</div>
         )}
       </div>
     </div>
@@ -225,15 +284,21 @@ export function MessageButton({ userId }: { userId: number }) {
   const { message } = App.useApp()
   const [busy, setBusy] = useState(false)
   return (
-    <Button size="large" loading={busy} onClick={async () => {
-      setBusy(true)
-      try {
-        navigate(`/messages/${(await messagesApi.open(userId)).id}`)
-      } catch (e) {
-        message.error(errorMessage(e))
-      } finally {
-        setBusy(false)
-      }
-    }}>Nhắn tin</Button>
+    <Button
+      size="large"
+      loading={busy}
+      onClick={async () => {
+        setBusy(true)
+        try {
+          navigate(`/messages/${(await messagesApi.open(userId)).id}`)
+        } catch (e) {
+          message.error(errorMessage(e))
+        } finally {
+          setBusy(false)
+        }
+      }}
+    >
+      Nhắn tin
+    </Button>
   )
 }

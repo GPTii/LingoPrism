@@ -14,9 +14,21 @@ export default function PostPage() {
   return (
     <div className="max-w-3xl mx-auto flex flex-col gap-5">
       <PageHeader back={{ to: '/community', label: 'Cộng đồng' }} title="Bài viết" />
-      {post.isLoading ? <div className="lp-card p-6"><Skeleton active avatar /></div>
-        : post.data ? <PostCard post={post.data} commentsOpen />
-          : <div className="lp-card"><EmptyState art={<Prismo mood="sad" size={88} />} title="Không xem được bài viết này" description={post.error ? errorMessage(post.error) : 'Bài có thể đã bị xoá.'} /></div>}
+      {post.isLoading ? (
+        <div className="lp-card p-6">
+          <Skeleton active avatar />
+        </div>
+      ) : post.data ? (
+        <PostCard post={post.data} commentsOpen />
+      ) : (
+        <div className="lp-card">
+          <EmptyState
+            art={<Prismo mood="sad" size={88} />}
+            title="Không xem được bài viết này"
+            description={post.error ? errorMessage(post.error) : 'Bài có thể đã bị xoá.'}
+          />
+        </div>
+      )}
     </div>
   )
 }

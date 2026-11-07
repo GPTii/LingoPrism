@@ -40,14 +40,23 @@ export default function PhotoDialogue({ detectionId, locale }: { detectionId: nu
       <ol className="m-0 p-0 list-none flex flex-col gap-2.5">
         {d.lines.map((l, n) => (
           <li key={n} className="flex gap-3">
-            <span className={`num mt-0.5 h-6 w-6 shrink-0 rounded-full text-xs font-bold grid place-items-center ${l.speaker === 'A' ? 'bg-brand-50 text-brand-700' : 'bg-slate-100 text-slate-600'}`}>
+            <span
+              className={`num mt-0.5 h-6 w-6 shrink-0 rounded-full text-xs font-bold grid place-items-center ${l.speaker === 'A' ? 'bg-brand-50 text-brand-700' : 'bg-slate-100 text-slate-600'}`}
+            >
               {l.speaker}
             </span>
             <div className="min-w-0 flex-1">
               <div className="flex items-start gap-2">
-                <span lang={langTag(d.language)} className="text-slate-800 font-medium">{l.text}</span>
-                <button type="button" onClick={() => speak(l.text, locale)} aria-label="Nghe câu này" title="Nghe câu này"
-                  className="text-brand-600 hover:text-brand-700 cursor-pointer shrink-0">
+                <span lang={langTag(d.language)} className="text-slate-800 font-medium">
+                  {l.text}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => speak(l.text, locale)}
+                  aria-label="Nghe câu này"
+                  title="Nghe câu này"
+                  className="text-brand-600 hover:text-brand-700 cursor-pointer shrink-0"
+                >
                   <SoundOutlined />
                 </button>
               </div>

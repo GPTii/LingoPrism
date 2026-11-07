@@ -41,7 +41,18 @@ export function ReportButton({ card }: { card: WordCard }) {
   }
   return (
     <>
-      <Button size="small" type="text" icon={<FlagOutlined />} className="!text-slate-500" onClick={(e) => { e.stopPropagation(); setOpen(true) }}>Báo lỗi</Button>
+      <Button
+        size="small"
+        type="text"
+        icon={<FlagOutlined />}
+        className="!text-slate-500"
+        onClick={(e) => {
+          e.stopPropagation()
+          setOpen(true)
+        }}
+      >
+        Báo lỗi
+      </Button>
       <Modal title="Báo lỗi từ vựng" open={open} onOk={submit} onCancel={() => setOpen(false)} okText="Gửi báo lỗi" cancelText="Huỷ">
         <Form form={form} layout="vertical">
           <Form.Item name="reason" label="Lỗi gì?" rules={[{ required: true, message: 'Chọn loại lỗi' }]}>
@@ -79,12 +90,22 @@ export default function WordCardView({ card, topicId }: { card: WordCard; topicI
   return (
     <div className="relative lp-card p-4 flex flex-col gap-3 transition-colors hover:border-[var(--line-strong)]">
       {card.level && (
-        <span className="absolute top-3 left-3 z-10 rounded-md px-1.5 py-0.5 text-[11px] font-bold text-white" style={{ background: LEVEL_COLORS[card.level - 1] }}>
+        <span
+          className="absolute top-3 left-3 z-10 rounded-md px-1.5 py-0.5 text-[11px] font-bold text-white"
+          style={{ background: LEVEL_COLORS[card.level - 1] }}
+        >
           Cấp {card.level}
         </span>
       )}
       <div className="h-28 rounded-xl bg-slate-50 flex items-center justify-center overflow-hidden">
-        <WordPicture image={card.image} emoji={card.emoji || '🖼️'} credit={card.image_credit} source={card.image_source} alt={card.meaning_vi} height="h-28" />
+        <WordPicture
+          image={card.image}
+          emoji={card.emoji || '🖼️'}
+          credit={card.image_credit}
+          source={card.image_source}
+          alt={card.meaning_vi}
+          height="h-28"
+        />
       </div>
       <TargetWord target={card.target} size="md" />
       <div className="text-center">
@@ -94,35 +115,43 @@ export default function WordCardView({ card, topicId }: { card: WordCard; topicI
       {card.examples[0] && (
         <div className="text-sm text-slate-600 bg-slate-50 rounded-lg p-2">
           {card.examples[0].tokens?.length ? (
-            <TokenLine tokens={card.examples[0].tokens} language={card.target.language} highlight={card.examples[0].target_tokens} size="text-base" />
+            <TokenLine
+              tokens={card.examples[0].tokens}
+              language={card.target.language}
+              highlight={card.examples[0].target_tokens}
+              size="text-base"
+            />
           ) : (
             <div lang={langTag(card.target.language)}>{card.examples[0].text}</div>
           )}
           <div className="text-slate-500">{card.examples[0].translation_vi || card.examples[0].translation_en}</div>
         </div>
       )}
-      {card.personal?.recall != null && (() => {
-        const r = card.personal.recall
-        const color = r >= 0.85 ? '#10c79a' : r >= 0.6 ? '#ffb020' : '#ff6b81'
-        return (
-          <div title="Ước tính theo FSRS: khả năng bạn còn nhớ từ này hôm nay">
-            <div className="flex justify-between text-xs text-slate-500 mb-1">
-              <span>Nhớ khoảng</span>
-              <span className="num font-semibold text-slate-700">{Math.round(r * 100)}%</span>
+      {card.personal?.recall != null &&
+        (() => {
+          const r = card.personal.recall
+          const color = r >= 0.85 ? '#10c79a' : r >= 0.6 ? '#ffb020' : '#ff6b81'
+          return (
+            <div title="Ước tính theo FSRS: khả năng bạn còn nhớ từ này hôm nay">
+              <div className="flex justify-between text-xs text-slate-500 mb-1">
+                <span>Nhớ khoảng</span>
+                <span className="num font-semibold text-slate-700">{Math.round(r * 100)}%</span>
+              </div>
+              <div className="h-1.5 rounded-full bg-slate-100 overflow-hidden">
+                <div className="h-full rounded-full" style={{ width: `${Math.round(r * 100)}%`, background: color }} />
+              </div>
             </div>
-            <div className="h-1.5 rounded-full bg-slate-100 overflow-hidden">
-              <div className="h-full rounded-full" style={{ width: `${Math.round(r * 100)}%`, background: color }} />
-            </div>
-          </div>
-        )
-      })()}
+          )
+        })()}
       <div className="flex items-center justify-between mt-auto">
         {card.personal ? (
           <span className={`inline-flex items-center gap-1 text-sm font-semibold ${STATUS[card.personal.status].className}`}>
             <CheckOutlined /> {STATUS[card.personal.status].label}
           </span>
         ) : (
-          <Button size="small" type="primary" icon={<PlusOutlined />} loading={saving} onClick={add}>Lưu từ</Button>
+          <Button size="small" type="primary" icon={<PlusOutlined />} loading={saving} onClick={add}>
+            Lưu từ
+          </Button>
         )}
         <ReportButton card={card} />
       </div>

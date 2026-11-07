@@ -6,7 +6,15 @@ import dayjs from 'dayjs'
 import { api, errorMessage } from '../../api/client'
 import type { Paginated, Role, User } from '../../api/types'
 import { useAuth } from '../../auth/store'
-import { BulkDeleteBar, DateRangeFilter, dateParams, pagination, useBulkDelete, useSelection, type DateRange } from '../../components/DataTools'
+import {
+  BulkDeleteBar,
+  DateRangeFilter,
+  dateParams,
+  pagination,
+  useBulkDelete,
+  useSelection,
+  type DateRange,
+} from '../../components/DataTools'
 import SearchBox from '../../components/SearchBox'
 
 const ROLE_OPTIONS = [
@@ -52,8 +60,17 @@ export default function UsersPage() {
   const activeLanguage = Form.useWatch('active_language', form)
 
   const filters = {
-    search: search || undefined, role, status, learner_type: learnerType, active_language: language, ...dateParams(created),
-    ...(activity === 'never' ? { never_logged_in: 1 } : activity ? { inactive_since: dayjs().subtract(Number(activity), 'day').format('YYYY-MM-DD') } : {}),
+    search: search || undefined,
+    role,
+    status,
+    learner_type: learnerType,
+    active_language: language,
+    ...dateParams(created),
+    ...(activity === 'never'
+      ? { never_logged_in: 1 }
+      : activity
+        ? { inactive_since: dayjs().subtract(Number(activity), 'day').format('YYYY-MM-DD') }
+        : {}),
   }
   const { data, isLoading } = useQuery({
     queryKey: ['admin-users', page, pageSize, filters],
@@ -61,7 +78,12 @@ export default function UsersPage() {
   })
   const selection = useSelection<User>([filters])
   /** every filter change starts again from page 1 */
-  const filter = <V,>(set: (v: V) => void) => (v: V) => { set(v); setPage(1) }
+  const filter =
+    <V,>(set: (v: V) => void) =>
+    (v: V) => {
+      set(v)
+      setPage(1)
+    }
 
   const done = (text: string) => {
     message.success(text)
@@ -106,42 +128,104 @@ export default function UsersPage() {
   return (
     <Card
       title="Người dùng"
-      extra={isAdmin && <Button type="primary" icon={<PlusOutlined />} onClick={() => openForm('new')}>Thêm người dùng</Button>}
+      extra={
+        isAdmin && (
+          <Button type="primary" icon={<PlusOutlined />} onClick={() => openForm('new')}>
+            Thêm người dùng
+          </Button>
+        )
+      }
     >
       <div className="flex flex-wrap gap-2 mb-3">
         <SearchBox placeholder="Tìm email, tên" allowClear onSearch={filter(setSearch)} style={{ width: 220 }} />
         <Select allowClear placeholder="Vai trò" options={ROLE_OPTIONS} value={role} onChange={filter(setRole)} style={{ width: 160 }} />
-        <Select allowClear placeholder="Trạng thái" value={status} onChange={filter(setStatus)} style={{ width: 130 }}
-          options={[{ value: 'active', label: 'Hoạt động' }, { value: 'locked', label: 'Bị khóa' }]} />
-        <Select allowClear placeholder="Đối tượng" value={learnerType} onChange={filter(setLearnerType)} style={{ width: 130 }}
-          options={[{ value: 'adult', label: 'Người lớn' }, { value: 'kid', label: 'Trẻ em' }]} />
-        <Select allowClear placeholder="Đang học" options={LANG_OPTIONS} value={language} onChange={filter(setLanguage)} style={{ width: 140 }} />
-        <Select allowClear placeholder="Hoạt động" options={ACTIVITY_OPTIONS} value={activity} onChange={filter(setActivity)} style={{ width: 210 }} />
+        <Select
+          allowClear
+          placeholder="Trạng thái"
+          value={status}
+          onChange={filter(setStatus)}
+          style={{ width: 130 }}
+          options={[
+            { value: 'active', label: 'Hoạt động' },
+            { value: 'locked', label: 'Bị khóa' },
+          ]}
+        />
+        <Select
+          allowClear
+          placeholder="Đối tượng"
+          value={learnerType}
+          onChange={filter(setLearnerType)}
+          style={{ width: 130 }}
+          options={[
+            { value: 'adult', label: 'Người lớn' },
+            { value: 'kid', label: 'Trẻ em' },
+          ]}
+        />
+        <Select
+          allowClear
+          placeholder="Đang học"
+          options={LANG_OPTIONS}
+          value={language}
+          onChange={filter(setLanguage)}
+          style={{ width: 140 }}
+        />
+        <Select
+          allowClear
+          placeholder="Hoạt động"
+          options={ACTIVITY_OPTIONS}
+          value={activity}
+          onChange={filter(setActivity)}
+          style={{ width: 210 }}
+        />
         <DateRangeFilter value={created} onChange={filter(setCreated)} placeholder={['Tạo từ ngày', 'đến ngày']} />
       </div>
-      <BulkDeleteBar count={selection.keys.length} noun="tài khoản" busy={bulk.busy} onClear={selection.clear}
+      <BulkDeleteBar
+        count={selection.keys.length}
+        noun="tài khoản"
+        busy={bulk.busy}
+        onClear={selection.clear}
         warning="Toàn bộ dữ liệu học của các tài khoản này bị xoá theo. Tài khoản đang đăng nhập và quản trị viên cuối cùng được giữ lại."
-        onDelete={() => bulk.run(selection.keys, (n) => `${n} tài khoản`)} />
+        onDelete={() => bulk.run(selection.keys, (n) => `${n} tài khoản`)}
+      />
       <Table<User>
         rowKey="id"
         loading={isLoading}
         dataSource={data?.results}
         scroll={{ x: 1150 }}
         rowSelection={isAdmin ? { ...selection.rowSelection, getCheckboxProps: (u) => ({ disabled: u.id === me?.id }) } : undefined}
-        pagination={pagination(page, data?.count, pageSize, (p, size) => { setPage(size === pageSize ? p : 1); setPageSize(size) })}
+        pagination={pagination(page, data?.count, pageSize, (p, size) => {
+          setPage(size === pageSize ? p : 1)
+          setPageSize(size)
+        })}
         columns={[
           { title: 'Email', dataIndex: 'email' },
           { title: 'Tên', dataIndex: 'display_name' },
-          { title: 'Vai trò', dataIndex: 'role', render: (v: Role) => <Tag color={ROLE_COLOR[v]}>{ROLE_OPTIONS.find((o) => o.value === v)?.label}</Tag> },
-          { title: 'Đối tượng', dataIndex: 'learner_type', render: (v) => (v === 'kid' ? <Tag color="orange">Trẻ em</Tag> : <Tag>Người lớn</Tag>) },
+          {
+            title: 'Vai trò',
+            dataIndex: 'role',
+            render: (v: Role) => <Tag color={ROLE_COLOR[v]}>{ROLE_OPTIONS.find((o) => o.value === v)?.label}</Tag>,
+          },
+          {
+            title: 'Đối tượng',
+            dataIndex: 'learner_type',
+            render: (v) => (v === 'kid' ? <Tag color="orange">Trẻ em</Tag> : <Tag>Người lớn</Tag>),
+          },
           {
             title: 'Đang học',
             dataIndex: 'active_language',
-            render: (v: string, row) => (v === 'zh' ? `Trung (${row.zh_script === 'hant' ? 'phồn' : 'giản'})` : LANG_LABEL[v] ?? v),
+            render: (v: string, row) => (v === 'zh' ? `Trung (${row.zh_script === 'hant' ? 'phồn' : 'giản'})` : (LANG_LABEL[v] ?? v)),
           },
-          { title: 'Trạng thái', dataIndex: 'status', render: (v) => (v === 'locked' ? <Tag color="red">Bị khóa</Tag> : <Tag color="green">Hoạt động</Tag>) },
+          {
+            title: 'Trạng thái',
+            dataIndex: 'status',
+            render: (v) => (v === 'locked' ? <Tag color="red">Bị khóa</Tag> : <Tag color="green">Hoạt động</Tag>),
+          },
           { title: 'Ngày tạo', dataIndex: 'created_at', render: (v) => dayjs(v).format('DD/MM/YYYY') },
-          { title: 'Đăng nhập gần nhất', dataIndex: 'last_login', render: (v) => (v ? dayjs(v).format('DD/MM/YYYY') : <span className="text-slate-400">Chưa</span>) },
+          {
+            title: 'Đăng nhập gần nhất',
+            dataIndex: 'last_login',
+            render: (v) => (v ? dayjs(v).format('DD/MM/YYYY') : <span className="text-slate-400">Chưa</span>),
+          },
           {
             title: '',
             key: 'actions',
@@ -184,25 +268,52 @@ export default function UsersPage() {
           <Form.Item
             name="password"
             label={editing === 'new' ? 'Mật khẩu' : 'Mật khẩu mới (để trống nếu không đổi)'}
-            rules={[{ required: editing === 'new', message: 'Nhập mật khẩu' }, { min: 8, message: 'Ít nhất 8 ký tự' }]}
+            rules={[
+              { required: editing === 'new', message: 'Nhập mật khẩu' },
+              { min: 8, message: 'Ít nhất 8 ký tự' },
+            ]}
           >
             <Input.Password autoComplete="new-password" />
           </Form.Item>
-          <Form.Item name="display_name" label="Tên hiển thị"><Input /></Form.Item>
+          <Form.Item name="display_name" label="Tên hiển thị">
+            <Input />
+          </Form.Item>
           <div className="grid grid-cols-2 gap-x-4">
-            <Form.Item name="role" label="Vai trò"><Select options={ROLE_OPTIONS} disabled={isSelf} /></Form.Item>
+            <Form.Item name="role" label="Vai trò">
+              <Select options={ROLE_OPTIONS} disabled={isSelf} />
+            </Form.Item>
             <Form.Item name="status" label="Trạng thái">
-              <Select disabled={isSelf} options={[{ value: 'active', label: 'Hoạt động' }, { value: 'locked', label: 'Bị khóa' }]} />
+              <Select
+                disabled={isSelf}
+                options={[
+                  { value: 'active', label: 'Hoạt động' },
+                  { value: 'locked', label: 'Bị khóa' },
+                ]}
+              />
             </Form.Item>
             <Form.Item name="learner_type" label="Đối tượng">
-              <Select options={[{ value: 'adult', label: 'Người lớn' }, { value: 'kid', label: 'Trẻ em' }]} />
+              <Select
+                options={[
+                  { value: 'adult', label: 'Người lớn' },
+                  { value: 'kid', label: 'Trẻ em' },
+                ]}
+              />
             </Form.Item>
-            <Form.Item name="active_language" label="Ngôn ngữ đang học"><Select options={LANG_OPTIONS} /></Form.Item>
+            <Form.Item name="active_language" label="Ngôn ngữ đang học">
+              <Select options={LANG_OPTIONS} />
+            </Form.Item>
           </div>
-          <Form.Item name="learning_languages" label="Các ngôn ngữ đăng ký học"><Select mode="multiple" options={LANG_OPTIONS} /></Form.Item>
+          <Form.Item name="learning_languages" label="Các ngôn ngữ đăng ký học">
+            <Select mode="multiple" options={LANG_OPTIONS} />
+          </Form.Item>
           {activeLanguage === 'zh' && (
             <Form.Item name="zh_script" label="Chữ Hán">
-              <Select options={[{ value: 'hans', label: 'Giản thể (Trung Quốc đại lục)' }, { value: 'hant', label: 'Phồn thể (Đài Loan)' }]} />
+              <Select
+                options={[
+                  { value: 'hans', label: 'Giản thể (Trung Quốc đại lục)' },
+                  { value: 'hant', label: 'Phồn thể (Đài Loan)' },
+                ]}
+              />
             </Form.Item>
           )}
         </Form>

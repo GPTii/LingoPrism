@@ -10,7 +10,10 @@ export function RequireAuth() {
   // The saved user may predate newer fields (e.g. public_id), so it is refreshed once per page load.
   useEffect(() => {
     if (!signedIn) return
-    authApi.me().then((fresh) => useAuth.getState().setUser(fresh)).catch(() => {})
+    authApi
+      .me()
+      .then((fresh) => useAuth.getState().setUser(fresh))
+      .catch(() => {})
   }, [signedIn])
   if (!user) return <Navigate to="/login" replace state={{ from: location.pathname }} />
   return <Outlet />

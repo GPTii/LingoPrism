@@ -18,10 +18,16 @@ function remembered(key: string, fallback: TranslateLang): TranslateLang {
   try {
     const v = localStorage.getItem(key) as TranslateLang | null
     return v && LANGS.some((l) => l.value === v) ? v : fallback
-  } catch { return fallback }
+  } catch {
+    return fallback
+  }
 }
 function remember(key: string, v: string) {
-  try { localStorage.setItem(key, v) } catch { /* private window */ }
+  try {
+    localStorage.setItem(key, v)
+  } catch {
+    /* private window */
+  }
 }
 
 /**
@@ -41,7 +47,10 @@ export default function ChatVoiceTools({ text, setText, disabled }: { text: stri
   const shown = done && done.result === text ? done : null
 
   const talk = async () => {
-    if (listening) { stop.current?.(); return }
+    if (listening) {
+      stop.current?.()
+      return
+    }
     const { result, stop: s } = listen(LANGS.find((l) => l.value === micLang)!.locale, 15000)
     stop.current = s
     setListening(true)
@@ -58,7 +67,10 @@ export default function ChatVoiceTools({ text, setText, disabled }: { text: stri
   const translate = async (target: TranslateLang) => {
     remember('lp-chat-to', target)
     const original = text.trim()
-    if (!original) { message.info('Nhập hoặc nói một câu trước rồi hãy dịch.'); return }
+    if (!original) {
+      message.info('Nhập hoặc nói một câu trước rồi hãy dịch.')
+      return
+    }
     setBusy(true)
     try {
       const out = await learnApi.translate(original, 'auto', target)
@@ -83,8 +95,14 @@ export default function ChatVoiceTools({ text, setText, disabled }: { text: stri
           <span className="rounded bg-slate-100 px-1.5 py-0.5 font-semibold text-slate-600">Bản dịch máy</span>
           <span>sang {label(shown.target)}</span>
           {shown.reading && <span className="text-slate-600">· {shown.reading}</span>}
-          <button type="button" className="inline-flex items-center gap-1 font-semibold text-brand-600 hover:text-brand-700 cursor-pointer"
-            onClick={() => { setText(shown.original); setDone(null) }}>
+          <button
+            type="button"
+            className="inline-flex items-center gap-1 font-semibold text-brand-600 hover:text-brand-700 cursor-pointer"
+            onClick={() => {
+              setText(shown.original)
+              setDone(null)
+            }}
+          >
             <UndoOutlined /> Hoàn tác
           </button>
         </div>
@@ -93,26 +111,46 @@ export default function ChatVoiceTools({ text, setText, disabled }: { text: stri
         {mic && (
           <Space.Compact size="small">
             <Tooltip title={listening ? 'Chạm để dừng' : `Nói bằng ${label(micLang)}`}>
-              <Button size="small" type={listening ? 'primary' : 'default'} danger={listening} icon={<AudioOutlined />}
-                disabled={disabled} onClick={talk} aria-label={listening ? 'Dừng nghe' : `Nói bằng ${label(micLang)}`}>
+              <Button
+                size="small"
+                type={listening ? 'primary' : 'default'}
+                danger={listening}
+                icon={<AudioOutlined />}
+                disabled={disabled}
+                onClick={talk}
+                aria-label={listening ? 'Dừng nghe' : `Nói bằng ${label(micLang)}`}
+              >
                 {listening ? 'Đang nghe…' : 'Nói'}
               </Button>
             </Tooltip>
-            <Dropdown disabled={disabled || listening} trigger={['click']} menu={{
-              selectable: true, selectedKeys: [micLang],
-              items: LANGS.map((l) => ({ key: l.value, label: `Nói bằng ${l.label}` })),
-              onClick: ({ key }) => { setMicLang(key as TranslateLang); remember('lp-chat-mic', key) },
-            }}>
+            <Dropdown
+              disabled={disabled || listening}
+              trigger={['click']}
+              menu={{
+                selectable: true,
+                selectedKeys: [micLang],
+                items: LANGS.map((l) => ({ key: l.value, label: `Nói bằng ${l.label}` })),
+                onClick: ({ key }) => {
+                  setMicLang(key as TranslateLang)
+                  remember('lp-chat-mic', key)
+                },
+              }}
+            >
               <Button size="small" icon={<DownOutlined className="text-[10px]" />} aria-label="Chọn ngôn ngữ nói" />
             </Dropdown>
           </Space.Compact>
         )}
         {canTranslate && (
-          <Dropdown disabled={disabled || busy || !text.trim()} trigger={['click']} menu={{
-            selectable: true, selectedKeys: [lastTarget],
-            items: LANGS.map((l) => ({ key: l.value, label: `Dịch sang ${l.label}` })),
-            onClick: ({ key }) => translate(key as TranslateLang),
-          }}>
+          <Dropdown
+            disabled={disabled || busy || !text.trim()}
+            trigger={['click']}
+            menu={{
+              selectable: true,
+              selectedKeys: [lastTarget],
+              items: LANGS.map((l) => ({ key: l.value, label: `Dịch sang ${l.label}` })),
+              onClick: ({ key }) => translate(key as TranslateLang),
+            }}
+          >
             <Button size="small" icon={<TranslationOutlined />} loading={busy} aria-label="Dịch tin nhắn trước khi gửi">
               Dịch <DownOutlined className="text-[10px]" />
             </Button>

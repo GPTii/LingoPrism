@@ -14,8 +14,20 @@ const REASONS = [
 
 /** "Báo cáo" a learner to the moderators. From a conversation (`threadId`) the server keeps its last messages as
  * evidence; "chặn luôn" also blocks them at once, which is what someone being harassed usually wants. */
-export function ReportUserButton({ userId, name, threadId, blocked, onDone, compact }: {
-  userId: number; name: string; threadId?: number; blocked?: boolean; onDone?: () => void; compact?: boolean
+export function ReportUserButton({
+  userId,
+  name,
+  threadId,
+  blocked,
+  onDone,
+  compact,
+}: {
+  userId: number
+  name: string
+  threadId?: number
+  blocked?: boolean
+  onDone?: () => void
+  compact?: boolean
 }) {
   const { message } = App.useApp()
   const [open, setOpen] = useState(false)
@@ -44,20 +56,35 @@ export function ReportUserButton({ userId, name, threadId, blocked, onDone, comp
       {compact ? (
         <Button type="text" icon={<FlagOutlined />} onClick={() => setOpen(true)} aria-label={`Báo cáo ${name}`} title="Báo cáo" />
       ) : (
-        <Button size="large" type="text" icon={<FlagOutlined />} onClick={() => setOpen(true)}>Báo cáo</Button>
+        <Button size="large" type="text" icon={<FlagOutlined />} onClick={() => setOpen(true)}>
+          Báo cáo
+        </Button>
       )}
-      <Modal open={open} title={`Báo cáo ${name}`} onCancel={() => setOpen(false)} onOk={submit} confirmLoading={busy}
-        okText="Gửi báo cáo" cancelText="Huỷ" okButtonProps={{ danger: true }} destroyOnHidden>
+      <Modal
+        open={open}
+        title={`Báo cáo ${name}`}
+        onCancel={() => setOpen(false)}
+        onOk={submit}
+        confirmLoading={busy}
+        okText="Gửi báo cáo"
+        cancelText="Huỷ"
+        okButtonProps={{ danger: true }}
+        destroyOnHidden
+      >
         <div className="flex flex-col gap-3">
           <p className="text-slate-500 m-0">
             {threadId
               ? 'Đội ngũ kiểm duyệt sẽ xem các tin nhắn gần đây trong cuộc trò chuyện này. Người kia không biết ai đã báo cáo.'
               : 'Người kia không biết ai đã báo cáo.'}
           </p>
-          <Radio.Group value={reason} onChange={(e) => setReason(e.target.value)} className="flex! flex-col gap-2"
-            options={REASONS} />
-          <Input.TextArea value={details} onChange={(e) => setDetails(e.target.value)} maxLength={500} rows={3}
-            placeholder={reason === 'other' ? 'Mô tả chuyện gì đã xảy ra (bắt buộc)' : 'Thêm chi tiết (không bắt buộc)'} />
+          <Radio.Group value={reason} onChange={(e) => setReason(e.target.value)} className="flex! flex-col gap-2" options={REASONS} />
+          <Input.TextArea
+            value={details}
+            onChange={(e) => setDetails(e.target.value)}
+            maxLength={500}
+            rows={3}
+            placeholder={reason === 'other' ? 'Mô tả chuyện gì đã xảy ra (bắt buộc)' : 'Thêm chi tiết (không bắt buộc)'}
+          />
           {!blocked && (
             <Checkbox checked={block} onChange={(e) => setBlock(e.target.checked)}>
               Chặn {name} luôn: hai bạn không nhắn tin và không thấy bài của nhau nữa

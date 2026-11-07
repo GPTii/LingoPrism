@@ -23,10 +23,42 @@ interface Answers {
 }
 
 const LANGS = [
-  { value: 'en', label: <span className="inline-flex items-center gap-2"><LangGlyph lang="en" size={18} />Tiếng Anh</span> },
-  { value: 'zh:hans', label: <span className="inline-flex items-center gap-2"><LangGlyph lang="zh" script="hans" size={18} />Tiếng Trung giản thể</span> },
-  { value: 'zh:hant', label: <span className="inline-flex items-center gap-2"><LangGlyph lang="zh" script="hant" size={18} />Tiếng Trung phồn thể</span> },
-  { value: 'vi', label: <span className="inline-flex items-center gap-2"><LangGlyph lang="vi" size={18} />Tiếng Việt</span> },
+  {
+    value: 'en',
+    label: (
+      <span className="inline-flex items-center gap-2">
+        <LangGlyph lang="en" size={18} />
+        Tiếng Anh
+      </span>
+    ),
+  },
+  {
+    value: 'zh:hans',
+    label: (
+      <span className="inline-flex items-center gap-2">
+        <LangGlyph lang="zh" script="hans" size={18} />
+        Tiếng Trung giản thể
+      </span>
+    ),
+  },
+  {
+    value: 'zh:hant',
+    label: (
+      <span className="inline-flex items-center gap-2">
+        <LangGlyph lang="zh" script="hant" size={18} />
+        Tiếng Trung phồn thể
+      </span>
+    ),
+  },
+  {
+    value: 'vi',
+    label: (
+      <span className="inline-flex items-center gap-2">
+        <LangGlyph lang="vi" size={18} />
+        Tiếng Việt
+      </span>
+    ),
+  },
 ]
 
 /**
@@ -63,7 +95,7 @@ export default function WelcomePage() {
         onboarding_completed: true,
       })
       setUser(updated)
-      doneAskingProfile()  // the survey just asked for all of it
+      doneAskingProfile() // the survey just asked for all of it
       queryClient.invalidateQueries()
       navigate('/', { replace: true })
     } catch (e) {
@@ -75,32 +107,67 @@ export default function WelcomePage() {
 
   return (
     <AuthCard title="Chào mừng bạn!" subtitle="Trả lời vài câu để LingoPrism chọn bài học hợp với bạn. Bạn đổi lại được trong Hồ sơ.">
-      <Form<Answers> layout="vertical" requiredMark={false} onFinish={onFinish}
-        initialValues={{ display_name: user.display_name, language: 'en', learner_type: 'adult', purpose: 'communication', daily_minutes: 10 }}>
+      <Form<Answers>
+        layout="vertical"
+        requiredMark={false}
+        onFinish={onFinish}
+        initialValues={{
+          display_name: user.display_name,
+          language: 'en',
+          learner_type: 'adult',
+          purpose: 'communication',
+          daily_minutes: 10,
+        }}
+      >
         <Form.Item label="Ảnh đại diện (không bắt buộc)">
           <AvatarChoice user={user} />
         </Form.Item>
-        <Form.Item name="display_name" label="Bạn muốn được gọi là gì?" rules={[{ required: true, whitespace: true, message: 'Nhập tên gọi' }]}>
+        <Form.Item
+          name="display_name"
+          label="Bạn muốn được gọi là gì?"
+          rules={[{ required: true, whitespace: true, message: 'Nhập tên gọi' }]}
+        >
           <Input size="large" maxLength={80} />
         </Form.Item>
         <Form.Item name="language" label="Bạn muốn học ngôn ngữ nào?">
           <Radio.Group className="!grid grid-cols-1 sm:grid-cols-2 gap-2" options={LANGS} />
         </Form.Item>
         <Form.Item name="learner_type" label="Ai sẽ học?" extra="Chế độ trẻ em ẩn bảng tin và nhóm học trong Cộng đồng.">
-          <Radio.Group optionType="button" buttonStyle="solid" options={[{ value: 'adult', label: 'Người lớn' }, { value: 'kid', label: 'Trẻ em' }]} />
+          <Radio.Group
+            optionType="button"
+            buttonStyle="solid"
+            options={[
+              { value: 'adult', label: 'Người lớn' },
+              { value: 'kid', label: 'Trẻ em' },
+            ]}
+          />
         </Form.Item>
         <Form.Item noStyle dependencies={['learner_type']}>
-          {({ getFieldValue }) => getFieldValue('learner_type') === 'adult' && (
-            <Form.Item name="bio" label="Giới thiệu bản thân (không bắt buộc)" extra="Hiện trên trang cá nhân của bạn trong Cộng đồng.">
-              <Input.TextArea maxLength={200} showCount autoSize={{ minRows: 2, maxRows: 4 }} placeholder="VD: Đang luyện HSK 3, thích chụp đồ ăn để học từ" />
-            </Form.Item>
-          )}
+          {({ getFieldValue }) =>
+            getFieldValue('learner_type') === 'adult' && (
+              <Form.Item name="bio" label="Giới thiệu bản thân (không bắt buộc)" extra="Hiện trên trang cá nhân của bạn trong Cộng đồng.">
+                <Input.TextArea
+                  maxLength={200}
+                  showCount
+                  autoSize={{ minRows: 2, maxRows: 4 }}
+                  placeholder="VD: Đang luyện HSK 3, thích chụp đồ ăn để học từ"
+                />
+              </Form.Item>
+            )
+          }
         </Form.Item>
         <Form.Item name="purpose" label="Bạn học để làm gì?">
-          <Radio.Group className="!flex flex-wrap gap-2" optionType="button" options={[
-            { value: 'communication', label: 'Giao tiếp hằng ngày' }, { value: 'study', label: 'Học tập' },
-            { value: 'work', label: 'Công việc' }, { value: 'friends', label: 'Kết bạn' }, { value: 'none', label: 'Chưa có' },
-          ]} />
+          <Radio.Group
+            className="!flex flex-wrap gap-2"
+            optionType="button"
+            options={[
+              { value: 'communication', label: 'Giao tiếp hằng ngày' },
+              { value: 'study', label: 'Học tập' },
+              { value: 'work', label: 'Công việc' },
+              { value: 'friends', label: 'Kết bạn' },
+              { value: 'none', label: 'Chưa có' },
+            ]}
+          />
         </Form.Item>
         <Form.Item name="daily_minutes" label="Mỗi ngày bạn dành bao lâu?">
           <Radio.Group optionType="button" options={[5, 10, 15, 20].map((m) => ({ value: m, label: `${m} phút` }))} />
@@ -113,7 +180,9 @@ export default function WelcomePage() {
             <Radio.Group optionType="button" options={GENDERS} />
           </Form.Item>
         </div>
-        <Button type="primary" htmlType="submit" size="large" block loading={saving}>Bắt đầu học</Button>
+        <Button type="primary" htmlType="submit" size="large" block loading={saving}>
+          Bắt đầu học
+        </Button>
       </Form>
     </AuthCard>
   )

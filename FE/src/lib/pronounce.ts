@@ -4,7 +4,10 @@
  * For Chinese the comparison is character by character, so a wrong tone that turns 买 into 卖 shows up.
  */
 
-interface Alternative { transcript: string; confidence: number }
+interface Alternative {
+  transcript: string
+  confidence: number
+}
 interface RecognitionLike {
   lang: string
   interimResults: boolean
@@ -19,19 +22,24 @@ interface RecognitionLike {
 
 type Ctor = new () => RecognitionLike
 const Recognition = (): Ctor | undefined =>
-  (window as unknown as { SpeechRecognition?: Ctor; webkitSpeechRecognition?: Ctor }).SpeechRecognition
-  ?? (window as unknown as { webkitSpeechRecognition?: Ctor }).webkitSpeechRecognition
+  (window as unknown as { SpeechRecognition?: Ctor; webkitSpeechRecognition?: Ctor }).SpeechRecognition ??
+  (window as unknown as { webkitSpeechRecognition?: Ctor }).webkitSpeechRecognition
 
 export const canRecognise = () => typeof window !== 'undefined' && !!Recognition()
 
-export interface Heard { alternatives: string[] }
+export interface Heard {
+  alternatives: string[]
+}
 
 /** Listen once (stops by itself after a pause). Rejects with a Vietnamese message on mic / network errors. */
 export function listen(locale: string, timeoutMs = 7000): { result: Promise<Heard>; stop: () => void } {
   const C = Recognition()
   let rec: RecognitionLike | null = null
   const result = new Promise<Heard>((resolve, reject) => {
-    if (!C) { reject(new Error('Trình duyệt này chưa nhận dạng được giọng nói. Hãy dùng Chrome hoặc Edge.')); return }
+    if (!C) {
+      reject(new Error('Trình duyệt này chưa nhận dạng được giọng nói. Hãy dùng Chrome hoặc Edge.'))
+      return
+    }
     rec = new C()
     rec.lang = locale
     rec.interimResults = false
@@ -67,7 +75,10 @@ export function listen(locale: string, timeoutMs = 7000): { result: Promise<Hear
 
 /** Compare form: lower case, no punctuation or spaces; Vietnamese keeps its marks (they change the word). */
 export function normalise(text: string, language: string): string {
-  const t = text.normalize('NFC').toLowerCase().replace(/[\p{P}\p{S}]/gu, '')
+  const t = text
+    .normalize('NFC')
+    .toLowerCase()
+    .replace(/[\p{P}\p{S}]/gu, '')
   return language.startsWith('zh') ? t.replace(/\s+/g, '') : t.replace(/\s+/g, ' ').trim()
 }
 
@@ -94,16 +105,26 @@ export interface Score {
 export function score(expected: string, heard: Heard, language: string): Score {
   const want = normalise(expected, language)
   const split = (s: string) => Array.from(language.startsWith('zh') ? s : s.replace(/ /g, ''))
-  let best: Score = { score: 0, heard: heard.alternatives[0] ?? '', verdict: 'wrong', units: split(want).map((u) => ({ unit: u, ok: false })) }
+  let best: Score = {
+    score: 0,
+    heard: heard.alternatives[0] ?? '',
+    verdict: 'wrong',
+    units: split(want).map((u) => ({ unit: u, ok: false })),
+  }
   for (const alt of heard.alternatives) {
     const got = normalise(alt, language)
-    const a = split(want), b = split(got)
-    const s = got === want || (got.includes(want) && want.length > 0) ? 100
-      : Math.max(0, Math.round(100 * (1 - levenshtein(a, b) / Math.max(a.length, b.length, 1))))
+    const a = split(want),
+      b = split(got)
+    const s =
+      got === want || (got.includes(want) && want.length > 0)
+        ? 100
+        : Math.max(0, Math.round(100 * (1 - levenshtein(a, b) / Math.max(a.length, b.length, 1))))
     if (s > best.score) {
       const set = new Set(b)
       best = {
-        score: s, heard: alt, verdict: s >= 90 ? 'right' : s >= 50 ? 'close' : 'wrong',
+        score: s,
+        heard: alt,
+        verdict: s >= 90 ? 'right' : s >= 50 ? 'close' : 'wrong',
         units: a.map((u) => ({ unit: u, ok: s === 100 || set.has(u) })),
       }
     }

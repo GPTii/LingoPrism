@@ -21,7 +21,10 @@ export function useUserEvents() {
 
   useEffect(() => {
     if (!user) return
-    notificationApi.unread().then((n) => useUnread.getState().set(n)).catch(() => undefined)
+    notificationApi
+      .unread()
+      .then((n) => useUnread.getState().set(n))
+      .catch(() => undefined)
     const socket = new LiveSocket('/ws/events/')
     socket.connect()
     const off = socket.on((e) => {

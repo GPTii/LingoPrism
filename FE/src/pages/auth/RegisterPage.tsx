@@ -54,16 +54,29 @@ export default function RegisterPage() {
         >
           <Input.Password size="large" autoComplete="new-password" />
         </Form.Item>
-        <Form.Item name="accept_terms" valuePropName="checked"
-          rules={[{ validator: (_, v) => (v ? Promise.resolve() : Promise.reject(new Error('Bạn cần đồng ý để tạo tài khoản'))) }]}>
+        <Form.Item
+          name="accept_terms"
+          valuePropName="checked"
+          rules={[{ validator: (_, v) => (v ? Promise.resolve() : Promise.reject(new Error('Bạn cần đồng ý để tạo tài khoản'))) }]}
+        >
           <Checkbox>
-            Tôi đã đọc và đồng ý <Link to="/terms" target="_blank">Điều khoản sử dụng</Link> và{' '}
-            <Link to="/privacy" target="_blank">Chính sách quyền riêng tư</Link>
+            Tôi đã đọc và đồng ý{' '}
+            <Link to="/terms" target="_blank">
+              Điều khoản sử dụng
+            </Link>{' '}
+            và{' '}
+            <Link to="/privacy" target="_blank">
+              Chính sách quyền riêng tư
+            </Link>
           </Checkbox>
         </Form.Item>
-        <Button type="primary" htmlType="submit" size="large" block loading={loading}>Tạo tài khoản</Button>
+        <Button type="primary" htmlType="submit" size="large" block loading={loading}>
+          Tạo tài khoản
+        </Button>
       </Form>
-      <div className="mt-5"><GoogleButton text="signup_with" /></div>
+      <div className="mt-5">
+        <GoogleButton text="signup_with" />
+      </div>
       <GoogleTermsNote />
       <p className="text-center text-slate-500 mt-6">
         Đã có tài khoản? <Link to="/login">Đăng nhập</Link>

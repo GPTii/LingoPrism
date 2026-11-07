@@ -18,7 +18,10 @@ export function SupportChatBox({ conversationId, title }: { conversationId: numb
   const bottom = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    communityApi.supportMessages(conversationId).then(setMessages).catch((e) => message.error(errorMessage(e)))
+    communityApi
+      .supportMessages(conversationId)
+      .then(setMessages)
+      .catch((e) => message.error(errorMessage(e)))
     const s = new LiveSocket(`/ws/support/${conversationId}/`)
     s.connect()
     let t: number | undefined
@@ -41,19 +44,37 @@ export function SupportChatBox({ conversationId, title }: { conversationId: numb
       }
     })
     socket.current = s
-    return () => { off(); s.close() }
+    return () => {
+      off()
+      s.close()
+    }
   }, [conversationId, me?.id, message])
 
-  useEffect(() => { bottom.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages])
+  useEffect(() => {
+    bottom.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages])
 
   const send = async () => {
     const content = text.trim()
     if (!content) return
     setText('')
     const client_id = `${me?.id}-${Date.now()}`
-    setMessages((l) => [...l, { id: -Date.now(), content, client_id, created_at: new Date().toISOString(), sender: { id: me!.id, display_name: me!.display_name, is_staff: false } }])
+    setMessages((l) => [
+      ...l,
+      {
+        id: -Date.now(),
+        content,
+        client_id,
+        created_at: new Date().toISOString(),
+        sender: { id: me!.id, display_name: me!.display_name, is_staff: false },
+      },
+    ])
     if (!socket.current?.send({ action: 'send', content, client_id })) {
-      try { await communityApi.sendSupport(conversationId, content, client_id) } catch (e) { message.error(errorMessage(e)) }
+      try {
+        await communityApi.sendSupport(conversationId, content, client_id)
+      } catch (e) {
+        message.error(errorMessage(e))
+      }
     }
   }
 
@@ -70,10 +91,19 @@ export function SupportChatBox({ conversationId, title }: { conversationId: numb
           const mine = m.sender?.id === me?.id
           return (
             <div key={m.id} className={`flex ${mine ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[75%] rounded-2xl px-3 py-2 ${mine ? 'bg-brand-600 text-white rounded-br-md' : 'bg-slate-100 text-slate-800 rounded-bl-md'}`}>
-                {!mine && <div className="text-xs font-semibold text-slate-500">{m.sender?.display_name}{m.sender?.is_staff && ' · giáo viên'}</div>}
+              <div
+                className={`max-w-[75%] rounded-2xl px-3 py-2 ${mine ? 'bg-brand-600 text-white rounded-br-md' : 'bg-slate-100 text-slate-800 rounded-bl-md'}`}
+              >
+                {!mine && (
+                  <div className="text-xs font-semibold text-slate-500">
+                    {m.sender?.display_name}
+                    {m.sender?.is_staff && ' · giáo viên'}
+                  </div>
+                )}
                 <div>{m.content}</div>
-                {mine && <div className="text-[11px] text-white/75 text-right">{m.id < 0 ? 'Đang gửi…' : m.read_at ? 'Đã xem' : 'Đã gửi'}</div>}
+                {mine && (
+                  <div className="text-[11px] text-white/75 text-right">{m.id < 0 ? 'Đang gửi…' : m.read_at ? 'Đã xem' : 'Đã gửi'}</div>
+                )}
               </div>
             </div>
           )
@@ -81,8 +111,18 @@ export function SupportChatBox({ conversationId, title }: { conversationId: numb
         <div ref={bottom} />
       </div>
       {typing && <div className="text-xs text-slate-500">Đang nhập…</div>}
-      <Input.Search className="mt-2" placeholder="Nhập tin nhắn…" enterButton="Gửi" aria-label="Tin nhắn" value={text}
-        onChange={(e) => { setText(e.target.value); socket.current?.send({ action: 'typing' }) }} onSearch={send} />
+      <Input.Search
+        className="mt-2"
+        placeholder="Nhập tin nhắn…"
+        enterButton="Gửi"
+        aria-label="Tin nhắn"
+        value={text}
+        onChange={(e) => {
+          setText(e.target.value)
+          socket.current?.send({ action: 'typing' })
+        }}
+        onSearch={send}
+      />
     </Section>
   )
 }
@@ -90,11 +130,22 @@ export function SupportChatBox({ conversationId, title }: { conversationId: numb
 export default function SupportPage() {
   const { message } = App.useApp()
   const [id, setId] = useState<number | null>(null)
-  useEffect(() => { communityApi.openSupport().then((c) => setId(c.id)).catch((e) => message.error(errorMessage(e))) }, [message])
+  useEffect(() => {
+    communityApi
+      .openSupport()
+      .then((c) => setId(c.id))
+      .catch((e) => message.error(errorMessage(e)))
+  }, [message])
   return (
     <div className="max-w-3xl mx-auto flex flex-col gap-6">
       <PageHeader title="Hỏi giáo viên" description="Nhắn riêng với giáo viên. Bạn sẽ nhận thông báo khi có câu trả lời." />
-      {id ? <SupportChatBox conversationId={id} /> : <div className="lp-card p-6"><Skeleton active /></div>}
+      {id ? (
+        <SupportChatBox conversationId={id} />
+      ) : (
+        <div className="lp-card p-6">
+          <Skeleton active />
+        </div>
+      )}
     </div>
   )
 }

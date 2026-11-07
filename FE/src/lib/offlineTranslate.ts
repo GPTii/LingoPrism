@@ -4,14 +4,13 @@
  * Elsewhere (Firefox, Safari, Chrome on phones) `offlineSupport()` says so and the online translation is used.
  */
 type Availability = 'unavailable' | 'downloadable' | 'downloading' | 'available'
-interface BrowserTranslator { translate: (text: string) => Promise<string>; destroy?: () => void }
+interface BrowserTranslator {
+  translate: (text: string) => Promise<string>
+  destroy?: () => void
+}
 interface TranslatorStatic {
   availability: (o: { sourceLanguage: string; targetLanguage: string }) => Promise<Availability>
-  create: (o: {
-    sourceLanguage: string
-    targetLanguage: string
-    monitor?: (m: EventTarget) => void
-  }) => Promise<BrowserTranslator>
+  create: (o: { sourceLanguage: string; targetLanguage: string; monitor?: (m: EventTarget) => void }) => Promise<BrowserTranslator>
 }
 
 const api = (): TranslatorStatic | undefined =>
@@ -52,10 +51,15 @@ export async function translateOffline(text: string, source: string, target: str
       throw new Error('Bộ dịch offline của trình duyệt chưa hỗ trợ cặp ngôn ngữ này.')
     }
     // the first time the browser downloads the language pack (tens of MB): allow it a few minutes
-    tr = await within(T.create({
-      sourceLanguage: tag(source), targetLanguage: tag(target),
-      monitor: (m) => m.addEventListener('downloadprogress', (e) => onProgress?.((e as unknown as { loaded: number }).loaded)),
-    }), 180_000, NO_MODEL)
+    tr = await within(
+      T.create({
+        sourceLanguage: tag(source),
+        targetLanguage: tag(target),
+        monitor: (m) => m.addEventListener('downloadprogress', (e) => onProgress?.((e as unknown as { loaded: number }).loaded)),
+      }),
+      180_000,
+      NO_MODEL,
+    )
     cache.set(key, tr)
   }
   return within(tr.translate(text), 30_000, 'Dịch offline quá lâu, thử lại nhé.')

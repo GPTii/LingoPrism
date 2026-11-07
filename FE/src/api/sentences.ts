@@ -53,7 +53,13 @@ export interface CheckResult {
 
 export const sentencesApi = {
   lesson: (topic?: number, size = 10) =>
-    api.get<{ language: string; scope: 'topic' | 'my_words' | 'all'; exercises: SentenceExercise[] }>('/sentences/lesson/', { params: { topic, size } }).then((r) => r.data),
+    api
+      .get<{
+        language: string
+        scope: 'topic' | 'my_words' | 'all'
+        exercises: SentenceExercise[]
+      }>('/sentences/lesson/', { params: { topic, size } })
+      .then((r) => r.data),
   check: (body: { sentence: number; type: SentenceExercise['type']; answer: string | string[]; response_ms: number }) =>
     api.post<CheckResult>('/sentences/check/', body).then((r) => r.data),
 }

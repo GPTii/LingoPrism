@@ -22,7 +22,10 @@ export default function LevelTestPage() {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    levelsApi.test(n).then(setTest).catch((e) => setError(errorMessage(e)))
+    levelsApi
+      .test(n)
+      .then(setTest)
+      .catch((e) => setError(errorMessage(e)))
   }, [n])
 
   const q = test?.questions[answers.length]
@@ -48,12 +51,21 @@ export default function LevelTestPage() {
   if (error) {
     return (
       <div className="lp-card max-w-xl mx-auto">
-        <EmptyState art={<Prismo mood="think" size={96} />} title="Chưa làm được bài kiểm tra này" description={error}
-          action={<Button onClick={() => navigate('/')}>Về trang chủ</Button>} />
+        <EmptyState
+          art={<Prismo mood="think" size={96} />}
+          title="Chưa làm được bài kiểm tra này"
+          description={error}
+          action={<Button onClick={() => navigate('/')}>Về trang chủ</Button>}
+        />
       </div>
     )
   }
-  if (!test) return <div className="flex justify-center py-20"><Spin size="large" /></div>
+  if (!test)
+    return (
+      <div className="flex justify-center py-20">
+        <Spin size="large" />
+      </div>
+    )
   if (result) {
     return (
       <div className="max-w-xl mx-auto flex flex-col items-center text-center gap-4 pt-4">
@@ -62,12 +74,17 @@ export default function LevelTestPage() {
           {result.passed ? `Bạn đã mở Cấp ${result.unlocked}` : `Chưa qua – đúng ${result.score}/${result.total} câu`}
         </h1>
         <p className="text-lg text-slate-600 m-0 max-w-[46ch]">
-          {result.passed ? `Đúng ${result.score}/${result.total} câu. Từ giờ từ mới sẽ lấy từ cấp ${result.unlocked}.`
+          {result.passed
+            ? `Đúng ${result.score}/${result.total} câu. Từ giờ từ mới sẽ lấy từ cấp ${result.unlocked}.`
             : `Cần đúng ít nhất ${test.pass} câu. Học thêm các từ của cấp ${n} rồi thử lại nhé.`}
         </p>
         <div className="flex flex-wrap justify-center gap-3 mt-2">
-          <Button size="large" onClick={() => navigate('/')}>Về trang chủ</Button>
-          <Button size="large" type="primary" onClick={() => navigate('/learn?kind=learn')}>Học từ mới</Button>
+          <Button size="large" onClick={() => navigate('/')}>
+            Về trang chủ
+          </Button>
+          <Button size="large" type="primary" onClick={() => navigate('/learn?kind=learn')}>
+            Học từ mới
+          </Button>
         </div>
       </div>
     )
@@ -79,7 +96,9 @@ export default function LevelTestPage() {
       <PageHeader title={`Kiểm tra vượt cấp ${n}`} description={`Đúng từ ${test.pass}/${test.questions.length} câu để mở cấp ${n + 1}.`} />
       <div className="flex items-center gap-3">
         <Progress percent={Math.round((100 * answers.length) / test.questions.length)} showInfo={false} className="flex-1 m-0" />
-        <span className="num text-sm font-bold text-slate-500">{answers.length + 1}/{test.questions.length}</span>
+        <span className="num text-sm font-bold text-slate-500">
+          {answers.length + 1}/{test.questions.length}
+        </span>
       </div>
       <div key={answers.length} className="lp-card p-6 sm:p-8 flex flex-col items-center gap-6 animate-rise">
         {q.prompt.word && (
@@ -92,15 +111,26 @@ export default function LevelTestPage() {
           <>
             <div className="text-slate-600 font-semibold">Nghe rồi chọn từ đúng</div>
             {q.prompt.emoji && <div className="text-6xl">{q.prompt.emoji}</div>}
-            <button type="button" aria-label="Nghe lại" onClick={() => speak(q.prompt.audio!.text, q.prompt.audio!.tts_locale)}
-              className="h-20 w-20 rounded-3xl prism-bg text-white text-3xl grid place-items-center cursor-pointer hover:bg-brand-700 btn-lip">
+            <button
+              type="button"
+              aria-label="Nghe lại"
+              onClick={() => speak(q.prompt.audio!.text, q.prompt.audio!.tts_locale)}
+              className="h-20 w-20 rounded-3xl prism-bg text-white text-3xl grid place-items-center cursor-pointer hover:bg-brand-700 btn-lip"
+            >
               <SoundOutlined />
             </button>
           </>
         )}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
           {q.options.map((o) => (
-            <button key={o} type="button" className="btn-3d px-4 py-3.5 text-lg font-semibold text-slate-800 cursor-pointer" onClick={() => pick(o)}>{o}</button>
+            <button
+              key={o}
+              type="button"
+              className="btn-3d px-4 py-3.5 text-lg font-semibold text-slate-800 cursor-pointer"
+              onClick={() => pick(o)}
+            >
+              {o}
+            </button>
           ))}
         </div>
       </div>

@@ -19,7 +19,15 @@ const itemIcon = (i: ShopItem) => {
 }
 
 const price = (i: { cost_scales: number | null; cost_gems: number | null }) =>
-  i.cost_scales ? <>{i.cost_scales} <ScaleIcon size={16} /></> : <>{i.cost_gems} <GemIcon size={16} /></>
+  i.cost_scales ? (
+    <>
+      {i.cost_scales} <ScaleIcon size={16} />
+    </>
+  ) : (
+    <>
+      {i.cost_gems} <GemIcon size={16} />
+    </>
+  )
 
 /** items used up the moment they are bought */
 const INSTANT = new Set(['streak_repair', 'gem_exchange'])
@@ -52,7 +60,10 @@ export default function AchievementsPage() {
   const refresh = () => ['game-summary', 'quests', 'shop', 'badges'].forEach((k) => queryClient.invalidateQueries({ queryKey: [k] }))
   const act = useMutation({
     mutationFn: ({ fn }: { fn: () => Promise<unknown>; done: string | ((result: unknown) => string) }) => fn(),
-    onSuccess: (r, v) => { message.success(typeof v.done === 'function' ? v.done(r) : v.done); refresh() },
+    onSuccess: (r, v) => {
+      message.success(typeof v.done === 'function' ? v.done(r) : v.done)
+      refresh()
+    },
     onError: (e) => message.error(errorMessage(e)),
   })
   // menu links like /achievements#shop land on their section (and highlight it briefly)
@@ -70,13 +81,19 @@ export default function AchievementsPage() {
   const items = shop.data?.filter((i) => i.effect !== 'sticker') ?? []
   const packs = shop.data?.filter((i) => i.effect === 'sticker') ?? []
   // earned badges first, then the ones still to get; long lists open with "Xem tất cả"
-  const badgeList = useShowMore([...(badges.data ?? [])].sort((a, b) => Number(b.owned) - Number(a.owned)), 12, 'Xem tất cả huy hiệu')
+  const badgeList = useShowMore(
+    [...(badges.data ?? [])].sort((a, b) => Number(b.owned) - Number(a.owned)),
+    12,
+    'Xem tất cả huy hiệu',
+  )
   const packList = useShowMore(packs, 2, 'Xem tất cả gói sticker')
 
   const cell = (d: Dayjs) => {
     const p = days.get(d.format('YYYY-MM-DD'))
     if (!p) return null
-    return <div className="flex justify-center">{p.freeze_used ? <FreezeIcon size={18} /> : p.active ? <StreakIcon size={18} /> : null}</div>
+    return (
+      <div className="flex justify-center">{p.freeze_used ? <FreezeIcon size={18} /> : p.active ? <StreakIcon size={18} /> : null}</div>
+    )
   }
 
   return (
@@ -84,17 +101,22 @@ export default function AchievementsPage() {
       <PageHeader title="Thành tích" description="Chuỗi ngày học, nhiệm vụ, huy hiệu và cửa hàng đổi vảy, ngọc." />
 
       <Section>
-        <Facts items={[
-          { label: 'ngày học liên tiếp', value: s?.streak ?? 0, icon: <StreakIcon size={24} active={!!s?.studied_today} /> },
-          { label: 'tổng kinh nghiệm', value: (s?.lifetime_xp ?? 0).toLocaleString('vi-VN'), icon: <XpIcon size={24} /> },
-          { label: 'XP hôm nay', value: s?.today_xp ?? 0, hint: `/ ${s?.daily_xp_cap ?? 500}` },
-          { label: 'vảy', value: s?.scales ?? 0, icon: <ScaleIcon size={24} /> },
-          { label: 'ngọc', value: s?.gems ?? 0, icon: <GemIcon size={24} /> },
-        ]} />
+        <Facts
+          items={[
+            { label: 'ngày học liên tiếp', value: s?.streak ?? 0, icon: <StreakIcon size={24} active={!!s?.studied_today} /> },
+            { label: 'tổng kinh nghiệm', value: (s?.lifetime_xp ?? 0).toLocaleString('vi-VN'), icon: <XpIcon size={24} /> },
+            { label: 'XP hôm nay', value: s?.today_xp ?? 0, hint: `/ ${s?.daily_xp_cap ?? 500}` },
+            { label: 'vảy', value: s?.scales ?? 0, icon: <ScaleIcon size={24} /> },
+            { label: 'ngọc', value: s?.gems ?? 0, icon: <GemIcon size={24} /> },
+          ]}
+        />
         {s?.active_boosts.length ? (
           <div className="mt-4 flex flex-wrap gap-2">
             {s.active_boosts.map((b) => (
-              <span key={b.item} className="inline-flex items-center gap-1.5 rounded-lg bg-amber-50 text-amber-700 px-2.5 py-1 text-sm font-semibold">
+              <span
+                key={b.item}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-amber-50 text-amber-700 px-2.5 py-1 text-sm font-semibold"
+              >
                 <ThunderboltFilled /> {b.name} ×{b.multiplier} đến {dayjs(b.expires_at).format('HH:mm DD/MM')}
               </span>
             ))}
@@ -104,23 +126,44 @@ export default function AchievementsPage() {
 
       <div className="grid lg:grid-cols-2 gap-6">
         <Section id="quests" title="Nhiệm vụ hằng ngày">
-          {quests.isLoading ? <Skeleton active /> : (
+          {quests.isLoading ? (
+            <Skeleton active />
+          ) : (
             <ul className="m-0 p-0 list-none flex flex-col gap-4">
               {quests.data?.quests.map((q) => (
                 <li key={q.id}>
                   <div className="flex justify-between items-center gap-3">
                     <span className={`font-medium ${q.reward_claimed ? 'text-slate-400' : 'text-slate-700'}`}>{q.title}</span>
                     {q.completed && !q.reward_claimed ? (
-                      <Button size="small" type="primary" loading={act.isPending}
-                        onClick={() => act.mutate({ fn: () => gameApi.claim(q.id), done: (r) => r && (r as { gems: number }).gems
-                          ? `Đã nhận ${q.reward_scales} vảy và 1 ngọc thưởng vì xong hết nhiệm vụ hôm nay!` : `Đã nhận ${q.reward_scales} vảy` })}>
+                      <Button
+                        size="small"
+                        type="primary"
+                        loading={act.isPending}
+                        onClick={() =>
+                          act.mutate({
+                            fn: () => gameApi.claim(q.id),
+                            done: (r) =>
+                              r && (r as { gems: number }).gems
+                                ? `Đã nhận ${q.reward_scales} vảy và 1 ngọc thưởng vì xong hết nhiệm vụ hôm nay!`
+                                : `Đã nhận ${q.reward_scales} vảy`,
+                          })
+                        }
+                      >
                         Nhận {q.reward_scales} <ScaleIcon size={14} />
                       </Button>
-                    ) : q.reward_claimed ? <span className="text-sm font-semibold text-emerald-600"><CheckOutlined /> Đã nhận</span>
-                      : !q.completed ? <QuestGo kind={q.kind} title={q.title} /> : null}
+                    ) : q.reward_claimed ? (
+                      <span className="text-sm font-semibold text-emerald-600">
+                        <CheckOutlined /> Đã nhận
+                      </span>
+                    ) : !q.completed ? (
+                      <QuestGo kind={q.kind} title={q.title} />
+                    ) : null}
                   </div>
-                  <Progress percent={Math.round((q.progress / Math.max(q.target, 1)) * 100)} format={() => `${q.progress}/${q.target}`}
-                    strokeColor={q.completed ? '#10c79a' : undefined} />
+                  <Progress
+                    percent={Math.round((q.progress / Math.max(q.target, 1)) * 100)}
+                    format={() => `${q.progress}/${q.target}`}
+                    strokeColor={q.completed ? '#10c79a' : undefined}
+                  />
                 </li>
               ))}
             </ul>
@@ -130,34 +173,59 @@ export default function AchievementsPage() {
               <div className="flex justify-between items-center gap-3">
                 <span className="font-semibold text-slate-700">Nhiệm vụ tháng: hoàn thành {quests.data.monthly.target} nhiệm vụ</span>
                 {quests.data.monthly.completed_count >= quests.data.monthly.target && !quests.data.monthly.reward_claimed && (
-                  <Button size="small" type="primary"
-                    onClick={() => act.mutate({ fn: gameApi.claimMonthly, done: `Đã nhận ${quests.data!.monthly.reward_gems} ngọc` })}>
+                  <Button
+                    size="small"
+                    type="primary"
+                    onClick={() => act.mutate({ fn: gameApi.claimMonthly, done: `Đã nhận ${quests.data!.monthly.reward_gems} ngọc` })}
+                  >
                     Nhận {quests.data.monthly.reward_gems} <GemIcon size={14} />
                   </Button>
                 )}
               </div>
-              <Progress percent={Math.round((quests.data.monthly.completed_count / Math.max(quests.data.monthly.target, 1)) * 100)}
-                format={() => `${quests.data!.monthly.completed_count}/${quests.data!.monthly.target}`} />
+              <Progress
+                percent={Math.round((quests.data.monthly.completed_count / Math.max(quests.data.monthly.target, 1)) * 100)}
+                format={() => `${quests.data!.monthly.completed_count}/${quests.data!.monthly.target}`}
+              />
             </div>
           )}
         </Section>
 
         <Section id="calendar" title="Lịch học">
-          <Calendar fullscreen={false} value={month} onPanelChange={(d) => setMonth(d)} cellRender={(d, info) => (info.type === 'date' ? cell(d) : null)} />
+          <Calendar
+            fullscreen={false}
+            value={month}
+            onPanelChange={(d) => setMonth(d)}
+            cellRender={(d, info) => (info.type === 'date' ? cell(d) : null)}
+          />
           <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-slate-500">
-            <span className="inline-flex items-center gap-1"><StreakIcon size={14} /> ngày có học</span>
-            <span className="inline-flex items-center gap-1"><FreezeIcon size={14} /> dùng Đá băng giữ chuỗi</span>
-            <span>Đá băng còn: <b className="num text-slate-700">{s?.streak_freezes ?? 0}</b></span>
+            <span className="inline-flex items-center gap-1">
+              <StreakIcon size={14} /> ngày có học
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <FreezeIcon size={14} /> dùng Đá băng giữ chuỗi
+            </span>
+            <span>
+              Đá băng còn: <b className="num text-slate-700">{s?.streak_freezes ?? 0}</b>
+            </span>
           </div>
         </Section>
       </div>
 
-      <Section id="gems" title="Cách kiếm ngọc"
-        extra={<Link to="/prismo" className="text-sm font-semibold">Tiêu ngọc ở Tủ đồ Prismo →</Link>}>
+      <Section
+        id="gems"
+        title="Cách kiếm ngọc"
+        extra={
+          <Link to="/prismo" className="text-sm font-semibold">
+            Tiêu ngọc ở Tủ đồ Prismo →
+          </Link>
+        }
+      >
         <ul className="m-0 p-0 list-none grid sm:grid-cols-2 lg:grid-cols-5 gap-3">
           {GEM_WAYS.map((w) => (
             <li key={w.title} className="rounded-xl bg-slate-50 p-3.5 flex flex-col gap-1">
-              <span className="num inline-flex items-center gap-1 text-lg font-extrabold text-brand-600">{w.gems} <GemIcon size={18} /></span>
+              <span className="num inline-flex items-center gap-1 text-lg font-extrabold text-brand-600">
+                {w.gems} <GemIcon size={18} />
+              </span>
               <span className="font-semibold text-slate-800 leading-snug">{w.title}</span>
               <span className="text-xs text-slate-500">{w.hint}</span>
             </li>
@@ -165,26 +233,54 @@ export default function AchievementsPage() {
         </ul>
       </Section>
 
-      <Section id="badges" title="Huy hiệu" extra={badges.data && <span className="num text-sm text-slate-500">{owned}/{badges.data.length} đã có</span>}>
+      <Section
+        id="badges"
+        title="Huy hiệu"
+        extra={
+          badges.data && (
+            <span className="num text-sm text-slate-500">
+              {owned}/{badges.data.length} đã có
+            </span>
+          )
+        }
+      >
         <ul className="m-0 p-0 list-none grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-x-4 gap-y-6">
           {badgeList.shown.map((b, i) => (
             <li key={b.code} className="flex flex-col items-center text-center gap-1">
-              {rewardUrl(b.icon)
-                ? <img src={rewardUrl(b.icon)!} alt="" width={72} height={72} loading="lazy"
-                    className={b.owned ? '' : 'grayscale opacity-40'} />
-                : <BadgeMedal owned={b.owned} seed={i} size={60} />}
+              {rewardUrl(b.icon) ? (
+                <img
+                  src={rewardUrl(b.icon)!}
+                  alt=""
+                  width={72}
+                  height={72}
+                  loading="lazy"
+                  className={b.owned ? '' : 'grayscale opacity-40'}
+                />
+              ) : (
+                <BadgeMedal owned={b.owned} seed={i} size={60} />
+              )}
               <div className={`font-semibold leading-snug ${b.owned ? 'text-slate-800' : 'text-slate-500'}`}>{b.name}</div>
               <div className="text-xs text-slate-500 max-w-[22ch]">{b.description}</div>
-              {b.owned && b.awarded_at
-                ? <div className="text-xs text-emerald-600 font-medium">{dayjs(b.awarded_at).format('DD/MM/YYYY')}</div>
-                : b.reward_gems > 0 && <div className="num inline-flex items-center gap-1 text-xs font-semibold text-brand-600">+{b.reward_gems} <GemIcon size={12} /></div>}
+              {b.owned && b.awarded_at ? (
+                <div className="text-xs text-emerald-600 font-medium">{dayjs(b.awarded_at).format('DD/MM/YYYY')}</div>
+              ) : (
+                b.reward_gems > 0 && (
+                  <div className="num inline-flex items-center gap-1 text-xs font-semibold text-brand-600">
+                    +{b.reward_gems} <GemIcon size={12} />
+                  </div>
+                )
+              )}
             </li>
           ))}
         </ul>
         {badgeList.toggle}
       </Section>
 
-      <Section id="shop" title="Cửa hàng" extra={<span className="text-sm text-slate-500">Vảy mua vật phẩm giữ chuỗi, tăng XP · ngọc mua đồ cho Prismo và sticker</span>}>
+      <Section
+        id="shop"
+        title="Cửa hàng"
+        extra={<span className="text-sm text-slate-500">Vảy mua vật phẩm giữ chuỗi, tăng XP · ngọc mua đồ cho Prismo và sticker</span>}
+      >
         <ul className="m-0 p-0 list-none grid md:grid-cols-3 gap-3">
           {items.map((i) => {
             const repair = i.effect === 'streak_repair'
@@ -194,15 +290,23 @@ export default function AchievementsPage() {
                 <div className="flex items-center gap-2 font-semibold text-slate-800">
                   {itemIcon(i)}
                   <span className="flex-1">{i.name}</span>
-                  {i.owned > 0 && !INSTANT.has(i.effect) && <span className="num text-sm font-medium text-slate-500">đang có {i.owned}</span>}
+                  {i.owned > 0 && !INSTANT.has(i.effect) && (
+                    <span className="num text-sm font-medium text-slate-500">đang có {i.owned}</span>
+                  )}
                 </div>
                 <div className="text-sm text-slate-500 flex-1">
-                  {repair && s?.repairable_streak ? <b className="text-amber-600">Nối lại chuỗi {s.repairable_streak} ngày vừa mất. </b> : null}
+                  {repair && s?.repairable_streak ? (
+                    <b className="text-amber-600">Nối lại chuỗi {s.repairable_streak} ngày vừa mất. </b>
+                  ) : null}
                   {i.description}
                 </div>
                 <div className="flex gap-2 pt-1">
-                  <Button type="primary" disabled={cannotRepair} title={cannotRepair ? 'Chỉ dùng được khi vừa mất chuỗi' : undefined}
-                    onClick={() => act.mutate({ fn: () => gameApi.buy(i.id), done: boughtText(i) })}>
+                  <Button
+                    type="primary"
+                    disabled={cannotRepair}
+                    title={cannotRepair ? 'Chỉ dùng được khi vừa mất chuỗi' : undefined}
+                    onClick={() => act.mutate({ fn: () => gameApi.buy(i.id), done: boughtText(i) })}
+                  >
                     {repair ? 'Hồi chuỗi' : i.effect === 'gem_exchange' ? 'Đổi' : 'Mua'} · {price(i)}
                   </Button>
                   {i.owned > 0 && (i.effect === 'xp_double_15m' || i.effect === 'xp_plus25_24h') && (
@@ -215,23 +319,36 @@ export default function AchievementsPage() {
         </ul>
       </Section>
 
-      <Section id="stickers" title="Gói sticker Prismo"
-        extra={<span className="text-sm text-slate-500">Mua một lần, gửi mãi trong bình luận, chat nhóm và tin nhắn</span>}>
+      <Section
+        id="stickers"
+        title="Gói sticker Prismo"
+        extra={<span className="text-sm text-slate-500">Mua một lần, gửi mãi trong bình luận, chat nhóm và tin nhắn</span>}
+      >
         <ul className="m-0 p-0 list-none grid md:grid-cols-2 gap-4">
           {packList.shown.map((p) => (
             <li key={p.id} className="rounded-2xl bg-slate-50 p-4 flex flex-col gap-3">
               <div className="flex items-center gap-2">
                 <span className="flex-1 font-bold text-slate-800">{p.name}</span>
-                {p.owned > 0
-                  ? <span className="inline-flex items-center gap-1 text-sm font-semibold text-emerald-600"><CheckOutlined /> Đã có</span>
-                  : <Button type="primary" onClick={() => act.mutate({ fn: () => gameApi.buy(p.id), done: `Đã mở khoá ${p.name}` })}>
-                      Mua · {price(p)}
-                    </Button>}
+                {p.owned > 0 ? (
+                  <span className="inline-flex items-center gap-1 text-sm font-semibold text-emerald-600">
+                    <CheckOutlined /> Đã có
+                  </span>
+                ) : (
+                  <Button type="primary" onClick={() => act.mutate({ fn: () => gameApi.buy(p.id), done: `Đã mở khoá ${p.name}` })}>
+                    Mua · {price(p)}
+                  </Button>
+                )}
               </div>
               <div className="grid grid-cols-3 sm:grid-cols-6 gap-1">
                 {p.stickers.map((st) => (
-                  <img key={st.code} src={stickerUrl(st.code)} alt={st.caption} title={st.caption} loading="lazy"
-                    className={`w-full h-auto ${p.owned ? '' : 'opacity-90'}`} />
+                  <img
+                    key={st.code}
+                    src={stickerUrl(st.code)}
+                    alt={st.caption}
+                    title={st.caption}
+                    loading="lazy"
+                    className={`w-full h-auto ${p.owned ? '' : 'opacity-90'}`}
+                  />
                 ))}
               </div>
             </li>

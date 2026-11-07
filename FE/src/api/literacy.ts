@@ -34,8 +34,14 @@ export interface LitIntro {
   rhyme_spell: string[]
 }
 
-interface Tts { text: string; locale: string }
-interface Base { token: string; tts: Tts }
+interface Tts {
+  text: string
+  locale: string
+}
+interface Base {
+  token: string
+  tts: Tts
+}
 
 export type LitExercise =
   | (Base & { type: 'listen_choose'; options: string[] })

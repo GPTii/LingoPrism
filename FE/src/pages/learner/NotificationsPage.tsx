@@ -21,9 +21,22 @@ export function webRoute(route?: string): string | null {
 }
 
 const KIND_ICON: Record<string, AppIconName> = {
-  friend_request: 'community', friend_accept: 'community', follow: 'profile', group_request: 'group', group: 'group',
-  like: 'medal', comment: 'chat', message: 'mail', achievement: 'trophy', league: 'podium', xp_milestone: 'chart',
-  reminder: 'calendar', exam: 'exam', location: 'pin', broadcast: 'bell', system: 'bell',
+  friend_request: 'community',
+  friend_accept: 'community',
+  follow: 'profile',
+  group_request: 'group',
+  group: 'group',
+  like: 'medal',
+  comment: 'chat',
+  message: 'mail',
+  achievement: 'trophy',
+  league: 'podium',
+  xp_milestone: 'chart',
+  reminder: 'calendar',
+  exam: 'exam',
+  location: 'pin',
+  broadcast: 'bell',
+  system: 'bell',
 }
 
 /** Accept / decline a friend request, or approve / refuse someone asking into my group, without leaving the list. */
@@ -33,7 +46,9 @@ function Answer({ n, onDone }: { n: AppNotification; onDone: () => void }) {
   const [busy, setBusy] = useState<string | null>(null)
   const { action, request_id, group_id, member_id } = n.data
   if (n.action_state === 'accepted') {
-    return <span className="text-sm font-semibold text-emerald-700">{action === 'friend_request' ? 'Đã là bạn bè' : 'Đã duyệt vào nhóm'}</span>
+    return (
+      <span className="text-sm font-semibold text-emerald-700">{action === 'friend_request' ? 'Đã là bạn bè' : 'Đã duyệt vào nhóm'}</span>
+    )
   }
   if (n.action_state === 'gone') {
     return <span className="text-sm text-slate-500">{action === 'friend_request' ? 'Lời mời không còn' : 'Yêu cầu đã được xử lý'}</span>
@@ -67,7 +82,9 @@ function Answer({ n, onDone }: { n: AppNotification; onDone: () => void }) {
       <Button type="primary" size="small" loading={busy === 'yes'} disabled={!!busy} onClick={() => run(true)}>
         {action === 'friend_request' ? 'Đồng ý' : 'Duyệt'}
       </Button>
-      <Button size="small" loading={busy === 'no'} disabled={!!busy} onClick={() => run(false)}>Từ chối</Button>
+      <Button size="small" loading={busy === 'no'} disabled={!!busy} onClick={() => run(false)}>
+        Từ chối
+      </Button>
     </span>
   )
 }
@@ -98,63 +115,147 @@ export default function NotificationsPage() {
   }
   return (
     <div className="max-w-3xl mx-auto flex flex-col gap-4">
-      <PageHeader title="Thông báo"
-        actions={!picking.active && (
-          <div className="flex flex-wrap gap-2">
-            {list.data?.some((n) => !n.read) && (
-              <Button onClick={async () => { await notificationApi.readAll(); useUnread.getState().set(0); list.refetch() }}>Đánh dấu tất cả đã đọc</Button>
-            )}
-            {!!list.data?.length && <Button icon={<CheckSquareOutlined />} onClick={picking.start}>Chọn nhiều</Button>}
-          </div>
-        )} />
+      <PageHeader
+        title="Thông báo"
+        actions={
+          !picking.active && (
+            <div className="flex flex-wrap gap-2">
+              {list.data?.some((n) => !n.read) && (
+                <Button
+                  onClick={async () => {
+                    await notificationApi.readAll()
+                    useUnread.getState().set(0)
+                    list.refetch()
+                  }}
+                >
+                  Đánh dấu tất cả đã đọc
+                </Button>
+              )}
+              {!!list.data?.length && (
+                <Button icon={<CheckSquareOutlined />} onClick={picking.start}>
+                  Chọn nhiều
+                </Button>
+              )}
+            </div>
+          )
+        }
+      />
       <div className="flex flex-wrap gap-2 -mt-2">
-        <Segmented value={group} onChange={(v) => setGroup(String(v))} options={[
-          { value: 'all', label: 'Tất cả' }, { value: 'social', label: 'Bạn bè & nhóm' }, { value: 'learning', label: 'Học tập' }, { value: 'system', label: 'Hệ thống' },
-        ]} />
-        <Select allowClear placeholder="Đã đọc?" value={read} onChange={setRead} style={{ width: 130 }}
-          options={[{ value: '0', label: 'Chưa đọc' }, { value: '1', label: 'Đã đọc' }]} />
+        <Segmented
+          value={group}
+          onChange={(v) => setGroup(String(v))}
+          options={[
+            { value: 'all', label: 'Tất cả' },
+            { value: 'social', label: 'Bạn bè & nhóm' },
+            { value: 'learning', label: 'Học tập' },
+            { value: 'system', label: 'Hệ thống' },
+          ]}
+        />
+        <Select
+          allowClear
+          placeholder="Đã đọc?"
+          value={read}
+          onChange={setRead}
+          style={{ width: 130 }}
+          options={[
+            { value: '0', label: 'Chưa đọc' },
+            { value: '1', label: 'Đã đọc' },
+          ]}
+        />
         <DateRangeFilter value={received} onChange={setReceived} placeholder={['Nhận từ ngày', 'đến ngày']} />
       </div>
       <div className="lp-card p-2">
-        {list.isLoading ? <div className="p-4"><Skeleton active /></div> : list.data?.length === 0 ? (
-          filtering
-            ? <EmptyState art={<Prismo mood="think" size={88} />} title="Không có thông báo nào khớp bộ lọc"
-                action={<Button onClick={() => { setGroup('all'); setRead(undefined); setReceived(null) }}>Bỏ lọc</Button>} />
-            : <EmptyState art={<Prismo mood="sleepy" size={88} />} title="Chưa có thông báo" description="Lời mời kết bạn, yêu cầu vào nhóm, lời nhắc học và tin nhóm sẽ hiện ở đây." />
+        {list.isLoading ? (
+          <div className="p-4">
+            <Skeleton active />
+          </div>
+        ) : list.data?.length === 0 ? (
+          filtering ? (
+            <EmptyState
+              art={<Prismo mood="think" size={88} />}
+              title="Không có thông báo nào khớp bộ lọc"
+              action={
+                <Button
+                  onClick={() => {
+                    setGroup('all')
+                    setRead(undefined)
+                    setReceived(null)
+                  }}
+                >
+                  Bỏ lọc
+                </Button>
+              }
+            />
+          ) : (
+            <EmptyState
+              art={<Prismo mood="sleepy" size={88} />}
+              title="Chưa có thông báo"
+              description="Lời mời kết bạn, yêu cầu vào nhóm, lời nhắc học và tin nhóm sẽ hiện ở đây."
+            />
+          )
         ) : (
-          <ShowMore items={list.data} limit={picking.active ? 100 : 20} label="Xem thông báo cũ hơn">{(shown) => (
-          <ul className="m-0 p-0 list-none flex flex-col">
-            {shown.map((n) => (
-              <li key={n.id} className={`flex flex-col sm:flex-row gap-2 sm:gap-3 rounded-xl p-3 transition-colors hover:bg-slate-50 ${n.read ? '' : 'bg-brand-50/70'}`}>
-                {picking.active && (
-                  <Checkbox checked={picking.ids.has(n.id)} onChange={() => picking.toggle(n.id)} className="self-start sm:self-center"
-                    aria-label={`Chọn thông báo: ${n.title}`} />
-                )}
-                <button type="button" onClick={() => (picking.active ? picking.toggle(n.id) : open(n))} className="flex gap-3 flex-1 min-w-0 text-left cursor-pointer">
-                  <span className="mt-0.5 h-10 w-10 shrink-0 rounded-full grid place-items-center bg-slate-100">
-                    {rewardUrl(n.image) ? <img src={rewardUrl(n.image)!} alt="" width={34} height={34} />
-                      : <AppIcon name={KIND_ICON[n.kind] ?? 'bell'} size={26} />}
-                  </span>
-                  <span className="flex-1 min-w-0">
-                    <span className={`block ${n.read ? 'font-medium text-slate-700' : 'font-bold text-slate-800'}`}>{n.title}</span>
-                    {n.body && <span className="block text-sm text-slate-600 mt-0.5 whitespace-pre-wrap">{n.data.action ? `“${n.body}”` : n.body}</span>}
-                    <span className="num block text-xs text-slate-500 mt-1">{dayjs(n.created_at).format('HH:mm · DD/MM/YYYY')}</span>
-                  </span>
-                  {!n.read && <span className="sr-only">chưa đọc</span>}
-                </button>
-                {!picking.active && n.data.action && n.action_state && (
-                  <div className="shrink-0 pl-[52px] sm:pl-0 sm:self-center"><Answer n={n} onDone={() => list.refetch()} /></div>
-                )}
-              </li>
-            ))}
-          </ul>
-          )}</ShowMore>
+          <ShowMore items={list.data} limit={picking.active ? 100 : 20} label="Xem thông báo cũ hơn">
+            {(shown) => (
+              <ul className="m-0 p-0 list-none flex flex-col">
+                {shown.map((n) => (
+                  <li
+                    key={n.id}
+                    className={`flex flex-col sm:flex-row gap-2 sm:gap-3 rounded-xl p-3 transition-colors hover:bg-slate-50 ${n.read ? '' : 'bg-brand-50/70'}`}
+                  >
+                    {picking.active && (
+                      <Checkbox
+                        checked={picking.ids.has(n.id)}
+                        onChange={() => picking.toggle(n.id)}
+                        className="self-start sm:self-center"
+                        aria-label={`Chọn thông báo: ${n.title}`}
+                      />
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => (picking.active ? picking.toggle(n.id) : open(n))}
+                      className="flex gap-3 flex-1 min-w-0 text-left cursor-pointer"
+                    >
+                      <span className="mt-0.5 h-10 w-10 shrink-0 rounded-full grid place-items-center bg-slate-100">
+                        {rewardUrl(n.image) ? (
+                          <img src={rewardUrl(n.image)!} alt="" width={34} height={34} />
+                        ) : (
+                          <AppIcon name={KIND_ICON[n.kind] ?? 'bell'} size={26} />
+                        )}
+                      </span>
+                      <span className="flex-1 min-w-0">
+                        <span className={`block ${n.read ? 'font-medium text-slate-700' : 'font-bold text-slate-800'}`}>{n.title}</span>
+                        {n.body && (
+                          <span className="block text-sm text-slate-600 mt-0.5 whitespace-pre-wrap">
+                            {n.data.action ? `“${n.body}”` : n.body}
+                          </span>
+                        )}
+                        <span className="num block text-xs text-slate-500 mt-1">{dayjs(n.created_at).format('HH:mm · DD/MM/YYYY')}</span>
+                      </span>
+                      {!n.read && <span className="sr-only">chưa đọc</span>}
+                    </button>
+                    {!picking.active && n.data.action && n.action_state && (
+                      <div className="shrink-0 pl-[52px] sm:pl-0 sm:self-center">
+                        <Answer n={n} onDone={() => list.refetch()} />
+                      </div>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </ShowMore>
         )}
       </div>
       {picking.active && (
-        <SelectionBar count={picking.ids.size} total={list.data?.length ?? 0} noun="thông báo" busy={bulk.busy}
-          onSelectAll={() => picking.selectAll(list.data?.map((n) => n.id) ?? [])} onClear={picking.clear} onDone={picking.stop}
-          onDelete={() => bulk.run([...picking.ids], (n) => `${n} thông báo`)} />
+        <SelectionBar
+          count={picking.ids.size}
+          total={list.data?.length ?? 0}
+          noun="thông báo"
+          busy={bulk.busy}
+          onSelectAll={() => picking.selectAll(list.data?.map((n) => n.id) ?? [])}
+          onClear={picking.clear}
+          onDone={picking.stop}
+          onDelete={() => bulk.run([...picking.ids], (n) => `${n} thông báo`)}
+        />
       )}
     </div>
   )

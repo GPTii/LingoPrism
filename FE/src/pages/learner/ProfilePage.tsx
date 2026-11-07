@@ -18,9 +18,33 @@ import { AvatarPicker, GENDERS, birthDateLimit, birthDateProps } from '../../com
 import { DeleteAccountSection } from '../../components/AccountGates'
 
 const LANGS = [
-  { value: 'en', label: <span className="inline-flex items-center gap-2"><LangGlyph lang="en" size={18} />Tiếng Anh</span> },
-  { value: 'zh', label: <span className="inline-flex items-center gap-2"><LangGlyph lang="zh" size={18} />Tiếng Trung</span> },
-  { value: 'vi', label: <span className="inline-flex items-center gap-2"><LangGlyph lang="vi" size={18} />Tiếng Việt</span> },
+  {
+    value: 'en',
+    label: (
+      <span className="inline-flex items-center gap-2">
+        <LangGlyph lang="en" size={18} />
+        Tiếng Anh
+      </span>
+    ),
+  },
+  {
+    value: 'zh',
+    label: (
+      <span className="inline-flex items-center gap-2">
+        <LangGlyph lang="zh" size={18} />
+        Tiếng Trung
+      </span>
+    ),
+  },
+  {
+    value: 'vi',
+    label: (
+      <span className="inline-flex items-center gap-2">
+        <LangGlyph lang="vi" size={18} />
+        Tiếng Việt
+      </span>
+    ),
+  },
 ]
 
 /** "HH:mm:ss" from the API ⇄ the time picker */
@@ -30,7 +54,8 @@ const fromTime = (v: Dayjs | null | undefined) => (v ? v.format('HH:mm:00') : nu
 function Shortcut({ to, icon, label }: { to: string; icon: AppIconName; label: string }) {
   return (
     <Link to={to} className="lift lp-card flex items-center gap-3 px-4 py-3 !text-slate-800 font-semibold">
-      <AppIcon name={icon} size={30} />{label}
+      <AppIcon name={icon} size={30} />
+      {label}
     </Link>
   )
 }
@@ -44,8 +69,11 @@ function GoalSection() {
     setSaving(true)
     try {
       await authApi.updateGoal({
-        daily_new_target: v.daily_new_target, daily_review_target: v.daily_review_target, smart_remind: v.smart_remind,
-        remind_morning: fromTime(v.morning), remind_evening: fromTime(v.evening),
+        daily_new_target: v.daily_new_target,
+        daily_review_target: v.daily_review_target,
+        smart_remind: v.smart_remind,
+        remind_morning: fromTime(v.morning),
+        remind_evening: fromTime(v.evening),
       })
       goal.refetch()
       message.success('Đã lưu mục tiêu')
@@ -57,8 +85,12 @@ function GoalSection() {
   }
   return (
     <Section title="Mục tiêu mỗi ngày">
-      <Form layout="vertical" requiredMark={false} onFinish={save}
-        initialValues={{ ...goal.data, morning: toTime(goal.data.remind_morning), evening: toTime(goal.data.remind_evening) }}>
+      <Form
+        layout="vertical"
+        requiredMark={false}
+        onFinish={save}
+        initialValues={{ ...goal.data, morning: toTime(goal.data.remind_morning), evening: toTime(goal.data.remind_evening) }}
+      >
         <div className="grid sm:grid-cols-2 gap-x-4">
           <Form.Item name="daily_new_target" label="Từ mới mỗi ngày" rules={[{ required: true }]}>
             <InputNumber min={1} max={100} size="large" className="!w-full" addonAfter="từ" />
@@ -73,8 +105,12 @@ function GoalSection() {
             <TimePicker format="HH:mm" minuteStep={5} size="large" className="!w-full" placeholder="Không nhắc" />
           </Form.Item>
         </div>
-        <Form.Item name="smart_remind" label="Nhắc thông minh (chọn giờ bạn hay học)" valuePropName="checked"><Switch /></Form.Item>
-        <Button htmlType="submit" type="primary" loading={saving}>Lưu mục tiêu</Button>
+        <Form.Item name="smart_remind" label="Nhắc thông minh (chọn giờ bạn hay học)" valuePropName="checked">
+          <Switch />
+        </Form.Item>
+        <Button htmlType="submit" type="primary" loading={saving}>
+          Lưu mục tiêu
+        </Button>
       </Form>
     </Section>
   )
@@ -103,7 +139,10 @@ function NotificationSection() {
       <ul className="m-0 p-0 list-none divide-y divide-slate-100">
         {rows.map((r) => (
           <li key={r.key} className="flex items-center gap-4 py-3">
-            <div className="flex-1 min-w-0"><div className="font-semibold text-slate-800">{r.label}</div><div className="text-sm text-slate-500">{r.hint}</div></div>
+            <div className="flex-1 min-w-0">
+              <div className="font-semibold text-slate-800">{r.label}</div>
+              <div className="text-sm text-slate-500">{r.hint}</div>
+            </div>
             <Switch checked={!!settings.data![r.key]} onChange={(v) => change({ [r.key]: v })} aria-label={r.label} />
           </li>
         ))}
@@ -138,14 +177,24 @@ function PasswordSection() {
         <Form.Item name="new_password" label="Mật khẩu mới" rules={[{ required: true, min: 8, message: 'Ít nhất 8 ký tự' }]}>
           <Input.Password size="large" autoComplete="new-password" />
         </Form.Item>
-        <Form.Item name="confirm" label="Nhập lại mật khẩu mới" dependencies={['new_password']}
-          rules={[{ required: true, message: 'Nhập lại mật khẩu mới' }, ({ getFieldValue }) => ({
-            validator: (_, v) => (!v || v === getFieldValue('new_password') ? Promise.resolve() : Promise.reject(new Error('Hai mật khẩu chưa khớp'))),
-          })]}>
+        <Form.Item
+          name="confirm"
+          label="Nhập lại mật khẩu mới"
+          dependencies={['new_password']}
+          rules={[
+            { required: true, message: 'Nhập lại mật khẩu mới' },
+            ({ getFieldValue }) => ({
+              validator: (_, v) =>
+                !v || v === getFieldValue('new_password') ? Promise.resolve() : Promise.reject(new Error('Hai mật khẩu chưa khớp')),
+            }),
+          ]}
+        >
           <Input.Password size="large" autoComplete="new-password" />
         </Form.Item>
         <p className="text-sm text-slate-500 mt-0">Sau khi đổi, mọi thiết bị đang đăng nhập sẽ phải đăng nhập lại.</p>
-        <Button htmlType="submit" loading={saving}>Đổi mật khẩu</Button>
+        <Button htmlType="submit" loading={saving}>
+          Đổi mật khẩu
+        </Button>
       </Form>
     </Section>
   )
@@ -182,7 +231,8 @@ export default function ProfilePage() {
               <span className="block text-base font-medium text-slate-500 mt-0.5">{user.email}</span>
             </span>
           </span>
-        } />
+        }
+      />
       <Link to="/prismo" className="lift lp-card p-4 flex items-center gap-4 group">
         <PrismoAvatar look={user.mascot} size={76} square />
         <span className="flex-1 min-w-0">
@@ -195,9 +245,11 @@ export default function ProfilePage() {
       {/* the learner's own corner ("Tôi"): progress, rewards, people, help – the same links as the menu */}
       <Section title="Của tôi">
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-          {meLinks({}).filter((l) => l.to !== '/profile' && !(l.adults && isKid)).map((l) => (
-            <Shortcut key={l.to} to={l.to} icon={l.icon} label={l.label} />
-          ))}
+          {meLinks({})
+            .filter((l) => l.to !== '/profile' && !(l.adults && isKid))
+            .map((l) => (
+              <Shortcut key={l.to} to={l.to} icon={l.icon} label={l.label} />
+            ))}
           {!isKid && <Shortcut to="/community?tab=saved" icon="bookmark" label="Bài đã lưu" />}
         </div>
       </Section>
@@ -207,7 +259,12 @@ export default function ProfilePage() {
             <Input size="large" maxLength={80} />
           </Form.Item>
           <Form.Item name="bio" label="Giới thiệu" extra="Hiện trên trang cá nhân của bạn trong Cộng đồng.">
-            <Input.TextArea maxLength={200} showCount autoSize={{ minRows: 2, maxRows: 4 }} placeholder="VD: Đang luyện HSK 3, thích chụp đồ ăn để học từ" />
+            <Input.TextArea
+              maxLength={200}
+              showCount
+              autoSize={{ minRows: 2, maxRows: 4 }}
+              placeholder="VD: Đang luyện HSK 3, thích chụp đồ ăn để học từ"
+            />
           </Form.Item>
           <div className="grid sm:grid-cols-2 gap-x-4">
             <Form.Item name="birth_date" label="Ngày sinh" {...birthDateProps}>
@@ -217,8 +274,18 @@ export default function ProfilePage() {
               <Radio.Group optionType="button" options={GENDERS} />
             </Form.Item>
           </div>
-          <Form.Item name="learner_type" label="Đối tượng" extra="Chế độ trẻ em ẩn bảng tin, kết bạn và nhóm học trong Cộng đồng." className="!mb-0">
-            <Radio.Group options={[{ value: 'adult', label: 'Người lớn' }, { value: 'kid', label: 'Trẻ em' }]} />
+          <Form.Item
+            name="learner_type"
+            label="Đối tượng"
+            extra="Chế độ trẻ em ẩn bảng tin, kết bạn và nhóm học trong Cộng đồng."
+            className="!mb-0"
+          >
+            <Radio.Group
+              options={[
+                { value: 'adult', label: 'Người lớn' },
+                { value: 'kid', label: 'Trẻ em' },
+              ]}
+            />
           </Form.Item>
         </Section>
         <Section title="Ngôn ngữ">
@@ -229,10 +296,25 @@ export default function ProfilePage() {
             <Radio.Group options={LANGS} />
           </Form.Item>
           <Form.Item name="zh_script" label="Dạng chữ Hán">
-            <Radio.Group className="!flex !flex-col gap-2"
+            <Radio.Group
+              className="!flex !flex-col gap-2"
               options={[
-                { value: 'hans', label: <span>Giản thể – chuẩn Trung Quốc đại lục (<span lang="zh-Hans">汉字</span>)</span> },
-                { value: 'hant', label: <span>Phồn thể – chuẩn Đài Loan (<span lang="zh-Hant">漢字</span>)</span> },
+                {
+                  value: 'hans',
+                  label: (
+                    <span>
+                      Giản thể – chuẩn Trung Quốc đại lục (<span lang="zh-Hans">汉字</span>)
+                    </span>
+                  ),
+                },
+                {
+                  value: 'hant',
+                  label: (
+                    <span>
+                      Phồn thể – chuẩn Đài Loan (<span lang="zh-Hant">漢字</span>)
+                    </span>
+                  ),
+                },
               ]}
             />
           </Form.Item>
@@ -241,7 +323,9 @@ export default function ProfilePage() {
           </Form.Item>
         </Section>
         <div>
-          <Button type="primary" size="large" htmlType="submit" loading={saving}>Lưu thay đổi</Button>
+          <Button type="primary" size="large" htmlType="submit" loading={saving}>
+            Lưu thay đổi
+          </Button>
         </div>
       </Form>
       <GoalSection />

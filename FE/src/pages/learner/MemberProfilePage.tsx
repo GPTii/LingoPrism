@@ -16,7 +16,12 @@ export default function MemberProfilePage() {
   const { message, modal } = App.useApp()
   const profile = useQuery({ queryKey: ['profile', id], queryFn: () => communityApi.profile(Number(id)) })
   const p = profile.data
-  if (!p) return <div className="max-w-3xl mx-auto lp-card p-6"><Skeleton active avatar /></div>
+  if (!p)
+    return (
+      <div className="max-w-3xl mx-auto lp-card p-6">
+        <Skeleton active avatar />
+      </div>
+    )
   const toggleBlock = () => {
     const run = async () => {
       try {
@@ -30,8 +35,12 @@ export default function MemberProfilePage() {
     if (p.blocked) return run()
     modal.confirm({
       title: `Chặn ${p.display_name}?`,
-      content: 'Hai bạn sẽ bỏ theo dõi nhau, không nhắn tin cho nhau được và không thấy bài đăng của nhau. Người kia không nhận được thông báo.',
-      okText: 'Chặn', okButtonProps: { danger: true }, cancelText: 'Huỷ', onOk: run,
+      content:
+        'Hai bạn sẽ bỏ theo dõi nhau, không nhắn tin cho nhau được và không thấy bài đăng của nhau. Người kia không nhận được thông báo.',
+      okText: 'Chặn',
+      okButtonProps: { danger: true },
+      cancelText: 'Huỷ',
+      onOk: run,
     })
   }
   const toggle = async () => {
@@ -44,7 +53,8 @@ export default function MemberProfilePage() {
   }
   return (
     <div className="max-w-3xl mx-auto flex flex-col gap-6">
-      <PageHeader back={{ to: '/community', label: 'Cộng đồng' }}
+      <PageHeader
+        back={{ to: '/community', label: 'Cộng đồng' }}
         title={
           <span className="flex items-center gap-4">
             <UserAvatar name={p.display_name} src={p.avatar} mascot={p.mascot} size={64} />
@@ -58,17 +68,26 @@ export default function MemberProfilePage() {
           </span>
         }
         description={p.bio || undefined}
-        actions={p.id !== me?.id && (
-          <span className="flex gap-2">
-            {!p.blocked && p.friend_status !== 'incoming' && (
-              <FriendButton userId={p.id} name={p.display_name} status={p.friend_status} requestId={p.friend_request_id} size="large" />
-            )}
-            {p.can_message && <MessageButton userId={p.id} />}
-            {!p.blocked && <Button size="large" type="default" onClick={toggle}>{p.is_following ? 'Đang theo dõi' : 'Theo dõi'}</Button>}
-            <Button size="large" type="text" danger={!p.blocked} onClick={toggleBlock}>{p.blocked ? 'Bỏ chặn' : 'Chặn'}</Button>
-            <ReportUserButton userId={p.id} name={p.display_name} blocked={p.blocked} onDone={() => profile.refetch()} />
-          </span>
-        )} />
+        actions={
+          p.id !== me?.id && (
+            <span className="flex gap-2">
+              {!p.blocked && p.friend_status !== 'incoming' && (
+                <FriendButton userId={p.id} name={p.display_name} status={p.friend_status} requestId={p.friend_request_id} size="large" />
+              )}
+              {p.can_message && <MessageButton userId={p.id} />}
+              {!p.blocked && (
+                <Button size="large" type="default" onClick={toggle}>
+                  {p.is_following ? 'Đang theo dõi' : 'Theo dõi'}
+                </Button>
+              )}
+              <Button size="large" type="text" danger={!p.blocked} onClick={toggleBlock}>
+                {p.blocked ? 'Bỏ chặn' : 'Chặn'}
+              </Button>
+              <ReportUserButton userId={p.id} name={p.display_name} blocked={p.blocked} onDone={() => profile.refetch()} />
+            </span>
+          )
+        }
+      />
       {p.friend_status === 'incoming' && !p.blocked && (
         <section className="lp-card p-5 border-brand-200 bg-brand-50 flex flex-col sm:flex-row sm:items-center gap-3">
           <div className="flex-1 min-w-0">
@@ -79,14 +98,16 @@ export default function MemberProfilePage() {
         </section>
       )}
       <Section>
-        <Facts items={[
-          { label: 'tổng XP', value: p.lifetime_xp.toLocaleString('vi-VN'), icon: <XpIcon size={22} /> },
-          { label: 'ngày liên tiếp', value: p.streak, icon: <StreakIcon size={22} /> },
-          { label: 'bạn bè', value: p.friends },
-          { label: 'bài đăng', value: p.posts },
-          { label: 'người theo dõi', value: p.followers },
-          { label: 'đang theo dõi', value: p.following },
-        ]} />
+        <Facts
+          items={[
+            { label: 'tổng XP', value: p.lifetime_xp.toLocaleString('vi-VN'), icon: <XpIcon size={22} /> },
+            { label: 'ngày liên tiếp', value: p.streak, icon: <StreakIcon size={22} /> },
+            { label: 'bạn bè', value: p.friends },
+            { label: 'bài đăng', value: p.posts },
+            { label: 'người theo dõi', value: p.followers },
+            { label: 'đang theo dõi', value: p.following },
+          ]}
+        />
       </Section>
       {p.mascot && (
         <Section title={`Prismo của ${p.display_name}`}>
@@ -98,11 +119,21 @@ export default function MemberProfilePage() {
       )}
       {p.recent_posts.length > 0 && (
         <Section title="Ảnh gần đây">
-          <ShowMore items={p.recent_posts} limit={6} label="Xem thêm ảnh">{(shown) => (
-          <div className="grid grid-cols-3 gap-2">
-            {shown.map((r) => <img key={r.id} src={r.image} alt="" loading="lazy" className="aspect-square w-full object-cover rounded-xl bg-slate-100" />)}
-          </div>
-          )}</ShowMore>
+          <ShowMore items={p.recent_posts} limit={6} label="Xem thêm ảnh">
+            {(shown) => (
+              <div className="grid grid-cols-3 gap-2">
+                {shown.map((r) => (
+                  <img
+                    key={r.id}
+                    src={r.image}
+                    alt=""
+                    loading="lazy"
+                    className="aspect-square w-full object-cover rounded-xl bg-slate-100"
+                  />
+                ))}
+              </div>
+            )}
+          </ShowMore>
         </Section>
       )}
     </div>

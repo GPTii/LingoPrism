@@ -39,13 +39,26 @@ export function VerifyEmailBanner() {
     <div role="status" className="lp-card mb-4 p-4 flex flex-col md:flex-row md:items-center gap-3 border-amber-300 bg-amber-50/60">
       <div className="flex-1 min-w-0">
         <div className="font-bold text-slate-800">Xác minh email của bạn</div>
-        <div className="text-sm text-slate-600">Nhập mã 6 số đã gửi tới <b>{user.email}</b>. Đăng bài, kết bạn và nhắn tin cần bước này.</div>
+        <div className="text-sm text-slate-600">
+          Nhập mã 6 số đã gửi tới <b>{user.email}</b>. Đăng bài, kết bạn và nhắn tin cần bước này.
+        </div>
       </div>
       <div className="flex gap-2">
-        <Input value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))} onPressEnter={verify}
-          inputMode="numeric" placeholder="Mã 6 số" aria-label="Mã xác minh email" style={{ width: 130 }} />
-        <Button type="primary" disabled={code.length !== 6} loading={busy === 'verify'} onClick={verify}>Xác minh</Button>
-        <Button type="text" loading={busy === 'resend'} onClick={resend}>Gửi lại mã</Button>
+        <Input
+          value={code}
+          onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+          onPressEnter={verify}
+          inputMode="numeric"
+          placeholder="Mã 6 số"
+          aria-label="Mã xác minh email"
+          style={{ width: 130 }}
+        />
+        <Button type="primary" disabled={code.length !== 6} loading={busy === 'verify'} onClick={verify}>
+          Xác minh
+        </Button>
+        <Button type="text" loading={busy === 'resend'} onClick={resend}>
+          Gửi lại mã
+        </Button>
       </div>
     </div>
   )
@@ -65,20 +78,38 @@ export function WhatsNew() {
     try {
       seen = localStorage.getItem(SEEN_KEY)
       if (!seen) localStorage.setItem(SEEN_KEY, latest.version)
-    } catch { /* private mode: never shown */ }
+    } catch {
+      /* private mode: never shown */
+    }
     if (seen && seen !== latest.version) setOpen(true)
   }, [latest])
   const close = () => {
     setOpen(false)
-    try { localStorage.setItem(SEEN_KEY, latest!.version) } catch { /* ignore */ }
+    try {
+      localStorage.setItem(SEEN_KEY, latest!.version)
+    } catch {
+      /* ignore */
+    }
   }
   if (!latest) return null
   return (
-    <Modal open={open} onCancel={close} onOk={close} okText="Tuyệt!" cancelButtonProps={{ style: { display: 'none' } }}
-      title={<span className="flex items-center gap-2">Có gì mới <Tag color="blue">{latest.version}</Tag></span>}>
+    <Modal
+      open={open}
+      onCancel={close}
+      onOk={close}
+      okText="Tuyệt!"
+      cancelButtonProps={{ style: { display: 'none' } }}
+      title={
+        <span className="flex items-center gap-2">
+          Có gì mới <Tag color="blue">{latest.version}</Tag>
+        </span>
+      }
+    >
       <p className="font-bold text-slate-800 mt-0">{latest.title}</p>
       <ReleaseLists r={latest} />
-      <Link to="/releases" onClick={close}>Xem mọi phiên bản</Link>
+      <Link to="/releases" onClick={close}>
+        Xem mọi phiên bản
+      </Link>
     </Modal>
   )
 }
@@ -109,13 +140,39 @@ export function DeleteAccountSection() {
       <p className="text-slate-600 mt-2">
         Xoá vĩnh viễn tài khoản cùng tiến độ học, từ đã lưu, ảnh, bài đăng, tin nhắn và bạn bè. Không thể khôi phục.
       </p>
-      <Button danger onClick={() => { setValue(''); setOpen(true) }}>Xoá tài khoản của tôi</Button>
-      <Modal open={open} title="Xoá vĩnh viễn tài khoản?" okText="Xoá vĩnh viễn" okButtonProps={{ danger: true, disabled: !value, loading: busy }}
-        cancelText="Huỷ" onOk={remove} onCancel={() => setOpen(false)} destroyOnHidden>
-        <p>Mọi dữ liệu của <b>{user?.email}</b> sẽ bị xoá ngay và mọi thiết bị bị đăng xuất.</p>
-        {hasPassword
-          ? <Input.Password autoFocus value={value} onChange={(e) => setValue(e.target.value)} placeholder="Nhập mật khẩu để xác nhận" autoComplete="current-password" />
-          : <Input autoFocus value={value} onChange={(e) => setValue(e.target.value)} placeholder="Gõ XOA để xác nhận" />}
+      <Button
+        danger
+        onClick={() => {
+          setValue('')
+          setOpen(true)
+        }}
+      >
+        Xoá tài khoản của tôi
+      </Button>
+      <Modal
+        open={open}
+        title="Xoá vĩnh viễn tài khoản?"
+        okText="Xoá vĩnh viễn"
+        okButtonProps={{ danger: true, disabled: !value, loading: busy }}
+        cancelText="Huỷ"
+        onOk={remove}
+        onCancel={() => setOpen(false)}
+        destroyOnHidden
+      >
+        <p>
+          Mọi dữ liệu của <b>{user?.email}</b> sẽ bị xoá ngay và mọi thiết bị bị đăng xuất.
+        </p>
+        {hasPassword ? (
+          <Input.Password
+            autoFocus
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            placeholder="Nhập mật khẩu để xác nhận"
+            autoComplete="current-password"
+          />
+        ) : (
+          <Input autoFocus value={value} onChange={(e) => setValue(e.target.value)} placeholder="Gõ XOA để xác nhận" />
+        )}
       </Modal>
     </section>
   )

@@ -39,11 +39,17 @@ export default function LoginPage() {
           <Input.Password size="large" autoComplete="current-password" />
         </Form.Item>
         <div className="flex justify-end -mt-2 mb-4">
-          <Link to="/forgot-password" className="text-sm">Quên mật khẩu?</Link>
+          <Link to="/forgot-password" className="text-sm">
+            Quên mật khẩu?
+          </Link>
         </div>
-        <Button type="primary" htmlType="submit" size="large" block loading={loading}>Đăng nhập</Button>
+        <Button type="primary" htmlType="submit" size="large" block loading={loading}>
+          Đăng nhập
+        </Button>
       </Form>
-      <div className="mt-5"><GoogleButton text="signin_with" /></div>
+      <div className="mt-5">
+        <GoogleButton text="signin_with" />
+      </div>
       <GoogleTermsNote />
       <p className="text-center text-slate-500 mt-6">
         Chưa có tài khoản? <Link to="/register">Đăng ký</Link>
