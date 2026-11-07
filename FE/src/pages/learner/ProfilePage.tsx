@@ -13,6 +13,7 @@ import { AppIcon, type AppIconName } from '../../components/brand/AppIcon'
 import { LangGlyph, PrismoAvatar } from '../../components/brand/Brand'
 import { MyIdCard } from '../../components/Friends'
 import { PageHeader, Section } from '../../components/ui'
+import { meLinks } from '../../components/SideNav'
 import { AvatarPicker, GENDERS, birthDateLimit, birthDateProps } from '../../components/ProfileSetup'
 import { DeleteAccountSection } from '../../components/AccountGates'
 
@@ -190,16 +191,16 @@ export default function ProfilePage() {
         </span>
         <ArrowRightOutlined className="text-slate-400 transition-transform duration-150 group-hover:translate-x-0.5" />
       </Link>
-      {!isKid && (
-        <>
-          <MyIdCard />
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            <Shortcut to="/friends" icon="community" label="Bạn bè" />
-            <Shortcut to="/community?tab=saved" icon="bookmark" label="Bài đã lưu" />
-            <Shortcut to="/notifications" icon="bell" label="Thông báo" />
-          </div>
-        </>
-      )}
+      {!isKid && <MyIdCard />}
+      {/* the learner's own corner ("Tôi"): progress, rewards, people, help – the same links as the menu */}
+      <Section title="Của tôi">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          {meLinks({}).filter((l) => l.to !== '/profile' && !(l.adults && isKid)).map((l) => (
+            <Shortcut key={l.to} to={l.to} icon={l.icon} label={l.label} />
+          ))}
+          {!isKid && <Shortcut to="/community?tab=saved" icon="bookmark" label="Bài đã lưu" />}
+        </div>
+      </Section>
       <Form layout="vertical" initialValues={user} onFinish={onFinish} requiredMark={false} className="flex flex-col gap-6">
         <Section title="Về bạn">
           <Form.Item name="display_name" label="Tên hiển thị" rules={[{ required: true, message: 'Nhập tên hiển thị' }]}>

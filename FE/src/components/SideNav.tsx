@@ -1,14 +1,19 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { Popover, Tooltip } from 'antd'
-import { DownOutlined, MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons'
+import { CameraFilled, DownOutlined, MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons'
 import { NavLink, useLocation } from 'react-router-dom'
 import { Logo, LogoMark } from './brand/Brand'
 import { AppIcon, type AppIconName } from './brand/AppIcon'
 
 export type NavLeaf = { to: string; label: string; icon: AppIconName; only?: string; count?: number; adults?: boolean }
-export type NavGroup = { key: string; label: string; icon: AppIconName; to?: string; children?: NavLeaf[] }
+export type NavGroup = { key: string; label: string; icon: AppIconName; to?: string; children?: NavLeaf[]; featured?: boolean }
 
-/** The whole app in groups; the counts make the work waiting inside each one visible. */
+/**
+ * The whole app in groups, most used first: today's lesson, the learning tools, the camera (the heart of the app),
+ * games and the word library. Everything about the learner – achievements, the shop, friends, messages, the
+ * community, help – lives under "Tôi" (also the avatar menu and the profile page). Translation is the floating
+ * button on every page (TranslateBubble), the /dich page stays for the full view.
+ */
 export function navGroups(counts: { due?: number; unread?: number; quests?: number; dm?: number; friends?: number }): NavGroup[] {
   return [
     { key: 'home', label: 'Hôm nay', icon: 'home', to: '/' },
@@ -16,54 +21,44 @@ export function navGroups(counts: { due?: number; unread?: number; quests?: numb
       key: 'learn', label: 'Học', icon: 'learn', children: [
         { to: '/learn?kind=learn', label: 'Học từ mới', icon: 'sparkle' },
         { to: '/learn?kind=review', label: 'Ôn từ đến hạn', icon: 'review', count: counts.due },
-        { to: '/sentences', label: 'Luyện câu', icon: 'tiles' },
         { to: '/speak', label: 'Luyện phát âm', icon: 'mic' },
+        { to: '/sentences', label: 'Luyện câu', icon: 'tiles' },
         { to: '/doc-viet', label: 'Học đọc – viết', icon: 'pencil', only: 'vi' },
         { to: '/exams', label: 'Đề thi', icon: 'exam' },
       ],
     },
+    { key: 'snap', label: 'Chụp ảnh học từ', icon: 'camera', to: '/camera', featured: true },
     { key: 'games', label: 'Trò chơi', icon: 'game', to: '/tro-choi' },
     {
       key: 'vocab', label: 'Từ vựng', icon: 'vocab', children: [
         { to: '/vocab', label: 'Chủ đề', icon: 'shapes' },
         { to: '/vocab?tab=library', label: 'Từ của tôi', icon: 'bookmark' },
-        { to: '/dich', label: 'Dịch', icon: 'chat' },
-      ],
-    },
-    {
-      key: 'snap', label: 'Chụp & khám phá', icon: 'camera', children: [
-        { to: '/camera', label: 'Chụp ảnh học từ', icon: 'camera' },
         { to: '/camera/history', label: 'Lịch sử ảnh', icon: 'photo' },
         { to: '/map', label: 'Học theo vị trí', icon: 'pin' },
       ],
     },
     {
-      key: 'community', label: 'Cộng đồng', icon: 'community', children: [
-        { to: '/community?tab=feed', label: 'Bảng tin', icon: 'news' },
-        { to: '/friends', label: 'Bạn bè', icon: 'community', count: counts.friends, adults: true },
-        { to: '/community?tab=saved', label: 'Bài đã lưu', icon: 'bookmark', adults: true },
-        { to: '/community?tab=groups', label: 'Nhóm học', icon: 'group' },
-        { to: '/community?tab=leaderboard', label: 'Bảng xếp hạng', icon: 'podium' },
-        { to: '/messages', label: 'Tin nhắn', icon: 'mail', count: counts.dm, adults: true },
-      ],
+      key: 'me', label: 'Tôi', icon: 'profile', children: meLinks(counts),
     },
-    {
-      key: 'rewards', label: 'Thành tích', icon: 'trophy', children: [
-        { to: '/stats', label: 'Thống kê học tập', icon: 'chart' },
-        { to: '/achievements#quests', label: 'Nhiệm vụ', icon: 'target', count: counts.quests },
-        { to: '/achievements#calendar', label: 'Lịch học', icon: 'calendar' },
-        { to: '/achievements#badges', label: 'Huy hiệu', icon: 'medal' },
-        { to: '/prismo', label: 'Tủ đồ Prismo', icon: 'sparkle' },
-        { to: '/achievements#shop', label: 'Cửa hàng', icon: 'bag' },
-      ],
-    },
-    {
-      key: 'help', label: 'Hỗ trợ', icon: 'chat', children: [
-        { to: '/support', label: 'Hỏi giáo viên', icon: 'cap' },
-        { to: '/notifications', label: 'Thông báo', icon: 'bell', count: counts.unread },
-        { to: '/profile', label: 'Hồ sơ & cài đặt', icon: 'profile' },
-      ],
-    },
+  ]
+}
+
+/** "Tôi": the learner's own corner – progress, rewards, people, help. Shared by the side menu, the phone tab bar,
+ * the avatar menu and the profile page. */
+export function meLinks(counts: { unread?: number; quests?: number; dm?: number; friends?: number }): NavLeaf[] {
+  return [
+    { to: '/profile', label: 'Hồ sơ & cài đặt', icon: 'profile' },
+    { to: '/achievements', label: 'Thành tích & nhiệm vụ', icon: 'trophy', count: counts.quests },
+    { to: '/stats', label: 'Thống kê học tập', icon: 'chart' },
+    { to: '/achievements#shop', label: 'Cửa hàng', icon: 'bag' },
+    { to: '/prismo', label: 'Tủ đồ Prismo', icon: 'sparkle' },
+    { to: '/friends', label: 'Bạn bè', icon: 'community', count: counts.friends, adults: true },
+    { to: '/messages', label: 'Tin nhắn', icon: 'mail', count: counts.dm, adults: true },
+    { to: '/community?tab=feed', label: 'Cộng đồng', icon: 'news' },
+    { to: '/community?tab=groups', label: 'Nhóm học', icon: 'group' },
+    { to: '/community?tab=leaderboard', label: 'Bảng xếp hạng', icon: 'podium' },
+    { to: '/support', label: 'Hỏi giáo viên', icon: 'cap' },
+    { to: '/notifications', label: 'Thông báo', icon: 'bell', count: counts.unread },
   ]
 }
 
@@ -157,7 +152,11 @@ export default function SideNav({ groups, footer }: { groups: NavGroup[]; footer
         <nav className="flex flex-col items-center gap-1.5" aria-label="Mục chính">
           {groups.map((g) => {
             const on = g.key === activeGroup
-            const icon = (
+            const icon = g.featured ? (
+              <span className={`h-12 w-12 rounded-xl grid place-items-center prism-bg text-white text-xl shadow-md ${on ? 'ring-2 ring-brand-300' : ''}`}>
+                <CameraFilled />
+              </span>
+            ) : (
               <span className={`relative h-12 w-12 rounded-xl grid place-items-center border-2 transition-colors ${
                 on ? 'bg-brand-50 border-brand-200' : 'border-transparent hover:bg-slate-100'}`}>
                 <AppIcon name={g.icon} size={30} />
@@ -200,6 +199,15 @@ export default function SideNav({ groups, footer }: { groups: NavGroup[]; footer
       <nav className="flex flex-col gap-0.5" aria-label="Mục chính">
         {groups.map((g) => {
           const on = g.key === activeGroup
+          if (g.to && g.featured) { // the camera: the main action of the app, always one click away
+            return (
+              <NavLink key={g.key} to={g.to} aria-current={g.to === active ? 'page' : undefined}
+                className={`my-1.5 flex items-center gap-3 rounded-xl h-12 px-2.5 font-bold !text-white prism-bg shadow-md transition-transform hover:-translate-y-0.5 ${
+                  on ? 'ring-2 ring-brand-300 ring-offset-2 ring-offset-[var(--page-bg)]' : ''}`}>
+                <span className="h-8 w-8 rounded-lg bg-white/20 grid place-items-center"><CameraFilled /></span>{g.label}
+              </NavLink>
+            )
+          }
           if (g.to) {
             return (
               <NavLink key={g.key} to={g.to} aria-current={g.to === active ? 'page' : undefined}
@@ -211,7 +219,7 @@ export default function SideNav({ groups, footer }: { groups: NavGroup[]; footer
           }
           const isOpen = open.includes(g.key)
           return (
-            <div key={g.key}>
+            <div key={g.key} className={g.key === 'me' ? 'mt-2 pt-2 border-t border-slate-200' : undefined}>
               <button type="button" onClick={() => toggle(g.key)} aria-expanded={isOpen}
                 className={`w-full flex items-center gap-3 rounded-xl h-12 px-2.5 font-bold border-2 border-transparent cursor-pointer transition-colors ${
                   on ? 'text-slate-900' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'}`}>

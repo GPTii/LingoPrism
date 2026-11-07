@@ -25,9 +25,12 @@ type Result = { text: string; reading?: string; target: TranslateLang; via: 'onl
 const POS_KEY = 'lp-translate-bubble'
 const SIZE = 56
 
-function loadPos(): { x: number; y: number } {
+/** phone and wide screens remember their own spot: a place dragged to on a laptop means nothing on a phone */
+const viewKind = () => (typeof window !== 'undefined' && window.innerWidth < 768 ? 'phone' : 'wide')
+
+function loadPos(view = viewKind()): { x: number; y: number } {
   try {
-    const p = JSON.parse(localStorage.getItem(POS_KEY) ?? '')
+    const p = JSON.parse(localStorage.getItem(`${POS_KEY}-${view}`) ?? '')
     if (typeof p?.x === 'number' && typeof p?.y === 'number') return p
   } catch { /* first visit or storage blocked */ }
   return { x: 20, y: 96 } // from the right / bottom edge: above the phone tab bar
@@ -44,7 +47,8 @@ export default function TranslateBubble() {
   const location = useLocation()
   const learning: TranslateLang = user?.active_language === 'zh' ? (user.zh_script === 'hant' ? 'zh-Hant' : 'zh-Hans') : 'en'
   const [open, setOpen] = useState(false)
-  const [pos, setPos] = useState(loadPos)
+  const [pos, setPos] = useState(() => loadPos())
+  const [view, setView] = useState(viewKind)
   const [source, setSource] = useState<TranslateLang>(user?.active_language === 'vi' ? 'en' : 'vi')
   const [target, setTarget] = useState<TranslateLang>(user?.active_language === 'vi' ? 'vi' : learning)
   const [mode, setMode] = useState<Mode>('auto')
@@ -58,6 +62,12 @@ export default function TranslateBubble() {
   const offline = offlineSupport()
 
   useEffect(() => () => stopRef.current?.(), [])
+  useEffect(() => { // phone <-> wide (rotation, resized window): that size's own spot
+    const onResize = () => setView(viewKind())
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
+  useEffect(() => { const p = loadPos(view); posRef.current = p; setPos(p) }, [view])
 
   const run = useMutation<Result, Error, { text: string; source: TranslateLang; target: TranslateLang }>({
     mutationFn: async ({ text: t, source: s, target: g }) => {
@@ -124,15 +134,16 @@ export default function TranslateBubble() {
     drag.current = null
     if (!d) return
     if (d.moved) {
-      try { localStorage.setItem(POS_KEY, JSON.stringify(posRef.current)) } catch { /* storage blocked */ }
+      try { localStorage.setItem(`${POS_KEY}-${view}`, JSON.stringify(posRef.current)) } catch { /* storage blocked */ }
     } else {
       setOpen((o) => !o)
     }
   }
 
   const out = run.data
-  const panelRight = Math.min(pos.x, Math.max(8, window.innerWidth - 380))
-  const panelBottom = pos.y + SIZE + 12 > window.innerHeight - 420 ? 8 : pos.y + SIZE + 12
+  const at = { x: Math.min(Math.max(8, pos.x), Math.max(8, window.innerWidth - SIZE - 8)), y: Math.min(Math.max(8, pos.y), Math.max(8, window.innerHeight - SIZE - 8)) }
+  const panelRight = Math.min(at.x, Math.max(8, window.innerWidth - 380))
+  const panelBottom = at.y + SIZE + 12 > window.innerHeight - 420 ? 8 : at.y + SIZE + 12
   const options = (other: TranslateLang) => LANGS.map((l) => ({ value: l.value, label: l.label, disabled: l.value === other || (isZh(l.value) && isZh(other)) }))
 
   return (
@@ -186,7 +197,7 @@ export default function TranslateBubble() {
       )}
       <button type="button" aria-label="Dịch nhanh" title="Dịch nhanh (kéo để di chuyển)"
         onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp}
-        style={{ right: pos.x, bottom: pos.y, width: SIZE, height: SIZE, touchAction: 'none' }}
+        style={{ right: at.x, bottom: at.y, width: SIZE, height: SIZE, touchAction: 'none' }}
         className="fixed z-50 rounded-full bg-brand-600 hover:bg-brand-700 text-white shadow-xl flex items-center justify-center cursor-grab active:cursor-grabbing select-none">
         {open ? <CloseOutlined className="text-xl" /> : <TranslationOutlined className="text-2xl" />}
       </button>

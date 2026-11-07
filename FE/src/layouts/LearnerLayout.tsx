@@ -4,7 +4,7 @@ import { Suspense, useEffect, useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { communityApi, gameApi, messagesApi } from '../api/app'
 import { authApi } from '../api/auth'
-import { CameraFilled, LogoutOutlined, MoonOutlined, SettingOutlined, SunOutlined, UserOutlined } from '@ant-design/icons'
+import { CameraFilled, LogoutOutlined, MoonOutlined, SettingOutlined, SunOutlined } from '@ant-design/icons'
 import { Navigate, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { isStaffRole, useAuth } from '../auth/store'
 import { useLogout } from '../auth/useLogout'
@@ -13,28 +13,13 @@ import { useUnread, useUserEvents } from '../lib/useUserEvents'
 import { GemIcon, LangGlyph, Logo, ScaleIcon, StreakIcon } from '../components/brand/Brand'
 import { AppIcon, type AppIconName } from '../components/brand/AppIcon'
 import { useThemeMode, type ThemeMode } from '../theme/store'
-import SideNav, { navGroups } from '../components/SideNav'
+import SideNav, { navGroups, type NavLeaf } from '../components/SideNav'
 import ErrorBoundary from '../components/ErrorBoundary'
 import TranslateBubble from '../components/TranslateBubble'
 import { VerifyEmailBanner, WhatsNew } from '../components/AccountGates'
 import { vocabApi } from '../api/vocab'
 import { ProfilePrompt } from '../components/ProfileSetup'
 import { UserAvatar } from '../components/ui'
-
-/** One quiet colour system: the page you are on is marked, the rest stay out of the way. */
-const NAV: { to: string; label: string; short?: string; icon: AppIconName; only?: string }[] = [
-  { to: '/', label: 'Trang chủ', short: 'Hôm nay', icon: 'home' },
-  { to: '/vocab', label: 'Từ vựng', icon: 'vocab' },
-  { to: '/doc-viet', label: 'Học đọc – viết', short: 'Đọc viết', icon: 'pencil', only: 'vi' },
-  { to: '/review', label: 'Ôn tập', icon: 'review' },
-  { to: '/sentences', label: 'Luyện câu', icon: 'tiles' },
-  { to: '/camera', label: 'Nhận diện', short: 'Chụp ảnh', icon: 'camera' },
-  { to: '/exams', label: 'Đề thi', icon: 'exam' },
-  { to: '/community', label: 'Cộng đồng', icon: 'community' },
-  { to: '/map', label: 'Bản đồ', icon: 'pin' },
-  { to: '/achievements', label: 'Thành tích', icon: 'trophy' },
-  { to: '/support', label: 'Hỏi giáo viên', short: 'Giáo viên', icon: 'cap' },
-]
 
 const THEMES: { mode: ThemeMode; label: string; icon: React.ReactNode }[] = [
   { mode: 'light', label: 'Sáng', icon: <SunOutlined /> },
@@ -87,7 +72,6 @@ function Stat({ icon, value, title, className = '' }: { icon: React.ReactNode; v
 
 export default function LearnerLayout() {
   const user = useAuth((s) => s.user)
-  const nav = NAV.filter((item) => !item.only || item.only === user?.active_language)
   const setUser = useAuth((s) => s.setUser)
   const logout = useLogout()
   const navigate = useNavigate()
@@ -124,22 +108,36 @@ export default function LearnerLayout() {
   }
   const languageValue = user?.active_language === 'zh' ? `zh:${user.zh_script}` : user?.active_language
   const screens = Grid.useBreakpoint()
-  const [moreOpen, setMoreOpen] = useState(false)
+  const [sheet, setSheet] = useState<'learn' | 'me' | null>(null)
   const location = useLocation()
-  useEffect(() => setMoreOpen(false), [location.pathname])
+  useEffect(() => setSheet(null), [location.pathname])
   const focus = location.pathname.startsWith('/learn') // during a lesson: no tab bar on the phone
   const isActive = (to: string) => (to === '/' ? location.pathname === '/' : location.pathname.startsWith(to))
 
   const menu = [
-    { key: 'profile', icon: <UserOutlined />, label: 'Hồ sơ & cài đặt', onClick: () => navigate('/profile') },
+    ...(groups.find((g) => g.key === 'me')?.children ?? []).map((c) => ({
+      key: c.to, icon: <AppIcon name={c.icon} size={20} />, onClick: () => navigate(c.to),
+      label: <span className="flex items-center gap-3 justify-between min-w-44">{c.label}{c.count ? <Badge count={c.count} size="small" /> : null}</span>,
+    })),
     ...(isStaffRole(user) ? [{ key: 'admin', icon: <SettingOutlined />, label: 'Trang quản trị', onClick: () => navigate('/admin') }] : []),
     { type: 'divider' as const },
     { key: 'logout', icon: <LogoutOutlined />, label: 'Đăng xuất', danger: true, onClick: logout },
   ]
   const streak = game.data?.streak ?? 0
-  const pick = (to: string) => nav.find((i) => i.to === to)!
-  const bottom = [pick('/'), pick('/vocab'), null, pick('/review')]
-  const onTab = bottom.some((i) => i && isActive(i.to)) || isActive('/camera')
+  // the phone's "Học" sheet: the learning group, games, the word library extras; "Tôi": the learner's own corner
+  const byKey = (k: string) => groups.find((g) => g.key === k)
+  const learnSheet: NavLeaf[] = [
+    ...(byKey('learn')?.children ?? []),
+    { to: '/tro-choi', label: 'Trò chơi', icon: 'game' },
+    ...(byKey('vocab')?.children ?? []).filter((c) => c.to !== '/vocab'),
+  ]
+  const meGroup = byKey('me')?.children ?? []
+  const sumCounts = (items: NavLeaf[]) => items.reduce((n, c) => n + (c.count ?? 0), 0)
+  const learnCount = sumCounts(learnSheet)
+  const meCount = sumCounts(meGroup)
+  const activeIn = (items: NavLeaf[]) => items.some((c) => c.to.split(/[?#]/)[0] !== '/' && location.pathname.startsWith(c.to.split(/[?#]/)[0]))
+  const learnActive = activeIn(learnSheet) || location.pathname === '/review'
+  const meActive = activeIn(meGroup)
 
   // first visit: the short survey comes before anything else (the app does the same)
   if (user && !user.onboarding_completed && !isStaffRole(user)) return <Navigate to="/welcome" replace />
@@ -200,52 +198,65 @@ export default function LearnerLayout() {
             </div>
           </main>
 
-          {/* phone: the camera – the heart of the app – raised in the middle */}
+          {/* phone: Hôm nay · Học · [camera, raised: the heart of the app] · Từ vựng · Tôi */}
           {!focus && <nav aria-label="Mục chính" className="md:hidden fixed bottom-0 inset-x-0 z-30 bg-[var(--surface)] border-t border-slate-200 grid grid-cols-5 items-end pt-1.5"
             style={{ paddingBottom: 'max(0.4rem, env(safe-area-inset-bottom))' }}>
-            {bottom.map((item, i) => item ? (
-              <NavLink key={item.to} to={item.to}
-                className={`flex flex-col items-center gap-0.5 min-h-12 text-[11px] font-semibold ${isActive(item.to) ? 'text-brand-700' : 'text-slate-500'}`}>
-                <span className={`px-3.5 py-0.5 rounded-xl border-2 transition-colors ${isActive(item.to) ? 'bg-brand-50 border-brand-200' : 'border-transparent'}`}>
-                  <AppIcon name={item.icon} size={28} /></span>
-                {item.label}
-              </NavLink>
-            ) : (
-              <NavLink key={`cam${i}`} to="/camera" aria-label="Chụp ảnh học từ" className="flex flex-col items-center -mt-7">
-                <span className="h-14 w-14 rounded-2xl prism-bg grid place-items-center text-white text-2xl ring-4 ring-[var(--page-bg)] active:scale-95 transition-transform">
-                  <CameraFilled />
-                </span>
-                <span className={`text-[11px] font-semibold mt-0.5 ${isActive('/camera') ? 'text-brand-700' : 'text-slate-500'}`}>Chụp ảnh</span>
-              </NavLink>
-            ))}
-            <button type="button" onClick={() => setMoreOpen(true)}
-              className={`flex flex-col items-center gap-0.5 min-h-12 text-[11px] font-semibold cursor-pointer ${onTab ? 'text-slate-500' : 'text-brand-700'}`}>
-              <span className={`px-3.5 py-0.5 rounded-xl border-2 ${onTab ? 'border-transparent' : 'bg-brand-50 border-brand-200'}`}><AppIcon name="more" size={28} /></span>
-              Thêm
-            </button>
+            <TabLink to="/" icon="home" label="Hôm nay" on={isActive('/')} />
+            <TabButton icon="learn" label="Học" on={sheet === 'learn' || learnActive} count={learnCount} onClick={() => setSheet('learn')} />
+            <NavLink to="/camera" aria-label="Chụp ảnh học từ" className="flex flex-col items-center -mt-7">
+              <span className="h-14 w-14 rounded-2xl prism-bg grid place-items-center text-white text-2xl ring-4 ring-[var(--page-bg)] active:scale-95 transition-transform">
+                <CameraFilled />
+              </span>
+              <span className={`text-[11px] font-semibold mt-0.5 ${isActive('/camera') ? 'text-brand-700' : 'text-slate-500'}`}>Chụp ảnh</span>
+            </NavLink>
+            <TabLink to="/vocab" icon="vocab" label="Từ vựng" on={isActive('/vocab')} />
+            <TabButton icon="profile" label="Tôi" on={sheet === 'me' || meActive} count={meCount} onClick={() => setSheet('me')} />
           </nav>}
-          <Drawer open={moreOpen} onClose={() => setMoreOpen(false)} placement="bottom" size="auto" title="Tất cả mục"
+          <Drawer open={!!sheet} onClose={() => setSheet(null)} placement="bottom" size="auto"
+            title={sheet === 'me' ? <span className="flex items-center gap-2"><UserAvatar name={user?.display_name} src={user?.avatar} mascot={user?.mascot} size={28} />{user?.display_name}</span> : 'Học'}
             styles={{ body: { paddingBottom: 'max(16px, env(safe-area-inset-bottom))' } }}>
-            <nav className="flex flex-col gap-4" aria-label="Tất cả mục">
-              {groups.filter((g) => g.children).map((g) => (
-                <section key={g.key}>
-                  <h3 className="flex items-center gap-2 text-sm font-bold text-slate-800 m-0 mb-1.5"><AppIcon name={g.icon} size={24} />{g.label}</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {g.children!.map((c) => (
-                      <NavLink key={c.to} to={c.to} onClick={() => setMoreOpen(false)}
-                        className="rounded-full bg-slate-100 pl-1.5 pr-3 py-1 text-sm font-medium !text-slate-700 inline-flex items-center gap-1.5">
-                        <AppIcon name={c.icon} size={22} />{c.label}{c.count ? <span className="num rounded-full bg-brand-600 text-white text-[11px] font-bold px-1.5">{c.count}</span> : null}
-                      </NavLink>
-                    ))}
-                  </div>
-                </section>
+            <nav aria-label={sheet === 'me' ? 'Tôi' : 'Học'} className="grid grid-cols-3 gap-2">
+              {(sheet === 'me' ? meGroup : learnSheet).map((c) => (
+                <NavLink key={c.to} to={c.to} onClick={() => setSheet(null)}
+                  className="relative rounded-2xl bg-slate-100 px-1 py-3 flex flex-col items-center gap-1 text-center text-xs font-semibold !text-slate-700 active:scale-95 transition-transform">
+                  <AppIcon name={c.icon} size={30} />{c.label}
+                  {c.count ? <span className="num absolute top-1.5 right-1.5 rounded-full bg-brand-600 text-white text-[10px] font-bold px-1.5">{c.count > 99 ? '99+' : c.count}</span> : null}
+                </NavLink>
               ))}
             </nav>
-            <div className="mt-5 text-sm font-semibold text-slate-500 mb-2">Giao diện</div>
-            <ThemeSwitch full />
+            {sheet === 'me' && (
+              <>
+                <div className="mt-5 text-sm font-semibold text-slate-500 mb-2">Giao diện</div>
+                <ThemeSwitch full />
+                <button type="button" onClick={logout} className="mt-4 w-full h-11 rounded-xl text-red-600 font-semibold bg-red-50 cursor-pointer">Đăng xuất</button>
+              </>
+            )}
           </Drawer>
         </div>
       </div>
     </ConfigProvider>
+  )
+}
+
+function TabLink({ to, icon, label, on }: { to: string; icon: AppIconName; label: string; on: boolean }) {
+  return (
+    <NavLink to={to} className={`flex flex-col items-center gap-0.5 min-h-12 text-[11px] font-semibold ${on ? 'text-brand-700' : 'text-slate-500'}`}>
+      <span className={`px-3.5 py-0.5 rounded-xl border-2 transition-colors ${on ? 'bg-brand-50 border-brand-200' : 'border-transparent'}`}>
+        <AppIcon name={icon} size={28} /></span>
+      {label}
+    </NavLink>
+  )
+}
+
+function TabButton({ icon, label, on, count, onClick }: { icon: AppIconName; label: string; on: boolean; count: number; onClick: () => void }) {
+  return (
+    <button type="button" onClick={onClick} aria-haspopup="dialog"
+      className={`flex flex-col items-center gap-0.5 min-h-12 text-[11px] font-semibold cursor-pointer ${on ? 'text-brand-700' : 'text-slate-500'}`}>
+      <Badge count={count} size="small" offset={[-6, 4]}>
+        <span className={`block px-3.5 py-0.5 rounded-xl border-2 transition-colors ${on ? 'bg-brand-50 border-brand-200' : 'border-transparent'}`}>
+          <AppIcon name={icon} size={28} /></span>
+      </Badge>
+      {label}
+    </button>
   )
 }
