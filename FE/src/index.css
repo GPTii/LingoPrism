@@ -210,3 +210,46 @@ a { text-underline-offset: 3px; }
   /* narrow screen: columns keep a readable width and the table scrolls sideways */
   .ant-table-cell:not(.ant-table-selection-column) { min-width: 7rem; }
 }
+
+/* ---------------------------------------------------------------- game map scenery (components/GameScenery.tsx) */
+.scene-meadow { background: linear-gradient(#e6faf1, #c8f0d9 60%, #b4e8c8); --sc-trail: rgb(255 255 255 / .75); --sc-dash: #9fd8b8; }
+.scene-sea    { background: linear-gradient(#e6f4ff, #c4e3fb 55%, #9fd2f5); --sc-trail: rgb(255 248 225 / .9); --sc-dash: #e9c98a; }
+.scene-desert { background: linear-gradient(#fff6e2, #fbe2b0 60%, #f3cf8a); --sc-trail: rgb(255 255 255 / .6); --sc-dash: #d9a752; }
+.scene-night  { background: linear-gradient(#2a1838, #43213f 55%, #5c2442); --sc-trail: rgb(255 255 255 / .12); --sc-dash: #ff9fb8; }
+.dark .scene-meadow { background: linear-gradient(#0f2a22, #123a2c 60%, #154533); --sc-trail: rgb(255 255 255 / .12); --sc-dash: #2f8a5f; }
+.dark .scene-sea    { background: linear-gradient(#0d2238, #10304f 55%, #123a62); --sc-trail: rgb(255 255 255 / .12); --sc-dash: #5b8fc4; }
+.dark .scene-desert { background: linear-gradient(#2a2110, #3a2c12 60%, #4a3614); --sc-trail: rgb(255 255 255 / .12); --sc-dash: #b98a3a; }
+.dark .scene-night  { background: linear-gradient(#170d20, #24112a 55%, #321430); }
+.sc-sun  { width: 54px; height: 54px; border-radius: 50%; background: radial-gradient(#fff3b0, #ffd23f 60%, #ffb800); box-shadow: 0 0 40px #ffd23f88; animation: sc-pulse 4s ease-in-out infinite; }
+.sc-moon { width: 46px; height: 46px; border-radius: 50%; background: #fff6d6; box-shadow: inset -12px -4px 0 #e9dcae, 0 0 30px #fff6d655; }
+.sc-cloud { width: 90px; height: 28px; border-radius: 30px; background: rgb(255 255 255 / .85); }
+.sc-cloud::before, .sc-cloud::after { content: ''; position: absolute; border-radius: 50%; background: inherit; }
+.sc-cloud::before { width: 40px; height: 40px; left: 14px; top: -18px; }
+.sc-cloud::after { width: 30px; height: 30px; left: 44px; top: -12px; }
+.dark .sc-cloud, .scene-night .sc-cloud { background: rgb(255 255 255 / .12); }
+.sc-sway { transform-origin: 50% 100%; animation: sc-sway 4s ease-in-out infinite; }
+.sc-bob { animation: sc-bob 3s ease-in-out infinite; }
+.sc-float { animation: sc-float 5s ease-in-out infinite; }
+.sc-flap { animation: sc-flap .35s ease-in-out infinite alternate; }
+.sc-wave { animation: sc-wave 3s ease-in-out infinite; }
+.sc-jump { animation: sc-jump 3.5s ease-in-out infinite; }
+.sc-twinkle { animation: sc-twinkle 2.2s ease-in-out infinite; }
+.sc-glow { animation: sc-glow 3s ease-in-out infinite; }
+.sc-smoke { animation: sc-smoke 3s ease-out infinite; }
+.sc-drift { left: -120px; animation: sc-drift 40s linear infinite; }
+.sc-wobble { animation: sc-wobble 1.6s ease-in-out infinite; }
+@keyframes sc-sway { 0%, 100% { transform: rotate(-3deg) } 50% { transform: rotate(3deg) } }
+@keyframes sc-bob { 0%, 100% { transform: translateY(0) rotate(-2deg) } 50% { transform: translateY(-5px) rotate(2deg) } }
+@keyframes sc-float { 0%, 100% { transform: translate(0, 0) } 33% { transform: translate(8px, -10px) } 66% { transform: translate(-6px, -4px) } }
+@keyframes sc-flap { from { transform: scaleX(1) } to { transform: scaleX(.35) } }
+@keyframes sc-wave { 0%, 100% { transform: translateX(-6px) } 50% { transform: translateX(6px) } }
+@keyframes sc-jump { 0%, 60%, 100% { transform: translateY(0) rotate(0) } 75% { transform: translateY(-22px) rotate(-25deg) } 90% { transform: translateY(-6px) rotate(20deg) } }
+@keyframes sc-twinkle { 0%, 100% { opacity: .35; transform: scale(.8) } 50% { opacity: 1; transform: scale(1.15) } }
+@keyframes sc-glow { 0%, 100% { filter: drop-shadow(0 0 2px #f472b6) } 50% { filter: drop-shadow(0 0 10px #c084fc) } }
+@keyframes sc-smoke { from { transform: translateY(0) scale(.6); opacity: .7 } to { transform: translateY(-26px) scale(1.4); opacity: 0 } }
+@keyframes sc-drift { from { transform: translateX(0) } to { transform: translateX(calc(100vw + 240px)) } }
+@keyframes sc-pulse { 0%, 100% { transform: scale(1) } 50% { transform: scale(1.08) } }
+@keyframes sc-wobble { 0%, 100% { transform: rotate(0) } 20% { transform: rotate(-8deg) } 40% { transform: rotate(7deg) } 60% { transform: rotate(-4deg) } 80% { transform: rotate(3deg) } }
+@media (prefers-reduced-motion: reduce) {
+  .sc-sway, .sc-bob, .sc-float, .sc-flap, .sc-wave, .sc-jump, .sc-twinkle, .sc-glow, .sc-smoke, .sc-drift, .sc-sun, .sc-wobble { animation: none; }
+}

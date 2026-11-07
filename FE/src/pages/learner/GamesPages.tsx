@@ -10,6 +10,7 @@ import { useAuth } from '../../auth/store'
 import { AppIcon } from '../../components/brand/AppIcon'
 import { Prismo, ScaleIcon } from '../../components/brand/Brand'
 import { GAME_NAMES, HelpContext, MiniGameView, type GameHelp } from '../../components/MiniGames'
+import { BannerArt, LevelScene } from '../../components/GameScenery'
 import { langTag } from '../../components/TargetWord'
 import { PageHeader, UserAvatar } from '../../components/ui'
 
@@ -45,11 +46,15 @@ function StopButton({ stop, color, current, onClick }: { stop: GameStop; color: 
           {stop.kind === 'chest' ? 'Mở rương!' : 'Chơi nào!'}
         </motion.div>
       )}
+      {current && (
+        <motion.span aria-hidden className="absolute rounded-full pointer-events-none" style={{ width: size, height: size, top: 0, border: `4px solid ${color}` }}
+          animate={{ scale: [1, 1.45], opacity: [0.7, 0] }} transition={{ duration: 1.6, repeat: Infinity, ease: 'easeOut' }} />
+      )}
       <button type="button" onClick={onClick} aria-label={`${stop.title}${stop.status === 'locked' ? ' (chưa mở)' : ''}`}
         style={{ width: size, height: size, background: face, boxShadow: `0 6px 0 ${lip}` }}
         className={`rounded-full grid place-items-center text-white text-2xl font-extrabold cursor-pointer transition active:translate-y-1.5 active:!shadow-none
           ${current ? 'ring-8 ring-brand-200' : ''}`}>
-        {stop.kind === 'chest' ? <AppIcon name="chest" size={big ? 56 : 44} className={stop.status === 'done' ? 'opacity-60' : ''} />
+        {stop.kind === 'chest' ? <AppIcon name="chest" size={big ? 56 : 44} className={stop.status === 'done' ? 'opacity-60' : stop.status === 'open' ? 'sc-wobble' : ''} />
           : stop.kind === 'boss' ? <AppIcon name="trophy" size={52} className={stop.status === 'locked' ? 'grayscale opacity-60' : ''} />
             : stop.status === 'locked' ? <LockFilled className="text-slate-400" /> : stop.index}
       </button>
@@ -169,7 +174,8 @@ export function GameMapPage() {
         const color = LEVEL_COLORS[level.level - 1]
         return (
           <section key={level.level} className="lp-card overflow-hidden">
-            <div className="p-5 text-white flex items-center gap-4" style={{ background: color }}>
+            <div className="relative overflow-hidden p-5 text-white flex items-center gap-4" style={{ background: color }}>
+              <BannerArt level={level.level} />
               <div className="flex-1 min-w-0">
                 <div className="text-sm opacity-90">Cấp {level.level}</div>
                 <div className="text-2xl font-extrabold">{level.name}</div>
@@ -183,6 +189,8 @@ export function GameMapPage() {
               </div>
             </div>
             {level.unlocked ? (
+              <LevelScene level={level.level} ids={level.nodes.map((n) => n.id)}
+                progress={Math.max(0, level.nodes.findLastIndex((n) => n.status === 'done' || n.id === data.current))}>
               <div className="pt-16 pb-10 flex flex-col items-center gap-9">
                 {level.nodes.map((stop, k) => {
                   const shift = Math.round(Math.sin(k * 0.85) * 80)
@@ -196,6 +204,7 @@ export function GameMapPage() {
                   )
                 })}
               </div>
+              </LevelScene>
             ) : (
               <div className="p-6 flex items-center gap-4 text-slate-500">
                 <Prismo mood="sleepy" size={56} className="shrink-0" />
