@@ -21,6 +21,7 @@ import '../../data/services/tts_service.dart';
 import '../../routes/app_pages.dart';
 import '../learning_session/controllers/learning_session_controller.dart';
 import '../levels/levels_module.dart' show levelColors;
+import 'game_scenery.dart';
 
 /// Trò chơi: the game map (4 levels of rounds, chests and a boss round) and its mini games (BE apps/games).
 /// Learning comes first: a round opens once its words / reading lesson were learned in the Học section, and a lost
@@ -54,6 +55,9 @@ class GameMapController extends GetxController {
   /// one key per stop, to scroll to the stop a friend is at
   final Map<String, GlobalKey> stopKeys = {};
   GlobalKey keyOf(String node) => stopKeys.putIfAbsent(node, GlobalKey.new);
+  /// the stop circles, for the trail of the scenery (game_scenery.dart)
+  final Map<String, GlobalKey> circleKeys = {};
+  GlobalKey circleKeyOf(String node) => circleKeys.putIfAbsent(node, GlobalKey.new);
 
   /// friends on this map: who they are, the stop they play next, whether they passed everything
   List<({Author who, String node, bool finished})> get friends => [
@@ -246,7 +250,9 @@ class GameMapView extends GetView<GameMapController> {
         Container(
           color: color,
           padding: EdgeInsets.all(16.w),
-          child: Row(children: [
+          child: Stack(clipBehavior: Clip.none, children: [
+           Positioned(right: 40.w, bottom: -16.h, child: bannerArt(n)),
+           Row(children: [
             Expanded(
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Text('Cấp $n', style: TextStyle(color: Colors.white70, fontSize: 12.sp)),
@@ -262,6 +268,7 @@ class GameMapView extends GetView<GameMapController> {
                 _FriendsHere([for (final e in here.entries) if (levelOf(e.key) == n) ...e.value], size: 26.r),
             ]),
           ]),
+          ]),
         ),
         if (!unlocked)
           Padding(
@@ -273,7 +280,11 @@ class GameMapView extends GetView<GameMapController> {
             ]),
           )
         else
-          Padding(
+          LevelScene(
+            level: n,
+            circleKeys: [for (final s in nodes) controller.circleKeyOf(asString(s['id']))],
+            progress: math.max(0, nodes.lastIndexWhere((s) => asString(s['status']) == 'done' || asString(s['id']) == current)),
+            child: Padding(
             padding: EdgeInsets.only(top: 44.h, bottom: 24.h),
             child: Column(children: [
               for (var k = 0; k < nodes.length; k++)
@@ -283,7 +294,8 @@ class GameMapView extends GetView<GameMapController> {
                   child: Transform.translate(
                     offset: Offset(math.sin(k * 0.85) * 70.w, 0),
                     child: _withFriends(
-                      _StopButton(stop: nodes[k], color: color, current: asString(nodes[k]['id']) == current, onTap: () => controller.tap(nodes[k])),
+                      _StopButton(stop: nodes[k], color: color, current: asString(nodes[k]['id']) == current, onTap: () => controller.tap(nodes[k]),
+                          circleKey: controller.circleKeyOf(asString(nodes[k]['id']))),
                       here[asString(nodes[k]['id'])] ?? const [],
                       // friends stand beside the stop, on the side facing the middle of the path
                       left: math.sin(k * 0.85) > 0,
@@ -291,6 +303,7 @@ class GameMapView extends GetView<GameMapController> {
                   ),
                 ),
             ]),
+          ),
           ),
       ]),
     );
@@ -354,7 +367,10 @@ class _FriendsHere extends StatelessWidget {
 }
 
 class _StopButton extends StatelessWidget {
-  const _StopButton({required this.stop, required this.color, required this.current, required this.onTap});
+  const _StopButton({required this.stop, required this.color, required this.current, required this.onTap, this.circleKey});
+
+  /// lets the level's scenery find the circle, to draw the trail through it
+  final GlobalKey? circleKey;
 
   final Json stop;
   final Color color;
@@ -393,7 +409,10 @@ class _StopButton extends StatelessWidget {
         label: '${asString(stop['title'])}${locked ? ' (chưa mở)' : ''}',
         child: GestureDetector(
           onTap: onTap,
-          child: Container(
+          child: Stack(alignment: Alignment.center, clipBehavior: Clip.none, children: [
+           if (current) PulseRing(size: size, color: color),
+           Container(
+            key: circleKey,
             width: size,
             height: size,
             decoration: BoxDecoration(
@@ -404,6 +423,7 @@ class _StopButton extends StatelessWidget {
             alignment: Alignment.center,
             child: inner,
           ),
+          ]),
         ),
       ),
       if (kind != 'chest' && status == 'done') Padding(padding: EdgeInsets.only(top: 8.h), child: _Stars(asInt(stop['stars']), size: 16)),
