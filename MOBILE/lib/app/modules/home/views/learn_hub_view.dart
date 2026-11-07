@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/app_icon.dart';
+import '../../../core/widgets/quest_strip.dart';
 import '../../../data/services/auth_service.dart';
 import '../../../routes/app_pages.dart';
 import '../../learning_session/controllers/learning_session_controller.dart';
@@ -37,6 +38,8 @@ class LearnHubView extends StatelessWidget {
       body: ListView(
         padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 120.h),
         children: [
+          const QuestStrip(),
+          SizedBox(height: 14.h),
           Row(children: [
             Expanded(
               child: _BigAction(

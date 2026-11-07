@@ -48,7 +48,9 @@ class LearningTabView extends GetView<HomeStatsController> {
         if (loading) return const Center(child: CircularProgressIndicator());
         return AnnotatedRegion<SystemUiOverlayStyle>(
           value: AppColors.isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
-          child: RefreshIndicator(
+          // a strip the colour of the top block behind the status bar: the page scrolls under it, not under the clock
+          child: Stack(children: [
+           RefreshIndicator(
             color: AppColors.primary,
             onRefresh: progressController.refreshProgress,
             child: ListView(
@@ -104,6 +106,8 @@ class LearningTabView extends GetView<HomeStatsController> {
               ],
             ),
           ),
+           Positioned(top: 0, left: 0, right: 0, height: MediaQuery.paddingOf(context).top, child: ColoredBox(color: _Hero.bg)),
+          ]),
         );
       }),
     );

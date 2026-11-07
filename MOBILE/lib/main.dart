@@ -44,6 +44,7 @@ class LingoPrismApp extends StatelessWidget {
           debugShowCheckedModeBanner: false,
           // the floating translate button sits above every screen (core/widgets/translate_bubble.dart)
           routingCallback: (r) => TranslateBubble.route.value = r?.current ?? '',
+          navigatorObservers: [BubblePopupObserver()],
           builder: (context, child) => _LearningLocale(
             child: Stack(children: [child ?? const SizedBox(), const TranslateBubble()]),
           ),

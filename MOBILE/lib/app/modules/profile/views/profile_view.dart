@@ -817,11 +817,14 @@ class _ShortcutGroup extends StatelessWidget {
         for (var i = 0; i < items.length; i += 2)
           Padding(
             padding: EdgeInsets.only(bottom: 10.h),
-            child: Row(children: [
-              Expanded(child: items[i]),
-              SizedBox(width: 10.w),
-              Expanded(child: i + 1 < items.length ? items[i + 1] : const SizedBox()),
-            ]),
+            // the two cards of a row stay the same height when one label wraps
+            child: IntrinsicHeight(
+              child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                Expanded(child: items[i]),
+                SizedBox(width: 10.w),
+                Expanded(child: i + 1 < items.length ? items[i + 1] : const SizedBox()),
+              ]),
+            ),
           ),
       ]),
     );

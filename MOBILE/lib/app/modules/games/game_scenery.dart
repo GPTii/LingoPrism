@@ -228,7 +228,10 @@ class _LevelSceneState extends State<LevelScene> with SingleTickerProviderStateM
         return false;
       },
       child: SizeChangedLayoutNotifier(
-        child: DecoratedBox(
+        // the whole width of the card, not just the width of the stops
+        child: SizedBox(
+          width: double.infinity,
+          child: DecoratedBox(
           key: _box,
           decoration:
               BoxDecoration(gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: _sky(theme, dark))),
@@ -263,6 +266,7 @@ class _LevelSceneState extends State<LevelScene> with SingleTickerProviderStateM
             ),
             widget.child,
           ]),
+        ),
         ),
       ),
     );

@@ -20,6 +20,9 @@ class TranslateBubble extends StatefulWidget {
   /// The current route, fed by GetMaterialApp.routingCallback: the bubble hides where it would be in the way.
   static final route = ''.obs;
 
+  /// Dialogs, menus and bottom sheets open now (BubblePopupObserver): the bubble would cover their buttons.
+  static final popups = 0.obs;
+
   @override
   State<TranslateBubble> createState() => _TranslateBubbleState();
 }
@@ -46,7 +49,9 @@ class _TranslateBubbleState extends State<TranslateBubble> {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      if (!AuthService.to.isLoggedIn || _hidden.contains(TranslateBubble.route.value)) return const SizedBox.shrink();
+      if (!AuthService.to.isLoggedIn || _hidden.contains(TranslateBubble.route.value) || TranslateBubble.popups.value > 0) {
+        return const SizedBox.shrink();
+      }
       final size = MediaQuery.of(context).size;
       final pos = _pos ?? Offset(16, 96 + MediaQuery.of(context).padding.bottom); // above the tab bar
       return Positioned(
@@ -275,5 +280,27 @@ class _QuickTranslateSheetState extends State<_QuickTranslateSheet> {
         ]),
       ),
     );
+  }
+}
+
+/// Counts the popup routes (dialogs, menus, bottom sheets) on the app's navigator for [TranslateBubble].
+class BubblePopupObserver extends NavigatorObserver {
+  void _add(Route<dynamic>? r, int d) {
+    if (r is PopupRoute) TranslateBubble.popups.value = (TranslateBubble.popups.value + d).clamp(0, 99);
+  }
+
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) => _add(route, 1);
+
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) => _add(route, -1);
+
+  @override
+  void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) => _add(route, -1);
+
+  @override
+  void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) {
+    _add(oldRoute, -1);
+    _add(newRoute, 1);
   }
 }

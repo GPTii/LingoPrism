@@ -22,6 +22,7 @@ import '../../routes/app_pages.dart';
 import '../learning_session/controllers/learning_session_controller.dart';
 import '../levels/levels_module.dart' show levelColors;
 import 'game_scenery.dart';
+import '../../core/widgets/quest_strip.dart';
 
 /// Trò chơi: the game map (4 levels of rounds, chests and a boss round) and its mini games (BE apps/games).
 /// Learning comes first: a round opens once its words / reading lesson were learned in the Học section, and a lost
@@ -167,6 +168,9 @@ class GameMapView extends GetView<GameMapController> {
         return RefreshIndicator(
           onRefresh: controller.load,
           child: ListView(padding: EdgeInsets.all(16.w), children: [
+            // streak, XP, gems and the daily quests one tap away (the web shows them in a side rail)
+            const QuestStrip(),
+            SizedBox(height: 14.h),
             Row(children: [
               Image.asset('assets/brand/mascot/prismo_party.png', width: 60.w, height: 60.w),
               SizedBox(width: 12.w),
@@ -251,7 +255,7 @@ class GameMapView extends GetView<GameMapController> {
           color: color,
           padding: EdgeInsets.all(16.w),
           child: Stack(clipBehavior: Clip.none, children: [
-           Positioned(right: 84.w, bottom: -16.h, child: bannerArt(n)), // left of the count
+           Positioned(right: 0, bottom: -18.h, child: bannerArt(n)), // under the count, clear of the text
            Row(children: [
             Expanded(
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
