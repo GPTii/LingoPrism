@@ -1,3 +1,4 @@
+import 'app/core/widgets/translate_bubble.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -41,7 +42,11 @@ class LingoPrismApp extends StatelessWidget {
           defaultTransition: Transition.rightToLeftWithFade,
           transitionDuration: const Duration(milliseconds: 280),
           debugShowCheckedModeBanner: false,
-          builder: (context, child) => _LearningLocale(child: child ?? const SizedBox()),
+          // the floating translate button sits above every screen (core/widgets/translate_bubble.dart)
+          routingCallback: (r) => TranslateBubble.route.value = r?.current ?? '',
+          builder: (context, child) => _LearningLocale(
+            child: Stack(children: [child ?? const SizedBox(), const TranslateBubble()]),
+          ),
         );
       },
     );
