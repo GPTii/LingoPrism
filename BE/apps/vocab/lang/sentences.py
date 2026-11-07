@@ -1,4 +1,4 @@
-"""Tokenising and cross-checking example sentences (Tatoeba) – see PLAN.md §3b.
+"""Tokenising and cross-checking example sentences (Tatoeba) – see docs/PLAN.md §3b.
 
 Chinese sentences are segmented with CC-CEDICT (forward maximum matching on the sentence's own script),
 pinyin comes from Tatoeba's transcription and is aligned one syllable per Han character. A sentence is only

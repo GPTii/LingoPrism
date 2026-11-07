@@ -14,8 +14,8 @@ Mọi biểu đồ được lưu thêm thành ảnh PNG trong `figures/` để �
 | `06_proximity.ipynb` | Chỉ mục lưới + Haversine vs brute force vs PostgreSQL | ~10 giây |
 | `07_yolo_report.ipynb` | Báo cáo model nhận diện: model tự train (đường cong, AP từng lớp) + so sánh mọi cách chạy trên ảnh thật, ghi precision/recall của model đang dùng, lưu `AI/report/yolo/` | ~2 phút |
 | `08_benchmark.ipynb` | **So sánh tổng hợp**: thử mọi phương án (64 tổ hợp lịch ôn × thứ tự ôn, dự đoán nhớ/quên, đáp án nhiễu, tìm điểm gần, nhận diện ảnh), tự chọn tốt nhất và áp dụng | ~2 phút |
-| `09_geofence_realtime.ipynb` | Geofencing (độ trễ kích hoạt, tỷ lệ phát hiện theo đi bộ / xe đạp / xe máy, chính sách cũ vs mới) và Realtime (độ trễ, nhất quán, chống dồn tin); dùng số của production nếu đã chạy `run-experiments.bat`; ghi bảng Markdown vào `AI/report/experiments/bang_ket_qua.md` | ~15 giây |
-| `10_production_report.ipynb` | **Tổng hợp cho chương 4**: bảng + biểu đồ SM-2/FSRS, GA, VIP, Smart Distractor, Proximity, các quyết định chọn cấu hình; số của production nếu đã chạy `run-experiments.bat` (bản đầy đủ), kèm quy mô dữ liệu thật / mẫu; ghi `AI/report/experiments/bang_tong_hop.md` | ~10 giây |
+| `09_geofence_realtime.ipynb` | Geofencing (độ trễ kích hoạt, tỷ lệ phát hiện theo đi bộ / xe đạp / xe máy, chính sách cũ vs mới) và Realtime (độ trễ, nhất quán, chống dồn tin); dùng số của production nếu đã chạy `scripts/run-experiments.bat`; ghi bảng Markdown vào `AI/report/experiments/bang_ket_qua.md` | ~15 giây |
+| `10_production_report.ipynb` | **Tổng hợp cho chương 4**: bảng + biểu đồ SM-2/FSRS, GA, VIP, Smart Distractor, Proximity, các quyết định chọn cấu hình; số của production nếu đã chạy `scripts/run-experiments.bat` (bản đầy đủ), kèm quy mô dữ liệu thật / mẫu; ghi `AI/report/experiments/bang_tong_hop.md` | ~10 giây |
 | `train_yolov10_colab.ipynb` | Train YOLOv10 (cần GPU → chạy trên Google Colab) | 5–6 giờ |
 
 ## Cách chạy

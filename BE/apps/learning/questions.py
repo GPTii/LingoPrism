@@ -2,7 +2,7 @@
 
 Distractors come from a `DistractorProvider` so Phase 5 can swap the random baseline for
 Smart Distractor Generation without changing the API. Regional variants / synonyms of the
-answer are never used as wrong options (PLAN.md §3b).
+answer are never used as wrong options (docs/PLAN.md §3b).
 """
 import random
 

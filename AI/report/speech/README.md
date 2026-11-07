@@ -1,6 +1,6 @@
 # Luyện nói – đánh giá bộ chấm phát âm (06/11/2026)
 
-Bộ chấm: `BE/apps/speech` (thiết kế: `docs/thiet-ke-luyen-noi.md`). Model nhận dạng âm vị wav2vec2 XLSR-53 espeak
+Bộ chấm: `BE/apps/speech` (thiết kế: `docs/thiet-ke/luyen-noi.md`). Model nhận dạng âm vị wav2vec2 XLSR-53 espeak
 (`facebook/wav2vec2-xlsr-53-espeak-cv-ft`, Xu và cộng sự 2021), ONNX INT8 318 MB, CPU; âm mong đợi từ espeak-ng;
 căn chuỗi theo đặc trưng cấu âm; điểm kiểu GOP; thanh điệu theo cao độ (YIN).
 

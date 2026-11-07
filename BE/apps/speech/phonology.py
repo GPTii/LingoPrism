@@ -1,4 +1,4 @@
-"""Expected pronunciation of a verified text, in the phone symbols of the recogniser (docs/thiet-ke-luyen-noi.md).
+"""Expected pronunciation of a verified text, in the phone symbols of the recogniser (docs/thiet-ke/luyen-noi.md).
 
 The recogniser (wav2vec2 XLSR-53 espeak, AI/scripts/export_phoneme_model.py) was trained on espeak-ng transcriptions,
 so espeak-ng gives the expected phones in exactly its conventions:

@@ -20,7 +20,7 @@ TRANSLATION_FIELDS = [
 
 
 class Command(BaseCommand):
-    help = "Dựng dữ liệu từ vựng từ seed/concepts/*.csv và kiểm tra chéo với các nguồn chuẩn (PLAN.md §3b)"
+    help = "Dựng dữ liệu từ vựng từ seed/concepts/*.csv và kiểm tra chéo với các nguồn chuẩn (docs/PLAN.md §3b)"
 
     def add_arguments(self, parser):
         parser.add_argument("--offline", action="store_true", help="Không gọi moedict qua mạng, chỉ dùng cache")

@@ -1,4 +1,4 @@
-"""Automated cross-checking of vocabulary data against authoritative sources (PLAN.md §3b).
+"""Automated cross-checking of vocabulary data against authoritative sources (docs/PLAN.md §3b).
 
 Each builder returns a dict with the fields of a WordTranslation plus:
   errors   – blocking problems → status "flagged" (hidden from learners)

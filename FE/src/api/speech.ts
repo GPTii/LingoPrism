@@ -1,6 +1,6 @@
 import { api } from './client'
 
-/** Phone-level pronunciation scoring (BE apps.speech, docs/thiet-ke-luyen-noi.md). */
+/** Phone-level pronunciation scoring (BE apps.speech, docs/thiet-ke/luyen-noi.md). */
 export interface SpeechPhone { expected: string; heard: string | null; status: 'ok' | 'close' | 'wrong' | 'missing'; score: number }
 export interface SpeechTone { expected: string | number; heard: string | number; status: 'ok' | 'close' | 'wrong' }
 export interface SpeechUnit { text: string; reading: string; score: number; status: 'right' | 'close' | 'wrong'; tone: SpeechTone | null; phones: SpeechPhone[] }

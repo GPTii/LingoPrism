@@ -9,9 +9,26 @@
 | `BE/` | REST API + WebSocket + Django Admin + YOLOv10 (ONNX) | Python 3.12+, Django 5.2, DRF, SimpleJWT, Channels, PostgreSQL (cube/earthdistance) |
 | `FE/` | Web học viên (`/`) + Web quản trị (`/admin`) | React 19, TypeScript, Vite 6, Ant Design, Tailwind, Leaflet |
 | `MOBILE/` | App Android/iOS | Flutter 3.38, GetX, dio, web_socket_channel, tflite_flutter, flutter_map |
-| `AI/` | Huấn luyện & đánh giá YOLOv10 (78 lớp ↔ từ vựng) | Ultralytics, FiftyOne, Colab |
+| `AI/` | Nhận diện ảnh (YOLO OIV7 + COCO, CLIP), chấm phát âm, thực nghiệm thuật toán, số liệu báo cáo | Ultralytics, ONNX Runtime, wav2vec2, Colab |
 
-Tài liệu: [PLAN.md](PLAN.md) · [FEATURES.md](FEATURES.md)
+Tài liệu: [docs/](docs/README.md) – kế hoạch, tính năng, thiết kế, CSDL, sơ đồ, **mục lục số liệu cho báo cáo**
+
+## Cấu trúc thư mục
+
+```
+├── BE/                Django API (apps/ theo nghiệp vụ, config/, seed/, models/ – model ONNX, không lên git)
+├── FE/                Web React (src/pages theo vai trò learner/admin, components/, api/, lib/)
+├── MOBILE/            App Flutter (lib/app/modules theo màn hình, data/, core/)
+├── AI/                scripts/ (train, đánh giá, export), notebooks/ (01–10 hình cho báo cáo), report/ (số liệu)
+├── deploy/            Script server: deploy.sh (trên VM), push.sh / pull-backups.sh / run-experiments.sh (từ máy)
+├── scripts/           Bấm đúp trên Windows: deploy.bat, pull-backups.bat, run-experiments.bat
+├── docs/              Tài liệu dự án + mục lục số liệu, hình, sơ đồ cho báo cáo
+├── private.example/   Mẫu cho private/ – nơi DUY NHẤT chứa bí mật (IP server, khóa Firebase…) và bản thảo báo cáo
+└── .env.example       Mẫu .env (cấu hình Django / Docker) – .env thật không lên git
+```
+
+**Bí mật:** không có trong code. IP server, khóa SSH, khóa Firebase nằm ở `private/secrets/`, cấu hình Django ở `.env` –
+cả hai bị `.gitignore` chặn, CI chạy gitleaks. Cách tạo: [private.example/README.md](private.example/README.md).
 
 ## Chạy local (không cần Docker)
 
@@ -62,17 +79,19 @@ cd FE && npm run build
 
 ## Dữ liệu ngôn ngữ
 
-Học viên chỉ thấy dữ liệu **đã kiểm tra** – đối chiếu chéo tự động với CC-CEDICT (CC BY-SA 4.0), danh sách HSK, từ điển Bộ Giáo dục Đài Loan qua moedict (CC BY-ND 3.0 TW), CMUdict, Tatoeba (CC BY 2.0 FR). Chi tiết: PLAN.md §3b.
+Học viên chỉ thấy dữ liệu **đã kiểm tra** – đối chiếu chéo tự động với CC-CEDICT (CC BY-SA 4.0), danh sách HSK, từ điển Bộ Giáo dục Đài Loan qua moedict (CC BY-ND 3.0 TW), CMUdict, Tatoeba (CC BY 2.0 FR). Chi tiết: [docs/PLAN.md](docs/PLAN.md) §3b.
 
 Ảnh minh họa từ vựng: ảnh thật từ Wikimedia Commons (CC0 / public domain / CC BY / CC BY-SA / GFDL), đã được duyệt từng ảnh; tác giả và giấy phép nằm trong `BE/seed/concepts/images.csv` và hiện kèm ảnh trong app. Tải lại: `python manage.py fetch_word_images`.
 
 Lộ trình 4 cấp độ (Nhập môn → Sơ cấp → Trung cấp → Nâng cao) cho mỗi ngôn ngữ: tiếng Trung theo HSK 3.0 (HSK 1–3; từ ngoài HSK hoặc HSK 4+ xếp theo tần suất), tiếng Anh/tiếng Việt theo tần suất trong câu Tatoeba – dữ liệu ở `BE/seed/concepts/levels.csv` (có cột ghi đè tay), tính lại bằng `python manage.py build_levels`. Học xong 70% số từ của một cấp thì mở cấp tiếp, hoặc qua bài kiểm tra vượt cấp (8/10).
 
-## Docker (khi deploy)
+## Deploy
 
-```bash
-docker compose up -d --build
-```
+Lên server `lingoprism.id.vn`: bấm đúp `scripts/deploy.bat` (gửi code + model, build lại Docker trên VM). Cần
+`private/secrets/server.env` (xem `private.example/`). Sao lưu về máy: `scripts/pull-backups.bat`. Chạy thực nghiệm cho
+báo cáo trên server: `scripts/run-experiments.bat`.
+
+Docker local: `docker compose up -d --build`.
 
 ## Thuật toán nghiên cứu (đề cương) – `BE/apps/algorithms`
 

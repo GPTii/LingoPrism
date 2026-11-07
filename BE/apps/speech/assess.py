@@ -1,4 +1,4 @@
-"""Score one recording against a verified text: phones, tones, completeness (docs/thiet-ke-luyen-noi.md §4)."""
+"""Score one recording against a verified text: phones, tones, completeness (docs/thiet-ke/luyen-noi.md §4)."""
 import io
 import time
 import wave

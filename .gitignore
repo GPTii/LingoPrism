@@ -1,7 +1,9 @@
-# ---- Local reference / private docs (not part of the repo) ----
-/SnapLingua-main/
+# ---- Private: secrets, thesis drafts, reference material – never in git (layout: private.example/) ----
+/private/
 /tàiliệu/
 /tailieu/
+# local tools
+.claude/
 
 # ---- Secrets ----
 .env
@@ -71,9 +73,9 @@ BE/seed/sources/
 BE/models/
 MOBILE/android/app/src/main/java/io/flutter/plugins/
 
-# raw download of the Colab run (copied to AI/runs/)
-/lingoprism-yolov10n/
 deploy/certs/
+# Ultralytics downloads sample datasets next to where it runs
+/datasets/
 
 # labelled test set images (rebuilt by AI/scripts/build_testset.py)
 AI/testset/images/

@@ -1,5 +1,5 @@
 """Review schedulers behind one interface so Phase 5 can plug in SM-2 / FSRS / SM-2+VIP
-without touching the API (PLAN.md §4)."""
+without touching the API (docs/PLAN.md §4)."""
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 

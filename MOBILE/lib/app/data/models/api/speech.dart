@@ -1,6 +1,6 @@
 import 'common.dart';
 
-/// Phone-level pronunciation scoring (BE apps.speech, docs/thiet-ke-luyen-noi.md).
+/// Phone-level pronunciation scoring (BE apps.speech, docs/thiet-ke/luyen-noi.md).
 class SpeechPhone {
   SpeechPhone(this.expected, this.heard, this.status, this.score);
   final String expected;

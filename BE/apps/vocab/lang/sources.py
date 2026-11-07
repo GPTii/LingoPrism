@@ -1,4 +1,4 @@
-"""Loaders for the authoritative language sources (see PLAN.md §3b).
+"""Loaders for the authoritative language sources (see docs/PLAN.md §3b).
 
 Raw downloads live in BE/seed/sources/ (gitignored, fetched by `manage.py fetch_sources`).
 Per-word Taiwan MOE dictionary lookups are cached in BE/seed/cache/moedict.json (committed)
