@@ -15,6 +15,7 @@ import { AppIcon, type AppIconName } from '../components/brand/AppIcon'
 import { useThemeMode, type ThemeMode } from '../theme/store'
 import SideNav, { navGroups } from '../components/SideNav'
 import ErrorBoundary from '../components/ErrorBoundary'
+import TranslateBubble from '../components/TranslateBubble'
 import { VerifyEmailBanner, WhatsNew } from '../components/AccountGates'
 import { vocabApi } from '../api/vocab'
 import { ProfilePrompt } from '../components/ProfileSetup'
@@ -195,6 +196,7 @@ export default function LearnerLayout() {
               <WhatsNew />
               <ProfilePrompt />
               <div key={location.pathname} className="animate-page"><ErrorBoundary><Suspense fallback={null}><Outlet /></Suspense></ErrorBoundary></div>
+              {!focus && <TranslateBubble />}
             </div>
           </main>
 
