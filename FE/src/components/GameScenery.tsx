@@ -132,7 +132,8 @@ const DECOR: Record<Theme, Sprite[]> = {
 /** Small art for the level banner. */
 export function BannerArt({ level }: { level: number }) {
   const S = { meadow: Tree, sea: Boat, desert: Pyramid, night: Volcano }[themeOf(level)]
-  return <span aria-hidden className="pointer-events-none absolute right-4 bottom-0 opacity-30"><S size={70} /></span>
+  // left of the "done / total" count, so it never covers it
+  return <span aria-hidden className="pointer-events-none absolute right-28 bottom-0 opacity-25"><S size={64} /></span>
 }
 
 // ------------------------------------------------------------------------------------------------- the trail

@@ -11,6 +11,7 @@ import { AppIcon } from '../../components/brand/AppIcon'
 import { Prismo, ScaleIcon } from '../../components/brand/Brand'
 import { GAME_NAMES, HelpContext, MiniGameView, type GameHelp } from '../../components/MiniGames'
 import { BannerArt, LevelScene } from '../../components/GameScenery'
+import SideRail from '../../components/SideRail'
 import { langTag } from '../../components/TargetWord'
 import { PageHeader, UserAvatar } from '../../components/ui'
 
@@ -142,7 +143,8 @@ export function GameMapPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto flex flex-col gap-6">
+    <div className="mx-auto flex gap-8 justify-center items-start">
+    <div className="max-w-2xl w-full min-w-0 flex flex-col gap-6">
       <PageHeader title="Trò chơi" description={data.track === 'reading'
         ? 'Học xong bài ở mục Học đọc – viết rồi vào đây chơi. Qua mỗi màn, mở rương nhận ngọc!'
         : `Chơi với những từ ${LANG_NAME[data.language] ?? ''} bạn đã học. Học thêm ở mục Học để mở màn mới.`} />
@@ -231,6 +233,8 @@ export function GameMapPage() {
           </div>
         )}
       </Modal>
+    </div>
+    <SideRail />
     </div>
   )
 }

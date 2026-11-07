@@ -251,7 +251,7 @@ class GameMapView extends GetView<GameMapController> {
           color: color,
           padding: EdgeInsets.all(16.w),
           child: Stack(clipBehavior: Clip.none, children: [
-           Positioned(right: 40.w, bottom: -16.h, child: bannerArt(n)),
+           Positioned(right: 84.w, bottom: -16.h, child: bannerArt(n)), // left of the count
            Row(children: [
             Expanded(
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
