@@ -1,0 +1,60 @@
+# Format and lint checks for the three code bases on every push / pull request. The same commands run locally:
+#   Python (BE, AI): ruff format . && ruff check .          (config: pyproject.toml)
+#   Web (FE):        npm run format && npx oxlint src        (config: FE/.prettierrc.json, FE/.oxlintrc.json)
+#   App (MOBILE):    dart format lib test && flutter analyze  (config: MOBILE/analysis_options.yaml)
+name: Format & lint
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  python:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install ruff==0.14.4
+      - run: ruff format --check .
+      - run: ruff check .
+
+  web:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: FE
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: FE/package-lock.json
+      - run: npm ci
+      - run: npm run format:check
+      - run: npx tsc -b
+      - run: npx oxlint src
+
+  mobile:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: MOBILE
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.38.8" # same as the development machine
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: dart format --output=none --set-exit-if-changed lib test
+      - run: flutter analyze --no-fatal-infos
+      - run: flutter test
