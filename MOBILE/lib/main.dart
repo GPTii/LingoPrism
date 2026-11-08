@@ -71,11 +71,21 @@ class _LearningLocale extends StatelessWidget {
       TextStyle? withLocale(TextStyle? s) => s?.copyWith(locale: locale);
       final t = theme.textTheme;
       final textTheme = t.copyWith(
-        displayLarge: withLocale(t.displayLarge), displayMedium: withLocale(t.displayMedium), displaySmall: withLocale(t.displaySmall),
-        headlineLarge: withLocale(t.headlineLarge), headlineMedium: withLocale(t.headlineMedium), headlineSmall: withLocale(t.headlineSmall),
-        titleLarge: withLocale(t.titleLarge), titleMedium: withLocale(t.titleMedium), titleSmall: withLocale(t.titleSmall),
-        bodyLarge: withLocale(t.bodyLarge), bodyMedium: withLocale(t.bodyMedium), bodySmall: withLocale(t.bodySmall),
-        labelLarge: withLocale(t.labelLarge), labelMedium: withLocale(t.labelMedium), labelSmall: withLocale(t.labelSmall),
+        displayLarge: withLocale(t.displayLarge),
+        displayMedium: withLocale(t.displayMedium),
+        displaySmall: withLocale(t.displaySmall),
+        headlineLarge: withLocale(t.headlineLarge),
+        headlineMedium: withLocale(t.headlineMedium),
+        headlineSmall: withLocale(t.headlineSmall),
+        titleLarge: withLocale(t.titleLarge),
+        titleMedium: withLocale(t.titleMedium),
+        titleSmall: withLocale(t.titleSmall),
+        bodyLarge: withLocale(t.bodyLarge),
+        bodyMedium: withLocale(t.bodyMedium),
+        bodySmall: withLocale(t.bodySmall),
+        labelLarge: withLocale(t.labelLarge),
+        labelMedium: withLocale(t.labelMedium),
+        labelSmall: withLocale(t.labelSmall),
       );
       return Theme(
         data: theme.copyWith(textTheme: textTheme),

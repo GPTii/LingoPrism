@@ -14,8 +14,7 @@ import 'package:lingoprism/app/core/theme/app_colors.dart';
 import 'package:lingoprism/app/core/navigation/back.dart';
 
 class ProfileSettingsController extends GetxController {
-  ProfileSettingsController({AuthService? authService})
-      : _authService = authService ?? AuthService.to;
+  ProfileSettingsController({AuthService? authService}) : _authService = authService ?? AuthService.to;
 
   final AuthService _authService;
   final RxBool isProcessing = false.obs;

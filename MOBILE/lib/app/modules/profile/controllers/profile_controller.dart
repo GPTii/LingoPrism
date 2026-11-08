@@ -9,8 +9,16 @@ import '../../../routes/app_pages.dart';
 
 /// The 10 league tiers, lowest first – tier i uses assets/brand/rank/rank_{i+1}.png (LingoPrism artwork).
 const leagueTierNames = [
-  'Tia Sáng', 'Ánh Đồng', 'Ánh Bạc', 'Ánh Vàng', 'Bạch Kim',
-  'Ngọc Lục', 'Lam Ngọc', 'Tử Ngọc', 'Cầu Vồng', 'Lăng Kính Huyền Thoại',
+  'Tia Sáng',
+  'Ánh Đồng',
+  'Ánh Bạc',
+  'Ánh Vàng',
+  'Bạch Kim',
+  'Ngọc Lục',
+  'Lam Ngọc',
+  'Tử Ngọc',
+  'Cầu Vồng',
+  'Lăng Kính Huyền Thoại',
 ];
 
 /// Tier name → rank image.

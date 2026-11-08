@@ -72,7 +72,12 @@ class MoreToggle extends StatelessWidget {
           onPressed: onTap,
           iconAlignment: IconAlignment.end,
           icon: Icon(open ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded, size: 22.sp),
-          label: Text(open ? 'Thu gọn' : count == null ? label : '$label ($count)',
+          label: Text(
+              open
+                  ? 'Thu gọn'
+                  : count == null
+                      ? label
+                      : '$label ($count)',
               style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700)),
           style: TextButton.styleFrom(foregroundColor: AppColors.primary),
         ),

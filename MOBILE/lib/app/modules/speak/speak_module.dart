@@ -87,7 +87,11 @@ class _SpeakPracticeViewState extends State<SpeakPracticeView> {
           if (_index >= deck.length) {
             final avg = _scores.isEmpty ? 0 : (_scores.values.reduce((a, b) => a + b) / _scores.length).round();
             return _Message(
-              mood: avg >= 80 ? PrismoMood.celebrate : avg >= 50 ? PrismoMood.happy : PrismoMood.think,
+              mood: avg >= 80
+                  ? PrismoMood.celebrate
+                  : avg >= 50
+                      ? PrismoMood.happy
+                      : PrismoMood.think,
               title: 'Điểm phát âm trung bình: $avg/100',
               body: avg >= 80 ? 'Rất tốt! Giọng bạn đã rõ ràng.' : 'Nghe lại giọng mẫu thật chậm rồi thử lại, nhất là phần gạch đỏ.',
               action: FilledButton(onPressed: _again, child: const Text('Luyện thêm 10 từ')),
@@ -145,11 +149,15 @@ class _SpeakPracticeViewState extends State<SpeakPracticeView> {
                     Text(sentence.text,
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                            fontSize: 22.sp, fontWeight: FontWeight.w700, locale: t.language.startsWith('zh') ? localeFor(t.language) : null)),
+                            fontSize: 22.sp,
+                            fontWeight: FontWeight.w700,
+                            locale: t.language.startsWith('zh') ? localeFor(t.language) : null)),
                     if (sentence.transliteration.isNotEmpty)
-                      Text(sentence.transliteration, textAlign: TextAlign.center, style: TextStyle(color: AppColors.textSecondary, fontSize: 14.sp)),
+                      Text(sentence.transliteration,
+                          textAlign: TextAlign.center, style: TextStyle(color: AppColors.textSecondary, fontSize: 14.sp)),
                     if (sentence.translationVi.isNotEmpty)
-                      Text(sentence.translationVi, textAlign: TextAlign.center, style: TextStyle(color: AppColors.textHint, fontSize: 13.sp)),
+                      Text(sentence.translationVi,
+                          textAlign: TextAlign.center, style: TextStyle(color: AppColors.textHint, fontSize: 13.sp)),
                     TextButton.icon(
                       onPressed: () => TtsService.to.speak(sentence.text, t.ttsLocale),
                       icon: const Icon(Icons.volume_up_rounded),
@@ -204,7 +212,8 @@ class _Message extends StatelessWidget {
           child: Column(mainAxisSize: MainAxisSize.min, children: [
             Prismo(mood: mood, size: 120.w),
             SizedBox(height: 12.h),
-            Text(title, textAlign: TextAlign.center, style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+            Text(title,
+                textAlign: TextAlign.center, style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
             SizedBox(height: 8.h),
             Text(body, textAlign: TextAlign.center, style: TextStyle(color: AppColors.textSecondary)),
             if (action != null) ...[SizedBox(height: 18.h), action!],

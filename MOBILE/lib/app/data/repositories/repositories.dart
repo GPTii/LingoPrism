@@ -65,7 +65,8 @@ class AuthRepository {
   static Future<AppUser> uploadAvatar(String path) async =>
       AppUser.fromJson(asMap(await _api.upload('/me/', filePath: path, field: 'avatar', method: 'PATCH')));
 
-  static Future<UserGoal> updateGoal(Map<String, dynamic> data) async => UserGoal.fromJson(asMap(await _api.patch('/me/goal/', data: data)));
+  static Future<UserGoal> updateGoal(Map<String, dynamic> data) async =>
+      UserGoal.fromJson(asMap(await _api.patch('/me/goal/', data: data)));
 }
 
 class VocabRepository {
@@ -114,16 +115,16 @@ class VocabRepository {
   static Future<void> report(int wordId, int? translationId, String reason, String details) =>
       _api.post('/reports/', data: {'word': wordId, 'translation': translationId, 'reason': reason, 'details': details});
 
-  static Future<List<WordCard>> myWords({String? status, int? topic}) async => ApiClient.results(
-          await _api.get('/my-words/', query: {'page_size': 200, 'status': status, 'topic': topic}))
-      .map(WordCard.fromJson)
-      .toList();
+  static Future<List<WordCard>> myWords({String? status, int? topic}) async =>
+      ApiClient.results(await _api.get('/my-words/', query: {'page_size': 200, 'status': status, 'topic': topic}))
+          .map(WordCard.fromJson)
+          .toList();
 
   static Future<List<WordCard>> dueWords() async =>
       ApiClient.results(await _api.get('/my-words/due/', query: {'page_size': 200})).map(WordCard.fromJson).toList();
 
-  static Future<WordCard> addWord(int wordId, {String source = 'manual', int? topic, String sourceRef = ''}) async =>
-      WordCard.fromJson(asMap(await _api.post('/my-words/', data: {'word': wordId, 'source': source, 'topic': topic, 'source_ref': sourceRef})));
+  static Future<WordCard> addWord(int wordId, {String source = 'manual', int? topic, String sourceRef = ''}) async => WordCard.fromJson(
+      asMap(await _api.post('/my-words/', data: {'word': wordId, 'source': source, 'topic': topic, 'source_ref': sourceRef})));
 
   static Future<void> removeWord(int personalId) => _api.delete('/my-words/$personalId/');
 
@@ -135,8 +136,12 @@ class LearningRepository {
   /// general learn / review lesson.
   static Future<StudySession> start(String kind, {int? topic, int? size, List<int>? wordIds}) async {
     try {
-      return StudySession.fromJson(asMap(await _api.post('/sessions/',
-          data: {'kind': kind, if (topic != null) 'topic': topic, if (size != null) 'size': size, if (wordIds != null) 'word_ids': wordIds})));
+      return StudySession.fromJson(asMap(await _api.post('/sessions/', data: {
+        'kind': kind,
+        if (topic != null) 'topic': topic,
+        if (size != null) 'size': size,
+        if (wordIds != null) 'word_ids': wordIds
+      })));
     } catch (e) {
       if (topic == null && OfflineLearning.isNetworkError(e)) {
         final kept = OfflineLearning.takeSession(kind);
@@ -147,12 +152,23 @@ class LearningRepository {
   }
 
   /// Offline, the answer waits on the phone and is sent when the connection is back.
-  static Future<void> answer(int sessionId, {required int personalWord, required String questionType, required bool correct,
-      bool firstTry = true, bool graded = false, int? responseMs, String answer = ''}) async {
+  static Future<void> answer(int sessionId,
+      {required int personalWord,
+      required String questionType,
+      required bool correct,
+      bool firstTry = true,
+      bool graded = false,
+      int? responseMs,
+      String answer = ''}) async {
     final path = '/sessions/$sessionId/answer/';
     final data = <String, dynamic>{
-      'personal_word': personalWord, 'question_type': questionType, 'correct': correct, 'first_try': firstTry,
-      'graded': graded, 'response_ms': responseMs, 'answer': answer,
+      'personal_word': personalWord,
+      'question_type': questionType,
+      'correct': correct,
+      'first_try': firstTry,
+      'graded': graded,
+      'response_ms': responseMs,
+      'answer': answer,
     };
     try {
       await _api.post(path, data: data);
@@ -195,6 +211,7 @@ class GameRepository {
     final r = asMap(await _api.post('/quests/$id/claim/'));
     return (asInt(r['scales']), asInt(r['gems']));
   }
+
   static Future<int> claimMonthly() async => asInt(asMap(await _api.post('/quests/monthly/claim/'))['gems']);
 
   static Future<List<BadgeInfo>> badges({int? userId}) async =>
@@ -252,14 +269,13 @@ class CommunityRepository {
   /// by the 8-digit ID (exact) or by name (2+ letters)
   static Future<List<Person>> search(String q) async =>
       asMapList(await _api.get('/community/users/search/', query: {'q': q})).map(Person.fromJson).toList();
-  static Future<List<Person>> friends() async =>
-      asMapList(await _api.get('/community/users/friends/')).map(Person.fromJson).toList();
+  static Future<List<Person>> friends() async => asMapList(await _api.get('/community/users/friends/')).map(Person.fromJson).toList();
 
   /// incoming: waiting for my answer · outgoing: the ones I sent
-  static Future<List<FriendRequestItem>> friendRequests({bool incoming = true}) async => asMapList(
-          await _api.get('/community/users/friend-requests/', query: {'box': incoming ? 'incoming' : 'outgoing'}))
-      .map(FriendRequestItem.fromJson)
-      .toList();
+  static Future<List<FriendRequestItem>> friendRequests({bool incoming = true}) async =>
+      asMapList(await _api.get('/community/users/friend-requests/', query: {'box': incoming ? 'incoming' : 'outgoing'}))
+          .map(FriendRequestItem.fromJson)
+          .toList();
 
   /// send a request with a hello – or accept theirs if they already asked
   static Future<FriendStatus> addFriend(int userId, {String message = ''}) async =>
@@ -284,9 +300,9 @@ class CommunityRepository {
   static Future<void> like(int id, bool like) => like ? _api.post('/posts/$id/like/') : _api.delete('/posts/$id/like/');
   static Future<List<PostComment>> comments(int id) async =>
       asMapList(await _api.get('/posts/$id/comments/')).map(PostComment.fromJson).toList();
-  static Future<PostComment> comment(int id, {String content = '', String? sticker}) async => PostComment.fromJson(asMap(await _api.post(
-      '/posts/$id/comments/',
-      data: sticker != null ? {'kind': 'sticker', 'sticker': sticker} : {'kind': 'text', 'content': content})));
+  static Future<PostComment> comment(int id, {String content = '', String? sticker}) async =>
+      PostComment.fromJson(asMap(await _api.post('/posts/$id/comments/',
+          data: sticker != null ? {'kind': 'sticker', 'sticker': sticker} : {'kind': 'text', 'content': content})));
   static Future<void> report(int id, String reason, String details) =>
       _api.post('/posts/$id/report/', data: {'reason': reason, 'details': details});
   static Future<int> saveWords(int id) async => asInt(asMap(await _api.post('/posts/$id/save-words/'))['added']);
@@ -301,20 +317,22 @@ class CommunityRepository {
       block ? _api.post('/community/users/$userId/block/') : _api.delete('/community/users/$userId/block/');
 
   /// Report a learner to the moderators; [thread] attaches that conversation's last messages as evidence.
-  static Future<void> reportUser(int userId,
-          {required String reason, String details = '', bool block = false, int? thread}) =>
+  static Future<void> reportUser(int userId, {required String reason, String details = '', bool block = false, int? thread}) =>
       _api.post('/community/users/$userId/report/',
           data: {'reason': reason, 'details': details, 'block': block, if (thread != null) 'thread': thread});
 
-  static Future<List<StudyGroup>> groups({bool mine = false, String? search}) async => ApiClient.results(
-          await _api.get('/groups/', query: {'mine': mine ? 1 : null, 'search': search, 'page_size': 100}))
-      .map(StudyGroup.fromJson)
-      .toList();
+  static Future<List<StudyGroup>> groups({bool mine = false, String? search}) async =>
+      ApiClient.results(await _api.get('/groups/', query: {'mine': mine ? 1 : null, 'search': search, 'page_size': 100}))
+          .map(StudyGroup.fromJson)
+          .toList();
   static Future<StudyGroup> group(int id) async => StudyGroup.fromJson(asMap(await _api.get('/groups/$id/')));
   static Future<StudyGroup> createGroup(String name, String description, bool requireApproval,
           {String icon = '', bool isPrivate = false}) async =>
       StudyGroup.fromJson(asMap(await _api.post('/groups/', data: {
-        'name': name, 'description': description, 'require_approval': requireApproval, 'icon': icon,
+        'name': name,
+        'description': description,
+        'require_approval': requireApproval,
+        'icon': icon,
         'is_private': isPrivate,
       })));
 
@@ -327,8 +345,7 @@ class CommunityRepository {
   static Future<void> leave(int id) => _api.post('/groups/$id/leave/');
   static Future<List<GroupMemberInfo>> members(int id) async =>
       asMapList(await _api.get('/groups/$id/members/')).map(GroupMemberInfo.fromJson).toList();
-  static Future<void> moderate(int groupId, int memberId, String decision) =>
-      _api.post('/groups/$groupId/members/$memberId/$decision/');
+  static Future<void> moderate(int groupId, int memberId, String decision) => _api.post('/groups/$groupId/members/$memberId/$decision/');
 }
 
 class ChatRepository {
@@ -337,9 +354,10 @@ class ChatRepository {
     return (asMapList(d['results']).map(ChatMessage.fromJson).toList(), d['has_more'] == true);
   }
 
-  static Future<ChatMessage> sendGroup(int groupId, {String kind = 'text', String content = '', String sticker = '', String clientId = ''}) async =>
-      ChatMessage.fromJson(asMap(await _api.post('/groups/$groupId/messages/',
-          data: {'kind': kind, 'content': content, 'sticker': sticker, 'client_id': clientId})));
+  static Future<ChatMessage> sendGroup(int groupId,
+          {String kind = 'text', String content = '', String sticker = '', String clientId = ''}) async =>
+      ChatMessage.fromJson(asMap(await _api
+          .post('/groups/$groupId/messages/', data: {'kind': kind, 'content': content, 'sticker': sticker, 'client_id': clientId})));
 
   static Future<SupportConversation> openSupport({String? content}) async =>
       SupportConversation.fromJson(asMap(await _api.post('/support/conversations/', data: {'content': content})));
@@ -364,8 +382,8 @@ class DetectionRepository {
           {String? imagePath}) async =>
       DetectionResult.fromJson(asMap(imagePath == null
           ? await _api.post('/detections/log/', data: {'model_name': modelName, 'inference_ms': inferenceMs, 'items': items})
-          : await _api.upload('/detections/log/', filePath: imagePath,
-              fields: {'model_name': modelName, 'inference_ms': inferenceMs, 'items': jsonEncode(items)})));
+          : await _api.upload('/detections/log/',
+              filePath: imagePath, fields: {'model_name': modelName, 'inference_ms': inferenceMs, 'items': jsonEncode(items)})));
 
   /// Returns (words saved, error reports remembered by the server).
   /// [added]: objects the detector missed, named by the learner.
@@ -384,7 +402,9 @@ class DetectionRepository {
                   })
               .toList(),
           topic: topic,
-          added: [for (final a in added) {'word': a.wordId, 'typed': a.typed}]);
+          added: [
+            for (final a in added) {'word': a.wordId, 'typed': a.typed}
+          ]);
 
   static Future<(int, int)> confirmRaw(int detectionId, List<Map<String, dynamic>> items,
       {int? topic, List<Map<String, dynamic>> added = const []}) async {
@@ -438,9 +458,10 @@ class SentenceRepository {
   static Future<SentenceLesson> lesson({int? topic, int size = 10}) async =>
       SentenceLesson.fromJson(asMap(await _api.get('/sentences/lesson/', query: {'topic': topic, 'size': size})));
 
-  static Future<SentenceCheck> check({required int sentence, required String type, required Object answer, required int responseMs}) async =>
-      SentenceCheck.fromJson(asMap(await _api.post('/sentences/check/',
-          data: {'sentence': sentence, 'type': type, 'answer': answer, 'response_ms': responseMs})));
+  static Future<SentenceCheck> check(
+          {required int sentence, required String type, required Object answer, required int responseMs}) async =>
+      SentenceCheck.fromJson(asMap(
+          await _api.post('/sentences/check/', data: {'sentence': sentence, 'type': type, 'answer': answer, 'response_ms': responseMs})));
 }
 
 class LiteracyRepository {
@@ -449,11 +470,11 @@ class LiteracyRepository {
 
   static Future<LitLesson> lesson(int n) async => LitLesson.fromJson(asMap(await _api.get('/literacy/lessons/$n/')));
 
-  static Future<LitCheck> check(String token, Object answer, int responseMs) async => LitCheck.fromJson(
-      asMap(await _api.post('/literacy/check/', data: {'token': token, 'answer': answer, 'response_ms': responseMs})));
+  static Future<LitCheck> check(String token, Object answer, int responseMs) async =>
+      LitCheck.fromJson(asMap(await _api.post('/literacy/check/', data: {'token': token, 'answer': answer, 'response_ms': responseMs})));
 
-  static Future<LitFinish> finish(int n, String session, int total) async => LitFinish.fromJson(
-      asMap(await _api.post('/literacy/lessons/$n/finish/', data: {'session': session, 'total': total})));
+  static Future<LitFinish> finish(int n, String session, int total) async =>
+      LitFinish.fromJson(asMap(await _api.post('/literacy/lessons/$n/finish/', data: {'session': session, 'total': total})));
 }
 
 /// Trò chơi (BE apps/games): the game map, its rounds and chests. Rounds stay plain JSON: each mini game reads
@@ -481,8 +502,8 @@ class LevelRepository {
 
   static Future<LevelTest> test(int level) async => LevelTest.fromJson(asMap(await _api.get('/levels/$level/test/')));
 
-  static Future<LevelTestResult> submit(int level, String token, List<String> answers) async => LevelTestResult.fromJson(
-      asMap(await _api.post('/levels/$level/test/', data: {'token': token, 'answers': answers})));
+  static Future<LevelTestResult> submit(int level, String token, List<String> answers) async =>
+      LevelTestResult.fromJson(asMap(await _api.post('/levels/$level/test/', data: {'token': token, 'answers': answers})));
 }
 
 /// Speaking practice: phone-level scoring on the server (BE apps.speech).

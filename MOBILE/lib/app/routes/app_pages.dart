@@ -245,29 +245,60 @@ class AppPages {
       name: _Paths.detectionResult,
       page: () => const DetectionResultView(),
     ),
-      GetPage(name: _Paths.stats, page: () => const StatsView()),
-      GetPage(name: _Paths.wardrobe, page: () => const WardrobeView()),
-      GetPage(name: _Paths.speakPractice, page: () => const SpeakPracticeView()),
-      GetPage(name: _Paths.translate, page: () => const TranslateView()),
-      GetPage(name: _Paths.liveCamera, page: () => const LiveCameraView()),
-      GetPage(name: _Paths.photoDialogue, page: () => const PhotoDialogueView()),
-      GetPage(name: _Paths.photoHistory, page: () => const PhotoHistoryView()),
-      GetPage(name: _Paths.photoShot, page: () => const PhotoShotView()),
-      GetPage(name: _Paths.examList, page: () => const ExamListView(), binding: BindingsBuilder(() => Get.lazyPut(() => ExamListController()))),
-    GetPage(name: _Paths.examTake, page: () => const ExamTakeView(), binding: BindingsBuilder(() => Get.lazyPut(() => ExamTakeController()))),
-    GetPage(name: _Paths.examResult, page: () => const ExamResultView(), binding: BindingsBuilder(() => Get.lazyPut(() => ExamResultController()))),
-    GetPage(name: _Paths.sentencePractice, page: () => const SentencePracticeView(), binding: BindingsBuilder(() => Get.lazyPut(() => SentencePracticeController()))),
-    GetPage(name: _Paths.literacyMap, page: () => const LiteracyMapView(), binding: BindingsBuilder(() => Get.lazyPut(() => LiteracyMapController()))),
-    GetPage(name: _Paths.literacyLesson, page: () => const LiteracyLessonView(), binding: BindingsBuilder(() => Get.lazyPut(() => LiteracyLessonController()))),
+    GetPage(name: _Paths.stats, page: () => const StatsView()),
+    GetPage(name: _Paths.wardrobe, page: () => const WardrobeView()),
+    GetPage(name: _Paths.speakPractice, page: () => const SpeakPracticeView()),
+    GetPage(name: _Paths.translate, page: () => const TranslateView()),
+    GetPage(name: _Paths.liveCamera, page: () => const LiveCameraView()),
+    GetPage(name: _Paths.photoDialogue, page: () => const PhotoDialogueView()),
+    GetPage(name: _Paths.photoHistory, page: () => const PhotoHistoryView()),
+    GetPage(name: _Paths.photoShot, page: () => const PhotoShotView()),
+    GetPage(
+        name: _Paths.examList, page: () => const ExamListView(), binding: BindingsBuilder(() => Get.lazyPut(() => ExamListController()))),
+    GetPage(
+        name: _Paths.examTake, page: () => const ExamTakeView(), binding: BindingsBuilder(() => Get.lazyPut(() => ExamTakeController()))),
+    GetPage(
+        name: _Paths.examResult,
+        page: () => const ExamResultView(),
+        binding: BindingsBuilder(() => Get.lazyPut(() => ExamResultController()))),
+    GetPage(
+        name: _Paths.sentencePractice,
+        page: () => const SentencePracticeView(),
+        binding: BindingsBuilder(() => Get.lazyPut(() => SentencePracticeController()))),
+    GetPage(
+        name: _Paths.literacyMap,
+        page: () => const LiteracyMapView(),
+        binding: BindingsBuilder(() => Get.lazyPut(() => LiteracyMapController()))),
+    GetPage(
+        name: _Paths.literacyLesson,
+        page: () => const LiteracyLessonView(),
+        binding: BindingsBuilder(() => Get.lazyPut(() => LiteracyLessonController()))),
     GetPage(name: _Paths.games, page: () => const GameMapView(), binding: BindingsBuilder(() => Get.lazyPut(() => GameMapController()))),
-    GetPage(name: _Paths.gamePlay, page: () => const GamePlayView(), binding: BindingsBuilder(() => Get.lazyPut(() => GamePlayController()))),
-    GetPage(name: _Paths.levelPath, page: () => const LevelPathView(), binding: BindingsBuilder(() => Get.put(LevelPathController(), permanent: true))),
-    GetPage(name: _Paths.levelTest, page: () => const LevelTestView(), binding: BindingsBuilder(() => Get.lazyPut(() => LevelTestController()))),
-    GetPage(name: _Paths.supportChat, page: () => const SupportChatView(), binding: BindingsBuilder(() => Get.lazyPut(() => SupportChatController()))),
-    GetPage(name: _Paths.messages, page: () => const MessagesView(), binding: BindingsBuilder(() => Get.lazyPut(() => MessagesController()))),
-    GetPage(name: _Paths.directChat, page: () => const DirectChatView(), binding: BindingsBuilder(() => Get.lazyPut(() => DirectChatController()))),
+    GetPage(
+        name: _Paths.gamePlay, page: () => const GamePlayView(), binding: BindingsBuilder(() => Get.lazyPut(() => GamePlayController()))),
+    GetPage(
+        name: _Paths.levelPath,
+        page: () => const LevelPathView(),
+        binding: BindingsBuilder(() => Get.put(LevelPathController(), permanent: true))),
+    GetPage(
+        name: _Paths.levelTest,
+        page: () => const LevelTestView(),
+        binding: BindingsBuilder(() => Get.lazyPut(() => LevelTestController()))),
+    GetPage(
+        name: _Paths.supportChat,
+        page: () => const SupportChatView(),
+        binding: BindingsBuilder(() => Get.lazyPut(() => SupportChatController()))),
+    GetPage(
+        name: _Paths.messages, page: () => const MessagesView(), binding: BindingsBuilder(() => Get.lazyPut(() => MessagesController()))),
+    GetPage(
+        name: _Paths.directChat,
+        page: () => const DirectChatView(),
+        binding: BindingsBuilder(() => Get.lazyPut(() => DirectChatController()))),
     GetPage(name: _Paths.poiMap, page: () => const PoiMapView(), binding: BindingsBuilder(() => Get.lazyPut(() => PoiMapController()))),
     GetPage(name: _Paths.friends, page: () => const FriendsView(), binding: BindingsBuilder(() => Get.lazyPut(() => FriendsController()))),
-    GetPage(name: _Paths.savedPosts, page: () => const SavedPostsView(), binding: BindingsBuilder(() => Get.lazyPut(() => SavedPostsController()))),
+    GetPage(
+        name: _Paths.savedPosts,
+        page: () => const SavedPostsView(),
+        binding: BindingsBuilder(() => Get.lazyPut(() => SavedPostsController()))),
   ];
 }

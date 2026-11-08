@@ -150,7 +150,8 @@ class _ResultView extends StatelessWidget {
       builder: (_) => SafeArea(
         child: ListView(shrinkWrap: true, padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 20.h), children: [
           Text(u.text,
-              style: TextStyle(fontSize: 30.sp, fontWeight: FontWeight.w800, color: color(u.status), locale: _zh ? localeFor(language) : null)),
+              style: TextStyle(
+                  fontSize: 30.sp, fontWeight: FontWeight.w800, color: color(u.status), locale: _zh ? localeFor(language) : null)),
           if (u.reading.isNotEmpty) Text(u.reading, style: TextStyle(color: AppColors.textSecondary, fontSize: 14.sp)),
           SizedBox(height: 12.h),
           Text('Từng âm (âm đúng → máy nghe được)', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14.sp)),
@@ -234,7 +235,11 @@ class _Chip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = value >= 90 ? AppColors.success : value >= 60 ? AppColors.beamAmber : AppColors.error;
+    final c = value >= 90
+        ? AppColors.success
+        : value >= 60
+            ? AppColors.beamAmber
+            : AppColors.error;
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 5.h),
       decoration: BoxDecoration(color: c.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(20.r)),

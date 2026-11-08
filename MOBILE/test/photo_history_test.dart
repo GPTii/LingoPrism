@@ -19,12 +19,38 @@ void main() {
       'created_at': '2026-10-22T10:00:00+00:00',
       'confirmed': true,
       'items': [
-        {'id': 1, 'label': 'Apple', 'bbox': [0, 0, 0.5, 0.5], 'card': _card('苹果', 'quả táo'), 'selected': false},
+        {
+          'id': 1,
+          'label': 'Apple',
+          'bbox': [0, 0, 0.5, 0.5],
+          'card': _card('苹果', 'quả táo'),
+          'selected': false
+        },
         // the model said apple, the learner said watermelon: the watermelon word is what was saved
-        {'id': 2, 'label': 'Apple', 'bbox': [0.5, 0, 1, 0.5], 'card': _card('苹果', 'quả táo'), 'selected': true,
-            'feedback': 'wrong', 'corrected_label': 'Watermelon', 'corrected_card': _card('西瓜', 'dưa hấu')},
-        {'id': 3, 'label': 'Watermelon', 'bbox': [0, 0.5, 0.5, 1], 'card': _card('西瓜', 'dưa hấu'), 'selected': false},
-        {'id': 4, 'label': 'Cup', 'bbox': [0.5, 0.5, 1, 1], 'feedback': 'wrong', 'corrected_label': ''}, // not an object
+        {
+          'id': 2,
+          'label': 'Apple',
+          'bbox': [0.5, 0, 1, 0.5],
+          'card': _card('苹果', 'quả táo'),
+          'selected': true,
+          'feedback': 'wrong',
+          'corrected_label': 'Watermelon',
+          'corrected_card': _card('西瓜', 'dưa hấu')
+        },
+        {
+          'id': 3,
+          'label': 'Watermelon',
+          'bbox': [0, 0.5, 0.5, 1],
+          'card': _card('西瓜', 'dưa hấu'),
+          'selected': false
+        },
+        {
+          'id': 4,
+          'label': 'Cup',
+          'bbox': [0.5, 0.5, 1, 1],
+          'feedback': 'wrong',
+          'corrected_label': ''
+        }, // not an object
       ],
     });
     expect(d.confirmed, isTrue);

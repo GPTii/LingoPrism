@@ -18,12 +18,14 @@ class ForgotPasswordController extends GetxController {
 
   // Code input controllers
   final List<TextEditingController> codeControllers = List.generate(
-    6, (index) => TextEditingController(),
+    6,
+    (index) => TextEditingController(),
   );
 
   // Focus nodes for OTP fields
   final List<FocusNode> codeFocusNodes = List.generate(
-    6, (index) => FocusNode(),
+    6,
+    (index) => FocusNode(),
   );
 
   // Observable states
@@ -65,9 +67,9 @@ class ForgotPasswordController extends GetxController {
 
   bool get canResetPassword {
     return newPasswordController.text.isNotEmpty &&
-           confirmPasswordController.text.isNotEmpty &&
-           _isValidPassword(newPasswordController.text) &&
-           newPasswordController.text == confirmPasswordController.text;
+        confirmPasswordController.text.isNotEmpty &&
+        _isValidPassword(newPasswordController.text) &&
+        newPasswordController.text == confirmPasswordController.text;
   }
 
   @override
@@ -105,9 +107,6 @@ class ForgotPasswordController extends GetxController {
   }
 
   // Email validation
-  bool _isValidEmail(String email) {
-    return RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$').hasMatch(email);
-  }
 
   void _validateEmail() {
     final email = emailController.text.trim();
@@ -213,7 +212,6 @@ class ForgotPasswordController extends GetxController {
       if (r['success'] != true) throw Exception(r['message']);
       _snack('Thành công', 'Mã xác thực mới đã được gửi', true);
       _startResendTimer();
-
     } catch (e) {
       Get.snackbar(
         'Lỗi',
@@ -331,7 +329,6 @@ class ForgotPasswordController extends GetxController {
       );
 
       Get.toNamed(Routes.newPassword);
-
     } catch (e) {
       Get.snackbar(
         'Lỗi',
@@ -378,7 +375,6 @@ class ForgotPasswordController extends GetxController {
 
       // Navigate back to login
       Get.offAllNamed(Routes.login);
-
     } catch (e) {
       Get.snackbar(
         'Lỗi',

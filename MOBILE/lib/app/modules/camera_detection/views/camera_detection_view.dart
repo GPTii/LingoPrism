@@ -6,7 +6,6 @@ import 'package:lingoprism/app/core/theme/app_colors.dart';
 import '../../../routes/app_pages.dart';
 import 'package:lingoprism/app/core/navigation/back.dart';
 
-
 class CameraDetectionView extends GetView<CameraDetectionController> {
   const CameraDetectionView({super.key});
 
@@ -177,7 +176,8 @@ class CameraDetectionView extends GetView<CameraDetectionController> {
             decoration: BoxDecoration(
               color: AppColors.surface,
               borderRadius: BorderRadius.circular(16.r),
-              border: Border.fromBorderSide(BorderSide(color: AppColors.line)),),
+              border: Border.fromBorderSide(BorderSide(color: AppColors.line)),
+            ),
             padding: EdgeInsets.all(20.w),
             child: Icon(
               icon,

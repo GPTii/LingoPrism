@@ -55,7 +55,10 @@ class NotificationController extends GetxController {
       _raw
         ..clear()
         ..addEntries(list.map((n) => MapEntry('${n.id}', n)));
-      actionStates.assignAll({for (final n in list) if (n.action != null && n.actionState != null) '${n.id}': n.actionState!});
+      actionStates.assignAll({
+        for (final n in list)
+          if (n.action != null && n.actionState != null) '${n.id}': n.actionState!
+      });
       notifications.assignAll(list.map((n) {
         final route = n.route ?? '';
         final userMatch = RegExp(r'/community/users/(\d+)').firstMatch(route);
@@ -124,7 +127,9 @@ class NotificationController extends GetxController {
       NotificationRepository.read(n.id).catchError((_) {});
       Get.snackbar(
           yes ? 'Xong' : 'Đã từ chối',
-          n.action == 'friend_request' ? (yes ? 'Hai bạn đã là bạn bè.' : 'Người kia không nhận được thông báo.') : (yes ? 'Đã duyệt vào nhóm.' : 'Đã từ chối yêu cầu.'),
+          n.action == 'friend_request'
+              ? (yes ? 'Hai bạn đã là bạn bè.' : 'Người kia không nhận được thông báo.')
+              : (yes ? 'Đã duyệt vào nhóm.' : 'Đã từ chối yêu cầu.'),
           snackPosition: SnackPosition.BOTTOM);
     } catch (e) {
       Get.snackbar('Lỗi', ApiClient.toApiException(e).message, snackPosition: SnackPosition.BOTTOM);

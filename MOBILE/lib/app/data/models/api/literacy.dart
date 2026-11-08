@@ -16,13 +16,16 @@ class LitUnit {
   String get spoken => kind == 'thanh' ? label : sound.split(' – ').last;
 
   factory LitUnit.fromJson(Map<String, dynamic> j) => LitUnit(
-      kind: asString(j['kind']), code: asString(j['code']), label: asString(j['label']),
-      sound: asString(j['sound']), symbol: asString(j['symbol']));
+      kind: asString(j['kind']),
+      code: asString(j['code']),
+      label: asString(j['label']),
+      sound: asString(j['sound']),
+      symbol: asString(j['symbol']));
 }
 
 class LitLessonInfo {
-  LitLessonInfo({required this.n, required this.title, required this.review, required this.units,
-      required this.status, required this.stars});
+  LitLessonInfo(
+      {required this.n, required this.title, required this.review, required this.units, required this.status, required this.stars});
 
   final int n;
   final String title;
@@ -49,8 +52,7 @@ class SpellExample {
   final String text;
   final List<String> spell;
 
-  factory SpellExample.fromJson(Map<String, dynamic> j) =>
-      SpellExample(text: asString(j['text']), spell: _strings(j['spell']));
+  factory SpellExample.fromJson(Map<String, dynamic> j) => SpellExample(text: asString(j['text']), spell: _strings(j['spell']));
 }
 
 List<String> _strings(dynamic v) => (v as List? ?? const []).map((e) => e.toString()).toList();
@@ -74,7 +76,9 @@ class LitIntro {
   factory LitIntro.fromJson(Map<String, dynamic> j) => LitIntro(
         unit: LitUnit.fromJson(asMap(j['unit'])),
         examples: asMapList(j['examples']).map(SpellExample.fromJson).toList(),
-        words: asMapList(j['words']).map((w) => LitWord(text: asString(w['text']), emoji: asString(w['emoji']), image: w['image'] as String?)).toList(),
+        words: asMapList(j['words'])
+            .map((w) => LitWord(text: asString(w['text']), emoji: asString(w['emoji']), image: w['image'] as String?))
+            .toList(),
         rhymeSpell: _strings(j['rhyme_spell']),
       );
 }
@@ -191,7 +195,8 @@ class LitCheck {
         word: asString(j['word']),
         spell: _strings(j['spell']),
         diff: asMapList(j['diff'])
-            .map((d) => LitDiff(expected: asString(d['expected']), given: asString(d['given']), ok: d['ok'] == true, hint: asString(d['hint'])))
+            .map((d) =>
+                LitDiff(expected: asString(d['expected']), given: asString(d['given']), ok: d['ok'] == true, hint: asString(d['hint'])))
             .toList(),
       );
 }
@@ -206,6 +211,9 @@ class LitFinish {
   final bool nextUnlocked;
 
   factory LitFinish.fromJson(Map<String, dynamic> j) => LitFinish(
-      correct: asInt(j['correct_first_try']), total: asInt(j['total']), stars: asInt(j['stars']),
-      passed: j['passed'] == true, nextUnlocked: j['next_unlocked'] == true);
+      correct: asInt(j['correct_first_try']),
+      total: asInt(j['total']),
+      stars: asInt(j['stars']),
+      passed: j['passed'] == true,
+      nextUnlocked: j['next_unlocked'] == true);
 }

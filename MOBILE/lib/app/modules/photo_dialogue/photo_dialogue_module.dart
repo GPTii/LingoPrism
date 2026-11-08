@@ -71,8 +71,8 @@ class _PhotoDialogueViewState extends State<PhotoDialogueView> {
               child: Padding(
                 padding: EdgeInsets.all(24.w),
                 child: Column(mainAxisSize: MainAxisSize.min, children: [
-                  Text(ApiClient.toApiException(snap.error!).message, textAlign: TextAlign.center,
-                      style: TextStyle(color: AppColors.textPrimary)),
+                  Text(ApiClient.toApiException(snap.error!).message,
+                      textAlign: TextAlign.center, style: TextStyle(color: AppColors.textPrimary)),
                   SizedBox(height: 12.h),
                   OutlinedButton(onPressed: () => setState(() => _dialogue = _load()), child: const Text('Thử lại')),
                 ]),
@@ -93,8 +93,8 @@ class _PhotoDialogueViewState extends State<PhotoDialogueView> {
                 ),
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
-                  decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(6.r),
-                      border: Border.all(color: AppColors.line)),
+                  decoration: BoxDecoration(
+                      color: AppColors.surface, borderRadius: BorderRadius.circular(6.r), border: Border.all(color: AppColors.line)),
                   child: Text('AI tạo', style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w700, color: AppColors.textSecondary)),
                 ),
               ]),
@@ -123,19 +123,20 @@ class _PhotoDialogueViewState extends State<PhotoDialogueView> {
         },
         child: Container(
           padding: EdgeInsets.all(12.w),
-          decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(12.r),
-              border: Border.all(color: AppColors.line)),
+          decoration:
+              BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(12.r), border: Border.all(color: AppColors.line)),
           child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
             CircleAvatar(
               radius: 13.r,
               backgroundColor: a ? AppColors.primary.withValues(alpha: 0.14) : AppColors.background,
-              child: Text(l['speaker'] as String? ?? '', style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w800, color: a ? AppColors.primary : AppColors.textSecondary)),
+              child: Text(l['speaker'] as String? ?? '',
+                  style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w800, color: a ? AppColors.primary : AppColors.textSecondary)),
             ),
             SizedBox(width: 10.w),
             Expanded(
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                LangText(text, language: language,
-                    style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+                LangText(text,
+                    language: language, style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
                 if (reading.isNotEmpty) Text(reading, style: TextStyle(fontSize: 13.sp, color: AppColors.textSecondary)),
                 SizedBox(height: 2.h),
                 Text(l['translation'] as String? ?? '', style: TextStyle(fontSize: 14.sp, color: AppColors.textSecondary)),

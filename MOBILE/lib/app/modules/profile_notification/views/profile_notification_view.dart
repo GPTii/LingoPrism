@@ -66,11 +66,11 @@ class ProfileNotificationView extends GetView<ProfileNotificationController> {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(22.r),
-        border: Border.fromBorderSide(BorderSide(color: AppColors.line)),),
+        border: Border.fromBorderSide(BorderSide(color: AppColors.line)),
+      ),
       child: Row(
         children: [
-          Icon(Icons.notifications_active_rounded,
-              color: AppColors.primary, size: 28.sp),
+          Icon(Icons.notifications_active_rounded, color: AppColors.primary, size: 28.sp),
           SizedBox(width: 12.w),
           Expanded(
             child: Text(
@@ -135,8 +135,7 @@ class ProfileNotificationView extends GetView<ProfileNotificationController> {
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              Icon(Icons.chevron_right_rounded,
-                  color: AppColors.primary, size: 24.sp),
+              Icon(Icons.chevron_right_rounded, color: AppColors.primary, size: 24.sp),
             ],
           ),
         ),
@@ -167,10 +166,7 @@ class ProfileNotificationView extends GetView<ProfileNotificationController> {
                   fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                 ),
               ),
-              trailing: isSelected
-                  ? Icon(Icons.check_circle_rounded,
-                      color: AppColors.primary, size: 22.sp)
-                  : null,
+              trailing: isSelected ? Icon(Icons.check_circle_rounded, color: AppColors.primary, size: 22.sp) : null,
               onTap: () => controller.updateFrequency(item),
             );
           }).toList(),

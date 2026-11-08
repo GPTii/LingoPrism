@@ -29,3 +29,7 @@ linter:
 
 # Additional information about this file can be found at
 # https://dart.dev/guides/language/analysis-options
+
+# dart format: same width the code is written in (repo-wide style: ../.editorconfig)
+formatter:
+  page_width: 140

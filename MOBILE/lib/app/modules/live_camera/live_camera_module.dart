@@ -117,7 +117,10 @@ class _LiveCameraViewState extends State<LiveCameraView> with WidgetsBindingObse
         title: const Text('Camera trực tiếp · thử nghiệm'),
       ),
       body: _error.isNotEmpty
-          ? Center(child: Padding(padding: EdgeInsets.all(24.w), child: Text(_error, textAlign: TextAlign.center, style: const TextStyle(color: Colors.white))))
+          ? Center(
+              child: Padding(
+                  padding: EdgeInsets.all(24.w),
+                  child: Text(_error, textAlign: TextAlign.center, style: const TextStyle(color: Colors.white))))
           : cam == null
               ? const Center(child: CircularProgressIndicator())
               : Column(children: [
@@ -139,7 +142,7 @@ class _LiveCameraViewState extends State<LiveCameraView> with WidgetsBindingObse
                     color: Colors.black,
                     padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 16.h),
                     child: Text(
-                      _boxes.isEmpty ? 'Hướng camera vào một đồ vật…' : 'Chạm vào tên để nghe · ${_ms} ms mỗi lần nhìn',
+                      _boxes.isEmpty ? 'Hướng camera vào một đồ vật…' : 'Chạm vào tên để nghe · $_ms ms mỗi lần nhìn',
                       textAlign: TextAlign.center,
                       style: TextStyle(color: Colors.white70, fontSize: 13.sp),
                     ),
@@ -168,7 +171,10 @@ class _LiveCameraViewState extends State<LiveCameraView> with WidgetsBindingObse
             decoration: BoxDecoration(color: AppColors.ink.withValues(alpha: 0.85), borderRadius: BorderRadius.circular(6)),
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
               Text(text,
-                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 15.sp,
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 15.sp,
                       locale: (w?.target?.language ?? '').startsWith('zh') ? localeFor(w!.target!.language) : null)),
               if (w != null)
                 Text('${w.meaningVi} · ${(b.confidence * 100).round()}%', style: TextStyle(color: Colors.white70, fontSize: 11.sp)),

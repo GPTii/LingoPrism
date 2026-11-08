@@ -36,8 +36,7 @@ class OfflineDetections {
     final raw = _box.read(_labelsKey);
     if (raw is! List) return {};
     return {
-      for (final r in raw.whereType<Map>())
-        asString(r['label']): Map<String, dynamic>.from(asMap(r['card'])),
+      for (final r in raw.whereType<Map>()) asString(r['label']): Map<String, dynamic>.from(asMap(r['card'])),
     };
   }
 

@@ -92,7 +92,9 @@ class VocabularyTopicView extends GetView<VocabularyTopicController> {
                               style: TextStyle(fontSize: 28.sp, fontWeight: FontWeight.w800, color: _fg, height: 1.1, letterSpacing: -0.6)),
                           SizedBox(height: 6.h),
                           Obx(() => Text(controller.countLabel,
-                              style: TextStyle(fontSize: 14.sp, color: AppColors.isDark ? Colors.white.withValues(alpha: 0.72) : AppColors.textSecondary))),
+                              style: TextStyle(
+                                  fontSize: 14.sp,
+                                  color: AppColors.isDark ? Colors.white.withValues(alpha: 0.72) : AppColors.textSecondary))),
                         ],
                       ),
                     ),
@@ -252,8 +254,7 @@ class _VocabularyCard extends StatelessWidget {
                     ),
                   ),
                   Container(
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                    padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
                     decoration: BoxDecoration(
                       color: _statusColor(item.status).withOpacity(0.15),
                       borderRadius: BorderRadius.circular(12.r),
@@ -339,7 +340,6 @@ class _ActionButton extends StatelessWidget {
     );
   }
 }
-
 
 /// The cards of a topic arrive one after another (only the first screenful, ease-out, no bounce);
 /// nothing moves with "reduce motion" on.

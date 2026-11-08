@@ -155,9 +155,7 @@ class LoginView extends GetView<LoginController> {
                                           suffixIcon: IconButton(
                                             onPressed: controller.togglePasswordVisibility,
                                             icon: Icon(
-                                              controller.isPasswordVisible
-                                                  ? Icons.visibility
-                                                  : Icons.visibility_off,
+                                              controller.isPasswordVisible ? Icons.visibility : Icons.visibility_off,
                                               color: AppColors.textSecondary,
                                             ),
                                           ),
@@ -210,13 +208,9 @@ class LoginView extends GetView<LoginController> {
                               child: Obx(() {
                                 final ctrl = Get.find<LoginController>();
                                 return ElevatedButton(
-                                  onPressed: ctrl.isLoading || !ctrl.canLogin
-                                      ? null
-                                      : ctrl.login,
+                                  onPressed: ctrl.isLoading || !ctrl.canLogin ? null : ctrl.login,
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: ctrl.canLogin && !ctrl.isLoading
-                                        ? AppColors.buttonActive
-                                        : AppColors.buttonDisabled,
+                                    backgroundColor: ctrl.canLogin && !ctrl.isLoading ? AppColors.buttonActive : AppColors.buttonDisabled,
                                     padding: EdgeInsets.symmetric(vertical: 16.h),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(12.r),

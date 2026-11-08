@@ -11,15 +11,10 @@ class PlatformDetector {
     // nhưng tránh việc auto coi thiết bị thật là emulator chỉ vì đang debug).
     const possibleKeys = ['ANDROID_PRODUCT', 'ANDROID_MODEL', 'ANDROID_HARDWARE'];
     final indicators = <String>[
-      for (final key in possibleKeys)
-        (Platform.environment[key] ?? '').toLowerCase(),
+      for (final key in possibleKeys) (Platform.environment[key] ?? '').toLowerCase(),
     ].where((e) => e.isNotEmpty).toList();
 
-    return indicators.any((v) =>
-        v.contains('sdk') ||
-        v.contains('emulator') ||
-        v.contains('gphone') ||
-        v.contains('generic'));
+    return indicators.any((v) => v.contains('sdk') || v.contains('emulator') || v.contains('gphone') || v.contains('generic'));
   }
 
   /// Kiểm tra xem có phải đang chạy trên iOS simulator không

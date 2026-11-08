@@ -119,7 +119,8 @@ class ProfileGuideView extends GetView<ProfileGuideController> {
             blurRadius: 18.r,
             offset: Offset(0, 10.h),
           ),
-        ],),
+        ],
+      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -130,8 +131,7 @@ class ProfileGuideView extends GetView<ProfileGuideController> {
               color: AppColors.surface,
               shape: BoxShape.circle,
             ),
-            child: Icon(Icons.school_rounded,
-                color: AppColors.primary, size: 28.sp),
+            child: Icon(Icons.school_rounded, color: AppColors.primary, size: 28.sp),
           ),
           SizedBox(width: 12.w),
           Expanded(
@@ -174,7 +174,8 @@ class ProfileGuideView extends GetView<ProfileGuideController> {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(16.r),
-        border: Border.fromBorderSide(BorderSide(color: AppColors.line)),),
+        border: Border.fromBorderSide(BorderSide(color: AppColors.line)),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -247,7 +248,8 @@ class ProfileGuideView extends GetView<ProfileGuideController> {
             blurRadius: 16.r,
             offset: Offset(0, 10.h),
           ),
-        ],),
+        ],
+      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

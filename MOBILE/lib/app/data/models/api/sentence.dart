@@ -31,8 +31,8 @@ class SentenceSource {
 
   String get label => url.isEmpty ? name : 'Câu #$id · $name · $license';
 
-  factory SentenceSource.fromJson(Map<String, dynamic> j) => SentenceSource(
-      name: asString(j['name']), id: asString(j['id']), url: asString(j['url']), license: asString(j['license']));
+  factory SentenceSource.fromJson(Map<String, dynamic> j) =>
+      SentenceSource(name: asString(j['name']), id: asString(j['id']), url: asString(j['url']), license: asString(j['license']));
 }
 
 class SentenceTranslation {

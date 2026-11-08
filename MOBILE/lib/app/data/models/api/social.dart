@@ -65,7 +65,14 @@ class Post {
 }
 
 class PostComment {
-  PostComment({required this.id, required this.author, this.kind = 'text', this.content = '', this.sticker = '', this.canDelete = false, required this.createdAt});
+  PostComment(
+      {required this.id,
+      required this.author,
+      this.kind = 'text',
+      this.content = '',
+      this.sticker = '',
+      this.canDelete = false,
+      required this.createdAt});
 
   final int id;
   final Author author;
@@ -91,13 +98,18 @@ class PostComment {
 /// Where I stand with someone: none · friends · outgoing (I asked) · incoming (they asked).
 enum FriendStatus { none, friends, outgoing, incoming }
 
-FriendStatus friendStatusFrom(dynamic v) =>
-    FriendStatus.values.firstWhere((s) => s.name == v, orElse: () => FriendStatus.none);
+FriendStatus friendStatusFrom(dynamic v) => FriendStatus.values.firstWhere((s) => s.name == v, orElse: () => FriendStatus.none);
 
 /// A learner in a list (search results, friends, requests) and where I stand with them.
 class Person {
-  Person({required this.author, this.bio = '', this.activeLanguage = 'en', this.friendStatus = FriendStatus.none,
-      this.friendRequestId, this.isFollowing = false, this.since});
+  Person(
+      {required this.author,
+      this.bio = '',
+      this.activeLanguage = 'en',
+      this.friendStatus = FriendStatus.none,
+      this.friendRequestId,
+      this.isFollowing = false,
+      this.since});
 
   final Author author;
   final String bio;
@@ -137,8 +149,17 @@ class FriendRequestItem {
 }
 
 class StudyGroup {
-  StudyGroup({required this.id, required this.name, this.description = '', this.icon = '', this.requireApproval = false,
-      this.memberCount = 0, this.myStatus, this.myRole, required this.createdAt, this.isPrivate = false});
+  StudyGroup(
+      {required this.id,
+      required this.name,
+      this.description = '',
+      this.icon = '',
+      this.requireApproval = false,
+      this.memberCount = 0,
+      this.myStatus,
+      this.myRole,
+      required this.createdAt,
+      this.isPrivate = false});
 
   final int id;
   final String name;
@@ -173,8 +194,14 @@ class StudyGroup {
 }
 
 class GroupMemberInfo {
-  GroupMemberInfo({required this.id, required this.user, required this.role, required this.status, this.requestMessage = '',
-      this.weeklyXp = 0, this.lifetimeXp = 0});
+  GroupMemberInfo(
+      {required this.id,
+      required this.user,
+      required this.role,
+      required this.status,
+      this.requestMessage = '',
+      this.weeklyXp = 0,
+      this.lifetimeXp = 0});
 
   final int weeklyXp;
   final int lifetimeXp;
@@ -197,8 +224,18 @@ class GroupMemberInfo {
 }
 
 class ChatMessage {
-  ChatMessage({required this.id, required this.userId, required this.displayName, this.kind = 'text', this.content = '',
-      this.sticker = '', this.badgeName, this.badgeIcon, this.clientId = '', required this.createdAt, this.pending = false,
+  ChatMessage(
+      {required this.id,
+      required this.userId,
+      required this.displayName,
+      this.kind = 'text',
+      this.content = '',
+      this.sticker = '',
+      this.badgeName,
+      this.badgeIcon,
+      this.clientId = '',
+      required this.createdAt,
+      this.pending = false,
       this.hearts = const []});
 
   final int id;
@@ -236,9 +273,23 @@ class ChatMessage {
 }
 
 class CommunityProfile {
-  CommunityProfile({required this.author, this.bio = '', this.friendStatus = FriendStatus.none, this.friendRequestId,
-      this.friendMessage = '', this.friends = 0, this.followers = 0, this.following = 0, this.posts = 0,
-      this.isFollowing = false, this.canMessage = false, this.blocked = false, this.lifetimeXp = 0, this.streak = 0, this.recentPosts = const [], this.groups = const []});
+  CommunityProfile(
+      {required this.author,
+      this.bio = '',
+      this.friendStatus = FriendStatus.none,
+      this.friendRequestId,
+      this.friendMessage = '',
+      this.friends = 0,
+      this.followers = 0,
+      this.following = 0,
+      this.posts = 0,
+      this.isFollowing = false,
+      this.canMessage = false,
+      this.blocked = false,
+      this.lifetimeXp = 0,
+      this.streak = 0,
+      this.recentPosts = const [],
+      this.groups = const []});
 
   final Author author;
   final String bio;
@@ -252,8 +303,10 @@ class CommunityProfile {
   final int following;
   final int posts;
   final bool isFollowing;
+
   /// both follow each other and neither is a child account
   final bool canMessage;
+
   /// I blocked this person
   final bool blocked;
   final int lifetimeXp;

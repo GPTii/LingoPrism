@@ -85,10 +85,10 @@ class SurveyController extends GetxController {
   // Validation for each step
   bool canContinueStep1() {
     return _name.value.isNotEmpty &&
-           _birthDay.value.isNotEmpty &&
-           _birthMonth.value.isNotEmpty &&
-           _birthYear.value.isNotEmpty &&
-           _gender.value.isNotEmpty;
+        _birthDay.value.isNotEmpty &&
+        _birthMonth.value.isNotEmpty &&
+        _birthYear.value.isNotEmpty &&
+        _gender.value.isNotEmpty;
   }
 
   bool canContinueStep2() {
@@ -167,7 +167,8 @@ class SurveyController extends GetxController {
       await AuthService.to.updateProfile({
         if (name.trim().isNotEmpty) 'display_name': name.trim(),
         if (birthday != null) 'birth_date': birthday.toIso8601String().substring(0, 10),
-        if (gender.isNotEmpty) 'gender': {'Nam': 'male', 'Nữ': 'female'}[gender] ?? (['male', 'female'].contains(gender) ? gender : 'other'),
+        if (gender.isNotEmpty)
+          'gender': {'Nam': 'male', 'Nữ': 'female'}[gender] ?? (['male', 'female'].contains(gender) ? gender : 'other'),
         'purpose': purposes[_purpose.value] ?? 'none',
         'daily_minutes': minutes,
         'active_language': parts.first,

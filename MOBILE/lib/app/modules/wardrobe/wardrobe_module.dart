@@ -291,7 +291,13 @@ class _PieceCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.surface,
           borderRadius: BorderRadius.circular(16.r),
-          border: Border.all(color: picked ? AppColors.primary : on ? AppColors.beamMint : AppColors.line, width: picked || on ? 2 : 1),
+          border: Border.all(
+              color: picked
+                  ? AppColors.primary
+                  : on
+                      ? AppColors.beamMint
+                      : AppColors.line,
+              width: picked || on ? 2 : 1),
         ),
         child: Column(children: [
           Stack(children: [
@@ -304,7 +310,10 @@ class _PieceCard extends StatelessWidget {
               ),
           ]),
           SizedBox(height: 4.h),
-          Text(o.name, maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center,
+          Text(o.name,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
               style: TextStyle(fontSize: 12.5.sp, fontWeight: FontWeight.w700, color: AppColors.textPrimary, height: 1.15)),
           const Spacer(),
           status,

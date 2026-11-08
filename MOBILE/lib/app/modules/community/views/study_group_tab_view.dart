@@ -36,9 +36,7 @@ class StudyGroupTabView extends StatelessWidget {
         controller: controller,
         onGroupTap: (context, group) => _onGroupTap(context, group),
         onLeaderTap: (group) {
-          final currentUserId = Get.isRegistered<AuthService>()
-              ? AuthService.to.currentUserId
-              : '';
+          final currentUserId = Get.isRegistered<AuthService>() ? AuthService.to.currentUserId : '';
           if (group.requireApproval && currentUserId == group.leaderId) {
             controller.showPendingJoinRequestsSheet(context, group.groupId);
           } else {
@@ -188,8 +186,7 @@ class StudyGroupList extends StatelessWidget {
   });
 
   final CommunityController controller;
-  final void Function(BuildContext context, CommunityStudyGroup group)
-      onGroupTap;
+  final void Function(BuildContext context, CommunityStudyGroup group) onGroupTap;
   final ValueChanged<CommunityStudyGroup> onLeaderTap;
 
   @override
@@ -250,7 +247,8 @@ class GroupSearchBar extends StatelessWidget {
             decoration: BoxDecoration(
               color: AppColors.surface,
               borderRadius: BorderRadius.circular(28.r),
-              border: Border.fromBorderSide(BorderSide(color: AppColors.line)),),
+              border: Border.fromBorderSide(BorderSide(color: AppColors.line)),
+            ),
             alignment: Alignment.center,
             child: Obx(() {
               final hasText = controller.groupSearchQuery.value.isNotEmpty;
@@ -307,7 +305,8 @@ class GroupSearchBar extends StatelessWidget {
                   blurRadius: 14.r,
                   offset: Offset(0, 8.h),
                 ),
-              ],),
+              ],
+            ),
             child: Icon(
               Icons.add_rounded,
               color: Colors.white,
@@ -398,7 +397,8 @@ class GroupHeaderCard extends StatelessWidget {
             blurRadius: 24.r,
             offset: Offset(0, 14.h),
           ),
-        ],),
+        ],
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -426,20 +426,16 @@ class GroupHeaderCard extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Obx(() {
-                            final count = controller.incomingJoinRequests
-                                .where((r) => r.groupId == details.group.groupId)
-                                .length;
+                            final count = controller.incomingJoinRequests.where((r) => r.groupId == details.group.groupId).length;
                             return Stack(
                               clipBehavior: Clip.none,
                               children: [
                                 _HeaderActionButton(
                                   icon: Icons.notifications_none_outlined,
                                   onTap: onNotificationsTap ?? () {},
-                                  backgroundColor:
-                                      Colors.white.withValues(alpha: 0.2),
+                                  backgroundColor: Colors.white.withValues(alpha: 0.2),
                                   iconColor: AppColors.primary,
-                                  borderColor:
-                                      Colors.white.withValues(alpha: 0.55),
+                                  borderColor: Colors.white.withValues(alpha: 0.55),
                                 ),
                                 if (count > 0)
                                   Positioned(
@@ -452,8 +448,7 @@ class GroupHeaderCard extends StatelessWidget {
                                       ),
                                       decoration: BoxDecoration(
                                         color: AppColors.error,
-                                        borderRadius:
-                                            BorderRadius.circular(12.r),
+                                        borderRadius: BorderRadius.circular(12.r),
                                         border: Border.all(
                                           color: Colors.white,
                                           width: 1.2,
@@ -476,21 +471,17 @@ class GroupHeaderCard extends StatelessWidget {
                           _HeaderActionButton(
                             icon: Icons.chat_bubble_outline_rounded,
                             onTap: onOpenChat,
-                            backgroundColor:
-                                Colors.white.withValues(alpha: 0.2),
+                            backgroundColor: Colors.white.withValues(alpha: 0.2),
                             iconColor: AppColors.primary,
-                            borderColor:
-                                Colors.white.withValues(alpha: 0.55),
+                            borderColor: Colors.white.withValues(alpha: 0.55),
                           ),
                           SizedBox(width: 12.w),
                           _HeaderActionButton(
                             icon: Icons.logout_rounded,
                             onTap: onLeave,
-                            backgroundColor:
-                                Colors.white.withValues(alpha: 0.2),
+                            backgroundColor: Colors.white.withValues(alpha: 0.2),
                             iconColor: AppColors.error,
-                            borderColor:
-                                Colors.white.withValues(alpha: 0.55),
+                            borderColor: Colors.white.withValues(alpha: 0.55),
                           ),
                         ],
                       ),
@@ -567,7 +558,8 @@ class _HeaderActionButton extends StatelessWidget {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: resolvedBackground,
-          border: Border.all(color: resolvedBorder, width: 1.4),),
+          border: Border.all(color: resolvedBorder, width: 1.4),
+        ),
         alignment: Alignment.center,
         child: Icon(icon, color: resolvedIcon, size: 20.sp),
       ),
@@ -624,7 +616,8 @@ class MilestoneOverview extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(28.r),
-        border: Border.all(color: AppColors.primaryLight, width: 1.2),),
+        border: Border.all(color: AppColors.primaryLight, width: 1.2),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -728,7 +721,8 @@ class _PointsSummary extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: AppColors.surface,
-              border: Border.fromBorderSide(BorderSide(color: AppColors.line)),),
+              border: Border.fromBorderSide(BorderSide(color: AppColors.line)),
+            ),
             alignment: Alignment.center,
             child: Image.asset(
               'assets/brand/icons/xp.png',
@@ -825,9 +819,7 @@ class ProgressStep extends StatelessWidget {
   Widget build(BuildContext context) {
     final isCurrent = isNext && !_isUnlocked;
     final nhomIndex = (index % 5) + 1;
-    final imagePath = _isUnlocked
-        ? 'assets/brand/group/group_$nhomIndex.png'
-        : 'assets/brand/rank/rank_locked.png';
+    final imagePath = _isUnlocked ? 'assets/brand/group/group_$nhomIndex.png' : 'assets/brand/rank/rank_locked.png';
     final textColor = _isUnlocked ? AppColors.primary : AppColors.textSecondary;
     final textWeight = _isUnlocked || isCurrent ? FontWeight.w700 : FontWeight.w600;
 
@@ -844,7 +836,8 @@ class ProgressStep extends StatelessWidget {
             border: Border.all(
               color: _isUnlocked ? Colors.white : AppColors.primaryTint,
               width: 1.1,
-            ),),
+            ),
+          ),
           padding: EdgeInsets.all(12.w),
           child: Image.asset(
             imagePath,
@@ -905,20 +898,20 @@ class LeaderboardList extends StatelessWidget {
       limit: 10,
       label: 'Xem tất cả thành viên',
       builder: (_, shown) => ListView.separated(
-      physics: const NeverScrollableScrollPhysics(),
-      shrinkWrap: true,
-      itemCount: shown,
-      padding: EdgeInsets.only(bottom: 24.h),
-      separatorBuilder: (_, __) => SizedBox(height: 12.h),
-      itemBuilder: (context, index) {
-        final member = members[index];
-        return LeaderboardTile(
-          member: member,
-          index: index,
-          onTap: () => onMemberTap(member),
-        );
-      },
-    ),
+        physics: const NeverScrollableScrollPhysics(),
+        shrinkWrap: true,
+        itemCount: shown,
+        padding: EdgeInsets.only(bottom: 24.h),
+        separatorBuilder: (_, __) => SizedBox(height: 12.h),
+        itemBuilder: (context, index) {
+          final member = members[index];
+          return LeaderboardTile(
+            member: member,
+            index: index,
+            onTap: () => onMemberTap(member),
+          );
+        },
+      ),
     );
   }
 }
@@ -940,14 +933,10 @@ class LeaderboardTile extends StatelessWidget {
     final colors = _resolveColors();
     final isHighlighted = member.isHighlighted;
     final borderColor = isHighlighted ? AppColors.primary : colors.border;
-    final shadowColor = isHighlighted
-        ? AppColors.primary.withValues(alpha: 0.28)
-        : colors.shadow.withValues(alpha: 0.24);
-  // badgeBackground not used directly (kept for future styling)
+    // badgeBackground not used directly (kept for future styling)
 
     Widget buildAvatar() {
-      final avatarBorderColor =
-          isHighlighted ? AppColors.primary : Colors.white.withValues(alpha: 0.7);
+      final avatarBorderColor = isHighlighted ? AppColors.primary : Colors.white.withValues(alpha: 0.7);
       final avatarUrl = member.avatarUrl.trim();
 
       Widget avatarContent;
@@ -1052,7 +1041,8 @@ class LeaderboardTile extends StatelessWidget {
           border: Border.all(
             color: colors.primary.withValues(alpha: 0.12),
             width: 1,
-          ),),
+          ),
+        ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -1076,8 +1066,6 @@ class LeaderboardTile extends StatelessWidget {
       );
     }
 
-  
-
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -1085,7 +1073,8 @@ class LeaderboardTile extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(24.r),
           color: (colors.background).first,
-          border: Border.all(color: borderColor, width: isHighlighted ? 1.6 : 1.2),),
+          border: Border.all(color: borderColor, width: isHighlighted ? 1.6 : 1.2),
+        ),
         child: Row(
           children: [
             buildRankBadge(),
@@ -1133,9 +1122,6 @@ class LeaderboardTile extends StatelessWidget {
                   ),
                   SizedBox(height: 10.h),
                   buildPointPill(),
-                      
-                    
-                  
                 ],
               ),
             ),
@@ -1210,7 +1196,8 @@ class StudyGroupCard extends StatelessWidget {
           border: Border.all(
             color: AppColors.primaryLight,
             width: 1.2,
-          ),),
+          ),
+        ),
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
         child: Row(
           children: [
@@ -1248,8 +1235,7 @@ class StudyGroupCard extends StatelessWidget {
                             vertical: 4.h,
                           ),
                           decoration: BoxDecoration(
-                            color:
-                                AppColors.primary.withValues(alpha: 0.1),
+                            color: AppColors.primary.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(16.r),
                           ),
                           child: Text(
@@ -1297,7 +1283,8 @@ class StudyGroupCard extends StatelessWidget {
                 border: Border.all(
                   color: AppColors.primary,
                   width: 1.6,
-                ),),
+                ),
+              ),
               alignment: Alignment.center,
               child: Text(
                 '${group.memberCount}',

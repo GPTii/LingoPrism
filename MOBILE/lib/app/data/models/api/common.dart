@@ -38,17 +38,26 @@ class Author {
 
   String get avatarOrDefault => (avatar == null || avatar!.isEmpty) ? defaultAvatar : avatar!;
 
-  factory Author.fromJson(Map<String, dynamic> j) =>
-      Author(id: asInt(j['id']), displayName: asString(j['display_name'], 'Người học LingoPrism'), avatar: _brandOrNull(j['avatar'] as String?),
-          publicId: asString(j['public_id']), mascot: MascotLook.fromJson(j['mascot']));
+  factory Author.fromJson(Map<String, dynamic> j) => Author(
+      id: asInt(j['id']),
+      displayName: asString(j['display_name'], 'Người học LingoPrism'),
+      avatar: _brandOrNull(j['avatar'] as String?),
+      publicId: asString(j['public_id']),
+      mascot: MascotLook.fromJson(j['mascot']));
 }
 
 String? _brandOrNull(String? path) => path == null ? null : brandAsset(path);
 
 /// What someone's Prismo wears (one outfit code per slot, '' for nothing) and whether it stands in for their photo.
 class MascotLook {
-  const MascotLook({this.name = 'Prismo', this.asAvatar = false, this.background = '', this.hat = '', this.glasses = '',
-      this.neck = '', this.hand = ''});
+  const MascotLook(
+      {this.name = 'Prismo',
+      this.asAvatar = false,
+      this.background = '',
+      this.hat = '',
+      this.glasses = '',
+      this.neck = '',
+      this.hand = ''});
 
   final String name;
   final bool asAvatar;

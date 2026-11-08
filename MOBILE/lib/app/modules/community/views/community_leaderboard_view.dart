@@ -100,40 +100,40 @@ class CommunityLeaderboardView extends StatelessWidget {
               ),
             )
           else ...[
-          _LeagueHeader(league: league),
-          SizedBox(height: 18.h),
-          Expanded(
-            child: ListView(
-              padding: EdgeInsets.only(bottom: 24.h),
-              // Performance optimizations for smooth scrolling
-              cacheExtent: _listCacheExtent,
-              physics: const BouncingScrollPhysics(
-                parent: AlwaysScrollableScrollPhysics(),
+            _LeagueHeader(league: league),
+            SizedBox(height: 18.h),
+            Expanded(
+              child: ListView(
+                padding: EdgeInsets.only(bottom: 24.h),
+                // Performance optimizations for smooth scrolling
+                cacheExtent: _listCacheExtent,
+                physics: const BouncingScrollPhysics(
+                  parent: AlwaysScrollableScrollPhysics(),
+                ),
+                children: [
+                  _LeagueSection(
+                    title: 'Top Thăng Hạng',
+                    color: AppColors.tint(const Color(0xFFBFF7AF)),
+                    participants: controller.promotionLeaders,
+                    onParticipantTap: controller.openLeaderboardProfile,
+                  ),
+                  SizedBox(height: 16.h),
+                  _LeagueSection(
+                    title: 'Top An Toàn',
+                    color: AppColors.tint(const Color(0xFFFFF3B0)),
+                    participants: controller.safeLeaders,
+                    onParticipantTap: controller.openLeaderboardProfile,
+                  ),
+                  SizedBox(height: 16.h),
+                  _LeagueSection(
+                    title: 'Top Tụt Hạng',
+                    color: AppColors.tint(const Color(0xFFFFC2C0)),
+                    participants: controller.demotionLeaders,
+                    onParticipantTap: controller.openLeaderboardProfile,
+                  ),
+                ],
               ),
-              children: [
-                _LeagueSection(
-                  title: 'Top Thăng Hạng',
-                  color: AppColors.tint(const Color(0xFFBFF7AF)),
-                  participants: controller.promotionLeaders,
-                  onParticipantTap: controller.openLeaderboardProfile,
-                ),
-                SizedBox(height: 16.h),
-                _LeagueSection(
-                  title: 'Top An Toàn',
-                  color: AppColors.tint(const Color(0xFFFFF3B0)),
-                  participants: controller.safeLeaders,
-                  onParticipantTap: controller.openLeaderboardProfile,
-                ),
-                SizedBox(height: 16.h),
-                _LeagueSection(
-                  title: 'Top Tụt Hạng',
-                  color: AppColors.tint(const Color(0xFFFFC2C0)),
-                  participants: controller.demotionLeaders,
-                  onParticipantTap: controller.openLeaderboardProfile,
-                ),
-              ],
             ),
-          ),
           ],
         ],
       );
@@ -180,16 +180,15 @@ class _LeagueHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     // Enhanced null safety for rank icon resolution
     final rankIcon = league.rankIcon.trim();
-    final currentRankIndex = rankIcon.isNotEmpty
-        ? _rankAssets.indexOf(rankIcon).clamp(0, _rankAssets.length - 1)
-        : 0;
+    final currentRankIndex = rankIcon.isNotEmpty ? _rankAssets.indexOf(rankIcon).clamp(0, _rankAssets.length - 1) : 0;
 
     return Container(
       padding: EdgeInsets.all(20.w),
       decoration: BoxDecoration(
         color: AppColors.primarySoft,
         borderRadius: BorderRadius.circular(28.r),
-        border: Border.all(color: AppColors.primaryTint, width: 1.2),),
+        border: Border.all(color: AppColors.primaryTint, width: 1.2),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -241,47 +240,47 @@ class _LeagueHeader extends StatelessWidget {
                   final bool isUnlocked = index <= currentRankIndex;
                   // Enhanced comparison for current rank with null safety
                   final bool isCurrent = asset == rankIcon && rankIcon.isNotEmpty;
-                  final displayAsset =
-                      isUnlocked ? asset : 'assets/brand/rank/rank_locked.png';
+                  final displayAsset = isUnlocked ? asset : 'assets/brand/rank/rank_locked.png';
                   return RepaintBoundary(
                     key: ValueKey('rank_${index}_$isCurrent'),
                     child: Container(
-                    width: 88.w,
-                    margin: EdgeInsets.only(right: index == _rankAssets.length - 1 ? 0 : 14.w),
-                    padding: EdgeInsets.all(14.w),
-                    decoration: BoxDecoration(
-                      color: AppColors.surface,
-                      borderRadius: BorderRadius.circular(26.r),
-                      border: Border.all(
-                        color: isCurrent ? AppColors.primary : Colors.transparent,
-                        width: 2.w,
-                      ),),
-                    child: Opacity(
-                      opacity: isUnlocked ? 1 : 0.35,
-                      child: Image.asset(
-                        displayAsset,
-                        width: 56.w,
-                        height: 56.w,
-                        fit: BoxFit.contain,
-                        // Enhanced error handling for rank assets
-                        errorBuilder: (context, error, stackTrace) {
-                          debugPrint('Failed to load rank asset: $displayAsset - $error');
-                          return Container(
-                            width: 56.w,
-                            height: 56.w,
-                            decoration: BoxDecoration(
-                              color: AppColors.line,
-                              borderRadius: BorderRadius.circular(8.r),
-                            ),
-                            child: Icon(
-                              Icons.emoji_events,
-                              size: 28.w,
-                              color: AppColors.textHint,
-                            ),
-                          );
-                        },
+                      width: 88.w,
+                      margin: EdgeInsets.only(right: index == _rankAssets.length - 1 ? 0 : 14.w),
+                      padding: EdgeInsets.all(14.w),
+                      decoration: BoxDecoration(
+                        color: AppColors.surface,
+                        borderRadius: BorderRadius.circular(26.r),
+                        border: Border.all(
+                          color: isCurrent ? AppColors.primary : Colors.transparent,
+                          width: 2.w,
+                        ),
                       ),
-                    ),
+                      child: Opacity(
+                        opacity: isUnlocked ? 1 : 0.35,
+                        child: Image.asset(
+                          displayAsset,
+                          width: 56.w,
+                          height: 56.w,
+                          fit: BoxFit.contain,
+                          // Enhanced error handling for rank assets
+                          errorBuilder: (context, error, stackTrace) {
+                            debugPrint('Failed to load rank asset: $displayAsset - $error');
+                            return Container(
+                              width: 56.w,
+                              height: 56.w,
+                              decoration: BoxDecoration(
+                                color: AppColors.line,
+                                borderRadius: BorderRadius.circular(8.r),
+                              ),
+                              child: Icon(
+                                Icons.emoji_events,
+                                size: 28.w,
+                                color: AppColors.textHint,
+                              ),
+                            );
+                          },
+                        ),
+                      ),
                     ),
                   );
                 }),
@@ -331,7 +330,8 @@ class _LeagueSection extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(28.r),
         color: AppColors.surface,
-        border: Border.fromBorderSide(BorderSide(color: AppColors.line)),),
+        border: Border.fromBorderSide(BorderSide(color: AppColors.line)),
+      ),
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 18.h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -563,7 +563,6 @@ class _LeagueParticipantTile extends StatelessWidget {
       if (_fileExistsSync(file)) {
         return FileImage(file);
       }
-
     } catch (e) {
       // Log error for debugging but return placeholder
       debugPrint('Avatar provider error for URL "$trimmed": $e');
@@ -635,7 +634,8 @@ class _LeagueParticipantTile extends StatelessWidget {
     return BoxDecoration(
       borderRadius: borderRadius,
       color: const Color(0xFFFFE066),
-      border: Border.all(color: const Color(0xFFFFC107), width: 1.6),);
+      border: Border.all(color: const Color(0xFFFFC107), width: 1.6),
+    );
   }
 
   /// Silver medal decoration for 2nd place
@@ -643,7 +643,8 @@ class _LeagueParticipantTile extends StatelessWidget {
     return BoxDecoration(
       borderRadius: borderRadius,
       color: AppColors.line,
-      border: Border.all(color: AppColors.textHint, width: 1.6),);
+      border: Border.all(color: AppColors.textHint, width: 1.6),
+    );
   }
 
   /// Bronze medal decoration for 3rd place
@@ -651,7 +652,8 @@ class _LeagueParticipantTile extends StatelessWidget {
     return BoxDecoration(
       borderRadius: borderRadius,
       color: AppColors.tint(const Color(0xFFFFD7B5)),
-      border: Border.all(color: const Color(0xFFFFA64D), width: 1.6),);
+      border: Border.all(color: const Color(0xFFFFA64D), width: 1.6),
+    );
   }
 
   /// Default decoration for other ranks
@@ -662,6 +664,7 @@ class _LeagueParticipantTile extends StatelessWidget {
       border: Border.all(
         color: _borderColor,
         width: 1.4,
-      ),);
+      ),
+    );
   }
 }

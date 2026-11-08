@@ -44,8 +44,7 @@ class SplashView extends GetView<SplashController> {
       ).animate(delay: 650.ms).fadeIn(duration: 380.ms).moveY(begin: 14, end: 0, curve: Curves.easeOutBack, duration: 480.ms);
 
   Widget _error() => Column(mainAxisSize: MainAxisSize.min, children: [
-        Text(controller.errorMessage,
-            textAlign: TextAlign.center, style: const TextStyle(color: Colors.white, fontSize: 15, height: 1.4)),
+        Text(controller.errorMessage, textAlign: TextAlign.center, style: const TextStyle(color: Colors.white, fontSize: 15, height: 1.4)),
         const SizedBox(height: 16),
         FilledButton(
           onPressed: controller.retry,

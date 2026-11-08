@@ -23,7 +23,8 @@ class TournamentNoticeBanner extends StatelessWidget {
             blurRadius: 18.r,
             offset: Offset(0, 10.h),
           ),
-        ],),
+        ],
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

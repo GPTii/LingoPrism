@@ -46,9 +46,8 @@ class LearningWord {
     return LearningWord(
       vocabularyId: c.id.toString(),
       word: c.text,
-      translation: c.isVietnameseTarget
-          ? (c.emoji.isNotEmpty ? c.emoji : '🔊')
-          : (c.meaningVi.isNotEmpty ? c.meaningVi : (c.english ?? '')),
+      translation:
+          c.isVietnameseTarget ? (c.emoji.isNotEmpty ? c.emoji : '🔊') : (c.meaningVi.isNotEmpty ? c.meaningVi : (c.english ?? '')),
       personalWordId: item.personalWordId.toString(),
       phonetic: c.target?.reading,
       status: c.personal?.status,
@@ -98,8 +97,7 @@ class RoundThreeSummary {
 
   int get firstTryAccuracyPercent => total == 0 ? 0 : ((firstTryCorrect * 100) / total).round();
 
-  List<RoundThreeResult> get difficultResults =>
-      results.where((r) => r.firstTryCorrect == false || r.firstTryCorrect == null).toList();
+  List<RoundThreeResult> get difficultResults => results.where((r) => r.firstTryCorrect == false || r.firstTryCorrect == null).toList();
 
   RoundThreeSummary copyWith({int? xpEarned, int? scalesEarned}) => RoundThreeSummary(
         total: total,
@@ -275,7 +273,8 @@ class LearningSessionController extends GetxController {
     required bool isCorrect,
   }) {
     final key = word.personalWordId ?? word.vocabularyId;
-    _roundThreeResults.putIfAbsent(key, () => RoundThreeResult(word))
+    _roundThreeResults
+        .putIfAbsent(key, () => RoundThreeResult(word))
         .recordAttempt(questionType: questionType, isFirstAttempt: isFirstAttempt, isCorrect: isCorrect);
     final s = _session;
     if (s == null || word.personalWordId == null) return;
@@ -301,8 +300,13 @@ class LearningSessionController extends GetxController {
   }
 
   /// XP is computed by the server when the session is finished.
-  Future<void> awardXp({required int amount, required String sourceType, required String action, int wordsCount = 1,
-      Map<String, dynamic>? metadata, String? sourceId}) async {}
+  Future<void> awardXp(
+      {required int amount,
+      required String sourceType,
+      required String action,
+      int wordsCount = 1,
+      Map<String, dynamic>? metadata,
+      String? sourceId}) async {}
 
   Future<RoundThreeSummary> finalizeRoundThree() async {
     final summary = buildRoundThreeSummary();

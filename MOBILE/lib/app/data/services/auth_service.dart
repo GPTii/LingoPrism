@@ -174,7 +174,8 @@ class AuthService extends GetxService {
     }
   }
 
-  Future<Map<String, dynamic>> changePassword({required String currentPassword, required String newPassword, String? confirmPassword}) async {
+  Future<Map<String, dynamic>> changePassword(
+      {required String currentPassword, required String newPassword, String? confirmPassword}) async {
     if (currentPassword.isEmpty || newPassword.isEmpty) return {'success': false, 'message': 'Vui lòng nhập đầy đủ thông tin'};
     if (confirmPassword != null && confirmPassword != newPassword) {
       return {'success': false, 'message': 'Xác nhận mật khẩu không khớp'};

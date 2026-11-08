@@ -44,10 +44,7 @@ class _ChatVoiceToolsState extends State<ChatVoiceTools> {
   @override
   void initState() {
     super.initState();
-    _canTranslate ??= ApiClient.to
-        .get<dynamic>('/ai/status/')
-        .then((d) => d is Map && d['translate'] == true)
-        .catchError((_) => false);
+    _canTranslate ??= ApiClient.to.get<dynamic>('/ai/status/').then((d) => d is Map && d['translate'] == true).catchError((_) => false);
     _box.addListener(_changed);
   }
 
@@ -109,8 +106,8 @@ class _ChatVoiceToolsState extends State<ChatVoiceTools> {
     }
     setState(() => _busy = true);
     try {
-      final d = Map<String, dynamic>.from(await ApiClient.to
-          .post<dynamic>('/translate/', data: {'text': original, 'source': 'auto', 'target': target}) as Map);
+      final d = Map<String, dynamic>.from(
+          await ApiClient.to.post<dynamic>('/translate/', data: {'text': original, 'source': 'auto', 'target': target}) as Map);
       final result = d['translation'] as String? ?? '';
       _box.value = TextEditingValue(text: result, selection: TextSelection.collapsed(offset: result.length));
       _done = (original: original, result: result, target: target, reading: d['reading'] as String? ?? '');
@@ -137,14 +134,11 @@ class _ChatVoiceToolsState extends State<ChatVoiceTools> {
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
                   decoration: BoxDecoration(
-                      color: AppColors.surface,
-                      borderRadius: BorderRadius.circular(4.r),
-                      border: Border.all(color: AppColors.line)),
+                      color: AppColors.surface, borderRadius: BorderRadius.circular(4.r), border: Border.all(color: AppColors.line)),
                   child: Text('Bản dịch máy', style: small.copyWith(fontWeight: FontWeight.w700)),
                 ),
                 Text('sang ${_label(done.target)}', style: small),
-                if (done.reading.isNotEmpty)
-                  Text('· ${done.reading}', style: small.copyWith(color: AppColors.textPrimary)),
+                if (done.reading.isNotEmpty) Text('· ${done.reading}', style: small.copyWith(color: AppColors.textPrimary)),
                 InkWell(
                   onTap: () {
                     _box.text = done.original;
@@ -193,8 +187,7 @@ class _ChatVoiceToolsState extends State<ChatVoiceTools> {
                 tooltip: 'Dịch tin nhắn trước khi gửi',
                 initialValue: _lastTarget,
                 onSelected: _translate,
-                itemBuilder: (_) =>
-                    [for (final l in _langs) PopupMenuItem(value: l.$1, child: Text('Dịch sang ${l.$2}'))],
+                itemBuilder: (_) => [for (final l in _langs) PopupMenuItem(value: l.$1, child: Text('Dịch sang ${l.$2}'))],
                 child: Padding(
                   padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
                   child: Row(mainAxisSize: MainAxisSize.min, children: [

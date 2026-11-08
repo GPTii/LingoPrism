@@ -15,7 +15,11 @@ class SpeakScore {
   final int score; // 0–100
   final String heard;
   final List<(String, bool)> units; // each unit of the expected text: heard right or not
-  String get verdict => score >= 90 ? 'right' : score >= 50 ? 'close' : 'wrong';
+  String get verdict => score >= 90
+      ? 'right'
+      : score >= 50
+          ? 'close'
+          : 'wrong';
 }
 
 String _normalise(String text, String language) {
@@ -163,7 +167,8 @@ class _SpeakCheckState extends State<SpeakCheck> {
                 ),
               ),
           ]),
-          style: TextStyle(fontSize: 22.sp, fontWeight: FontWeight.w700, locale: widget.language.startsWith('zh') ? localeFor(widget.language) : null),
+          style: TextStyle(
+              fontSize: 22.sp, fontWeight: FontWeight.w700, locale: widget.language.startsWith('zh') ? localeFor(widget.language) : null),
         ),
         if (r.verdict != 'right' && r.heard.isNotEmpty)
           Text('Máy nghe thành: ${r.heard}', style: TextStyle(fontSize: 13.sp, color: AppColors.textSecondary)),

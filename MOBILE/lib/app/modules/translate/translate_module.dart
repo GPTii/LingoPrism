@@ -82,8 +82,8 @@ class _TranslateViewState extends State<TranslateView> {
       _error = '';
     });
     try {
-      final d = await ApiClient.to.post<dynamic>('/translate/',
-          data: {'text': t, 'source': source ?? _source, 'target': target ?? _target});
+      final d =
+          await ApiClient.to.post<dynamic>('/translate/', data: {'text': t, 'source': source ?? _source, 'target': target ?? _target});
       if (mounted) setState(() => _out = Map<String, dynamic>.from(d as Map));
     } catch (e) {
       if (mounted) setState(() => _error = ApiClient.toApiException(e).message);
@@ -216,7 +216,8 @@ class _TranslateViewState extends State<TranslateView> {
               _resultCard(),
               if (_out != null) ...[
                 SizedBox(height: 10.h),
-                Text('Bản dịch do AI viết, có thể chưa chính xác và không được dùng làm bài học. '
+                Text(
+                    'Bản dịch do AI viết, có thể chưa chính xác và không được dùng làm bài học. '
                     'Chỉ những từ đã kiểm duyệt bên dưới mới lưu được vào thẻ học.',
                     style: TextStyle(fontSize: 12.sp, color: AppColors.textSecondary)),
                 ..._words(),
@@ -245,7 +246,8 @@ class _TranslateViewState extends State<TranslateView> {
           DropdownMenuItem(
             value: l.$1,
             enabled: l.$1 != other && !(_zh(l.$1) && _zh(other)),
-            child: Text(l.$2, overflow: TextOverflow.ellipsis,
+            child: Text(l.$2,
+                overflow: TextOverflow.ellipsis,
                 style: TextStyle(color: l.$1 != other && !(_zh(l.$1) && _zh(other)) ? null : AppColors.textSecondary)),
           ),
       ],
@@ -340,10 +342,9 @@ class _TranslateViewState extends State<TranslateView> {
             const Spacer(),
             Container(
               padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
-              decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(6.r),
-                  border: Border.all(color: AppColors.line)),
-              child: Text('Bản dịch máy',
-                  style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w700, color: AppColors.textSecondary)),
+              decoration: BoxDecoration(
+                  color: AppColors.surface, borderRadius: BorderRadius.circular(6.r), border: Border.all(color: AppColors.line)),
+              child: Text('Bản dịch máy', style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w700, color: AppColors.textSecondary)),
             ),
           ],
         ]),
@@ -356,8 +357,7 @@ class _TranslateViewState extends State<TranslateView> {
     if (words.isEmpty) return const [];
     return [
       SizedBox(height: 16.h),
-      Text('Từ đã kiểm duyệt trong câu',
-          style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+      Text('Từ đã kiểm duyệt trong câu', style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
       SizedBox(height: 8.h),
       for (final w in words)
         Container(
@@ -371,7 +371,8 @@ class _TranslateViewState extends State<TranslateView> {
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Row(children: [
                     Flexible(
-                      child: LangText(w['text'] as String, language: w['language'] as String,
+                      child: LangText(w['text'] as String,
+                          language: w['language'] as String,
                           style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
                     ),
                     SizedBox(width: 6.w),
@@ -379,8 +380,7 @@ class _TranslateViewState extends State<TranslateView> {
                   ]),
                   Text(
                     [
-                      if ((w['reading'] as String? ?? '').isNotEmpty)
-                        w['language'] == 'en' ? '/${w['reading']}/' : w['reading'] as String,
+                      if ((w['reading'] as String? ?? '').isNotEmpty) w['language'] == 'en' ? '/${w['reading']}/' : w['reading'] as String,
                       w['meaning_vi'] as String? ?? '',
                     ].where((s) => s.isNotEmpty).join(' · '),
                     maxLines: 2,

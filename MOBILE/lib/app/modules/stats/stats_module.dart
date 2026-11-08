@@ -23,8 +23,7 @@ class _StatsViewState extends State<StatsView> {
   int _days = 30;
   late Future<Map<String, dynamic>> _future = _load();
 
-  Future<Map<String, dynamic>> _load() async =>
-      asMap(await ApiClient.to.get('/stats/learning/', query: {'days': _days}));
+  Future<Map<String, dynamic>> _load() async => asMap(await ApiClient.to.get('/stats/learning/', query: {'days': _days}));
 
   void _setDays(int d) => setState(() {
         _days = d;
@@ -73,7 +72,8 @@ class _StatsViewState extends State<StatsView> {
                       SizedBox(height: 8.h),
                       Text('Chưa có số liệu', style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
                       SizedBox(height: 4.h),
-                      Text('Học vài từ mới, số liệu của bạn sẽ hiện ở đây.', textAlign: TextAlign.center, style: TextStyle(color: AppColors.textSecondary)),
+                      Text('Học vài từ mới, số liệu của bạn sẽ hiện ở đây.',
+                          textAlign: TextAlign.center, style: TextStyle(color: AppColors.textSecondary)),
                     ]),
                   )
                 else ...[
@@ -92,9 +92,9 @@ class _StatsViewState extends State<StatsView> {
                     title: 'Câu trả lời mỗi ngày',
                     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                       Row(children: [
-                        _Legend(AppColors.beamMint, 'Đúng'),
+                        const _Legend(AppColors.beamMint, 'Đúng'),
                         SizedBox(width: 14.w),
-                        _Legend(AppColors.beamCoral, 'Sai'),
+                        const _Legend(AppColors.beamCoral, 'Sai'),
                       ]),
                       SizedBox(height: 10.h),
                       SizedBox(
@@ -105,7 +105,8 @@ class _StatsViewState extends State<StatsView> {
                               child: Padding(
                                 padding: EdgeInsets.symmetric(horizontal: daily.length > 40 ? 0.5 : 1.5),
                                 child: Column(mainAxisAlignment: MainAxisAlignment.end, children: [
-                                  Container(height: 120.h * (asInt(d['answers']) - asInt(d['correct'])) / maxDay, color: AppColors.beamCoral),
+                                  Container(
+                                      height: 120.h * (asInt(d['answers']) - asInt(d['correct'])) / maxDay, color: AppColors.beamCoral),
                                   Container(height: 120.h * asInt(d['correct']) / maxDay, color: AppColors.beamMint),
                                 ]),
                               ),
@@ -119,7 +120,11 @@ class _StatsViewState extends State<StatsView> {
                     title: 'Theo dạng câu hỏi',
                     child: Column(children: [
                       for (final r in asMapList(s['by_question_type']))
-                        _MeterRow(label: asString(r['label']), right: '${asInt(r['answers'])} câu', value: r['accuracy'] as num?, pct: _pct(r['accuracy'])),
+                        _MeterRow(
+                            label: asString(r['label']),
+                            right: '${asInt(r['answers'])} câu',
+                            value: r['accuracy'] as num?,
+                            pct: _pct(r['accuracy'])),
                     ]),
                   ),
                   SizedBox(height: 12.h),
@@ -142,17 +147,18 @@ class _StatsViewState extends State<StatsView> {
                       title: 'Từ hay sai',
                       child: Column(children: [
                         ShowMoreColumn(limit: 8, label: 'Xem tất cả từ hay sai', children: [
-                        for (final h in hardest)
-                          Builder(builder: (context) {
-                            final c = WordCard.fromJson(asMap(h['card']));
-                            return ListTile(
-                              contentPadding: EdgeInsets.zero,
-                              title: Text(c.text, style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-                              subtitle: Text(c.meaningVi, style: TextStyle(color: AppColors.textSecondary)),
-                              trailing: Text('sai ${asInt(h['wrong'])}/${asInt(h['answers'])}',
-                                  style: TextStyle(color: AppColors.error, fontWeight: FontWeight.w700)),
-                            );
-                          }),
+                          for (final h in hardest)
+                            Builder(builder: (context) {
+                              final c = WordCard.fromJson(asMap(h['card']));
+                              return ListTile(
+                                contentPadding: EdgeInsets.zero,
+                                title: Text(c.text,
+                                    style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+                                subtitle: Text(c.meaningVi, style: TextStyle(color: AppColors.textSecondary)),
+                                trailing: Text('sai ${asInt(h['wrong'])}/${asInt(h['answers'])}',
+                                    style: TextStyle(color: AppColors.error, fontWeight: FontWeight.w700)),
+                              );
+                            }),
                         ]),
                         SizedBox(height: 8.h),
                         SizedBox(
@@ -202,7 +208,10 @@ class _Fact extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
         Text(value,
-            style: TextStyle(fontSize: 22.sp, fontWeight: FontWeight.w800, color: AppColors.textPrimary,
+            style: TextStyle(
+                fontSize: 22.sp,
+                fontWeight: FontWeight.w800,
+                color: AppColors.textPrimary,
                 fontFeatures: const [FontFeature.tabularFigures()])),
         Text(label, style: TextStyle(fontSize: 12.sp, color: AppColors.textSecondary)),
       ]);
@@ -249,7 +258,9 @@ class _MeterRow extends StatelessWidget {
               ),
             ),
             SizedBox(width: 10.w),
-            SizedBox(width: 40.w, child: Text(pct, textAlign: TextAlign.right, style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.textPrimary))),
+            SizedBox(
+                width: 40.w,
+                child: Text(pct, textAlign: TextAlign.right, style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.textPrimary))),
           ]),
         ]),
       );

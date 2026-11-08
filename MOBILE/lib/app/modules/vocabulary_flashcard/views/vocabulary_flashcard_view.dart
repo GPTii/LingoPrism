@@ -44,11 +44,9 @@ class VocabularyFlashcardView extends GetView<VocabularyFlashcardController> {
                           child: PageView.builder(
                             controller: controller.pageController,
                             onPageChanged: controller.onPageChanged,
-                            physics:
-                                const NeverScrollableScrollPhysics(),
+                            physics: const NeverScrollableScrollPhysics(),
                             itemCount: controller.total,
-                            itemBuilder: (context, index) =>
-                                _Flashcard(
+                            itemBuilder: (context, index) => _Flashcard(
                               item: controller.items[index],
                               index: index,
                             ),
@@ -107,8 +105,7 @@ class _Flashcard extends StatelessWidget {
                         switchInCurve: Curves.easeOut,
                         switchOutCurve: Curves.easeIn,
                         transitionBuilder: (child, animation) {
-                          final rotate =
-                              Tween(begin: 1.0, end: 0.0).animate(animation);
+                          final rotate = Tween(begin: 1.0, end: 0.0).animate(animation);
                           return AnimatedBuilder(
                             animation: rotate,
                             child: child,
@@ -134,8 +131,7 @@ class _Flashcard extends StatelessWidget {
                           ],
                         ),
                         child: showBack
-                            ? _FlashcardBack(
-                                item: item, key: ValueKey('back-$index'))
+                            ? _FlashcardBack(item: item, key: ValueKey('back-$index'))
                             : _FlashcardFront(
                                 item: item,
                                 index: index,
@@ -200,8 +196,7 @@ class _PillButton extends StatelessWidget {
     final isEnabled = onPressed != null;
     final activeColor = AppColors.buttonActive;
     final textColor = isEnabled ? activeColor : AppColors.textHint;
-    final borderColor =
-        isEnabled ? activeColor : AppColors.textHint.withOpacity(0.4);
+    final borderColor = isEnabled ? activeColor : AppColors.textHint.withOpacity(0.4);
 
     return SizedBox(
       height: 48,
@@ -282,8 +277,7 @@ class _SwipeableFlashcardState extends State<_SwipeableFlashcard> {
   static const double _swipeThreshold = 60;
   double _dragExtent = 0;
 
-  VocabularyFlashcardController get _controller =>
-      Get.find<VocabularyFlashcardController>();
+  VocabularyFlashcardController get _controller => Get.find<VocabularyFlashcardController>();
 
   void _handleDragUpdate(DragUpdateDetails details) {
     _dragExtent += details.primaryDelta ?? 0;

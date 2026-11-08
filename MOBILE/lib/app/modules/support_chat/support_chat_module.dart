@@ -64,8 +64,14 @@ class SupportChatController extends GetxController {
     if (text.isEmpty || conversation == null) return;
     input.clear();
     final clientId = '${AuthService.to.userId}-${DateTime.now().millisecondsSinceEpoch}';
-    messages.add(ChatMessage(id: 0, userId: AuthService.to.userId, displayName: AuthService.to.currentUser?.displayName ?? '',
-        content: text, clientId: clientId, createdAt: DateTime.now(), pending: true));
+    messages.add(ChatMessage(
+        id: 0,
+        userId: AuthService.to.userId,
+        displayName: AuthService.to.currentUser?.displayName ?? '',
+        content: text,
+        clientId: clientId,
+        createdAt: DateTime.now(),
+        pending: true));
     _toBottom();
     if (_ws?.send({'action': 'send', 'content': text, 'client_id': clientId}) != true) {
       try {
@@ -136,7 +142,8 @@ class SupportChatView extends GetView<SupportChatController> {
                       borderRadius: BorderRadius.circular(14.r),
                     ),
                     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                      if (!mine) Text(m.displayName, style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w700, color: AppColors.textSecondary)),
+                      if (!mine)
+                        Text(m.displayName, style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w700, color: AppColors.textSecondary)),
                       Text(m.content, style: TextStyle(color: mine ? Colors.white : AppColors.textPrimary, fontSize: 15.sp)),
                       if (m.pending) Text('Đang gửi…', style: TextStyle(fontSize: 10.sp, color: Colors.white70)),
                     ]),
@@ -147,7 +154,9 @@ class SupportChatView extends GetView<SupportChatController> {
           }),
         ),
         Obx(() => controller.staffTyping.value
-            ? Padding(padding: EdgeInsets.only(left: 16.w, bottom: 4.h), child: const Align(alignment: Alignment.centerLeft, child: Text('Giáo viên đang nhập…')))
+            ? Padding(
+                padding: EdgeInsets.only(left: 16.w, bottom: 4.h),
+                child: const Align(alignment: Alignment.centerLeft, child: Text('Giáo viên đang nhập…')))
             : const SizedBox()),
         SafeArea(
           child: Padding(

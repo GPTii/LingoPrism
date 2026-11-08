@@ -18,6 +18,7 @@ class RealtimeService extends GetxService {
   final _notifications = StreamController<Map<String, dynamic>>.broadcast();
   Stream<Map<String, dynamic>> get notifications => _notifications.stream;
   final _directMessages = StreamController<WsEvent>.broadcast();
+
   /// "dm" (a new private message), "dm_read" and "dm_heart" events, for the messages screens.
   Stream<WsEvent> get directMessages => _directMessages.stream;
 
@@ -57,7 +58,9 @@ class RealtimeService extends GetxService {
           final route = data is Map ? data['route']?.toString() : null;
           final hasRoute = route != null && route.startsWith('/');
           Get.snackbar(title, e.payload['body']?.toString() ?? '',
-              snackPosition: SnackPosition.TOP, duration: Duration(seconds: hasRoute ? 5 : 3), margin: const EdgeInsets.all(12),
+              snackPosition: SnackPosition.TOP,
+              duration: Duration(seconds: hasRoute ? 5 : 3),
+              margin: const EdgeInsets.all(12),
               onTap: hasRoute
                   ? (_) {
                       Get.closeCurrentSnackbar();

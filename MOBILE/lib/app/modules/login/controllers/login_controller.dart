@@ -53,8 +53,7 @@ class LoginController extends GetxController {
 
   bool _validate() {
     final email = emailController.text.trim();
-    _emailError.value =
-        RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$').hasMatch(email) ? '' : 'Email không đúng định dạng';
+    _emailError.value = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$').hasMatch(email) ? '' : 'Email không đúng định dạng';
     _passwordError.value = passwordController.text.isEmpty ? 'Mật khẩu không được để trống' : '';
     return _emailError.value.isEmpty && _passwordError.value.isEmpty;
   }

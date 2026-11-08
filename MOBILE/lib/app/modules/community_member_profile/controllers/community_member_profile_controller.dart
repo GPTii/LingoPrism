@@ -30,12 +30,11 @@ class CommunityMemberProfileArguments {
       Get.toNamed(Routes.profile);
       return;
     }
-    Get.toNamed(Routes.communityMemberProfile, arguments: CommunityMemberProfileArguments(
-      userId: '$userId',
-      summary: displayName == null
-          ? null
-          : ProfileSummary.initial().copyWith(displayName: displayName, avatarUrl: avatar),
-    ));
+    Get.toNamed(Routes.communityMemberProfile,
+        arguments: CommunityMemberProfileArguments(
+          userId: '$userId',
+          summary: displayName == null ? null : ProfileSummary.initial().copyWith(displayName: displayName, avatarUrl: avatar),
+        ));
   }
 }
 

@@ -113,7 +113,8 @@ class LevelPathView extends GetView<LevelPathController> {
         return RefreshIndicator(
           onRefresh: controller.load,
           child: ListView(padding: EdgeInsets.all(16.w), children: [
-            Text('Học xong ${p.unlockPercent}% số từ của một cấp thì mở cấp tiếp theo. '
+            Text(
+                'Học xong ${p.unlockPercent}% số từ của một cấp thì mở cấp tiếp theo. '
                 'Đã biết rồi? Làm bài kiểm tra ${p.testSize} câu, đúng từ ${p.testPass} câu là qua.',
                 style: TextStyle(fontSize: 13.sp, color: AppColors.textSecondary)),
             SizedBox(height: 12.h),
@@ -278,7 +279,8 @@ class LevelTestView extends GetView<LevelTestController> {
         child: Padding(
           padding: EdgeInsets.all(24.w),
           child: Column(mainAxisSize: MainAxisSize.min, children: [
-            Image.asset(r.passed ? 'assets/brand/mascot/prismo_celebrate.png' : 'assets/brand/mascot/prismo_think.png', width: 120.w, height: 120.w),
+            Image.asset(r.passed ? 'assets/brand/mascot/prismo_celebrate.png' : 'assets/brand/mascot/prismo_think.png',
+                width: 120.w, height: 120.w),
             SizedBox(height: 8.h),
             Text(r.passed ? 'Bạn đã mở Cấp ${r.unlocked}!' : 'Chưa qua – đúng ${r.score}/${r.total} câu',
                 textAlign: TextAlign.center, style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w800)),

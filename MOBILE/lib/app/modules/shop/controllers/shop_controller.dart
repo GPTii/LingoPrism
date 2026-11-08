@@ -66,7 +66,11 @@ class ShopController extends GetxController {
       AppWidgets.showErrorDialog(title: 'Chuỗi vẫn còn', message: 'Hồi chuỗi chỉ dùng được trong 3 ngày sau khi mất chuỗi ngày học.');
       return;
     }
-    final verb = repair ? 'Hồi chuỗi' : item.effect == 'gem_exchange' ? 'Đổi' : 'Mua';
+    final verb = repair
+        ? 'Hồi chuỗi'
+        : item.effect == 'gem_exchange'
+            ? 'Đổi'
+            : 'Mua';
     final ok = await Get.dialog<bool>(
       Dialog(
         backgroundColor: AppColors.surface,
@@ -81,11 +85,11 @@ class ShopController extends GetxController {
             else
               Image.asset(item.image, height: 80.h, errorBuilder: (_, __, ___) => Icon(Icons.inventory, size: 60.sp)),
             SizedBox(height: 14.h),
-            Text(item.name, textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+            Text(item.name,
+                textAlign: TextAlign.center, style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
             SizedBox(height: 6.h),
-            Text(repair ? 'Nối lại chuỗi ${repairableStreak.value} ngày vừa mất.' : item.description, textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 14.sp, color: AppColors.textSecondary)),
+            Text(repair ? 'Nối lại chuỗi ${repairableStreak.value} ngày vừa mất.' : item.description,
+                textAlign: TextAlign.center, style: TextStyle(fontSize: 14.sp, color: AppColors.textSecondary)),
             SizedBox(height: 16.h),
             PriceTag(item: item, size: 22),
             SizedBox(height: 20.h),
@@ -135,7 +139,8 @@ class PriceTag extends StatelessWidget {
   Widget build(BuildContext context) => Row(mainAxisSize: MainAxisSize.min, children: [
         Image.asset(item.paidWithScales ? 'assets/brand/icons/scale.png' : 'assets/brand/icons/gem.png', height: (size * 1.5).h),
         SizedBox(width: 4.w),
-        Text('${item.price}', style: TextStyle(fontSize: size.sp, fontWeight: FontWeight.w800,
-            color: item.paidWithScales ? AppColors.textPrimary : AppColors.primary)),
+        Text('${item.price}',
+            style: TextStyle(
+                fontSize: size.sp, fontWeight: FontWeight.w800, color: item.paidWithScales ? AppColors.textPrimary : AppColors.primary)),
       ]);
 }

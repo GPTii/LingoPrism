@@ -19,7 +19,8 @@ final List<OnboardingModel> onboardingData = [
   OnboardingModel(
     image: 'assets/brand/mascot/prismo_reminder.png',
     title: 'Học tập\nmọi lúc, mọi nơi',
-    description: 'Không tiện học phát âm ở nơi đông người? Không có thời gian để hoàn thành bài học dài? Chúng tôi luôn có lựa chọn khác cho bạn!',
+    description:
+        'Không tiện học phát âm ở nơi đông người? Không có thời gian để hoàn thành bài học dài? Chúng tôi luôn có lựa chọn khác cho bạn!',
   ),
   OnboardingModel(
     image: 'assets/brand/mascot/prismo_group.png',

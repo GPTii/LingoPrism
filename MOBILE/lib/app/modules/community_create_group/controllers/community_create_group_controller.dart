@@ -6,7 +6,6 @@ import '../../../data/repositories/repositories.dart';
 import 'package:lingoprism/app/data/services/auth_service.dart';
 import 'package:lingoprism/app/core/navigation/back.dart';
 
-
 enum StudyGroupApprovalMode { auto, require }
 
 class CommunityCreateGroupController extends GetxController {
@@ -15,8 +14,7 @@ class CommunityCreateGroupController extends GetxController {
   final requirementController = TextEditingController();
 
   final RxInt selectedIconIndex = (-1).obs;
-  final Rx<StudyGroupApprovalMode> approvalMode =
-      StudyGroupApprovalMode.auto.obs;
+  final Rx<StudyGroupApprovalMode> approvalMode = StudyGroupApprovalMode.auto.obs;
   final RxBool canSubmit = false.obs;
 
   /// a class: not listed in the group list, members are added by their 8-digit ID
@@ -44,13 +42,11 @@ class CommunityCreateGroupController extends GetxController {
   void _recomputeSubmitState() {
     final hasName = nameController.text.trim().isNotEmpty;
     final hasRequirement = requirementController.text.trim().isNotEmpty;
-    final hasIcon = selectedIconIndex.value >= 0 &&
-        selectedIconIndex.value < iconAssets.length;
+    final hasIcon = selectedIconIndex.value >= 0 && selectedIconIndex.value < iconAssets.length;
     canSubmit.value = hasName && hasRequirement && hasIcon;
   }
 
   String? _resolveUserId() => AuthService.to.isLoggedIn ? AuthService.to.currentUserId : null;
-
 
   Future<void> submit() async {
     if (!canSubmit.value || isSubmitting.value) {
@@ -69,15 +65,13 @@ class CommunityCreateGroupController extends GetxController {
 
     final iconIndex = selectedIconIndex.value;
     final iconPath = iconAssets[iconIndex];
-    final requireApproval =
-        approvalMode.value == StudyGroupApprovalMode.require;
+    final requireApproval = approvalMode.value == StudyGroupApprovalMode.require;
 
     final name = nameController.text.trim();
     final description = requirementController.text.trim();
     isSubmitting.value = true;
     try {
-      final group = await CommunityRepository.createGroup(name, description, requireApproval,
-          icon: iconPath, isPrivate: isPrivate.value);
+      final group = await CommunityRepository.createGroup(name, description, requireApproval, icon: iconPath, isPrivate: isPrivate.value);
       goBack(result: group);
     } catch (e) {
       Get.snackbar(

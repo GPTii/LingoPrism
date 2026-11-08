@@ -37,7 +37,9 @@ class TermsCheckbox extends StatelessWidget {
     return Obx(() => Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Checkbox(value: accepted.value, onChanged: (v) => accepted.value = v ?? false,
+            Checkbox(
+                value: accepted.value,
+                onChanged: (v) => accepted.value = v ?? false,
                 side: BorderSide(color: error && !accepted.value ? AppColors.error : AppColors.lineStrong, width: 1.5)),
             Expanded(
               child: Padding(
@@ -185,7 +187,9 @@ Future<void> confirmDeleteAccount() async {
     ]),
     actions: [
       TextButton(onPressed: () => goBack(result: false), child: const Text('Huỷ')),
-      TextButton(onPressed: () => goBack(result: true), style: TextButton.styleFrom(foregroundColor: AppColors.error),
+      TextButton(
+          onPressed: () => goBack(result: true),
+          style: TextButton.styleFrom(foregroundColor: AppColors.error),
           child: const Text('Xoá vĩnh viễn')),
     ],
   ));

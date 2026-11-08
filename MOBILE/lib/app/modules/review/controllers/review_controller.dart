@@ -26,6 +26,7 @@ class VocabularyCategory {
   String get name => topic.nameVi;
   String get icon => topic.icon.isEmpty ? '📘' : topic.icon;
   bool get isSystem => topic.isSystem;
+
   /// All the words of the topic – the same number its page lists.
   int get wordCount => topic.wordCount > 0 ? topic.wordCount : topic.savedCount;
 
@@ -130,9 +131,8 @@ class ReviewController extends GetxController {
       isSearching.value = true;
       try {
         final cards = await VocabRepository.search(currentQuery.value);
-        searchResults.assignAll(cards
-            .where((c) => c.target != null)
-            .map((c) => VocabularySearchResult(card: c, item: VocabularyTopicItem.fromCard(c))));
+        searchResults.assignAll(
+            cards.where((c) => c.target != null).map((c) => VocabularySearchResult(card: c, item: VocabularyTopicItem.fromCard(c))));
       } catch (_) {
         searchResults.clear();
       } finally {
@@ -228,8 +228,7 @@ class ReviewController extends GetxController {
   Future<void> startReviewSession() async {
     await GameService.to.refreshLibrary();
     if (GameService.to.library.value.due == 0) {
-      Get.snackbar('Chưa có từ để ôn tập', 'Bạn đã ôn hết các từ đến hạn. Hãy học thêm từ mới nhé!',
-          snackPosition: SnackPosition.BOTTOM);
+      Get.snackbar('Chưa có từ để ôn tập', 'Bạn đã ôn hết các từ đến hạn. Hãy học thêm từ mới nhé!', snackPosition: SnackPosition.BOTTOM);
       return;
     }
     Get.toNamed(Routes.learningSession, arguments: const LearningSessionArguments(kind: 'review'));

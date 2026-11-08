@@ -18,8 +18,7 @@ class StreakView extends GetView<StreakController> {
         backgroundColor: AppColors.primarySoft,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded,
-              color: AppColors.textPrimary),
+          icon: Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.textPrimary),
           onPressed: () => goBack(),
         ),
         title: Text(
@@ -70,13 +69,10 @@ class StreakView extends GetView<StreakController> {
               children: [
                 _buildStreakHeader(),
                 SizedBox(height: 16.h),
-
                 _buildMonthNavigation(),
                 SizedBox(height: 12.h),
-
                 _buildStatisticsCards(),
                 SizedBox(height: 12.h),
-
                 _buildCalendar(),
               ],
             ),
@@ -104,7 +100,8 @@ class StreakView extends GetView<StreakController> {
               blurRadius: 18.r,
               offset: Offset(0, 12.h),
             ),
-          ],),
+          ],
+        ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [

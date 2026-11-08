@@ -6,8 +6,7 @@ import '../controllers/profile_change_password_controller.dart';
 import 'package:lingoprism/app/core/theme/app_colors.dart';
 import 'package:lingoprism/app/core/navigation/back.dart';
 
-class ProfileChangePasswordView
-    extends GetView<ProfileChangePasswordController> {
+class ProfileChangePasswordView extends GetView<ProfileChangePasswordController> {
   const ProfileChangePasswordView({super.key});
 
   @override
@@ -85,8 +84,7 @@ class ProfileChangePasswordView
                           height: 22.w,
                           child: const CircularProgressIndicator(
                             strokeWidth: 2,
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(Colors.white),
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                           ),
                         )
                       : Text(
@@ -143,8 +141,7 @@ class _PasswordFieldState extends State<_PasswordField> {
           decoration: InputDecoration(
             filled: true,
             fillColor: AppColors.surface,
-            contentPadding:
-                EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+            contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(18.r),
               borderSide: BorderSide(color: AppColors.primary, width: 2),

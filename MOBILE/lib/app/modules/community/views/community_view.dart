@@ -24,18 +24,6 @@ const int _maxTopicLength = 50;
 const int _minTopicLength = 2;
 const int _minReportDescriptionLength = 10;
 const double _listCacheExtent = 1000.0;
-const double _leaderboardCacheExtent = 500.0;
-
-/// Helper function for formatting remaining time
-String _formatRemainingTime(int daysRemaining) {
-  if (daysRemaining <= 0) {
-    return 'Đã kết thúc';
-  } else if (daysRemaining == 1) {
-    return 'Còn 1 ngày';
-  } else {
-    return 'Còn $daysRemaining ngày';
-  }
-}
 
 /// Main community view with three tabs: Timeline Feed, Study Groups, and Leaderboard
 ///
@@ -148,8 +136,7 @@ class CommunityView extends GetView<CommunityController> {
                   children: [
                     SizedBox(height: 80.h),
                     _EmptyFeedState(
-                      message: error ??
-                          'Chưa cập nhật được dữ liệu, hãy thử tải lại nhé!',
+                      message: error ?? 'Chưa cập nhật được dữ liệu, hãy thử tải lại nhé!',
                       onRetry: controller.reloadPosts,
                       isError: error != null,
                     ),
@@ -211,7 +198,6 @@ class _EmptyFeedState extends StatelessWidget {
           Image.asset(
             'assets/brand/mascot/prismo_sorry.png',
             width: 150.w,
-            
           ),
         SizedBox(height: 16.h),
         Padding(
@@ -252,547 +238,6 @@ class _EmptyFeedState extends StatelessWidget {
   }
 }
 
-class _JoinedHeader extends StatelessWidget {
-  const _JoinedHeader({
-    required this.details,
-    required this.onLeave,
-    required this.onOpenChat,
-  });
-
-  final CommunityGroupDetails details;
-  final VoidCallback onLeave;
-  final VoidCallback onOpenChat;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(16.w),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(26.r),
-        border: Border.fromBorderSide(BorderSide(color: AppColors.line)),),
-      child: Row(
-        children: [
-          Container(
-            height: 62.h,
-            width: 62.h,
-            decoration: BoxDecoration(
-              color: AppColors.primarySoft,
-              borderRadius: BorderRadius.circular(20.r),
-            ),
-            padding: EdgeInsets.all(10.w),
-            child: _GroupImage(path: details.group.assetImage, size: 62.w),
-          ),
-          SizedBox(width: 14.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  details.group.name,
-                  style: TextStyle(
-                    fontSize: 18.sp,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                SizedBox(height: 6.h),
-                Text(
-                  '${details.group.memberCount} thành viên • Trưởng nhóm: ${details.group.leaderName}',
-                  style: TextStyle(
-                    fontSize: 13.sp,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Align(
-            alignment: Alignment.topCenter,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    IconButton(
-                      onPressed: onOpenChat,
-                      icon: const Icon(Icons.chat_bubble_outline_rounded),
-                      color: AppColors.primary,
-                    ),
-                    IconButton(
-                      onPressed: onLeave,
-                      icon: const Icon(Icons.logout_rounded),
-                      color: AppColors.error,
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _MilestoneOverview extends StatelessWidget {
-  const _MilestoneOverview({required this.details});
-
-  final CommunityGroupDetails details;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(18.w),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(28.r),
-        border: Border.all(color: AppColors.primaryLight, width: 1.2),),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Mốc hiện tại',
-                      style: TextStyle(
-                        fontSize: 15.sp,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    SizedBox(height: 4.h),
-                    Text(
-                      details.currentMilestoneLabel,
-                      style: TextStyle(
-                        fontSize: 20.sp,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.primary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Text(
-                _formatRemainingTime(details.daysRemaining),
-                style: TextStyle(
-                  fontSize: 13.sp,
-                  color: AppColors.textSecondary,
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 18.h),
-          _MilestoneIcons(milestones: details.milestones),
-          SizedBox(height: 18.h),
-          Text(
-            '${details.currentPoints}',
-            style: TextStyle(
-              fontSize: 28.sp,
-              fontWeight: FontWeight.w800,
-              color: AppColors.primary,
-            ),
-          ),
-          Text(
-            'Điểm tích luỹ',
-            style: TextStyle(
-              fontSize: 13.sp,
-              color: AppColors.textSecondary,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _MilestoneIcons extends StatelessWidget {
-  const _MilestoneIcons({required this.milestones});
-
-  final List<CommunityGroupMilestone> milestones;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: milestones
-          .map(
-            (milestone) => Expanded(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    height: 54.h,
-                    margin: EdgeInsets.symmetric(horizontal: 4.w),
-                    decoration: BoxDecoration(
-                      color: milestone.isReached
-                          ? AppColors.primary.withValues(alpha: 0.12)
-                          : AppColors.primarySoft,
-                      borderRadius: BorderRadius.circular(18.r),
-                    ),
-                    alignment: Alignment.center,
-                    child: Icon(
-                      Icons.emoji_events_rounded,
-                      color: milestone.isReached
-                          ? AppColors.primary
-                          : AppColors.textHint,
-                    ),
-                  ),
-                  SizedBox(height: 6.h),
-                  Text(
-                    '${milestone.requiredPoints}',
-                    style: TextStyle(
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.w600,
-                      color: milestone.isReached
-                          ? AppColors.primary
-                          : AppColors.textHint,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          )
-          .toList(),
-    );
-  }
-}
-
-class _LeaderboardList extends StatelessWidget {
-  const _LeaderboardList({required this.members, required this.onMemberTap});
-
-  final List<CommunityGroupMemberScore> members;
-  final ValueChanged<CommunityGroupMemberScore> onMemberTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView.separated(
-      padding: EdgeInsets.only(bottom: 24.h),
-      itemCount: members.length,
-      // Performance optimizations
-      cacheExtent: _leaderboardCacheExtent,
-      physics: const BouncingScrollPhysics(),
-      separatorBuilder: (_, __) => SizedBox(height: 12.h),
-      itemBuilder: (context, index) {
-        final member = members[index];
-        return RepaintBoundary(
-          child: _LeaderboardCard(member: member, onTap: onMemberTap),
-        );
-      },
-    );
-  }
-}
-
-class _LeaderboardCard extends StatelessWidget {
-  const _LeaderboardCard({required this.member, required this.onTap});
-
-  final CommunityGroupMemberScore member;
-  final ValueChanged<CommunityGroupMemberScore> onTap;
-
-  Color _backgroundForRank(int rank) {
-    switch (rank) {
-      case 1:
-        return AppColors.tint(const Color(0xFFFFF1AA));
-      case 2:
-        return AppColors.primarySoft;
-      case 3:
-        return AppColors.tint(const Color(0xFFFFDEBB));
-      default:
-        return AppColors.tint(const Color(0xFFE7FFE2));
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-      decoration: BoxDecoration(
-        color: _backgroundForRank(member.rank),
-        borderRadius: BorderRadius.circular(24.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 16.r,
-            offset: Offset(0, 8.h),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          CircleAvatar(
-            backgroundColor: AppColors.surface,
-            radius: 26.r,
-            backgroundImage: NetworkImage(member.avatarUrl),
-          ),
-          SizedBox(width: 14.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Text(
-                      '${member.rank}',
-                      style: TextStyle(
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    SizedBox(width: 10.w),
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () => onTap(member),
-                        child: Text(
-                          member.displayName,
-                          style: TextStyle(
-                            fontSize: 15.sp,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.textPrimary,
-                            decoration: TextDecoration.underline,
-                            decorationStyle: TextDecorationStyle.dotted,
-                          ),
-                        ),
-                      ),
-                    ),
-                    if (member.isHighlighted)
-                      Icon(Icons.star,
-                          color: const Color(0xFFF7B500), size: 20.sp),
-                  ],
-                ),
-                SizedBox(height: 6.h),
-                Row(
-                  children: [
-                    Icon(Icons.water_drop,
-                        color: AppColors.primary, size: 18.sp),
-                    SizedBox(width: 4.w),
-                    Text(
-                      '${member.weeklyPoints}',
-                      style: TextStyle(
-                        fontSize: 13.sp,
-                        color: AppColors.primary,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          SizedBox(width: 12.w),
-          Text(
-            '${member.totalPoints}',
-            style: TextStyle(
-              fontSize: 18.sp,
-              fontWeight: FontWeight.w700,
-              color: AppColors.primaryDark,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _StudyGroupCard extends StatelessWidget {
-  const _StudyGroupCard({
-    required this.group,
-    required this.onTap,
-    required this.onLeaderTap,
-  });
-
-  final CommunityStudyGroup group;
-  final VoidCallback onTap;
-  final VoidCallback onLeaderTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(26.r),
-          color: AppColors.surface,
-          border: Border.all(
-            color: AppColors.primaryLight,
-            width: 1.2,
-          ),),
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
-        child: Row(
-          children: [
-            Container(
-              height: 56.h,
-              width: 56.w,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(18.r),
-                color: AppColors.surface,
-              ),
-              padding: EdgeInsets.all(6.w),
-              child: _GroupImage(path: group.assetImage, size: 72.w),
-            ),
-            SizedBox(width: 14.w),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          group.name,
-                          style: TextStyle(
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.primaryDark,
-                          ),
-                        ),
-                      ),
-                      if (group.requireApproval)
-                        Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 10.w,
-                            vertical: 4.h,
-                          ),
-                          decoration: BoxDecoration(
-                            color:
-                                AppColors.primary.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(16.r),
-                          ),
-                          child: Text(
-                            'Cần duyệt',
-                            style: TextStyle(
-                              fontSize: 11.sp,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.primary,
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                  SizedBox(height: 6.h),
-                  Text(
-                    'Yêu cầu: ${group.requirement}',
-                    style: TextStyle(
-                      fontSize: 13.sp,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                  SizedBox(height: 4.h),
-                  GestureDetector(
-                    onTap: onLeaderTap,
-                    child: Text(
-                      'Trưởng nhóm: ${group.leaderName}',
-                      style: TextStyle(
-                        fontSize: 12.sp,
-                        color: AppColors.primary,
-                        decoration: TextDecoration.underline,
-                        decorationStyle: TextDecorationStyle.dotted,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(width: 12.w),
-            Container(
-              width: 42.w,
-              height: 42.w,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppColors.surface,
-                border: Border.all(
-                  color: AppColors.primary,
-                  width: 1.6,
-                ),),
-              alignment: Alignment.center,
-              child: Text(
-                '${group.memberCount}',
-                style: TextStyle(
-                  fontSize: 15.sp,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.primary,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _GroupImage extends StatelessWidget {
-  const _GroupImage({required this.path, required this.size});
-
-  final String path;
-  final double size;
-
-  @override
-  Widget build(BuildContext context) {
-    if (path.isEmpty) {
-      return Icon(
-        Icons.group_outlined,
-        size: size * 0.6,
-        color: AppColors.textHint,
-      );
-    }
-
-    final isNetwork = path.startsWith('http');
-    final image = isNetwork
-        ? Image.network(
-            path,
-            width: size,
-            height: size,
-            fit: BoxFit.contain,
-            cacheWidth: (size * 2).round(), // Cache optimization
-            loadingBuilder: (context, child, loadingProgress) {
-              if (loadingProgress == null) return child;
-              return SizedBox(
-                width: size,
-                height: size,
-                child: Center(
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2.0,
-                    value: loadingProgress.expectedTotalBytes != null
-                        ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
-                        : null,
-                  ),
-                ),
-              );
-            },
-            errorBuilder: (context, error, stackTrace) {
-              debugPrint('Failed to load group image: $error');
-              return Icon(
-                Icons.group_outlined,
-                size: size * 0.6,
-                color: AppColors.textHint,
-              );
-            },
-          )
-        : Image.asset(
-            path,
-            width: size,
-            height: size,
-            fit: BoxFit.contain,
-            cacheWidth: (size * 2).round(), // Cache optimization
-            errorBuilder: (context, error, stackTrace) {
-              debugPrint('Failed to load asset image: $error');
-              return Icon(
-                Icons.group_outlined,
-                size: size * 0.6,
-                color: AppColors.textHint,
-              );
-            },
-          );
-    return RepaintBoundary(child: image);
-  }
-}
-
 class _FeedCard extends StatelessWidget {
   const _FeedCard({required this.post});
 
@@ -809,7 +254,8 @@ class _FeedCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.surface,
           borderRadius: BorderRadius.circular(32.r),
-          border: Border.fromBorderSide(BorderSide(color: AppColors.line)),),
+          border: Border.fromBorderSide(BorderSide(color: AppColors.line)),
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -872,10 +318,7 @@ class _FeedCard extends StatelessWidget {
                           return const SizedBox.shrink();
                         }
                         return TextButton(
-                          onPressed: post.isFollowActionPending.value
-                              ? null
-                              : () => Get.find<CommunityController>()
-                                  .followAuthor(post),
+                          onPressed: post.isFollowActionPending.value ? null : () => Get.find<CommunityController>().followAuthor(post),
                           style: TextButton.styleFrom(
                             padding: EdgeInsets.symmetric(
                               horizontal: 14.w,
@@ -955,8 +398,7 @@ class _FeedCard extends StatelessWidget {
                     top: 16.h,
                     left: 16.w,
                     child: Container(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
                       decoration: BoxDecoration(
                         color: Colors.black.withValues(alpha: 0.6),
                         borderRadius: BorderRadius.circular(16.r),
@@ -994,7 +436,7 @@ class _FeedCard extends StatelessWidget {
 
   ImageProvider _avatarProvider() {
     try {
-      final avatar = _normalizeImagePath(post.authorAvatar ?? '');
+      final avatar = _normalizeImagePath(post.authorAvatar);
       if (avatar.isEmpty) {
         return const AssetImage('assets/brand/avatar/avatar_1.png');
       }
@@ -1052,7 +494,7 @@ class _FeedCard extends StatelessWidget {
 
   Widget _buildPostImage() {
     try {
-      final url = _normalizeImagePath(post.imageUrl ?? '');
+      final url = _normalizeImagePath(post.imageUrl);
 
       if (url.isEmpty) {
         return _buildFallbackImage();
@@ -1148,8 +590,7 @@ class _FeedCard extends StatelessWidget {
       return trimmed;
     }
 
-    String stripLeadingSlash(String path) =>
-        path.startsWith('/') ? path.substring(1) : path;
+    String stripLeadingSlash(String path) => path.startsWith('/') ? path.substring(1) : path;
 
     try {
       if (trimmed.startsWith('file://')) {
@@ -1198,9 +639,7 @@ class _FeedCard extends StatelessWidget {
           () => _ActionItem(
             icon: post.isLiked.value ? Icons.favorite : Icons.favorite_border,
             label: post.likes.value.toString(),
-            color: post.isLiked.value
-                ? const Color(0xFFFF3A30)
-                : AppColors.textSecondary,
+            color: post.isLiked.value ? const Color(0xFFFF3A30) : AppColors.textSecondary,
             onTap: () => communityController.toggleLike(post),
           ),
         ),
@@ -1209,10 +648,8 @@ class _FeedCard extends StatelessWidget {
           return _ActionItem(
             icon: isExpanded ? Icons.chat_bubble : Icons.chat_bubble_outline,
             label: post.comments.value.toString(),
-            color:
-                isExpanded ? AppColors.primary : AppColors.textSecondary,
-            labelColor:
-                isExpanded ? AppColors.primary : AppColors.textSecondary,
+            color: isExpanded ? AppColors.primary : AppColors.textSecondary,
+            labelColor: isExpanded ? AppColors.primary : AppColors.textSecondary,
             onTap: () => communityController.showComments(post),
           );
         }),
@@ -1280,8 +717,7 @@ class _FeedCard extends StatelessWidget {
                         _CommentPreviewString(
                           comment: highlightComments[i],
                         ),
-                        if (i < highlightComments.length - 1)
-                          SizedBox(height: 12.h),
+                        if (i < highlightComments.length - 1) SizedBox(height: 12.h),
                       ],
                     ],
                   ),
@@ -1308,18 +744,13 @@ class _FeedCard extends StatelessWidget {
         return const SizedBox.shrink();
       }
       final rawIndex = post.currentVocabularyIndex.value;
-      final currentIndex =
-          rawIndex < 0 ? 0 : (rawIndex >= total ? total - 1 : rawIndex);
+      final currentIndex = rawIndex < 0 ? 0 : (rawIndex >= total ? total - 1 : rawIndex);
       final vocabulary = post.vocabularyItems[currentIndex];
       final isSelected = vocabulary.isSelected.value;
       final selectedTopic = vocabulary.topic.value ?? 'chọn chủ đề';
 
-      final borderColor = isSelected
-          ? AppColors.primary
-          : AppColors.primary.withValues(alpha: 0.6);
-      final gradientColors = isSelected
-          ? [AppColors.primarySoft, AppColors.primaryTint]
-          : [AppColors.primarySoft, AppColors.primarySoft];
+      final borderColor = isSelected ? AppColors.primary : AppColors.primary.withValues(alpha: 0.6);
+      final gradientColors = isSelected ? [AppColors.primarySoft, AppColors.primaryTint] : [AppColors.primarySoft, AppColors.primarySoft];
       final hasMultiple = total > 1;
 
       Widget card = Container(
@@ -1327,7 +758,8 @@ class _FeedCard extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(24.r),
           border: Border.all(color: borderColor, width: 1.8),
-          color: (gradientColors).first,),
+          color: (gradientColors).first,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -1335,8 +767,7 @@ class _FeedCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 GestureDetector(
-                  onTap: () =>
-                      communityController.toggleSelection(post, vocabulary),
+                  onTap: () => communityController.toggleSelection(post, vocabulary),
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 200),
                     width: 24.w,
@@ -1347,8 +778,8 @@ class _FeedCard extends StatelessWidget {
                         color: AppColors.primary,
                         width: isSelected ? 2.4 : 2,
                       ),
-                      color:
-                          isSelected ? AppColors.primary : Colors.white,),
+                      color: isSelected ? AppColors.primary : Colors.white,
+                    ),
                     child: isSelected
                         ? Icon(
                             Icons.check,
@@ -1396,15 +827,15 @@ class _FeedCard extends StatelessWidget {
                   ),
                 ),
                 GestureDetector(
-                  onTap: () =>
-                      communityController.speakWord(vocabulary.headword),
+                  onTap: () => communityController.speakWord(vocabulary.headword),
                   child: Container(
                     width: 40.w,
                     height: 40.w,
                     decoration: BoxDecoration(
                       color: AppColors.surface,
                       borderRadius: BorderRadius.circular(20.r),
-                      border: Border.fromBorderSide(BorderSide(color: AppColors.line)),),
+                      border: Border.fromBorderSide(BorderSide(color: AppColors.line)),
+                    ),
                     child: Icon(
                       Icons.volume_up_rounded,
                       color: AppColors.primary,
@@ -1427,11 +858,9 @@ class _FeedCard extends StatelessWidget {
                 ),
                 SizedBox(width: 8.w),
                 GestureDetector(
-                  onTap: () => _showTopicPicker(
-                      context, communityController, vocabulary),
+                  onTap: () => _showTopicPicker(context, communityController, vocabulary),
                   child: Container(
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
+                    padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
                     decoration: BoxDecoration(
                       color: AppColors.primary,
                       borderRadius: BorderRadius.circular(18.r),
@@ -1475,9 +904,7 @@ class _FeedCard extends StatelessWidget {
                   left: -6.w,
                   child: _NavButton(
                     icon: Icons.chevron_left,
-                    onTap: currentIndex > 0
-                        ? () => communityController.goToPreviousVocabulary(post)
-                        : null,
+                    onTap: currentIndex > 0 ? () => communityController.goToPreviousVocabulary(post) : null,
                   ),
                 ),
               if (hasMultiple)
@@ -1485,9 +912,7 @@ class _FeedCard extends StatelessWidget {
                   right: -6.w,
                   child: _NavButton(
                     icon: Icons.chevron_right,
-                    onTap: currentIndex < total - 1
-                        ? () => communityController.goToNextVocabulary(post)
-                        : null,
+                    onTap: currentIndex < total - 1 ? () => communityController.goToNextVocabulary(post) : null,
                   ),
                 ),
             ],
@@ -1520,8 +945,7 @@ class _FeedCard extends StatelessWidget {
       }
       final total = post.vocabularyItems.length;
       final rawIndex = post.currentVocabularyIndex.value;
-      final currentIndex =
-          rawIndex < 0 ? 0 : (rawIndex >= total ? total - 1 : rawIndex);
+      final currentIndex = rawIndex < 0 ? 0 : (rawIndex >= total ? total - 1 : rawIndex);
       final vocabulary = post.vocabularyItems[currentIndex];
       final isSelected = vocabulary.isSelected.value;
 
@@ -1538,8 +962,7 @@ class _FeedCard extends StatelessWidget {
     CommunityController controller,
     CommunityVocabularyItem vocabulary,
   ) {
-    final textController =
-        TextEditingController(text: vocabulary.topic.value ?? '');
+    final textController = TextEditingController(text: vocabulary.topic.value ?? '');
     String? tempSelection = vocabulary.topic.value;
 
     showModalBottomSheet(
@@ -1607,9 +1030,7 @@ class _FeedCard extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 12.sp,
                               fontWeight: FontWeight.w600,
-                              color: isActive
-                                  ? Colors.white
-                                  : AppColors.textPrimary,
+                              color: isActive ? Colors.white : AppColors.textPrimary,
                             ),
                           ),
                           selected: isActive,
@@ -1617,9 +1038,7 @@ class _FeedCard extends StatelessWidget {
                             setModalState(() {
                               tempSelection = topicOption;
                               textController.text = topicOption;
-                              textController.selection =
-                                  TextSelection.collapsed(
-                                      offset: topicOption.length);
+                              textController.selection = TextSelection.collapsed(offset: topicOption.length);
                             });
                           },
                           selectedColor: AppColors.primary,
@@ -1628,9 +1047,7 @@ class _FeedCard extends StatelessWidget {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20.r),
                             side: BorderSide(
-                              color: isActive
-                                  ? AppColors.primary
-                                  : AppColors.primaryTint,
+                              color: isActive ? AppColors.primary : AppColors.primaryTint,
                             ),
                           ),
                         );
@@ -1656,13 +1073,11 @@ class _FeedCard extends StatelessWidget {
                         ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16.r),
-                          borderSide:
-                              BorderSide(color: AppColors.primarySoft),
+                          borderSide: BorderSide(color: AppColors.primarySoft),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16.r),
-                          borderSide:
-                              BorderSide(color: AppColors.primary),
+                          borderSide: BorderSide(color: AppColors.primary),
                         ),
                       ),
                     ),
@@ -1675,9 +1090,7 @@ class _FeedCard extends StatelessWidget {
                             final manualTopic = textController.text.trim();
 
                             // Enhanced validation
-                            if (manualTopic.isEmpty &&
-                                (tempSelection == null ||
-                                    tempSelection!.trim().isEmpty)) {
+                            if (manualTopic.isEmpty && (tempSelection == null || tempSelection!.trim().isEmpty)) {
                               Get.snackbar(
                                 'Thiếu thông tin',
                                 'Hãy chọn hoặc nhập một chủ đề.',
@@ -1686,9 +1099,7 @@ class _FeedCard extends StatelessWidget {
                               return;
                             }
 
-                            final newTopic = manualTopic.isNotEmpty
-                                ? manualTopic
-                                : tempSelection!;
+                            final newTopic = manualTopic.isNotEmpty ? manualTopic : tempSelection!;
 
                             // Topic validation
                             if (newTopic.length < _minTopicLength) {
@@ -1875,8 +1286,7 @@ class _FeedCard extends StatelessWidget {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Icon(Icons.info_outline,
-                              color: const Color(0xFF8C6E02), size: 20.sp),
+                          Icon(Icons.info_outline, color: const Color(0xFF8C6E02), size: 20.sp),
                           SizedBox(width: 10.w),
                           Expanded(
                             child: Text(
@@ -1912,13 +1322,9 @@ class _FeedCard extends StatelessWidget {
                             ),
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(16.r),
-                              color: isSelected
-                                  ? AppColors.primarySoft
-                                  : Colors.white,
+                              color: isSelected ? AppColors.primarySoft : Colors.white,
                               border: Border.all(
-                                color: isSelected
-                                    ? AppColors.primary
-                                    : AppColors.line,
+                                color: isSelected ? AppColors.primary : AppColors.line,
                                 width: 1.2,
                               ),
                             ),
@@ -1930,9 +1336,7 @@ class _FeedCard extends StatelessWidget {
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
                                     border: Border.all(
-                                      color: isSelected
-                                          ? AppColors.primary
-                                          : AppColors.textHint,
+                                      color: isSelected ? AppColors.primary : AppColors.textHint,
                                       width: 2,
                                     ),
                                   ),
@@ -1942,9 +1346,7 @@ class _FeedCard extends StatelessWidget {
                                     width: 10.w,
                                     height: 10.w,
                                     decoration: BoxDecoration(
-                                      color: isSelected
-                                          ? AppColors.primary
-                                          : Colors.transparent,
+                                      color: isSelected ? AppColors.primary : Colors.transparent,
                                       shape: BoxShape.circle,
                                     ),
                                   ),
@@ -2040,9 +1442,7 @@ class _FeedCard extends StatelessWidget {
                                 communityController.submitPostReport(
                                   post: post,
                                   reason: selectedReason,
-                                  description: selectedReason == 'Khác'
-                                      ? noteController.text.trim()
-                                      : null,
+                                  description: selectedReason == 'Khác' ? noteController.text.trim() : null,
                                 );
                               } catch (e) {
                                 debugPrint('Error submitting report: $e');
@@ -2054,9 +1454,7 @@ class _FeedCard extends StatelessWidget {
                               }
                             },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: alreadyReported
-                            ? AppColors.line
-                            : AppColors.error,
+                        backgroundColor: alreadyReported ? AppColors.line : AppColors.error,
                         foregroundColor: Colors.white,
                         disabledForegroundColor: Colors.white,
                         elevation: 0,
@@ -2126,11 +1524,8 @@ class _CommentPreviewString extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final content = comment.content.trim();
-    final userName = comment.userName.trim().isNotEmpty
-        ? comment.userName.trim()
-        : 'Thành viên';
-    final initial =
-        userName.isNotEmpty ? userName.characters.first.toUpperCase() : 'T';
+    final userName = comment.userName.trim().isNotEmpty ? comment.userName.trim() : 'Thành viên';
+    final initial = userName.isNotEmpty ? userName.characters.first.toUpperCase() : 'T';
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -2182,19 +1577,6 @@ class _CommentPreviewString extends StatelessWidget {
       ],
     );
   }
-}
-
-ImageProvider? _resolveAvatar(String avatarUrl) {
-  if (avatarUrl.isEmpty) {
-    return null;
-  }
-  if (avatarUrl.startsWith('http')) {
-    return NetworkImage(avatarUrl);
-  }
-  if (avatarUrl.startsWith('assets/')) {
-    return AssetImage(avatarUrl);
-  }
-  return null;
 }
 
 class _ActionItem extends StatelessWidget {
@@ -2250,11 +1632,8 @@ class _PrimaryActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = isActive
-        ? [AppColors.primary, AppColors.primary]
-        : [AppColors.primaryTint, AppColors.primaryLight];
-    final shadowColor =
-        isActive ? AppColors.primary : AppColors.primaryLight;
+    final colors = isActive ? [AppColors.primary, AppColors.primary] : [AppColors.primaryTint, AppColors.primaryLight];
+    final shadowColor = isActive ? AppColors.primary : AppColors.primaryLight;
 
     return GestureDetector(
       onTap: onTap,
@@ -2270,7 +1649,8 @@ class _PrimaryActionButton extends StatelessWidget {
               blurRadius: 20.r,
               offset: Offset(0, 12.h),
             ),
-          ],),
+          ],
+        ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,

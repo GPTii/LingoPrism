@@ -124,8 +124,9 @@ class OnDeviceDetector {
         final cls = output[o + 5].round();
         if (cls < 0 || cls >= _labels.length) continue;
         final label = _labels[cls];
-        boxes.add(OnDeviceBox(label, score, toNorm(output[o], output[o + 1], output[o + 2], output[o + 3], normalized),
-            [{'label': label, 'confidence': double.parse(score.toStringAsFixed(4))}]));
+        boxes.add(OnDeviceBox(label, score, toNorm(output[o], output[o + 1], output[o + 2], output[o + 3], normalized), [
+          {'label': label, 'confidence': double.parse(score.toStringAsFixed(4))}
+        ]));
       }
     } else {
       // [1, 4 + nc, N]

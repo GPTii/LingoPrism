@@ -9,8 +9,7 @@ import 'package:timezone/timezone.dart' as tz;
 class NotificationSchedulerService extends GetxService {
   NotificationSchedulerService({
     FlutterLocalNotificationsPlugin? notificationsPlugin,
-  }) : _notificationsPlugin =
-            notificationsPlugin ?? FlutterLocalNotificationsPlugin();
+  }) : _notificationsPlugin = notificationsPlugin ?? FlutterLocalNotificationsPlugin();
 
   static NotificationSchedulerService get to => Get.find();
 
@@ -37,8 +36,7 @@ class NotificationSchedulerService extends GetxService {
   }
 
   Future<void> _initializePlugin() async {
-    const androidSettings =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
     const iosSettings = DarwinInitializationSettings(
       requestAlertPermission: true,
       requestBadgePermission: true,
@@ -52,9 +50,7 @@ class NotificationSchedulerService extends GetxService {
     await _notificationsPlugin.initialize(initializationSettings);
 
     // Request permissions sequentially to avoid conflicts
-    final androidImplementation = _notificationsPlugin
-        .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>();
+    final androidImplementation = _notificationsPlugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
 
     if (androidImplementation != null) {
       try {
@@ -63,8 +59,7 @@ class NotificationSchedulerService extends GetxService {
 
         // Wait a bit and then request exact alarms permission
         await Future.delayed(const Duration(milliseconds: 100));
-        _canScheduleExact =
-            await androidImplementation.requestExactAlarmsPermission() ?? false;
+        _canScheduleExact = await androidImplementation.requestExactAlarmsPermission() ?? false;
         // Một số phiên bản plugin/platform không hỗ trợ kiểm tra trạng thái;
         // nếu request trả về false, ta vẫn giữ nguyên (_canScheduleExact) để
         // dùng lịch inexact.
@@ -107,8 +102,7 @@ class NotificationSchedulerService extends GetxService {
   /// Lên lịch thông báo thử sau [delay] (mặc định 1 phút) để kiểm tra scheduling.
   Future<void> scheduleTestNotification({Duration delay = const Duration(minutes: 1)}) async {
     await init();
-    final tz.TZDateTime scheduled =
-        tz.TZDateTime.from(DateTime.now().add(delay), tz.local);
+    final tz.TZDateTime scheduled = tz.TZDateTime.from(DateTime.now().add(delay), tz.local);
 
     const details = NotificationDetails(
       android: AndroidNotificationDetails(
@@ -135,8 +129,7 @@ class NotificationSchedulerService extends GetxService {
         scheduled,
         details,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime,
+        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
         androidAllowWhileIdle: true,
       );
     } else {
@@ -220,13 +213,11 @@ class NotificationSchedulerService extends GetxService {
         final int hour = totalMinutes ~/ 60;
         final int minute = totalMinutes % 60;
 
-        final tz.TZDateTime scheduledDate =
-            _nextInstanceOfWeekdayTime(weekday, hour, minute);
+        final tz.TZDateTime scheduledDate = _nextInstanceOfWeekdayTime(weekday, hour, minute);
 
         final notificationId = weekday * 100 + index;
 
-        final String message =
-            _notificationMessages[random.nextInt(_notificationMessages.length)];
+        final String message = _notificationMessages[random.nextInt(_notificationMessages.length)];
 
         await _notificationsPlugin.zonedSchedule(
           notificationId,
@@ -234,11 +225,8 @@ class NotificationSchedulerService extends GetxService {
           message,
           scheduledDate,
           notificationDetails,
-          androidScheduleMode: _canScheduleExact
-              ? AndroidScheduleMode.exactAllowWhileIdle
-              : AndroidScheduleMode.inexactAllowWhileIdle,
-          uiLocalNotificationDateInterpretation:
-              UILocalNotificationDateInterpretation.absoluteTime,
+          androidScheduleMode: _canScheduleExact ? AndroidScheduleMode.exactAllowWhileIdle : AndroidScheduleMode.inexactAllowWhileIdle,
+          uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
           matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
         );
       }
@@ -312,13 +300,11 @@ class NotificationSchedulerService extends GetxService {
 
   tz.TZDateTime _nextInstanceOfWeekdayTime(int weekday, int hour, int minute) {
     final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
-    tz.TZDateTime scheduledDate =
-        tz.TZDateTime(tz.local, now.year, now.month, now.day, hour, minute);
+    tz.TZDateTime scheduledDate = tz.TZDateTime(tz.local, now.year, now.month, now.day, hour, minute);
 
     while (scheduledDate.weekday != weekday || scheduledDate.isBefore(now)) {
       scheduledDate = scheduledDate.add(const Duration(days: 1));
-      scheduledDate = tz.TZDateTime(tz.local, scheduledDate.year,
-          scheduledDate.month, scheduledDate.day, hour, minute);
+      scheduledDate = tz.TZDateTime(tz.local, scheduledDate.year, scheduledDate.month, scheduledDate.day, hour, minute);
     }
     return scheduledDate;
   }

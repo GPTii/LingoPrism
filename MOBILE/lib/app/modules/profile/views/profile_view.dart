@@ -166,7 +166,8 @@ class ProfileView extends GetView<ProfileController> {
                     decoration: BoxDecoration(
                       color: AppColors.surface,
                       borderRadius: BorderRadius.circular(20.r),
-                      border: Border.fromBorderSide(BorderSide(color: AppColors.line)),),
+                      border: Border.fromBorderSide(BorderSide(color: AppColors.line)),
+                    ),
                     child: Text(
                       'Chưa có bài đăng nào',
                       style: TextStyle(
@@ -219,7 +220,8 @@ class ProfileHeader extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(28.r),
-        border: Border.fromBorderSide(BorderSide(color: AppColors.line)),),
+        border: Border.fromBorderSide(BorderSide(color: AppColors.line)),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -431,26 +433,26 @@ class RecentPostsGrid extends StatelessWidget {
       limit: 6,
       label: 'Xem thêm ảnh',
       builder: (_, shown) => GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        crossAxisSpacing: 12.w,
-        mainAxisSpacing: 12.h,
-        childAspectRatio: 1,
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 3,
+          crossAxisSpacing: 12.w,
+          mainAxisSpacing: 12.h,
+          childAspectRatio: 1,
+        ),
+        itemCount: shown,
+        itemBuilder: (_, index) {
+          final imagePath = images[index];
+          return GestureDetector(
+            onTap: () => _openPostDetail(imagePath),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(16.r),
+              child: ProfileAdaptiveImage(imagePath: imagePath),
+            ),
+          );
+        },
       ),
-      itemCount: shown,
-      itemBuilder: (_, index) {
-        final imagePath = images[index];
-        return GestureDetector(
-          onTap: () => _openPostDetail(imagePath),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(16.r),
-            child: ProfileAdaptiveImage(imagePath: imagePath),
-          ),
-        );
-      },
-    ),
     );
   }
 
@@ -489,7 +491,8 @@ class ProfileOverviewCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(22.r),
-        border: Border.all(color: data.background, width: 2),),
+        border: Border.all(color: data.background, width: 2),
+      ),
       child: Row(
         children: [
           Container(
@@ -566,8 +569,7 @@ class ProfileAvatarImage extends StatelessWidget {
       return Image.network(
         resolved,
         fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) =>
-            Image.asset(placeholder, fit: BoxFit.cover),
+        errorBuilder: (_, __, ___) => Image.asset(placeholder, fit: BoxFit.cover),
       );
     }
     if (resolved.startsWith('assets/')) {
@@ -584,8 +586,7 @@ class ProfileAvatarImage extends StatelessWidget {
         return Image.file(
           file,
           fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) =>
-              Image.asset(placeholder, fit: BoxFit.cover),
+          errorBuilder: (_, __, ___) => Image.asset(placeholder, fit: BoxFit.cover),
         );
       } catch (_) {
         return Image.asset(placeholder, fit: BoxFit.cover);
@@ -606,8 +607,7 @@ class ProfileAvatarImage extends StatelessWidget {
       return trimmed;
     }
 
-    String stripLeadingSlash(String path) =>
-        path.startsWith('/') ? path.substring(1) : path;
+    String stripLeadingSlash(String path) => path.startsWith('/') ? path.substring(1) : path;
 
     if (trimmed.startsWith('file://')) {
       try {
@@ -678,17 +678,14 @@ class _FollowButton extends StatelessWidget {
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
                         valueColor: AlwaysStoppedAnimation<Color>(
-                          isFollowing
-                              ? AppColors.primary
-                              : Colors.white,
+                          isFollowing ? AppColors.primary : Colors.white,
                         ),
                       ),
                     )
                   : Text(
                       isFollowing ? 'Đang theo dõi' : 'Theo dõi',
                       style: TextStyle(
-                        color:
-                            isFollowing ? AppColors.primary : Colors.white,
+                        color: isFollowing ? AppColors.primary : Colors.white,
                         fontWeight: FontWeight.w700,
                         fontSize: 14.sp,
                       ),

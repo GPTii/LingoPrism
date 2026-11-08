@@ -5,16 +5,13 @@ import '../../../data/services/auth_service.dart';
 import 'package:lingoprism/app/core/navigation/back.dart';
 
 class ProfileChangePasswordController extends GetxController {
-  ProfileChangePasswordController({AuthService? authService})
-      : _authService = authService ?? AuthService.to;
+  ProfileChangePasswordController({AuthService? authService}) : _authService = authService ?? AuthService.to;
 
   final AuthService _authService;
 
-  final TextEditingController currentPasswordController =
-      TextEditingController();
+  final TextEditingController currentPasswordController = TextEditingController();
   final TextEditingController newPasswordController = TextEditingController();
-  final TextEditingController confirmPasswordController =
-      TextEditingController();
+  final TextEditingController confirmPasswordController = TextEditingController();
 
   final RxBool isSaving = false.obs;
   final RxString errorMessage = ''.obs;
@@ -26,9 +23,7 @@ class ProfileChangePasswordController extends GetxController {
     final newPassword = newPasswordController.text.trim();
     final confirmPassword = confirmPasswordController.text.trim();
 
-    if (currentPassword.isEmpty ||
-        newPassword.isEmpty ||
-        confirmPassword.isEmpty) {
+    if (currentPassword.isEmpty || newPassword.isEmpty || confirmPassword.isEmpty) {
       errorMessage.value = 'Vui lòng nhập đầy đủ thông tin';
       return;
     }
@@ -51,12 +46,10 @@ class ProfileChangePasswordController extends GetxController {
           snackPosition: SnackPosition.BOTTOM,
         );
       } else {
-        errorMessage.value = result['message'] as String? ??
-            'Không thể đổi mật khẩu. Vui lòng thử lại.';
+        errorMessage.value = result['message'] as String? ?? 'Không thể đổi mật khẩu. Vui lòng thử lại.';
       }
     } catch (e) {
-      errorMessage.value =
-          'Có lỗi xảy ra khi đổi mật khẩu. Vui lòng thử lại.';
+      errorMessage.value = 'Có lỗi xảy ra khi đổi mật khẩu. Vui lòng thử lại.';
     } finally {
       isSaving.value = false;
     }

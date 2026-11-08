@@ -93,7 +93,10 @@ class _BurstPainter extends CustomPainter {
       canvas.rotate(p.spin * t);
       final paint = Paint()..color = p.color.withValues(alpha: fade);
       if (p.long) {
-        canvas.drawRRect(RRect.fromRectAndRadius(Rect.fromCenter(center: Offset.zero, width: p.size * 2.2, height: p.size * 0.8), const Radius.circular(2)), paint);
+        canvas.drawRRect(
+            RRect.fromRectAndRadius(
+                Rect.fromCenter(center: Offset.zero, width: p.size * 2.2, height: p.size * 0.8), const Radius.circular(2)),
+            paint);
       } else {
         canvas.drawCircle(Offset.zero, p.size / 2, paint);
       }
@@ -118,10 +121,13 @@ class PrismoReaction {
     if (overlay == null) return;
     _entry?.remove();
     late final OverlayEntry entry;
-    entry = OverlayEntry(builder: (_) => _ReactionToast(correct: correct, onDone: () {
-          if (_entry == entry) _entry = null;
-          entry.remove();
-        }));
+    entry = OverlayEntry(
+        builder: (_) => _ReactionToast(
+            correct: correct,
+            onDone: () {
+              if (_entry == entry) _entry = null;
+              entry.remove();
+            }));
     _entry = entry;
     overlay.insert(entry);
   }
@@ -137,7 +143,8 @@ class _ReactionToast extends StatefulWidget {
 }
 
 class _ReactionToastState extends State<_ReactionToast> with SingleTickerProviderStateMixin {
-  late final AnimationController _c = AnimationController(vsync: this, duration: const Duration(milliseconds: 260), reverseDuration: const Duration(milliseconds: 200));
+  late final AnimationController _c =
+      AnimationController(vsync: this, duration: const Duration(milliseconds: 260), reverseDuration: const Duration(milliseconds: 200));
 
   @override
   void initState() {

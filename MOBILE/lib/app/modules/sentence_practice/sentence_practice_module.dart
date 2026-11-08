@@ -192,7 +192,9 @@ class SentenceCard extends StatelessWidget {
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Flexible(child: TokenLine(tokens: sentence.tokens, language: sentence.language, highlight: sentence.targetTokens, fontSize: fontSize)),
+            Flexible(
+                child:
+                    TokenLine(tokens: sentence.tokens, language: sentence.language, highlight: sentence.targetTokens, fontSize: fontSize)),
             IconButton(
               icon: Icon(Icons.volume_up_rounded, color: AppColors.buttonActive),
               onPressed: () => TtsService.to.speak(sentence.text, sentence.ttsLocale),
@@ -201,8 +203,7 @@ class SentenceCard extends StatelessWidget {
         ),
         if (showTranslation && t != null) ...[
           SizedBox(height: 6.h),
-          Text(t.text,
-              textAlign: TextAlign.center, style: TextStyle(fontSize: 14.sp, color: AppColors.textSecondary)),
+          Text(t.text, textAlign: TextAlign.center, style: TextStyle(fontSize: 14.sp, color: AppColors.textSecondary)),
         ],
         if (sentence.source.url.isNotEmpty)
           TextButton(
@@ -253,8 +254,10 @@ class SentencePracticeView extends GetView<SentencePracticeController> {
           child: Column(mainAxisSize: MainAxisSize.min, children: [
             Text(text, textAlign: TextAlign.center, style: TextStyle(fontSize: 15.sp)),
             SizedBox(height: 16.h),
-            if (retry) ElevatedButton(onPressed: controller.load, child: const Text('Thử lại'))
-            else const ElevatedButton(onPressed: goBack, child: Text('Quay lại')),
+            if (retry)
+              ElevatedButton(onPressed: controller.load, child: const Text('Thử lại'))
+            else
+              const ElevatedButton(onPressed: goBack, child: Text('Quay lại')),
           ]),
         ),
       );
@@ -294,7 +297,8 @@ class SentencePracticeView extends GetView<SentencePracticeController> {
               decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(20.r)),
               child: Column(
                 children: [
-                  Text(_titles[ex.type] ?? '', style: TextStyle(fontSize: 14.sp, color: AppColors.textSecondary, fontWeight: FontWeight.w600)),
+                  Text(_titles[ex.type] ?? '',
+                      style: TextStyle(fontSize: 14.sp, color: AppColors.textSecondary, fontWeight: FontWeight.w600)),
                   SizedBox(height: 16.h),
                   if (ex.isTiles) _tiles(ex, res),
                   if (ex.type == 'fill') _fill(ex, res),
@@ -326,7 +330,8 @@ class SentencePracticeView extends GetView<SentencePracticeController> {
                 color: AppColors.surface,
               ),
               child: Column(mainAxisSize: MainAxisSize.min, children: [
-                if (reading) Text(zhuyin && t.zhuyin.isNotEmpty ? t.zhuyin : t.pinyin, style: TextStyle(fontSize: 10.sp, color: AppColors.textHint)),
+                if (reading)
+                  Text(zhuyin && t.zhuyin.isNotEmpty ? t.zhuyin : t.pinyin, style: TextStyle(fontSize: 10.sp, color: AppColors.textHint)),
                 Text(t.text, locale: locale, style: TextStyle(fontSize: 18.sp)),
               ]),
             ),
@@ -351,7 +356,8 @@ class SentencePracticeView extends GetView<SentencePracticeController> {
       SizedBox(height: 16.h),
       Wrap(alignment: WrapAlignment.center, spacing: 8.w, runSpacing: 8.h, children: [
         for (var i = 0; i < ex.tiles.length; i++)
-          tile(ex.tiles[i], reading: isZh && ex.type == 'arrange', hidden: controller.picked.contains(i), onTap: () => controller.pickTile(i)),
+          tile(ex.tiles[i],
+              reading: isZh && ex.type == 'arrange', hidden: controller.picked.contains(i), onTap: () => controller.pickTile(i)),
       ]),
       SizedBox(height: 20.h),
       if (res == null)
@@ -381,7 +387,8 @@ class SentencePracticeView extends GetView<SentencePracticeController> {
             borderRadius: BorderRadius.circular(16.r),
           ),
           child: language != null
-              ? LangText(opt, language: language, textAlign: TextAlign.center, style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w600))
+              ? LangText(opt,
+                  language: language, textAlign: TextAlign.center, style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w600))
               : Text(opt, style: TextStyle(fontSize: 15.sp)),
         ),
       );

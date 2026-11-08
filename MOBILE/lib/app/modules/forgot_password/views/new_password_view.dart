@@ -13,7 +13,8 @@ class NewPasswordView extends GetView<ForgotPasswordController> {
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
-          color: AppColors.primary,),
+          color: AppColors.primary,
+        ),
         child: SafeArea(
           child: Column(
             children: [
@@ -125,9 +126,7 @@ class NewPasswordView extends GetView<ForgotPasswordController> {
                                       suffixIcon: IconButton(
                                         onPressed: controller.toggleNewPasswordVisibility,
                                         icon: Icon(
-                                          controller.isNewPasswordVisible
-                                              ? Icons.visibility
-                                              : Icons.visibility_off,
+                                          controller.isNewPasswordVisible ? Icons.visibility : Icons.visibility_off,
                                           color: AppColors.textSecondary,
                                         ),
                                       ),
@@ -185,9 +184,7 @@ class NewPasswordView extends GetView<ForgotPasswordController> {
                                       suffixIcon: IconButton(
                                         onPressed: controller.toggleConfirmPasswordVisibility,
                                         icon: Icon(
-                                          controller.isConfirmPasswordVisible
-                                              ? Icons.visibility
-                                              : Icons.visibility_off,
+                                          controller.isConfirmPasswordVisible ? Icons.visibility : Icons.visibility_off,
                                           color: AppColors.textSecondary,
                                         ),
                                       ),
@@ -249,13 +246,10 @@ class NewPasswordView extends GetView<ForgotPasswordController> {
                         SizedBox(
                           width: double.infinity,
                           child: Obx(() => ElevatedButton(
-                                onPressed: controller.isLoading || !controller.canResetPassword
-                                    ? null
-                                    : controller.resetPassword,
+                                onPressed: controller.isLoading || !controller.canResetPassword ? null : controller.resetPassword,
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: controller.canResetPassword && !controller.isLoading
-                                      ? AppColors.primary
-                                      : AppColors.lineStrong,
+                                  backgroundColor:
+                                      controller.canResetPassword && !controller.isLoading ? AppColors.primary : AppColors.lineStrong,
                                   padding: EdgeInsets.symmetric(vertical: 16.h),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(12.r),

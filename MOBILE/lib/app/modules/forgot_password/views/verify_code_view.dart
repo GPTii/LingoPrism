@@ -210,13 +210,10 @@ class VerifyCodeView extends GetView<ForgotPasswordController> {
                         SizedBox(
                           width: double.infinity,
                           child: Obx(() => ElevatedButton(
-                                onPressed: controller.isLoading || !controller.canVerifyCode
-                                    ? null
-                                    : controller.verifyCode,
+                                onPressed: controller.isLoading || !controller.canVerifyCode ? null : controller.verifyCode,
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: controller.canVerifyCode && !controller.isLoading
-                                      ? AppColors.buttonActive
-                                      : AppColors.buttonDisabled,
+                                  backgroundColor:
+                                      controller.canVerifyCode && !controller.isLoading ? AppColors.buttonActive : AppColors.buttonDisabled,
                                   padding: EdgeInsets.symmetric(vertical: 16.h),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(12.r),

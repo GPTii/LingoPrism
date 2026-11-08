@@ -74,12 +74,12 @@ class RegisterController extends GetxController {
     final confirmPasswordError = _confirmPasswordError.value;
 
     return emailText.isNotEmpty &&
-           passwordText.isNotEmpty &&
-           confirmPasswordText.isNotEmpty &&
-           emailError.isEmpty &&
-           passwordError.isEmpty &&
-           confirmPasswordError.isEmpty &&
-           acceptedTerms.value;
+        passwordText.isNotEmpty &&
+        confirmPasswordText.isNotEmpty &&
+        emailError.isEmpty &&
+        passwordError.isEmpty &&
+        confirmPasswordError.isEmpty &&
+        acceptedTerms.value;
   }
 
   void togglePasswordVisibility() {
@@ -134,9 +134,7 @@ class RegisterController extends GetxController {
     _validatePassword();
     _validateConfirmPassword();
 
-    if (_emailError.value.isNotEmpty ||
-        _passwordError.value.isNotEmpty ||
-        _confirmPasswordError.value.isNotEmpty) {
+    if (_emailError.value.isNotEmpty || _passwordError.value.isNotEmpty || _confirmPasswordError.value.isNotEmpty) {
       return;
     }
 
@@ -145,10 +143,7 @@ class RegisterController extends GetxController {
     try {
       final email = emailController.text.trim();
       final password = passwordController.text;
-      final displayName =
-          displayNameController.text.trim().isEmpty
-              ? null
-              : displayNameController.text.trim();
+      final displayName = displayNameController.text.trim().isEmpty ? null : displayNameController.text.trim();
 
       final response = await _authService.register(
         email: email,

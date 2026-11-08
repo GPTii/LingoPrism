@@ -153,13 +153,10 @@ class ForgotPasswordView extends GetView<ForgotPasswordController> {
                         SizedBox(
                           width: double.infinity,
                           child: Obx(() => ElevatedButton(
-                                onPressed: controller.isLoading || !controller.canSendCode
-                                    ? null
-                                    : controller.sendResetCode,
+                                onPressed: controller.isLoading || !controller.canSendCode ? null : controller.sendResetCode,
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: controller.canSendCode && !controller.isLoading
-                                      ? AppColors.buttonActive
-                                      : AppColors.buttonDisabled,
+                                  backgroundColor:
+                                      controller.canSendCode && !controller.isLoading ? AppColors.buttonActive : AppColors.buttonDisabled,
                                   padding: EdgeInsets.symmetric(vertical: 16.h),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(12.r),

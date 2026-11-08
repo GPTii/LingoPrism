@@ -31,8 +31,7 @@ class NotificationView extends GetView<NotificationController> {
         ),
         actions: [
           Obx(() {
-            final hasUnread =
-                controller.notifications.any((element) => !element.isRead);
+            final hasUnread = controller.notifications.any((element) => !element.isRead);
             if (!hasUnread) {
               return const SizedBox.shrink();
             }
@@ -138,9 +137,7 @@ class NotificationView extends GetView<NotificationController> {
     final isFollow = notification.type == NotificationType.follow;
     final opacity = notification.isRead ? 0.65 : 1.0;
 
-    final card = isFollow
-        ? _buildFollowCard(notification)
-        : _buildDefaultCard(notification);
+    final card = isFollow ? _buildFollowCard(notification) : _buildDefaultCard(notification);
 
     return GestureDetector(
       onTap: () => controller.onNotificationTap(notification),
@@ -164,8 +161,11 @@ class NotificationView extends GetView<NotificationController> {
         return Padding(
           padding: EdgeInsets.only(top: 6.h, left: 4.w),
           child: Text(
-            state == 'accepted' ? (friend ? 'Đã là bạn bè' : 'Đã duyệt vào nhóm') : (friend ? 'Lời mời không còn' : 'Yêu cầu đã được xử lý'),
-            style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w600, color: state == 'accepted' ? AppColors.success : AppColors.textSecondary),
+            state == 'accepted'
+                ? (friend ? 'Đã là bạn bè' : 'Đã duyệt vào nhóm')
+                : (friend ? 'Lời mời không còn' : 'Yêu cầu đã được xử lý'),
+            style: TextStyle(
+                fontSize: 13.sp, fontWeight: FontWeight.w600, color: state == 'accepted' ? AppColors.success : AppColors.textSecondary),
           ),
         );
       }
@@ -380,8 +380,7 @@ class NotificationView extends GetView<NotificationController> {
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
                     value: loadingProgress.expectedTotalBytes != null
-                        ? loadingProgress.cumulativeBytesLoaded /
-                            loadingProgress.expectedTotalBytes!
+                        ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
                         : null,
                   ),
                 ),

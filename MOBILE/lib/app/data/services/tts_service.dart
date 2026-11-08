@@ -33,8 +33,7 @@ class TtsService extends GetxService {
   Future<bool> speak(String text, String locale) async {
     if (text.trim().isEmpty) return false;
     if (!await _hasLocale(locale)) {
-      Get.snackbar('Chưa có giọng đọc $locale',
-          'Hãy cài thêm giọng đọc trong Cài đặt > Chuyển văn bản thành giọng nói của điện thoại.',
+      Get.snackbar('Chưa có giọng đọc $locale', 'Hãy cài thêm giọng đọc trong Cài đặt > Chuyển văn bản thành giọng nói của điện thoại.',
           snackPosition: SnackPosition.BOTTOM);
       return false;
     }

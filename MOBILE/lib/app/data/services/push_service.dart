@@ -53,8 +53,11 @@ class PushService {
         FirebaseMessaging.onMessage.listen((m) {
           final n = m.notification;
           if (n != null) {
-            Get.snackbar(n.title ?? 'LingoPrism', n.body ?? '', snackPosition: SnackPosition.TOP,
-                onTap: (_) => _open(m.data), duration: const Duration(seconds: 4), margin: const EdgeInsets.all(12));
+            Get.snackbar(n.title ?? 'LingoPrism', n.body ?? '',
+                snackPosition: SnackPosition.TOP,
+                onTap: (_) => _open(m.data),
+                duration: const Duration(seconds: 4),
+                margin: const EdgeInsets.all(12));
           }
         });
         FirebaseMessaging.onMessageOpenedApp.listen((m) => _open(m.data));

@@ -89,14 +89,16 @@ class VocabularyListController extends GetxController {
   }
 
   String getWordStatus(String vocabularyId) {
-    return _items.firstWhere(
-      (item) => item.id == vocabularyId,
-      orElse: () => VocabularyItem(
-        id: vocabularyId,
-        word: '',
-        translation: '',
-      ),
-    ).status;
+    return _items
+        .firstWhere(
+          (item) => item.id == vocabularyId,
+          orElse: () => VocabularyItem(
+            id: vocabularyId,
+            word: '',
+            translation: '',
+          ),
+        )
+        .status;
   }
 
   Future<void> playPronunciation(String audioUrl) async {
@@ -197,9 +199,7 @@ class VocabularyListController extends GetxController {
                 vocab.isFavorite ? Icons.favorite : Icons.favorite_border,
               ),
               title: Text(
-                vocab.isFavorite
-                    ? 'Bỏ khỏi yêu thích'
-                    : 'Thêm vào yêu thích',
+                vocab.isFavorite ? 'Bỏ khỏi yêu thích' : 'Thêm vào yêu thích',
               ),
               onTap: () {
                 goBack();

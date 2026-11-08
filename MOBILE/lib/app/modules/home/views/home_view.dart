@@ -22,22 +22,22 @@ class HomeView extends GetView<HomeController> {
       body: Column(children: [
         const VerifyEmailBanner(),
         Expanded(child: Obx(() {
-        switch (controller.currentIndex) {
-          case 0:
-            return const LearningTabView();
-          case 1:
-            return const LearnHubView();
-          case 2:
-            return const ReviewView(); // the word library ("Từ vựng")
-          case 3:
-            if (!Get.isRegistered<ProfileController>()) {
-              Get.lazyPut(() => ProfileController());
-            }
-            return const ProfileView();
-          default:
-            return const LearningTabView();
-        }
-      })),
+          switch (controller.currentIndex) {
+            case 0:
+              return const LearningTabView();
+            case 1:
+              return const LearnHubView();
+            case 2:
+              return const ReviewView(); // the word library ("Từ vựng")
+            case 3:
+              if (!Get.isRegistered<ProfileController>()) {
+                Get.lazyPut(() => ProfileController());
+              }
+              return const ProfileView();
+            default:
+              return const LearningTabView();
+          }
+        })),
       ]),
       bottomNavigationBar: Obx(() => DecoratedBox(
             decoration: BoxDecoration(border: Border(top: BorderSide(color: AppColors.line))),

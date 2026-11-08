@@ -25,7 +25,18 @@ import '../../../core/widgets/target_word.dart';
 import 'package:lingoprism/app/core/navigation/back.dart';
 
 const _monthNames = [
-  'Một', 'Hai', 'Ba', 'Tư', 'Năm', 'Sáu', 'Bảy', 'Tám', 'Chín', 'Mười', 'Mười Một', 'Mười Hai',
+  'Một',
+  'Hai',
+  'Ba',
+  'Tư',
+  'Năm',
+  'Sáu',
+  'Bảy',
+  'Tám',
+  'Chín',
+  'Mười',
+  'Mười Một',
+  'Mười Hai',
 ];
 
 /// Home tab, same structure as the web home page: "today" on the ink surface with the goal
@@ -50,63 +61,63 @@ class LearningTabView extends GetView<HomeStatsController> {
           value: AppColors.isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
           // a strip the colour of the top block behind the status bar: the page scrolls under it, not under the clock
           child: Stack(children: [
-           RefreshIndicator(
-            color: AppColors.primary,
-            onRefresh: progressController.refreshProgress,
-            child: ListView(
-              padding: EdgeInsets.zero,
-              children: [
-                // the top block: the header, the greeting and the day's light (white in light mode, ink in dark)
-                Obx(() => _buildTodayCard(
-                      devicePixelRatio,
-                      user: statsUser,
-                      learned: progressController.newLearned.value,
-                      target: progressController.newTarget.value,
-                      due: progressController.dueNow.value,
-                      header: _buildHeader(devicePixelRatio, user: statsUser, streak: streak, unreadNotifications: unread),
-                    )),
-                Padding(
-                  padding: EdgeInsets.fromLTRB(16.w, 24.h, 16.w, 32.h),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                          const _TodayWord(),
-                          SizedBox(height: 24.h),
-                          _buildCameraCard(),
-                          Align(
-                            alignment: Alignment.centerRight,
-                            child: TextButton.icon(
-                              onPressed: () => Get.toNamed(Routes.liveCamera),
-                              icon: const Icon(Icons.center_focus_strong_rounded, size: 18),
-                              label: const Text('Camera trực tiếp (thử nghiệm)'),
-                            ),
+            RefreshIndicator(
+              color: AppColors.primary,
+              onRefresh: progressController.refreshProgress,
+              child: ListView(
+                padding: EdgeInsets.zero,
+                children: [
+                  // the top block: the header, the greeting and the day's light (white in light mode, ink in dark)
+                  Obx(() => _buildTodayCard(
+                        devicePixelRatio,
+                        user: statsUser,
+                        learned: progressController.newLearned.value,
+                        target: progressController.newTarget.value,
+                        due: progressController.dueNow.value,
+                        header: _buildHeader(devicePixelRatio, user: statsUser, streak: streak, unreadNotifications: unread),
+                      )),
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(16.w, 24.h, 16.w, 32.h),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const _TodayWord(),
+                        SizedBox(height: 24.h),
+                        _buildCameraCard(),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton.icon(
+                            onPressed: () => Get.toNamed(Routes.liveCamera),
+                            icon: const Icon(Icons.center_focus_strong_rounded, size: 18),
+                            label: const Text('Camera trực tiếp (thử nghiệm)'),
                           ),
-                          SizedBox(height: 8.h),
-                          _buildGamesCard(),
-                          SizedBox(height: 20.h),
-                          const LevelPathCard(),
-                          SizedBox(height: 12.h),
-                          _buildQuickActions(),
-                          SizedBox(height: 28.h),
-                          _sectionTitle('Nhiệm vụ'),
-                          SizedBox(height: 12.h),
-                          Obx(() {
-                            final monthly = progressController.monthlyQuest.value;
-                            return _buildMonthlyQuest(
-                              devicePixelRatio,
-                              current: monthly?.completedCount ?? 0,
-                              total: progressController.monthlyTarget,
-                            );
-                          }),
-                          SizedBox(height: 12.h),
-                          Obx(() => _buildDailyQuests(devicePixelRatio, progressController.dailyQuests)),
-                    ],
+                        ),
+                        SizedBox(height: 8.h),
+                        _buildGamesCard(),
+                        SizedBox(height: 20.h),
+                        const LevelPathCard(),
+                        SizedBox(height: 12.h),
+                        _buildQuickActions(),
+                        SizedBox(height: 28.h),
+                        _sectionTitle('Nhiệm vụ'),
+                        SizedBox(height: 12.h),
+                        Obx(() {
+                          final monthly = progressController.monthlyQuest.value;
+                          return _buildMonthlyQuest(
+                            devicePixelRatio,
+                            current: monthly?.completedCount ?? 0,
+                            total: progressController.monthlyTarget,
+                          );
+                        }),
+                        SizedBox(height: 12.h),
+                        Obx(() => _buildDailyQuests(devicePixelRatio, progressController.dailyQuests)),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-           Positioned(top: 0, left: 0, right: 0, height: MediaQuery.paddingOf(context).top, child: ColoredBox(color: _Hero.bg)),
+            Positioned(top: 0, left: 0, right: 0, height: MediaQuery.paddingOf(context).top, child: ColoredBox(color: _Hero.bg)),
           ]),
         );
       }),
@@ -127,7 +138,13 @@ class LearningTabView extends GetView<HomeStatsController> {
 
   String _greeting() {
     final h = DateTime.now().hour;
-    return h < 11 ? 'Chào buổi sáng' : h < 14 ? 'Chào buổi trưa' : h < 18 ? 'Chào buổi chiều' : 'Chào buổi tối';
+    return h < 11
+        ? 'Chào buổi sáng'
+        : h < 14
+            ? 'Chào buổi trưa'
+            : h < 18
+                ? 'Chào buổi chiều'
+                : 'Chào buổi tối';
   }
 
   // ---------------------------------------------------------------- today
@@ -186,8 +203,7 @@ class LearningTabView extends GetView<HomeStatsController> {
             Row(children: [
               _LangGlyph(user: user),
               SizedBox(width: 8.w),
-              Text('Đang học ${user.languageLabel.toLowerCase()}',
-                  style: TextStyle(color: _Hero.soft, fontSize: 13.sp)),
+              Text('Đang học ${user.languageLabel.toLowerCase()}', style: TextStyle(color: _Hero.soft, fontSize: 13.sp)),
             ]),
           SizedBox(height: 10.h),
           Text(
@@ -255,8 +271,7 @@ class LearningTabView extends GetView<HomeStatsController> {
             SizedBox(width: 14.w),
             Expanded(
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text('Chụp một đồ vật',
-                    style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+                Text('Chụp một đồ vật', style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
                 SizedBox(height: 2.h),
                 Text('Nhận ra vật trong ảnh, cho ngay từ Việt · Anh · Trung.',
                     style: TextStyle(fontSize: 13.sp, color: AppColors.textSecondary, height: 1.35)),
@@ -325,10 +340,7 @@ class LearningTabView extends GetView<HomeStatsController> {
     return Row(children: [
       item('mic', 'Luyện phát âm', Routes.speakPractice),
       SizedBox(width: 8.w),
-      if (learningVietnamese)
-        item('pencil', 'Học đọc – viết', Routes.literacyMap)
-      else
-        item('tiles', 'Luyện câu', Routes.sentencePractice),
+      if (learningVietnamese) item('pencil', 'Học đọc – viết', Routes.literacyMap) else item('tiles', 'Luyện câu', Routes.sentencePractice),
       SizedBox(width: 8.w),
       item('exam', 'Bài kiểm tra', Routes.examList),
     ]);
@@ -467,9 +479,7 @@ class LearningTabView extends GetView<HomeStatsController> {
 
   Future<void> _handleReviewTap() async {
     try {
-      final reviewController = Get.isRegistered<ReviewController>()
-          ? Get.find<ReviewController>()
-          : Get.put(ReviewController());
+      final reviewController = Get.isRegistered<ReviewController>() ? Get.find<ReviewController>() : Get.put(ReviewController());
       Get.log('LearningTab: Bắt đầu luồng Ôn tập ngay từ trang chủ');
       await reviewController.startReviewSession();
     } catch (e, stack) {
@@ -775,12 +785,8 @@ class LearningTabView extends GetView<HomeStatsController> {
     final targetHeightPx = (height * safeRatio).clamp(1, double.maxFinite).round();
     const maxDimensionPx = 512;
 
-    final cacheWidth = targetWidthPx > maxDimensionPx
-        ? maxDimensionPx
-        : targetWidthPx;
-    final cacheHeight = targetHeightPx > maxDimensionPx
-        ? (targetHeightPx * (cacheWidth / targetWidthPx)).round()
-        : targetHeightPx;
+    final cacheWidth = targetWidthPx > maxDimensionPx ? maxDimensionPx : targetWidthPx;
+    final cacheHeight = targetHeightPx > maxDimensionPx ? (targetHeightPx * (cacheWidth / targetWidthPx)).round() : targetHeightPx;
 
     return Image.asset(
       imagePath,
@@ -881,9 +887,8 @@ class _InkButton extends StatelessWidget {
           child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
             if (icon != null) ...[Icon(icon, size: 18.sp, color: fg), SizedBox(width: 6.w)],
             Flexible(
-              child: Text(label,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(color: fg, fontWeight: FontWeight.w700, fontSize: 15.sp)),
+              child:
+                  Text(label, overflow: TextOverflow.ellipsis, style: TextStyle(color: fg, fontWeight: FontWeight.w700, fontSize: 15.sp)),
             ),
           ]),
         ),
@@ -901,7 +906,11 @@ class _LangGlyph extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final lang = user.activeLanguage;
-    final color = lang == 'zh' ? AppColors.beamCoral : lang == 'vi' ? AppColors.beamMint : AppColors.beamAmber;
+    final color = lang == 'zh'
+        ? AppColors.beamCoral
+        : lang == 'vi'
+            ? AppColors.beamMint
+            : AppColors.beamAmber;
     final text = lang == 'zh' ? (user.zhScript == 'hant' ? '繁' : '简') : lang.toUpperCase();
     return Container(
       width: 20.w,
@@ -960,8 +969,22 @@ class _TodayWordState extends State<_TodayWord> {
         if (data == null) return const SizedBox.shrink();
         final (zh, en) = data;
         final rows = [
-          ('EN', 'Tiếng Anh', AppColors.beamAmber, en?.target?.text ?? zh.english ?? '', (en?.target?.ipa ?? '').isEmpty ? '' : '/${en!.target!.ipa}/', en?.target),
-          (zh.target?.language == 'zh-Hant' ? '繁' : '简', 'Tiếng Trung', AppColors.beamCoral, zh.target?.text ?? '', zh.target?.pinyin ?? '', zh.target),
+          (
+            'EN',
+            'Tiếng Anh',
+            AppColors.beamAmber,
+            en?.target?.text ?? zh.english ?? '',
+            (en?.target?.ipa ?? '').isEmpty ? '' : '/${en!.target!.ipa}/',
+            en?.target
+          ),
+          (
+            zh.target?.language == 'zh-Hant' ? '繁' : '简',
+            'Tiếng Trung',
+            AppColors.beamCoral,
+            zh.target?.text ?? '',
+            zh.target?.pinyin ?? '',
+            zh.target
+          ),
           ('VI', 'Tiếng Việt', AppColors.beamMint, zh.meaningVi, '', null),
         ];
         return Column(
@@ -981,8 +1004,8 @@ class _TodayWordState extends State<_TodayWord> {
                 if (zh.image != null)
                   ClipRRect(
                     borderRadius: BorderRadius.circular(14.r),
-                    child: Image.network(zh.image!, height: 150.h, width: double.infinity, fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => const SizedBox.shrink()),
+                    child: Image.network(zh.image!,
+                        height: 150.h, width: double.infinity, fit: BoxFit.cover, errorBuilder: (_, __, ___) => const SizedBox.shrink()),
                   ),
                 for (final r in rows)
                   Container(
@@ -995,7 +1018,9 @@ class _TodayWordState extends State<_TodayWord> {
                         height: 22.w,
                         alignment: Alignment.center,
                         decoration: BoxDecoration(color: r.$3, borderRadius: BorderRadius.circular(5.r)),
-                        child: Text(r.$1, style: TextStyle(color: AppColors.ink, fontWeight: FontWeight.w700, fontSize: r.$1.length > 1 ? 9.sp : 12.sp, height: 1)),
+                        child: Text(r.$1,
+                            style: TextStyle(
+                                color: AppColors.ink, fontWeight: FontWeight.w700, fontSize: r.$1.length > 1 ? 9.sp : 12.sp, height: 1)),
                       ),
                       SizedBox(width: 12.w),
                       Expanded(

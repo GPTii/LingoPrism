@@ -9,8 +9,8 @@ import '../theme/app_colors.dart';
 /// Vietnamese – a machine translation shown under the bubble, only to me. Same as the web MessageActions.
 /// The hearts are shown under the bubble; tapping them (or double-tapping the bubble) toggles mine.
 class MessageActions extends StatefulWidget {
-  const MessageActions({super.key, required this.child, required this.text, required this.hearts, required this.me,
-      required this.mine, this.onHeart});
+  const MessageActions(
+      {super.key, required this.child, required this.text, required this.hearts, required this.me, required this.mine, this.onHeart});
 
   final Widget child;
 
@@ -48,8 +48,8 @@ class _MessageActionsState extends State<MessageActions> {
     }
     setState(() => _busy = true);
     try {
-      final d = Map<String, dynamic>.from(await ApiClient.to.post<dynamic>('/translate/',
-          data: {'text': widget.text, 'source': 'auto', 'target': 'vi'}) as Map);
+      final d = Map<String, dynamic>.from(
+          await ApiClient.to.post<dynamic>('/translate/', data: {'text': widget.text, 'source': 'auto', 'target': 'vi'}) as Map);
       if (!mounted) return;
       setState(() {
         _translation = (text: d['translation'] as String? ?? '', reading: d['source_reading'] as String? ?? '');

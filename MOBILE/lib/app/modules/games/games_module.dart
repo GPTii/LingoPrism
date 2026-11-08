@@ -56,6 +56,7 @@ class GameMapController extends GetxController {
   /// one key per stop, to scroll to the stop a friend is at
   final Map<String, GlobalKey> stopKeys = {};
   GlobalKey keyOf(String node) => stopKeys.putIfAbsent(node, GlobalKey.new);
+
   /// the stop circles, for the trail of the scenery (game_scenery.dart)
   final Map<String, GlobalKey> circleKeys = {};
   GlobalKey circleKeyOf(String node) => circleKeys.putIfAbsent(node, GlobalKey.new);
@@ -71,7 +72,8 @@ class GameMapController extends GetxController {
     if (at != null) {
       Scrollable.ensureVisible(at, alignment: 0.5, duration: const Duration(milliseconds: 450), curve: Curves.easeOutCubic);
     } else {
-      Get.snackbar(f.who.displayName, 'Đang ở cấp ${levelOf(f.node)} – thắng màn trùm để theo kịp nhé!', snackPosition: SnackPosition.BOTTOM);
+      Get.snackbar(f.who.displayName, 'Đang ở cấp ${levelOf(f.node)} – thắng màn trùm để theo kịp nhé!',
+          snackPosition: SnackPosition.BOTTOM);
     }
   }
 
@@ -119,9 +121,11 @@ class GameMapController extends GetxController {
   void _locked(Json lock) {
     final reason = asString(lock['reason']);
     if (reason == 'learn') {
-      _ask('Học trước rồi chơi nhé!',
+      _ask(
+          'Học trước rồi chơi nhé!',
           'Màn này dùng những từ bạn đã học. Hãy học thêm ${asInt(lock['need'])} từ ở cấp ${asInt(lock['level'])} để mở.',
-          'Đi học từ mới', () => Get.toNamed(Routes.learningSession, arguments: const LearningSessionArguments(kind: 'learn')));
+          'Đi học từ mới',
+          () => Get.toNamed(Routes.learningSession, arguments: const LearningSessionArguments(kind: 'learn')));
     } else if (reason == 'lesson') {
       _ask('Học bài trước rồi chơi nhé!', 'Màn này mở khi con học xong bài “${asString(lock['title'])}”.',
           'Học bài ${asInt(lock['lesson'])}', () => Get.toNamed(Routes.literacyLesson, arguments: asInt(lock['lesson'])));
@@ -136,7 +140,12 @@ class GameMapController extends GetxController {
       content: Text(text),
       actions: [
         TextButton(onPressed: () => goBack(), child: const Text('Để sau')),
-        FilledButton(onPressed: () { goBack(); go(); }, child: Text(action)),
+        FilledButton(
+            onPressed: () {
+              goBack();
+              go();
+            },
+            child: Text(action)),
       ],
     ));
   }
@@ -153,7 +162,9 @@ class GameMapView extends GetView<GameMapController> {
       body: Obx(() {
         final d = controller.data.value;
         if (d == null) {
-          if (controller.error.isNotEmpty) return Center(child: Padding(padding: EdgeInsets.all(24.w), child: Text(controller.error.value)));
+          if (controller.error.isNotEmpty) {
+            return Center(child: Padding(padding: EdgeInsets.all(24.w), child: Text(controller.error.value)));
+          }
           return const Center(child: CircularProgressIndicator());
         }
         final reading = asString(d['track']) == 'reading';
@@ -196,7 +207,8 @@ class GameMapView extends GetView<GameMapController> {
     return Container(
       margin: EdgeInsets.only(bottom: 16.h),
       padding: EdgeInsets.all(14.w),
-      decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(20.r), border: Border.all(color: AppColors.line)),
+      decoration:
+          BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(20.r), border: Border.all(color: AppColors.line)),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text('Bạn bè đang chơi', style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
         SizedBox(height: 10.h),
@@ -223,7 +235,9 @@ class GameMapView extends GetView<GameMapController> {
                       child: Column(children: [
                         PersonAvatar(avatar: f.who.avatar, look: f.who.mascot, size: 46.r),
                         SizedBox(height: 4.h),
-                        Text(f.who.displayName, maxLines: 1, overflow: TextOverflow.ellipsis,
+                        Text(f.who.displayName,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
                         Text(f.finished ? 'Đã phá đảo!' : 'Cấp ${levelOf(f.node)}',
                             style: TextStyle(fontSize: 11.sp, color: AppColors.textSecondary)),
@@ -245,33 +259,34 @@ class GameMapView extends GetView<GameMapController> {
     final nodes = asMapList(level['nodes']);
     return Container(
       margin: EdgeInsets.only(bottom: 18.h),
-      decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(20.r),
-          border: Border.all(color: AppColors.line)),
+      decoration:
+          BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(20.r), border: Border.all(color: AppColors.line)),
       clipBehavior: Clip.antiAlias,
       child: Column(children: [
         Container(
           color: color,
           padding: EdgeInsets.all(16.w),
           child: Stack(clipBehavior: Clip.none, children: [
-           Positioned(right: 0, bottom: -18.h, child: bannerArt(n)), // under the count, clear of the text
-           Row(children: [
-            Expanded(
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text('Cấp $n', style: TextStyle(color: Colors.white70, fontSize: 12.sp)),
-                Text(asString(level['name']), style: TextStyle(color: Colors.white, fontSize: 22.sp, fontWeight: FontWeight.w800)),
-                Text(asString(level['description']), style: TextStyle(color: Colors.white70, fontSize: 12.sp)),
+            Positioned(right: 0, bottom: -18.h, child: bannerArt(n)), // under the count, clear of the text
+            Row(children: [
+              Expanded(
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text('Cấp $n', style: TextStyle(color: Colors.white70, fontSize: 12.sp)),
+                  Text(asString(level['name']), style: TextStyle(color: Colors.white, fontSize: 22.sp, fontWeight: FontWeight.w800)),
+                  Text(asString(level['description']), style: TextStyle(color: Colors.white70, fontSize: 12.sp)),
+                ]),
+              ),
+              Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+                Text('${asInt(level['done'])}/${asInt(level['total'])}',
+                    style: TextStyle(color: Colors.white, fontSize: 18.sp, fontWeight: FontWeight.w700)),
+                if (!unlocked) const Icon(Icons.lock_rounded, color: Colors.white70),
+                if (!unlocked)
+                  _FriendsHere([
+                    for (final e in here.entries)
+                      if (levelOf(e.key) == n) ...e.value
+                  ], size: 26.r),
               ]),
-            ),
-            Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-              Text('${asInt(level['done'])}/${asInt(level['total'])}',
-                  style: TextStyle(color: Colors.white, fontSize: 18.sp, fontWeight: FontWeight.w700)),
-              if (!unlocked) const Icon(Icons.lock_rounded, color: Colors.white70),
-              if (!unlocked)
-                _FriendsHere([for (final e in here.entries) if (levelOf(e.key) == n) ...e.value], size: 26.r),
             ]),
-          ]),
           ]),
         ),
         if (!unlocked)
@@ -280,7 +295,9 @@ class GameMapView extends GetView<GameMapController> {
             child: Row(children: [
               Image.asset('assets/brand/mascot/prismo_sleepy.png', width: 48.w, height: 48.w),
               SizedBox(width: 10.w),
-              Expanded(child: Text('Thắng màn trùm của cấp trước để mở cấp này.', style: TextStyle(color: AppColors.textSecondary, fontSize: 13.sp))),
+              Expanded(
+                  child: Text('Thắng màn trùm của cấp trước để mở cấp này.',
+                      style: TextStyle(color: AppColors.textSecondary, fontSize: 13.sp))),
             ]),
           )
         else
@@ -289,25 +306,29 @@ class GameMapView extends GetView<GameMapController> {
             circleKeys: [for (final s in nodes) controller.circleKeyOf(asString(s['id']))],
             progress: math.max(0, nodes.lastIndexWhere((s) => asString(s['status']) == 'done' || asString(s['id']) == current)),
             child: Padding(
-            padding: EdgeInsets.only(top: 44.h, bottom: 24.h),
-            child: Column(children: [
-              for (var k = 0; k < nodes.length; k++)
-                Padding(
-                  key: controller.keyOf(asString(nodes[k]['id'])),
-                  padding: EdgeInsets.only(bottom: 30.h),
-                  child: Transform.translate(
-                    offset: Offset(math.sin(k * 0.85) * 70.w, 0),
-                    child: _withFriends(
-                      _StopButton(stop: nodes[k], color: color, current: asString(nodes[k]['id']) == current, onTap: () => controller.tap(nodes[k]),
-                          circleKey: controller.circleKeyOf(asString(nodes[k]['id']))),
-                      here[asString(nodes[k]['id'])] ?? const [],
-                      // friends stand beside the stop, on the side facing the middle of the path
-                      left: math.sin(k * 0.85) > 0,
+              padding: EdgeInsets.only(top: 44.h, bottom: 24.h),
+              child: Column(children: [
+                for (var k = 0; k < nodes.length; k++)
+                  Padding(
+                    key: controller.keyOf(asString(nodes[k]['id'])),
+                    padding: EdgeInsets.only(bottom: 30.h),
+                    child: Transform.translate(
+                      offset: Offset(math.sin(k * 0.85) * 70.w, 0),
+                      child: _withFriends(
+                        _StopButton(
+                            stop: nodes[k],
+                            color: color,
+                            current: asString(nodes[k]['id']) == current,
+                            onTap: () => controller.tap(nodes[k]),
+                            circleKey: controller.circleKeyOf(asString(nodes[k]['id']))),
+                        here[asString(nodes[k]['id'])] ?? const [],
+                        // friends stand beside the stop, on the side facing the middle of the path
+                        left: math.sin(k * 0.85) > 0,
+                      ),
                     ),
                   ),
-                ),
-            ]),
-          ),
+              ]),
+            ),
           ),
       ]),
     );
@@ -318,7 +339,8 @@ class GameMapView extends GetView<GameMapController> {
 Widget _withFriends(Widget stop, List<Author> friends, {required bool left}) {
   if (friends.isEmpty) return stop;
   final side = SizedBox(width: 74.w);
-  final faces = SizedBox(width: 74.w, child: Align(alignment: left ? Alignment.centerRight : Alignment.centerLeft, child: _FriendsHere(friends)));
+  final faces =
+      SizedBox(width: 74.w, child: Align(alignment: left ? Alignment.centerRight : Alignment.centerLeft, child: _FriendsHere(friends)));
   return Row(mainAxisSize: MainAxisSize.min, children: [
     Padding(padding: EdgeInsets.only(right: 8.w), child: left ? faces : side),
     stop,
@@ -343,13 +365,18 @@ class _FriendsHere extends StatelessWidget {
     final more = friends.length - shown.length;
     final names = friends.map((f) => f.displayName).join(', ');
     Widget ring(Widget child) => Container(
-        decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: Colors.white, width: 2.5), boxShadow: const [BoxShadow(color: Color(0x22000000), blurRadius: 3)]),
+        decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(color: Colors.white, width: 2.5),
+            boxShadow: const [BoxShadow(color: Color(0x22000000), blurRadius: 3)]),
         child: child);
     final faces = [
       for (final f in shown) ring(PersonAvatar(avatar: f.avatar, look: f.mascot, size: d)),
       if (more > 0)
         ring(Container(
-            width: d, height: d, alignment: Alignment.center,
+            width: d,
+            height: d,
+            alignment: Alignment.center,
             decoration: const BoxDecoration(color: Color(0xFFE2E8F0), shape: BoxShape.circle),
             child: Text('+$more', style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w800, color: AppColors.textSecondary)))),
     ];
@@ -388,8 +415,16 @@ class _StopButton extends StatelessWidget {
     final boss = kind == 'boss';
     final size = (boss ? 88 : 68).w;
     final locked = status == 'locked';
-    final face = locked ? const Color(0xFFD5DCE6) : status == 'done' ? _green : color;
-    final lip = locked ? const Color(0xFFAAB6C4) : status == 'done' ? _greenLip : Color.lerp(color, Colors.black, 0.3)!;
+    final face = locked
+        ? const Color(0xFFD5DCE6)
+        : status == 'done'
+            ? _green
+            : color;
+    final lip = locked
+        ? const Color(0xFFAAB6C4)
+        : status == 'done'
+            ? _greenLip
+            : Color.lerp(color, Colors.black, 0.3)!;
     Widget inner;
     if (kind == 'chest') {
       inner = Opacity(opacity: status == 'done' ? 0.55 : 1, child: AppIcon('chest', size: size * 0.62));
@@ -405,8 +440,10 @@ class _StopButton extends StatelessWidget {
         Container(
           margin: EdgeInsets.only(bottom: 8.h),
           padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
-          decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(12.r), border: Border.all(color: AppColors.line, width: 2)),
-          child: Text(kind == 'chest' ? 'Mở rương!' : 'Chơi nào!', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w800, fontSize: 13.sp)),
+          decoration: BoxDecoration(
+              color: AppColors.surface, borderRadius: BorderRadius.circular(12.r), border: Border.all(color: AppColors.line, width: 2)),
+          child: Text(kind == 'chest' ? 'Mở rương!' : 'Chơi nào!',
+              style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w800, fontSize: 13.sp)),
         ),
       Semantics(
         button: true,
@@ -414,24 +451,29 @@ class _StopButton extends StatelessWidget {
         child: GestureDetector(
           onTap: onTap,
           child: Stack(alignment: Alignment.center, clipBehavior: Clip.none, children: [
-           if (current) PulseRing(size: size, color: color),
-           Container(
-            key: circleKey,
-            width: size,
-            height: size,
-            decoration: BoxDecoration(
-              color: face,
-              shape: BoxShape.circle,
-              boxShadow: [BoxShadow(color: lip, offset: Offset(0, 6.h)), if (current) BoxShadow(color: color.withValues(alpha: 0.25), spreadRadius: 8.w)],
+            if (current) PulseRing(size: size, color: color),
+            Container(
+              key: circleKey,
+              width: size,
+              height: size,
+              decoration: BoxDecoration(
+                color: face,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(color: lip, offset: Offset(0, 6.h)),
+                  if (current) BoxShadow(color: color.withValues(alpha: 0.25), spreadRadius: 8.w)
+                ],
+              ),
+              alignment: Alignment.center,
+              child: inner,
             ),
-            alignment: Alignment.center,
-            child: inner,
-          ),
           ]),
         ),
       ),
       if (kind != 'chest' && status == 'done') Padding(padding: EdgeInsets.only(top: 8.h), child: _Stars(asInt(stop['stars']), size: 16)),
-      if (boss) Padding(padding: EdgeInsets.only(top: 4.h), child: Text('Màn trùm', style: TextStyle(fontSize: 11.sp, color: AppColors.textSecondary))),
+      if (boss)
+        Padding(
+            padding: EdgeInsets.only(top: 4.h), child: Text('Màn trùm', style: TextStyle(fontSize: 11.sp, color: AppColors.textSecondary))),
     ]);
   }
 }
@@ -444,7 +486,8 @@ class _Stars extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Row(mainAxisSize: MainAxisSize.min, children: [
-        for (var s = 1; s <= 3; s++) Icon(Icons.star_rounded, size: size.sp, color: s <= n ? const Color(0xFFFFC800) : AppColors.lineStrong),
+        for (var s = 1; s <= 3; s++)
+          Icon(Icons.star_rounded, size: size.sp, color: s <= n ? const Color(0xFFFFC800) : AppColors.lineStrong),
       ]);
 }
 
@@ -488,9 +531,18 @@ class _ChestDialog extends StatelessWidget {
 // ====================================================================== play
 
 const gameNames = {
-  'pop': 'Bắt bong bóng', 'fish': 'Câu cá', 'tone': 'Thả dấu', 'picture': 'Chọn hình', 'meaning': 'Chọn nghĩa',
-  'gate': 'Chọn cửa', 'train': 'Ghép toa tàu', 'sort': 'Hái quả', 'match': 'Lật thẻ', 'spell': 'Ghép chữ',
-  'order': 'Xếp câu', 'type': 'Đuổi hình bắt chữ',
+  'pop': 'Bắt bong bóng',
+  'fish': 'Câu cá',
+  'tone': 'Thả dấu',
+  'picture': 'Chọn hình',
+  'meaning': 'Chọn nghĩa',
+  'gate': 'Chọn cửa',
+  'train': 'Ghép toa tàu',
+  'sort': 'Hái quả',
+  'match': 'Lật thẻ',
+  'spell': 'Ghép chữ',
+  'order': 'Xếp câu',
+  'type': 'Đuổi hình bắt chữ',
 };
 
 class GamePlayController extends GetxController {
@@ -611,7 +663,8 @@ class GamePlayView extends GetView<GamePlayController> {
                 Expanded(
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(8.r),
-                    child: LinearProgressIndicator(value: at / games.length, minHeight: 10.h, color: AppColors.primary, backgroundColor: AppColors.surfaceMuted),
+                    child: LinearProgressIndicator(
+                        value: at / games.length, minHeight: 10.h, color: AppColors.primary, backgroundColor: AppColors.surfaceMuted),
                   ),
                 ),
                 SizedBox(width: 10.w),
@@ -637,7 +690,8 @@ class GamePlayView extends GetView<GamePlayController> {
                         key: ValueKey('game-$at'),
                         padding: EdgeInsets.all(16.w),
                         child: Column(children: [
-                          Text(asString(game['title']), textAlign: TextAlign.center, style: TextStyle(fontSize: 14.sp, color: AppColors.textSecondary)),
+                          Text(asString(game['title']),
+                              textAlign: TextAlign.center, style: TextStyle(fontSize: 14.sp, color: AppColors.textSecondary)),
                           SizedBox(height: 12.h),
                           MiniGame(key: ValueKey('mini-$at'), game: game, lang: lang, onDone: controller.done),
                         ]),
@@ -694,7 +748,11 @@ class GamePlayView extends GetView<GamePlayController> {
     final boss = asString(r['kind']) == 'boss';
     final title = !passed
         ? 'Chưa qua màn này'
-        : !boss ? 'Qua màn rồi!' : asInt(r['level']) == 4 ? 'Thắng màn trùm cuối! Bạn đã hoàn thành cả 4 cấp.' : 'Thắng màn trùm! Cấp mới đã mở.';
+        : !boss
+            ? 'Qua màn rồi!'
+            : asInt(r['level']) == 4
+                ? 'Thắng màn trùm cuối! Bạn đã hoàn thành cả 4 cấp.'
+                : 'Thắng màn trùm! Cấp mới đã mở.';
     final review = asMap(f['review']);
     final nxt = asMap(f['next']);
     return Center(
@@ -707,18 +765,22 @@ class GamePlayView extends GetView<GamePlayController> {
           SizedBox(height: 10.h),
           _Stars(asInt(f['stars']), size: 40),
           SizedBox(height: 8.h),
-          Text('Đúng ${asInt(f['correct'])}/${asInt(f['total'])} câu (${asInt(f['percent'])}%) · cần ${asInt(r['pass_percent'])}% để qua màn',
-              textAlign: TextAlign.center, style: TextStyle(color: AppColors.textSecondary, fontSize: 13.sp)),
+          Text(
+              'Đúng ${asInt(f['correct'])}/${asInt(f['total'])} câu (${asInt(f['percent'])}%) · cần ${asInt(r['pass_percent'])}% để qua màn',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColors.textSecondary, fontSize: 13.sp)),
           if (asInt(f['xp']) > 0 || asInt(f['gems']) > 0)
             Padding(
               padding: EdgeInsets.only(top: 8.h),
-              child: Text([if (asInt(f['xp']) > 0) '+${asInt(f['xp'])} XP', if (asInt(f['gems']) > 0) '+${asInt(f['gems'])} ngọc'].join('   '),
+              child: Text(
+                  [if (asInt(f['xp']) > 0) '+${asInt(f['xp'])} XP', if (asInt(f['gems']) > 0) '+${asInt(f['gems'])} ngọc'].join('   '),
                   style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w800, color: AppColors.xpGold)),
             ),
           if (!passed)
             Padding(
               padding: EdgeInsets.only(top: 8.h),
-              child: Text('Học lại những phần còn sai rồi quay lại chơi nhé!', textAlign: TextAlign.center, style: TextStyle(fontSize: 14.sp)),
+              child:
+                  Text('Học lại những phần còn sai rồi quay lại chơi nhé!', textAlign: TextAlign.center, style: TextStyle(fontSize: 14.sp)),
             ),
           SizedBox(height: 22.h),
           if (passed) ...[
@@ -726,7 +788,9 @@ class GamePlayView extends GetView<GamePlayController> {
               onPressed: controller.next,
               child: Text(nxt.isNotEmpty && asString(nxt['kind']) != 'chest' && asString(nxt['status']) == 'open'
                   ? 'Màn tiếp theo'
-                  : asString(nxt['kind']) == 'chest' ? 'Đi mở rương' : 'Về bản đồ'),
+                  : asString(nxt['kind']) == 'chest'
+                      ? 'Đi mở rương'
+                      : 'Về bản đồ'),
             ),
             TextButton(onPressed: () => goBack(), child: const Text('Về bản đồ')),
           ] else ...[
@@ -880,7 +944,8 @@ mixin _Steps<T extends StatefulWidget> on State<T> {
         margin: EdgeInsets.only(top: 12.h),
         padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
         decoration: BoxDecoration(color: const Color(0xFFFFF7E0), borderRadius: BorderRadius.circular(14.r)),
-        child: Text('💡 $hint', textAlign: TextAlign.center, style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w600, color: const Color(0xFF8A5A00))),
+        child: Text('💡 $hint',
+            textAlign: TextAlign.center, style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w600, color: const Color(0xFF8A5A00))),
       );
     }
     return Padding(
@@ -908,7 +973,12 @@ Widget _dots(int count, int at) => Row(mainAxisAlignment: MainAxisAlignment.cent
           width: k == at ? 22.w : 8.w,
           height: 8.w,
           decoration: BoxDecoration(
-              color: k < at ? _green : k == at ? AppColors.primary : AppColors.lineStrong, borderRadius: BorderRadius.circular(4.r)),
+              color: k < at
+                  ? _green
+                  : k == at
+                      ? AppColors.primary
+                      : AppColors.lineStrong,
+              borderRadius: BorderRadius.circular(4.r)),
         ),
     ]);
 
@@ -920,7 +990,12 @@ Widget _feedback(bool? ok, String answer, {bool hide = false}) {
     padding: EdgeInsets.symmetric(horizontal: 14.w),
     decoration: BoxDecoration(color: ok ? AppColors.successSoft : AppColors.errorSoft, borderRadius: BorderRadius.circular(14.r)),
     alignment: Alignment.center,
-    child: Text(ok ? '✓ Giỏi lắm!' : hide || answer.isEmpty ? '✗ Chưa đúng rồi' : '✗ Đáp án đúng: $answer',
+    child: Text(
+        ok
+            ? '✓ Giỏi lắm!'
+            : hide || answer.isEmpty
+                ? '✗ Chưa đúng rồi'
+                : '✗ Đáp án đúng: $answer',
         style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w700, color: ok ? AppColors.success : AppColors.error)),
   );
 }
@@ -930,7 +1005,8 @@ Widget _speaker(dynamic audio, {double size = 64}) => GestureDetector(
       child: Container(
         width: size.w,
         height: size.w,
-        decoration: BoxDecoration(color: AppColors.primary, shape: BoxShape.circle, boxShadow: [BoxShadow(color: AppColors.primaryDark, offset: Offset(0, 4.h))]),
+        decoration: BoxDecoration(
+            color: AppColors.primary, shape: BoxShape.circle, boxShadow: [BoxShadow(color: AppColors.primaryDark, offset: Offset(0, 4.h))]),
         child: Icon(Icons.volume_up_rounded, color: Colors.white, size: (size * 0.45).sp),
       ),
     );
@@ -946,7 +1022,9 @@ Widget _optionFace(Json o, String lang, {double fontSize = 20, Color? color}) {
   if (asString(o['image']).isNotEmpty || asString(o['emoji']).isNotEmpty) return _picture(o, 80.w);
   final s = asString(o['s']);
   return Column(mainAxisSize: MainAxisSize.min, children: [
-    Text(asString(o['t']), textAlign: TextAlign.center, locale: localeFor(lang),
+    Text(asString(o['t']),
+        textAlign: TextAlign.center,
+        locale: localeFor(lang),
         style: TextStyle(fontSize: fontSize.sp, fontWeight: FontWeight.w700, color: color ?? AppColors.textPrimary)),
     if (s.isNotEmpty) Text(s, style: TextStyle(fontSize: 12.sp, color: color?.withValues(alpha: 0.8) ?? AppColors.textSecondary)),
   ]);
@@ -963,8 +1041,20 @@ class _Tile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final border = state == true ? AppColors.beamMint : state == false ? AppColors.error : selected ? AppColors.primary : AppColors.line;
-    final bg = state == true ? AppColors.successSoft : state == false ? AppColors.errorSoft : selected ? AppColors.primarySoft : AppColors.surface;
+    final border = state == true
+        ? AppColors.beamMint
+        : state == false
+            ? AppColors.error
+            : selected
+                ? AppColors.primary
+                : AppColors.line;
+    final bg = state == true
+        ? AppColors.successSoft
+        : state == false
+            ? AppColors.errorSoft
+            : selected
+                ? AppColors.primarySoft
+                : AppColors.surface;
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
@@ -974,8 +1064,10 @@ class _Tile extends StatelessWidget {
           color: bg,
           borderRadius: BorderRadius.circular(14.r),
           border: Border(
-            top: BorderSide(color: border, width: 2), left: BorderSide(color: border, width: 2),
-            right: BorderSide(color: border, width: 2), bottom: BorderSide(color: border, width: 4)),
+              top: BorderSide(color: border, width: 2),
+              left: BorderSide(color: border, width: 2),
+              right: BorderSide(color: border, width: 2),
+              bottom: BorderSide(color: border, width: 4)),
         ),
         child: child,
       ),
@@ -1050,15 +1142,21 @@ class _ChooseGameState extends State<_ChooseGame> with _Steps<_ChooseGame>, Sing
       if (asString(prompt['text']).isNotEmpty)
         GestureDetector(
           onTap: () => _sayAudio(prompt['audio']),
-          child: Text(asString(prompt['text']), locale: localeFor(widget.lang),
+          child: Text(asString(prompt['text']),
+              locale: localeFor(widget.lang),
               style: TextStyle(fontSize: (widget.kind == 'meaning' ? 40 : 52).sp, fontWeight: FontWeight.w800)),
         )
       else
         _speaker(prompt['audio']),
       if (asString(prompt['sub']).isNotEmpty)
-        Padding(padding: EdgeInsets.only(top: 6.h), child: Text(asString(prompt['sub']), textAlign: TextAlign.center, style: TextStyle(fontSize: 15.sp, color: AppColors.textSecondary))),
+        Padding(
+            padding: EdgeInsets.only(top: 6.h),
+            child: Text(asString(prompt['sub']),
+                textAlign: TextAlign.center, style: TextStyle(fontSize: 15.sp, color: AppColors.textSecondary))),
       if (widget.kind == 'tone' && widget.lang == 'vi')
-        Padding(padding: EdgeInsets.only(top: 6.h), child: Text('Thêm dấu nào thì thành tiếng vừa nghe?', style: TextStyle(color: AppColors.textSecondary, fontSize: 13.sp))),
+        Padding(
+            padding: EdgeInsets.only(top: 6.h),
+            child: Text('Thêm dấu nào thì thành tiếng vừa nghe?', style: TextStyle(color: AppColors.textSecondary, fontSize: 13.sp))),
       SizedBox(height: 18.h),
       _options(options),
       _feedback(answered, rightLabel, hide: !reveal),
@@ -1093,10 +1191,20 @@ class _ChooseGameState extends State<_ChooseGame> with _Steps<_ChooseGame>, Sing
                           alignment: Alignment.center,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            gradient: RadialGradient(center: const Alignment(-0.4, -0.45), radius: 0.9,
-                                colors: [Colors.white.withValues(alpha: 0.75), _bubbleColors[k % _bubbleColors.length], _bubbleColors[k % _bubbleColors.length]],
-                                stops: const [0, 0.22, 1]),
-                            border: stateOf(options[k]) == true ? Border.all(color: _green, width: 4) : stateOf(options[k]) == false ? Border.all(color: AppColors.error, width: 4) : null,
+                            gradient: RadialGradient(center: const Alignment(-0.4, -0.45), radius: 0.9, colors: [
+                              Colors.white.withValues(alpha: 0.75),
+                              _bubbleColors[k % _bubbleColors.length],
+                              _bubbleColors[k % _bubbleColors.length]
+                            ], stops: const [
+                              0,
+                              0.22,
+                              1
+                            ]),
+                            border: stateOf(options[k]) == true
+                                ? Border.all(color: _green, width: 4)
+                                : stateOf(options[k]) == false
+                                    ? Border.all(color: AppColors.error, width: 4)
+                                    : null,
                           ),
                           child: _optionFace(options[k], widget.lang, fontSize: 22, color: Colors.white),
                         ),
@@ -1113,7 +1221,8 @@ class _ChooseGameState extends State<_ChooseGame> with _Steps<_ChooseGame>, Sing
           padding: EdgeInsets.symmetric(vertical: 14.h),
           decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(22.r),
-              gradient: const LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Color(0xFFBFE9FF), Color(0xFF38BDF8)])),
+              gradient: const LinearGradient(
+                  begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Color(0xFFBFE9FF), Color(0xFF38BDF8)])),
           child: AnimatedBuilder(
             animation: _float,
             builder: (_, __) => Column(children: [
@@ -1149,7 +1258,9 @@ class _ChooseGameState extends State<_ChooseGame> with _Steps<_ChooseGame>, Sing
                   duration: const Duration(milliseconds: 450),
                   builder: (_, t, child) => Transform(
                     alignment: Alignment.centerLeft,
-                    transform: Matrix4.identity()..setEntry(3, 2, 0.002)..rotateY(-t * 0.9),
+                    transform: Matrix4.identity()
+                      ..setEntry(3, 2, 0.002)
+                      ..rotateY(-t * 0.9),
                     child: child,
                   ),
                   child: Container(
@@ -1177,7 +1288,10 @@ class _ChooseGameState extends State<_ChooseGame> with _Steps<_ChooseGame>, Sing
           childAspectRatio: widget.kind == 'picture' ? 1.1 : 1.9,
           children: [
             for (final o in options)
-              _Tile(onTap: () => pick(o), state: stateOf(o), child: Center(child: _optionFace(o, widget.lang, fontSize: widget.kind == 'tone' ? 28 : 18))),
+              _Tile(
+                  onTap: () => pick(o),
+                  state: stateOf(o),
+                  child: Center(child: _optionFace(o, widget.lang, fontSize: widget.kind == 'tone' ? 28 : 18))),
           ],
         );
     }
@@ -1261,7 +1375,9 @@ class _TrainGameState extends State<_TrainGame> with _Steps<_TrainGame> {
                     borderRadius: BorderRadius.circular(10.r),
                     border: Border(bottom: BorderSide(color: value != null ? AppColors.primaryDark : AppColors.lineStrong, width: 4)),
                   ),
-                  child: Text(value ?? '?', style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w800, color: value != null ? Colors.white : AppColors.textHint)),
+                  child: Text(value ?? '?',
+                      style: TextStyle(
+                          fontSize: 20.sp, fontWeight: FontWeight.w800, color: value != null ? Colors.white : AppColors.textHint)),
                 ),
                 Text(label, style: TextStyle(fontSize: 10.sp, color: AppColors.textHint)),
               ]),
@@ -1275,7 +1391,8 @@ class _TrainGameState extends State<_TrainGame> with _Steps<_TrainGame> {
       if (answered == null)
         FilledButton(
           onPressed: pick.length == 3
-              ? () => answer(pick['onset'] == asString(a['onset']) && pick['rhyme'] == asString(a['rhyme']) && pick['tone'] == asString(a['tone']))
+              ? () => answer(
+                  pick['onset'] == asString(a['onset']) && pick['rhyme'] == asString(a['rhyme']) && pick['tone'] == asString(a['tone']))
               : null,
           child: const Text('Cho tàu chạy'),
         )
@@ -1345,7 +1462,12 @@ class _SortGameState extends State<_SortGame> with _Steps<_SortGame> {
                 Text('🍎', style: TextStyle(fontSize: 100.sp)),
                 Padding(
                   padding: EdgeInsets.only(top: 18.h),
-                  child: Text(asString(item['t']), style: TextStyle(fontSize: 22.sp, fontWeight: FontWeight.w800, color: Colors.white, shadows: const [Shadow(color: Colors.black54, offset: Offset(0, 2))])),
+                  child: Text(asString(item['t']),
+                      style: TextStyle(
+                          fontSize: 22.sp,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.white,
+                          shadows: const [Shadow(color: Colors.black54, offset: Offset(0, 2))])),
                 ),
               ]),
             ),
@@ -1359,7 +1481,13 @@ class _SortGameState extends State<_SortGame> with _Steps<_SortGame> {
             padding: EdgeInsets.symmetric(horizontal: 8.w),
             child: _Tile(
               onTap: () => drop(b),
-              state: answered == null ? null : b == target && answered == false ? false : reveal && b == asString(item['answer']) ? true : null,
+              state: answered == null
+                  ? null
+                  : b == target && answered == false
+                      ? false
+                      : reveal && b == asString(item['answer'])
+                          ? true
+                          : null,
               padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 10.h),
               child: Column(children: [
                 Text('🧺', style: TextStyle(fontSize: 42.sp)),
@@ -1416,7 +1544,9 @@ class _MatchGameState extends State<_MatchGame> {
         if (x.$2 == y.$2) {
           found.add(x.$2);
         } else {
-          missed..add(x.$2)..add(y.$2);
+          missed
+            ..add(x.$2)
+            ..add(y.$2);
         }
         open.clear();
         busy = false;
@@ -1452,18 +1582,34 @@ class _MatchGameState extends State<_MatchGame> {
                   final shown = t > 0.5;
                   return Transform(
                     alignment: Alignment.center,
-                    transform: Matrix4.identity()..setEntry(3, 2, 0.002)..rotateY((1 - t) * math.pi),
+                    transform: Matrix4.identity()
+                      ..setEntry(3, 2, 0.002)
+                      ..rotateY((1 - t) * math.pi),
                     child: Container(
                       decoration: BoxDecoration(
-                        color: found.contains(c.$2) ? AppColors.successSoft : shown ? AppColors.surface : AppColors.primary,
+                        color: found.contains(c.$2)
+                            ? AppColors.successSoft
+                            : shown
+                                ? AppColors.surface
+                                : AppColors.primary,
                         borderRadius: BorderRadius.circular(14.r),
-                        border: Border.all(color: found.contains(c.$2) ? AppColors.beamMint : shown ? AppColors.primaryLight : AppColors.primaryDark, width: 2),
+                        border: Border.all(
+                            color: found.contains(c.$2)
+                                ? AppColors.beamMint
+                                : shown
+                                    ? AppColors.primaryLight
+                                    : AppColors.primaryDark,
+                            width: 2),
                       ),
                       alignment: Alignment.center,
                       padding: EdgeInsets.all(4.w),
                       child: shown
-                          ? Transform(alignment: Alignment.center, transform: Matrix4.rotationY(t < 1 ? math.pi : 0), child: _optionFace(c.$3, widget.lang, fontSize: 16))
-                          : Transform(  // the card is turned over: turn its back face round so "?" reads normally
+                          ? Transform(
+                              alignment: Alignment.center,
+                              transform: Matrix4.rotationY(t < 1 ? math.pi : 0),
+                              child: _optionFace(c.$3, widget.lang, fontSize: 16))
+                          : Transform(
+                              // the card is turned over: turn its back face round so "?" reads normally
                               alignment: Alignment.center,
                               transform: Matrix4.rotationY(math.pi),
                               child: Text('?', style: TextStyle(fontSize: 28.sp, color: Colors.white, fontWeight: FontWeight.w800))),
@@ -1519,7 +1665,10 @@ class _TilesGameState extends State<_TilesGame> with _Steps<_TilesGame> {
             padding: EdgeInsets.symmetric(horizontal: joiner == ' ' ? 12.w : 0, vertical: 8.h),
             child: SizedBox(
               width: joiner == ' ' ? null : 34.w,
-              child: Text(text, textAlign: TextAlign.center, locale: localeFor(widget.lang), style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w700)),
+              child: Text(text,
+                  textAlign: TextAlign.center,
+                  locale: localeFor(widget.lang),
+                  style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w700)),
             ),
           ),
         );
@@ -1532,16 +1681,29 @@ class _TilesGameState extends State<_TilesGame> with _Steps<_TilesGame> {
         _speaker(prompt['audio'], size: 56),
       ]),
       if (asString(prompt['sub']).isNotEmpty)
-        Padding(padding: EdgeInsets.only(top: 8.h), child: Text('“${asString(prompt['sub'])}”', textAlign: TextAlign.center, style: TextStyle(fontSize: 15.sp, color: AppColors.textSecondary))),
+        Padding(
+            padding: EdgeInsets.only(top: 8.h),
+            child: Text('“${asString(prompt['sub'])}”',
+                textAlign: TextAlign.center, style: TextStyle(fontSize: 15.sp, color: AppColors.textSecondary))),
       SizedBox(height: 14.h),
       Container(
         width: double.infinity,
         constraints: BoxConstraints(minHeight: 64.h),
         padding: EdgeInsets.all(8.w),
         decoration: BoxDecoration(
-          color: answered == null ? null : answered! ? AppColors.successSoft : AppColors.errorSoft,
+          color: answered == null
+              ? null
+              : answered!
+                  ? AppColors.successSoft
+                  : AppColors.errorSoft,
           borderRadius: BorderRadius.circular(14.r),
-          border: Border.all(color: answered == null ? AppColors.lineStrong : answered! ? AppColors.beamMint : AppColors.error, width: 2),
+          border: Border.all(
+              color: answered == null
+                  ? AppColors.lineStrong
+                  : answered!
+                      ? AppColors.beamMint
+                      : AppColors.error,
+              width: 2),
         ),
         child: Wrap(alignment: WrapAlignment.center, spacing: 6.w, runSpacing: 6.h, children: [
           for (var p = 0; p < used.length; p++) tile(tiles[used[p]], answered == null ? () => setState(() => used.removeAt(p)) : null),
@@ -1554,7 +1716,9 @@ class _TilesGameState extends State<_TilesGame> with _Steps<_TilesGame> {
       ]),
       SizedBox(height: 16.h),
       if (answered == null)
-        FilledButton(onPressed: used.isEmpty ? null : () => answer(_normalize(built) == _normalize(asString(item['answer']))), child: const Text('Kiểm tra'))
+        FilledButton(
+            onPressed: used.isEmpty ? null : () => answer(_normalize(built) == _normalize(asString(item['answer']))),
+            child: const Text('Kiểm tra'))
       else
         _feedback(answered, asString(item['answer']), hide: !reveal),
       helpBar(asString(item['hint'])),

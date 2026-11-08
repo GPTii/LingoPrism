@@ -87,15 +87,12 @@ class LearningSessionView extends GetView<LearningSessionController> {
         elevation: 0,
         leading: IconButton(
           onPressed: goBack,
-          icon: Icon(Icons.arrow_back_ios_new_rounded,
-              color: AppColors.textPrimary),
+          icon: Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.textPrimary),
         ),
         titleSpacing: 0,
         title: Obx(
           () => Text(
-            controller.currentSessionType == 'review'
-                ? 'Ôn tập: vòng ${controller.round}'
-                : 'Học từ mới: vòng ${controller.round}',
+            controller.currentSessionType == 'review' ? 'Ôn tập: vòng ${controller.round}' : 'Học từ mới: vòng ${controller.round}',
             style: TextStyle(
               color: AppColors.textPrimary,
               fontSize: 20.sp,
@@ -121,139 +118,123 @@ class LearningSessionView extends GetView<LearningSessionController> {
             );
           }
 
-          final showProgress =
-              controller.round != LearningSessionController.roundFinalCheck;
+          final showProgress = controller.round != LearningSessionController.roundFinalCheck;
 
           // Every text in the session inherits the learned language's locale (correct CJK glyphs).
           return DefaultTextStyle.merge(
             style: TextStyle(locale: localeFor(controller.words.first.language)),
             child: Column(
-            children: [
-              if (showProgress) ...[
-                SizedBox(height: 12.h),
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 20.w),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Tiến độ',
-                            style: TextStyle(
-                              color: AppColors.textSecondary,
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.w600,
+              children: [
+                if (showProgress) ...[
+                  SizedBox(height: 12.h),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 20.w),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Tiến độ',
+                              style: TextStyle(
+                                color: AppColors.textSecondary,
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
-                          ),
-                          Text(
-                            '${controller.displayPosition}/${controller.displayTotal}',
-                            style: TextStyle(
-                              color: AppColors.textPrimary,
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.w700,
+                            Text(
+                              '${controller.displayPosition}/${controller.displayTotal}',
+                              style: TextStyle(
+                                color: AppColors.textPrimary,
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
+                          ],
+                        ),
+                        SizedBox(height: 8.h),
+                        Builder(builder: (_) {
+                          final total = controller.displayTotal;
+                          final position = controller.displayPosition;
+                          final clamped = total == 0 ? 0 : (position > total ? total : position);
+                          return LessonProgressBar(
+                            value: total == 0 ? 0.0 : clamped / total.toDouble(),
+                          );
+                        }),
+                      ],
+                    ),
+                  ),
+                ] else
+                  SizedBox(height: 20.h),
+                SizedBox(height: 18.h),
+                Expanded(
+                  child: controller.isFlashcardRound
+                      ? _FlashcardContent(controller: controller)
+                      : controller.round == LearningSessionController.roundFinalCheck
+                          ? _RoundThreeContent(controller: controller)
+                          : _RoundOneContent(controller: controller),
+                ),
+                if (!controller.isFlashcardRound && controller.round != LearningSessionController.roundFinalCheck) ...[
+                  Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 20.w,
+                      vertical: 16.h,
+                    ),
+                    child: Row(
+                      children: [
+                        _NavigationButton(
+                          icon: Icons.arrow_back_ios_new_rounded,
+                          onTap: controller.canPrevious ? controller.previousWord : null,
+                        ),
+                        SizedBox(width: 12.w),
+                        _NavigationButton(
+                          icon: Icons.arrow_forward_ios_rounded,
+                          onTap: controller.canNext ? controller.nextWord : null,
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 24.h),
+                    child: DuoButton(
+                      label: 'Kiểm tra lại bằng Flashcard',
+                      onPressed: controller.isOnLastCard ? controller.startFlashcardRound : null,
+                    ),
+                  ),
+                ],
+                if (controller.isFlashcardRound && !controller.isAwaitingRoundThree)
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 28.h),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: DuoButton(
+                            label: 'Chưa nhớ',
+                            tone: DuoTone.neutral,
+                            onPressed: controller.hasFlashcards ? controller.markForgotten : null,
                           ),
-                        ],
-                      ),
-                      SizedBox(height: 8.h),
-                      Builder(builder: (_) {
-                        final total = controller.displayTotal;
-                        final position = controller.displayPosition;
-                        final clamped = total == 0
-                            ? 0
-                            : (position > total ? total : position);
-                        return LessonProgressBar(
-                          value: total == 0 ? 0.0 : clamped / total.toDouble(),
-                        );
-                      }),
-                    ],
+                        ),
+                        SizedBox(width: 12.w),
+                        Expanded(
+                          child: DuoButton(
+                            label: 'Đã nhớ',
+                            onPressed: controller.hasFlashcards ? controller.markRemembered : null,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ] else
-                SizedBox(height: 20.h),
-              SizedBox(height: 18.h),
-              Expanded(
-                child: controller.isFlashcardRound
-                    ? _FlashcardContent(controller: controller)
-                    : controller.round ==
-                            LearningSessionController.roundFinalCheck
-                        ? _RoundThreeContent(controller: controller)
-                        : _RoundOneContent(controller: controller),
-              ),
-              if (!controller.isFlashcardRound &&
-                  controller.round !=
-                      LearningSessionController.roundFinalCheck) ...[
-                Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 20.w,
-                    vertical: 16.h,
+                if (controller.isFlashcardRound && controller.isAwaitingRoundThree)
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 28.h),
+                    child: DuoButton(
+                      label: 'Tiếp tục',
+                      onPressed: controller.proceedToRoundThree,
+                    ),
                   ),
-                  child: Row(
-                    children: [
-                      _NavigationButton(
-                        icon: Icons.arrow_back_ios_new_rounded,
-                        onTap: controller.canPrevious
-                            ? controller.previousWord
-                            : null,
-                      ),
-                      SizedBox(width: 12.w),
-                      _NavigationButton(
-                        icon: Icons.arrow_forward_ios_rounded,
-                        onTap: controller.canNext ? controller.nextWord : null,
-                      ),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 24.h),
-                  child: DuoButton(
-                    label: 'Kiểm tra lại bằng Flashcard',
-                    onPressed: controller.isOnLastCard
-                        ? controller.startFlashcardRound
-                        : null,
-                  ),
-                ),
               ],
-              if (controller.isFlashcardRound &&
-                  !controller.isAwaitingRoundThree)
-                Padding(
-                  padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 28.h),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: DuoButton(
-                          label: 'Chưa nhớ',
-                          tone: DuoTone.neutral,
-                          onPressed: controller.hasFlashcards
-                              ? controller.markForgotten
-                              : null,
-                        ),
-                      ),
-                      SizedBox(width: 12.w),
-                      Expanded(
-                        child: DuoButton(
-                          label: 'Đã nhớ',
-                          onPressed: controller.hasFlashcards
-                              ? controller.markRemembered
-                              : null,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              if (controller.isFlashcardRound &&
-                  controller.isAwaitingRoundThree)
-                Padding(
-                  padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 28.h),
-                  child: DuoButton(
-                    label: 'Tiếp tục',
-                    onPressed: controller.proceedToRoundThree,
-                  ),
-                ),
-            ],
-          ),
+            ),
           );
         },
       ),
@@ -412,23 +393,22 @@ class _RoundThreeContentState extends State<_RoundThreeContent> {
       if (!isCorrect) {
         _wrongWords.add(wordKey);
       } else {
-          if (!_awarded.contains(vocabularyId)) {
-            _awarded.add(vocabularyId);
-            int xp = 0;
-            if (type == 'mc') {
-              xp = 3;
-            } else if (type == 'match') {
-              xp = 5;
-            } else if (type == 'scramble') {
-              xp = 7;
-            } else if (type == 'listen') {
-              xp = 6;
-            } else if (type == 'misspelled') {
-              xp = 4;
-            }
-            if (xp > 0) {
-            final sourceType =
-                widget.controller.currentSessionType == 'review' ? 'review' : 'learning';
+        if (!_awarded.contains(vocabularyId)) {
+          _awarded.add(vocabularyId);
+          int xp = 0;
+          if (type == 'mc') {
+            xp = 3;
+          } else if (type == 'match') {
+            xp = 5;
+          } else if (type == 'scramble') {
+            xp = 7;
+          } else if (type == 'listen') {
+            xp = 6;
+          } else if (type == 'misspelled') {
+            xp = 4;
+          }
+          if (xp > 0) {
+            final sourceType = widget.controller.currentSessionType == 'review' ? 'review' : 'learning';
             widget.controller.awardXp(
               amount: xp,
               sourceType: sourceType,
@@ -443,8 +423,7 @@ class _RoundThreeContentState extends State<_RoundThreeContent> {
         }
       }
     } else {
-      if (_retryPhase && !isCorrect) {
-      }
+      if (_retryPhase && !isCorrect) {}
     }
 
     widget.controller.recordRoundThreeResult(
@@ -518,9 +497,7 @@ class _RoundThreeContentState extends State<_RoundThreeContent> {
     } catch (error, stackTrace) {
       Get.log('Finalize round three error: $error');
       debugPrintStack(stackTrace: stackTrace);
-      summary = widget.controller
-          .buildRoundThreeSummary()
-          .copyWith(
+      summary = widget.controller.buildRoundThreeSummary().copyWith(
             xpEarned: widget.controller.totalXpEarned,
             scalesEarned: widget.controller.totalScalesEarned,
           );
@@ -585,11 +562,6 @@ class _RoundThreeContentState extends State<_RoundThreeContent> {
       await _finalizeSession();
       return;
     }
-  }
-
-  void _showCompletionDialog({required int percent}) {
-    // legacy dialog (unused after fullscreen change)
-    goBack<void>();
   }
 
   void _showCompletionPage({required RoundThreeSummary summary}) {
@@ -748,9 +720,8 @@ class _AnswerVerdict extends StatelessWidget {
 // --- Widgets for Round 3 Question Types ---
 
 /// A typed answer that was wrong gives a short shake.
-Widget _shakeIfWrong(BuildContext context, bool? isCorrect, Widget field) => reduceMotion(context)
-    ? field
-    : field.animate(target: isCorrect == false ? 1 : 0).shakeX(duration: 420.ms, hz: 5, amount: 6);
+Widget _shakeIfWrong(BuildContext context, bool? isCorrect, Widget field) =>
+    reduceMotion(context) ? field : field.animate(target: isCorrect == false ? 1 : 0).shakeX(duration: 420.ms, hz: 5, amount: 6);
 
 class _MultipleChoiceQuestionWidget extends StatefulWidget {
   final MultipleChoiceQuestion question;
@@ -874,7 +845,7 @@ class _MatchingQuestionWidget extends StatefulWidget {
 class _MatchingQuestionWidgetState extends State<_MatchingQuestionWidget> {
   late List<String> _englishWords;
   late List<String> _vietnameseWords;
-  
+
   String? _selectedEnglish;
   String? _selectedVietnamese;
 
@@ -1049,7 +1020,6 @@ class _MatchingQuestionWidgetState extends State<_MatchingQuestionWidget> {
   }
 }
 
-
 class _ScrambleQuestionWidget extends StatefulWidget {
   final ScrambleQuestion question;
   final void Function(bool correct) onCompleted;
@@ -1139,27 +1109,30 @@ class _ScrambleQuestionWidgetState extends State<_ScrambleQuestionWidget> {
               ),
             ),
             SizedBox(height: 40.h),
-            _shakeIfWrong(context, _isCorrect, TextField(
-              controller: _textController,
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w600),
-              onSubmitted: (_) => _checkAnswer(),
-              decoration: InputDecoration(
-                hintText: 'Câu trả lời của bạn',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16.r),
-                  borderSide: BorderSide(color: AppColors.textHint),
-                ),
-                filled: true,
-                fillColor: AppColors.surface,
-                suffixIcon: _isCorrect == null
-                    ? null
-                    : Icon(
-                        _isCorrect! ? Icons.check_circle : Icons.cancel,
-                        color: _isCorrect! ? AppColors.success : Colors.red,
-                      ),
-              ),
-            )),
+            _shakeIfWrong(
+                context,
+                _isCorrect,
+                TextField(
+                  controller: _textController,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w600),
+                  onSubmitted: (_) => _checkAnswer(),
+                  decoration: InputDecoration(
+                    hintText: 'Câu trả lời của bạn',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16.r),
+                      borderSide: BorderSide(color: AppColors.textHint),
+                    ),
+                    filled: true,
+                    fillColor: AppColors.surface,
+                    suffixIcon: _isCorrect == null
+                        ? null
+                        : Icon(
+                            _isCorrect! ? Icons.check_circle : Icons.cancel,
+                            color: _isCorrect! ? AppColors.success : Colors.red,
+                          ),
+                  ),
+                )),
             SizedBox(height: 30.h),
             if (_isCorrect == false) ...[
               SizedBox(height: 12.h),
@@ -1288,28 +1261,31 @@ class _ListenAndTypeQuestionWidgetState extends State<_ListenAndTypeQuestionWidg
               ),
             ),
             SizedBox(height: 40.h),
-            _shakeIfWrong(context, _isCorrect, TextField(
-              controller: _textController,
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w600),
-              onSubmitted: (_) => _checkAnswer(),
-              decoration: InputDecoration(
-                hintText: 'Gõ lại từ tiếng Anh',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16.r),
-                  borderSide: BorderSide(color: AppColors.textHint),
-                ),
-                filled: true,
-                fillColor: AppColors.surface,
-                suffixIcon: _isCorrect == null
-                    ? null
-                    : Icon(
-                        _isCorrect! ? Icons.check_circle : Icons.cancel,
-                        color: _isCorrect! ? AppColors.success : Colors.red,
-                      ),
-              ),
-            )),
-      if (_isCorrect == false) ...[
+            _shakeIfWrong(
+                context,
+                _isCorrect,
+                TextField(
+                  controller: _textController,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w600),
+                  onSubmitted: (_) => _checkAnswer(),
+                  decoration: InputDecoration(
+                    hintText: 'Gõ lại từ tiếng Anh',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16.r),
+                      borderSide: BorderSide(color: AppColors.textHint),
+                    ),
+                    filled: true,
+                    fillColor: AppColors.surface,
+                    suffixIcon: _isCorrect == null
+                        ? null
+                        : Icon(
+                            _isCorrect! ? Icons.check_circle : Icons.cancel,
+                            color: _isCorrect! ? AppColors.success : Colors.red,
+                          ),
+                  ),
+                )),
+            if (_isCorrect == false) ...[
               SizedBox(height: 12.h),
               Text(
                 'Đáp án đúng: ${word.word}',
@@ -1345,8 +1321,6 @@ class _ListenAndTypeQuestionWidgetState extends State<_ListenAndTypeQuestionWidg
   }
 }
 
-                 
-
 class _FlashcardContent extends StatelessWidget {
   const _FlashcardContent({required this.controller});
 
@@ -1363,11 +1337,8 @@ class _FlashcardContent extends StatelessWidget {
               builder: (context, constraints) {
                 final maxWidth = constraints.maxWidth;
                 final maxHeight = constraints.maxHeight;
-                final minSide =
-                    math.min(maxWidth.isFinite ? maxWidth : double.infinity,
-                        maxHeight.isFinite ? maxHeight : double.infinity);
-                final baseSide =
-                    minSide.isFinite && minSide > 0 ? minSide : maxWidth;
+                final minSide = math.min(maxWidth.isFinite ? maxWidth : double.infinity, maxHeight.isFinite ? maxHeight : double.infinity);
+                final baseSide = minSide.isFinite && minSide > 0 ? minSide : maxWidth;
                 final side = baseSide.clamp(220.w, maxWidth);
 
                 return Obx(
@@ -1391,21 +1362,17 @@ class _FlashcardContent extends StatelessWidget {
                             child: AspectRatio(
                               aspectRatio: 1,
                               child: _FlipCard(
-                                showBack:
-                                    controller.isFlashcardBackVisible,
+                                showBack: controller.isFlashcardBackVisible,
                                 word: word,
                                 version: controller.flashcardVersion,
                                 onFlip: controller.toggleFlashcardSide,
-                                onSpeak: () =>
-                                    controller.speakWord(word),
+                                onSpeak: () => controller.speakWord(word),
                               ),
                             ),
                           ),
                           SizedBox(height: 10.h),
                           Text(
-                            controller.isFlashcardBackVisible
-                                ? 'Chạm để xem mặt trước'
-                                : 'Chạm để xem nghĩa tiếng Việt',
+                            controller.isFlashcardBackVisible ? 'Chạm để xem mặt trước' : 'Chạm để xem nghĩa tiếng Việt',
                             style: TextStyle(
                               color: AppColors.textSecondary,
                               fontSize: 14.sp,
@@ -1479,8 +1446,8 @@ class _LearningCard extends StatelessWidget {
             if (word.target != null && word.target!.isTraditional && word.target!.zhuyin.isNotEmpty)
               LangText(word.target!.zhuyin, language: 'zh-Hant', style: TextStyle(fontSize: 14.sp, color: AppColors.textSecondary)),
             if (word.target != null && word.target!.measureWord.isNotEmpty)
-              LangText('Lượng từ: ${word.target!.measureWord}', language: word.language,
-                  style: TextStyle(fontSize: 13.sp, color: AppColors.textSecondary)),
+              LangText('Lượng từ: ${word.target!.measureWord}',
+                  language: word.language, style: TextStyle(fontSize: 13.sp, color: AppColors.textSecondary)),
             SizedBox(height: 12.h),
             Text(
               word.phonetic ?? '',
@@ -1578,7 +1545,8 @@ class _FlashcardFront extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(32.r),
-        border: Border.fromBorderSide(BorderSide(color: AppColors.line)),),
+        border: Border.fromBorderSide(BorderSide(color: AppColors.line)),
+      ),
       padding: EdgeInsets.symmetric(horizontal: 28.w, vertical: 32.h),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -1668,15 +1636,15 @@ class _FlashcardBack extends StatelessWidget {
           if (word.isVietnamese)
             WordPicture(imageUrl: word.imageUrl, emoji: word.emoji, size: 200.w)
           else
-          Text(
-            word.translation,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 26.sp,
-              fontWeight: FontWeight.w700,
-              color: const Color(0xFF045D56),
+            Text(
+              word.translation,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 26.sp,
+                fontWeight: FontWeight.w700,
+                color: const Color(0xFF045D56),
+              ),
             ),
-          ),
           if ((word.exampleVi ?? '').isNotEmpty) ...[
             SizedBox(height: 24.h),
             Text(
@@ -1722,7 +1690,7 @@ class _LessonCompletedScreenState extends State<_LessonCompletedScreen> {
   Future<void> _playCompletionSound() async {
     try {
       await _player.stop();
-      await _player.play( AssetSource('sounds/complete.wav'), volume: 1.0);
+      await _player.play(AssetSource('sounds/complete.wav'), volume: 1.0);
     } catch (e) {
       Get.log('Play completion screen sound error: $e');
     }
@@ -1740,7 +1708,6 @@ class _LessonCompletedScreenState extends State<_LessonCompletedScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              
               const Spacer(),
               // the finish, after Duolingo: the title drops in, Prismo hops in a burst of beams,
               // then the three result cards land one by one and count up
@@ -1804,7 +1771,8 @@ class _LessonCompletedScreenState extends State<_LessonCompletedScreen> {
                   decoration: BoxDecoration(
                     color: AppColors.surface,
                     borderRadius: BorderRadius.circular(16.r),
-                    border: Border.fromBorderSide(BorderSide(color: AppColors.line)),),
+                    border: Border.fromBorderSide(BorderSide(color: AppColors.line)),
+                  ),
                   child: ListView.builder(
                     padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 16.w),
                     itemCount: difficult.length,
@@ -1900,8 +1868,7 @@ class _ResultCard extends StatelessWidget {
         child: Column(children: [
           Padding(
             padding: EdgeInsets.symmetric(vertical: 5.h),
-            child: Text(label,
-                style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w800, color: Colors.white, letterSpacing: 0.6)),
+            child: Text(label, style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w800, color: Colors.white, letterSpacing: 0.6)),
           ),
           Container(
             width: double.infinity,

@@ -43,8 +43,7 @@ class _CustomCameraViewState extends State<CustomCameraView> {
         return;
       }
 
-      final initialIndex = _cameras!
-          .indexWhere((camera) => camera.lensDirection == CameraLensDirection.back);
+      final initialIndex = _cameras!.indexWhere((camera) => camera.lensDirection == CameraLensDirection.back);
 
       _currentCameraIndex = initialIndex == -1 ? 0 : initialIndex;
 
@@ -186,9 +185,7 @@ class _CustomCameraViewState extends State<CustomCameraView> {
   Future<void> _cycleZoomLevel() async {
     if (_controller == null || !_controller!.value.isInitialized) return;
 
-    final nextZoom = (_currentZoomLevel + 1.0) <= _maxAvailableZoom
-        ? _currentZoomLevel + 1.0
-        : _minAvailableZoom;
+    final nextZoom = (_currentZoomLevel + 1.0) <= _maxAvailableZoom ? _currentZoomLevel + 1.0 : _minAvailableZoom;
 
     try {
       await _controller!.setZoomLevel(nextZoom);
@@ -337,61 +334,60 @@ class _CustomCameraViewState extends State<CustomCameraView> {
           child: Stack(
             clipBehavior: Clip.none,
             children: [
-                  Positioned.fill(
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(40.r),
-                      child: _buildCameraPreview(),
+              Positioned.fill(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(40.r),
+                  child: _buildCameraPreview(),
+                ),
+              ),
+              Positioned.fill(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(40.r),
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.black.withOpacity(0.35),
+                        Colors.transparent,
+                        Colors.black.withOpacity(0.45),
+                      ],
+                      stops: const [0.0, 0.45, 1.0],
                     ),
                   ),
-                  Positioned.fill(
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(40.r),
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Colors.black.withOpacity(0.35),
-                            Colors.transparent,
-                            Colors.black.withOpacity(0.45),
-                          ],
-                          stops: const [0.0, 0.45, 1.0],
-                        ),
+                ),
+              ),
+              Positioned(
+                top: 24.h,
+                left: 24.w,
+                child: _buildCircleButton(
+                  icon: _flashIcon,
+                  onTap: _toggleFlash,
+                  size: 48.w,
+                ),
+              ),
+              Positioned(
+                top: 24.h,
+                right: 24.w,
+                child: GestureDetector(
+                  onTap: _cycleZoomLevel,
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 10.h),
+                    decoration: BoxDecoration(
+                      color: AppColors.textSecondary,
+                      borderRadius: BorderRadius.circular(24.r),
+                    ),
+                    child: Text(
+                      '${_currentZoomLevel.toStringAsFixed(1)}x',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
-                  Positioned(
-                    top: 24.h,
-                    left: 24.w,
-                    child: _buildCircleButton(
-                      icon: _flashIcon,
-                      onTap: _toggleFlash,
-                      size: 48.w,
-                    ),
-                  ),
-                  Positioned(
-                    top: 24.h,
-                    right: 24.w,
-                    child: GestureDetector(
-                      onTap: _cycleZoomLevel,
-                      child: Container(
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 18.w, vertical: 10.h),
-                        decoration: BoxDecoration(
-                          color: AppColors.textSecondary,
-                          borderRadius: BorderRadius.circular(24.r),
-                        ),
-                        child: Text(
-                          '${_currentZoomLevel.toStringAsFixed(1)}x',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
+                ),
+              ),
             ],
           ),
         );
@@ -438,7 +434,8 @@ class _CustomCameraViewState extends State<CustomCameraView> {
                   height: 96.w,
                   decoration: const BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Colors.white,),
+                    color: Colors.white,
+                  ),
                 ),
                 Container(
                   width: 80.w,
@@ -454,7 +451,8 @@ class _CustomCameraViewState extends State<CustomCameraView> {
                       height: _isTakingPicture ? 48.w : 64.w,
                       decoration: BoxDecoration(
                         color: AppColors.primary,
-                        shape: BoxShape.circle,),
+                        shape: BoxShape.circle,
+                      ),
                     ),
                   ),
                 ),
@@ -470,7 +468,6 @@ class _CustomCameraViewState extends State<CustomCameraView> {
       ),
     );
   }
-
 
   Widget _buildCircleButton({
     required IconData icon,

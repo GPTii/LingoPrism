@@ -17,9 +17,19 @@ class DetectionAlternative {
 }
 
 class DetectedItem {
-  DetectedItem({required this.id, required this.label, required this.confidence, required this.bbox, this.card,
-      this.selected = false, this.feedback = 'unknown', this.uncertain = false, this.alternatives = const [],
-      this.learned = false, this.correctedLabel = '', this.correctedCard});
+  DetectedItem(
+      {required this.id,
+      required this.label,
+      required this.confidence,
+      required this.bbox,
+      this.card,
+      this.selected = false,
+      this.feedback = 'unknown',
+      this.uncertain = false,
+      this.alternatives = const [],
+      this.learned = false,
+      this.correctedLabel = '',
+      this.correctedCard});
 
   final int id;
   final String label;
@@ -81,13 +91,20 @@ class NamedObject {
   final int? wordId;
   final WordCard? card;
 
-  factory NamedObject.fromJson(String typed, Map<String, dynamic> j) => NamedObject(
-      typed: typed, label: asString(j['label']), wordId: asInt(j['word_id']), card: WordCard.fromJson(asMap(j['card'])));
+  factory NamedObject.fromJson(String typed, Map<String, dynamic> j) =>
+      NamedObject(typed: typed, label: asString(j['label']), wordId: asInt(j['word_id']), card: WordCard.fromJson(asMap(j['card'])));
 }
 
 class DetectionResult {
-  DetectionResult({required this.id, required this.model, required this.device, this.inferenceMs, this.image, required this.items,
-      this.createdAt, this.confirmed = false});
+  DetectionResult(
+      {required this.id,
+      required this.model,
+      required this.device,
+      this.inferenceMs,
+      this.image,
+      required this.items,
+      this.createdAt,
+      this.confirmed = false});
 
   final int id;
   final String model;
@@ -111,8 +128,17 @@ class DetectionResult {
 }
 
 class Poi {
-  Poi({required this.id, required this.name, required this.category, required this.categoryLabel, required this.lat,
-      required this.lng, this.radiusM = 150, this.address = '', this.distanceM, this.topics = const []});
+  Poi(
+      {required this.id,
+      required this.name,
+      required this.category,
+      required this.categoryLabel,
+      required this.lat,
+      required this.lng,
+      this.radiusM = 150,
+      this.address = '',
+      this.distanceM,
+      this.topics = const []});
 
   final int id;
   final String name;
@@ -140,8 +166,18 @@ class Poi {
 }
 
 class ExamInfo {
-  ExamInfo({required this.id, required this.title, this.description = '', required this.language, this.topicName,
-      this.timeLimitMinutes, this.passPercent = 60, this.questionCount = 0, this.bestPercent, this.bestStatus, this.bestSubmission});
+  ExamInfo(
+      {required this.id,
+      required this.title,
+      this.description = '',
+      required this.language,
+      this.topicName,
+      this.timeLimitMinutes,
+      this.passPercent = 60,
+      this.questionCount = 0,
+      this.bestPercent,
+      this.bestStatus,
+      this.bestSubmission});
 
   final int id;
   final String title;
@@ -194,7 +230,13 @@ class ExamQuestion {
 }
 
 class ExamAttempt {
-  ExamAttempt({required this.submissionId, required this.title, required this.language, this.timeLimitMinutes, required this.startedAt, required this.questions});
+  ExamAttempt(
+      {required this.submissionId,
+      required this.title,
+      required this.language,
+      this.timeLimitMinutes,
+      required this.startedAt,
+      required this.questions});
 
   final int submissionId;
   final String title;
@@ -214,8 +256,19 @@ class ExamAttempt {
 }
 
 class AnswerResult {
-  AnswerResult({required this.questionKind, required this.prompt, this.options = const [], this.correctOption, this.acceptedAnswers = const [],
-      this.explanation = '', this.selectedOption, this.text = '', this.isCorrect, this.score, this.points = 1, this.feedback = ''});
+  AnswerResult(
+      {required this.questionKind,
+      required this.prompt,
+      this.options = const [],
+      this.correctOption,
+      this.acceptedAnswers = const [],
+      this.explanation = '',
+      this.selectedOption,
+      this.text = '',
+      this.isCorrect,
+      this.score,
+      this.points = 1,
+      this.feedback = ''});
 
   final String questionKind;
   final String prompt;
@@ -250,8 +303,16 @@ class AnswerResult {
 }
 
 class SubmissionResult {
-  SubmissionResult({required this.id, required this.examTitle, required this.status, this.score = 0, this.maxScore = 0,
-      this.percent = 0, this.passed = false, this.feedback = '', this.answers = const []});
+  SubmissionResult(
+      {required this.id,
+      required this.examTitle,
+      required this.status,
+      this.score = 0,
+      this.maxScore = 0,
+      this.percent = 0,
+      this.passed = false,
+      this.feedback = '',
+      this.answers = const []});
 
   final int id;
   final String examTitle;

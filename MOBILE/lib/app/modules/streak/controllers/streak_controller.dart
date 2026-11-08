@@ -75,4 +75,5 @@ class StreakController extends GetxController {
     } else {
       return 'Huyền thoại! Streak 100+ ngày là điều tuyệt vời!';
     }
-  }}
+  }
+}

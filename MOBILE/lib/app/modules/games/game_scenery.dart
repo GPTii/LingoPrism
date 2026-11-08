@@ -205,7 +205,11 @@ class _LevelSceneState extends State<LevelScene> with SingleTickerProviderStateM
     for (var i = 0; i < _pts.length; i++) {
       final p = _pts[i];
       final left = p.dx > w / 2;
-      final a = (sprites[i % sprites.length], 46.0 + (i * 7) % 18, (left ? p.dx - 140 : p.dx + 140).clamp(28.0, math.max(28.0, w - 28)).toDouble());
+      final a = (
+        sprites[i % sprites.length],
+        46.0 + (i * 7) % 18,
+        (left ? p.dx - 140 : p.dx + 140).clamp(28.0, math.max(28.0, w - 28)).toDouble()
+      );
       decor.add((a.$3, p.dy + 10, a.$1, a.$2, i));
       if (i.isOdd) {
         decor.add((
@@ -232,41 +236,41 @@ class _LevelSceneState extends State<LevelScene> with SingleTickerProviderStateM
         child: SizedBox(
           width: double.infinity,
           child: DecoratedBox(
-          key: _box,
-          decoration:
-              BoxDecoration(gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: _sky(theme, dark))),
-          child: Stack(children: [
-            Positioned.fill(
-              child: IgnorePointer(
-                child: RepaintBoundary(
-                  child: AnimatedBuilder(
-                    animation: _anim,
-                    builder: (context, _) {
-                      final t = _anim.value;
-                      return Stack(clipBehavior: Clip.hardEdge, children: [
-                        Positioned(right: 20, top: 16, child: _SunMoon(night: theme == SceneTheme.night, t: t)),
-                        for (final (i, top, scale) in [(0, 24.0, 1.0), (1, 96.0, 0.75)])
-                          Positioned(
-                            left: ((t + i * 0.45) % 1) * (w + 200) - 120,
-                            top: top,
-                            child: Transform.scale(scale: scale, child: _Cloud(dark: dark || theme == SceneTheme.night)),
-                          ),
-                        CustomPaint(size: _size, painter: _TrailPainter(_pts, widget.progress, theme, dark)),
-                        for (final (k, (x, y, s, size, phase)) in decor.indexed)
-                          Positioned(
-                            left: x - size * s.w / 2,
-                            top: y - size * s.h,
-                            child: _moving(s, pics[k], t, phase),
-                          ),
-                      ]);
-                    },
+            key: _box,
+            decoration:
+                BoxDecoration(gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: _sky(theme, dark))),
+            child: Stack(children: [
+              Positioned.fill(
+                child: IgnorePointer(
+                  child: RepaintBoundary(
+                    child: AnimatedBuilder(
+                      animation: _anim,
+                      builder: (context, _) {
+                        final t = _anim.value;
+                        return Stack(clipBehavior: Clip.hardEdge, children: [
+                          Positioned(right: 20, top: 16, child: _SunMoon(night: theme == SceneTheme.night, t: t)),
+                          for (final (i, top, scale) in [(0, 24.0, 1.0), (1, 96.0, 0.75)])
+                            Positioned(
+                              left: ((t + i * 0.45) % 1) * (w + 200) - 120,
+                              top: top,
+                              child: Transform.scale(scale: scale, child: _Cloud(dark: dark || theme == SceneTheme.night)),
+                            ),
+                          CustomPaint(size: _size, painter: _TrailPainter(_pts, widget.progress, theme, dark)),
+                          for (final (k, (x, y, s, size, phase)) in decor.indexed)
+                            Positioned(
+                              left: x - size * s.w / 2,
+                              top: y - size * s.h,
+                              child: _moving(s, pics[k], t, phase),
+                            ),
+                        ]);
+                      },
+                    ),
                   ),
                 ),
               ),
-            ),
-            widget.child,
-          ]),
-        ),
+              widget.child,
+            ]),
+          ),
         ),
       ),
     );

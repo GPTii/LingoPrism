@@ -262,8 +262,7 @@ class AddVocabularyCategoryController extends GetxController {
                             GridView.builder(
                               shrinkWrap: true,
                               physics: const NeverScrollableScrollPhysics(),
-                              gridDelegate:
-                                  const SliverGridDelegateWithFixedCrossAxisCount(
+                              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                                 crossAxisCount: 6,
                                 mainAxisSpacing: 12,
                                 crossAxisSpacing: 12,
@@ -282,15 +281,10 @@ class AddVocabularyCategoryController extends GetxController {
                                   child: AnimatedContainer(
                                     duration: const Duration(milliseconds: 200),
                                     decoration: BoxDecoration(
-                                      color: isSelected
-                                          ? AppColors.primary
-                                              .withValues(alpha: 0.18)
-                                          : AppColors.primarySoft,
+                                      color: isSelected ? AppColors.primary.withValues(alpha: 0.18) : AppColors.primarySoft,
                                       borderRadius: BorderRadius.circular(16),
                                       border: Border.all(
-                                        color: isSelected
-                                            ? AppColors.primary
-                                            : Colors.transparent,
+                                        color: isSelected ? AppColors.primary : Colors.transparent,
                                         width: 2,
                                       ),
                                     ),

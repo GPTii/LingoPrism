@@ -83,7 +83,8 @@ class LearnHubView extends StatelessWidget {
 }
 
 class _BigAction extends StatelessWidget {
-  const _BigAction({required this.icon, required this.title, required this.subtitle, required this.onTap, this.filled = false, this.badge = 0});
+  const _BigAction(
+      {required this.icon, required this.title, required this.subtitle, required this.onTap, this.filled = false, this.badge = 0});
   final String icon, title, subtitle;
   final VoidCallback onTap;
   final bool filled;
@@ -112,7 +113,8 @@ class _BigAction extends StatelessWidget {
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
                   decoration: BoxDecoration(color: AppColors.beamCoral, borderRadius: BorderRadius.circular(10.r)),
-                  child: Text(badge > 99 ? '99+' : '$badge', style: TextStyle(color: Colors.white, fontSize: 11.sp, fontWeight: FontWeight.w800)),
+                  child: Text(badge > 99 ? '99+' : '$badge',
+                      style: TextStyle(color: Colors.white, fontSize: 11.sp, fontWeight: FontWeight.w800)),
                 ),
             ]),
             SizedBox(height: 10.h),

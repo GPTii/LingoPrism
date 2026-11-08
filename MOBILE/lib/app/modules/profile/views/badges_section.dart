@@ -19,12 +19,14 @@ class BadgesSection extends StatelessWidget {
     final shown = [...owned.take(8), ...next];
     return Container(
       padding: EdgeInsets.fromLTRB(14.w, 12.h, 6.w, 12.h),
-      decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(16.r), border: Border.all(color: AppColors.line)),
+      decoration:
+          BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(16.r), border: Border.all(color: AppColors.line)),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [
           Text('Huy hiệu', style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
           SizedBox(width: 6.w),
-          Text('${owned.length}/${badges.length}', style: TextStyle(fontSize: 13.sp, color: AppColors.textSecondary, fontWeight: FontWeight.w600)),
+          Text('${owned.length}/${badges.length}',
+              style: TextStyle(fontSize: 13.sp, color: AppColors.textSecondary, fontWeight: FontWeight.w600)),
           const Spacer(),
           TextButton(onPressed: () => _showAll(badges), child: const Text('Xem tất cả')),
         ]),
@@ -57,8 +59,8 @@ class BadgesSection extends StatelessWidget {
           Expanded(
             child: GridView.builder(
               padding: EdgeInsets.only(bottom: 24.h),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3, mainAxisSpacing: 12.h, crossAxisSpacing: 8.w,
-                  childAspectRatio: 0.62),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3, mainAxisSpacing: 12.h, crossAxisSpacing: 8.w, childAspectRatio: 0.62),
               itemCount: badges.length,
               itemBuilder: (_, i) => _Badge(badge: badges[i]),
             ),
@@ -78,7 +80,9 @@ class _Badge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget art = Image.asset(badge.icon, width: compact ? 56.w : 72.w, height: compact ? 56.w : 72.w,
+    Widget art = Image.asset(badge.icon,
+        width: compact ? 56.w : 72.w,
+        height: compact ? 56.w : 72.w,
         errorBuilder: (_, __, ___) => Icon(Icons.military_tech_rounded, size: 48.sp, color: AppColors.primary));
     if (!badge.owned) {
       art = Opacity(opacity: 0.4, child: ColorFiltered(colorFilter: const ColorFilter.matrix(_grey), child: art));
@@ -86,12 +90,21 @@ class _Badge extends StatelessWidget {
     return Column(children: [
       art,
       SizedBox(height: 4.h),
-      Text(badge.name, textAlign: TextAlign.center, maxLines: 2, overflow: TextOverflow.ellipsis,
-          style: TextStyle(fontSize: compact ? 10.5.sp : 12.sp, height: 1.2, fontWeight: FontWeight.w700,
+      Text(badge.name,
+          textAlign: TextAlign.center,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+              fontSize: compact ? 10.5.sp : 12.sp,
+              height: 1.2,
+              fontWeight: FontWeight.w700,
               color: badge.owned ? AppColors.textPrimary : AppColors.textSecondary)),
       if (!compact) ...[
         SizedBox(height: 2.h),
-        Text(badge.description, textAlign: TextAlign.center, maxLines: 2, overflow: TextOverflow.ellipsis,
+        Text(badge.description,
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
             style: TextStyle(fontSize: 10.5.sp, color: AppColors.textSecondary)),
         if (!badge.owned && badge.rewardGems > 0)
           Row(mainAxisSize: MainAxisSize.min, children: [

@@ -3,6 +3,7 @@
 /// A comprehensive chat interface for SnapLingua community groups
 /// featuring real-time messaging, sticker support, and optimized performance.
 library community_chat_view;
+
 ///
 /// Features:
 /// - Real-time message display with optimized ListView
@@ -89,9 +90,8 @@ class CommunityChatView extends GetView<CommunityChatController> {
     }
 
     // Limit messages in memory for performance
-    final displayMessages = messages.length > _maxMessagesInMemory
-        ? messages.skip(messages.length - _maxMessagesInMemory).toList()
-        : messages;
+    final displayMessages =
+        messages.length > _maxMessagesInMemory ? messages.skip(messages.length - _maxMessagesInMemory).toList() : messages;
 
     return ListView.builder(
       controller: controller.scrollController,
@@ -215,8 +215,8 @@ class _ChatHeader extends StatelessWidget {
           ),
           // assignments of the group: leaders give and mark them, members do them
           TextButton.icon(
-            onPressed: () => Get.to(() => AssignmentListView(
-                groupId: int.tryParse(details.group.groupId) ?? 0, groupName: details.group.validatedName)),
+            onPressed: () =>
+                Get.to(() => AssignmentListView(groupId: int.tryParse(details.group.groupId) ?? 0, groupName: details.group.validatedName)),
             icon: const Icon(Icons.assignment_rounded),
             label: const Text('Bài tập'),
           ),
@@ -288,13 +288,9 @@ class _ChatBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final alignment =
-        message.isCurrentUser ? Alignment.centerRight : Alignment.centerLeft;
-    final bubbleColor = message.isCurrentUser
-        ? AppColors.primary
-        : AppColors.primarySoft;
-    final textColor =
-        message.isCurrentUser ? Colors.white : AppColors.textPrimary;
+    final alignment = message.isCurrentUser ? Alignment.centerRight : Alignment.centerLeft;
+    final bubbleColor = message.isCurrentUser ? AppColors.primary : AppColors.primarySoft;
+    final textColor = message.isCurrentUser ? Colors.white : AppColors.textPrimary;
 
     return Container(
       margin: EdgeInsets.only(
@@ -304,9 +300,7 @@ class _ChatBubble extends StatelessWidget {
       ),
       alignment: alignment,
       child: Column(
-        crossAxisAlignment: message.isCurrentUser
-            ? CrossAxisAlignment.end
-            : CrossAxisAlignment.start,
+        crossAxisAlignment: message.isCurrentUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
         children: [
           Padding(
             padding: EdgeInsets.only(
@@ -331,44 +325,44 @@ class _ChatBubble extends StatelessWidget {
             me: AuthService.to.userId,
             mine: message.isCurrentUser,
             onHeart: message.serverId == null ? null : () => onHeart(message.serverId!),
-            child: message.isSticker ?
-            Container(
-              padding: EdgeInsets.all(4.w),
-              decoration: BoxDecoration(
-                color: Colors.transparent,
-                borderRadius: BorderRadius.circular(18.r),
-              ),
-              child: _StickerImage(path: message.validatedContent),
-            )
-          : Container(
-              constraints: BoxConstraints(
-                maxWidth: 280.w,
-                minWidth: 40.w,
-              ),
-              padding: EdgeInsets.symmetric(
-                horizontal: 16.w,
-                vertical: 12.h,
-              ),
-              decoration: BoxDecoration(
-                color: bubbleColor,
-                borderRadius: _buildBubbleBorderRadius(),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 8.r,
-                    offset: Offset(0, 2.h),
+            child: message.isSticker
+                ? Container(
+                    padding: EdgeInsets.all(4.w),
+                    decoration: BoxDecoration(
+                      color: Colors.transparent,
+                      borderRadius: BorderRadius.circular(18.r),
+                    ),
+                    child: _StickerImage(path: message.validatedContent),
+                  )
+                : Container(
+                    constraints: BoxConstraints(
+                      maxWidth: 280.w,
+                      minWidth: 40.w,
+                    ),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 16.w,
+                      vertical: 12.h,
+                    ),
+                    decoration: BoxDecoration(
+                      color: bubbleColor,
+                      borderRadius: _buildBubbleBorderRadius(),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.05),
+                          blurRadius: 8.r,
+                          offset: Offset(0, 2.h),
+                        ),
+                      ],
+                    ),
+                    child: Text(
+                      message.validatedContent,
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        color: textColor,
+                        height: 1.3,
+                      ),
+                    ),
                   ),
-                ],
-              ),
-              child: Text(
-                message.validatedContent,
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  color: textColor,
-                  height: 1.3,
-                ),
-              ),
-            ),
           ),
         ],
       ),
@@ -457,8 +451,7 @@ class _StickerImage extends StatelessWidget {
                     child: CircularProgressIndicator(
                       strokeWidth: 2.0,
                       value: loadingProgress.expectedTotalBytes != null
-                          ? loadingProgress.cumulativeBytesLoaded /
-                              loadingProgress.expectedTotalBytes!
+                          ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
                           : null,
                     ),
                   ),
@@ -623,80 +616,73 @@ class _ChatInputState extends State<_ChatInput> {
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           ChatVoiceTools(controller: _controller),
           Row(
-          children: [
-            StickerButton(onPick: widget.onSticker),
-            Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(26.r),
-                  border: Border.all(
-                    color: AppColors.line,
-                    width: 1.0,
-                  ),),
-                padding: EdgeInsets.symmetric(horizontal: 16.w),
-                child: TextField(
-                  controller: _controller,
-                  focusNode: _focusNode,
-                  maxLength: _maxMessageLength,
-                  maxLines: 4,
-                  minLines: 1,
-                  enabled: !_isSending,
-                  textCapitalization: TextCapitalization.sentences,
-                  decoration: InputDecoration(
-                    hintText: _isSending ? 'Đang gửi...' : 'Hãy viết gì đó...',
-                    border: InputBorder.none,
-                    enabledBorder: InputBorder.none,
-                    focusedBorder: InputBorder.none,
-                    counterText: '',
-                    hintStyle: TextStyle(
-                      fontSize: 14.sp,
-                      color: _isSending
-                          ? AppColors.textHint
-                          : AppColors.textHint,
+            children: [
+              StickerButton(onPick: widget.onSticker),
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(26.r),
+                    border: Border.all(
+                      color: AppColors.line,
+                      width: 1.0,
                     ),
                   ),
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    color: _isSending
-                        ? AppColors.textHint
-                        : AppColors.textPrimary,
+                  padding: EdgeInsets.symmetric(horizontal: 16.w),
+                  child: TextField(
+                    controller: _controller,
+                    focusNode: _focusNode,
+                    maxLength: _maxMessageLength,
+                    maxLines: 4,
+                    minLines: 1,
+                    enabled: !_isSending,
+                    textCapitalization: TextCapitalization.sentences,
+                    decoration: InputDecoration(
+                      hintText: _isSending ? 'Đang gửi...' : 'Hãy viết gì đó...',
+                      border: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      counterText: '',
+                      hintStyle: TextStyle(
+                        fontSize: 14.sp,
+                        color: _isSending ? AppColors.textHint : AppColors.textHint,
+                      ),
+                    ),
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      color: _isSending ? AppColors.textHint : AppColors.textPrimary,
+                    ),
+                    onSubmitted: (_) => _handleSend(),
+                    onChanged: (_) => _handleTextChange(),
                   ),
-                  onSubmitted: (_) => _handleSend(),
-                  onChanged: (_) => _handleTextChange(),
                 ),
               ),
-            ),
-            SizedBox(width: 10.w),
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              child: _isSending
-                  ? Padding(
-                      padding: EdgeInsets.all(12.w),
-                      child: SizedBox(
-                        width: 20.w,
-                        height: 20.w,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.0,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            AppColors.primary,
+              SizedBox(width: 10.w),
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                child: _isSending
+                    ? Padding(
+                        padding: EdgeInsets.all(12.w),
+                        child: SizedBox(
+                          width: 20.w,
+                          height: 20.w,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.0,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              AppColors.primary,
+                            ),
                           ),
                         ),
+                      )
+                    : IconButton(
+                        onPressed: _controller.text.trim().isNotEmpty ? _handleSend : null,
+                        icon: const Icon(Icons.send_rounded),
+                        color: _controller.text.trim().isNotEmpty ? AppColors.primary : AppColors.textHint,
+                        disabledColor: AppColors.textHint,
                       ),
-                    )
-                  : IconButton(
-                      onPressed: _controller.text.trim().isNotEmpty
-                          ? _handleSend
-                          : null,
-                      icon: const Icon(Icons.send_rounded),
-                      color: _controller.text.trim().isNotEmpty
-                          ? AppColors.primary
-                          : AppColors.textHint,
-                      disabledColor: AppColors.textHint,
-                    ),
-            ),
-          ],
-        ),
+              ),
+            ],
+          ),
         ]),
       ),
     );

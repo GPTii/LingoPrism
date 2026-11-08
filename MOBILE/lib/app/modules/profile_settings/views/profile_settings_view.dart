@@ -75,7 +75,7 @@ class ProfileSettingsView extends GetView<ProfileSettingsController> {
             SizedBox(height: 14.h),
             _SettingsTile(label: 'Điều khoản sử dụng', onTap: () => openSite('/terms')),
             SizedBox(height: 14.h),
-            _SettingsTile(label: 'Xoá tài khoản', onTap: confirmDeleteAccount),
+            const _SettingsTile(label: 'Xoá tài khoản', onTap: confirmDeleteAccount),
             SizedBox(height: 32.h),
             Obx(() {
               final isProcessing = controller.isProcessing.value;
@@ -97,8 +97,7 @@ class ProfileSettingsView extends GetView<ProfileSettingsController> {
                           height: 20.w,
                           child: const CircularProgressIndicator(
                             strokeWidth: 2,
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(Colors.white),
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                           ),
                         )
                       : Text(
@@ -137,7 +136,8 @@ class _SettingsTile extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.surface,
           borderRadius: BorderRadius.circular(18.r),
-          border: Border.all(color: AppColors.primaryTint, width: 2),),
+          border: Border.all(color: AppColors.primaryTint, width: 2),
+        ),
         padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 14.h),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -164,7 +164,6 @@ class _SettingsTile extends StatelessWidget {
   }
 }
 
-
 /// Giao diện: Sáng / Tối side by side; the choice is kept on the device.
 class _ThemeChoice extends StatefulWidget {
   const _ThemeChoice();
@@ -183,10 +182,12 @@ class _ThemeChoiceState extends State<_ThemeChoice> {
             button: true,
             child: InkWell(
               borderRadius: BorderRadius.circular(10.r),
-              onTap: selected ? null : () async {
-                await ThemeService.set(mode);
-                if (mounted) setState(() {});
-              },
+              onTap: selected
+                  ? null
+                  : () async {
+                      await ThemeService.set(mode);
+                      if (mounted) setState(() {});
+                    },
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 180),
                 height: 44.h,

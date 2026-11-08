@@ -12,8 +12,7 @@ import '../../../data/models/api/social.dart';
 import 'package:lingoprism/app/core/theme/app_colors.dart';
 import 'package:lingoprism/app/core/navigation/back.dart';
 
-class CommunityMemberProfileView
-    extends GetView<CommunityMemberProfileController> {
+class CommunityMemberProfileView extends GetView<CommunityMemberProfileController> {
   const CommunityMemberProfileView({super.key});
 
   @override
@@ -25,8 +24,7 @@ class CommunityMemberProfileView
         elevation: 0,
         leading: IconButton(
           onPressed: goBack,
-          icon: Icon(Icons.arrow_back_ios_new_rounded,
-              color: AppColors.textPrimary),
+          icon: Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.textPrimary),
         ),
         titleSpacing: 0,
         actions: [
@@ -175,7 +173,8 @@ class CommunityMemberProfileView
                   decoration: BoxDecoration(
                     color: AppColors.surface,
                     borderRadius: BorderRadius.circular(20.r),
-                    border: Border.fromBorderSide(BorderSide(color: AppColors.line)),),
+                    border: Border.fromBorderSide(BorderSide(color: AppColors.line)),
+                  ),
                   child: Text(
                     'Chưa có bài đăng nào',
                     style: TextStyle(

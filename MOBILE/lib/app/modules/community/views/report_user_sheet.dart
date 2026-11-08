@@ -75,8 +75,7 @@ class _ReportUserSheetState extends State<_ReportUserSheet> {
         top: false,
         child: SingleChildScrollView(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
-            Text('Báo cáo ${widget.name}',
-                style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+            Text('Báo cáo ${widget.name}', style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
             SizedBox(height: 6.h),
             Text(
               widget.threadId != null

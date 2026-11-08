@@ -165,8 +165,7 @@ class CommunityDetailView extends GetView<CommunityDetailController> {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Icon(Icons.info_outline,
-                              color: const Color(0xFF8C6E02), size: 20.sp),
+                          Icon(Icons.info_outline, color: const Color(0xFF8C6E02), size: 20.sp),
                           SizedBox(width: 10.w),
                           Expanded(
                             child: Text(
@@ -202,13 +201,9 @@ class CommunityDetailView extends GetView<CommunityDetailController> {
                             ),
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(16.r),
-                              color: isSelected
-                                  ? AppColors.primarySoft
-                                  : Colors.white,
+                              color: isSelected ? AppColors.primarySoft : Colors.white,
                               border: Border.all(
-                                color: isSelected
-                                    ? AppColors.primary
-                                    : AppColors.line,
+                                color: isSelected ? AppColors.primary : AppColors.line,
                                 width: 1.2,
                               ),
                             ),
@@ -220,9 +215,7 @@ class CommunityDetailView extends GetView<CommunityDetailController> {
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
                                     border: Border.all(
-                                      color: isSelected
-                                          ? AppColors.primary
-                                          : AppColors.textHint,
+                                      color: isSelected ? AppColors.primary : AppColors.textHint,
                                       width: 2,
                                     ),
                                   ),
@@ -232,9 +225,7 @@ class CommunityDetailView extends GetView<CommunityDetailController> {
                                     width: 10.w,
                                     height: 10.w,
                                     decoration: BoxDecoration(
-                                      color: isSelected
-                                          ? AppColors.primary
-                                          : Colors.transparent,
+                                      color: isSelected ? AppColors.primary : Colors.transparent,
                                       shape: BoxShape.circle,
                                     ),
                                   ),
@@ -314,8 +305,7 @@ class CommunityDetailView extends GetView<CommunityDetailController> {
                                   );
                                   return;
                                 }
-                                if (description.length <
-                                    _minReportDescriptionLength) {
+                                if (description.length < _minReportDescriptionLength) {
                                   Get.snackbar(
                                     'Mô tả quá ngắn',
                                     'Hãy mô tả chi tiết ít nhất $_minReportDescriptionLength ký tự.',
@@ -330,9 +320,7 @@ class CommunityDetailView extends GetView<CommunityDetailController> {
                                 communityController.submitPostReport(
                                   post: post,
                                   reason: selectedReason,
-                                  description: selectedReason == 'Khác'
-                                      ? noteController.text.trim()
-                                      : null,
+                                  description: selectedReason == 'Khác' ? noteController.text.trim() : null,
                                 );
                               } catch (e) {
                                 debugPrint('Error submitting report: $e');
@@ -344,9 +332,7 @@ class CommunityDetailView extends GetView<CommunityDetailController> {
                               }
                             },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: alreadyReported
-                            ? AppColors.line
-                            : AppColors.error,
+                        backgroundColor: alreadyReported ? AppColors.line : AppColors.error,
                         foregroundColor: Colors.white,
                         disabledForegroundColor: Colors.white,
                         elevation: 0,
@@ -416,8 +402,7 @@ class _PostImage extends StatelessWidget {
             return Center(
               child: CircularProgressIndicator(
                 value: loadingProgress.expectedTotalBytes != null
-                    ? loadingProgress.cumulativeBytesLoaded /
-                        loadingProgress.expectedTotalBytes!
+                    ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
                     : null,
               ),
             );
@@ -484,7 +469,6 @@ class _PostImage extends StatelessWidget {
   }
 }
 
-
 class _FeedCard extends StatelessWidget {
   const _FeedCard({required this.post});
 
@@ -493,24 +477,22 @@ class _FeedCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Safe access to vocabulary items with comprehensive validation
-    final allVocabularyItems = post.vocabularyItems ?? <CommunityVocabularyItem>[];
-    final vocabularyItems = allVocabularyItems
-        .where((item) {
-          if (item.headword.isEmpty) return false;
-          final trimmedHeadword = item.headword.trim();
-          return trimmedHeadword.isNotEmpty &&
-                 trimmedHeadword.toLowerCase() != 'từ vựng' &&
-                 trimmedHeadword.length > 1; // Avoid single character words
-        })
-        .toList(growable: false);
+    final allVocabularyItems = post.vocabularyItems;
+    final vocabularyItems = allVocabularyItems.where((item) {
+      if (item.headword.isEmpty) return false;
+      final trimmedHeadword = item.headword.trim();
+      return trimmedHeadword.isNotEmpty &&
+          trimmedHeadword.toLowerCase() != 'từ vựng' &&
+          trimmedHeadword.length > 1; // Avoid single character words
+    }).toList(growable: false);
 
-    final primaryVocabulary =
-        vocabularyItems.isNotEmpty ? vocabularyItems.first : null;
+    final primaryVocabulary = vocabularyItems.isNotEmpty ? vocabularyItems.first : null;
     return Container(
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(20.r),
-        border: Border.fromBorderSide(BorderSide(color: AppColors.line)),),
+        border: Border.fromBorderSide(BorderSide(color: AppColors.line)),
+      ),
       padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 20.h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -530,7 +512,7 @@ class _FeedCard extends StatelessWidget {
                     left: 16.w,
                     top: 16.h,
                     child: _VocabularyTag(item: primaryVocabulary),
-                ),
+                  ),
               ],
             ),
           ),
@@ -642,7 +624,6 @@ class _ActionRow extends StatelessWidget {
   }
 }
 
-
 class _CommentsSection extends StatelessWidget {
   const _CommentsSection({required this.post});
 
@@ -733,8 +714,6 @@ class _CommentComposerState extends State<_CommentComposer> {
       _communityController.addComment(widget.post, content);
       _textController.clear();
       FocusScope.of(context).unfocus();
-
-     
     } catch (e) {
       // Handle error gracefully
       debugPrint('Error adding comment: $e');
@@ -820,66 +799,62 @@ class _DetectedVocabularyList extends StatelessWidget {
 
         final vocabulary = items[currentIndex];
 
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Từ vựng đã nhận diện',
-            style: TextStyle(
-              fontSize: 15.sp,
-              fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
-            ),
-          ),
-          SizedBox(height: 12.h),
-          Stack(
-            clipBehavior: Clip.none,
-            alignment: Alignment.center,
-            children: [
-              RepaintBoundary(
-                child: _DetectedVocabularyItem(item: vocabulary, post: post),
-              ),
-              if (total > 1)
-                Positioned(
-                  left: -8.w,
-                  child: _NavButton(
-                    icon: Icons.chevron_left,
-                    onTap: currentIndex > 0
-                        ? () => communityController.goToPreviousVocabulary(post)
-                        : null,
-                  ),
-                ),
-              if (total > 1)
-                Positioned(
-                  right: -8.w,
-                  child: _NavButton(
-                    icon: Icons.chevron_right,
-                    onTap: currentIndex < total - 1
-                        ? () => communityController.goToNextVocabulary(post)
-                        : null,
-                  ),
-                ),
-            ],
-          ),
-          SizedBox(height: 12.h),
-          Center(
-            child: Text(
-              '${currentIndex + 1}/$total',
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Từ vựng đã nhận diện',
               style: TextStyle(
-                fontSize: 13.sp,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textSecondary,
+                fontSize: 15.sp,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textPrimary,
               ),
             ),
-          ),
-          SizedBox(height: 16.h),
-          _PrimaryActionButton(
-            label: 'Lưu từ vựng',
-            leadingIcon: Icons.bookmark_add_rounded,
-            onTap: () => communityController.saveVocabulary(post, vocabulary),
-          ),
-        ],
-      );
+            SizedBox(height: 12.h),
+            Stack(
+              clipBehavior: Clip.none,
+              alignment: Alignment.center,
+              children: [
+                RepaintBoundary(
+                  child: _DetectedVocabularyItem(item: vocabulary, post: post),
+                ),
+                if (total > 1)
+                  Positioned(
+                    left: -8.w,
+                    child: _NavButton(
+                      icon: Icons.chevron_left,
+                      onTap: currentIndex > 0 ? () => communityController.goToPreviousVocabulary(post) : null,
+                    ),
+                  ),
+                if (total > 1)
+                  Positioned(
+                    right: -8.w,
+                    child: _NavButton(
+                      icon: Icons.chevron_right,
+                      onTap: currentIndex < total - 1 ? () => communityController.goToNextVocabulary(post) : null,
+                    ),
+                  ),
+              ],
+            ),
+            SizedBox(height: 12.h),
+            Center(
+              child: Text(
+                '${currentIndex + 1}/$total',
+                style: TextStyle(
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ),
+            SizedBox(height: 16.h),
+            _PrimaryActionButton(
+              label: 'Lưu từ vựng',
+              leadingIcon: Icons.bookmark_add_rounded,
+              onTap: () => communityController.saveVocabulary(post, vocabulary),
+            ),
+          ],
+        );
       });
     } catch (e) {
       debugPrint('Error in DetectedVocabularyList: $e');
@@ -908,7 +883,6 @@ class _DetectedVocabularyItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final communityController = Get.find<CommunityController>();
-    final confidencePercent = (item.confidence * 100).clamp(0, 100);
     return Obx(() {
       final topic = item.topic.value?.trim() ?? '';
       final isSaved = item.isSelected.value;
@@ -917,7 +891,8 @@ class _DetectedVocabularyItem extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(28.r),
           color: AppColors.surface,
-          border: Border.all(color: AppColors.primaryTint),),
+          border: Border.all(color: AppColors.primaryTint),
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -925,8 +900,7 @@ class _DetectedVocabularyItem extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 GestureDetector(
-                  onTap: () =>
-                      communityController.toggleSelection(post, item),
+                  onTap: () => communityController.toggleSelection(post, item),
                   child: _SelectIndicator(isActive: isSaved),
                 ),
                 SizedBox(width: 12.w),
@@ -963,7 +937,6 @@ class _DetectedVocabularyItem extends StatelessWidget {
                           ),
                         ),
                       ],
-                      
                     ],
                   ),
                 ),
@@ -1001,8 +974,7 @@ class _DetectedVocabularyItem extends StatelessWidget {
                 Expanded(
                   child: _TopicButton(
                     label: topic.isEmpty ? 'Chọn chủ đề' : topic,
-                    onPressed: () =>
-                        _showTopicPicker(context, communityController, item),
+                    onPressed: () => _showTopicPicker(context, communityController, item),
                   ),
                 ),
               ],
@@ -1090,9 +1062,7 @@ void _showTopicPicker(
                           style: TextStyle(
                             fontSize: 12.sp,
                             fontWeight: FontWeight.w600,
-                            color: isActive
-                                ? Colors.white
-                                : AppColors.textPrimary,
+                            color: isActive ? Colors.white : AppColors.textPrimary,
                           ),
                         ),
                         selected: isActive,
@@ -1111,9 +1081,7 @@ void _showTopicPicker(
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20.r),
                           side: BorderSide(
-                            color: isActive
-                                ? AppColors.primary
-                                : AppColors.primaryTint,
+                            color: isActive ? AppColors.primary : AppColors.primaryTint,
                           ),
                         ),
                       );
@@ -1156,8 +1124,7 @@ void _showTopicPicker(
                         final selectedTopic = tempSelection?.trim();
 
                         // Enhanced validation
-                        if (manualTopic.isEmpty &&
-                            (selectedTopic == null || selectedTopic.isEmpty)) {
+                        if (manualTopic.isEmpty && (selectedTopic == null || selectedTopic.isEmpty)) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                               content: Text('Vui lòng chọn hoặc nhập chủ đề'),
@@ -1167,9 +1134,7 @@ void _showTopicPicker(
                           return;
                         }
 
-                        final newTopic = manualTopic.isNotEmpty
-                            ? manualTopic
-                            : selectedTopic!;
+                        final newTopic = manualTopic.isNotEmpty ? manualTopic : selectedTopic!;
 
                         // Additional validation for topic length
                         if (newTopic.length > 50) {
@@ -1237,7 +1202,8 @@ class _CommentItem extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(22.r),
-        border: Border.fromBorderSide(BorderSide(color: AppColors.line)),),
+        border: Border.fromBorderSide(BorderSide(color: AppColors.line)),
+      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1257,7 +1223,10 @@ class _CommentItem extends StatelessWidget {
                 ),
                 SizedBox(height: 4.h),
                 if (comment.content.startsWith('assets/rewards/stickers/'))
-                  Image.asset(comment.content, width: 96.w, height: 100.w, fit: BoxFit.contain,
+                  Image.asset(comment.content,
+                      width: 96.w,
+                      height: 100.w,
+                      fit: BoxFit.contain,
                       errorBuilder: (_, __, ___) => const Icon(Icons.emoji_emotions_outlined))
                 else
                   Text(
@@ -1393,7 +1362,8 @@ class _PrimaryActionButton extends StatelessWidget {
               blurRadius: 20.r,
               offset: Offset(0, 10.h),
             ),
-          ],),
+          ],
+        ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -1432,7 +1402,8 @@ class _NavButton extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.surface,
           shape: BoxShape.circle,
-          border: Border.fromBorderSide(BorderSide(color: AppColors.line)),),
+          border: Border.fromBorderSide(BorderSide(color: AppColors.line)),
+        ),
         child: Icon(
           icon,
           color: AppColors.textSecondary,
@@ -1461,9 +1432,7 @@ class _SelectIndicator extends StatelessWidget {
         ),
         color: isActive ? AppColors.primary : Colors.transparent,
       ),
-      child: isActive
-          ? Icon(Icons.check, color: Colors.white, size: 16.sp)
-          : null,
+      child: isActive ? Icon(Icons.check, color: Colors.white, size: 16.sp) : null,
     );
   }
 }

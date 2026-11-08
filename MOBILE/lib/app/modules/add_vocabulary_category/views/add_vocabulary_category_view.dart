@@ -6,8 +6,7 @@ import '../../../core/theme/app_colors.dart';
 import '../controllers/add_vocabulary_category_controller.dart';
 import 'package:lingoprism/app/core/navigation/back.dart';
 
-class AddVocabularyCategoryView
-    extends GetView<AddVocabularyCategoryController> {
+class AddVocabularyCategoryView extends GetView<AddVocabularyCategoryController> {
   const AddVocabularyCategoryView({super.key});
 
   @override
@@ -64,15 +63,14 @@ class AddVocabularyCategoryView
               decoration: BoxDecoration(
                 color: AppColors.surface,
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-                border: Border.fromBorderSide(BorderSide(color: AppColors.line)),),
-              padding: EdgeInsets.fromLTRB(24.w, 16.h, 24.w,
-                  bottomPadding > 0 ? bottomPadding + 16 : 24.h),
+                border: Border.fromBorderSide(BorderSide(color: AppColors.line)),
+              ),
+              padding: EdgeInsets.fromLTRB(24.w, 16.h, 24.w, bottomPadding > 0 ? bottomPadding + 16 : 24.h),
               child: SizedBox(
                 width: double.infinity,
                 child: Obx(
                   () => ElevatedButton(
-                    onPressed:
-                        controller.canSave.value ? controller.onSave : null,
+                    onPressed: controller.canSave.value ? controller.onSave : null,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       disabledBackgroundColor: AppColors.primaryLight,
@@ -126,11 +124,10 @@ class _IconPickerSection extends StatelessWidget {
                   color: AppColors.surface,
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: error == null
-                        ? AppColors.primary
-                        : AppColors.error,
+                    color: error == null ? AppColors.primary : AppColors.error,
                     width: 2,
-                  ),),
+                  ),
+                ),
                 child: Center(
                   child: icon == null
                       ? Text(
@@ -193,18 +190,14 @@ class _NameField extends StatelessWidget {
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(24.r),
                   borderSide: BorderSide(
-                    color: error == null
-                        ? AppColors.primarySoft
-                        : AppColors.error,
+                    color: error == null ? AppColors.primarySoft : AppColors.error,
                     width: 1.5,
                   ),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(24.r),
                   borderSide: BorderSide(
-                    color: error == null
-                        ? AppColors.primary
-                        : AppColors.error,
+                    color: error == null ? AppColors.primary : AppColors.error,
                     width: 1.8,
                   ),
                 ),

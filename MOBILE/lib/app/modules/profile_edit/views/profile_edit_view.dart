@@ -147,9 +147,7 @@ class ProfileEditView extends GetView<ProfileEditController> {
                                 d == null
                                     ? 'Chọn ngày'
                                     : '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}',
-                                style: TextStyle(
-                                    fontSize: 15.sp,
-                                    color: d == null ? AppColors.textSecondary : AppColors.textPrimary),
+                                style: TextStyle(fontSize: 15.sp, color: d == null ? AppColors.textSecondary : AppColors.textPrimary),
                               ),
                             ),
                             Icon(Icons.calendar_month_rounded, color: AppColors.primary),

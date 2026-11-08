@@ -31,8 +31,15 @@ class _TranslateBubbleState extends State<TranslateBubble> {
   static const _key = 'translate_bubble_pos';
   static const _size = 56.0;
   static const _hidden = {
-    Routes.splash, Routes.onboarding, Routes.login, Routes.register, Routes.survey, Routes.forgotPassword,
-    Routes.verifyResetCode, Routes.newPassword, Routes.translate,
+    Routes.splash,
+    Routes.onboarding,
+    Routes.login,
+    Routes.register,
+    Routes.survey,
+    Routes.forgotPassword,
+    Routes.verifyResetCode,
+    Routes.newPassword,
+    Routes.translate,
   };
   Offset? _pos; // from the right / bottom edges
 
@@ -43,7 +50,9 @@ class _TranslateBubbleState extends State<TranslateBubble> {
     if (saved != null && saved.length == 2) _pos = Offset((saved[0] as num).toDouble(), (saved[1] as num).toDouble());
   }
 
-  void _open() => Get.bottomSheet(const _QuickTranslateSheet(), isScrollControlled: true, backgroundColor: AppColors.surface,
+  void _open() => Get.bottomSheet(const _QuickTranslateSheet(),
+      isScrollControlled: true,
+      backgroundColor: AppColors.surface,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20.r))));
 
   @override

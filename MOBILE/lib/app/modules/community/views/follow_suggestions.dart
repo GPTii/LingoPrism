@@ -47,8 +47,7 @@ class _FollowSuggestionsState extends State<FollowSuggestions> {
     return Padding(
       padding: EdgeInsets.only(bottom: 16.h),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text('Gợi ý bạn học',
-            style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+        Text('Gợi ý bạn học', style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
         SizedBox(height: 10.h),
         SizedBox(
           height: 168.h,
@@ -71,25 +70,30 @@ class _FollowSuggestionsState extends State<FollowSuggestions> {
                 ),
                 child: Column(children: [
                   GestureDetector(
-                    onTap: () => CommunityMemberProfileArguments.open(author.id,
-                        displayName: author.displayName, avatar: author.avatarOrDefault),
+                    onTap: () =>
+                        CommunityMemberProfileArguments.open(author.id, displayName: author.displayName, avatar: author.avatarOrDefault),
                     child: Column(children: [
                       PersonAvatar(avatar: author.avatar, look: author.mascot, size: 44.r),
                       SizedBox(height: 6.h),
-                      Text(author.displayName, maxLines: 1, overflow: TextOverflow.ellipsis,
+                      Text(author.displayName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
                     ]),
                   ),
                   Text(followsMe ? 'Đang theo dõi bạn' : 'Học ${_langName[p['active_language']] ?? ''}',
-                      maxLines: 1, overflow: TextOverflow.ellipsis,
-                      style: TextStyle(fontSize: 11.sp, color: AppColors.textSecondary)),
+                      maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 11.sp, color: AppColors.textSecondary)),
                   const Spacer(),
                   SizedBox(
                     width: double.infinity,
                     child: FilledButton(
                       onPressed: done ? null : () => _follow(author.id),
                       style: FilledButton.styleFrom(padding: EdgeInsets.zero, visualDensity: VisualDensity.compact),
-                      child: Text(done ? 'Đã theo dõi' : followsMe ? 'Theo dõi lại' : 'Theo dõi'),
+                      child: Text(done
+                          ? 'Đã theo dõi'
+                          : followsMe
+                              ? 'Theo dõi lại'
+                              : 'Theo dõi'),
                     ),
                   ),
                 ]),

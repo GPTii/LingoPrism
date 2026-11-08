@@ -15,8 +15,7 @@ class ReviewView extends GetView<ReviewController> {
   const ReviewView({super.key});
 
   @override
-  ReviewController get controller =>
-      Get.isRegistered<ReviewController>() ? Get.find<ReviewController>() : Get.put(ReviewController());
+  ReviewController get controller => Get.isRegistered<ReviewController>() ? Get.find<ReviewController>() : Get.put(ReviewController());
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +63,8 @@ class ReviewView extends GetView<ReviewController> {
               decoration: BoxDecoration(
                 color: AppColors.surface,
                 borderRadius: BorderRadius.circular(12.r),
-                border: Border.fromBorderSide(BorderSide(color: AppColors.line)),),
+                border: Border.fromBorderSide(BorderSide(color: AppColors.line)),
+              ),
               child: TextField(
                 controller: controller.searchController,
                 onChanged: controller.onSearchChanged,
@@ -77,9 +77,7 @@ class ReviewView extends GetView<ReviewController> {
                     size: 24.sp,
                   ),
                   suffixIcon: Obx(() {
-                    final hasText =
-                        controller.currentQuery.value.isNotEmpty ||
-                        controller.searchController.text.isNotEmpty;
+                    final hasText = controller.currentQuery.value.isNotEmpty || controller.searchController.text.isNotEmpty;
                     if (!hasText) {
                       return const SizedBox.shrink();
                     }
@@ -153,145 +151,6 @@ class ReviewView extends GetView<ReviewController> {
     );
   }
 
-  Widget _buildSuggestedTopicsSection(BuildContext context) {
-    return Obx(() {
-      if (controller.isSearching.value) {
-        return const SizedBox.shrink();
-      }
-
-      final hasUserTopics = controller.categories
-          .any((category) => !category.isSystem);
-      if (hasUserTopics) {
-        return const SizedBox.shrink();
-      }
-
-      final isLoading = controller.isLoadingRecommendations.value;
-      final topics = controller.recommendedTopics;
-      final unsavedTopics = topics
-          .where((topic) => !controller.isTopicSaved(topic))
-          .toList();
-
-      if (isLoading && topics.isEmpty) {
-        return Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
-          child: Container(
-            padding: EdgeInsets.all(16.w),
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(16.r),
-              border: Border.fromBorderSide(BorderSide(color: AppColors.line)),),
-            child: Row(
-              children: [
-                SizedBox(
-                  width: 20.w,
-                  height: 20.w,
-                  child: const CircularProgressIndicator(strokeWidth: 2),
-                ),
-                SizedBox(width: 12.w),
-                Expanded(
-                  child: Text(
-                    'Đang tải chủ đề gợi ý...',
-                    style: AppTextStyles.bodyMedium,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      }
-
-      if (unsavedTopics.isEmpty) {
-        return const SizedBox.shrink();
-      }
-
-      final preview = unsavedTopics.take(3).toList();
-      final hasMore = unsavedTopics.length > preview.length;
-
-      return Padding(
-        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
-        child: Container(
-          padding: EdgeInsets.all(16.w),
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.circular(16.r),
-            border: Border.fromBorderSide(BorderSide(color: AppColors.line)),),
-        
-        ),
-      );
-    });
-  }
-
-  Widget _buildSuggestedTopicRow(Topic topic) {
-    final isSaving = controller.isTopicSaving(topic.id);
-    final icon = topic.icon.isNotEmpty
-        ? topic.icon
-        : '📘';
-    final wordCount = topic.wordCount;
-
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 6.h),
-      child: Row(
-        children: [
-          Container(
-            width: 44.w,
-            height: 44.w,
-            decoration: BoxDecoration(
-              color: AppColors.cardBackground,
-              borderRadius: BorderRadius.circular(12.r),
-            ),
-            child: Center(
-              child: Text(
-                icon,
-                style: TextStyle(fontSize: 22.sp),
-              ),
-            ),
-          ),
-          SizedBox(width: 12.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  topic.nameVi,
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                SizedBox(height: 4.h),
-                Text(
-                  '$wordCount từ vựng',
-                  style: AppTextStyles.captionMedium,
-                ),
-              ],
-            ),
-          ),
-          SizedBox(width: 12.w),
-          OutlinedButton(
-            onPressed: isSaving ? null : () => controller.onSaveTopic(topic),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: AppColors.primaryAccent,
-              side: BorderSide(color: AppColors.primaryAccent),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12.r),
-              ),
-              padding: EdgeInsets.symmetric(
-                horizontal: 16.w,
-                vertical: 10.h,
-              ),
-            ),
-            child: isSaving
-                ? SizedBox(
-                    width: 18.w,
-                    height: 18.w,
-                    child: const CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Text('Lưu'),
-          ),
-        ],
-      ),
-    );
-  }
-
   void _showSystemTopicsSheet(BuildContext context) {
     controller.ensureRecommendedTopicsLoaded();
     Get.bottomSheet(
@@ -299,7 +158,8 @@ class ReviewView extends GetView<ReviewController> {
         decoration: BoxDecoration(
           color: AppColors.surface,
           borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
-          border: Border.fromBorderSide(BorderSide(color: AppColors.line)),),
+          border: Border.fromBorderSide(BorderSide(color: AppColors.line)),
+        ),
         child: SafeArea(
           top: false,
           child: SizedBox(
@@ -332,10 +192,8 @@ class ReviewView extends GetView<ReviewController> {
                   if (isLoading)
                     LinearProgressIndicator(
                       minHeight: 2,
-                      backgroundColor:
-                          AppColors.progressLocked.withOpacity(0.3),
-                      valueColor:
-                          AlwaysStoppedAnimation(AppColors.primaryAccent),
+                      backgroundColor: AppColors.progressLocked.withOpacity(0.3),
+                      valueColor: AlwaysStoppedAnimation(AppColors.primaryAccent),
                     ),
                   Expanded(
                     child: topics.isEmpty && !isLoading
@@ -372,9 +230,7 @@ class ReviewView extends GetView<ReviewController> {
   Widget _buildSystemTopicTile(Topic topic) {
     final isSaved = controller.isTopicSaved(topic);
     final isSaving = controller.isTopicSaving(topic.id);
-    final icon = topic.icon.isNotEmpty
-        ? topic.icon
-        : '📘';
+    final icon = topic.icon.isNotEmpty ? topic.icon : '📘';
     final wordCount = topic.wordCount;
 
     return Container(
@@ -541,7 +397,8 @@ class ReviewView extends GetView<ReviewController> {
           decoration: BoxDecoration(
             color: AppColors.surface,
             borderRadius: BorderRadius.circular(16.r),
-            border: Border.fromBorderSide(BorderSide(color: AppColors.line)),),
+            border: Border.fromBorderSide(BorderSide(color: AppColors.line)),
+          ),
           child: Row(
             children: [
               // Icon – flies up into the topic page's header (Hero)
@@ -612,7 +469,7 @@ class ReviewView extends GetView<ReviewController> {
 
   Widget _buildSearchResultCard(VocabularySearchResult result) {
     final item = result.item;
-  // statusColor not needed here; style is computed inline where required.
+    // statusColor not needed here; style is computed inline where required.
 
     return GestureDetector(
       onTap: () => controller.onSearchResultTap(result),
@@ -683,7 +540,6 @@ class ReviewView extends GetView<ReviewController> {
                     ],
                   ),
                 ),
-                
               ],
             ),
             SizedBox(height: 12.h),

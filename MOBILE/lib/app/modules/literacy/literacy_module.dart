@@ -76,7 +76,8 @@ class LiteracyMapView extends GetView<LiteracyMapController> {
                 decoration: BoxDecoration(
                   color: AppColors.surface,
                   border: Border.fromBorderSide(BorderSide(color: AppColors.line)),
-                  borderRadius: BorderRadius.circular(16.r),),
+                  borderRadius: BorderRadius.circular(16.r),
+                ),
                 child: Row(children: [
                   Image.asset('assets/brand/mascot/prismo_happy.png', width: 56.w, height: 56.w),
                   SizedBox(width: 12.w),
@@ -86,7 +87,9 @@ class LiteracyMapView extends GetView<LiteracyMapController> {
                       SizedBox(height: 8.h),
                       LinearProgressIndicator(
                           value: controller.lessons.isEmpty ? 0 : done / controller.lessons.length,
-                          minHeight: 8.h, color: AppColors.primary, backgroundColor: AppColors.surfaceMuted),
+                          minHeight: 8.h,
+                          color: AppColors.primary,
+                          backgroundColor: AppColors.surfaceMuted),
                       SizedBox(height: 4.h),
                       Text('$done/${controller.lessons.length} bài', style: TextStyle(fontSize: 12.sp)),
                     ]),
@@ -126,7 +129,10 @@ class LiteracyMapView extends GetView<LiteracyMapController> {
           SizedBox(height: 4.h),
           l.locked
               ? Icon(Icons.lock_rounded, color: AppColors.textHint, size: 28.sp)
-              : Text(big, textAlign: TextAlign.center, maxLines: 1, overflow: TextOverflow.ellipsis,
+              : Text(big,
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(fontSize: 22.sp, fontWeight: FontWeight.w800)),
           SizedBox(height: 4.h),
           Text(l.title, textAlign: TextAlign.center, maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 11.sp)),
@@ -261,7 +267,8 @@ class LiteracyLessonView extends GetView<LiteracyLessonController> {
       backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
         backgroundColor: AppColors.appBarBackground,
-        title: Obx(() => Text(controller.lesson.value == null ? 'Bài ${controller.n}' : 'Bài ${controller.n}: ${controller.lesson.value!.title}',
+        title: Obx(() => Text(
+            controller.lesson.value == null ? 'Bài ${controller.n}' : 'Bài ${controller.n}: ${controller.lesson.value!.title}',
             style: TextStyle(fontSize: 15.sp))),
       ),
       body: SafeArea(
@@ -316,7 +323,9 @@ class LiteracyLessonView extends GetView<LiteracyLessonController> {
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
                 child: Text(steps[i],
-                    style: TextStyle(fontSize: 18.sp, fontWeight: i == steps.length - 1 ? FontWeight.w800 : FontWeight.w400,
+                    style: TextStyle(
+                        fontSize: 18.sp,
+                        fontWeight: i == steps.length - 1 ? FontWeight.w800 : FontWeight.w400,
                         color: i == steps.length - 1 ? AppColors.buttonActive : AppColors.textSecondary)),
               ),
             ),
@@ -327,8 +336,15 @@ class LiteracyLessonView extends GetView<LiteracyLessonController> {
   Widget _intro(LitIntro intro) {
     final u = intro.unit;
     return Column(children: [
-      Text(u.kind == 'am' ? 'Âm mới' : u.kind == 'van' ? 'Vần mới' : 'Dấu thanh mới', style: TextStyle(color: AppColors.textHint, fontSize: 14.sp)),
-      InkWell(onTap: () => _say(u.spoken),
+      Text(
+          u.kind == 'am'
+              ? 'Âm mới'
+              : u.kind == 'van'
+                  ? 'Vần mới'
+                  : 'Dấu thanh mới',
+          style: TextStyle(color: AppColors.textHint, fontSize: 14.sp)),
+      InkWell(
+          onTap: () => _say(u.spoken),
           child: Text(u.display, style: TextStyle(fontSize: 80.sp, fontWeight: FontWeight.w800, color: AppColors.buttonActive))),
       Text(u.kind == 'thanh' ? u.label : 'đọc là “${u.spoken}”', style: TextStyle(fontSize: 18.sp)),
       if (intro.rhymeSpell.length > 1) ...[SizedBox(height: 8.h), _spell(intro.rhymeSpell)],
@@ -350,8 +366,13 @@ class LiteracyLessonView extends GetView<LiteracyLessonController> {
               borderRadius: BorderRadius.circular(14.r),
               child: Container(
                 padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
-                decoration: BoxDecoration(border: Border.all(color: AppColors.lineStrong, width: 2), borderRadius: BorderRadius.circular(14.r)),
-                child: Column(children: [WordPicture(imageUrl: w.image, emoji: w.emoji, size: 72.w), SizedBox(height: 4.h), Text(w.text, style: TextStyle(fontSize: 16.sp))]),
+                decoration:
+                    BoxDecoration(border: Border.all(color: AppColors.lineStrong, width: 2), borderRadius: BorderRadius.circular(14.r)),
+                child: Column(children: [
+                  WordPicture(imageUrl: w.image, emoji: w.emoji, size: 72.w),
+                  SizedBox(height: 4.h),
+                  Text(w.text, style: TextStyle(fontSize: 16.sp))
+                ]),
               ),
             ),
         ]),
@@ -376,11 +397,21 @@ class LiteracyLessonView extends GetView<LiteracyLessonController> {
             child: Container(
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: res == null ? Colors.white : o == res.expected ? AppColors.successSoft
-                    : o == controller.picked.value ? AppColors.errorSoft : Colors.white,
+                color: res == null
+                    ? Colors.white
+                    : o == res.expected
+                        ? AppColors.successSoft
+                        : o == controller.picked.value
+                            ? AppColors.errorSoft
+                            : Colors.white,
                 border: Border.all(
-                    color: res == null ? (o == controller.picked.value ? AppColors.buttonActive : AppColors.lineStrong)
-                        : o == res.expected ? AppColors.success : o == controller.picked.value ? Colors.red : AppColors.lineStrong,
+                    color: res == null
+                        ? (o == controller.picked.value ? AppColors.buttonActive : AppColors.lineStrong)
+                        : o == res.expected
+                            ? AppColors.success
+                            : o == controller.picked.value
+                                ? Colors.red
+                                : AppColors.lineStrong,
                     width: 2),
                 borderRadius: BorderRadius.circular(16.r),
               ),
@@ -393,7 +424,8 @@ class LiteracyLessonView extends GetView<LiteracyLessonController> {
 
   Widget _title(String text) => Padding(
         padding: EdgeInsets.only(bottom: 12.h),
-        child: Text(text, textAlign: TextAlign.center, style: TextStyle(fontSize: 16.sp, color: AppColors.textSecondary, fontWeight: FontWeight.w600)),
+        child: Text(text,
+            textAlign: TextAlign.center, style: TextStyle(fontSize: 16.sp, color: AppColors.textSecondary, fontWeight: FontWeight.w600)),
       );
 
   Widget _exercise(LitExercise ex) {
@@ -476,7 +508,8 @@ class LiteracyLessonView extends GetView<LiteracyLessonController> {
       if (!done) ...[
         SizedBox(height: 10.h),
         Wrap(spacing: 6.w, runSpacing: 6.h, alignment: WrapAlignment.center, children: [
-          for (final l in specialLetters) OutlinedButton(onPressed: () => controller.typeLetter(l), child: Text(l, style: TextStyle(fontSize: 18.sp))),
+          for (final l in specialLetters)
+            OutlinedButton(onPressed: () => controller.typeLetter(l), child: Text(l, style: TextStyle(fontSize: 18.sp))),
           for (final (tone, label) in const [('huyen', '`'), ('sac', '´'), ('hoi', '?'), ('nga', '~'), ('nang', '.'), ('ngang', 'bỏ dấu')])
             OutlinedButton(
               style: OutlinedButton.styleFrom(foregroundColor: Colors.orange.shade800),
@@ -488,7 +521,9 @@ class LiteracyLessonView extends GetView<LiteracyLessonController> {
         SizedBox(
           width: double.infinity,
           child: ElevatedButton(
-            onPressed: controller.checking.value ? null : () => controller.input.text.trim().isEmpty ? null : controller.submit(controller.input.text),
+            onPressed: controller.checking.value
+                ? null
+                : () => controller.input.text.trim().isEmpty ? null : controller.submit(controller.input.text),
             child: const Text('Kiểm tra'),
           ),
         ),
@@ -517,7 +552,11 @@ class LiteracyLessonView extends GetView<LiteracyLessonController> {
             Wrap(spacing: 8.w, runSpacing: 4.h, children: [
               for (final d in r.diff)
                 Text(
-                  d.ok ? d.expected : (d.expected.isEmpty ? '(thừa: ${d.given})' : '${d.expected} (con viết: ${d.given.isEmpty ? '…' : d.given}${d.hint.isNotEmpty ? ' – ${d.hint}' : ''})'),
+                  d.ok
+                      ? d.expected
+                      : (d.expected.isEmpty
+                          ? '(thừa: ${d.given})'
+                          : '${d.expected} (con viết: ${d.given.isEmpty ? '…' : d.given}${d.hint.isNotEmpty ? ' – ${d.hint}' : ''})'),
                   style: TextStyle(fontSize: 18.sp, color: d.ok ? AppColors.success : AppColors.error, fontWeight: FontWeight.w600),
                 ),
             ]),
@@ -532,7 +571,8 @@ class LiteracyLessonView extends GetView<LiteracyLessonController> {
         child: Padding(
           padding: EdgeInsets.all(24.w),
           child: Column(mainAxisSize: MainAxisSize.min, children: [
-            Image.asset(f.passed ? 'assets/brand/mascot/prismo_celebrate.png' : 'assets/brand/mascot/prismo_think.png', width: 120.w, height: 120.w),
+            Image.asset(f.passed ? 'assets/brand/mascot/prismo_celebrate.png' : 'assets/brand/mascot/prismo_think.png',
+                width: 120.w, height: 120.w),
             SizedBox(height: 8.h),
             Text(f.passed ? 'Giỏi lắm! Con đã xong bài học.' : 'Cố lên! Mình học lại bài này nhé.',
                 textAlign: TextAlign.center, style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w800)),

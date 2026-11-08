@@ -65,11 +65,21 @@ class PoiMapView extends GetView<PoiMapController> {
   const PoiMapView({super.key});
 
   static const _icons = <String, IconData>{
-    'market': Icons.storefront_rounded, 'supermarket': Icons.shopping_cart_rounded, 'hospital': Icons.local_hospital_rounded,
-    'school': Icons.school_rounded, 'park': Icons.park_rounded, 'zoo': Icons.pets_rounded, 'museum': Icons.museum_rounded,
-    'airport': Icons.flight_rounded, 'station': Icons.train_rounded, 'religious': Icons.temple_buddhist_rounded,
-    'restaurant': Icons.restaurant_rounded, 'stadium': Icons.stadium_rounded, 'landmark': Icons.place_rounded,
-    'library': Icons.local_library_rounded, 'theater': Icons.theater_comedy_rounded,
+    'market': Icons.storefront_rounded,
+    'supermarket': Icons.shopping_cart_rounded,
+    'hospital': Icons.local_hospital_rounded,
+    'school': Icons.school_rounded,
+    'park': Icons.park_rounded,
+    'zoo': Icons.pets_rounded,
+    'museum': Icons.museum_rounded,
+    'airport': Icons.flight_rounded,
+    'station': Icons.train_rounded,
+    'religious': Icons.temple_buddhist_rounded,
+    'restaurant': Icons.restaurant_rounded,
+    'stadium': Icons.stadium_rounded,
+    'landmark': Icons.place_rounded,
+    'library': Icons.local_library_rounded,
+    'theater': Icons.theater_comedy_rounded,
   };
 
   /// map pin: the category's icon on a blue drop with a white ring
@@ -114,8 +124,13 @@ class PoiMapView extends GetView<PoiMapController> {
                 ]),
                 MarkerLayer(markers: [
                   if (controller.me.value != null)
-                    Marker(point: controller.me.value!, width: 22, height: 22,
-                        child: Container(decoration: BoxDecoration(color: AppColors.primary, shape: BoxShape.circle, border: Border.all(color: Colors.white, width: 3)))),
+                    Marker(
+                        point: controller.me.value!,
+                        width: 22,
+                        height: 22,
+                        child: Container(
+                            decoration: BoxDecoration(
+                                color: AppColors.primary, shape: BoxShape.circle, border: Border.all(color: Colors.white, width: 3)))),
                   for (final p in controller.pois)
                     Marker(
                       point: LatLng(p.lat, p.lng),

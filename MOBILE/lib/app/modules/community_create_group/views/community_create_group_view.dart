@@ -91,19 +91,13 @@ class CommunityCreateGroupView extends GetView<CommunityCreateGroupController> {
                     height: 54.h,
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: controller.canSubmit.value &&
-                              !controller.isSubmitting.value
-                          ? controller.submit
-                          : null,
+                      onPressed: controller.canSubmit.value && !controller.isSubmitting.value ? controller.submit : null,
                       style: ElevatedButton.styleFrom(
                         elevation: 0,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14.r),
                         ),
-                        backgroundColor: controller.canSubmit.value &&
-                                !controller.isSubmitting.value
-                            ? AppColors.primary
-                            : AppColors.line,
+                        backgroundColor: controller.canSubmit.value && !controller.isSubmitting.value ? AppColors.primary : AppColors.line,
                         foregroundColor: Colors.white,
                         textStyle: TextStyle(
                           fontSize: 15.sp,
@@ -116,8 +110,7 @@ class CommunityCreateGroupView extends GetView<CommunityCreateGroupController> {
                               width: 20.w,
                               child: const CircularProgressIndicator(
                                 strokeWidth: 2.6,
-                                valueColor:
-                                    AlwaysStoppedAnimation<Color>(Colors.white),
+                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                               ),
                             )
                           : const Text('Lưu lại'),
@@ -143,11 +136,8 @@ class _IconSelector extends StatelessWidget {
     return Obx(
       () {
         final selectedIndex = controller.selectedIconIndex.value;
-        final hasSelection = selectedIndex >= 0 &&
-            selectedIndex < CommunityCreateGroupController.iconAssets.length;
-        final imagePath = hasSelection
-            ? CommunityCreateGroupController.iconAssets[selectedIndex]
-            : null;
+        final hasSelection = selectedIndex >= 0 && selectedIndex < CommunityCreateGroupController.iconAssets.length;
+        final imagePath = hasSelection ? CommunityCreateGroupController.iconAssets[selectedIndex] : null;
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -157,7 +147,8 @@ class _IconSelector extends StatelessWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: AppColors.surface,
-                border: Border.fromBorderSide(BorderSide(color: AppColors.line)),),
+                border: Border.fromBorderSide(BorderSide(color: AppColors.line)),
+              ),
               alignment: Alignment.center,
               child: imagePath != null
                   ? Padding(
@@ -180,8 +171,7 @@ class _IconSelector extends StatelessWidget {
               children: List.generate(
                 CommunityCreateGroupController.iconAssets.length,
                 (index) {
-                  final asset =
-                      CommunityCreateGroupController.iconAssets[index];
+                  final asset = CommunityCreateGroupController.iconAssets[index];
                   final isActive = selectedIndex == index;
                   return GestureDetector(
                     onTap: () => controller.selectIcon(index),
@@ -193,11 +183,10 @@ class _IconSelector extends StatelessWidget {
                         shape: BoxShape.circle,
                         color: AppColors.surface,
                         border: Border.all(
-                          color: isActive
-                              ? AppColors.primary
-                              : AppColors.primaryTint,
+                          color: isActive ? AppColors.primary : AppColors.primaryTint,
                           width: isActive ? 2 : 1,
-                        ),),
+                        ),
+                      ),
                       padding: EdgeInsets.all(8.w),
                       child: Image.asset(asset, fit: BoxFit.contain),
                     ),
@@ -241,7 +230,8 @@ class _GroupTextField extends StatelessWidget {
           decoration: BoxDecoration(
             color: AppColors.surface,
             borderRadius: BorderRadius.circular(24.r),
-            border: Border.fromBorderSide(BorderSide(color: AppColors.line)),),
+            border: Border.fromBorderSide(BorderSide(color: AppColors.line)),
+          ),
           child: TextFormField(
             controller: controller,
             decoration: InputDecoration(
@@ -286,8 +276,7 @@ class _ApprovalToggle extends StatelessWidget {
                 inactiveColor: AppColors.primaryTint,
                 activeTextColor: Colors.white,
                 inactiveTextColor: AppColors.textSecondary,
-                onTap: () =>
-                    controller.setApprovalMode(StudyGroupApprovalMode.auto),
+                onTap: () => controller.setApprovalMode(StudyGroupApprovalMode.auto),
               ),
             ),
             SizedBox(width: 12.w),
@@ -299,8 +288,7 @@ class _ApprovalToggle extends StatelessWidget {
                 inactiveColor: AppColors.line,
                 activeTextColor: Colors.white,
                 inactiveTextColor: AppColors.textSecondary,
-                onTap: () =>
-                    controller.setApprovalMode(StudyGroupApprovalMode.require),
+                onTap: () => controller.setApprovalMode(StudyGroupApprovalMode.require),
               ),
             ),
           ],

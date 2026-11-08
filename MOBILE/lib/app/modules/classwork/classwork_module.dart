@@ -17,8 +17,25 @@ import '../../data/repositories/repositories.dart';
 /// No teacher role: the group's leaders give and mark the work, the other members do it.
 
 const _kinds = {'mcq': 'Trắc nghiệm', 'fill': 'Điền từ', 'essay': 'Tự luận', 'file': 'Nộp file'};
-const _fileTypes = ['pdf', 'doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx', 'txt', 'jpg', 'jpeg', 'png', 'webp', 'heic',
-    'mp3', 'm4a', 'wav', 'zip'];
+const _fileTypes = [
+  'pdf',
+  'doc',
+  'docx',
+  'ppt',
+  'pptx',
+  'xls',
+  'xlsx',
+  'txt',
+  'jpg',
+  'jpeg',
+  'png',
+  'webp',
+  'heic',
+  'mp3',
+  'm4a',
+  'wav',
+  'zip'
+];
 
 num? _num(dynamic v) => v == null || v == '' ? null : num.tryParse('$v');
 String _fmt(dynamic v) {
@@ -55,22 +72,19 @@ Future<MultipartFile> _part(PlatformFile f) => MultipartFile.fromFile(f.path!, f
 class ClassworkApi {
   static ApiClient get _api => ApiClient.to;
 
-  static Future<List<Map<String, dynamic>>> list(int group) async =>
-      asMapList(await _api.get('/assignments/', query: {'group': group}));
+  static Future<List<Map<String, dynamic>>> list(int group) async => asMapList(await _api.get('/assignments/', query: {'group': group}));
   static Future<Map<String, dynamic>> get(int id) async => asMap(await _api.get('/assignments/$id/'));
   static Future<Map<String, dynamic>> create(Map<String, dynamic> d) async => asMap(await _api.post('/assignments/', data: d));
-  static Future<Map<String, dynamic>> update(int id, Map<String, dynamic> d) async =>
-      asMap(await _api.patch('/assignments/$id/', data: d));
+  static Future<Map<String, dynamic>> update(int id, Map<String, dynamic> d) async => asMap(await _api.patch('/assignments/$id/', data: d));
   static Future<void> remove(int id) => _api.delete('/assignments/$id/');
   static Future<Map<String, dynamic>> attach(int id, PlatformFile f) async =>
       asMap(await _api.post('/assignments/$id/attachment/', data: FormData.fromMap({'file': await _part(f)})));
   static Future<Map<String, dynamic>> detach(int id) async => asMap(await _api.delete('/assignments/$id/attachment/'));
-  static Future<Map<String, dynamic>> action(int id, String what) async =>
-      asMap(await _api.post('/assignments/$id/$what/'));
-  static Future<Map<String, dynamic>> importFile(int group, PlatformFile f) async => asMap(await _api.post(
-      '/assignments/import/', data: FormData.fromMap({'group': '$group', 'file': await _part(f)})));
-  static Future<Map<String, dynamic>> submit(int id, List<Map<String, dynamic>> answers, Map<String, PlatformFile> files,
-      String text) async {
+  static Future<Map<String, dynamic>> action(int id, String what) async => asMap(await _api.post('/assignments/$id/$what/'));
+  static Future<Map<String, dynamic>> importFile(int group, PlatformFile f) async =>
+      asMap(await _api.post('/assignments/import/', data: FormData.fromMap({'group': '$group', 'file': await _part(f)})));
+  static Future<Map<String, dynamic>> submit(
+      int id, List<Map<String, dynamic>> answers, Map<String, PlatformFile> files, String text) async {
     final form = FormData.fromMap({'answers': jsonEncode(answers), 'text': text});
     for (final e in files.entries) {
       form.files.add(MapEntry(e.key, await _part(e.value)));
@@ -78,10 +92,8 @@ class ClassworkApi {
     return asMap(await _api.post('/assignments/$id/submit/', data: form));
   }
 
-  static Future<List<Map<String, dynamic>>> submissions(int id) async =>
-      asMapList(await _api.get('/assignments/$id/submissions/'));
-  static Future<Map<String, dynamic>> submission(int id, int sid) async =>
-      asMap(await _api.get('/assignments/$id/submissions/$sid/'));
+  static Future<List<Map<String, dynamic>>> submissions(int id) async => asMapList(await _api.get('/assignments/$id/submissions/'));
+  static Future<Map<String, dynamic>> submission(int id, int sid) async => asMap(await _api.get('/assignments/$id/submissions/$sid/'));
   static Future<Map<String, dynamic>> grade(int id, int sid, Map<String, dynamic> d) async =>
       asMap(await _api.post('/assignments/$id/submissions/$sid/grade/', data: d));
 }
@@ -106,8 +118,8 @@ Widget _status(Map a) {
       : _chip('Đã nộp', AppColors.primary);
 }
 
-BoxDecoration _card() => BoxDecoration(
-    color: AppColors.surface, borderRadius: BorderRadius.circular(14.r), border: Border.all(color: AppColors.line));
+BoxDecoration _card() =>
+    BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(14.r), border: Border.all(color: AppColors.line));
 
 // ---------------------------------------------------------------- list
 
@@ -143,7 +155,8 @@ class _AssignmentListViewState extends State<AssignmentListView> {
       content: Column(mainAxisSize: MainAxisSize.min, children: [
         const Text('Nhập ID 8 số của người muốn thêm (xem trong Hồ sơ). Bạn bè được thêm ngay, người khác nhận lời mời.'),
         SizedBox(height: 10.h),
-        TextField(controller: input, keyboardType: TextInputType.number, maxLength: 8, decoration: const InputDecoration(hintText: '12345678')),
+        TextField(
+            controller: input, keyboardType: TextInputType.number, maxLength: 8, decoration: const InputDecoration(hintText: '12345678')),
       ]),
       actions: [
         TextButton(onPressed: () => Get.back(result: false), child: const Text('Huỷ')),
@@ -172,10 +185,14 @@ class _AssignmentListViewState extends State<AssignmentListView> {
             SizedBox(height: 12.h),
             TextField(controller: title, decoration: const InputDecoration(labelText: 'Tên bài tập', hintText: 'VD: Bài 3 – Gia đình')),
             SizedBox(height: 14.h),
-            OutlinedButton.icon(onPressed: () => Get.back(result: 'blank'), icon: const Icon(Icons.edit_note_rounded),
+            OutlinedButton.icon(
+                onPressed: () => Get.back(result: 'blank'),
+                icon: const Icon(Icons.edit_note_rounded),
                 label: const Text('Tự soạn câu hỏi')),
             SizedBox(height: 8.h),
-            FilledButton.icon(onPressed: () => Get.back(result: 'ai'), icon: const Icon(Icons.auto_awesome_rounded),
+            FilledButton.icon(
+                onPressed: () => Get.back(result: 'ai'),
+                icon: const Icon(Icons.auto_awesome_rounded),
                 label: const Text('Tải file đề – AI tách thành câu hỏi')),
             SizedBox(height: 8.h),
             Text('PDF, Word (.docx), ảnh chụp phiếu bài tập hoặc .txt. Câu hỏi AI tách ra là bản nháp: kiểm tra, sửa đáp án rồi mới giao.',
@@ -202,11 +219,13 @@ class _AssignmentListViewState extends State<AssignmentListView> {
       Get.back();
     }
     try {
-      final name = title.text.trim().isNotEmpty ? title.text.trim()
-          : (draft?['title'] as String?)?.isNotEmpty == true ? draft!['title'] as String
-          : file?.name.replaceAll(RegExp(r'\.[^.]+$'), '') ?? 'Bài tập mới';
-      final a = await ClassworkApi.create({'group': widget.groupId, 'title': name, 'questions': draft?['questions'] ?? [],
-          'ai_generated': draft != null});
+      final name = title.text.trim().isNotEmpty
+          ? title.text.trim()
+          : (draft?['title'] as String?)?.isNotEmpty == true
+              ? draft!['title'] as String
+              : file?.name.replaceAll(RegExp(r'\.[^.]+$'), '') ?? 'Bài tập mới';
+      final a = await ClassworkApi.create(
+          {'group': widget.groupId, 'title': name, 'questions': draft?['questions'] ?? [], 'ai_generated': draft != null});
       if (file != null && RegExp(r'\.(pdf|docx?|jpe?g|png|webp)$', caseSensitive: false).hasMatch(file.name)) {
         await ClassworkApi.attach(asInt(a['id']), file).catchError((_) => <String, dynamic>{});
       }
@@ -239,8 +258,9 @@ class _AssignmentListViewState extends State<AssignmentListView> {
                       child: snap.data!.$2.isEmpty
                           ? ListView(children: [
                               SizedBox(height: 120.h),
-                              Center(child: Text(leader ? 'Chưa có bài tập. Bấm "Tạo bài tập" để giao bài.' : 'Trưởng nhóm chưa giao bài nào.',
-                                  style: TextStyle(color: AppColors.textSecondary))),
+                              Center(
+                                  child: Text(leader ? 'Chưa có bài tập. Bấm "Tạo bài tập" để giao bài.' : 'Trưởng nhóm chưa giao bài nào.',
+                                      style: TextStyle(color: AppColors.textSecondary))),
                             ])
                           : ListView(padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 96.h), children: [
                               for (final a in snap.data!.$2)
@@ -315,10 +335,12 @@ class _AssignmentDetailViewState extends State<AssignmentDetailView> {
               : snap.hasError
                   ? Center(child: Text(ApiClient.toApiException(snap.error!).message))
                   : a!['is_leader'] == true && (a['status'] == 'draft' || _editing)
-                      ? _Editor(a: a, onSaved: (x, {bool done = false}) {
-                          if (done) _editing = false;
-                          _set(x);
-                        })
+                      ? _Editor(
+                          a: a,
+                          onSaved: (x, {bool done = false}) {
+                            if (done) _editing = false;
+                            _set(x);
+                          })
                       : a['is_leader'] == true
                           ? _LeaderPanel(a: a, onChanged: _set, onEdit: () => setState(() => _editing = true), onReload: _reload)
                           : _DoPanel(a: a, onChanged: _set),
@@ -348,7 +370,9 @@ Widget _header(Map a) {
       ),
       if ('${a['instructions'] ?? ''}'.isNotEmpty) ...[SizedBox(height: 8.h), Text('${a['instructions']}')],
       if (a['attachment'] != null)
-        TextButton.icon(onPressed: () => _openUrl(a['attachment'] as String?), icon: const Icon(Icons.attach_file_rounded),
+        TextButton.icon(
+            onPressed: () => _openUrl(a['attachment'] as String?),
+            icon: const Icon(Icons.attach_file_rounded),
             label: Text('${a['attachment_name']}', overflow: TextOverflow.ellipsis)),
     ]),
   );
@@ -375,23 +399,41 @@ class _EditorState extends State<_Editor> {
   late bool allowLate = a['allow_late'] != false;
   late bool showAnswers = a['show_answers'] != false;
   late bool ai = a['ai_generated'] == true;
-  late final List<Map<String, dynamic>> questions =
-      asMapList(a['questions']).map((q) => {...q, 'options': asMapList(q['options']).map((o) => {...o}).toList()}).toList();
+  late final List<Map<String, dynamic>> questions = asMapList(a['questions'])
+      .map((q) => {
+            ...q,
+            'options': asMapList(q['options']).map((o) => {...o}).toList()
+          })
+      .toList();
   String busy = '';
 
   bool get locked => a['status'] != 'draft' && asInt((a['counts'] as Map?)?['submitted']) > 0;
 
   Map<String, dynamic> _blank(String kind) => {
-        'kind': kind, 'prompt': '', 'points': 1, 'explanation': '', 'accepted_answers': <String>[],
-        'options': kind == 'mcq' ? [{'text': '', 'correct': true}, {'text': '', 'correct': false}] : [],
+        'kind': kind,
+        'prompt': '',
+        'points': 1,
+        'explanation': '',
+        'accepted_answers': <String>[],
+        'options': kind == 'mcq'
+            ? [
+                {'text': '', 'correct': true},
+                {'text': '', 'correct': false}
+              ]
+            : [],
       };
 
   Future<void> _save({bool publish = false}) async {
     setState(() => busy = publish ? 'publish' : 'save');
     try {
       var x = await ClassworkApi.update(asInt(a['id']), {
-        'title': title.text.trim(), 'instructions': instructions.text, 'due_at': due?.toUtc().toIso8601String(),
-        'points': points, 'allow_late': allowLate, 'show_answers': showAnswers, 'ai_generated': ai,
+        'title': title.text.trim(),
+        'instructions': instructions.text,
+        'due_at': due?.toUtc().toIso8601String(),
+        'points': points,
+        'allow_late': allowLate,
+        'show_answers': showAnswers,
+        'ai_generated': ai,
         if (!locked) 'questions': questions,
       });
       if (publish) x = await ClassworkApi.action(asInt(a['id']), 'publish');
@@ -424,7 +466,10 @@ class _EditorState extends State<_Editor> {
 
   Future<void> _pickDue() async {
     final now = DateTime.now();
-    final d = await showDatePicker(context: context, initialDate: due ?? now, firstDate: now.subtract(const Duration(days: 1)),
+    final d = await showDatePicker(
+        context: context,
+        initialDate: due ?? now,
+        firstDate: now.subtract(const Duration(days: 1)),
         lastDate: now.add(const Duration(days: 365)));
     if (d == null || !mounted) return;
     final t = await showTimePicker(context: context, initialTime: TimeOfDay.fromDateTime(due ?? DateTime(d.year, d.month, d.day, 21)));
@@ -477,11 +522,13 @@ class _EditorState extends State<_Editor> {
               Radio<int>(
                 value: j,
                 groupValue: options.indexWhere((o) => o['correct'] == true),
-                onChanged: locked ? null : (v) => setState(() {
-                  for (var k = 0; k < options.length; k++) {
-                    options[k]['correct'] = k == v;
-                  }
-                }),
+                onChanged: locked
+                    ? null
+                    : (v) => setState(() {
+                          for (var k = 0; k < options.length; k++) {
+                            options[k]['correct'] = k == v;
+                          }
+                        }),
               ),
               Expanded(
                 child: TextFormField(
@@ -495,8 +542,10 @@ class _EditorState extends State<_Editor> {
                 IconButton(onPressed: () => setState(() => options.removeAt(j)), icon: const Icon(Icons.close, size: 18)),
             ]),
           if (!locked && options.length < 8)
-            TextButton.icon(onPressed: () => setState(() => options.add({'text': '', 'correct': false})),
-                icon: const Icon(Icons.add), label: const Text('Thêm phương án')),
+            TextButton.icon(
+                onPressed: () => setState(() => options.add({'text': '', 'correct': false})),
+                icon: const Icon(Icons.add),
+                label: const Text('Thêm phương án')),
           Text('Chạm vòng tròn để chọn đáp án đúng', style: TextStyle(fontSize: 11.sp, color: AppColors.textSecondary)),
         ],
         if (q['kind'] == 'fill')
@@ -509,7 +558,10 @@ class _EditorState extends State<_Editor> {
         if (q['kind'] == 'essay' || q['kind'] == 'file')
           Padding(
             padding: EdgeInsets.only(top: 6.h),
-            child: Text(q['kind'] == 'essay' ? 'Học viên viết câu trả lời, bạn chấm tay.' : 'Học viên nộp file (ảnh bài làm, ghi âm…), bạn chấm tay.',
+            child: Text(
+                q['kind'] == 'essay'
+                    ? 'Học viên viết câu trả lời, bạn chấm tay.'
+                    : 'Học viên nộp file (ảnh bài làm, ghi âm…), bạn chấm tay.',
                 style: TextStyle(fontSize: 12.sp, color: AppColors.textSecondary)),
           ),
       ]),
@@ -523,7 +575,10 @@ class _EditorState extends State<_Editor> {
       Expanded(
         child: ListView(padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 24.h), children: [
           TextField(controller: title, decoration: const InputDecoration(labelText: 'Tên bài tập')),
-          TextField(controller: instructions, minLines: 2, maxLines: 6,
+          TextField(
+              controller: instructions,
+              minLines: 2,
+              maxLines: 6,
               decoration: const InputDecoration(labelText: 'Đề bài / hướng dẫn', hintText: 'VD: Đọc file đính kèm rồi làm bài 1–3')),
           SizedBox(height: 8.h),
           ListTile(
@@ -533,39 +588,55 @@ class _EditorState extends State<_Editor> {
             trailing: due == null ? null : IconButton(onPressed: () => setState(() => due = null), icon: const Icon(Icons.close)),
             onTap: _pickDue,
           ),
-          SwitchListTile(contentPadding: EdgeInsets.zero, value: allowLate, onChanged: (v) => setState(() => allowLate = v),
+          SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              value: allowLate,
+              onChanged: (v) => setState(() => allowLate = v),
               title: const Text('Cho nộp muộn')),
-          SwitchListTile(contentPadding: EdgeInsets.zero, value: showAnswers, onChanged: (v) => setState(() => showAnswers = v),
+          SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              value: showAnswers,
+              onChanged: (v) => setState(() => showAnswers = v),
               title: const Text('Cho xem đáp án sau khi chấm')),
           if (questions.isEmpty)
-            TextFormField(initialValue: _fmt(points), keyboardType: TextInputType.number,
+            TextFormField(
+                initialValue: _fmt(points),
+                keyboardType: TextInputType.number,
                 decoration: const InputDecoration(labelText: 'Điểm tối đa (bài nộp bài làm / file)'),
                 onChanged: (v) => points = num.tryParse(v) ?? 10),
           SizedBox(height: 8.h),
           Wrap(spacing: 8.w, runSpacing: 8.h, children: [
             if (a['attachment'] != null) ...[
-              ActionChip(avatar: const Icon(Icons.attach_file, size: 18), label: Text('${a['attachment_name']}'),
+              ActionChip(
+                  avatar: const Icon(Icons.attach_file, size: 18),
+                  label: Text('${a['attachment_name']}'),
                   onPressed: () => _openUrl(a['attachment'] as String?)),
-              ActionChip(label: const Text('Bỏ file'), onPressed: () async {
-                try {
-                  widget.onSaved(await ClassworkApi.detach(asInt(a['id'])));
-                } catch (e) {
-                  _fail(e);
-                }
-              }),
+              ActionChip(
+                  label: const Text('Bỏ file'),
+                  onPressed: () async {
+                    try {
+                      widget.onSaved(await ClassworkApi.detach(asInt(a['id'])));
+                    } catch (e) {
+                      _fail(e);
+                    }
+                  }),
             ] else
-              ActionChip(avatar: const Icon(Icons.attach_file, size: 18), label: const Text('Đính kèm file đề'), onPressed: () async {
-                final f = await _pick();
-                if (f == null) return;
-                try {
-                  widget.onSaved(await ClassworkApi.attach(asInt(a['id']), f));
-                } catch (e) {
-                  _fail(e);
-                }
-              }),
+              ActionChip(
+                  avatar: const Icon(Icons.attach_file, size: 18),
+                  label: const Text('Đính kèm file đề'),
+                  onPressed: () async {
+                    final f = await _pick();
+                    if (f == null) return;
+                    try {
+                      widget.onSaved(await ClassworkApi.attach(asInt(a['id']), f));
+                    } catch (e) {
+                      _fail(e);
+                    }
+                  }),
             if (!locked)
               ActionChip(
-                avatar: busy == 'ai' ? SizedBox(width: 16.w, height: 16.w, child: const CircularProgressIndicator(strokeWidth: 2))
+                avatar: busy == 'ai'
+                    ? SizedBox(width: 16.w, height: 16.w, child: const CircularProgressIndicator(strokeWidth: 2))
                     : const Icon(Icons.auto_awesome_rounded, size: 18),
                 label: Text(busy == 'ai' ? 'AI đang đọc đề…' : 'Thêm câu hỏi từ file (AI)'),
                 onPressed: busy.isEmpty ? _importAi : null,
@@ -588,7 +659,9 @@ class _EditorState extends State<_Editor> {
           if (!locked)
             Wrap(spacing: 8.w, children: [
               for (final e in _kinds.entries)
-                OutlinedButton.icon(onPressed: () => setState(() => questions.add(_blank(e.key))), icon: const Icon(Icons.add, size: 18),
+                OutlinedButton.icon(
+                    onPressed: () => setState(() => questions.add(_blank(e.key))),
+                    icon: const Icon(Icons.add, size: 18),
                     label: Text(e.value)),
             ]),
         ]),
@@ -664,7 +737,8 @@ class _LeaderPanelState extends State<_LeaderPanel> {
       SizedBox(height: 8.h),
       Wrap(spacing: 8.w, children: [
         OutlinedButton(onPressed: widget.onEdit, child: const Text('Sửa')),
-        OutlinedButton(onPressed: () => _act(a['status'] == 'published' ? 'close' : 'reopen'),
+        OutlinedButton(
+            onPressed: () => _act(a['status'] == 'published' ? 'close' : 'reopen'),
             child: Text(a['status'] == 'published' ? 'Đóng nộp bài' : 'Mở lại')),
         TextButton(
           onPressed: () async {
@@ -761,7 +835,9 @@ class _GradeViewState extends State<GradeView> {
     setState(() => saving = true);
     try {
       await ClassworkApi.grade(asInt(widget.a['id']), widget.sid, {
-        'answers': [for (final x in manual) {'answer': x['id'], 'score': scores[asInt(x['id'])], 'feedback': notes[asInt(x['id'])] ?? ''}],
+        'answers': [
+          for (final x in manual) {'answer': x['id'], 'score': scores[asInt(x['id'])], 'feedback': notes[asInt(x['id'])] ?? ''}
+        ],
         if (questions.isEmpty) 'score': total,
         'feedback': feedback,
       });
@@ -805,7 +881,9 @@ class _GradeViewState extends State<GradeView> {
                   if (questions.isEmpty) ...[
                     if ('${s['text'] ?? ''}'.isNotEmpty) Padding(padding: EdgeInsets.only(top: 8.h), child: Text('${s['text']}')),
                     if (s['attachment'] != null)
-                      TextButton.icon(onPressed: () => _openUrl(s['attachment'] as String?), icon: const Icon(Icons.attach_file),
+                      TextButton.icon(
+                          onPressed: () => _openUrl(s['attachment'] as String?),
+                          icon: const Icon(Icons.attach_file),
                           label: Text('${s['attachment_name']}')),
                     Row(children: [const Text('Điểm '), _scoreBox(total, _num(widget.a['points']) ?? 10, (v) => total = v)]),
                   ],
@@ -821,13 +899,16 @@ class _GradeViewState extends State<GradeView> {
                         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                           Text('Câu ${i + 1} (${_kinds[q['kind']]}): ${q['prompt']}', style: const TextStyle(fontWeight: FontWeight.w600)),
                           if (q['kind'] == 'mcq')
-                            Text('Chọn: ${x?['selected_option'] != null && asInt(x!['selected_option']) < opts.length ? opts[asInt(x['selected_option'])]['text'] : '—'}'
+                            Text(
+                                'Chọn: ${x?['selected_option'] != null && asInt(x!['selected_option']) < opts.length ? opts[asInt(x['selected_option'])]['text'] : '—'}'
                                 ' · Đúng: ${opts.firstWhereOrNull((o) => o['correct'] == true)?['text'] ?? ''}'),
                           if (q['kind'] == 'fill')
                             Text('Trả lời: ${x?['text'] ?? '—'} · Đáp án: ${(q['accepted_answers'] as List? ?? []).join(' / ')}'),
                           if ((q['kind'] == 'essay' || q['kind'] == 'file') && '${x?['text'] ?? ''}'.isNotEmpty) Text('${x!['text']}'),
                           if (x?['attachment'] != null)
-                            TextButton.icon(onPressed: () => _openUrl(x['attachment'] as String?), icon: const Icon(Icons.attach_file),
+                            TextButton.icon(
+                                onPressed: () => _openUrl(x['attachment'] as String?),
+                                icon: const Icon(Icons.attach_file),
                                 label: Text('${x!['attachment_name']}')),
                           if (x != null)
                             Row(children: [
@@ -899,9 +980,13 @@ class _DoPanelState extends State<_DoPanel> {
   Future<void> _submit() async {
     setState(() => sending = true);
     try {
-      final x = await ClassworkApi.submit(asInt(a['id']), [
-        for (final q in asMapList(a['questions'])) {'question': q['id'], ...?answers[asInt(q['id'])]},
-      ], files, text);
+      final x = await ClassworkApi.submit(
+          asInt(a['id']),
+          [
+            for (final q in asMapList(a['questions'])) {'question': q['id'], ...?answers[asInt(q['id'])]},
+          ],
+          files,
+          text);
       files.clear();
       setState(() => a = x);
       widget.onChanged(x);
@@ -916,14 +1001,19 @@ class _DoPanelState extends State<_DoPanel> {
   Widget _filePick(String key, Map? submittedAnswer) {
     return Wrap(crossAxisAlignment: WrapCrossAlignment.center, spacing: 8.w, children: [
       if (submittedAnswer?['attachment'] != null)
-        ActionChip(avatar: const Icon(Icons.attach_file, size: 18), label: Text('${submittedAnswer!['attachment_name']} (đã nộp)'),
+        ActionChip(
+            avatar: const Icon(Icons.attach_file, size: 18),
+            label: Text('${submittedAnswer!['attachment_name']} (đã nộp)'),
             onPressed: () => _openUrl(submittedAnswer['attachment'] as String?)),
       if (files[key] != null) Chip(label: Text(files[key]!.name), onDeleted: () => setState(() => files.remove(key))),
       if (!done && !closed)
-        OutlinedButton.icon(onPressed: () async {
-          final f = await _pick();
-          if (f != null) setState(() => files[key] = f);
-        }, icon: const Icon(Icons.upload_file_rounded), label: const Text('Chọn file')),
+        OutlinedButton.icon(
+            onPressed: () async {
+              final f = await _pick();
+              if (f != null) setState(() => files[key] = f);
+            },
+            icon: const Icon(Icons.upload_file_rounded),
+            label: const Text('Chọn file')),
     ]);
   }
 
@@ -941,9 +1031,10 @@ class _DoPanelState extends State<_DoPanel> {
           decoration: BoxDecoration(
               color: (done ? AppColors.success : AppColors.primary).withValues(alpha: 0.08), borderRadius: BorderRadius.circular(12.r)),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(done
-                ? 'Đã chấm: ${_fmt(mine['score'])}/${_fmt(mine['max_score'])} điểm${mine['percent'] != null ? ' (${mine['percent']}%)' : ''}'
-                : 'Đã nộp lúc ${_when(mine['submitted_at'])}${mine['late'] == true ? ' (muộn)' : ''} – chờ chấm. Bạn vẫn sửa và nộp lại được.',
+            Text(
+                done
+                    ? 'Đã chấm: ${_fmt(mine['score'])}/${_fmt(mine['max_score'])} điểm${mine['percent'] != null ? ' (${mine['percent']}%)' : ''}'
+                    : 'Đã nộp lúc ${_when(mine['submitted_at'])}${mine['late'] == true ? ' (muộn)' : ''} – chờ chấm. Bạn vẫn sửa và nộp lại được.',
                 style: const TextStyle(fontWeight: FontWeight.w700)),
             if ('${mine['feedback'] ?? ''}'.isNotEmpty) Text('${mine['feedback']}'),
           ]),
@@ -994,12 +1085,16 @@ class _DoPanelState extends State<_DoPanel> {
                     groupValue: val['selected_option'] == null ? null : asInt(val['selected_option']),
                     onChanged: done || closed ? null : (v) => setState(() => val['selected_option'] = v),
                     title: Text('${String.fromCharCode(65 + j)}. ${opts[j]['text']}',
-                        style: TextStyle(color: done && opts[j]['correct'] == true ? AppColors.success : null,
+                        style: TextStyle(
+                            color: done && opts[j]['correct'] == true ? AppColors.success : null,
                             fontWeight: done && opts[j]['correct'] == true ? FontWeight.w700 : null)),
                   ),
               if (q['kind'] == 'fill')
-                TextFormField(initialValue: '${val['text'] ?? ''}', enabled: !done && !closed,
-                    decoration: const InputDecoration(hintText: 'Câu trả lời'), onChanged: (v) => val['text'] = v),
+                TextFormField(
+                    initialValue: '${val['text'] ?? ''}',
+                    enabled: !done && !closed,
+                    decoration: const InputDecoration(hintText: 'Câu trả lời'),
+                    onChanged: (v) => val['text'] = v),
               if (q['kind'] == 'essay' || q['kind'] == 'file')
                 TextFormField(
                   initialValue: '${val['text'] ?? ''}',
@@ -1023,7 +1118,9 @@ class _DoPanelState extends State<_DoPanel> {
       if (!done && !closed)
         FilledButton.icon(
           onPressed: sending ? null : _submit,
-          icon: sending ? SizedBox(width: 16.w, height: 16.w, child: const CircularProgressIndicator(strokeWidth: 2)) : const Icon(Icons.send_rounded),
+          icon: sending
+              ? SizedBox(width: 16.w, height: 16.w, child: const CircularProgressIndicator(strokeWidth: 2))
+              : const Icon(Icons.send_rounded),
           label: Text(mine != null ? 'Nộp lại' : 'Nộp bài'),
         ),
       if (closed && mine == null)

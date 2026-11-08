@@ -346,8 +346,7 @@ class CommunityPost {
         isFollowingAuthor = isFollowingAuthor.obs,
         isFollowActionPending = isFollowActionPending.obs {
     if (initiallySelected && this.vocabularyItems.isNotEmpty) {
-      this.vocabularyItems[currentVocabularyIndex.value].isSelected.value =
-          true;
+      this.vocabularyItems[currentVocabularyIndex.value].isSelected.value = true;
     }
   }
 
@@ -378,8 +377,7 @@ class CommunityPost {
   final RxBool isFollowingAuthor;
   final RxBool isFollowActionPending;
 
-  CommunityVocabularyItem get currentVocabulary => vocabularyItems[
-      _boundIndex(vocabularyItems.length, currentVocabularyIndex.value)];
+  CommunityVocabularyItem get currentVocabulary => vocabularyItems[_boundIndex(vocabularyItems.length, currentVocabularyIndex.value)];
 }
 
 class CommunityPostReport {
@@ -655,7 +653,8 @@ class CommunityController extends GetxController {
     post.isSaved.value = next;
     try {
       await CommunityRepository.bookmark(int.parse(post.id), next);
-      Get.snackbar(next ? 'Đã lưu bài viết' : 'Đã bỏ lưu', next ? 'Xem lại trong Hồ sơ › Bài đã lưu.' : 'Bài viết không còn trong Bài đã lưu.',
+      Get.snackbar(
+          next ? 'Đã lưu bài viết' : 'Đã bỏ lưu', next ? 'Xem lại trong Hồ sơ › Bài đã lưu.' : 'Bài viết không còn trong Bài đã lưu.',
           snackPosition: SnackPosition.BOTTOM);
     } catch (e) {
       post.isSaved.value = !next;
@@ -888,7 +887,8 @@ class CommunityController extends GetxController {
       final status = await CommunityRepository.join(int.parse(group.groupId), message: message.trim());
       if (Get.isBottomSheetOpen == true || Get.isDialogOpen == true) goBack();
       Get.snackbar(status == 'pending' ? 'Đã gửi yêu cầu' : 'Đã tham gia',
-          status == 'pending' ? 'Cần trưởng nhóm duyệt.' : 'Chào mừng bạn đến với ${group.name}!', snackPosition: SnackPosition.BOTTOM);
+          status == 'pending' ? 'Cần trưởng nhóm duyệt.' : 'Chào mừng bạn đến với ${group.name}!',
+          snackPosition: SnackPosition.BOTTOM);
       await loadGroups();
     } catch (e) {
       Get.snackbar('Lỗi', ApiClient.toApiException(e).message, snackPosition: SnackPosition.BOTTOM);
@@ -926,7 +926,8 @@ class CommunityController extends GetxController {
     Get.bottomSheet(
       Container(
         padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(color: Theme.of(context).canvasColor, borderRadius: const BorderRadius.vertical(top: Radius.circular(16))),
+        decoration:
+            BoxDecoration(color: Theme.of(context).canvasColor, borderRadius: const BorderRadius.vertical(top: Radius.circular(16))),
         child: Obx(() {
           final requests = incomingJoinRequests.where((r) => r.groupId == groupId).toList();
           if (requests.isEmpty) return const SizedBox(height: 160, child: Center(child: Text('Không có yêu cầu nào.')));
@@ -953,23 +954,24 @@ class CommunityController extends GetxController {
   void openChat() {
     final d = joinedGroupDetails.value;
     if (d == null) return;
-    Get.toNamed(Routes.communityChat, arguments: chat_models.CommunityGroupDetails(
-      group: chat_models.CommunityStudyGroup(
-        groupId: d.group.groupId,
-        name: d.group.name,
-        requirement: d.group.requirement,
-        memberCount: d.group.memberCount,
-        assetImage: d.group.assetImage,
-        leaderId: d.group.leaderId,
-        leaderName: d.group.leaderName,
-        requireApproval: d.group.requireApproval,
-      ),
-      currentMilestoneLabel: d.currentMilestoneLabel,
-      remainingLabel: '${d.daysRemaining} ngày',
-      currentPoints: d.currentPoints,
-      milestones: d.milestones.map((m) => m.label).toList(),
-      memberScores: d.memberScores.map((m) => '${m.displayName}: ${m.totalPoints}').toList(),
-    ));
+    Get.toNamed(Routes.communityChat,
+        arguments: chat_models.CommunityGroupDetails(
+          group: chat_models.CommunityStudyGroup(
+            groupId: d.group.groupId,
+            name: d.group.name,
+            requirement: d.group.requirement,
+            memberCount: d.group.memberCount,
+            assetImage: d.group.assetImage,
+            leaderId: d.group.leaderId,
+            leaderName: d.group.leaderName,
+            requireApproval: d.group.requireApproval,
+          ),
+          currentMilestoneLabel: d.currentMilestoneLabel,
+          remainingLabel: '${d.daysRemaining} ngày',
+          currentPoints: d.currentPoints,
+          milestones: d.milestones.map((m) => m.label).toList(),
+          memberScores: d.memberScores.map((m) => '${m.displayName}: ${m.totalPoints}').toList(),
+        ));
   }
 
   void openGroupMemberProfile(CommunityGroupMemberScore member) {

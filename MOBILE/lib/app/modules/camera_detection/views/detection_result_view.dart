@@ -112,7 +112,8 @@ class _DetectionResultViewState extends State<DetectionResultView> {
           try {
             final r = await DetectionRepository.lookup(q);
             if (ctx.mounted) setSheet(() => found = r);
-          } catch (e) {  // a snackbar cannot show over the sheet: the message goes inside it
+          } catch (e) {
+            // a snackbar cannot show over the sheet: the message goes inside it
             if (ctx.mounted) setSheet(() => error = ApiClient.toApiException(e).message);
           } finally {
             if (ctx.mounted) setSheet(() => busy = false);
@@ -133,7 +134,9 @@ class _DetectionResultViewState extends State<DetectionResultView> {
                     hintText: 'Gõ tên tiếng Việt, VD: cái ly',
                     prefixIcon: const Icon(Icons.edit_rounded),
                     suffixIcon: busy
-                        ? const Padding(padding: EdgeInsets.all(12), child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)))
+                        ? const Padding(
+                            padding: EdgeInsets.all(12),
+                            child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)))
                         : IconButton(icon: const Icon(Icons.translate_rounded), tooltip: 'Dịch', onPressed: search),
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r)),
                   ),
@@ -143,11 +146,11 @@ class _DetectionResultViewState extends State<DetectionResultView> {
               ),
               Expanded(
                 child: ListView(children: [
-                  if (error != null)
-                    Padding(padding: EdgeInsets.all(16.w), child: Text(error!, style: TextStyle(color: AppColors.error))),
+                  if (error != null) Padding(padding: EdgeInsets.all(16.w), child: Text(error!, style: TextStyle(color: AppColors.error))),
                   for (final n in found ?? const <NamedObject>[])
                     ListTile(
-                      title: Text(n.card?.target?.text ?? n.card?.text ?? '', locale: localeFor(n.card?.target?.language ?? 'en'),
+                      title: Text(n.card?.target?.text ?? n.card?.text ?? '',
+                          locale: localeFor(n.card?.target?.language ?? 'en'),
                           style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w700)),
                       subtitle: Text(n.card?.meaningVi ?? ''),
                       trailing: const Icon(Icons.chevron_right_rounded),
@@ -201,7 +204,8 @@ class _DetectionResultViewState extends State<DetectionResultView> {
       builder: (ctx) => StatefulBuilder(builder: (ctx, setSheet) {
         final q = query.toLowerCase();
         final options = allLabels!
-            .where((o) => q.isEmpty ||
+            .where((o) =>
+                q.isEmpty ||
                 o.label.toLowerCase().contains(q) ||
                 o.card.text.toLowerCase().contains(q) ||
                 o.card.meaningVi.toLowerCase().contains(q))
@@ -268,7 +272,9 @@ class _DetectionResultViewState extends State<DetectionResultView> {
           'Thành công',
           '${share ? 'Đã lưu $saved từ và chia sẻ lên cộng đồng' : 'Đã lưu $saved từ vào thư viện'}'
               '${reported > 0 ? '\nCảm ơn bạn đã báo lỗi! Lần sau gặp vật tương tự, hệ thống sẽ nhận đúng.' : ''}',
-          snackPosition: SnackPosition.BOTTOM, backgroundColor: AppColors.buttonSuccess, colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: AppColors.buttonSuccess,
+          colorText: Colors.white,
           duration: Duration(seconds: talk ? 6 : 3),
           mainButton: talk
               ? TextButton(
@@ -346,8 +352,7 @@ class _DetectionResultViewState extends State<DetectionResultView> {
             ChoiceChip(
               selected: chosen == o.label,
               onSelected: (_) => _pick(it, o.label),
-              label: Text(
-                  '${o.card.target?.text ?? o.card.text}${o.card.meaningVi.isNotEmpty ? ' (${o.card.meaningVi})' : ''}',
+              label: Text('${o.card.target?.text ?? o.card.text}${o.card.meaningVi.isNotEmpty ? ' (${o.card.meaningVi})' : ''}',
                   locale: localeFor(o.card.target?.language ?? 'en')),
             ),
           if (it.picked != null && !options.any((o) => o.label == it.picked))
@@ -380,16 +385,17 @@ class _DetectionResultViewState extends State<DetectionResultView> {
     return Container(
       margin: EdgeInsets.only(bottom: 12.h),
       padding: EdgeInsets.all(12.w),
-      decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(16.r),
+      decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(16.r),
           border: Border.fromBorderSide(BorderSide(color: AppColors.line))),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Checkbox(
             value: it.selected,
-            onChanged: card == null || (it.feedback == 'wrong' && it.picked == null)
-                ? null
-                : (v) => setState(() => it.selected = v ?? false),
+            onChanged:
+                card == null || (it.feedback == 'wrong' && it.picked == null) ? null : (v) => setState(() => it.selected = v ?? false),
           ),
           Expanded(
             child: Column(
@@ -409,7 +415,8 @@ class _DetectionResultViewState extends State<DetectionResultView> {
                     child: Text('✓ Đã học từ báo lỗi của người dùng',
                         style: TextStyle(fontSize: 12.sp, color: AppColors.primary, fontWeight: FontWeight.w600)),
                   ),
-                Text('${it.picked != null ? 'Bạn đã chọn' : it.notObject ? 'Đã báo: không phải đồ vật' : it.typed != null ? 'Đã ghi nhận “${it.typed}” – đội ngũ sẽ bổ sung từ này' : 'Độ tin cậy ${(it.confidence * 100).round()}%'}'
+                Text(
+                    '${it.picked != null ? 'Bạn đã chọn' : it.notObject ? 'Đã báo: không phải đồ vật' : it.typed != null ? 'Đã ghi nhận “${it.typed}” – đội ngũ sẽ bổ sung từ này' : 'Độ tin cậy ${(it.confidence * 100).round()}%'}'
                     '${card?.personal != null ? ' · đã có trong thư viện (${card!.personal!.statusLabel})' : ''}',
                     style: TextStyle(fontSize: 12.sp, color: it.uncertain && it.picked == null ? Colors.orange : AppColors.textSecondary)),
                 if (asking) _choices(it),
@@ -445,17 +452,21 @@ class _DetectionResultViewState extends State<DetectionResultView> {
   Widget _addedSection() => Container(
         margin: EdgeInsets.only(bottom: 12.h),
         padding: EdgeInsets.all(12.w),
-        decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(16.r),
+        decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(16.r),
             border: Border.fromBorderSide(BorderSide(color: AppColors.line))),
         child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
           Text('Máy bỏ sót đồ vật? Gõ tên để thêm', style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w700)),
           for (var k = 0; k < added.length; k++)
             ListTile(
               contentPadding: EdgeInsets.zero,
-              title: Text(added[k].card?.target?.text ?? added[k].typed, locale: localeFor(added[k].card?.target?.language ?? 'vi'),
+              title: Text(added[k].card?.target?.text ?? added[k].typed,
+                  locale: localeFor(added[k].card?.target?.language ?? 'vi'),
                   style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w700)),
               subtitle: Text(added[k].card != null ? added[k].card!.meaningVi : 'Chưa có trong từ điển – đã ghi nhận để bổ sung'),
-              trailing: IconButton(icon: const Icon(Icons.close_rounded), tooltip: 'Bỏ', onPressed: () => setState(() => added.removeAt(k))),
+              trailing:
+                  IconButton(icon: const Icon(Icons.close_rounded), tooltip: 'Bỏ', onPressed: () => setState(() => added.removeAt(k))),
             ),
           if (added.length < 5)
             Align(
@@ -498,7 +509,8 @@ class _DetectionResultViewState extends State<DetectionResultView> {
               margin: EdgeInsets.only(top: 8.h),
               padding: EdgeInsets.all(10.w),
               decoration: BoxDecoration(color: Colors.orange.shade50, borderRadius: BorderRadius.circular(12.r)),
-              child: Text('Đang offline: nhận diện bằng mô hình trên điện thoại. Từ bạn lưu và lỗi bạn báo '
+              child: Text(
+                  'Đang offline: nhận diện bằng mô hình trên điện thoại. Từ bạn lưu và lỗi bạn báo '
                   'sẽ được gửi lên máy chủ khi có mạng.',
                   style: TextStyle(fontSize: 13.sp, color: Colors.orange.shade900)),
             ),
@@ -530,7 +542,8 @@ class _DetectionResultViewState extends State<DetectionResultView> {
                 icon: const Icon(Icons.bookmark_add_rounded),
                 label: const Text('Lưu lại'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.buttonActive, foregroundColor: Colors.white,
+                  backgroundColor: AppColors.buttonActive,
+                  foregroundColor: Colors.white,
                   padding: EdgeInsets.symmetric(vertical: 14.h),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
                 ),

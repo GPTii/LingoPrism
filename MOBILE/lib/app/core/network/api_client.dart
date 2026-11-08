@@ -103,7 +103,9 @@ class ApiClient extends GetxService {
     dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) {
         if (ApiConfig.insecure) {
-          return handler.reject(DioException(requestOptions: options, error: 'insecure',
+          return handler.reject(DioException(
+              requestOptions: options,
+              error: 'insecure',
               message: 'Bản phát hành chỉ kết nối máy chủ qua HTTPS (API_URL phải là https://).'));
         }
         final token = TokenStorage.access;
@@ -175,8 +177,7 @@ class ApiClient extends GetxService {
     }
   }
 
-  Future<T> get<T>(String path, {Map<String, dynamic>? query}) =>
-      _wrap<T>(() => dio.get(path, queryParameters: _clean(query)));
+  Future<T> get<T>(String path, {Map<String, dynamic>? query}) => _wrap<T>(() => dio.get(path, queryParameters: _clean(query)));
 
   Future<T> post<T>(String path, {Object? data, Map<String, dynamic>? query, bool auth = true}) =>
       _wrap<T>(() => dio.post(path, data: data, queryParameters: _clean(query), options: Options(extra: {'noAuth': !auth})));

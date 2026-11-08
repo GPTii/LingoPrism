@@ -71,13 +71,17 @@ class ShotPhoto extends StatelessWidget {
       child: Column(mainAxisSize: MainAxisSize.min, children: [
         Icon(Icons.phone_android_rounded, color: AppColors.textSecondary, size: 28.sp),
         SizedBox(height: 6.h),
-        Text('Nhận diện trên máy, ảnh không được lưu', textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 11.sp, color: AppColors.textSecondary)),
+        Text('Nhận diện trên máy, ảnh không được lưu',
+            textAlign: TextAlign.center, style: TextStyle(fontSize: 11.sp, color: AppColors.textSecondary)),
       ]),
     );
     if (shot.image != null) {
-      return CachedNetworkImage(imageUrl: shot.image!, fit: fit, width: double.infinity,
-          placeholder: (_, __) => Container(color: AppColors.primarySoft), errorWidget: (_, __, ___) => placeholder);
+      return CachedNetworkImage(
+          imageUrl: shot.image!,
+          fit: fit,
+          width: double.infinity,
+          placeholder: (_, __) => Container(color: AppColors.primarySoft),
+          errorWidget: (_, __, ___) => placeholder);
     }
     return FutureBuilder<File?>(
       future: LocalShots.fileFor(shot.id),
@@ -136,8 +140,8 @@ class _PhotoHistoryViewState extends State<PhotoHistoryView> {
     _loading = true;
     final filter = _filter;
     try {
-      final (list, more) = await DetectionRepository.history(
-          page: _page + 1, confirmed: filter == ShotFilter.all ? null : filter == ShotFilter.saved);
+      final (list, more) =
+          await DetectionRepository.history(page: _page + 1, confirmed: filter == ShotFilter.all ? null : filter == ShotFilter.saved);
       if (!mounted || filter != _filter) return;
       setState(() {
         _shots.addAll(list);
@@ -195,8 +199,7 @@ class _PhotoHistoryViewState extends State<PhotoHistoryView> {
                       onSelected: (_) => _setFilter(f),
                       showCheckmark: false,
                       selectedColor: AppColors.buttonActive,
-                      labelStyle: TextStyle(
-                          color: _filter == f ? Colors.white : AppColors.textPrimary, fontWeight: FontWeight.w600),
+                      labelStyle: TextStyle(color: _filter == f ? Colors.white : AppColors.textPrimary, fontWeight: FontWeight.w600),
                       shape: const StadiumBorder(),
                     ),
                 ]),
@@ -218,8 +221,7 @@ class _PhotoHistoryViewState extends State<PhotoHistoryView> {
                 ),
               ),
             if (_shots.isNotEmpty && _more)
-              const SliverToBoxAdapter(
-                  child: Padding(padding: EdgeInsets.all(16), child: Center(child: CircularProgressIndicator()))),
+              const SliverToBoxAdapter(child: Padding(padding: EdgeInsets.all(16), child: Center(child: CircularProgressIndicator()))),
           ],
         ),
       ),
@@ -240,8 +242,8 @@ class _PhotoHistoryViewState extends State<PhotoHistoryView> {
       child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
         Icon(Icons.photo_library_outlined, size: 56.sp, color: AppColors.textHint),
         SizedBox(height: 12.h),
-        Text(title, textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+        Text(title,
+            textAlign: TextAlign.center, style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
         SizedBox(height: 6.h),
         Text(body, textAlign: TextAlign.center, style: TextStyle(color: AppColors.textSecondary)),
         SizedBox(height: 16.h),
@@ -290,13 +292,16 @@ class _PhotoHistoryViewState extends State<PhotoHistoryView> {
         Row(children: [
           Flexible(
             child: target != null
-                ? LangText(target.text, language: target.language, maxLines: 1,
+                ? LangText(target.text,
+                    language: target.language,
+                    maxLines: 1,
                     style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w700, color: AppColors.textPrimary))
-                : Text(main?.label ?? 'Không có đồ vật', maxLines: 1, overflow: TextOverflow.ellipsis,
+                : Text(main?.label ?? 'Không có đồ vật',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
           ),
-          if (words.length > 1)
-            Text('  +${words.length - 1}', style: TextStyle(fontSize: 13.sp, color: AppColors.textSecondary)),
+          if (words.length > 1) Text('  +${words.length - 1}', style: TextStyle(fontSize: 13.sp, color: AppColors.textSecondary)),
         ]),
         Text(
           [if ((main?.card?.meaningVi ?? '').isNotEmpty) main!.card!.meaningVi, shotTime(d.createdAt)].join(' · '),
@@ -407,8 +412,7 @@ class _PhotoShotViewState extends State<PhotoShotView> {
               TargetWordView(target: c!.target!, fontSize: 22, center: false)
             else
               Text(w.label, style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-            if ((c?.meaningVi ?? '').isNotEmpty)
-              Text(c!.meaningVi, style: TextStyle(fontSize: 14.sp, color: AppColors.textSecondary)),
+            if ((c?.meaningVi ?? '').isNotEmpty) Text(c!.meaningVi, style: TextStyle(fontSize: 14.sp, color: AppColors.textSecondary)),
           ]),
         ),
         if (w.count > 1) Text('×${w.count}', style: TextStyle(fontSize: 14.sp, color: AppColors.textSecondary)),

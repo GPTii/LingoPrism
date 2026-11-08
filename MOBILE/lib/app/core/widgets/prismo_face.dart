@@ -34,9 +34,12 @@ class PrismoFacePainter extends CustomPainter {
       (const Offset(134, 104), const Offset(23, 0), const Color(0xFF10C79A)),
       (const Offset(131, 113), const Offset(21, 11), const Color(0xFFFF6B81)),
     ]) {
-      canvas.drawLine(from, from + dir * beams, round
-        ..color = color
-        ..strokeWidth = 7);
+      canvas.drawLine(
+          from,
+          from + dir * beams,
+          round
+            ..color = color
+            ..strokeWidth = 7);
     }
 
     // body: a rounded triangle sitting on its darker lip
@@ -56,9 +59,12 @@ class PrismoFacePainter extends CustomPainter {
             ..strokeWidth = 22
             ..strokeJoin = StrokeJoin.round);
     }
-    canvas.drawLine(const Offset(67, 43), const Offset(58, 59), round
-      ..color = Colors.white.withValues(alpha: 0.6)
-      ..strokeWidth = 6);
+    canvas.drawLine(
+        const Offset(67, 43),
+        const Offset(58, 59),
+        round
+          ..color = Colors.white.withValues(alpha: 0.6)
+          ..strokeWidth = 6);
 
     final cheek = Paint()..color = const Color(0xFFFF8FA3).withValues(alpha: 0.75);
     canvas.drawOval(Rect.fromCenter(center: const Offset(44, 113), width: 14, height: 9), cheek);
@@ -75,9 +81,13 @@ class PrismoFacePainter extends CustomPainter {
     }
 
     if (smile <= 0) {
-      canvas.drawPath(Path()..moveTo(73, 113)..quadraticBezierTo(80, 120, 87, 113), round
-        ..color = ink
-        ..strokeWidth = 4);
+      canvas.drawPath(
+          Path()
+            ..moveTo(73, 113)
+            ..quadraticBezierTo(80, 120, 87, 113),
+          round
+            ..color = ink
+            ..strokeWidth = 4);
     } else {
       final w = 7 + 3 * smile, h = 7 + 9 * smile;
       final mouth = Path()
@@ -85,10 +95,12 @@ class PrismoFacePainter extends CustomPainter {
         ..quadraticBezierTo(80, 112 + h * 1.6, 80 + w, 112)
         ..close();
       canvas.drawPath(mouth, Paint()..color = ink);
-      canvas.drawPath(mouth, round
-        ..color = ink
-        ..strokeWidth = 3
-        ..strokeJoin = StrokeJoin.round);
+      canvas.drawPath(
+          mouth,
+          round
+            ..color = ink
+            ..strokeWidth = 3
+            ..strokeJoin = StrokeJoin.round);
     }
   }
 

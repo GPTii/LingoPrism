@@ -207,7 +207,9 @@ class ExamTakeView extends GetView<ExamTakeController> {
             Obx(() => ElevatedButton(
                   onPressed: controller.submitting.value ? null : () => controller.submit(),
                   style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.buttonActive, foregroundColor: Colors.white, padding: EdgeInsets.symmetric(vertical: 14.h)),
+                      backgroundColor: AppColors.buttonActive,
+                      foregroundColor: Colors.white,
+                      padding: EdgeInsets.symmetric(vertical: 14.h)),
                   child: Text(controller.submitting.value ? 'Đang nộp…' : 'Nộp bài'),
                 )),
           ],
@@ -303,13 +305,12 @@ class ExamResultView extends GetView<ExamResultController> {
     final yours = a.questionKind == 'mcq'
         ? (a.selectedOption != null && a.selectedOption! < a.options.length ? a.options[a.selectedOption!] : '(bỏ trống)')
         : (a.text.isEmpty ? '(bỏ trống)' : a.text);
-    final correct = a.questionKind == 'mcq'
-        ? (a.correctOption != null ? a.options[a.correctOption!] : '')
-        : a.acceptedAnswers.join(' / ');
+    final correct = a.questionKind == 'mcq' ? (a.correctOption != null ? a.options[a.correctOption!] : '') : a.acceptedAnswers.join(' / ');
     return Container(
       margin: EdgeInsets.only(bottom: 10.h),
       padding: EdgeInsets.all(14.w),
-      decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(14.r), border: Border(left: BorderSide(color: color, width: 4))),
+      decoration: BoxDecoration(
+          color: AppColors.surface, borderRadius: BorderRadius.circular(14.r), border: Border(left: BorderSide(color: color, width: 4))),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text('Câu $n: ${a.prompt}', style: const TextStyle(fontWeight: FontWeight.w600)),
         SizedBox(height: 6.h),

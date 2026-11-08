@@ -82,7 +82,6 @@ class AppUser {
   /// false for a Google-only account: deleting it asks for a typed word instead of the password
   final bool hasPassword;
 
-
   static const String defaultAvatar = 'assets/brand/avatar/avatar_1.png';
 
   bool get isKid => learnerType == 'kid';

@@ -33,8 +33,12 @@ class LangText extends StatelessWidget {
   final int? maxLines;
 
   @override
-  Widget build(BuildContext context) =>
-      Text(text, locale: localeFor(language), style: style, textAlign: textAlign, maxLines: maxLines, overflow: maxLines != null ? TextOverflow.ellipsis : null);
+  Widget build(BuildContext context) => Text(text,
+      locale: localeFor(language),
+      style: style,
+      textAlign: textAlign,
+      maxLines: maxLines,
+      overflow: maxLines != null ? TextOverflow.ellipsis : null);
 }
 
 /// Word + reading (IPA / pinyin / zhuyin) + measure word + speaker button.
@@ -76,8 +80,7 @@ class TargetWordView extends StatelessWidget {
             ),
           ],
         ),
-        if (showReading && reading.isNotEmpty)
-          Text(reading.join('  '), style: TextStyle(fontSize: 14.sp, color: AppColors.textSecondary)),
+        if (showReading && reading.isNotEmpty) Text(reading.join('  '), style: TextStyle(fontSize: 14.sp, color: AppColors.textSecondary)),
         if (showReading && target.isTraditional && showZhuyin && target.zhuyin.isNotEmpty)
           LangText(target.zhuyin, language: 'zh-Hant', style: TextStyle(fontSize: 13.sp, color: AppColors.textSecondary)),
         if (showReading && target.isChinese && target.measureWord.isNotEmpty)
@@ -85,8 +88,7 @@ class TargetWordView extends StatelessWidget {
             Text('Lượng từ: ', style: TextStyle(fontSize: 12.sp, color: AppColors.textHint)),
             LangText(target.measureWord, language: target.language, style: TextStyle(fontSize: 12.sp, color: AppColors.textHint)),
           ]),
-        if (target.unverified)
-          Text('Chưa được kiểm tra', style: TextStyle(fontSize: 11.sp, color: Colors.orange)),
+        if (target.unverified) Text('Chưa được kiểm tra', style: TextStyle(fontSize: 11.sp, color: Colors.orange)),
       ],
     );
   }

@@ -7,8 +7,18 @@ const _tones = ['ngang', 'huyen', 'sac', 'hoi', 'nga', 'nang'];
 
 /// Precomposed forms, index = tone (ngang, huyền, sắc, hỏi, ngã, nặng).
 const _forms = {
-  'a': 'aàáảãạ', 'ă': 'ăằắẳẵặ', 'â': 'âầấẩẫậ', 'e': 'eèéẻẽẹ', 'ê': 'êềếểễệ', 'i': 'iìíỉĩị',
-  'o': 'oòóỏõọ', 'ô': 'ôồốổỗộ', 'ơ': 'ơờớởỡợ', 'u': 'uùúủũụ', 'ư': 'ưừứửữự', 'y': 'yỳýỷỹỵ',
+  'a': 'aàáảãạ',
+  'ă': 'ăằắẳẵặ',
+  'â': 'âầấẩẫậ',
+  'e': 'eèéẻẽẹ',
+  'ê': 'êềếểễệ',
+  'i': 'iìíỉĩị',
+  'o': 'oòóỏõọ',
+  'ô': 'ôồốổỗộ',
+  'ơ': 'ơờớởỡợ',
+  'u': 'uùúủũụ',
+  'ư': 'ưừứửữự',
+  'y': 'yỳýỷỹỵ',
 };
 final Map<String, String> _baseOf = {
   for (final e in _forms.entries)
@@ -27,7 +37,10 @@ String applyTone(String syllable, String tone) {
   final chars = syllable.split('').map((c) => _baseOf[c] ?? c).toList(); // strip any tone
   if (tone == 'ngang') return chars.join();
   final lower = chars.map((c) => c.toLowerCase()).toList();
-  var idx = [for (var i = 0; i < lower.length; i++) if (_forms.containsKey(lower[i])) i];
+  var idx = [
+    for (var i = 0; i < lower.length; i++)
+      if (_forms.containsKey(lower[i])) i
+  ];
   if (idx.isEmpty) return chars.join();
   final word = lower.join();
   if ((word.startsWith('qu') || word.startsWith('gi')) && idx.length > 1 && idx[0] == 1) idx = idx.sublist(1);

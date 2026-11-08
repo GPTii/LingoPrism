@@ -42,8 +42,13 @@ class LevelRow {
 }
 
 class LevelProgress {
-  LevelProgress({required this.language, required this.current, required this.unlockPercent,
-      required this.testSize, required this.testPass, required this.levels});
+  LevelProgress(
+      {required this.language,
+      required this.current,
+      required this.unlockPercent,
+      required this.testSize,
+      required this.testPass,
+      required this.levels});
 
   final String language;
   final int current;

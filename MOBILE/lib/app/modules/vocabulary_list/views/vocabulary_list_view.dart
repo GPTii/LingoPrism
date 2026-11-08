@@ -60,7 +60,8 @@ class VocabularyListView extends GetView<VocabularyListController> {
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        border: Border.fromBorderSide(BorderSide(color: AppColors.line)),),
+        border: Border.fromBorderSide(BorderSide(color: AppColors.line)),
+      ),
       child: Row(
         children: [
           // Back button

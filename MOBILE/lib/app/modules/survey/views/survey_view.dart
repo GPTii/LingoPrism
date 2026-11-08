@@ -89,9 +89,7 @@ class SurveyView extends GetView<SurveyController> {
             margin: EdgeInsets.symmetric(horizontal: 2.w),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(2.r),
-              color: isActive || isCompleted
-                  ? AppColors.buttonActive
-                  : AppColors.progressLocked,
+              color: isActive || isCompleted ? AppColors.buttonActive : AppColors.progressLocked,
             ),
           ),
         );
@@ -119,54 +117,53 @@ class SurveyView extends GetView<SurveyController> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                  SizedBox(height: 20.h),
+                    SizedBox(height: 20.h),
 
-                  // Prismo and chat bubble in a row
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      // Prismo (mascot)
-                      _buildMascot(fallbackIcon: Icons.person),
+                    // Prismo and chat bubble in a row
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        // Prismo (mascot)
+                        _buildMascot(fallbackIcon: Icons.person),
 
-
-                      // Chat bubble
-                      Expanded(
-                        child: Container(
-                          padding: EdgeInsets.all(16.w),
-                          decoration: BoxDecoration(
-                            color: AppColors.buttonActive,
-                            borderRadius: BorderRadius.circular(20.r),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Đăng ký thành công!',
-                                style: AppTextStyles.bodyMedium.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.textWhite,
+                        // Chat bubble
+                        Expanded(
+                          child: Container(
+                            padding: EdgeInsets.all(16.w),
+                            decoration: BoxDecoration(
+                              color: AppColors.buttonActive,
+                              borderRadius: BorderRadius.circular(20.r),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Đăng ký thành công!',
+                                  style: AppTextStyles.bodyMedium.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.textWhite,
+                                  ),
                                 ),
-                              ),
-                              SizedBox(height: 4.h),
-                              Text(
-                                'Trả lời nhanh để cá nhân hóa trải nghiệm học tập.',
-                                style: AppTextStyles.captionMedium.copyWith(
-                                  color: AppColors.textWhite,
+                                SizedBox(height: 4.h),
+                                Text(
+                                  'Trả lời nhanh để cá nhân hóa trải nghiệm học tập.',
+                                  style: AppTextStyles.captionMedium.copyWith(
+                                    color: AppColors.textWhite,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
 
-                  SizedBox(height: 32.h),
+                    SizedBox(height: 32.h),
 
-                  // Form content
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
+                    // Form content
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
                         Text(
                           'Chúng tôi có thể gọi bạn là gì?',
                           style: AppTextStyles.h4,
@@ -241,7 +238,7 @@ class SurveyView extends GetView<SurveyController> {
                             )),
                       ],
                     ),
-                ],
+                  ],
                 ),
               ),
             ),
@@ -271,8 +268,7 @@ class SurveyView extends GetView<SurveyController> {
                         child: Container(
                           padding: EdgeInsets.all(16.w),
                           decoration: BoxDecoration(color: AppColors.buttonActive, borderRadius: BorderRadius.circular(20.r)),
-                          child: Text('Bạn muốn học ngôn ngữ nào?',
-                              style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textWhite)),
+                          child: Text('Bạn muốn học ngôn ngữ nào?', style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textWhite)),
                         ),
                       ),
                     ],
@@ -292,9 +288,13 @@ class SurveyView extends GetView<SurveyController> {
                         SizedBox(height: 8.h),
                         Obx(() => Row(
                               children: [
-                                Expanded(child: _buildOptionItem('Người lớn', controller.learnerType == 'adult', () => controller.setLearnerType('adult'))),
+                                Expanded(
+                                    child: _buildOptionItem(
+                                        'Người lớn', controller.learnerType == 'adult', () => controller.setLearnerType('adult'))),
                                 SizedBox(width: 12.w),
-                                Expanded(child: _buildOptionItem('Trẻ em', controller.learnerType == 'kid', () => controller.setLearnerType('kid'))),
+                                Expanded(
+                                    child: _buildOptionItem(
+                                        'Trẻ em', controller.learnerType == 'kid', () => controller.setLearnerType('kid'))),
                               ],
                             )),
                       ],
@@ -343,7 +343,6 @@ class SurveyView extends GetView<SurveyController> {
                       // Prismo (mascot)
                       _buildMascot(fallbackIcon: Icons.school),
 
-
                       // Chat bubble
                       Expanded(
                         child: Container(
@@ -372,10 +371,10 @@ class SurveyView extends GetView<SurveyController> {
                       itemBuilder: (context, index) {
                         final option = controller.purposeOptions[index];
                         return Obx(() => _buildOptionItem(
-                          option,
-                          controller.purpose == option,
-                          () => controller.setPurpose(option),
-                        ));
+                              option,
+                              controller.purpose == option,
+                              () => controller.setPurpose(option),
+                            ));
                       },
                     ),
                   ),
@@ -455,10 +454,10 @@ class SurveyView extends GetView<SurveyController> {
                       itemBuilder: (context, index) {
                         final option = controller.studyTimeOptions[index];
                         return Obx(() => _buildOptionItem(
-                          option,
-                          controller.studyTime == option,
-                          () => controller.setStudyTime(option),
-                        ));
+                              option,
+                              controller.studyTime == option,
+                              () => controller.setStudyTime(option),
+                            ));
                       },
                     ),
                   ),
@@ -540,13 +539,9 @@ class SurveyView extends GetView<SurveyController> {
   }
 
   Widget _buildDatePicker() {
-    final hasDate = controller.birthDay.isNotEmpty &&
-                   controller.birthMonth.isNotEmpty &&
-                   controller.birthYear.isNotEmpty;
+    final hasDate = controller.birthDay.isNotEmpty && controller.birthMonth.isNotEmpty && controller.birthYear.isNotEmpty;
 
-    final displayText = hasDate
-        ? '${controller.birthDay}/${controller.birthMonth}/${controller.birthYear}'
-        : 'Ngày sinh';
+    final displayText = hasDate ? '${controller.birthDay}/${controller.birthMonth}/${controller.birthYear}' : 'Ngày sinh';
 
     return GestureDetector(
       onTap: () => _selectBirthDate(),
@@ -568,9 +563,7 @@ class SurveyView extends GetView<SurveyController> {
               child: Text(
                 displayText,
                 style: AppTextStyles.bodyMedium.copyWith(
-                  color: hasDate
-                      ? AppColors.textPrimary
-                      : AppColors.textSecondary,
+                  color: hasDate ? AppColors.textPrimary : AppColors.textSecondary,
                 ),
               ),
             ),
@@ -823,10 +816,12 @@ class SurveyView extends GetView<SurveyController> {
         decoration: BoxDecoration(
           color: isSelected ? AppColors.primaryTint : AppColors.background,
           borderRadius: BorderRadius.circular(25.r),
-          border: isSelected ? Border.all(
-            color: AppColors.primaryBlue,
-            width: 2,
-          ) : null,
+          border: isSelected
+              ? Border.all(
+                  color: AppColors.primaryBlue,
+                  width: 2,
+                )
+              : null,
         ),
         child: Text(
           text,

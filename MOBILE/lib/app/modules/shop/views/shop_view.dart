@@ -77,7 +77,10 @@ class ShopView extends GetView<ShopController> {
               SizedBox(height: 20.h),
               _title('Vật phẩm'),
               for (final item in controller.items) ...[
-                _ItemRow(item: item, repairable: controller.repairableStreak.value, busy: controller.busy.value == item.code,
+                _ItemRow(
+                    item: item,
+                    repairable: controller.repairableStreak.value,
+                    busy: controller.busy.value == item.code,
                     onTap: () => controller.confirmPurchase(item)),
                 SizedBox(height: 10.h),
               ],
@@ -141,7 +144,9 @@ class _MyItem extends StatelessWidget {
         child: Column(children: [
           Image.asset(item.image, height: 48.h, errorBuilder: (_, __, ___) => Icon(Icons.inventory, size: 40.sp)),
           SizedBox(height: 4.h),
-          Text(item.name, maxLines: 1, overflow: TextOverflow.ellipsis,
+          Text(item.name,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
           Text('x${item.owned}', style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w800, color: AppColors.primary)),
           if (onUse != null)
@@ -170,7 +175,9 @@ class _GemWay extends StatelessWidget {
             Image.asset('assets/brand/icons/gem.png', width: 18.w),
           ]),
           SizedBox(height: 2.h),
-          Text(way.$2, maxLines: 1, overflow: TextOverflow.ellipsis,
+          Text(way.$2,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
           Text(way.$3, maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 11.sp, color: AppColors.textSecondary)),
         ]),
@@ -205,7 +212,9 @@ class _ItemRow extends StatelessWidget {
                 Text(item.name, style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                 SizedBox(height: 2.h),
                 Text(repair && repairable > 0 ? 'Nối lại chuỗi $repairable ngày vừa mất!' : item.description,
-                    style: TextStyle(fontSize: 12.5.sp, color: repair && repairable > 0 ? AppColors.beamAmber : AppColors.textSecondary,
+                    style: TextStyle(
+                        fontSize: 12.5.sp,
+                        color: repair && repairable > 0 ? AppColors.beamAmber : AppColors.textSecondary,
                         fontWeight: repair && repairable > 0 ? FontWeight.w700 : FontWeight.w400)),
               ]),
             ),

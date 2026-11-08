@@ -25,8 +25,8 @@ import '../../core/widgets/show_more.dart';
 /// The friend button in its four states: "Kết bạn" (asks for a hello first), "Đã gửi lời mời" (can be cancelled),
 /// "Đồng ý" / "Từ chối" when they asked me, and "Bạn bè" (can be ended).
 class FriendButton extends StatefulWidget {
-  const FriendButton({super.key, required this.userId, required this.name, required this.status, this.requestId,
-      this.onChanged, this.compact = false});
+  const FriendButton(
+      {super.key, required this.userId, required this.name, required this.status, this.requestId, this.onChanged, this.compact = false});
 
   final int userId;
   final String name;
@@ -73,11 +73,17 @@ class _FriendButtonState extends State<FriendButton> {
           padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 16.h + MediaQuery.of(context).viewInsets.bottom),
           decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.vertical(top: Radius.circular(24.r))),
           child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text('Kết bạn với ${widget.name}', style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+            Text('Kết bạn với ${widget.name}',
+                style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
             SizedBox(height: 6.h),
             Text('Lời chào này gửi kèm thông báo tới ${widget.name}.', style: TextStyle(fontSize: 13.sp, color: AppColors.textSecondary)),
             SizedBox(height: 12.h),
-            TextField(controller: text, maxLength: 200, maxLines: 4, minLines: 2, autofocus: true,
+            TextField(
+                controller: text,
+                maxLength: 200,
+                maxLines: 4,
+                minLines: 2,
+                autofocus: true,
                 decoration: const InputDecoration(border: OutlineInputBorder())),
             SizedBox(height: 8.h),
             SizedBox(
@@ -120,11 +126,12 @@ class _FriendButtonState extends State<FriendButton> {
 
   @override
   Widget build(BuildContext context) {
-    final dense = widget.compact
-        ? const VisualDensity(horizontal: -2, vertical: -2)
-        : VisualDensity.standard;
+    final dense = widget.compact ? const VisualDensity(horizontal: -2, vertical: -2) : VisualDensity.standard;
     if (_busy) {
-      return SizedBox(width: 40.w, height: 32.h, child: const Center(child: SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))));
+      return SizedBox(
+          width: 40.w,
+          height: 32.h,
+          child: const Center(child: SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))));
     }
     switch (_status) {
       case FriendStatus.incoming:
@@ -184,7 +191,11 @@ class MyIdCard extends StatelessWidget {
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text('ID của tôi', style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
             Text(id,
-                style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.w800, letterSpacing: 3, color: AppColors.textPrimary,
+                style: TextStyle(
+                    fontSize: 24.sp,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 3,
+                    color: AppColors.textPrimary,
                     fontFeatures: const [FontFeature.tabularFigures()])),
           ]),
         ),
@@ -200,8 +211,7 @@ class MyIdCard extends StatelessWidget {
 
 Future<void> copyPublicId(String id, {bool mine = false}) async {
   await Clipboard.setData(ClipboardData(text: id));
-  Get.snackbar('Đã sao chép', mine ? 'Gửi ID $id cho bạn bè để họ tìm bạn.' : 'Đã sao chép ID $id.',
-      snackPosition: SnackPosition.BOTTOM);
+  Get.snackbar('Đã sao chép', mine ? 'Gửi ID $id cho bạn bè để họ tìm bạn.' : 'Đã sao chép ID $id.', snackPosition: SnackPosition.BOTTOM);
 }
 
 /// A small copy icon to sit next to someone's "ID 12345678".
@@ -241,15 +251,22 @@ class PersonTile extends StatelessWidget {
           SizedBox(width: 12.w),
           Expanded(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(a.displayName, maxLines: 1, overflow: TextOverflow.ellipsis,
+              Text(a.displayName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
               Text('ID ${a.publicId}', style: TextStyle(fontSize: 12.sp, color: AppColors.textSecondary)),
               if (extra != null) extra!,
             ]),
           ),
           SizedBox(width: 8.w),
-          FriendButton(userId: a.id, name: a.displayName, status: person.friendStatus, requestId: person.friendRequestId,
-              onChanged: onChanged, compact: true),
+          FriendButton(
+              userId: a.id,
+              name: a.displayName,
+              status: person.friendStatus,
+              requestId: person.friendRequestId,
+              onChanged: onChanged,
+              compact: true),
         ]),
       ),
     );
@@ -331,7 +348,8 @@ class FriendsView extends GetView<FriendsController> {
         SizedBox(height: 40.h),
         Center(child: Prismo(mood: mood, size: 90.w)),
         SizedBox(height: 12.h),
-        Text(title, textAlign: TextAlign.center, style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+        Text(title,
+            textAlign: TextAlign.center, style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 32.w, vertical: 6.h),
           child: Text(body, textAlign: TextAlign.center, style: TextStyle(fontSize: 13.sp, color: AppColors.textSecondary)),
@@ -373,8 +391,7 @@ class FriendsView extends GetView<FriendsController> {
                 : controller.friends.isEmpty
                     ? _empty('Chưa có bạn bè', 'Vào "Tìm bạn", nhập ID hoặc tên để gửi lời mời kết bạn.', PrismoMood.wow)
                     : _list([
-                        for (final p in controller.friends)
-                          PersonTile(person: p, onChanged: (_) => controller.load()),
+                        for (final p in controller.friends) PersonTile(person: p, onChanged: (_) => controller.load()),
                       ])),
             Obx(() => controller.incoming.isEmpty
                 ? _empty('Không có lời mời nào', 'Khi ai đó muốn kết bạn, lời mời hiện ở đây và trong Thông báo.', PrismoMood.sleepy)
@@ -487,12 +504,12 @@ class SavedPostsView extends GetView<SavedPostsController> {
             SizedBox(height: 60.h),
             Center(child: AppIcon('bookmark', size: 72.w)),
             SizedBox(height: 12.h),
-            Text('Chưa lưu bài nào', textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+            Text('Chưa lưu bài nào',
+                textAlign: TextAlign.center, style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 32.w, vertical: 6.h),
-              child: Text('Bấm "Lưu" dưới một bài viết trong Cộng đồng để xem lại ở đây.', textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 13.sp, color: AppColors.textSecondary)),
+              child: Text('Bấm "Lưu" dưới một bài viết trong Cộng đồng để xem lại ở đây.',
+                  textAlign: TextAlign.center, style: TextStyle(fontSize: 13.sp, color: AppColors.textSecondary)),
             ),
           ]);
         }
@@ -516,19 +533,27 @@ class SavedPostsView extends GetView<SavedPostsController> {
                       ClipRRect(
                         borderRadius: BorderRadius.circular(12.r),
                         child: p.image.startsWith('http')
-                            ? Image.network(p.image, width: 72.w, height: 72.w, fit: BoxFit.cover,
+                            ? Image.network(p.image,
+                                width: 72.w,
+                                height: 72.w,
+                                fit: BoxFit.cover,
                                 errorBuilder: (_, __, ___) => SizedBox(width: 72.w, height: 72.w))
                             : SizedBox(width: 72.w, height: 72.w),
                       ),
                       SizedBox(width: 12.w),
                       Expanded(
                         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                          Text(p.author.displayName, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+                          Text(p.author.displayName,
+                              style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
                           if (p.caption.isNotEmpty)
-                            Text(p.caption, maxLines: 2, overflow: TextOverflow.ellipsis,
+                            Text(p.caption,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
                                 style: TextStyle(fontSize: 13.sp, color: AppColors.textSecondary)),
                           if (p.words.isNotEmpty)
-                            Text(p.words.map((w) => w.text).take(4).join(' · '), maxLines: 1, overflow: TextOverflow.ellipsis,
+                            Text(p.words.map((w) => w.text).take(4).join(' · '),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                                 style: TextStyle(fontSize: 12.sp, color: AppColors.primary, fontWeight: FontWeight.w600)),
                         ]),
                       ),

@@ -52,7 +52,9 @@ class VocabularyTopicItem {
       exampleEn: ex?.text ?? '',
       exampleVi: c.isVietnameseTarget
           ? ''
-          : (ex?.translationVi.isNotEmpty ?? false) ? ex!.translationVi : (ex?.translationEn ?? ''),
+          : (ex?.translationVi.isNotEmpty ?? false)
+              ? ex!.translationVi
+              : (ex?.translationEn ?? ''),
       status: status,
       card: c,
     );

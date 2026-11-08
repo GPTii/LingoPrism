@@ -90,9 +90,7 @@ class OnboardingView extends GetView<OnboardingController> {
                             width: controller.currentIndex == index ? 24.w : 8.w,
                             height: 8.h,
                             decoration: BoxDecoration(
-                              color: controller.currentIndex == index
-                                  ? AppColors.primary
-                                  : AppColors.lineStrong,
+                              color: controller.currentIndex == index ? AppColors.primary : AppColors.lineStrong,
                               borderRadius: BorderRadius.circular(4.r),
                             ),
                           ),

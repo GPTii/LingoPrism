@@ -155,8 +155,14 @@ class MonthlyQuest {
 }
 
 class BadgeInfo {
-  BadgeInfo({required this.code, required this.name, this.description = '', this.icon = '', this.rewardGems = 0,
-      this.owned = false, this.awardedAt});
+  BadgeInfo(
+      {required this.code,
+      required this.name,
+      this.description = '',
+      this.icon = '',
+      this.rewardGems = 0,
+      this.owned = false,
+      this.awardedAt});
 
   final String code;
   final String name;
@@ -194,7 +200,14 @@ class StickerInfo {
 String stickerAsset(String code) => 'assets/rewards/stickers/$code.png';
 
 class LeaderboardEntry {
-  LeaderboardEntry({required this.rank, required this.userId, required this.displayName, this.avatar, this.xp = 0, this.zone = 'safe', this.isMe = false,
+  LeaderboardEntry(
+      {required this.rank,
+      required this.userId,
+      required this.displayName,
+      this.avatar,
+      this.xp = 0,
+      this.zone = 'safe',
+      this.isMe = false,
       this.mascot});
 
   final int rank;
@@ -254,8 +267,17 @@ class Leaderboard {
 }
 
 class ShopItem {
-  ShopItem({required this.id, required this.code, required this.name, required this.description, required this.image,
-      required this.effect, this.costScales, this.costGems, this.owned = 0, this.stickers = const []});
+  ShopItem(
+      {required this.id,
+      required this.code,
+      required this.name,
+      required this.description,
+      required this.image,
+      required this.effect,
+      this.costScales,
+      this.costGems,
+      this.owned = 0,
+      this.stickers = const []});
 
   final int id;
   final String code;
@@ -293,8 +315,16 @@ class ShopItem {
 }
 
 class AppNotification {
-  AppNotification({required this.id, required this.kind, required this.title, this.body = '', this.image = '',
-      this.data = const {}, this.read = false, this.actionState, required this.createdAt});
+  AppNotification(
+      {required this.id,
+      required this.kind,
+      required this.title,
+      this.body = '',
+      this.image = '',
+      this.data = const {},
+      this.read = false,
+      this.actionState,
+      required this.createdAt});
 
   final int id;
   final String kind;
@@ -313,8 +343,16 @@ class AppNotification {
   /// friend_request | group_request | null
   String? get action => data['action'] as String?;
 
-  AppNotification copyWith({bool? read, String? actionState}) => AppNotification(id: id, kind: kind, title: title, body: body,
-      image: image, data: data, read: read ?? this.read, actionState: actionState ?? this.actionState, createdAt: createdAt);
+  AppNotification copyWith({bool? read, String? actionState}) => AppNotification(
+      id: id,
+      kind: kind,
+      title: title,
+      body: body,
+      image: image,
+      data: data,
+      read: read ?? this.read,
+      actionState: actionState ?? this.actionState,
+      createdAt: createdAt);
 
   factory AppNotification.fromJson(Map<String, dynamic> j) => AppNotification(
         id: asInt(j['id']),
@@ -333,8 +371,16 @@ String? _brandOrNull(String? path) => path == null ? null : brandAsset(path);
 
 /// One piece of Prismo's wardrobe (/mascot/).
 class OutfitInfo {
-  OutfitInfo({required this.code, required this.name, required this.slot, this.costGems, this.owned = false, this.forSale = false,
-      this.how = '', this.badge = '', this.event = ''});
+  OutfitInfo(
+      {required this.code,
+      required this.name,
+      required this.slot,
+      this.costGems,
+      this.owned = false,
+      this.forSale = false,
+      this.how = '',
+      this.badge = '',
+      this.event = ''});
 
   final String code;
   final String name;

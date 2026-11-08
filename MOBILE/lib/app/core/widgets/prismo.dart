@@ -159,8 +159,8 @@ class _PrismoPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round;
 
     // shadow
-    canvas.drawOval(Rect.fromCenter(center: const Offset(80, 141), width: 88, height: 12),
-        Paint()..color = Colors.black.withValues(alpha: 0.12));
+    canvas.drawOval(
+        Rect.fromCenter(center: const Offset(80, 141), width: 88, height: 12), Paint()..color = Colors.black.withValues(alpha: 0.12));
 
     // light leaving the prism: the three languages
     for (final (a, b, c) in [
@@ -168,9 +168,12 @@ class _PrismoPainter extends CustomPainter {
       (const Offset(131, 100), const Offset(155, 99), const Color(0xFF10C79A)),
       (const Offset(128, 108), const Offset(150, 118), const Color(0xFFFF6B81)),
     ]) {
-      canvas.drawLine(a, b, stroke
-        ..color = c
-        ..strokeWidth = 6);
+      canvas.drawLine(
+          a,
+          b,
+          stroke
+            ..color = c
+            ..strokeWidth = 6);
     }
 
     // feet
@@ -198,11 +201,19 @@ class _PrismoPainter extends CustomPainter {
           ..style = PaintingStyle.stroke
           ..strokeWidth = 18
           ..strokeJoin = StrokeJoin.round);
-    canvas.drawPath(Path()..moveTo(80, 24)..lineTo(80, 124)..lineTo(26, 124)..close(),
+    canvas.drawPath(
+        Path()
+          ..moveTo(80, 24)
+          ..lineTo(80, 124)
+          ..lineTo(26, 124)
+          ..close(),
         Paint()..color = Colors.white.withValues(alpha: 0.12));
-    canvas.drawLine(const Offset(66, 46), const Offset(56, 64), stroke
-      ..color = Colors.white.withValues(alpha: 0.65)
-      ..strokeWidth = 5);
+    canvas.drawLine(
+        const Offset(66, 46),
+        const Offset(56, 64),
+        stroke
+          ..color = Colors.white.withValues(alpha: 0.65)
+          ..strokeWidth = 5);
 
     // cheeks
     final cheek = Paint()..color = const Color(0xFFFF8FA3).withValues(alpha: 0.55);
@@ -214,7 +225,11 @@ class _PrismoPainter extends CustomPainter {
     _mouth(canvas, stroke);
 
     if (mood == PrismoMood.sad) {
-      canvas.drawPath(Path()..moveTo(101, 97)..quadraticBezierTo(105, 104, 101, 106)..quadraticBezierTo(97, 104, 101, 97),
+      canvas.drawPath(
+          Path()
+            ..moveTo(101, 97)
+            ..quadraticBezierTo(105, 104, 101, 106)
+            ..quadraticBezierTo(97, 104, 101, 97),
           Paint()..color = const Color(0xFF7DD3FC));
     }
     if (mood == PrismoMood.celebrate) {
@@ -241,14 +256,26 @@ class _PrismoPainter extends CustomPainter {
       ..strokeWidth = 4.5;
     switch (mood) {
       case PrismoMood.celebrate:
-        canvas.drawPath(Path()..moveTo(x - 7, 90)..quadraticBezierTo(x, 81, x + 7, 90), p);
+        canvas.drawPath(
+            Path()
+              ..moveTo(x - 7, 90)
+              ..quadraticBezierTo(x, 81, x + 7, 90),
+            p);
         return;
       case PrismoMood.sleepy:
-        canvas.drawPath(Path()..moveTo(x - 7, 88)..quadraticBezierTo(x, 94, x + 7, 88), p..strokeWidth = 4);
+        canvas.drawPath(
+            Path()
+              ..moveTo(x - 7, 88)
+              ..quadraticBezierTo(x, 94, x + 7, 88),
+            p..strokeWidth = 4);
         return;
       default:
         final big = mood == PrismoMood.wow;
-        final dy = mood == PrismoMood.sad ? 3.0 : mood == PrismoMood.think ? -2.0 : 1.0;
+        final dy = mood == PrismoMood.sad
+            ? 3.0
+            : mood == PrismoMood.think
+                ? -2.0
+                : 1.0;
         final open = eyeOpen.clamp(0.08, 1.0);
         canvas.save();
         canvas.translate(x, 88);
@@ -267,17 +294,34 @@ class _PrismoPainter extends CustomPainter {
     final fill = Paint()..color = _ink;
     switch (mood) {
       case PrismoMood.happy:
-        canvas.drawPath(Path()..moveTo(70, 104)..quadraticBezierTo(80, 114, 90, 104), p);
+        canvas.drawPath(
+            Path()
+              ..moveTo(70, 104)
+              ..quadraticBezierTo(80, 114, 90, 104),
+            p);
       case PrismoMood.celebrate:
-        canvas.drawPath(Path()..moveTo(67, 101)..quadraticBezierTo(80, 122, 93, 101)..close(), fill);
-        canvas.drawPath(Path()..moveTo(74, 110)..quadraticBezierTo(80, 116, 86, 110)..quadraticBezierTo(80, 107, 74, 110),
+        canvas.drawPath(
+            Path()
+              ..moveTo(67, 101)
+              ..quadraticBezierTo(80, 122, 93, 101)
+              ..close(),
+            fill);
+        canvas.drawPath(
+            Path()
+              ..moveTo(74, 110)
+              ..quadraticBezierTo(80, 116, 86, 110)
+              ..quadraticBezierTo(80, 107, 74, 110),
             Paint()..color = const Color(0xFFFF6B81));
       case PrismoMood.sleepy:
         canvas.drawOval(Rect.fromCenter(center: const Offset(80, 106), width: 8, height: 6), fill);
       case PrismoMood.think:
         canvas.drawLine(const Offset(72, 107), const Offset(88, 104), p);
       case PrismoMood.sad:
-        canvas.drawPath(Path()..moveTo(70, 110)..quadraticBezierTo(80, 101, 90, 110), p);
+        canvas.drawPath(
+            Path()
+              ..moveTo(70, 110)
+              ..quadraticBezierTo(80, 101, 90, 110),
+            p);
       case PrismoMood.wow:
         canvas.drawOval(Rect.fromCenter(center: const Offset(80, 107), width: 11, height: 13), fill);
     }

@@ -31,7 +31,10 @@ class QuestStrip extends StatelessWidget {
             padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
             decoration: BoxDecoration(borderRadius: BorderRadius.circular(16.r), border: Border.all(color: AppColors.line)),
             child: Row(children: [
-              _Stat(icon: Icon(Icons.local_fire_department_rounded, color: s.studiedToday ? const Color(0xFFFF9600) : AppColors.textHint, size: 22.sp), value: '${s.streak}'),
+              _Stat(
+                  icon: Icon(Icons.local_fire_department_rounded,
+                      color: s.studiedToday ? const Color(0xFFFF9600) : AppColors.textHint, size: 22.sp),
+                  value: '${s.streak}'),
               _Stat(icon: AppIcon('sparkle', size: 20.sp), value: '${s.todayXp} XP'),
               _Stat(icon: Image.asset('assets/brand/icons/gem.png', width: 20.sp, height: 20.sp), value: '${s.gems}'),
               const Spacer(),
@@ -45,7 +48,8 @@ class QuestStrip extends StatelessWidget {
                   AppIcon('chest', size: 18.sp),
                   SizedBox(width: 4.w),
                   Text(toClaim > 0 ? 'Nhận thưởng' : 'Nhiệm vụ $done/${quests.length}',
-                      style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w800, color: toClaim > 0 ? Colors.white : AppColors.primary)),
+                      style:
+                          TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w800, color: toClaim > 0 ? Colors.white : AppColors.primary)),
                 ]),
               ),
             ]),
@@ -120,8 +124,7 @@ class _QuestSheet extends StatelessWidget {
           return ListView(shrinkWrap: true, padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 20.h), children: [
             Text('Nhiệm vụ hằng ngày', style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
             SizedBox(height: 12.h),
-            if (quests.isEmpty)
-              Text('Học một bài để mở nhiệm vụ hôm nay.', style: TextStyle(color: AppColors.textSecondary)),
+            if (quests.isEmpty) Text('Học một bài để mở nhiệm vụ hôm nay.', style: TextStyle(color: AppColors.textSecondary)),
             for (final q in quests)
               Padding(
                 padding: EdgeInsets.only(bottom: 14.h),
@@ -131,7 +134,10 @@ class _QuestSheet extends StatelessWidget {
                   Expanded(
                     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                       Text(q.title,
-                          style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: q.rewardClaimed ? AppColors.textHint : AppColors.textPrimary)),
+                          style: TextStyle(
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w700,
+                              color: q.rewardClaimed ? AppColors.textHint : AppColors.textPrimary)),
                       SizedBox(height: 4.h),
                       Stack(alignment: Alignment.center, children: [
                         ClipRRect(

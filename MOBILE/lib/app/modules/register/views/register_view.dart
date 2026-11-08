@@ -155,9 +155,7 @@ class RegisterView extends GetView<RegisterController> {
                                           suffixIcon: IconButton(
                                             onPressed: controller.togglePasswordVisibility,
                                             icon: Icon(
-                                              controller.isPasswordVisible
-                                                  ? Icons.visibility
-                                                  : Icons.visibility_off,
+                                              controller.isPasswordVisible ? Icons.visibility : Icons.visibility_off,
                                               color: AppColors.textSecondary,
                                             ),
                                           ),
@@ -210,9 +208,7 @@ class RegisterView extends GetView<RegisterController> {
                                           suffixIcon: IconButton(
                                             onPressed: controller.toggleConfirmPasswordVisibility,
                                             icon: Icon(
-                                              controller.isConfirmPasswordVisible
-                                                  ? Icons.visibility
-                                                  : Icons.visibility_off,
+                                              controller.isConfirmPasswordVisible ? Icons.visibility : Icons.visibility_off,
                                               color: AppColors.textSecondary,
                                             ),
                                           ),
@@ -252,13 +248,10 @@ class RegisterView extends GetView<RegisterController> {
                               child: Obx(() {
                                 final ctrl = Get.find<RegisterController>();
                                 return ElevatedButton(
-                                  onPressed: ctrl.isLoading || !ctrl.canRegister
-                                      ? null
-                                      : ctrl.register,
+                                  onPressed: ctrl.isLoading || !ctrl.canRegister ? null : ctrl.register,
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: ctrl.canRegister && !ctrl.isLoading
-                                        ? AppColors.buttonActive
-                                        : AppColors.buttonDisabled,
+                                    backgroundColor:
+                                        ctrl.canRegister && !ctrl.isLoading ? AppColors.buttonActive : AppColors.buttonDisabled,
                                     padding: EdgeInsets.symmetric(vertical: 16.h),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(12.r),
